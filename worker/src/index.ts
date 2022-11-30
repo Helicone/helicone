@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import * as argon2 from "argon2";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -71,6 +72,21 @@ function valyrHeaders(requestResult: Result): Record<string, string> {
   }
 }
 
+async function createDbClient(env: Env, auth: string): Promise<SupabaseClient> {
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${argon2.hash(auth)}`,
+        },
+      },
+    }
+  );
+  return dbClient;
+}
+
 export default {
   async fetch(
     request: Request,
@@ -82,11 +98,11 @@ export default {
       return new Response("Not authorization header found!", { status: 401 });
     }
 
-    const body = await request.text();
-    const dbClient = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    const [body, dbClient] = await Promise.all([
+      argon2.hash(auth),
+      createDbClient(env, auth),
+    ]);
+
     const [requestResult, response] = await Promise.all([
       logRequest(dbClient, request, body),
       forwardRequestToOpenAi(request, body),
