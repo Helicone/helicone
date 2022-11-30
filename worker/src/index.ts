@@ -33,17 +33,42 @@ async function logRequest(
   request: Request,
   body: string
 ): Promise<Result> {
-  return { data: "THis is a UUID", error: null };
+  const json = JSON.parse(body);
+  const { data, error } = await dbClient
+    .from("request")
+    .insert([{ path: request.url, body: json }])
+    .select("id")
+    .single();
+  if (error !== null) {
+    return { data: null, error: error.message };
+  } else {
+    return { data: data.id, error: null };
+  }
 }
 
 async function logResponse(
   dbClient: SupabaseClient,
   requestId: string,
-  response: Response
+  body: string
 ): Promise<void> {
-  console.log("Logging id");
-  await new Promise((f) => setTimeout(f, 1500));
-  console.log("LOgged!", requestId);
+  const { data, error } = await dbClient
+    .from("response")
+    .insert([{ request: requestId, body: JSON.parse(body) }])
+    .select("id");
+  if (error !== null) {
+    console.error(error);
+  }
+}
+
+function valyrHeaders(requestResult: Result): Record<string, string> {
+  if (requestResult.error !== null) {
+    return {
+      "Valyr-Error": requestResult.error,
+      "Valyr-Status": "error",
+    };
+  } else {
+    return { "Valyr-Status": "success", "Valyr-Id": requestResult.data };
+  }
 }
 
 export default {
@@ -62,15 +87,21 @@ export default {
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
-    const [requestId, response] = await Promise.all([
+    const [requestResult, response] = await Promise.all([
       logRequest(dbClient, request, body),
       forwardRequestToOpenAi(request, body),
     ]);
+    const responseBody = await response.text();
+    if (requestResult.data !== null) {
+      ctx.waitUntil(logResponse(dbClient, requestResult.data, responseBody));
+    }
 
-    ctx.waitUntil(logResponse(dbClient, requestId.data!, response));
-    return new Response(response.body, {
+    return new Response(responseBody, {
       ...response,
-      headers: { requestId: requestId.data!, ...response.headers },
+      headers: {
+        ...valyrHeaders(requestResult),
+        ...response.headers,
+      },
     });
   },
 };
