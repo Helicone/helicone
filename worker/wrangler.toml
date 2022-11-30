@@ -1,6 +1,7 @@
 name = "valyr-worker-dev"
 main = "src/index.ts"
 compatibility_date = "2022-11-29"
+node_compat = true
 
 
 [vars]

@@ -1,6 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import * as argon2 from "argon2";
-
+// import bcrypt from "bcrypt";
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
@@ -29,15 +28,17 @@ function forwardRequestToOpenAi(
     body,
   });
 }
+
 async function logRequest(
   dbClient: SupabaseClient,
   request: Request,
-  body: string
+  body: string,
+  auth: string
 ): Promise<Result> {
   const json = JSON.parse(body);
   const { data, error } = await dbClient
     .from("request")
-    .insert([{ path: request.url, body: json }])
+    .insert([{ path: request.url, body: json, auth_hash: await hash(auth) }])
     .select("id")
     .single();
   if (error !== null) {
@@ -71,20 +72,19 @@ function valyrHeaders(requestResult: Result): Record<string, string> {
     return { "Valyr-Status": "success", "Valyr-Id": requestResult.data };
   }
 }
-
-async function createDbClient(env: Env, auth: string): Promise<SupabaseClient> {
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${argon2.hash(auth)}`,
-        },
-      },
-    }
+async function hash(key: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const hashedKey = await crypto.subtle.digest(
+    { name: "SHA-256" },
+    encoder.encode(key)
   );
-  return dbClient;
+  const byteArray = Array.from(new Uint8Array(hashedKey));
+  const hexCodes = byteArray.map((value) => {
+    const hexCode = value.toString(16);
+    const paddedHexCode = hexCode.padStart(2, "0");
+    return paddedHexCode;
+  });
+  return hexCodes.join("");
 }
 
 export default {
@@ -98,14 +98,15 @@ export default {
       return new Response("Not authorization header found!", { status: 401 });
     }
 
-    const [body, dbClient] = await Promise.all([
-      argon2.hash(auth),
-      createDbClient(env, auth),
-    ]);
+    const body = await request.text();
+    const dbClient = createClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    const [requestResult, response] = await Promise.all([
-      logRequest(dbClient, request, body),
+    const [response, requestResult] = await Promise.all([
       forwardRequestToOpenAi(request, body),
+      logRequest(dbClient, request, body, auth),
     ]);
     const responseBody = await response.text();
     if (requestResult.data !== null) {
