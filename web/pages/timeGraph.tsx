@@ -56,7 +56,7 @@ const timeGraphConfig: Record<TimeLength, TimeGraphConfig> = {
   "1h": {
     timeMap: (date) => date.toLocaleTimeString(),
     increment: (date) => new Date(date.getTime() + 120 * 1000), // every 2 minutes
-    dbIncrement: "hour",
+    dbIncrement: "min",
     start: getXMinuteasAgoFloored(60),
     end: getXMinuteasAgoFloored(0),
   },
