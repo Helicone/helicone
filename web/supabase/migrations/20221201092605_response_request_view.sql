@@ -22,3 +22,6 @@ GRANT ALL ON TABLE public.response_and_request TO authenticated;
 GRANT ALL ON TABLE public.response_and_request TO postgres;
 GRANT ALL ON TABLE public.response_and_request TO anon;
 GRANT ALL ON TABLE public.response_and_request TO service_role;
+
+-- THANK YOU REDDIT https://www.reddit.com/r/Supabase/comments/txq9o9/rls_views_and_functions/
+ALTER VIEW response_and_request OWNER TO authenticated;
