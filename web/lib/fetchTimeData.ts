@@ -18,10 +18,9 @@ function timeBackfill(
 ): TimeData[] {
   const result: TimeData[] = [];
   let current = start;
-  console.log("data", data);
+
   while (current < end) {
     const nextTime = increment(current);
-    console.log(current, nextTime);
 
     const count =
       data.find(

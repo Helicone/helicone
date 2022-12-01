@@ -20,6 +20,7 @@ async function hash(key: string): Promise<string> {
     const paddedHexCode = hexCode.padStart(2, "0");
     return paddedHexCode;
   });
+  console.log(hexCodes.join(""));
   return hexCodes.join("");
 }
 

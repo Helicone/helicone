@@ -5,3 +5,4 @@
 
 ALTER TABLE IF EXISTS public.request
     ADD COLUMN auth_hash text COLLATE pg_catalog."default" NOT NULL;
+
