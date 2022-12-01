@@ -13,7 +13,7 @@ import { DateMetrics } from "./timeGraph";
 export default function Home() {
   const [client, setClient] = useState<SupabaseClient | null>(null);
   useEffect(() => {
-    supabaseClient("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").then(
+    supabaseClient("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").then(
       (client) => {
         setClient(client);
       }
@@ -60,7 +60,7 @@ function LoggedInFlow({
       <div className="h-2/6 w-full ">
         <div className="flex flex-col md:flex-row gap-8 ">
           <div className="flex-1 border-[1px] border-slate-700 rounded-lg px-5 py-3 flex flex-col items-center">
-            {MetricsPanel()}
+            <MetricsPanel client={client} />
           </div>
           <div className="flex-1 border-[1px] text-xs border-slate-700 rounded-lg px-5 py-3 max-h-60 overflow-y-auto ">
             {/* This is a vertically scrollable table */}
@@ -76,6 +76,7 @@ function LoggedInFlow({
             </div>
             <div className="flex flex-col gap-2 mt-2">
               <p className="text-slate-300">Logs here</p>
+              <Logs client={client} />
             </div>
           </div>
         </div>
@@ -86,7 +87,33 @@ function LoggedInFlow({
     </div>
   );
 }
+function Logs({ client }: { client: SupabaseClient }) {
+  const [logs, setLogs] = useState("");
+  useEffect(() => {
+    client
+      .channel("public:request")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "request" },
+        (payload) => {
+          setLogs((logs) => logs + payload.new.record.request);
+        }
+      )
+      .subscribe();
+    client
+      .channel("public:response")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "response" },
+        (payload) => {
+          setLogs((logs) => logs + payload.new.record.request);
+        }
+      )
+      .subscribe();
+  }, [client]);
 
+  return <div>{logs}</div>;
+}
 function GraphAndCharts({ client }: { client: SupabaseClient }) {
   const [showRequestTable, setShowRequestTable] = useState(false);
   return (
@@ -233,33 +260,66 @@ function TimeGraphWHeader({ client }: { client: SupabaseClient }) {
   );
 }
 
-function MetricsPanel() {
+function MetricsPanel({ client }: { client: SupabaseClient }) {
+  interface Metrics {
+    request_today: number;
+    avg_requests_per_day: number;
+    avg_response_time: number;
+    avg_token_per_request: number;
+    avg_cost_per_request: number;
+    total_requests: number;
+  }
+
+  const [data, setData] = useState<Metrics | null>(null);
   const metrics = [
     {
-      value: "123",
+      value: data?.request_today ?? "n/a",
       label: "Requests today",
     },
     {
-      value: "231",
+      value: data?.avg_requests_per_day ?? "n/a",
       label: "Average requests per day",
     },
     {
-      value: "1.24s",
+      value: data?.avg_response_time ?? "n/a",
       label: "Average response time",
     },
     {
-      value: "3984303",
+      value: data?.avg_token_per_request ?? "n/a",
       label: "Average # of Token/request",
     },
     {
-      value: "$0.003242",
+      value: data?.avg_cost_per_request ?? "n/a",
       label: "Average cost/request",
     },
     {
-      value: "325234",
+      value: data?.total_requests ?? "n/a",
       label: "Total requests",
     },
   ];
+  useEffect(() => {
+    const fetch = async () => {
+      const { count: totalRequests, error: totalRequestError } = await client
+        .from("response")
+        .select("*", { count: "exact", head: true });
+
+      if (totalRequestError !== null) {
+        console.log(totalRequestError);
+      } else {
+        console.log("JKF", totalRequests);
+        setData({
+          request_today: undefined!, //TODO
+          avg_requests_per_day: undefined!,
+          avg_response_time: undefined!,
+          avg_token_per_request: undefined!,
+          avg_cost_per_request: undefined!,
+          total_requests: totalRequests!,
+        });
+      }
+    };
+    fetch();
+  }, [client]);
+
   return (
     <div className="grid grid-cols-5 gap-2">
       {metrics.map((m) => (
