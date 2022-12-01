@@ -8,6 +8,7 @@ if (supabaseUrl === "" || supabaseAnonKey === "") {
 }
 
 async function hash(key: string): Promise<string> {
+  key = `Bearer ${key}`;
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
     { name: "SHA-256" },
