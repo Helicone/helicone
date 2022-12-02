@@ -1,12 +1,8 @@
 import { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
+import { DateCountDBModel } from "../schema/dateCount";
 import { Result } from "./result";
 export interface TimeData {
   time: Date;
-  count: number;
-}
-
-interface DateCountDBModel {
-  created_at_trunc: Date;
   count: number;
 }
 

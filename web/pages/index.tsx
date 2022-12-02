@@ -1,6 +1,7 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  DocumentDuplicateIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -8,6 +9,8 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 
 import { supabaseClient } from "../lib/supabaseClient";
+import { Request as ValyrRequest } from "../schema/request";
+import { ValyrResponse } from "../schema/resoponse";
 import { DateMetrics } from "./timeGraph";
 
 export default function Home() {
@@ -75,7 +78,6 @@ function LoggedInFlow({
               </div>
             </div>
             <div className="flex flex-col gap-2 mt-2">
-              <p className="text-slate-300">Logs here</p>
               <Logs client={client} />
             </div>
           </div>
@@ -87,33 +89,91 @@ function LoggedInFlow({
     </div>
   );
 }
+interface Log {
+  event: "request" | "response";
+  id: string;
+  created_at: Date;
+  body: string;
+}
 function Logs({ client }: { client: SupabaseClient }) {
-  const [logs, setLogs] = useState("");
+  const [logs, setLogs] = useState<Log[]>([]);
+
   useEffect(() => {
-    client
-      .channel("public:request")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "request" },
-        (payload) => {
-          setLogs((logs) => logs + payload.new.record.request);
-        }
-      )
-      .subscribe();
-    client
-      .channel("public:response")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "response" },
-        (payload) => {
-          setLogs((logs) => logs + payload.new.record.request);
-        }
-      )
-      .subscribe();
+    console.log("Fetching logs");
+    const channel = client.channel("db-messages");
+    channel.on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "request" },
+      (payload) => {
+        const request: ValyrRequest = payload.new as unknown as ValyrRequest;
+        setLogs((logs) =>
+          logs.concat([
+            {
+              event: "request",
+              id: request.id,
+              created_at: new Date(request.created_at),
+              body: JSON.stringify(request.body),
+            },
+          ])
+        );
+      }
+    );
+    channel.on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "response" },
+      (payload) => {
+        const response: ValyrResponse = payload.new as unknown as ValyrResponse;
+        setLogs((logs) =>
+          logs.concat([
+            {
+              event: "response",
+              id: response.id,
+              created_at: new Date(response.created_at),
+              body: JSON.stringify(response.body),
+            },
+          ])
+        );
+      }
+    );
+    channel.subscribe(async (status) => {
+      console.log("STATUS", status);
+    });
   }, [client]);
 
-  return <div>{logs}</div>;
+  return (
+    <div>
+      {logs.reverse().map((log) => (
+        <LogCard log={log} key={log.id} />
+      ))}
+    </div>
+  );
 }
+
+function LogCard({ log: l, key }: { log: Log; key: string }): JSX.Element {
+  return (
+    <div
+      key={key}
+      className="flex flex-row justify-between items-center border-[1px] border-slate-700 rounded-lg px-5 py-3"
+    >
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-2">
+          <p className="text-slate-300">{l.event}</p>
+          <p className="text-slate-300">{l.created_at.toLocaleString()}</p>
+        </div>
+        <div className="flex flex-row gap-2">
+          <p className="text-slate-300">{middleTruncString(l.body, 50)}</p>
+        </div>
+      </div>
+      <DocumentDuplicateIcon
+        className="h-5 w-5 text-slate-300 hover:cursor-pointer"
+        onClick={() => {
+          navigator.clipboard.writeText(l.body);
+        }}
+      />
+    </div>
+  );
+}
+
 function GraphAndCharts({ client }: { client: SupabaseClient }) {
   const [showRequestTable, setShowRequestTable] = useState(false);
   return (
@@ -185,6 +245,14 @@ interface ResponseAndRequest {
 
 function truncString(str: string, n: number) {
   return str.length > n ? str.substring(0, n - 1) + "..." : str;
+}
+
+function middleTruncString(str: string, n: number) {
+  return str.length > n
+    ? str.substring(0, n / 2) +
+        "..." +
+        str.substring(str.length - n / 2, str.length)
+    : str;
 }
 
 function RequestTable({ client }: { client: SupabaseClient }) {
