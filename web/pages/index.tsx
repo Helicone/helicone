@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { supabaseClient } from "../lib/supabaseClient";
 import { Request as ValyrRequest } from "../schema/request";
 import { ValyrResponse } from "../schema/resoponse";
-import { DateMetrics } from "./timeGraph";
+import { DateMetrics } from "../components/timeGraph";
 
 export default function Home() {
   const [client, setClient] = useState<SupabaseClient | null>(null);
@@ -37,7 +37,7 @@ export default function Home() {
         ) : (
           <>
             <h1 className="text-6xl text-center my-8">Welcome to Valyr 🛡</h1>
-            {OnBoarding(setClient)}
+            <OnBoarding setClient={setClient} />
           </>
         )}
       </main>
@@ -59,7 +59,9 @@ function LoggedInFlow({
 }) {
   return (
     <div className="flex flex-col h-full px-10 pb-12">
-      <div className="h-1/6 ">{ResetAPIKey(setClient)}</div>
+      <div className="h-1/6 ">
+        <ResetAPIKey setClient={setClient} />
+      </div>
       <div className="h-2/6 w-full ">
         <div className="flex flex-col md:flex-row gap-8 ">
           <div className="flex-1 border-[1px] border-slate-700 rounded-lg px-5 py-3 flex flex-col items-center">
@@ -402,7 +404,11 @@ function MetricsPanel({ client }: { client: SupabaseClient }) {
   );
 }
 
-function ResetAPIKey(setClient) {
+function ResetAPIKey({
+  setClient,
+}: {
+  setClient: (client: SupabaseClient | null) => void;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-row justify-center items-center gap-4">
@@ -425,7 +431,11 @@ function ResetAPIKey(setClient) {
   );
 }
 
-function OnBoarding(setClient) {
+function OnBoarding({
+  setClient,
+}: {
+  setClient: (client: SupabaseClient | null) => void;
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div className="border-[1px] border-slate-700 rounded-lg px-5 py-3 flex flex-col items-center">
