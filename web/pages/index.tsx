@@ -5,7 +5,7 @@ import {
   ExclamationCircleIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/solid";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
@@ -15,6 +15,7 @@ import { ValyrResponse } from "../schema/resoponse";
 import { DateMetrics } from "../components/timeGraph";
 import Image from "next/image";
 import { Logo } from "../components/logo";
+import { MetricsDB } from "../schema/metrics";
 
 function getStorageValue<T>(key: string, defaultValue: T) {
   const saved =
@@ -393,6 +394,14 @@ function RequestTable({ client }: { client: SupabaseClient }) {
                   s
                 </td>
                 <td>{row.response_body.usage.total_tokens}</td>
+                <td>
+                  <DocumentDuplicateIcon
+                    className="h-5 w-5 text-slate-300 hover:cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(row));
+                    }}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -418,33 +427,35 @@ function TimeGraphWHeader({ client }: { client: SupabaseClient }) {
 function MetricsPanel({ client }: { client: SupabaseClient }) {
   interface Metrics {
     request_today: number;
-    avg_requests_per_day: number;
-    avg_response_time: number;
-    avg_token_per_request: number;
-    avg_cost_per_request: number;
+    average_requests_per_day: number;
+    average_response_time: number;
+    average_tokens_per_request: number;
+    average_tokens_per_response: number;
+    average_cost_per_request: number;
     total_requests: number;
   }
 
   const [data, setData] = useState<Metrics | null>(null);
+  console.log("data", data);
   const metrics = [
     {
       value: data?.request_today ?? "n/a",
       label: "Requests today",
     },
     {
-      value: data?.avg_requests_per_day ?? "n/a",
+      value: data?.average_requests_per_day ?? "n/a",
       label: "Average requests per day",
     },
     {
-      value: data?.avg_response_time ?? "n/a",
+      value: data?.average_response_time ?? "n/a",
       label: "Average response time",
     },
     {
-      value: data?.avg_token_per_request ?? "n/a",
+      value: data?.average_tokens_per_request ?? "n/a",
       label: "Average # of Token/request",
     },
     {
-      value: data?.avg_cost_per_request ?? "n/a",
+      value: data?.average_cost_per_request ?? "n/a",
       label: "Average cost/request",
     },
     {
@@ -454,21 +465,32 @@ function MetricsPanel({ client }: { client: SupabaseClient }) {
   ];
   useEffect(() => {
     const fetch = async () => {
-      const { count: totalRequests, error: totalRequestError } = await client
+      const { count: requestToday, error: requestTodayError } = await client
         .from("response")
-        .select("*", { count: "exact", head: true });
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .gte("created_at", new Date().toISOString().split("T")[0])
+        .order("created_at", { ascending: false });
 
-      if (totalRequestError !== null) {
-        console.log(totalRequestError);
+      const {
+        data: metrics,
+        error: metricsError,
+      }: { data: MetricsDB | null; error: PostgrestError | null } = await client
+        .from("metrics")
+        .select("*")
+        .single();
+
+      if (metricsError !== null) {
+        console.error(metricsError);
+      } else if (requestTodayError !== null) {
+        console.error(requestTodayError);
       } else {
-        console.log("JKF", totalRequests);
         setData({
-          request_today: undefined!, //TODO
-          avg_requests_per_day: undefined!,
-          avg_response_time: undefined!,
-          avg_token_per_request: undefined!,
-          avg_cost_per_request: undefined!,
-          total_requests: totalRequests!,
+          request_today: requestToday!, //TODO
+          average_cost_per_request: undefined!,
+          ...metrics!,
         });
       }
     };
