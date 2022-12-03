@@ -451,8 +451,8 @@ function MetricsPanel({ client }: { client: SupabaseClient }) {
       label: "Average response time",
     },
     {
-      value: data?.average_tokens_per_request ?? "n/a",
-      label: "Average # of Token/request",
+      value: data?.average_tokens_per_response ?? "n/a",
+      label: "Average # of Token/response",
     },
     {
       value: data?.average_cost_per_request ?? "n/a",
