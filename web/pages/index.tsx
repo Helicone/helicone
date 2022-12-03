@@ -417,7 +417,7 @@ function TimeGraphWHeader({ client }: { client: SupabaseClient }) {
       <div className="w-full h-1/6 pl-10">
         <p className="text-lg text-slate-300">Number of requests over time</p>
       </div>
-      <div className="w-full h-5/6">
+      <div className="w-full md:h-5/6 h-40">
         <DateMetrics client={client} />
       </div>
     </div>
