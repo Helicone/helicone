@@ -7,7 +7,7 @@ if (supabaseUrl === "" || supabaseAnonKey === "") {
   throw new Error("URL or Anon ENV not set");
 }
 
-async function hash(key: string): Promise<string> {
+export async function hashAuth(key: string): Promise<string> {
   key = `Bearer ${key}`;
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
@@ -24,12 +24,12 @@ async function hash(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
-export const supabaseClient = async (auth: string) =>
+export const supabaseClient = async (authhash: string) =>
   createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: true },
     global: {
       headers: {
-        authhash: await hash(auth),
+        authhash,
       },
     },
   });

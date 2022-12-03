@@ -2,28 +2,65 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   DocumentDuplicateIcon,
+  ExclamationCircleIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
-import { supabaseClient } from "../lib/supabaseClient";
+import { hashAuth, supabaseClient } from "../lib/supabaseClient";
 import { Request as ValyrRequest } from "../schema/request";
 import { ValyrResponse } from "../schema/resoponse";
 import { DateMetrics } from "../components/timeGraph";
 import Image from "next/image";
 import { Logo } from "../components/logo";
 
-export default function Home() {
-  const [client, setClient] = useState<SupabaseClient | null>(null);
+function getStorageValue<T>(key: string, defaultValue: T) {
+  const saved =
+    typeof window !== "undefined" ? localStorage.getItem(key) : null;
+  if (saved === null) {
+    return defaultValue;
+  }
+  return JSON.parse(saved) as T;
+}
+
+function useLocalStorage<T>(
+  key: string,
+  defaultValue: T
+): [T, (value: T) => void] {
+  const [value, setValue] = useState(() => {
+    return getStorageValue(key, defaultValue);
+  });
+
   useEffect(() => {
-    supabaseClient("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").then(
-      (client) => {
-        // setClient(client);
-      }
-    );
-  }, []);
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
+export default function Home() {
+  const [authHash, setAuthHash] = useLocalStorage<string | null>(
+    "authHashedToken",
+    null
+  );
+  const [authPreview, setAuthPreview] = useLocalStorage<string | null>(
+    "authPreview",
+    null
+  );
+
+  const [client, setClient] = useState<SupabaseClient | null>(null);
+
+  useEffect(() => {
+    if (authHash !== null) {
+      supabaseClient(authHash).then((client) => {
+        setClient(client);
+      });
+    } else {
+      setClient(null);
+    }
+  }, [authHash]);
 
   return (
     <div className="flex flex-col">
@@ -35,7 +72,11 @@ export default function Home() {
 
       <main className="items-center pt-5 pb-12 md:h-screen ">
         {client !== null ? (
-          <LoggedInFlow setClient={setClient} client={client} />
+          <LoggedInFlow
+            setAuthHash={setAuthHash}
+            client={client}
+            authPreview={authPreview!}
+          />
         ) : (
           <div className="flex flex-col items-center">
             <h1 className="text-6xl text-center my-8">
@@ -51,7 +92,10 @@ export default function Home() {
                 </div>
               </div>
             </h1>
-            <OnBoarding setClient={setClient} />
+            <OnBoarding
+              setAuthHash={setAuthHash}
+              setAuthPreview={setAuthPreview}
+            />
           </div>
         )}
       </main>
@@ -87,16 +131,18 @@ export default function Home() {
   );
 }
 function LoggedInFlow({
-  setClient,
+  setAuthHash,
   client,
+  authPreview,
 }: {
-  setClient: (client: SupabaseClient | null) => void;
+  setAuthHash: (client: string | null) => void;
   client: SupabaseClient;
+  authPreview: string;
 }) {
   return (
     <div className="flex flex-col h-full px-10 pb-12">
       <div className="h-1/6 ">
-        <ResetAPIKey setClient={setClient} />
+        <ResetAPIKey setAuthHash={setAuthHash} authPreview={authPreview} />
       </div>
       <div className="h-2/6 w-full ">
         <div className="flex flex-col md:flex-row gap-8 ">
@@ -444,23 +490,49 @@ function MetricsPanel({ client }: { client: SupabaseClient }) {
 }
 
 function ResetAPIKey({
-  setClient,
+  setAuthHash,
+  authPreview,
 }: {
-  setClient: (client: SupabaseClient | null) => void;
+  setAuthHash: (client: string | null) => void;
+  authPreview: string;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-row justify-center items-center gap-4">
-        <InformationCircleIcon className="h-6 w-6 text-slate-300" />
-        <p className="text-slate-300">
-          You are currently viewing API Key {"Kkfd...kjdf"}
-        </p>
-      </div>
+      {authPreview === "Demo...Demo" ? (
+        <div className="flex flex-col gap-2 items-center">
+          <div className="flex flex-row justify-center items-center gap-4">
+            <ExclamationCircleIcon className="h-6 w-6 text-slate-300" />
+            <p className="text-slate-300">
+              You are currently using the demo API Key.
+            </p>
+          </div>
+          <div>
+            All of the data associated with this API Key is coming from
+            <a
+              href="https://demoapp.valyrai.com/"
+              className="text-indigo-400 font-bold hover:underline"
+            >
+              {" "}
+              this demo app
+            </a>
+            .
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-row justify-center items-center gap-4">
+          <InformationCircleIcon className="h-6 w-6 text-slate-300" />
+          <p className="text-slate-300">
+            You are currently viewing API Key{" "}
+            <i className="text-slate-300 font-bold">{authPreview}</i>
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-row justify-center items-center gap-4">
         <button
           className="px-4 py-2 rounded-full text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
           onClick={() => {
-            setClient(null);
+            setAuthHash(null);
           }}
         >
           Reset API key
@@ -471,9 +543,11 @@ function ResetAPIKey({
 }
 
 function OnBoarding({
-  setClient,
+  setAuthHash,
+  setAuthPreview,
 }: {
-  setClient: (client: SupabaseClient | null) => void;
+  setAuthHash: (client: string | null) => void;
+  setAuthPreview: (auth: string) => void;
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -496,12 +570,21 @@ function OnBoarding({
             type="password"
             placeholder="Your OpenAI API key"
             onChange={(e) => {
-              supabaseClient(e.target.value).then((client) => {
-                setClient(client);
-              });
+              hashAuth(e.target.value).then((hash) => setAuthHash(hash));
+              setAuthPreview(middleTruncString(e.target.value, 8));
             }}
           />
-          <button className="text-sm text-slate-300">demo</button>
+          <button
+            className="text-sm text-slate-300"
+            onClick={() => {
+              setAuthHash(
+                "1155382dfb904996467a32e42a28adf9cc0033b13874697d03527c09916a4bc7"
+              );
+              setAuthPreview("Demo...Demo");
+            }}
+          >
+            demo
+          </button>
         </div>
         <i className="text-sm text-slate-300 flex flex-row items-center">
           your key is never stored on our servers
