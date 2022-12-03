@@ -12,13 +12,15 @@ import { supabaseClient } from "../lib/supabaseClient";
 import { Request as ValyrRequest } from "../schema/request";
 import { ValyrResponse } from "../schema/resoponse";
 import { DateMetrics } from "../components/timeGraph";
+import Image from "next/image";
+import { Logo } from "../components/logo";
 
 export default function Home() {
   const [client, setClient] = useState<SupabaseClient | null>(null);
   useEffect(() => {
-    supabaseClient("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").then(
+    supabaseClient("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").then(
       (client) => {
-        setClient(client);
+        // setClient(client);
       }
     );
   }, []);
@@ -35,17 +37,51 @@ export default function Home() {
         {client !== null ? (
           <LoggedInFlow setClient={setClient} client={client} />
         ) : (
-          <>
-            <h1 className="text-6xl text-center my-8">Welcome to Valyr 🛡</h1>
+          <div className="flex flex-col items-center">
+            <h1 className="text-6xl text-center my-8">
+              <div className="hidden md:flex md:flex-row gap-5 items-center">
+                <div className="hidden md:block">Welcome to Valyr</div>
+                <Logo />
+              </div>
+              <div className=" md:hidden flex flex-col items-center">
+                Welcome to
+                <div className="md:hidden flex flex-row gap-5 items-center">
+                  <span>Valyr</span>
+                  <Logo />
+                </div>
+              </div>
+            </h1>
             <OnBoarding setClient={setClient} />
-          </>
+          </div>
         )}
       </main>
 
       <footer className="fixed left-0 bottom-0 z-20 h-12 w-full text-center border-t-2 border-slate-800 bg-black bg-opacity-90">
-        <a target="_blank" rel="noopener noreferrer">
-          Footer things go here
-        </a>
+        <div className="flex flex-row items-center justify-center h-full gap-1">
+          <div>
+            Made by <i>Helicone</i>
+          </div>
+
+          <div>
+            {"("}
+            <a
+              href="https://twitter.com/justinstorre"
+              className="text-slate-300"
+            >
+              Justin
+            </a>{" "}
+            <a href="https://twitter.com/barakoshri" className="text-slate-300">
+              Barak
+            </a>{" "}
+            <a
+              href="https://twitter.com/NguyenScott7"
+              className="text-slate-300"
+            >
+              Scott
+            </a>
+            {")"}
+          </div>
+        </div>
       </footer>
     </div>
   );
@@ -80,6 +116,7 @@ function LoggedInFlow({
               </div>
             </div>
             <div className="flex flex-col gap-2 mt-2">
+              LOGIN to view logs live
               <Logs client={client} />
             </div>
           </div>
@@ -107,6 +144,7 @@ function Logs({ client }: { client: SupabaseClient }) {
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "request" },
       (payload) => {
+        console.log("REQUEST", payload);
         const request: ValyrRequest = payload.new as unknown as ValyrRequest;
         setLogs((logs) =>
           logs.concat([
@@ -124,6 +162,7 @@ function Logs({ client }: { client: SupabaseClient }) {
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "response" },
       (payload) => {
+        console.log("RESPONSE", payload);
         const response: ValyrResponse = payload.new as unknown as ValyrResponse;
         setLogs((logs) =>
           logs.concat([
@@ -443,6 +482,11 @@ function OnBoarding({
         <code className="bg-slate-800 p-1 text-md">api.openai.com/v1</code>
         <ArrowDownIcon className="h-4" />
         <code className="bg-slate-800 p-1 text-md">oai.valyrai.com/v1</code>
+        <i className="text-xs">
+          <a href="https://github.com/bhunkio/app-ideas-valyr-demo/commit/d7443e5e6d2721a08863df82b34775e7e936ad30">
+            example
+          </a>
+        </i>
       </div>
       <div className="border-[1px] border-slate-700 rounded-lg px-5 py-3 flex flex-col items-center justify-between">
         <h3 className="text-xl mb-5">Paste your OpenAI API key</h3>
