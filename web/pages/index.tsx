@@ -162,7 +162,7 @@ function LoggedInFlow({
               </div>
             </div>
             <div className="flex flex-col gap-2 mt-2">
-              LOGIN to view logs live
+              Live logs coming soon!
               <Logs client={client} />
             </div>
           </div>
