@@ -571,6 +571,7 @@ function OnBoarding({
   setAuthHash: (client: string | null) => void;
   setAuthPreview: (auth: string) => void;
 }) {
+  const [authLocal, setAuthLocal] = useState("");
   return (
     <div className="flex flex-col">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -585,7 +586,7 @@ function OnBoarding({
             </a>
           </i>
         </div>
-        <div className="border-[1px] border-slate-700 rounded-lg px-5 py-5 flex flex-col items-center justify-between ">
+        <div className="border-[1px] border-slate-700 rounded-lg px-5 py-5 gap-3 flex flex-col items-center justify-between ">
           <h3 className="text-xl mb-5">Paste your OpenAI API key</h3>
           <div className="flex flex-col items-end">
             <input
@@ -593,11 +594,19 @@ function OnBoarding({
               type="password"
               placeholder="Your OpenAI API key"
               onChange={(e) => {
-                hashAuth(e.target.value).then((hash) => setAuthHash(hash));
-                setAuthPreview(middleTruncString(e.target.value, 8));
+                setAuthLocal(e.target.value);
               }}
             />
           </div>
+          <button
+            className="px-4 py-2 rounded-full text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
+            onClick={() => {
+              setAuthPreview(middleTruncString(authLocal, 8));
+              hashAuth(authLocal).then((hash) => setAuthHash(hash));
+            }}
+          >
+            view dashboard
+          </button>
           <i className="text-sm text-slate-300 flex flex-row items-center">
             your key is never stored on our servers
             <InformationCircleIcon className="h-5 mx-1" />
