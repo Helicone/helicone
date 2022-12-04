@@ -64,14 +64,14 @@ export default function Home() {
   }, [authHash]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-black text-slate-100">
       <Head>
         <title>Valyr better logging for OpenAI</title>
         <meta name="description" content="Valyr" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="items-center pt-5 pb-12 md:h-screen ">
+      <main className="items-center pt-5 pb-12 md:h-screen min-h-screen">
         {client !== null ? (
           <LoggedInFlow
             setAuthHash={setAuthHash}
