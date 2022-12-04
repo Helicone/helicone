@@ -443,15 +443,15 @@ function MetricsPanel({ client }: { client: SupabaseClient }) {
       label: "Requests today",
     },
     {
-      value: data?.average_requests_per_day ?? "n/a",
+      value: data?.average_requests_per_day.toFixed(3) ?? "n/a",
       label: "Average requests per day",
     },
     {
-      value: data?.average_response_time ?? "n/a",
+      value: data?.average_response_time.toFixed(3) ?? "n/a",
       label: "Average response time",
     },
     {
-      value: data?.average_tokens_per_response ?? "n/a",
+      value: data?.average_tokens_per_response.toFixed(3) ?? "n/a",
       label: "Average # of Token/response",
     },
     {
