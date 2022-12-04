@@ -101,7 +101,7 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="fixed left-0 bottom-0 z-20 h-12 w-full text-center border-t-2 border-slate-800 bg-black bg-opacity-90">
+      <footer className="fixed left-0 bottom-0 z-20 h-12 w-full text-center border-t-2 dark:border-slate-800 border-slate-300 dark:bg-black bg-opacity-90">
         <div className="flex flex-row items-center justify-center h-full gap-1">
           <div>
             Made by <i>Helicone</i>
@@ -111,16 +111,19 @@ export default function Home() {
             {"("}
             <a
               href="https://twitter.com/justinstorre"
-              className="text-slate-300"
+              className="dark:text-slate-300 text-slate-700"
             >
               Justin
             </a>{" "}
-            <a href="https://twitter.com/barakoshri" className="text-slate-300">
+            <a
+              href="https://twitter.com/barakoshri"
+              className="dark:text-slate-300 text-slate-700"
+            >
               Barak
             </a>{" "}
             <a
               href="https://twitter.com/NguyenScott7"
-              className="text-slate-300"
+              className="dark:text-slate-300 text-slate-700"
             >
               Scott
             </a>
@@ -155,10 +158,12 @@ function LoggedInFlow({
             <div className="flex flex-row justify-between">
               <div className="flex flex-row gap-2">
                 <InformationCircleIcon className="h-5 w-5 text-slate-300" />
-                <p className="text-slate-300">Logs</p>
+                <p className="text-slate-600 dark:text-slate-300">Logs</p>
               </div>
               <div className="flex flex-row gap-2">
-                <p className="text-slate-300 animate-pulse">Live</p>
+                <p className="dark:text-slate-300 text-slate-600 animate-pulse">
+                  Live
+                </p>
                 <ArrowUpIcon className="h-5 w-5 text-slate-300" />
               </div>
             </div>
@@ -268,17 +273,19 @@ function GraphAndCharts({ client }: { client: SupabaseClient }) {
     <>
       <div className="h-[10%] w-full pl-10 flex flex-col gap-3 mt-4">
         <div className="flex flex-row gap-5 items-center">
-          <div className="bg-slate-800 rounded-full flex flex-row gap-2">
+          <div className="border-2 dark:border-none dark:bg-slate-800 rounded-full flex flex-row gap-2">
             <div
               className={
                 "flex flex-row gap-2 items-center px-10 rounded-full py-1 cursor-pointer " +
-                (showRequestTable || "bg-slate-600")
+                (showRequestTable || "dark:bg-slate-600 bg-slate-500")
               }
               onClick={() => setShowRequestTable(false)}
             >
               <p
                 className={
-                  showRequestTable ? "text-slate-100" : "text-slate-200"
+                  showRequestTable
+                    ? "dark:text-slate-100 "
+                    : "dark:text-slate-200 text-slate-100"
                 }
               >
                 Graph
@@ -287,13 +294,15 @@ function GraphAndCharts({ client }: { client: SupabaseClient }) {
             <div
               className={
                 "flex flex-row gap-2 items-center px-10 rounded-full py-1 cursor-pointer " +
-                (showRequestTable && "bg-slate-600")
+                (showRequestTable && "dark:bg-slate-600 bg-slate-500")
               }
               onClick={() => setShowRequestTable(true)}
             >
               <p
                 className={
-                  showRequestTable ? "text-slate-200" : "text-slate-100"
+                  showRequestTable
+                    ? "dark:text-slate-200 text-slate-100"
+                    : "dark:text-slate-100 "
                 }
               >
                 Table
@@ -524,7 +533,7 @@ function ResetAPIKey({
         <div className="flex flex-col gap-2 items-center">
           <div className="flex flex-row justify-center items-center gap-4">
             <ExclamationCircleIcon className="h-6 w-6 text-slate-300" />
-            <p className="text-slate-300">
+            <p className="dark:text-slate-300 text-slate-600">
               You are currently using the demo API Key.
             </p>
           </div>
@@ -552,7 +561,7 @@ function ResetAPIKey({
 
       <div className="flex flex-row justify-center items-center gap-4">
         <button
-          className="px-4 py-2 rounded-full text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
+          className="px-4 py-2 rounded-full text-slate-600 dark:text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
           onClick={() => {
             setAuthHash(null);
           }}
@@ -577,9 +586,13 @@ function OnBoarding({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="border-[1px] border-slate-700 rounded-lg px-5 py-3 flex flex-col items-center">
           <h3 className="text-xl mb-5">Replace your OpenAI url</h3>
-          <code className="bg-slate-800 p-1 text-md">api.openai.com/v1</code>
+          <code className="bg-slate-800 p-1  px-3 text-md  text-slate-200">
+            api.openai.com/v1
+          </code>
           <ArrowDownIcon className="h-4" />
-          <code className="bg-slate-800 p-1 text-md">oai.valyrai.com/v1</code>
+          <code className="bg-slate-800 py-1  px-3 text-md text-slate-200 ">
+            oai.valyrai.com/v1
+          </code>
           <i className="text-xs">
             <a href="https://github.com/bhunkio/app-ideas-valyr-demo/commit/d7443e5e6d2721a08863df82b34775e7e936ad30">
               example
@@ -590,7 +603,7 @@ function OnBoarding({
           <h3 className="text-xl mb-5">Paste your OpenAI API key</h3>
           <div className="flex flex-col items-end">
             <input
-              className="bg-slate-800 p-1"
+              className="bg-slate-800 p-1  px-2"
               type="password"
               placeholder="Your OpenAI API key"
               onChange={(e) => {
@@ -599,7 +612,7 @@ function OnBoarding({
             />
           </div>
           <button
-            className="px-4 py-2 rounded-full text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
+            className="px-4 py-2 rounded-full text-slate-600 dark:text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
             onClick={() => {
               setAuthPreview(middleTruncString(authLocal, 8));
               hashAuth(authLocal).then((hash) => setAuthHash(hash));
@@ -607,7 +620,7 @@ function OnBoarding({
           >
             view dashboard
           </button>
-          <i className="text-sm text-slate-300 flex flex-row items-center">
+          <i className="text-sm text-slate-600 dark:text-slate-300 flex flex-row items-center">
             your key is never stored on our servers
             <InformationCircleIcon className="h-5 mx-1" />
           </i>
@@ -616,7 +629,7 @@ function OnBoarding({
       {/* Demo button */}
       <div className="flex flex-row justify-center items-center gap-4 mt-8">
         <button
-          className="px-4 py-2 rounded-full text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
+          className="px-4 py-2 rounded-full text-slate-600 dark:text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100"
           onClick={() => {
             setAuthHash(
               "1155382dfb904996467a32e42a28adf9cc0033b13874697d03527c09916a4bc7"

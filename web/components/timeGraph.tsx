@@ -87,12 +87,17 @@ export function DateMetrics({ client }: { client: SupabaseClient }) {
   const allTimeLengths: TimeLength[] = ["1m", "7d", "24h", "1h"];
   const [timeLength, setTimeLength] = useState<TimeLength>("1m");
   const [data, setData] = useState<TimeData[]>([]);
-  const pillStyle =
-    "px-2 py-1 rounded-full text-xs text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-slate-100 cursor-pointer";
-  const selectedPillStyle = "bg-slate-700";
+  const pillStyle = "px-2 py-1 rounded-full text-xs cursor-pointer";
+
+  const selectedPillStyle =
+    "bg-slate-600 text-slate-200 dark:bg-slate-700 dark:text-slate-100 hover:bg-slate-600 hover:text-slate-100";
+  const unselectedPillStyle = "dark:text-slate-300  border-slate-700 border";
 
   const getStyle = (tL: TimeLength) =>
-    classNames(pillStyle, timeLength === tL ? selectedPillStyle : "");
+    classNames(
+      pillStyle,
+      timeLength === tL ? selectedPillStyle : unselectedPillStyle
+    );
   useEffect(() => {
     fetchLastXTimeData(
       client,
