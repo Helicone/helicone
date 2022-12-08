@@ -393,7 +393,14 @@ function RequestTable({ client }: { client: SupabaseClient }) {
               <tr className="text-slate-300" key={row.request_id}>
                 <td>{new Date(row.request_created_at).toLocaleString()}</td>
                 <td>{truncString(row.request_body.prompt, 15)}</td>
-                <td>{truncString(row.response_body.choices[0].text, 15)}</td>
+                <td>
+                  {truncString(
+                    row.response_body.choices
+                      ? row.response_body.choices[0].text
+                      : "{{ no reponse }}",
+                    15
+                  )}
+                </td>
                 <td>
                   {(
                     (new Date(row.response_created_at).getTime() -
@@ -402,7 +409,11 @@ function RequestTable({ client }: { client: SupabaseClient }) {
                   ).toString()}{" "}
                   s
                 </td>
-                <td>{row.response_body.usage.total_tokens}</td>
+                <td>
+                  {row.response_body.usage
+                    ? row.response_body.usage.total_tokens
+                    : "{{ no tokens found }}"}
+                </td>
                 <td>
                   <DocumentDuplicateIcon
                     className="h-5 w-5 text-slate-300 hover:cursor-pointer"
