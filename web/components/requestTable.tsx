@@ -47,8 +47,7 @@ export function RequestTable({ client }: { client: SupabaseClient }) {
         (total: any, num: any) => total + num,
         0
       );
-      prob = Math.pow(Math.E, sum);
-      prob = (prob * 100).toFixed(3).concat("%");
+      prob = sum.toFixed(2);
     } else {
       prob = "";
     }
@@ -71,7 +70,7 @@ export function RequestTable({ client }: { client: SupabaseClient }) {
               <th className="text-left">Response</th>
               <th className="text-left">Duration</th>
               <th className="text-left">Token Count</th>
-              <th className="text-left">Probability</th>
+              <th className="text-left">Log Probability</th>
               <th className="text-left">User Id</th>
               <th className="text-left">Copy</th>
             </tr>
