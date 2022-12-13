@@ -338,6 +338,7 @@ interface ResponseAndRequest {
   request_body: any;
   request_path: string;
   request_created_at: string;
+  request_user_id: string;
 }
 
 function truncString(str: string, n: number) {
@@ -410,6 +411,7 @@ function RequestTable({ client }: { client: SupabaseClient }) {
               <th className="text-left">Duration</th>
               <th className="text-left">Token Count</th>
               <th className="text-left">Probability</th>
+              <th className="text-left">User Id</th>
               <th className="text-left">Copy</th>
             </tr>
           </thead>
@@ -440,6 +442,9 @@ function RequestTable({ client }: { client: SupabaseClient }) {
                     : "{{ no tokens found }}"}
                 </td>
                 <td>{probabilities[i]}</td>
+                <td>
+                  {row.request_user_id && truncString(row.request_user_id, 5)}
+                </td>
                 <td>
                   <DocumentDuplicateIcon
                     className="h-5 w-5 text-slate-300 hover:cursor-pointer"

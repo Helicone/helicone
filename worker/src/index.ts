@@ -32,13 +32,21 @@ function forwardRequestToOpenAi(
 async function logRequest(
   dbClient: SupabaseClient,
   request: Request,
+  userId: string | null,
   body: string,
   auth: string
 ): Promise<Result> {
   const json = JSON.parse(body);
   const { data, error } = await dbClient
     .from("request")
-    .insert([{ path: request.url, body: json, auth_hash: await hash(auth) }])
+    .insert([
+      {
+        path: request.url,
+        body: json,
+        auth_hash: await hash(auth),
+        user_id: userId,
+      },
+    ])
     .select("id")
     .single();
   if (error !== null) {
@@ -51,6 +59,7 @@ async function logRequest(
 async function logResponse(
   dbClient: SupabaseClient,
   requestId: string,
+
   body: string
 ): Promise<void> {
   const { data, error } = await dbClient
@@ -106,7 +115,7 @@ export default {
 
     const [response, requestResult] = await Promise.all([
       forwardRequestToOpenAi(request, body),
-      logRequest(dbClient, request, body, auth),
+      logRequest(dbClient, request, request.headers.get("User-Id"), body, auth),
     ]);
     const responseBody = await response.text();
     if (requestResult.data !== null) {
