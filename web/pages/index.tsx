@@ -631,7 +631,7 @@ function OnBoarding({
             oai.valyrai.com/v1
           </code>
           <i className="text-xs">
-            <a href="https://github.com/bhunkio/app-ideas-valyr-demo/commit/d7443e5e6d2721a08863df82b34775e7e936ad30">
+            <a href="https://github.com/PromptZero/app-ideas-valyr-demo/commit/cb21fcbb82d89797c2e409d01ba62576d88b0af6">
               example
             </a>
           </i>
