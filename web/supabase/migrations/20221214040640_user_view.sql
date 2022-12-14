@@ -10,7 +10,7 @@ CREATE OR REPLACE VIEW public.user_metrics
     max(request.created_at) AS last_active,
     count(request.id) AS total_requests,
     count(request.id)::double precision / count(DISTINCT date_trunc('day'::text, request.created_at))::double precision AS average_requests_per_day_active,
-    avg((request.body ->> 'max_tokens'::text)::integer) AS average_tokens_per_request
+    avg(((response.body ->> 'usage'::text)::json->> 'total_tokens'::text)::integer) AS average_tokens_per_request
    FROM request
      LEFT JOIN response ON response.request = request.id
   GROUP BY request.user_id;
