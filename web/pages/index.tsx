@@ -1,15 +1,24 @@
-import { ArrowUpIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ExclamationCircleIcon,
+  InformationCircleIcon,
+  PlusIcon,
+  MinusIcon,
+} from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import { supabaseClient } from "../lib/supabaseClient";
+import { hashAuth, supabaseClient } from "../lib/supabaseClient";
 import { DateMetrics } from "../components/timeGraph";
 import { Logo } from "../components/logo";
 import { RequestTable } from "../components/requestTable";
 import { MetricsPanel } from "../components/metricsPanel";
 import { Logs } from "../components/logPanel";
-import { OnBoarding } from "../components/onBoarding";
 import { ResetAPIKey } from "../components/resetAPIKey";
+import Step from "../components/common/step";
+import Image from "next/image";
+import { middleTruncString } from "../lib/stringHelpers";
 import { UserTable } from "../components/userTable";
 
 function getStorageValue<T>(key: string, defaultValue: T) {
@@ -48,6 +57,8 @@ export default function Home() {
 
   const [client, setClient] = useState<SupabaseClient | null>(null);
 
+  const [apiKey, setApiKey] = useState<string>("");
+
   useEffect(() => {
     if (authHash !== null) {
       supabaseClient(authHash).then((client) => {
@@ -74,24 +85,119 @@ export default function Home() {
             authPreview={authPreview!}
           />
         ) : (
-          <div className="flex flex-col items-center">
-            <h1 className="text-6xl text-center my-8">
+          <div className="flex flex-col md:items-center p-4 md:p-0">
+            <div className="my-8 mt-8 sm:mt-36">
               <div className="hidden md:flex md:flex-row gap-5 items-center">
-                <div className="hidden md:block">Welcome to Valyr</div>
-                <Logo />
-              </div>
-              <div className=" md:hidden flex flex-col items-center">
-                Welcome to
-                <div className="md:hidden flex flex-row gap-5 items-center">
-                  <span>Valyr</span>
-                  <Logo />
+                <div className="hidden md:block font-light text-6xl">
+                  Welcome to{" "}
+                  <span className="font-semibold bg-gray-700 py-2 px-4 rounded-lg">
+                    VALYR
+                  </span>
                 </div>
               </div>
-            </h1>
-            <OnBoarding
-              setAuthHash={setAuthHash}
-              setAuthPreview={setAuthPreview}
-            />
+              <div className="md:hidden flex flex-col text-center text-5xl md:text-6xl">
+                Welcome to
+                <div className="font-semibold bg-gray-700 py-1 px-2 rounded-lg mt-2 m-auto">
+                  VALYR
+                </div>
+              </div>
+            </div>
+            <div className="font-extralight text-3xl mb-8 text-center">
+              Simplify GPT-3 monitoring with{" "}
+              <span className="font-semibold">one</span> line of code
+            </div>
+            <button
+              onClick={() => {
+                setAuthHash(
+                  "1155382dfb904996467a32e42a28adf9cc0033b13874697d03527c09916a4bc7"
+                );
+                setAuthPreview("Demo...Demo");
+              }}
+              className="items-center rounded-md border border-slate-700 bg-slate-800 px-4 py-2 text-white hover:bg-slate-600 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 mb-16"
+            >
+              View Demo
+            </button>
+            <div className="flex flex-col md:flex-row gap-12 md:gap-8">
+              <Step stepNumber={1} label="Replace <base url, SDK>">
+                <div
+                  className="flex flex-row"
+                  style={{ backgroundColor: "rgba(229, 83, 75, 0.15)" }}
+                >
+                  <MinusIcon className="h-4 mt-3 mx-2" />
+                  <code
+                    className="py-2 px-4 text-md  text-slate-200"
+                    style={{ backgroundColor: "rgba(229, 83, 75, 0.15)" }}
+                  >
+                    <span
+                      className="p-1 rounded-md"
+                      style={{ backgroundColor: "rgba(229,83,75,0.4)" }}
+                    >
+                      api.openai
+                    </span>
+                    .com/v1
+                  </code>
+                </div>
+
+                <ArrowDownIcon className="h-4 my-2" />
+                <div
+                  className="flex flex-row"
+                  style={{ backgroundColor: "rgba(70,149,74,0.15)" }}
+                >
+                  <PlusIcon className="h-4 mt-3 mx-2" />
+                  <code
+                    className="py-2 px-4 text-md  text-slate-200"
+                    style={{ backgroundColor: "rgba(70,149,74,0.15)" }}
+                  >
+                    <span
+                      className="p-1 rounded-md"
+                      style={{ backgroundColor: "rgba(70,149,74,0.4)" }}
+                    >
+                      oai.valyrai
+                    </span>
+                    .com/v1
+                  </code>
+                </div>
+              </Step>
+              <Step stepNumber={2} label="Paste your OpenAI API Key">
+                <div className="flex flex-col items-end">
+                  <input
+                    className="bg-slate-800 py-2 px-4 rounded-md"
+                    type="password"
+                    placeholder="Your OpenAI API key"
+                    value={apiKey}
+                    onChange={(e) => {
+                      setApiKey(e.target.value);
+                    }}
+                  />
+                </div>
+                <i className="text-sm text-slate-600 dark:text-slate-300 flex flex-row items-center mt-4">
+                  <InformationCircleIcon className="h-5 mx-1" />
+                  your key is never stored on our servers
+                </i>
+              </Step>
+              <Step stepNumber={3} label="View requests in dashboard">
+                <Image
+                  src="/assets/demo-dashboard.png"
+                  alt="Dashboard Image"
+                  width={250}
+                  height={250}
+                />
+                <button
+                  disabled={apiKey === ""}
+                  onClick={() => {
+                    setAuthPreview(middleTruncString(apiKey, 8));
+                    hashAuth(apiKey).then((hash) => setAuthHash(hash));
+                  }}
+                  className={`items-center rounded-md border border-slate-700 ${
+                    apiKey === ""
+                      ? "bg-slate-400 hover:cursor-not-allowed"
+                      : "bg-slate-800 hover:cursor-pointer hover:bg-slate-600"
+                  } px-4 py-2 text-white focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 mt-2`}
+                >
+                  View Dashboard
+                </button>
+              </Step>
+            </div>
           </div>
         )}
       </main>
