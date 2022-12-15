@@ -58,6 +58,7 @@ export default function Home() {
   const [client, setClient] = useState<SupabaseClient | null>(null);
 
   const [apiKey, setApiKey] = useState<string>("");
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     if (authHash !== null) {
@@ -85,7 +86,7 @@ export default function Home() {
             authPreview={authPreview!}
           />
         ) : (
-          <div className="flex flex-col md:items-center p-4 md:p-0">
+          <div className="flex flex-col md:items-center p-4 md:p-0 items-center">
             <div className="my-8 mt-8 sm:mt-36">
               <div className="hidden md:flex md:flex-row gap-5 items-center">
                 <div className="hidden md:block font-light text-6xl">
@@ -113,11 +114,11 @@ export default function Home() {
                 );
                 setAuthPreview("Demo...Demo");
               }}
-              className="items-center rounded-md border border-slate-700 bg-slate-800 px-4 py-2 text-white hover:bg-slate-600 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 mb-16"
+              className="max-w-md items-center rounded-md border border-slate-700 bg-slate-800 px-4 py-2 text-white hover:bg-slate-600 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 mb-16"
             >
               View Demo
             </button>
-            <div className="flex flex-col md:flex-row gap-12 md:gap-8">
+            <div className="flex flex-col lg:flex-row gap-12 md:gap-8 ">
               <Step stepNumber={1} label="Replace <base url, SDK>">
                 <div
                   className="flex flex-row"
@@ -170,10 +171,28 @@ export default function Home() {
                     }}
                   />
                 </div>
-                <i className="text-sm text-slate-600 dark:text-slate-300 flex flex-row items-center mt-4">
-                  <InformationCircleIcon className="h-5 mx-1" />
+                <i
+                  className="text-sm text-slate-600 dark:text-slate-300 flex flex-row items-center hover:cursor-pointer"
+                  onClick={() => {
+                    setShowInfo(!showInfo);
+                  }}
+                >
                   your key is never stored on our servers
+                  <InformationCircleIcon className="h-5 mx-1" />
                 </i>
+                {showInfo && (
+                  <div className="text-xs text-slate-600 dark:text-slate-300 flex flex-col gap-2 mt-2">
+                    <p>
+                      We log each request to our API using a hashed version of
+                      your API key. This allows us to identify your account
+                      without storing your API key.
+                    </p>
+                    <p>
+                      When you paste your API key into the input above, we hash
+                      it using the same algorithm we use to log requests.
+                    </p>
+                  </div>
+                )}
               </Step>
               <Step stepNumber={3} label="View requests in dashboard">
                 <Image
