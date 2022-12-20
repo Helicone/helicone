@@ -13,6 +13,9 @@ export default function MyApp({
 }>) {
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+  if (typeof window !== "undefined") {
+    document.documentElement.classList.add("dark");
+  }
   return (
     <>
       <SessionContextProvider
