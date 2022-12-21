@@ -98,7 +98,6 @@ export default function LoggedInFlow() {
               </div>
             </div>
             <div className="flex flex-col gap-2 mt-2">
-              Live logs coming soon!
               <Logs />
             </div>
           </div>
