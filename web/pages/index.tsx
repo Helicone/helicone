@@ -174,37 +174,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      <footer className="fixed left-0 bottom-0 z-20 h-12 w-full text-center border-t-2 dark:border-slate-800 border-slate-300 dark:bg-black bg-opacity-90">
-        <div className="flex flex-row items-center justify-center h-full gap-1">
-          <div>
-            Made by <i>Helicone</i>
-          </div>
-
-          <div>
-            {"("}
-            <a
-              href="https://twitter.com/justinstorre"
-              className="dark:text-slate-300 text-slate-700"
-            >
-              Justin
-            </a>{" "}
-            <a
-              href="https://twitter.com/barakoshri"
-              className="dark:text-slate-300 text-slate-700"
-            >
-              Barak
-            </a>{" "}
-            <a
-              href="https://twitter.com/NguyenScott7"
-              className="dark:text-slate-300 text-slate-700"
-            >
-              Scott
-            </a>
-            {")"}
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

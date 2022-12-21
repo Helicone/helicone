@@ -115,15 +115,16 @@ function GraphAndCharts() {
 
   return (
     <>
-      <div className="h-[10%] w-full pl-10 flex flex-col gap-3 mt-4">
-        <div className="flex flex-row gap-5 items-center">
-          <div className="border-2 dark:border-none dark:bg-slate-800 rounded-full flex flex-row gap-2">
+      <div className="h-[10%] w-full md:pl-10 flex flex-col gap-3 mt-4">
+        <div className="flex flex-row gap-5 items-center  overflow-auto">
+          <div className="border-2 dark:border-none rounded-full grid grid-cols-2 sm:grid-cols-3 gap-2">
             {differentViews.map((view) => (
               <div
                 className={
-                  "flex flex-row gap-2 items-center px-10 rounded-full py-1 cursor-pointer " +
-                  (view.name !== currentView ||
-                    "dark:bg-slate-600 bg-slate-500")
+                  "items-center px-8 text-center rounded-full py-1 cursor-pointer " +
+                  (view.name === currentView
+                    ? "dark:bg-slate-500 bg-slate-500"
+                    : "dark:bg-slate-800 ")
                 }
                 onClick={() => setCurrentView(view.name)}
                 key={view.name}
@@ -131,8 +132,8 @@ function GraphAndCharts() {
                 <p
                   className={
                     view.name === currentView
-                      ? "dark:text-slate-100 "
-                      : "dark:text-slate-200 text-slate-100"
+                      ? "dark:text-slate-200 text-slate-100"
+                      : "dark:text-slate-100 "
                   }
                 >
                   {view.name}
