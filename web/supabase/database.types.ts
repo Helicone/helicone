@@ -55,6 +55,26 @@ export interface Database {
           created_at?: string
         }
       }
+      user_api_keys: {
+        Row: {
+          api_key_hash: string
+          api_key_preview: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          api_key_hash: string
+          api_key_preview: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          api_key_hash?: string
+          api_key_preview?: string
+          user_id?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       metrics: {
@@ -76,6 +96,7 @@ export interface Database {
           request_path: string | null
           request_created_at: string | null
           request_user_id: string | null
+          api_key_preview: string | null
         }
       }
       user_metrics: {
@@ -90,6 +111,14 @@ export interface Database {
       }
     }
     Functions: {
+      check_request_access: {
+        Args: { this_auth_hash: string; this_user_id: string }
+        Returns: boolean
+      }
+      check_response_access: {
+        Args: { this_associated_request_id: string; this_user_id: string }
+        Returns: boolean
+      }
       date_count:
         | {
             Args: { time_increment: string }
@@ -99,10 +128,6 @@ export interface Database {
             Args: { time_increment: string; prev_period: string }
             Returns: Record<string, unknown>[]
           }
-      response_has_access: {
-        Args: { this_accociated_request_id: string; this_auth_hash: string }
-        Returns: boolean
-      }
     }
     Enums: {
       [_ in never]: never

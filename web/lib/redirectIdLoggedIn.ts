@@ -7,7 +7,7 @@ import {
 } from "next";
 import { ParsedUrlQuery } from "querystring";
 
-type SSRContext =
+export type SSRContext =
   | GetServerSidePropsContext<ParsedUrlQuery, PreviewData>
   | { req: NextApiRequest; res: NextApiResponse<any> };
 
