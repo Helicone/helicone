@@ -66,8 +66,9 @@ export default function NavBar() {
                 <div
                   className="text-sm font-semibold hover:cursor-pointer"
                   onClick={() => {
-                    supabaseClient.auth.signOut();
-                    router.push("/");
+                    supabaseClient.auth.signOut().then(() => {
+                      router.push("/");
+                    });
                   }}
                 >
                   Logout
