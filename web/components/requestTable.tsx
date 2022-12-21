@@ -19,7 +19,7 @@ type ResponseAndRequest = Omit<
   } | null;
   request_body: {
     prompt: string;
-  };
+  } | null;
 };
 
 export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
@@ -30,7 +30,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
         .from("response_and_request")
         .select("*")
         .order("request_created_at", { ascending: false })
-        .limit(1000);
+        .limit(100);
       if (error) {
         console.log(error);
       } else {
@@ -67,7 +67,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
     <div className="h-full">
       <div>
         <span>Showing the most recent {} </span>
-        <span className="font-thin text-xs">(max 1000)</span>
+        <span className="font-thin text-xs">(max 100)</span>
       </div>
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">
@@ -87,7 +87,11 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
             {data.map((row, i) => (
               <tr className="text-slate-300" key={row.request_id}>
                 <td>{new Date(row.request_created_at!).toLocaleString()}</td>
-                <td>{truncString(row.request_body!.prompt, 15)}</td>
+                <td>
+                  {row.request_body?.prompt
+                    ? truncString(row.request_body.prompt, 15)
+                    : "{{no prompt }}"}
+                </td>
                 <td>
                   {truncString(
                     row.response_body!.choices
