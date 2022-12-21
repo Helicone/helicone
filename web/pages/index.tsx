@@ -52,15 +52,6 @@ function useLocalStorage<T>(
 }
 
 export default function Home() {
-  const [authHash, setAuthHash] = useLocalStorage<string | null>(
-    "authHashedToken",
-    null
-  );
-  const [authPreview, setAuthPreview] = useLocalStorage<string | null>(
-    "authPreview",
-    null
-  );
-
   const router = useRouter();
 
   const supabaseClient = useSupabaseClient<Database>();
@@ -110,11 +101,6 @@ export default function Home() {
                     router.push("/dashboard");
                   });
               });
-
-              setAuthHash(
-                "1155382dfb904996467a32e42a28adf9cc0033b13874697d03527c09916a4bc7"
-              );
-              setAuthPreview("Demo...Demo");
             }}
             className="max-w-md items-center rounded-md border border-slate-700 bg-slate-800 px-4 py-2 text-white hover:bg-slate-600 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 mb-16"
           >
