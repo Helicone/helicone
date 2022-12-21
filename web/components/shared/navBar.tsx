@@ -26,6 +26,12 @@ export default function NavBar() {
           >
             Dashboard
           </div>
+          <Link
+            className="text-sm font-semibold ml-2 hover:cursor-pointer"
+            href={"https://discord.gg/2TkeWdXNPQ"}
+          >
+            Discord
+          </Link>
         </div>
         {!user || <div className="text-sm font-semibold ">{user.email}</div>}
         <div className="flex flex-row justify-end items-center gap-5">
