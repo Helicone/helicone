@@ -163,7 +163,7 @@ function Step2() {
                 .delete()
                 .eq("api_key_hash", key.api_key_hash)
                 .then((res) => {
-                  if (user?.email === "demo@valyrai.com") {
+                  if (user?.email === "valyrdemo@gmail.com") {
                     setError("You can't delete keys on the demo account");
                     return;
                   }
