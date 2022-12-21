@@ -2,36 +2,50 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { MetricsDB } from "../schema/metrics";
+import { Database } from "../supabase/database.types";
 
 export function MetricsPanel() {
-  const client = useSupabaseClient();
+  const client = useSupabaseClient<Database>();
   interface Metrics {
-    request_today: number;
-    average_requests_per_day: number;
-    average_response_time: number;
-    average_tokens_per_request: number;
-    average_tokens_per_response: number;
-    average_cost_per_request: number;
-    total_requests: number;
+    request_today?: number;
+    average_requests_per_day?: number;
+    average_response_time?: number;
+    average_tokens_per_request?: number;
+    average_tokens_per_response?: number;
+    average_cost_per_request?: number;
+    total_requests?: number;
+    first_request?: Date;
+    last_request?: Date;
   }
 
-  const [data, setData] = useState<Metrics | null>(null);
-  console.log("data", data);
+  const [data, setData] = useState<Metrics>({});
+
+  const numberOfDaysActive = !data?.first_request
+    ? null
+    : Math.floor(
+        (new Date().getTime() - (data.first_request!.getTime() ?? 0)) /
+          (86400 * 1000) +
+          1
+      );
+
   const metrics = [
     {
       value: data?.request_today ?? "n/a",
       label: "Requests today",
     },
     {
-      value: data?.average_requests_per_day.toFixed(3) ?? "n/a",
+      value:
+        numberOfDaysActive && data?.total_requests
+          ? (data?.total_requests / numberOfDaysActive).toFixed(3)
+          : "n/a",
       label: "Average requests per day",
     },
     {
-      value: data?.average_response_time.toFixed(3) ?? "n/a",
+      value: data.average_response_time?.toFixed(3) ?? "n/a",
       label: "Average response time",
     },
     {
-      value: data?.average_tokens_per_response.toFixed(3) ?? "n/a",
+      value: data?.average_tokens_per_response?.toFixed(3) ?? "n/a",
       label: "Average # of Token/response",
     },
     {
@@ -45,35 +59,71 @@ export function MetricsPanel() {
   ];
   useEffect(() => {
     const fetch = async () => {
-      const { count: requestToday, error: requestTodayError } = await client
-        .from("response")
-        .select("*", {
-          count: "exact",
-          head: true,
-        })
-        .gte("created_at", new Date().toISOString().split("T")[0])
-        .order("created_at", { ascending: false });
+      client
+        .from("request")
+        .select("*", { count: "exact" })
+        .then((res) => {
+          setData((data) => ({ ...data, total_requests: res.count ?? 0 }));
+        });
+      client
+        .from("request")
+        .select("*", { count: "exact" })
+        .gte("created_at", (new Date().setHours(0, 0, 0, 0) - 86400).toString())
+        .then((res) => {
+          setData((data) => ({ ...data, request_today: res.count ?? 0 }));
+        });
+      client
+        .from("request")
+        .select("*")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .single()
+        .then(({ data: createdAt }) => {
+          setData((data) => {
+            if (createdAt) {
+              return {
+                ...data,
+                first_request: new Date(createdAt.created_at) ?? null,
+              };
+            }
+            return data;
+          });
+        });
+      client
+        .from("request")
+        .select("created_at")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single()
+        .then(({ data: createdAt }) => {
+          setData((data) => {
+            if (createdAt) {
+              return {
+                ...data,
+                last_request: new Date(createdAt.created_at) ?? null,
+              };
+            }
+            return data;
+          });
+        });
 
-      const {
-        data: metrics,
-        error: metricsError,
-      }: { data: MetricsDB | null; error: PostgrestError | null } = await client
+      client
         .from("metrics")
         .select("*")
-        .single();
-
-      if (metricsError !== null) {
-        console.error(metricsError);
-      } else if (requestTodayError !== null) {
-        console.error(requestTodayError);
-      } else {
-        setData({
-          request_today: requestToday!, //TODO
-          average_cost_per_request: undefined!,
-          ...metrics!,
+        .limit(1)
+        .single()
+        .then(({ data: metrics }) => {
+          if (metrics) {
+            setData((data) => ({
+              ...data,
+              average_response_time: metrics.average_response_time ?? undefined,
+              average_tokens_per_response:
+                metrics.average_tokens_per_response ?? undefined,
+            }));
+          }
         });
-      }
     };
+
     fetch();
   }, [client]);
 
