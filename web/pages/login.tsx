@@ -31,7 +31,7 @@ const Login = (props: LoginProps) => {
       }}
       error={error}
       onPasswordReset={function (): void {
-        throw new Error("Function not implemented.");
+        router.push("/reset");
       }}
     />
   );

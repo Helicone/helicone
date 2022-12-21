@@ -164,7 +164,21 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
                       : "bg-gray-600 hover:bg-gray-700 hover:cursor-not-allowed"
                   } flex w-full justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2`}
                 >
-                  {formType === "register" ? "Sign Up" : "Sign in"}
+                  {(() => {
+                    if (formType === "login") {
+                      return "Sign in";
+                    }
+                    if (formType === "register") {
+                      return "Register";
+                    }
+                    if (formType === "resetPassword") {
+                      return "Reset Password";
+                    }
+                    if (formType === "reset") {
+                      return "Send Reset Email";
+                    }
+                    return "Submit";
+                  })()}
                 </button>
               </div>
             </div>

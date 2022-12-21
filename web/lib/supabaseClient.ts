@@ -24,7 +24,7 @@ export async function hashAuth(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
-export const supabaseClient = async (authhash: string) =>
+export const supabaseClientAuthHash = async (authhash: string) =>
   createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: true },
     global: {

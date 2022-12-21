@@ -1,9 +1,16 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
+import {
+  Session,
+  SessionContextProvider,
+  useSupabaseClient,
+  useUser,
+} from "@supabase/auth-helpers-react";
 import { AppProps } from "next/app";
 import { useState } from "react";
 import "../styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
+import { useRouter } from "next/router";
+import NavBar from "../components/shared/navBar";
 
 export default function MyApp({
   Component,
@@ -22,7 +29,11 @@ export default function MyApp({
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <Component {...pageProps} />
+        <div className="bg-black text-gray-100 min-h-screen h-full flex flex-col">
+          <NavBar />
+
+          <Component {...pageProps} />
+        </div>
       </SessionContextProvider>
       <Analytics />
     </>

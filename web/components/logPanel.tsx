@@ -1,9 +1,11 @@
 import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { middleTruncString } from "../lib/stringHelpers";
 import { Request as ValyrRequest } from "../schema/request";
 import { ValyrResponse } from "../schema/resoponse";
+import { Database } from "../supabase/database.types";
 
 interface Log {
   event: "request" | "response";
@@ -11,7 +13,8 @@ interface Log {
   created_at: Date;
   body: string;
 }
-export function Logs({ client }: { client: SupabaseClient }) {
+export function Logs() {
+  const client = useSupabaseClient<Database>();
   const [logs, setLogs] = useState<Log[]>([]);
 
   useEffect(() => {

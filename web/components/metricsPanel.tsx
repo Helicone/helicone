@@ -1,8 +1,10 @@
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { MetricsDB } from "../schema/metrics";
 
-export function MetricsPanel({ client }: { client: SupabaseClient }) {
+export function MetricsPanel() {
+  const client = useSupabaseClient();
   interface Metrics {
     request_today: number;
     average_requests_per_day: number;

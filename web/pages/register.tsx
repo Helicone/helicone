@@ -24,6 +24,7 @@ const Login = (props: LoginProps) => {
             },
           })
           .then((res) => {
+            console.log("res", res);
             if (res.error) {
               setError(res.error.message);
             } else {
