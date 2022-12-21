@@ -102,8 +102,8 @@ export default function Home() {
               supabaseClient.auth.signOut().then(() => {
                 supabaseClient.auth
                   .signInWithPassword({
-                    email: "demo@valyrai.com",
-                    password: "demodemo",
+                    email: "valyrdemo@gmail.com",
+                    password: "valyrdemo",
                   })
                   .then((res) => {
                     console.log(res);
