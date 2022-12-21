@@ -79,10 +79,7 @@ export interface Database {
     Views: {
       metrics: {
         Row: {
-          total_requests: number | null
-          average_requests_per_day: number | null
           average_response_time: number | null
-          average_tokens_per_request: number | null
           average_tokens_per_response: number | null
         }
       }
@@ -115,10 +112,15 @@ export interface Database {
         Args: { this_auth_hash: string; this_user_id: string }
         Returns: boolean
       }
-      check_response_access: {
-        Args: { this_associated_request_id: string; this_user_id: string }
-        Returns: boolean
-      }
+      check_response_access:
+        | {
+            Args: { this_associated_request_id: string }
+            Returns: boolean
+          }
+        | {
+            Args: { this_associated_request_id: string; this_user_id: string }
+            Returns: boolean
+          }
       date_count:
         | {
             Args: { time_increment: string }
