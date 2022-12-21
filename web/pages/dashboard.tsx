@@ -31,6 +31,8 @@ import { Database } from "../supabase/database.types";
 
 import { GetServerSidePropsContext } from "next";
 import { useKeys } from "../lib/useKeys";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
@@ -54,8 +56,28 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 };
 
 export default function LoggedInFlow() {
+  const user = useUser();
+
   return (
     <div className="flex flex-col h-full px-10 pb-12">
+      {user?.email === "valyrdemo@gmail.com" && (
+        <div className="flex flex-row items-center justify-center bg-red-500 text-white p-2 mb-5">
+          <ExclamationCircleIcon className="h-5 w-5 mr-2" />
+          <p className="text-sm">
+            You are currently logged in as a demo user. All of the traffic for
+            this user is coming from this demo site{" "}
+            <Link
+              href="https://demoapp.valyrai.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              AI App Ideas
+            </Link>{" "}
+            .
+          </p>
+        </div>
+      )}
       <div className="h-2/6 w-full ">
         <div className="flex flex-col md:flex-row gap-8 ">
           <div className="flex-1 border-[1px] border-slate-700 rounded-lg px-5 py-3 flex flex-col items-center">
