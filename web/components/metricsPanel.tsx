@@ -7,7 +7,6 @@ import { Database } from "../supabase/database.types";
 export function MetricsPanel() {
   const client = useSupabaseClient<Database>();
   interface Metrics {
-    request_today?: number;
     average_requests_per_day?: number;
     average_response_time?: number;
     average_tokens_per_request?: number;
@@ -29,10 +28,6 @@ export function MetricsPanel() {
       );
 
   const metrics = [
-    {
-      value: data?.request_today ?? "n/a",
-      label: "Requests today",
-    },
     {
       value:
         numberOfDaysActive && data?.total_requests
@@ -64,13 +59,6 @@ export function MetricsPanel() {
         .select("*", { count: "exact" })
         .then((res) => {
           setData((data) => ({ ...data, total_requests: res.count ?? 0 }));
-        });
-      client
-        .from("request")
-        .select("*", { count: "exact" })
-        .gte("created_at", (new Date().setHours(0, 0, 0, 0) - 86400).toString())
-        .then((res) => {
-          setData((data) => ({ ...data, request_today: res.count ?? 0 }));
         });
       client
         .from("request")
