@@ -52,6 +52,12 @@ export default function NavBar() {
                 >
                   Signup
                 </Link>
+                <Link
+                  href="https://github.com/Helicone/valyr"
+                  className="text-lg font-semibold ml-2 hover:cursor-pointer"
+                >
+                  <AiFillGithub />
+                </Link>
               </>
             ) : (
               <>
