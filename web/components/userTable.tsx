@@ -17,7 +17,7 @@ export function UserTable({ client }: { client: SupabaseClient }) {
   useEffect(() => {
     const fetch = async () => {
       const { data, error } = await client
-        .from("user_metrics")
+        .from("user_metrics_rls")
         .select("*")
 
         .limit(100);
