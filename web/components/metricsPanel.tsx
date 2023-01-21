@@ -55,13 +55,13 @@ export function MetricsPanel() {
   useEffect(() => {
     const fetch = async () => {
       client
-        .from("request")
+        .from("request_rls")
         .select("*", { count: "exact" })
         .then((res) => {
           setData((data) => ({ ...data, total_requests: res.count ?? 0 }));
         });
       client
-        .from("request")
+        .from("request_rls")
         .select("*")
         .order("created_at", { ascending: true })
         .limit(1)
@@ -78,7 +78,7 @@ export function MetricsPanel() {
           });
         });
       client
-        .from("request")
+        .from("request_rls")
         .select("created_at")
         .order("created_at", { ascending: false })
         .limit(1)
