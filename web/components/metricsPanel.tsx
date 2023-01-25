@@ -55,13 +55,13 @@ export function MetricsPanel() {
   useEffect(() => {
     const fetch = async () => {
       client
-        .from("request_rls")
+        .from("request_rbac")
         .select("*", { count: "exact" })
         .then((res) => {
           setData((data) => ({ ...data, total_requests: res.count ?? 0 }));
         });
       client
-        .from("request_rls")
+        .from("request_rbac")
         .select("*")
         .order("created_at", { ascending: true })
         .limit(1)
@@ -78,7 +78,7 @@ export function MetricsPanel() {
           });
         });
       client
-        .from("request_rls")
+        .from("request_rbac")
         .select("created_at")
         .order("created_at", { ascending: false })
         .limit(1)
@@ -96,7 +96,7 @@ export function MetricsPanel() {
         });
 
       client
-        .from("metrics")
+        .from("metrics_rbac")
         .select("*")
         .limit(1)
         .single()

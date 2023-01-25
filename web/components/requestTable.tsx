@@ -27,7 +27,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
   useEffect(() => {
     const fetch = async () => {
       const { data, error } = await client
-        .from("response_and_request_rls")
+        .from("response_and_request_rbac")
         .select("*")
         .order("request_created_at", { ascending: false })
         .limit(100);
