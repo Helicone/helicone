@@ -18,37 +18,70 @@ type Result = SuccessResult | ErrorResult;
 
 function forwardRequestToOpenAi(
   request: Request,
-  body: string
+  body?: string
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
-  return fetch(new_url.href, {
-    method: request.method,
-    headers: request.headers,
-    body,
-  });
+  return request.method === "GET"
+    ? fetch(new_url.href, {
+        method: request.method,
+        headers: request.headers,
+      })
+    : fetch(new_url.href, {
+        method: request.method,
+        headers: request.headers,
+        body,
+      });
 }
 
-async function logRequest(
-  dbClient: SupabaseClient,
-  request: Request,
-  userId: string | null,
-  body: string,
-  auth: string
-): Promise<Result> {
-  const json = JSON.parse(body);
-  const { data, error } = await dbClient
-    .from("request")
-    .insert([
-      {
-        path: request.url,
-        body: json,
-        auth_hash: await hash(auth),
-        user_id: userId,
-      },
-    ])
-    .select("id")
-    .single();
+async function logRequest({
+  dbClient,
+  request,
+  userId,
+  promptId,
+  requestId,
+  auth,
+  body,
+}: {
+  dbClient: SupabaseClient;
+  request: Request;
+  userId: string | null;
+  promptId: string | null;
+  requestId?: string;
+  auth: string;
+  body?: string;
+}): Promise<Result> {
+  const json = body ? JSON.parse(body) : {};
+
+  const { data, error } = requestId
+    ? await dbClient
+        .from("request")
+        .insert([
+          {
+            id: requestId,
+            path: request.url,
+            body: json,
+            auth_hash: await hash(auth),
+            user_id: userId,
+            prompt_id: promptId,
+          },
+        ])
+        .select("id")
+        .single()
+    : await dbClient
+        .from("request")
+        .insert([
+          {
+            path: request.url,
+            body: json,
+            auth_hash: await hash(auth),
+            user_id: userId,
+            prompt_id: promptId,
+          },
+        ])
+        .select("id")
+        .single();
+
   if (error !== null) {
     return { data: null, error: error.message };
   } else {
@@ -73,6 +106,7 @@ async function logResponse(
 
 function valyrHeaders(requestResult: Result): Record<string, string> {
   if (requestResult.error !== null) {
+    console.error(requestResult.error);
     return {
       "Valyr-Error": requestResult.error,
       "Valyr-Status": "error",
@@ -115,7 +149,16 @@ export default {
 
     const [response, requestResult] = await Promise.all([
       forwardRequestToOpenAi(request, body),
-      logRequest(dbClient, request, request.headers.get("User-Id"), body, auth),
+      logRequest({
+        dbClient,
+        request,
+        userId: request.headers.get("Valyr-User-Id")?.substring(0, 128) ?? null,
+        promptId:
+          request.headers.get("Valyr-Prompt-Id")?.substring(0, 128) ?? null,
+        requestId: request.headers.get("Valyr-Request-Id")?.substring(0, 128),
+        auth,
+        body: body === "" ? undefined : body,
+      }),
     ]);
     const responseBody = await response.text();
     if (requestResult.data !== null) {
