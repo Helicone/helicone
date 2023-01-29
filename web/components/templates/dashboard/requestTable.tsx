@@ -1,8 +1,8 @@
 import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { truncString } from "../lib/stringHelpers";
-import { Database } from "../supabase/database.types";
+import { truncString } from "../../../lib/stringHelpers";
+import { Database } from "../../../supabase/database.types";
 
 type ResponseAndRequest = Omit<
   Database["public"]["Views"]["response_and_request"]["Row"],
@@ -24,6 +24,7 @@ type ResponseAndRequest = Omit<
 
 export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
   const [data, setData] = useState<ResponseAndRequest[]>([]);
+
   useEffect(() => {
     const fetch = async () => {
       const { data, error } = await client
@@ -39,6 +40,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
     };
     fetch();
   }, [client]);
+
   console.log(data[0]);
   const probabilities = data.map((d) => {
     const choice = d.response_body?.choices
@@ -72,7 +74,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">
           <thead>
-            <tr className="text-slate-300">
+            <tr className="text-black">
               <th className="text-left">Time</th>
               <th className="text-left">Request</th>
               <th className="text-left">Response</th>
@@ -85,7 +87,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
           </thead>
           <tbody>
             {data.map((row, i) => (
-              <tr className="text-slate-300" key={row.request_id}>
+              <tr className="text-black" key={row.request_id}>
                 <td>{new Date(row.request_created_at!).toLocaleString()}</td>
                 <td>
                   {row.request_body?.prompt
@@ -119,7 +121,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
                 </td>
                 <td>
                   <DocumentDuplicateIcon
-                    className="h-5 w-5 text-slate-300 hover:cursor-pointer"
+                    className="h-5 w-5 text-black hover:cursor-pointer"
                     onClick={() => {
                       navigator.clipboard.writeText(JSON.stringify(row));
                     }}

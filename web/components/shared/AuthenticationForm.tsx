@@ -47,19 +47,19 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
 
   return (
     <>
-      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-black text-white">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <p className="text-4xl md:text-6xl font-bold text-center">Valyr</p>
-          <h2 className="mt-6 text-center text-xl md:text-3xl font-thin tracking-tight text-white">
+      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-300 text-black">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-4">
+          <p className="text-5xl sm:text-6xl font-serif">Valyr.ai</p>
+          <p className="text-3xl sm:text-4xl font-sans font-light">
             {formType === "login"
               ? "Sign in to your account"
               : "Register a new account"}
-          </h2>
+          </p>
           <p className="mt-2 text-center text-lg font-light text-gray-600">
             Or{" "}
             <a
               href={formType === "login" ? "/register" : "/login"}
-              className="font-medium text-rose-600 hover:text-rose-500"
+              className="font-medium text-black underline"
             >
               {formType === "login"
                 ? "register a new account"
@@ -69,7 +69,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md p-4">
-          <div className="bg-zinc-700 py-8 px-4 shadow rounded-lg sm:px-10">
+          <div className="bg-gray-400 py-8 px-4 shadow rounded-lg sm:px-10 border border-black text-black">
             <div className="space-y-6">
               {formType === "resetPassword" && (
                 <div>
@@ -81,10 +81,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
                 formType === "login" ||
                 formType === "register") && (
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-bold text-zinc-300"
-                  >
+                  <label htmlFor="email" className="block text-sm font-bold">
                     Email address
                   </label>
                   <div className="mt-1">
@@ -108,7 +105,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-semibold text-zinc-300"
+                    className="block text-sm font-semibold"
                   >
                     Password
                   </label>
@@ -130,7 +127,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-semibold text-zinc-300"
+                    className="block text-sm font-semibold"
                   >
                     Confirm Password
                   </label>
@@ -160,9 +157,9 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
                   type="submit"
                   className={`${
                     isFormValid()
-                      ? "bg-rose-600 hover:bg-rose-700"
-                      : "bg-gray-600 hover:bg-gray-700 hover:cursor-not-allowed"
-                  } flex w-full justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2`}
+                      ? "bg-black hover:bg-gray-800"
+                      : "bg-gray-800 hover:bg-gray-600 hover:cursor-not-allowed"
+                  } flex w-full justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2`}
                 >
                   {(() => {
                     if (formType === "login") {
@@ -190,7 +187,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
             {onPasswordReset && (
               <div>
                 <div
-                  className="font-light text-rose-600 hover:text-rose-500 hover:cursor-pointer mt-1"
+                  className="text-right text-sm text-gray-800 hover:text-black hover:cursor-pointer mt-4"
                   onClick={() => onPasswordReset()}
                 >
                   Forgot your password?
