@@ -15,7 +15,7 @@ const HomePage = (props: HomePageProps) => {
   return (
     <BasePage>
       <div className="h-4/5 justify-center align-middle items-left flex flex-col space-y-4">
-        <p className="text-5xl sm:text-6xl font-sans">ContextOwl</p>
+        <p className="text-5xl sm:text-6xl font-sans">Valyr.ai</p>
         <p className="text-3xl sm:text-4xl font-sans font-light">
           Simplify GPT-3 observability with{" "}
           <span className="bg-sky-300 py-0.5 px-1.5 rounded-sm font-bold">
