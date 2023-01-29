@@ -202,13 +202,6 @@
   dependencies:
     cross-fetch "^3.1.5"
 
-"@supabase/gotrue-js@^2.10.0":
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/@supabase/gotrue-js/-/gotrue-js-2.10.0.tgz#f92ca76e41dc7bf06374b73159bd3d3affa734eb"
-  integrity sha512-3k9zg+TN4rJFVbAWoX1KnOpKthb21HxYu87mBG8ccCXSl3fxnFBJNs898+pksj4fw5E6aM/dVtHHHAfV3MwVRQ==
-  dependencies:
-    cross-fetch "^3.1.5"
-
 "@supabase/gotrue-js@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@supabase/gotrue-js/-/gotrue-js-2.3.1.tgz#d0f5e4d0a5f0a155d50693efec91b38465f79211"
@@ -256,13 +249,6 @@
   integrity sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==
   dependencies:
     tslib "^2.4.0"
-
-"@tailwindcss/forms@^0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@tailwindcss/forms/-/forms-0.5.3.tgz#e4d7989686cbcaf416c53f1523df5225332a86e7"
-  integrity sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==
-  dependencies:
-    mini-svg-data-uri "^1.2.3"
 
 "@types/d3-color@^2":
   version "2.0.3"
@@ -1743,11 +1729,6 @@ micromatch@^4.0.4, micromatch@^4.0.5:
   dependencies:
     braces "^3.0.2"
     picomatch "^2.3.1"
-
-mini-svg-data-uri@^1.2.3:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/mini-svg-data-uri/-/mini-svg-data-uri-1.4.4.tgz#8ab0aabcdf8c29ad5693ca595af19dd2ead09939"
-  integrity sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==
 
 minimatch@^3.0.4, minimatch@^3.0.5, minimatch@^3.1.1, minimatch@^3.1.2:
   version "3.1.2"
