@@ -1,7 +1,7 @@
 import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { truncString } from "../../../lib/stringHelpers";
+import { truncString } from "../lib/stringHelpers";
 
 interface UserMetricsDB {
   user_id: string;
@@ -40,7 +40,7 @@ export function UserTable({ client }: { client: SupabaseClient }) {
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">
           <thead>
-            <tr className="text-black">
+            <tr className="text-slate-300">
               <th className="text-left">User ID</th>
               <th className="text-left">Active for</th>
               <th className="text-left">Last Active</th>
@@ -53,7 +53,7 @@ export function UserTable({ client }: { client: SupabaseClient }) {
           <tbody>
             {data.map((row, i) => (
               <tr
-                className="text-black"
+                className="text-slate-300"
                 key={row.user_id ? truncString(row.user_id, 11) : "NULL"}
               >
                 <td>{row.user_id ? truncString(row.user_id, 11) : "NULL"}</td>
