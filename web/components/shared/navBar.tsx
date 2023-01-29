@@ -74,7 +74,7 @@ const NavBar = (props: NavBarProps) => {
               <div className="flex">
                 <div className="flex flex-shrink-0 items-center">
                   <div className="text-lg border border-black p-2 rounded-lg">
-                    ContextOwl
+                    Valyr.ai
                   </div>
                 </div>
               </div>
