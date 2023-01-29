@@ -1,8 +1,8 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { MetricsDB } from "../schema/metrics";
-import { Database } from "../supabase/database.types";
+import { MetricsDB } from "../../../schema/metrics";
+import { Database } from "../../../supabase/database.types";
 
 export function MetricsPanel() {
   const client = useSupabaseClient<Database>();
@@ -120,7 +120,7 @@ export function MetricsPanel() {
       {metrics.map((m) => (
         <>
           <div className="col-span-3">{m.label}</div>
-          <div className="text-indigo-400 font-bold text-right col-span-2">
+          <div className="text-black font-bold text-right col-span-2">
             {m.value}
           </div>
         </>
