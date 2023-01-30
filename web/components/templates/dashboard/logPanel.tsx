@@ -2,10 +2,10 @@ import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { middleTruncString } from "../lib/stringHelpers";
-import { Request as ValyrRequest } from "../schema/request";
-import { ValyrResponse } from "../schema/resoponse";
-import { Database } from "../supabase/database.types";
+import { middleTruncString } from "../../../lib/stringHelpers";
+import { Request as ValyrRequest } from "../../../schema/request";
+import { ValyrResponse } from "../../../schema/resoponse";
+import { Database } from "../../../supabase/database.types";
 
 interface Log {
   event: "request" | "response";
@@ -61,7 +61,7 @@ export function Logs() {
   }, [client]);
 
   return (
-    <div>
+    <div className="min-h-[100px]">
       {logs.reverse().map((log) => (
         <LogCard log={log} key={log.id} />
       ))}
@@ -73,19 +73,19 @@ function LogCard({ log: l, key }: { log: Log; key: string }): JSX.Element {
   return (
     <div
       key={key}
-      className="flex flex-row justify-between items-center border-[1px] border-slate-700 rounded-lg px-5 py-3"
+      className="flex flex-row justify-between items-center border-[1px] border-black rounded-lg px-5 py-3"
     >
       <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2">
-          <p className="text-slate-300">{l.event}</p>
-          <p className="text-slate-300">{l.created_at.toLocaleString()}</p>
+          <p className="text-black">{l.event}</p>
+          <p className="text-black">{l.created_at.toLocaleString()}</p>
         </div>
         <div className="flex flex-row gap-2">
-          <p className="text-slate-300">{middleTruncString(l.body, 50)}</p>
+          <p className="text-black">{middleTruncString(l.body, 50)}</p>
         </div>
       </div>
       <DocumentDuplicateIcon
-        className="h-5 w-5 text-slate-300 hover:cursor-pointer"
+        className="h-5 w-5 text-black hover:cursor-pointer"
         onClick={() => {
           navigator.clipboard.writeText(l.body);
         }}
