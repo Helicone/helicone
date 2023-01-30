@@ -152,7 +152,10 @@ export default {
       logRequest({
         dbClient,
         request,
-        userId: request.headers.get("Valyr-User-Id")?.substring(0, 128) ?? null,
+        userId:
+          request.headers.get("Valyr-User-Id")?.substring(0, 128) ??
+          request.headers.get("User-Id")?.substring(0, 128) ??
+          null,
         promptId:
           request.headers.get("Valyr-Prompt-Id")?.substring(0, 128) ?? null,
         requestId: request.headers.get("Valyr-Request-Id")?.substring(0, 128),
