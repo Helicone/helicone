@@ -3,9 +3,10 @@ import {
   ExclamationCircleIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/solid";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import BasePage from "../../shared/basePage";
 import LeftNavLayout from "../../shared/leftNavLayout";
 import NavBar from "../../shared/navBar";
@@ -20,16 +21,27 @@ interface DashboardPageProps {
 const DashboardPage = (props: DashboardPageProps) => {
   const {} = props;
   const user = useUser();
+  const client = useSupabaseClient();
+  const router = useRouter();
 
   return (
     <BasePage variant="secondary">
       <LeftNavLayout>
         {user?.email === "valyrdemo@gmail.com" && (
-          <div className="flex flex-row items-center justify-center bg-red-800 text-white p-2 mb-5">
-            <ExclamationCircleIcon className="h-5 w-5 mr-2" />
-            <p className="text-sm">
-              You are currently logged in as a demo user. All of the traffic for
-              this user is coming from this demo site{" "}
+          <div className="text-sm flex flex-col items-center justify-center bg-red-800 text-white p-2 mb-5">
+            <div
+              className="hover:bg-red-900 hover:cursor-pointer text-base underline flex flex-row items-center justify-center bg-red-800 text-white"
+              onClick={() => {
+                client.auth.signOut().then(() => {
+                  router.push("/");
+                });
+              }}
+            >
+              <ExclamationCircleIcon className="h-5 w-5 mr-2" />
+              <p className="">Exit demo</p>
+            </div>
+            <div>
+              Demo data from:{" "}
               <Link
                 href="https://demoapp.valyrai.com"
                 target="_blank"
@@ -38,8 +50,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               >
                 AI App Ideas
               </Link>{" "}
-              .
-            </p>
+            </div>
           </div>
         )}
         <div className="h-2/6 w-full">
