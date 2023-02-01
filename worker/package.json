@@ -1,5 +1,5 @@
 {
-  "name": "valyr-worker",
+  "name": "helicone-worker",
   "version": "0.0.0",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",

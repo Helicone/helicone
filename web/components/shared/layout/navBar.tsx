@@ -114,7 +114,7 @@ const NavBar = (props: NavBarProps) => {
                     </Link>
                   )} */}
                   <Link
-                    href="https://docs.valyrai.com/"
+                    href="https://docs.helicone.ai/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className={clsx(
@@ -238,7 +238,7 @@ const NavBar = (props: NavBarProps) => {
                 ))}
                 <div className="border-b border-gray-300"></div>
                 <Link
-                  href="https://docs.valyrai.com/"
+                  href="https://docs.helicone.ai/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={clsx("block py-2 pl-3 pr-4 text-base font-medium")}
@@ -295,7 +295,7 @@ const NavBar = (props: NavBarProps) => {
                 ))}
                 <div className="border-b border-gray-300"></div>
                 <Link
-                  href="https://docs.valyrai.com/"
+                  href="https://docs.helicone.ai/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={clsx("block py-2 pl-3 pr-4 text-base font-medium")}

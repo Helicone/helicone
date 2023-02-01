@@ -46,8 +46,8 @@ const HomePage = (props: HomePageProps) => {
                   supabaseClient.auth.signOut().then(() => {
                     supabaseClient.auth
                       .signInWithPassword({
-                        email: "valyrdemo@gmail.com",
-                        password: "valyrdemo",
+                        email: "heliconedemo@gmail.com",
+                        password: "heliconedemo",
                       })
                       .then((res) => {
                         console.log(res);

@@ -75,7 +75,7 @@ export const getServerSideProps = async (ctx: SSRContext) => {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (session?.user.email === "valyrdemo@gmail.com") {
+  if (session?.user.email === "heliconedemo@gmail.com") {
     return {
       redirect: {
         destination: "/dashboard",

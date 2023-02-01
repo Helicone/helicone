@@ -26,8 +26,7 @@ const OneLineChange = (props: OneLineChangeProps) => {
         <div className="flex flex-row bg-green-900">
           <PlusIcon className="h-4 w-4 mt-4 mx-4" />
           <code className="py-2 px-4  bg-green-800">
-            {/* TODO: change this route to Helicone */}
-            <span className="p-1 rounded-md bg-green-700">oai.valyrai</span>
+            <span className="p-1 rounded-md bg-green-700">oai.heliconeai</span>
             .com/v1
           </code>
         </div>

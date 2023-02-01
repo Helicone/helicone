@@ -104,15 +104,15 @@ async function logResponse(
   }
 }
 
-function valyrHeaders(requestResult: Result): Record<string, string> {
+function heliconeHeaders(requestResult: Result): Record<string, string> {
   if (requestResult.error !== null) {
     console.error(requestResult.error);
     return {
-      "Valyr-Error": requestResult.error,
-      "Valyr-Status": "error",
+      "Helicone-Error": requestResult.error,
+      "Helicone-Status": "error",
     };
   } else {
-    return { "Valyr-Status": "success", "Valyr-Id": requestResult.data };
+    return { "Helicone-Status": "success", "Helicone-Id": requestResult.data };
   }
 }
 async function hash(key: string): Promise<string> {
@@ -153,12 +153,14 @@ export default {
         dbClient,
         request,
         userId:
-          request.headers.get("Valyr-User-Id")?.substring(0, 128) ??
+          request.headers.get("Helicone-User-Id")?.substring(0, 128) ??
           request.headers.get("User-Id")?.substring(0, 128) ??
           null,
         promptId:
-          request.headers.get("Valyr-Prompt-Id")?.substring(0, 128) ?? null,
-        requestId: request.headers.get("Valyr-Request-Id")?.substring(0, 128),
+          request.headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
+        requestId: request.headers
+          .get("Helicone-Request-Id")
+          ?.substring(0, 128),
         auth,
         body: body === "" ? undefined : body,
       }),
@@ -171,7 +173,7 @@ export default {
     return new Response(responseBody, {
       ...response,
       headers: {
-        ...valyrHeaders(requestResult),
+        ...heliconeHeaders(requestResult),
         ...response.headers,
       },
     });
