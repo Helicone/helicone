@@ -11,7 +11,7 @@ const OneLineChange = (props: OneLineChangeProps) => {
   return (
     <>
       <p className="font-mono text-md pb-4 mb-4 border-b border-black">
-        Step 1: Replace your OpenAI URL with Valyr
+        Step 1: Replace your OpenAI URL with Helicone
       </p>
       <div className="flex flex-col border border-black rounded-lg p-8 items-center text-white text-lg sm:text-2xl bg-gray-400">
         <div className="flex flex-row bg-red-900">
@@ -26,7 +26,7 @@ const OneLineChange = (props: OneLineChangeProps) => {
         <div className="flex flex-row bg-green-900">
           <PlusIcon className="h-4 w-4 mt-4 mx-4" />
           <code className="py-2 px-4  bg-green-800">
-            <span className="p-1 rounded-md bg-green-700">oai.valyrai</span>
+            <span className="p-1 rounded-md bg-green-700">oai.heliconeai</span>
             .com/v1
           </code>
         </div>

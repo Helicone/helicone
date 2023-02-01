@@ -49,7 +49,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
     <>
       <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-300 text-black">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-4">
-          <p className="text-5xl sm:text-6xl font-serif">Valyr</p>
+          <p className="text-5xl sm:text-6xl font-serif">Helicone</p>
           <p className="text-3xl sm:text-4xl font-sans font-light">
             {formType === "login"
               ? "Sign in to your account"

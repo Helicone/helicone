@@ -26,7 +26,7 @@ cd web
 yarn
 yarn dev
 
-# start worker (simulates oai.valyrai.com)
+# start worker (simulates oai.hconeai.com)
 # in another terminal
 cd worker
 wrangler dev
