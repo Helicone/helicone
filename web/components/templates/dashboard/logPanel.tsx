@@ -24,7 +24,8 @@ export function Logs() {
       { event: "INSERT", schema: "public", table: "request" },
       (payload) => {
         console.log("REQUEST", payload);
-        const request: HeliconeRequest = payload.new as unknown as HeliconeRequest;
+        const request: HeliconeRequest =
+          payload.new as unknown as HeliconeRequest;
         setLogs((logs) =>
           logs.concat([
             {
@@ -42,7 +43,8 @@ export function Logs() {
       { event: "INSERT", schema: "public", table: "response" },
       (payload) => {
         console.log("RESPONSE", payload);
-        const response: HeliconeResponse = payload.new as unknown as HeliconeResponse;
+        const response: HeliconeResponse =
+          payload.new as unknown as HeliconeResponse;
         setLogs((logs) =>
           logs.concat([
             {
