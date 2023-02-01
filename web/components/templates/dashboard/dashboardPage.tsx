@@ -43,7 +43,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             <div>
               Demo data from:{" "}
               <Link
-                href="https://demoapp.heliconeai.com"
+                href="https://demoapp.helicone.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
