@@ -14,6 +14,7 @@ import { GetServerSidePropsContext } from "next";
 import { useKeys } from "../lib/useKeys";
 import KeyPage from "../components/templates/keys/keyPage";
 import BasePage from "../components/shared/basePage";
+import AuthLayout from "../components/shared/layout/authLayout";
 
 interface KeysProps {}
 
@@ -21,9 +22,9 @@ const Keys = (props: KeysProps) => {
   const {} = props;
 
   return (
-    <BasePage variant="secondary">
+    <AuthLayout>
       <KeyPage />
-    </BasePage>
+    </AuthLayout>
   );
 };
 

@@ -60,7 +60,7 @@ const NavBar = (props: NavBarProps) => {
     >
       {({ open }) => (
         <>
-          <div className="mx-auto font-sans">
+          <div className="mx-auto font-sans z-50">
             <div className="flex h-16 justify-between">
               <div className="flex">
                 <div className="flex flex-shrink-0 items-center">

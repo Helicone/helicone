@@ -65,6 +65,12 @@ const HomePage = (props: HomePageProps) => {
             </>
           )}
         </div>
+        <p className="text-lg sm:text-xl font-sans font-light absolute bottom-0 pb-8 sm:pb-16">
+          Backed by
+          <span className="text-orange-600 py-0.5 px-1.5 rounded-sm font-bold">
+            YCombinator
+          </span>
+        </p>
       </div>
     </BasePage>
   );

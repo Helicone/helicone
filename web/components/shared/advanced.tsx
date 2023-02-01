@@ -46,7 +46,7 @@ export default function Advanced() {
           </div>
         </div>
       </div>
-      <div className="mx-auto max-w-4xl px-6 lg:max-w-7xl lg:px-8 xl:grid xl:grid-flow-col-dense xl:grid-cols-2 xl:gap-x-8">
+      <div className="mx-auto px-6 lg:px-8 xl:grid xl:grid-flow-col-dense xl:grid-cols-2 xl:gap-x-8">
         <div className="relative pt-12 pb-64 sm:pt-24 sm:pb-64 xl:col-start-1 xl:pb-24">
           <h2 className="text-base font-semibold text-sky-300">
             Advanced Analytics

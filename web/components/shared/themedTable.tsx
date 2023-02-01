@@ -58,7 +58,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         key={colIdx}
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-transparent",
-                          "relative py-4 pl-4 sm:pl-6 pr-3 text-sm lg:table-cell"
+                          "relative py-4 pl-4 sm:pl-6 pr-3 text-sm"
                         )}
                       >
                         <div className="font-medium text-gray-900 overflow-ellipsis max-w-[160px] overflow-hidden">
