@@ -21,9 +21,14 @@ const BasePage = (props: BasePageProps) => {
     }
   };
 
+  // bg-gradient-to-r from-cyan-300 to-blue-300
   return (
     <div
-      className={clsx("px-4 flex flex-col h-screen w-screen", variantTheme())}
+      className={clsx(
+        "bg-gray-300 bg-blend-overlay bg-center bg-cover px-4 flex flex-col h-screen w-screen",
+        variantTheme()
+      )}
+      style={{ backgroundImage: "url(/assets/dev.jpg" }}
     >
       <NavBar variant={variant} />
       <div className="h-full">{children}</div>

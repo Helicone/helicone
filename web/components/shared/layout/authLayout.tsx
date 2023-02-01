@@ -160,7 +160,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
         <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col ">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
-            <div className="flex flex-shrink-0 items-center px-2">
+            <div className="flex flex-shrink-0 items-center px-4">
               <Image
                 className="rounded-md"
                 src="/assets/heli-full-logo.png"

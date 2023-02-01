@@ -20,10 +20,7 @@ const HomePage = (props: HomePageProps) => {
         </p>
         <p className="text-2xl sm:text-3xl font-sans font-light">
           Track usage, costs, and latency metrics with{" "}
-          <span className="bg-sky-300 py-0.5 px-1.5 rounded-sm font-bold">
-            one
-          </span>{" "}
-          line of code
+          <span className="font-bold">one</span> line of code
         </p>
         <div className="pt-8 flex flex-row sm:items-center justify-start gap-4">
           {user ? (
@@ -65,12 +62,14 @@ const HomePage = (props: HomePageProps) => {
             </>
           )}
         </div>
-        <p className="text-lg sm:text-xl font-sans font-light absolute bottom-0 pb-8 sm:pb-16">
-          Backed by
-          <span className="text-orange-600 py-0.5 px-1.5 rounded-sm font-bold">
-            YCombinator
-          </span>
-        </p>
+        <div className="flex flex-row justify-end">
+          <p className="text-lg sm:text-xl font-sans font-light absolute bottom-4 sm:bottom-0 pb-8 sm:pb-16">
+            Backed by
+            <span className="text-orange-600 py-0.5 px-1.5 rounded-sm font-bold">
+              YCombinator
+            </span>
+          </p>
+        </div>
       </div>
     </BasePage>
   );

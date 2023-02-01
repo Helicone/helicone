@@ -54,7 +54,7 @@ const NavBar = (props: NavBarProps) => {
       as="nav"
       className={clsx(
         variant === "primary"
-          ? "bg-gray-200 py-1"
+          ? "bg-gray-200 py-1 bg-transparent"
           : "bg-white border-b-[0.5px] border-gray-300 sm:px-4 py-0"
       )}
     >
@@ -108,7 +108,7 @@ const NavBar = (props: NavBarProps) => {
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:items-center">
                 <div className="hidden sm:ml-6 sm:flex sm:flex-row sm:space-x-6 p-1 pr-4 text-black">
-                  {!user && (
+                  {/* {!user && (
                     <Link
                       href="/"
                       key="home"
@@ -119,7 +119,7 @@ const NavBar = (props: NavBarProps) => {
                     >
                       Home
                     </Link>
-                  )}
+                  )} */}
                   <Link
                     href="https://docs.valyrai.com/"
                     target="_blank"
