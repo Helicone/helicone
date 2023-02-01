@@ -16,7 +16,7 @@ const CreateAccount = (props: CreateAccountProps) => {
   return (
     <>
       <p className="font-mono text-md pb-4 mb-4 border-b border-black">
-        Step 2: Get started with Valyr
+        Step 2: Get started with Helicone
       </p>
       <div className="flex flex-col border w-full sm:w-2/5 border-black rounded-lg p-8 items-center text-white bg-gray-400">
         <div className="w-full">

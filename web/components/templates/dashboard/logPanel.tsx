@@ -3,8 +3,8 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { middleTruncString } from "../../../lib/stringHelpers";
-import { Request as ValyrRequest } from "../../../schema/request";
-import { ValyrResponse } from "../../../schema/resoponse";
+import { Request as HeliconeRequest } from "../../../schema/request";
+import { HeliconeResponse } from "../../../schema/resoponse";
 import { Database } from "../../../supabase/database.types";
 
 interface Log {
@@ -24,7 +24,7 @@ export function Logs() {
       { event: "INSERT", schema: "public", table: "request" },
       (payload) => {
         console.log("REQUEST", payload);
-        const request: ValyrRequest = payload.new as unknown as ValyrRequest;
+        const request: HeliconeRequest = payload.new as unknown as HeliconeRequest;
         setLogs((logs) =>
           logs.concat([
             {
@@ -42,7 +42,7 @@ export function Logs() {
       { event: "INSERT", schema: "public", table: "response" },
       (payload) => {
         console.log("RESPONSE", payload);
-        const response: ValyrResponse = payload.new as unknown as ValyrResponse;
+        const response: HeliconeResponse = payload.new as unknown as HeliconeResponse;
         setLogs((logs) =>
           logs.concat([
             {
