@@ -1,3 +1,4 @@
+import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { Database } from "../../../supabase/database.types";
@@ -63,11 +64,16 @@ const HomePage = (props: HomePageProps) => {
           )}
         </div>
         <div className="flex flex-row justify-end">
-          <p className="text-lg sm:text-xl font-sans font-light absolute bottom-4 sm:bottom-0 pb-8 sm:pb-16">
+          <p className="text-lg sm:text-xl font-sans font-light absolute bottom-0 sm:bottom-4 pb-16 sm:pb-12">
             Backed by
             <span className="text-orange-600 py-0.5 px-1.5 rounded-sm font-bold">
               YCombinator
             </span>
+          </p>
+        </div>
+        <div className="flex flex-row justify-center">
+          <p className="text-lg sm:text-xl font-sans font-light absolute bottom-0 sm:bottom-1 pb-4">
+            <ChevronDoubleDownIcon className="h-5 w-5 sm:h-6 sm:w-6 animate-bounce" />
           </p>
         </div>
       </div>
