@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/router";
 
 interface AuthenticationFormProps {
   formType: "login" | "register" | "reset" | "resetPassword";
@@ -21,6 +23,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
     error,
     resetEmail,
   } = props;
+  const router = useRouter();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -47,15 +50,24 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
 
   return (
     <>
-      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-300 text-black">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-4">
-          <p className="text-5xl sm:text-6xl font-serif">Helicone</p>
-          <p className="text-3xl sm:text-4xl font-sans font-light">
+      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-200 text-black">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md text-center items-center justify-center space-y-4">
+          <button onClick={() => router.push("/")}>
+            <Image
+              className="rounded-md mx-auto"
+              src="/assets/heli-full-logo.png"
+              width={250}
+              height={200}
+              alt="Helicone-full-logo"
+            />
+          </button>
+
+          <p className="text-xl sm:text-2xl font-sans font-light">
             {formType === "login"
               ? "Sign in to your account"
               : "Register a new account"}
           </p>
-          <p className="mt-2 text-center text-lg font-light text-gray-600">
+          <p className="mt-2 text-center text-md font-light text-gray-600">
             Or{" "}
             <a
               href={formType === "login" ? "/onboarding" : "/login"}

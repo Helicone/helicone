@@ -10,7 +10,7 @@ import { useState } from "react";
 import "../styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { useRouter } from "next/router";
-import NavBar from "../components/shared/navBar";
+import NavBar from "../components/shared/layout/navBar";
 
 export default function MyApp({
   Component,

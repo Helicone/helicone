@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { User, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
+import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 
 interface DashboardProps {
@@ -11,9 +12,9 @@ const Dashboard = (props: DashboardProps) => {
   const { user } = props;
 
   return (
-    <>
+    <MetaData title="Dashboard">
       <DashboardPage user={user} />
-    </>
+    </MetaData>
   );
 };
 
