@@ -13,6 +13,7 @@ import {
   InboxIcon,
   KeyIcon,
   UserCircleIcon,
+  UserGroupIcon,
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -37,6 +38,12 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       href: "/dashboard",
       icon: HomeIcon,
       current: pathname === "/dashboard",
+    },
+    {
+      name: "Users",
+      href: "/users",
+      icon: UserGroupIcon,
+      current: pathname === "/users",
     },
     {
       name: "Keys",

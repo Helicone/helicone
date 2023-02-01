@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { clsx } from "./clsx";
+import { clsx } from "../clsx";
 import NavBar from "./navBar";
 
 interface BasePageProps {
@@ -13,9 +13,9 @@ const BasePage = (props: BasePageProps) => {
   const variantTheme = () => {
     switch (variant) {
       case "primary":
-        return "bg-gray-200 sm:px-8";
+        return "bg-gray-200 bg-gray-300 bg-blend-overlay bg-center bg-cover";
       case "secondary":
-        return "bg-white sm:px-0";
+        return "bg-white";
       default:
         return "bg-gray-200";
     }
@@ -25,12 +25,14 @@ const BasePage = (props: BasePageProps) => {
   return (
     <div
       className={clsx(
-        "bg-gray-300 bg-blend-overlay bg-center bg-cover px-4 flex flex-col h-screen w-screen",
+        "px-4 sm:px-8 flex flex-col h-screen w-screen",
         variantTheme()
       )}
-      style={{ backgroundImage: "url(/assets/dev.jpg" }}
+      style={{
+        backgroundImage: variant === "primary" ? "url(/assets/dev.jpg" : "",
+      }}
     >
-      <NavBar variant={variant} />
+      <NavBar />
       <div className="h-full">{children}</div>
     </div>
   );

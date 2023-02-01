@@ -75,13 +75,13 @@ const KeyPage = (props: KeyPageProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-2 pb-24">
+    <div className="flex flex-col gap-2">
       {apiKeys !== undefined && apiKeys.length < 1 && (
-        <p className="text-sm text-red-600 mt-1">
+        <p className="text-sm text-red-600">
           Please add an API key to get started
         </p>
       )}
-      <div className="pt-4 inline-flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
+      <div className="inline-flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
         <div className="w-2/3">
           <label
             htmlFor="openAIKey"

@@ -1,7 +1,7 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { Database } from "../../../supabase/database.types";
-import BasePage from "../../shared/basePage";
+import BasePage from "../../shared/layout/basePage";
 import Test from "../../shared/test";
 
 interface HomePageProps {}

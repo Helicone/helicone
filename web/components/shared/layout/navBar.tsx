@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useEffect } from "react";
-import { clsx } from "./clsx";
+import { clsx } from "../clsx";
 
 interface NavBarProps {
   variant?: "primary" | "secondary";
@@ -50,14 +50,7 @@ const NavBar = (props: NavBarProps) => {
   ];
 
   return (
-    <Disclosure
-      as="nav"
-      className={clsx(
-        variant === "primary"
-          ? "bg-gray-200 py-1 bg-transparent"
-          : "bg-white border-b-[0.5px] border-gray-300 sm:px-4 py-0"
-      )}
-    >
+    <Disclosure as="nav" className={clsx("bg-transparent px-0 py-2")}>
       {({ open }) => (
         <>
           <div className="mx-auto font-sans z-50">

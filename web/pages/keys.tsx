@@ -13,8 +13,9 @@ import {
 import { GetServerSidePropsContext } from "next";
 import { useKeys } from "../lib/useKeys";
 import KeyPage from "../components/templates/keys/keyPage";
-import BasePage from "../components/shared/basePage";
+import BasePage from "../components/shared/layout/basePage";
 import AuthLayout from "../components/shared/layout/authLayout";
+import MetaData from "../components/shared/metaData";
 
 interface KeysProps {}
 
@@ -22,9 +23,11 @@ const Keys = (props: KeysProps) => {
   const {} = props;
 
   return (
-    <AuthLayout>
-      <KeyPage />
-    </AuthLayout>
+    <MetaData title="Keys">
+      <AuthLayout>
+        <KeyPage />
+      </AuthLayout>
+    </MetaData>
   );
 };
 
