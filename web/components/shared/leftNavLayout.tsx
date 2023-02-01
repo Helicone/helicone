@@ -35,6 +35,12 @@ const LeftNavLayout = (props: LeftNavLayoutProps) => {
       active: pathname === "/keys",
       icon: KeyIcon,
     },
+    {
+      name: "Billing",
+      path: "/billing",
+      active: pathname === "/billing",
+      icon: BellAlertIcon,
+    },
   ];
 
   const getTitle = () => {
