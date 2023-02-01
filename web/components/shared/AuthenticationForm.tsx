@@ -50,7 +50,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
 
   return (
     <>
-      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-200 text-black">
+      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-r from-sky-200 to-purple-200 text-black">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center items-center justify-center space-y-4">
           <button onClick={() => router.push("/")}>
             <Image
