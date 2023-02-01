@@ -143,7 +143,7 @@ const KeyPage = (props: KeyPageProps) => {
               API key.
             </p>
             <Link
-              href="https://docs.valyrai.com/"
+              href="https://docs.heliconeai.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="underline inline-flex flex-row w-fit"
@@ -172,7 +172,7 @@ const KeyPage = (props: KeyPageProps) => {
               .delete()
               .eq("api_key_hash", row.api_key_hash)
               .then((res) => {
-                if (user?.email === "valyrdemo@gmail.com") {
+                if (user?.email === "heliconedemo@gmail.com") {
                   setError("You can't delete keys on the demo account");
                   return;
                 }

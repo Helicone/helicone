@@ -14,7 +14,7 @@ const AddAPIKey = (props: AddAPIKeyProps) => {
   return (
     <>
       <p className="font-mono text-md pb-4 mb-4 border-b border-black">
-        Step 3: Add OpenAI key to Valyr account
+        Step 3: Add OpenAI key to Helicone account
       </p>
 
       <div className="flex flex-col border w-full sm:w-2/5 border-black rounded-lg p-8 items-center text-white bg-gray-400">
