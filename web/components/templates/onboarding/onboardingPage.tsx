@@ -89,7 +89,7 @@ const OnboardingPage = (props: OnboardingPageProps) => {
   };
 
   return (
-    <BasePage>
+    <BasePage variant="secondary">
       <div className="h-full justify-center align-middle items-center flex flex-col space-y-6 sm:space-y-12">
         <ProgressBar currentStep={step} />
         {renderStep()}
