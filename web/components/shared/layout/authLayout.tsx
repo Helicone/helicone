@@ -39,12 +39,12 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       icon: HomeIcon,
       current: pathname === "/dashboard",
     },
-    {
-      name: "Users",
-      href: "/users",
-      icon: UserGroupIcon,
-      current: pathname === "/users",
-    },
+    // {
+    //   name: "Users",
+    //   href: "/users",
+    //   icon: UserGroupIcon,
+    //   current: pathname === "/users",
+    // },
     {
       name: "Keys",
       href: "/keys",
@@ -57,14 +57,6 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-100">
-        <body class="h-full">
-        ```
-      */}
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
@@ -257,10 +249,10 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white pt-1 pb-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item key="user-email">
                         {({ active }) => (
-                          <p className="block px-4 py-2 text-sm text-black font-bold border-b border-gray-300 mb-1">
+                          <p className="block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">
                             {user?.email}
                           </p>
                         )}
@@ -285,7 +277,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                           <button
                             className={clsx(
                               active ? "bg-gray-100" : "",
-                              "flex w-full px-4 py-2 text-sm text-gray-500"
+                              "flex w-full px-4 py-2 text-sm text-gray-500 border-t border-gray-300"
                             )}
                             onClick={() => {
                               supabaseClient.auth
