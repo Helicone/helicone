@@ -61,8 +61,8 @@ const ThemedTable = (props: ThemedTableProps) => {
                           "relative py-4 pl-4 sm:pl-6 pr-3 text-sm"
                         )}
                       >
-                        <div className="font-medium text-gray-900">
-                          {middleTruncString(row[col.key], 12)}
+                        <div className="font-medium text-gray-900 overflow-ellipsis max-w-[160px] overflow-hidden">
+                          {row[col.key]}
                         </div>
                         {rowIdx !== 0 ? (
                           <div className="absolute right-0 left-6 -top-px h-px bg-gray-200" />
@@ -76,7 +76,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-gray-200",
                           col.hidden ? "hidden" : "",
-                          "px-3 py-3.5 text-sm text-gray-500 lg:table-cell"
+                          "px-3 py-3.5 text-sm text-gray-500 lg:table-cell overflow-ellipsis max-w-[160px] overflow-hidden"
                         )}
                       >
                         {row[col.key]}
