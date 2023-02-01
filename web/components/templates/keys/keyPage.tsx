@@ -143,7 +143,7 @@ const KeyPage = (props: KeyPageProps) => {
               API key.
             </p>
             <Link
-              href="https://docs.heliconeai.com/"
+              href="https://docs.helicone.ai/"
               target="_blank"
               rel="noopener noreferrer"
               className="underline inline-flex flex-row w-fit"
