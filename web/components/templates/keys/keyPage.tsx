@@ -77,7 +77,7 @@ const KeyPage = (props: KeyPageProps) => {
 
   return (
     <LeftNavLayout>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 pb-24">
         {apiKeys !== undefined && apiKeys.length < 1 && (
           <p className="text-sm text-red-600 mt-1">
             Please add an API key to get started

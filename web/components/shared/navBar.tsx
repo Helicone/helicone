@@ -7,6 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useEffect } from "react";
@@ -53,7 +54,7 @@ const NavBar = (props: NavBarProps) => {
       as="nav"
       className={clsx(
         variant === "primary"
-          ? "bg-gray-300 py-1"
+          ? "bg-gray-200 py-1"
           : "bg-white border-b-[0.5px] border-gray-300 sm:px-4 py-0"
       )}
     >
@@ -63,11 +64,45 @@ const NavBar = (props: NavBarProps) => {
             <div className="flex h-16 justify-between">
               <div className="flex">
                 <div className="flex flex-shrink-0 items-center">
+                  {variant === "primary" ? (
+                    <button
+                      onClick={() => router.push("/")}
+                      className="hidden sm:block"
+                    >
+                      <Image
+                        className="rounded-md"
+                        src="/assets/heli-full-logo.png"
+                        width={175}
+                        height={125}
+                        alt="Helicone-full-logo"
+                      />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => router.push("/")}
+                      className="hidden sm:block"
+                    >
+                      <Image
+                        className="rounded-md"
+                        src="/assets/heli-full-logo.png"
+                        width={150}
+                        height={100}
+                        alt="Helicone-full-logo"
+                      />
+                    </button>
+                  )}
+
                   <button
                     onClick={() => router.push("/")}
-                    className="text-lg border border-black p-2 rounded-lg font-serif"
+                    className="block sm:hidden"
                   >
-                    Valyr
+                    <Image
+                      className="rounded-md"
+                      src="/assets/heli-full-logo.png"
+                      width={150}
+                      height={100}
+                      alt="Helicone-full-logo"
+                    />
                   </button>
                 </div>
               </div>
@@ -119,8 +154,10 @@ const NavBar = (props: NavBarProps) => {
                 {user && (
                   <Menu as="div" className="relative ml-3">
                     <div>
-                      <Menu.Button className="flex rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
-                        <UserCircleIcon className="h-8 w-8 text-black" />
+                      <Menu.Button className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                        {user.email?.charAt(0).toUpperCase() || (
+                          <UserCircleIcon className="h-8 w-8 text-black" />
+                        )}
                       </Menu.Button>
                     </div>
                     <Transition

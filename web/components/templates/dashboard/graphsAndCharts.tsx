@@ -37,7 +37,7 @@ const GraphAndCharts = () => {
               <div
                 className={
                   "items-center px-8 text-center rounded-full py-1 cursor-pointer " +
-                  (view.name === currentView ? "bg-black" : "bg-gray-300")
+                  (view.name === currentView ? "bg-black" : "bg-gray-200")
                 }
                 onClick={() => setCurrentView(view.name)}
                 key={view.name}

@@ -14,7 +14,7 @@ const Error = (props: ErrorProps) => {
     <BasePage>
       <div className="h-full sm:h-4/5 justify-center align-middle items-center flex flex-col sm:flex-row gap-8">
         <div className="flex flex-col space-y-4">
-          <p className="text-5xl sm:text-6xl font-serif">Oops!</p>
+          <p className="text-5xl sm:text-6xl">Oops!</p>
           <p className="text-3xl sm:text-4xl font-sans font-light">
             Looks like you&apos;re lost. Don&apos;t worry, click on the home
             button below to get back on track.

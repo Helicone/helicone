@@ -2,7 +2,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { Database } from "../../../supabase/database.types";
 import BasePage from "../../shared/basePage";
-import NavBar from "../../shared/navBar";
+import Test from "../../shared/test";
 
 interface HomePageProps {}
 
@@ -14,8 +14,8 @@ const HomePage = (props: HomePageProps) => {
 
   return (
     <BasePage>
-      <div className="h-4/5 justify-center align-middle items-left flex flex-col space-y-4">
-        <p className="text-4xl sm:text-5xl font-serif">
+      <div className="h-5/6 justify-center align-middle items-left flex flex-col space-y-4">
+        <p className="text-4xl sm:text-5xl font-semibold">
           Observe your GPT-3 logs
         </p>
         <p className="text-2xl sm:text-3xl font-sans font-light">
@@ -41,7 +41,7 @@ const HomePage = (props: HomePageProps) => {
               >
                 Get started{" "}
                 <span className="hidden sm:inline-flex">
-                  in less than 3 minutes
+                  for free in less than 3 minutes
                 </span>
               </button>
               <button

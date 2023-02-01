@@ -13,11 +13,11 @@ const BasePage = (props: BasePageProps) => {
   const variantTheme = () => {
     switch (variant) {
       case "primary":
-        return "bg-gray-300 sm:px-8";
+        return "bg-gray-200 sm:px-8";
       case "secondary":
         return "bg-white sm:px-0";
       default:
-        return "bg-gray-300";
+        return "bg-gray-200";
     }
   };
 
