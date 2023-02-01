@@ -2,6 +2,7 @@ import {
   BellAlertIcon,
   CreditCardIcon,
   FolderArrowDownIcon,
+  MagnifyingGlassCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 
@@ -11,23 +12,29 @@ const metrics = [
     id: 1,
     icon: CreditCardIcon,
     emphasis: "Stripe",
-    rest: "integration to automatically charge high-usage customers.",
+    rest: "integration to automatically bill users by token usage.",
   },
   {
     id: 2,
     icon: BellAlertIcon,
     emphasis: "Alerts",
-    rest: "so that you can stay on top of your OpenAI usage.",
+    rest: "to stay on top of your costs and model downtime.",
   },
   {
     id: 3,
     icon: FolderArrowDownIcon,
     emphasis: "Export",
-    rest: "your data into other tools like Looker, Mixpanel, and more.",
+    rest: "your metrics into other tools like Looker, Mixpanel, and more.",
+  },
+  {
+    id: 4,
+    icon: MagnifyingGlassCircleIcon,
+    emphasis: "Detect",
+    rest: "toxicity, bias, and adversarial attacks to your model.",
   },
 ];
 
-export default function Advanced() {
+export default function AdvancedAnalytics() {
   const router = useRouter();
   return (
     <div className="relative bg-gray-900 py-8">
@@ -52,8 +59,7 @@ export default function Advanced() {
             Advanced Analytics
           </h2>
           <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-            We&apos;re focusing on common pain points in the large language
-            model space.
+            We help businesses use large language models in production.
           </p>
           <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-6 sm:grid-cols-2">
             {metrics.map((item) => (

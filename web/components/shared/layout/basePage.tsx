@@ -13,7 +13,7 @@ const BasePage = (props: BasePageProps) => {
   const variantTheme = () => {
     switch (variant) {
       case "primary":
-        return "bg-gray-200 bg-gray-300 bg-blend-overlay bg-center bg-cover";
+        return "bg-gradient-to-r from-sky-200 to-cyan-200";
       case "secondary":
         return "bg-white";
       default:
@@ -28,9 +28,9 @@ const BasePage = (props: BasePageProps) => {
         "px-4 sm:px-8 flex flex-col h-screen w-screen",
         variantTheme()
       )}
-      style={{
-        backgroundImage: variant === "primary" ? "url(/assets/dev.jpg" : "",
-      }}
+      // style={{
+      //   backgroundImage: variant === "primary" ? "url(/assets/dev.jpg" : "",
+      // }}
     >
       <NavBar />
       <div className="h-full">{children}</div>
