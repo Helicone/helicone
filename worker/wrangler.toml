@@ -1,4 +1,4 @@
-name = "valyr-worker-dev"
+name = "helicone-worker-dev"
 main = "src/index.ts"
 compatibility_date = "2022-11-29"
 
@@ -8,9 +8,9 @@ SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdX
 SUPABASE_URL = "http://localhost:54321"
 
 [env.production]
-name = "valyr-worker-prod"
+name = "helicone-worker-prod"
 routes = [
-	{ pattern = "oai.valyrai.com", custom_domain = true, zone_name = "valyrai.com" }
+	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" }
 ]
 
 [env.production.vars]
