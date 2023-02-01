@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 interface AuthenticationFormProps {
   formType: "login" | "register" | "reset" | "resetPassword";
@@ -22,6 +23,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
     error,
     resetEmail,
   } = props;
+  const router = useRouter();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -50,13 +52,16 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
     <>
       <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-200 text-black">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center items-center justify-center space-y-4">
-          <Image
-            className="rounded-md mx-auto"
-            src="/assets/heli-full-logo.png"
-            width={250}
-            height={200}
-            alt="Helicone-full-logo"
-          />
+          <button onClick={() => router.push("/")}>
+            <Image
+              className="rounded-md mx-auto"
+              src="/assets/heli-full-logo.png"
+              width={250}
+              height={200}
+              alt="Helicone-full-logo"
+            />
+          </button>
+
           <p className="text-xl sm:text-2xl font-sans font-light">
             {formType === "login"
               ? "Sign in to your account"
