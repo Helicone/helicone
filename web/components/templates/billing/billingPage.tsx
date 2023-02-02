@@ -178,6 +178,7 @@ const BillingPage = (props: BillingPageProps) => {
           return res.json() as Promise<UserSettingsResponse>;
         } else {
           setError("Failed to get request limit");
+          return null;
         }
       })
       .then((data) => {

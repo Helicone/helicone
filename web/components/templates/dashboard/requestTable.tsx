@@ -5,7 +5,7 @@ import { truncString } from "../../../lib/stringHelpers";
 import { Database } from "../../../supabase/database.types";
 
 type ResponseAndRequest = Omit<
-  Database["public"]["Views"]["response_and_request"]["Row"],
+  Database["public"]["Views"]["response_and_request_rbac"]["Row"],
   "response_body" | "request_body"
 > & {
   response_body: {
