@@ -11,79 +11,112 @@ export interface Database {
     Tables: {
       request: {
         Row: {
-          body: Json
-          path: string
           id: string
           created_at: string
-          auth_hash: string
-          user_id: string | null
-        }
-        Insert: {
           body: Json
           path: string
+          auth_hash: string
+          user_id: string | null
+          prompt_id: string | null
+        }
+        Insert: {
           id?: string
           created_at?: string
+          body: Json
+          path: string
           auth_hash: string
           user_id?: string | null
+          prompt_id?: string | null
         }
         Update: {
-          body?: Json
-          path?: string
           id?: string
           created_at?: string
+          body?: Json
+          path?: string
           auth_hash?: string
           user_id?: string | null
+          prompt_id?: string | null
         }
       }
       response: {
         Row: {
-          body: Json
-          request: string
           id: string
           created_at: string
-        }
-        Insert: {
           body: Json
           request: string
+        }
+        Insert: {
           id?: string
           created_at?: string
+          body: Json
+          request: string
         }
         Update: {
-          body?: Json
-          request?: string
           id?: string
           created_at?: string
+          body?: Json
+          request?: string
         }
       }
       user_api_keys: {
         Row: {
+          created_at: string
           api_key_hash: string
           api_key_preview: string
           user_id: string
-          created_at: string
         }
         Insert: {
+          created_at?: string
           api_key_hash: string
           api_key_preview: string
           user_id: string
-          created_at?: string
         }
         Update: {
+          created_at?: string
           api_key_hash?: string
           api_key_preview?: string
           user_id?: string
-          created_at?: string
+        }
+      }
+      user_settings: {
+        Row: {
+          user: string
+          created_at: string | null
+          request_limit: number
+          tier: string
+        }
+        Insert: {
+          user: string
+          created_at?: string | null
+          request_limit?: number
+          tier?: string
+        }
+        Update: {
+          user?: string
+          created_at?: string | null
+          request_limit?: number
+          tier?: string
         }
       }
     }
     Views: {
-      metrics: {
+      metrics_rbac: {
         Row: {
           average_response_time: number | null
           average_tokens_per_response: number | null
         }
       }
-      response_and_request: {
+      request_rbac: {
+        Row: {
+          id: string | null
+          created_at: string | null
+          body: Json | null
+          path: string | null
+          auth_hash: string | null
+          user_id: string | null
+        }
+      }
+      response_and_request_rbac: {
         Row: {
           response_body: Json | null
           response_id: string | null
@@ -94,9 +127,18 @@ export interface Database {
           request_created_at: string | null
           request_user_id: string | null
           api_key_preview: string | null
+          user_id: string | null
         }
       }
-      user_metrics: {
+      response_rbac: {
+        Row: {
+          id: string | null
+          created_at: string | null
+          body: Json | null
+          request: string | null
+        }
+      }
+      user_metrics_rbac: {
         Row: {
           user_id: string | null
           first_active: string | null
@@ -123,11 +165,11 @@ export interface Database {
           }
       date_count:
         | {
-            Args: { time_increment: string }
+            Args: { time_increment: string; prev_period: string }
             Returns: Record<string, unknown>[]
           }
         | {
-            Args: { time_increment: string; prev_period: string }
+            Args: { time_increment: string }
             Returns: Record<string, unknown>[]
           }
     }
