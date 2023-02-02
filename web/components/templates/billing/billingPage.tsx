@@ -2,6 +2,7 @@ import {
   ArrowTopRightOnSquareIcon,
   ChevronDoubleRightIcon,
   ChevronRightIcon,
+  LightBulbIcon,
 } from "@heroicons/react/24/outline";
 import {
   CheckIcon,
@@ -26,39 +27,15 @@ import getStripe from "../../../utlis/getStripe";
 import Subscriptions from "./subscriptions";
 import { subscriptionChange } from "../../../lib/subscriptionChange";
 import AuthLayout from "../../shared/layout/authLayout";
-
-type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
-
+import { useRouter } from "next/router";
+import { UserSettingsResponse } from "../../../pages/api/user_settings";
+import Stripe from "stripe";
+export type Tier = "free" | "pro" | "enterprise" | "pro-pending-cancel";
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
     // Default options are marked with *
     const response = await fetch(url, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
-      mode: "cors", // no-cors, *cors, same-origin
-      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: "same-origin", // include, *same-origin, omit
-      headers: {
-        "Content-Type": "application/json",
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      redirect: "follow", // manual, *follow, error
-      referrerPolicy: "no-referrer", // no-referrer, *client
-      body: JSON.stringify(data || {}), // body data type must match "Content-Type" header
-    });
-    return await response.json(); // parses JSON response into native JavaScript objects
-  } catch (err) {
-    if (err instanceof Error) {
-      throw new Error(err.message);
-    }
-    throw err;
-  }
-}
-
-export async function fetchDeleteJSON(url: string, data?: {}) {
-  try {
-    // Default options are marked with *
-    const response = await fetch(url, {
-      method: "DELETE", // *GET, POST, PUT, DELETE, etc.
       mode: "cors", // no-cors, *cors, same-origin
       cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
       credentials: "same-origin", // include, *same-origin, omit
@@ -96,13 +73,19 @@ const RequestProgress = ({ userLimit }: { userLimit: number }) => {
   const client = useSupabaseClient<Database>();
   const [requestsCount, setRequestsCount] = useState(0);
 
-  const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
-
   useEffect(() => {
+    const startOfThisMonth = new Date();
+    startOfThisMonth.setDate(1);
+    startOfThisMonth.setHours(0);
+    startOfThisMonth.setMinutes(0);
+    startOfThisMonth.setSeconds(0);
+    startOfThisMonth.setMilliseconds(0);
+
     client &&
       client
         .from("request_rbac")
         .select("*", { count: "exact" })
+        .gte("created_at", startOfThisMonth.toISOString())
         .then((res) => {
           if (res.error !== null) {
             console.error(res.error);
@@ -125,28 +108,76 @@ const RequestProgress = ({ userLimit }: { userLimit: number }) => {
       <div className="text-xs text-gray-500">
         {requestsCount} / {userLimit} requests
       </div>
+      <div className="text-xs text-gray-500">
+        You have {userLimit - requestsCount} requests left this month.
+      </div>
     </div>
   );
 };
-type Tier = "free" | "pro" | "enterprise";
-interface BillingInfo {
+const CurrentSubscriptionStatus = ({
+  subscription,
+  tier,
+}: {
+  subscription?: Stripe.Subscription;
   tier: Tier;
-  userLimit: number;
-}
+}) => {
+  if (tier === "free") {
+    return (
+      <div className="text-gray-500">
+        You are currently on the free tier. You can upgrade to the pro tier to
+        get more requests per month.
+      </div>
+    );
+  } else if (tier === "pro") {
+    return (
+      <div className="text-gray-500">
+        You are currently on the pro tier. You can upgrade to the enterprise
+        tier to get more requests per month.
+      </div>
+    );
+  } else if (tier === "pro-pending-cancel") {
+    const endingDate = new Date(
+      subscription?.current_period_end! * 1000
+    ).toLocaleDateString();
+    const daysLeft = Math.round(
+      (subscription?.current_period_end! * 1000 - Date.now()) /
+        1000 /
+        60 /
+        60 /
+        24
+    );
+    return (
+      <div className="text-gray-500">
+        You pro account is still active until {endingDate} ({daysLeft} days
+        left). You can upgrade to the enterprise tier to get more requests per
+        month.
+      </div>
+    );
+  } else if (tier === "enterprise") {
+    return (
+      <div className="text-gray-500">
+        You are currently on the enterprise tier. You can downgrade to the pro
+        tier to get less requests per month.
+      </div>
+    );
+  } else {
+    return <div></div>;
+  }
+};
 
 const BillingPage = (props: BillingPageProps) => {
-  const user = useUser();
+  const [userSettings, setUserSettings] = useState<UserSettingsResponse | null>(
+    null
+  );
+  const [error, setError] = useState<string | null>(null);
 
-  const supabaseClient = useSupabaseClient<Database>();
-  const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
-  const tier: Tier = (userSettings?.tier as Tier) ?? "free";
   useEffect(() => {
     fetch("/api/user_settings")
       .then((res) => {
         if (res.status === 200) {
-          return res.json() as Promise<UserSettings>;
+          return res.json() as Promise<UserSettingsResponse>;
         } else {
-          throw new Error("Failed to get request limit");
+          setError("Failed to get request limit");
         }
       })
       .then((data) => {
@@ -154,31 +185,22 @@ const BillingPage = (props: BillingPageProps) => {
         setUserSettings(data);
       });
   }, []);
-  const handleSubmit = async () => {
-    // Create a Checkout Session.
-    const response = await fetchPostJSON("/api/checkout_sessions");
 
-    if (response.statusCode === 500) {
-      console.error(response.message);
-      return;
-    }
-
-    // Redirect to Checkout.
-    const stripe = await getStripe();
-    const { error } = await stripe!.redirectToCheckout({
-      // Make the id field from the Checkout Session creation API response
-      // available to this file, so you can provide it as parameter here
-      // instead of the {{CHECKOUT_SESSION_ID}} placeholder.
-      sessionId: response.id,
-    });
-    // If `redirectToCheckout` fails due to a browser or network
-    // error, display the localized error message to your customer
-    // using `error.message`.
-    console.warn(error.message);
-  };
-  const handleDelete = async () => {
-    const response = await fetchDeleteJSON("/api/subscription/5");
-  };
+  const router = useRouter();
+  if (userSettings === null) {
+    return (
+      <AuthLayout>
+        <div className="animate-pulse w-full h-40 bg-white p-10 text-gray-500">
+          {error === null ? (
+            "Fetching your billing information..."
+          ) : (
+            <div className="text-red-500">{error}</div>
+          )}
+        </div>
+      </AuthLayout>
+    );
+  }
+  const currentTier = userSettings.user_settings.tier as Tier;
 
   return (
     <AuthLayout>
@@ -191,22 +213,31 @@ const BillingPage = (props: BillingPageProps) => {
         <div className="flex flex-col space-y-2 ">
           <div className="text-xl font-bold">Request Limit</div>
           <div className="text-gray-500">
-            You can make {userSettings?.request_limit ?? 0} requests per month
+            You can make {userSettings.user_settings.request_limit ?? 0}{" "}
+            requests per month
           </div>
-          <RequestProgress userLimit={userSettings?.request_limit ?? 0} />
+          <RequestProgress
+            userLimit={userSettings.user_settings.request_limit ?? 0}
+          />
+          <div className="border-2 p-5 rounded-md flex gap-5 items-center text-gray-500">
+            <LightBulbIcon className="h-6 w-6 text-gray-500" />
+            We continue logging your requests after your limit is reached, you
+            will just lose access to the dashboard until you upgrade.
+          </div>
         </div>
 
         <div className="flex flex-col space-y-2">
           <div className="text-xl font-bold">Subscription</div>
-
-          <Subscriptions
-            activeSubscription={tier}
-            onClick={(tier) => subscriptionChange(tier)}
+          <CurrentSubscriptionStatus
+            subscription={userSettings.subscription}
+            tier={currentTier}
           />
-        </div>
-        <div className="flex flex-col space-y-2">
-          <div className="text-xl font-bold">Billing History</div>
-          <div className="text-gray-500">kljdf</div>
+          <Subscriptions
+            activeSubscription={currentTier}
+            onClick={(newTier) =>
+              subscriptionChange(newTier, currentTier, router)
+            }
+          />
         </div>
       </div>
     </AuthLayout>

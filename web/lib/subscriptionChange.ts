@@ -1,4 +1,6 @@
+import { NextRouter } from "next/router";
 import Stripe from "stripe";
+import { Tier } from "../components/templates/billing/billingPage";
 import getStripe from "../utlis/getStripe";
 import { Result } from "./result";
 export async function fetchPostJSON(url: string, data?: {}) {
@@ -27,33 +29,45 @@ export async function fetchPostJSON(url: string, data?: {}) {
 }
 
 const subscribeToPro = async () => {
-  // Create a Checkout Session.
   const response = await fetchPostJSON("/api/checkout_sessions");
 
   if (response.statusCode === 500) {
     console.error(response.message);
     return;
   }
-
-  // Redirect to Checkout.
   const stripe = await getStripe();
   const { error } = await stripe!.redirectToCheckout({
-    // Make the id field from the Checkout Session creation API response
-    // available to this file, so you can provide it as parameter here
-    // instead of the {{CHECKOUT_SESSION_ID}} placeholder.
     sessionId: response.id,
   });
-  // If `redirectToCheckout` fails due to a browser or network
-  // error, display the localized error message to your customer
-  // using `error.message`.
   console.warn(error.message);
 };
 
+const heliconeContactLink = process.env.NEXT_PUBLIC_HELICONE_CONTACT_LINK;
+const heliconeBillingPortalLink =
+  process.env.NEXT_PUBLIC_HELICONE_BILLING_PORTAL_LINK;
+
 export async function subscriptionChange(
-  changeTo: "free" | "pro" | "enterprise"
+  changeTo: Tier,
+  changeFrom: Tier,
+  router: NextRouter
 ): Promise<Result<Stripe.Subscription, string>> {
   if (changeTo === "pro") {
-    await subscribeToPro();
+    if (changeFrom === "free") {
+      await subscribeToPro();
+    } else if (changeFrom === "enterprise") {
+      window.open(heliconeContactLink, "_ blank");
+    } else if (changeFrom === "pro-pending-cancel") {
+      window.open(heliconeBillingPortalLink, "_ blank");
+    }
+  } else if (changeTo === "enterprise") {
+    window.open(heliconeContactLink, "_ blank");
+  } else if (changeTo === "free") {
+    if (changeFrom === "pro") {
+      window.open(heliconeBillingPortalLink, "_ blank");
+    } else if (changeFrom === "enterprise") {
+      window.open(heliconeContactLink, "_ blank");
+    }
   }
+
   return { error: "Not implemented", data: null };
 }

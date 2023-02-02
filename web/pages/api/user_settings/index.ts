@@ -10,7 +10,13 @@ import { deleteSubscription } from "../../../lib/api/subscription/delete";
 import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
+import { Tier } from "../../../components/templates/billing/billingPage";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
+
+export type UserSettingsResponse = {
+  user_settings: UserSettings;
+  subscription?: Stripe.Subscription;
+};
 async function getOrCreateUserSettings(
   user: User
 ): Promise<Result<UserSettings, string>> {
@@ -41,12 +47,61 @@ async function getOrCreateUserSettings(
   }
 }
 
+async function syncSettingsWithStripe(
+  userSettings: UserSettings,
+  subscriptions: Stripe.Subscription[]
+): Promise<Result<undefined, string>> {
+  if (userSettings.tier === "enterprise") {
+    return { data: undefined, error: null };
+  } else {
+    const activeSubscription = subscriptions.find((subscription) => {
+      if (subscription.status === "active") {
+        return true;
+      }
+    });
+    const isPendingCancellation =
+      activeSubscription?.cancel_at_period_end === true;
+    if (isPendingCancellation) {
+      const tier: Tier = "pro-pending-cancel";
+      const userSetting = await supabaseServer
+        .from("user_settings")
+        .update({
+          tier: tier,
+        })
+        .eq("user", userSettings.user)
+        .select("*")
+        .single();
+      if (userSetting.error !== null) {
+        return { data: null, error: userSetting.error.message };
+      } else {
+        return { data: undefined, error: null };
+      }
+    } else {
+      const tier: Tier = activeSubscription ? "pro" : "free";
+      const userSetting = await supabaseServer
+        .from("user_settings")
+        .update({
+          tier: tier,
+        })
+        .eq("user", userSettings.user)
+        .select("*")
+        .single();
+      if (userSetting.error !== null) {
+        return { data: null, error: userSetting.error.message };
+      } else {
+        return { data: undefined, error: null };
+      }
+    }
+  }
+}
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<UserSettings | string>
+  res: NextApiResponse<UserSettingsResponse | string>
 ) {
   if (req.method === "GET") {
     const client = createServerSupabaseClient({ req, res });
+
     const {
       data: { user },
       error: userError,
@@ -73,7 +128,37 @@ export default async function handler(
       res.status(404).json("User settings not found");
       return;
     }
-    return res.status(200).json(userSettings);
+    const { data: subscriptions, error: subscriptionError } =
+      await getSubscriptions(req, res);
+
+    const syncSettingsWithStripeResult = await syncSettingsWithStripe(
+      userSettings,
+      subscriptions ?? []
+    );
+    if (syncSettingsWithStripeResult.error !== null) {
+      res.status(500).json(syncSettingsWithStripeResult.error);
+      return;
+    }
+
+    if (subscriptionError !== null) {
+      res.status(500).json(subscriptionError);
+      return;
+    }
+
+    if (subscriptions !== null && subscriptions.length > 0) {
+      const subscription = subscriptions[0];
+      if (subscription.status === "active") {
+        res.status(200).json({
+          user_settings: userSettings,
+          subscription,
+        });
+        return;
+      }
+    }
+
+    return res.status(200).json({
+      user_settings: userSettings,
+    });
   } else {
     res.setHeader("Allow", "GET");
     res.status(405).end("Method Not Allowed");

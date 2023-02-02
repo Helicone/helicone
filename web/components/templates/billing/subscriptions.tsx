@@ -1,10 +1,23 @@
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { SparklesIcon } from "@heroicons/react/24/solid";
+import { Tier } from "./billingPage";
 
-const pricing = {
+const pricing: {
+  tiers: {
+    title: string;
+    tier: Tier;
+    price: number;
+    frequency: string;
+    description: string;
+    features: string[];
+    cta: string;
+    mostPopular: boolean;
+  }[];
+} = {
   tiers: [
     {
       title: "Free",
+      tier: "free",
       price: 0,
       frequency: "/month",
       description: "The essentials to provide your best work for clients.",
@@ -18,6 +31,7 @@ const pricing = {
     },
     {
       title: "Pro",
+      tier: "pro",
       price: 200,
       frequency: "/month",
       description: "A plan that scales with your rapidly growing business.",
@@ -31,6 +45,7 @@ const pricing = {
     },
     {
       title: "Enterprise",
+      tier: "enterprise",
       price: 48,
       frequency: "/month",
       description: "Dedicated support and infrastructure for your company.",
@@ -47,27 +62,76 @@ const pricing = {
   ],
 };
 
-function classNames(...classes) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
+}
+
+function SubscriptionButton({
+  activeSubscription,
+  buttonTier,
+  cta,
+  onClick,
+}: {
+  activeSubscription: Tier;
+  buttonTier: Tier;
+  cta: string;
+  onClick: (tier: Tier) => void;
+}) {
+  const disabled =
+    buttonTier === activeSubscription ||
+    (activeSubscription === "pro-pending-cancel" && buttonTier === "free");
+
+  let ctaElement: JSX.Element = <>{cta}</>;
+  if (activeSubscription === "pro-pending-cancel" && buttonTier === "free") {
+    ctaElement = <>Pro still active</>;
+  } else if (
+    buttonTier === "pro" &&
+    activeSubscription === "pro-pending-cancel"
+  ) {
+    ctaElement = <>Undo Cancel</>;
+  } else if (buttonTier === "pro" && activeSubscription === "free") {
+    ctaElement = (
+      <>
+        Upgrade <SparklesIcon className="h-5 w-5 ml-2" />
+      </>
+    );
+  } else if (buttonTier === "pro" && activeSubscription === "enterprise") {
+    ctaElement = <>Downgrade</>;
+  } else if (buttonTier === activeSubscription) {
+    ctaElement = <>Current plan</>;
+  }
+
+  return (
+    <button
+      onClick={() => onClick(buttonTier)}
+      className={classNames(
+        disabled
+          ? "bg-gray-400 text-white "
+          : "bg-black text-gray-100 hover:bg-indigo-700 transition-colors",
+        "mt-8 block w-full py-3 px-6 border border-transparent text-center rounded-b-sm font-medium"
+      )}
+      disabled={disabled}
+    >
+      <div className="flex items-center justify-center">
+        <>{ctaElement}</>
+      </div>
+    </button>
+  );
 }
 
 export default function Subscriptions({
   activeSubscription,
   onClick,
 }: {
-  activeSubscription: "free" | "pro" | "enterprise";
-  onClick: (tier: "free" | "pro" | "enterprise") => void;
+  activeSubscription: Tier;
+  onClick: (tier: Tier) => void;
 }) {
-  const isActive = (tier: string) => {
-    return activeSubscription === tier.toLowerCase();
-  };
   return (
     <div className="mt-24 space-y-12  max-w-md lg:max-w-full lg:grid lg:grid-cols-3 lg:gap-x-8 lg:space-y-0">
       {pricing.tiers.map((tier) => (
         <div
           key={tier.title}
           className={classNames(
-            isActive(tier.title) ? "" : "",
             "relative flex flex-col drop-shadow-sm rounded-sm border border-gray-200 bg-white shadow-sm"
           )}
         >
@@ -100,24 +164,12 @@ export default function Subscriptions({
               ))}
             </ul>
           </div>
-
-          <button
-            onClick={() => onClick(tier.title.toLowerCase() as any)}
-            className={classNames(
-              isActive(tier.title)
-                ? "bg-gray-400 text-white "
-                : "bg-black text-gray-100 hover:bg-indigo-700 transition-colors",
-              "mt-8 block w-full py-3 px-6 border border-transparent text-center rounded-b-sm font-medium"
-            )}
-            disabled={isActive(tier.title)}
-          >
-            <div className="flex items-center justify-center">
-              {isActive(tier.title) ? "Active" : tier.cta}
-              {tier.title === "Pro" && (
-                <SparklesIcon className="h-5 w-5 ml-2" />
-              )}
-            </div>
-          </button>
+          <SubscriptionButton
+            activeSubscription={activeSubscription}
+            buttonTier={tier.tier}
+            cta={tier.cta}
+            onClick={onClick}
+          />
         </div>
       ))}
     </div>

@@ -5,8 +5,10 @@ import Stripe from "stripe";
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 
-const MIN_AMOUNT = 50;
-const MAX_AMOUNT = 50000;
+const stripePriceId = process.env.STRIPE_PRICE_ID;
+if (!stripePriceId) {
+  throw new Error("Missing Stripe Price ID");
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,8 +31,6 @@ export default async function handler(
         return;
       }
 
-      console.log("customer", customer.subscriptions);
-
       if (!customer.id) {
         throw new Error("Customer not found");
       }
@@ -39,13 +39,13 @@ export default async function handler(
         payment_method_types: ["card"],
         line_items: [
           {
-            price: `price_1MWC01FeVmeixR9wL5VNBGIS`,
+            price: stripePriceId,
             quantity: 1,
           },
         ],
         mode: "subscription",
         customer: customer.id,
-        success_url: `${req.headers.origin}/confirm_billing?string_session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${req.headers.origin}/billing?string_session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.origin}/billing`,
       };
       const checkoutSession: Stripe.Checkout.Session =
