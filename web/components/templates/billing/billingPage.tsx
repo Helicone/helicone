@@ -19,13 +19,13 @@ import { middleTruncString } from "../../../lib/stringHelpers";
 import { hashAuth } from "../../../lib/supabaseClient";
 import { useKeys } from "../../../lib/useKeys";
 import { Database } from "../../../supabase/database.types";
-import LeftNavLayout from "../../shared/leftNavLayout";
 import ThemedTable from "../../shared/themedTable";
 import { loadStripe } from "@stripe/stripe-js";
 
 import getStripe from "../../../utlis/getStripe";
 import Subscriptions from "./subscriptions";
 import { subscriptionChange } from "../../../lib/subscriptionChange";
+import AuthLayout from "../../shared/layout/authLayout";
 
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
@@ -181,7 +181,7 @@ const BillingPage = (props: BillingPageProps) => {
   };
 
   return (
-    <LeftNavLayout>
+    <AuthLayout>
       <div className="flex flex-col space-y-16 overflow-scroll">
         <div className="flex flex-col space-y-2">
           <div className="text-gray-500">
@@ -209,7 +209,7 @@ const BillingPage = (props: BillingPageProps) => {
           <div className="text-gray-500">kljdf</div>
         </div>
       </div>
-    </LeftNavLayout>
+    </AuthLayout>
   );
 };
 

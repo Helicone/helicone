@@ -13,8 +13,8 @@ import {
 import { GetServerSidePropsContext } from "next";
 import { useKeys } from "../lib/useKeys";
 import KeyPage from "../components/templates/keys/keyPage";
-import BasePage from "../components/shared/basePage";
 import BillingPage from "../components/templates/billing/billingPage";
+import MetaData from "../components/shared/metaData";
 
 interface KeysProps {}
 
@@ -22,9 +22,9 @@ const Keys = (props: KeysProps) => {
   const {} = props;
 
   return (
-    <BasePage variant="secondary">
+    <MetaData title="Billing">
       <BillingPage />
-    </BasePage>
+    </MetaData>
   );
 };
 
