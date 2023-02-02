@@ -68,7 +68,7 @@ export function MetricsPanel() {
         .single()
         .then(({ data: createdAt }) => {
           setData((data) => {
-            if (createdAt) {
+            if (createdAt && createdAt.created_at) {
               return {
                 ...data,
                 first_request: new Date(createdAt.created_at) ?? null,
@@ -85,7 +85,7 @@ export function MetricsPanel() {
         .single()
         .then(({ data: createdAt }) => {
           setData((data) => {
-            if (createdAt) {
+            if (createdAt && createdAt.created_at) {
               return {
                 ...data,
                 last_request: new Date(createdAt.created_at) ?? null,
