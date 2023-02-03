@@ -302,9 +302,9 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                   Dashboard
                 </h1>
               </div> */}
-            <div className="mx-auto max-w-7xl px-6 bg-gray-100 min-h-[92.5vh]">
+            <div className="mx-auto px-6 bg-gray-100 min-h-[92.5vh]">
               {/* Replace with your content */}
-              <div className="py-6 ">{children}</div>
+              <div className="py-6 max-w-7xl">{children}</div>
               {/* /End replace */}
             </div>
           </main>
