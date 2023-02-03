@@ -184,7 +184,7 @@ const OneLineChange = (props: OneLineChangeProps) => {
               </button>
             </div>
           </div>
-          <div className="px-6 pt-6 pb-14 h-52 sm:h-96 flex flex-col gap-4 font-mono text-[10px] sm:text-sm">
+          <div className="px-6 pt-6 pb-8 min-h-[20em] flex flex-col gap-4 font-mono text-[10px] sm:text-sm">
             {codeSnippet()}
           </div>
         </div>
