@@ -178,7 +178,7 @@ const KeyPage = (props: KeyPageProps) => {
             API key.
           </p>
           <Link
-            href="https://docs.valyrai.com/"
+            href="https://docs.helicone.ai/getting-started/how-encryption-works"
             target="_blank"
             rel="noopener noreferrer"
             className="underline inline-flex flex-row w-fit"

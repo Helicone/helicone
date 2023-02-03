@@ -118,7 +118,7 @@ export default function Details() {
               </div>
               <div className="flex flex-row gap-0 pl-4 bg-green-900">
                 <p className="text-green-700 -ml-3 pr-1">+</p>
-                <p className="text-gray-300">basePath: process.env.</p>
+                <p className="text-gray-300 pr-1">basePath: </p>
                 <div className="flex flex-row">
                   <p className="text-blue-300">{`"https://oai.hconeai.com/v1"`}</p>
                   <p className="text-gray-300">,</p>
