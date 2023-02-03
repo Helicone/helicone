@@ -4,6 +4,13 @@ import React, { useEffect, useState } from "react";
 import { MetricsDB } from "../../../schema/metrics";
 import { Database } from "../../../supabase/database.types";
 
+const OPENAI_COSTS = {
+  ada: 0.0004,
+  babbage: 0.0005,
+  curie: 0.002,
+  davinci: 0.02,
+};
+
 export function MetricsPanel() {
   const client = useSupabaseClient<Database>();
   interface Metrics {
@@ -15,6 +22,7 @@ export function MetricsPanel() {
     total_requests?: number;
     first_request?: Date;
     last_request?: Date;
+    total_cost?: number;
   }
 
   const [data, setData] = useState<Metrics>({});
@@ -44,8 +52,8 @@ export function MetricsPanel() {
       label: "Average # of Token/response",
     },
     {
-      value: data?.average_cost_per_request ?? "n/a",
-      label: "Average cost/request",
+      value: data?.total_cost?.toFixed(3) ?? "n/a",
+      label: "Total cost (USD)",
     },
     {
       value: data?.total_requests ?? "n/a",
@@ -77,6 +85,45 @@ export function MetricsPanel() {
             return data;
           });
         });
+
+      client
+        .from("model_metrics")
+        .select("*")
+
+        .then(({ data: metrics, error }) => {
+          if (error) {
+            console.error(error);
+          }
+          if (metrics) {
+            const total_cost = metrics.reduce((acc, m) => {
+              const model = m.model;
+              const tokens = m.sum_tokens;
+              if (tokens === null) {
+                console.error("Tokens is null");
+                return 0;
+              }
+              if (model === null) {
+                console.error("Model is null");
+                return 0;
+              }
+              const cost = Object.entries(OPENAI_COSTS).find(([key]) =>
+                model.includes(key)
+              )?.[1];
+              if (!cost) {
+                console.error("No cost found for model", model);
+                return 0;
+              }
+              return acc + (cost * tokens) / 1000;
+            }, 0);
+            setData((data) => ({
+              ...data,
+              total_cost: total_cost,
+            }));
+
+            console.log(metrics);
+          }
+        });
+
       client
         .from("request_rbac")
         .select("created_at")

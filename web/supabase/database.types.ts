@@ -64,18 +64,21 @@ export interface Database {
           api_key_hash: string
           api_key_preview: string
           user_id: string
+          key_name: string | null
         }
         Insert: {
           created_at?: string
           api_key_hash: string
           api_key_preview: string
           user_id: string
+          key_name?: string | null
         }
         Update: {
           created_at?: string
           api_key_hash?: string
           api_key_preview?: string
           user_id?: string
+          key_name?: string | null
         }
       }
       user_settings: {
@@ -104,6 +107,12 @@ export interface Database {
         Row: {
           average_response_time: number | null
           average_tokens_per_response: number | null
+        }
+      }
+      model_metrics: {
+        Row: {
+          model: string | null
+          sum_tokens: number | null
         }
       }
       request_rbac: {
