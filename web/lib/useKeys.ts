@@ -16,6 +16,9 @@ export function useKeys(supabaseClient: SupabaseClient) {
         } else {
           const keys = res.data;
           keys.forEach((key) => {
+            if (key.key_name === null) {
+              key.key_name = "n/a";
+            }
             key.created_at = new Date(key.created_at).toLocaleString();
           });
           setApiKeys(keys);
