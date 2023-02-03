@@ -210,7 +210,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
                 <Link
-                  href="https://docs.heliconeai.com/"
+                  href="https://docs.helicone.ai/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={clsx(
