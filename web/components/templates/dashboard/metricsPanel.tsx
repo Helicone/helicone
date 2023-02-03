@@ -53,7 +53,7 @@ export function MetricsPanel() {
     },
     {
       value: data?.total_cost?.toFixed(3) ?? "n/a",
-      label: "Total cost",
+      label: "Total cost (USD)",
     },
     {
       value: data?.total_requests ?? "n/a",
