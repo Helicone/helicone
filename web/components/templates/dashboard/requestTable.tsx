@@ -13,6 +13,9 @@ type ResponseAndRequest = Omit<
     choices:
       | {
           text: string;
+          logprobs: {
+            token_logprobs: number[];
+          };
         }[]
       | null;
     usage:
