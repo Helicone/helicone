@@ -10,7 +10,12 @@ type ResponseAndRequest = Omit<
   "response_body" | "request_body"
 > & {
   response_body: {
-    choices: any[] | null | undefined;
+    choices:
+      | {
+          text: string;
+        }[]
+      | null
+      | undefined;
     usage:
       | {
           total_tokens: number;
@@ -20,6 +25,9 @@ type ResponseAndRequest = Omit<
   } | null;
   request_body: {
     prompt: string;
+    max_tokens: number;
+    model: string;
+    temperature: number;
   } | null;
 };
 
