@@ -13,7 +13,16 @@ interface UserMetricsDB {
   average_tokens_per_request: string;
 }
 
-export function UserTable({ client }: { client: SupabaseClient }) {
+interface UserRow {
+  user_id: string;
+  active_for: string;
+  last_active: string;
+  total_requests: string;
+  average_requests_per_day_active: string;
+  average_tokens_per_request: string;
+}
+
+export function GetTableData({ client, limit}: { client: SupabaseClient, limit?: number}): UserRow[] {
   const [data, setData] = useState<UserMetricsDB[]>([]);
   useEffect(() => {
     const fetch = async () => {
@@ -32,6 +41,34 @@ export function UserTable({ client }: { client: SupabaseClient }) {
     fetch();
   }, [client]);
 
+  return data.map((row, i) => {
+    return {
+      user_id: row.user_id ? truncString(row.user_id, 11) : "NULL",
+      active_for: (
+          (new Date().getTime() -
+            new Date(row.first_active).getTime()) /
+          (1000 * 3600 * 24)
+        ).toFixed(2),
+      last_active: new Date(row.last_active).toLocaleString(),
+      total_requests: row.total_requests,
+      average_requests_per_day_active: (
+          +row.total_requests /
+          Math.ceil(
+            (new Date().getTime() -
+              new Date(row.first_active).getTime()) /
+              (1000 * 3600 * 24)
+          )
+        ).toFixed(2),
+      average_tokens_per_request: row.average_tokens_per_request
+        ? (+row.average_tokens_per_request).toFixed(2)
+        : "{{ no tokens found }}",
+    }; 
+  })
+}
+
+export function UserTable({ client }: { client: SupabaseClient }) {
+  const data = GetTableData({ client, limit: 100 });
+
   return (
     <div className="h-full">
       <div>
@@ -44,7 +81,7 @@ export function UserTable({ client }: { client: SupabaseClient }) {
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">
           <thead>
-            <tr className="text-black">
+            <tr className="text-slate-300">
               <th className="text-left">User ID</th>
               <th className="text-left">Active for</th>
               <th className="text-left">Last Active</th>
@@ -57,34 +94,21 @@ export function UserTable({ client }: { client: SupabaseClient }) {
           <tbody>
             {data.map((row, i) => (
               <tr
-                className="text-black"
+                className="text-slate-300"
                 key={row.user_id ? truncString(row.user_id, 11) : "NULL"}
               >
-                <td>{row.user_id ? truncString(row.user_id, 11) : "NULL"}</td>
+                <td>{row.user_id}</td>
                 <td>
-                  {(
-                    (new Date().getTime() -
-                      new Date(row.first_active).getTime()) /
-                    (1000 * 3600 * 24)
-                  ).toFixed(2)}{" "}
+                  {row.active_for}{" "}
                   days
                 </td>
-                <td>{new Date(row.last_active).toLocaleString()}</td>
+                <td>{row.last_active}</td>
                 <td>{row.total_requests}</td>
                 <td>
-                  {(
-                    +row.total_requests /
-                    Math.ceil(
-                      (new Date().getTime() -
-                        new Date(row.first_active).getTime()) /
-                        (1000 * 3600 * 24)
-                    )
-                  ).toFixed(2)}
+                  {row.average_requests_per_day_active}
                 </td>
                 <td>
-                  {row.average_tokens_per_request
-                    ? (+row.average_tokens_per_request).toFixed(2)
-                    : "{{ no tokens found }}"}
+                  {row.average_tokens_per_request}
                 </td>
                 <td>$ TBD</td>
               </tr>

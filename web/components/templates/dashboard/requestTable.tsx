@@ -23,16 +23,27 @@ type ResponseAndRequest = Omit<
   } | null;
 };
 
-export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
-  const [data, setData] = useState<ResponseAndRequest[]>([]);
+export interface DataTable {
+  data: ResponseAndRequest[];
+  probabilities: (String | undefined)[]; 
+}
 
+export function GetTableData({ client, limit }: { client: SupabaseClient, limit?: number }): DataTable {
+  const [data, setData] = useState<ResponseAndRequest[]>([]);
   useEffect(() => {
     const fetch = async () => {
-      const { data, error } = await client
+
+      var sql = client
         .from("response_and_request_rbac")
         .select("*")
-        .order("request_created_at", { ascending: false })
-        .limit(100);
+        .order("request_created_at", { ascending: false });
+
+      if (typeof limit !== "undefined") {
+        sql.limit(limit);
+      }
+
+      const { data, error } = await sql;
+
       if (error) {
         console.log(error);
       } else {
@@ -41,7 +52,6 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
     };
     fetch();
   }, [client]);
-
   console.log(data[0]);
   const probabilities = data.map((d) => {
     const choice = d.response_body?.choices
@@ -65,6 +75,17 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
 
     return prob;
   });
+
+  const dataTable: DataTable = {
+    data: data,
+    probabilities: probabilities
+  }
+
+  return dataTable;
+}
+
+export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
+  const data = GetTableData({ client });
 
   return (
     <div className="h-full">
@@ -90,7 +111,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
             </tr>
           </thead>
           <tbody>
-            {data.map((row, i) => (
+            {data.data.map((row, i) => (
               <tr className="text-black" key={row.request_id}>
                 <td>{new Date(row.request_created_at!).toLocaleString()}</td>
                 <td>
@@ -119,7 +140,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
                     ? row.response_body!.usage.total_tokens
                     : "{{ no tokens found }}"}
                 </td>
-                <td>{probabilities[i]}</td>
+                <td>{data.probabilities[i]}</td>
                 <td>
                   {row.request_user_id && truncString(row.request_user_id, 5)}
                 </td>
