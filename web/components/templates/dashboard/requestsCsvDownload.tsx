@@ -2,7 +2,7 @@ import { CSVDownload, CSVLink } from "react-csv";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { GetTableData, ResponseAndRequest } from "./requestTable";
+import { GetTableData } from "./requestTable";
 
 export function RequestsCSVDownloadButton({
   client,
