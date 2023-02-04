@@ -86,7 +86,7 @@ export default function RequestsTab() {
       </div> */}
       {/* UNCOMMENT BELOW */}
       <div className="flex flex-col">
-        <div className="">
+        <div className="overflow-x-auto">
           <div className="inline-block min-w-full py-2 align-middle">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
