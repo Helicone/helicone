@@ -265,7 +265,7 @@ export default function RequestsTab() {
               </ul>
             </div>
           </div>
-          <div className="mt-5 sm:mt-6 w-full justify-between gap-4">
+          <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
             <button
               type="button"
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
