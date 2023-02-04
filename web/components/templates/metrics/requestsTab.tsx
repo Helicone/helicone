@@ -90,7 +90,7 @@ export default function RequestsTab() {
           <div className="inline-block min-w-full py-2 align-middle">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
-                <thead className="sticky top-16 z-10 bg-gray-50 rounded-lg">
+                <thead className="bg-gray-50">
                   <tr>
                     <th
                       scope="col"
