@@ -15,6 +15,7 @@ import {
   HomeIcon,
   InboxIcon,
   KeyIcon,
+  TableCellsIcon,
   UserCircleIcon,
   UserGroupIcon,
   UsersIcon,
@@ -41,6 +42,12 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       href: "/dashboard",
       icon: HomeIcon,
       current: pathname === "/dashboard",
+    },
+    {
+      name: "Metrics",
+      href: "/metrics",
+      icon: TableCellsIcon,
+      current: pathname === "/metrics",
     },
     {
       name: "Usage",

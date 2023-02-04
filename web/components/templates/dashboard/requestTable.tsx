@@ -41,7 +41,6 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
     fetch();
   }, [client]);
 
-  console.log(data[0]);
   const probabilities = data.map((d) => {
     const choice = d.response_body?.choices
       ? d.response_body?.choices[0]
