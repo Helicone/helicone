@@ -204,6 +204,29 @@ const BillingPage = (props: BillingPageProps) => {
     },
   ];
 
+  const renderPendingPlans = (tier: Tier, name: string) => {
+    if (tier === "free") {
+      return (
+        <button
+          disabled
+          type="button"
+          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+          onClick={() => subscriptionChange(tier, currentTier, router)}
+        >
+          Select<span className="sr-only">, {name}</span>
+        </button>
+      );
+    } else if (tier === "pro") {
+      <button
+        type="button"
+        className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+        onClick={() => subscriptionChange(tier, currentTier, router)}
+      >
+        Renew<span className="sr-only">, {name}</span>
+      </button>;
+    }
+  };
+
   return (
     <AuthLayout>
       <div className="flex flex-col space-y-12">
@@ -330,17 +353,8 @@ const BillingPage = (props: BillingPageProps) => {
                         "relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
                       )}
                     >
-                      {plan.tier === "pro" &&
-                      currentTier === "pro-pending-cancel" ? (
-                        <button
-                          type="button"
-                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                          onClick={() =>
-                            subscriptionChange(plan.tier, currentTier, router)
-                          }
-                        >
-                          Renew<span className="sr-only">, {plan.name}</span>
-                        </button>
+                      {currentTier === "pro-pending-cancel" ? (
+                        renderPendingPlans(plan.tier, plan.name)
                       ) : (
                         <button
                           type="button"
