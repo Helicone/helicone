@@ -23,7 +23,7 @@ export function RequestsCSVDownloadButton({
       response_id: d.response_id,
       time: d.request_created_at,
       request: d.request_body?.prompt,
-      response: d.response_body?.choices?[0]?.text,
+      response: d.response_body?.choices?.[0]?.text,
       "duration (s)": latency[i],
       token_count: d.request_body?.max_tokens,
       logprobs: tableData.probabilities[i],

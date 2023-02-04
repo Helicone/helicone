@@ -14,8 +14,7 @@ type ResponseAndRequest = Omit<
       | {
           text: string;
         }[]
-      | null
-      | undefined;
+      | null;
     usage:
       | {
           total_tokens: number;
