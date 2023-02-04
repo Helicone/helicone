@@ -210,7 +210,7 @@ export default function RequestsTab() {
               >
                 Request Information
               </Dialog.Title>
-              <ul className="mt-4">
+              <ul className="mt-4 space-y-2">
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Time:</p>
                   <p>
@@ -221,7 +221,7 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Request:</p>
-                  <p>
+                  <p className="max-w-xl">
                     {selectedData.request_body?.prompt
                       ? selectedData.request_body.prompt
                       : "{{no prompt }}"}
@@ -229,7 +229,7 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Response:</p>
-                  <p>
+                  <p className="max-w-xl">
                     {selectedData.response_body!.choices
                       ? selectedData.response_body!.choices[0].text
                       : "{{ no reponse }}"}
