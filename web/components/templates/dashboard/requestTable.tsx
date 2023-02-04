@@ -126,6 +126,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
               <th className="text-left">Token Count</th>
               <th className="text-left">Log Probability</th>
               <th className="text-left">User Id</th>
+              <th className="text-left">Model</th>
               <th className="text-left">Copy</th>
             </tr>
           </thead>
@@ -162,6 +163,9 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
                 <td>{data.probabilities[i]}</td>
                 <td>
                   {row.request_user_id && truncString(row.request_user_id, 5)}
+                </td>
+                <td>
+                  {row.request_body?.model}
                 </td>
                 <td>
                   <DocumentDuplicateIcon
