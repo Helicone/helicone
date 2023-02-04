@@ -52,7 +52,6 @@ export function GetTableData({ client, limit }: { client: SupabaseClient, limit?
     };
     fetch();
   }, [client]);
-  console.log(data[0]);
   const probabilities = data.map((d) => {
     const choice = d.response_body?.choices
       ? d.response_body?.choices[0]
@@ -92,9 +91,9 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
       <div>
         <span>Showing the most recent {} </span>
         <span className="font-thin text-xs">(max 100)</span>
-        <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
+        {data.data.length > 0 ? <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
           <RequestsCSVDownloadButton client={client} />
-        </span>
+        </span> : null }
       </div>
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">

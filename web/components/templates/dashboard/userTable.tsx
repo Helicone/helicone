@@ -74,14 +74,14 @@ export function UserTable({ client }: { client: SupabaseClient }) {
       <div>
         <span>Showing the most recent {} </span>
         <span className="font-thin text-xs">(max 100)</span>
-        <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
+        {data.length > 0 ? <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
           <UsersCSVDownloadButton client={client} />
-        </span>
+        </span> : null}
       </div>
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">
           <thead>
-            <tr className="text-slate-300">
+            <tr className="text-black">
               <th className="text-left">User ID</th>
               <th className="text-left">Active for</th>
               <th className="text-left">Last Active</th>
@@ -94,7 +94,7 @@ export function UserTable({ client }: { client: SupabaseClient }) {
           <tbody>
             {data.map((row, i) => (
               <tr
-                className="text-slate-300"
+                className="text-black"
                 key={row.user_id ? truncString(row.user_id, 11) : "NULL"}
               >
                 <td>{row.user_id}</td>
