@@ -45,8 +45,8 @@ export default async function handler(
         ],
         mode: "subscription",
         customer: customer.id,
-        success_url: `${req.headers.origin}/billing?string_session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin}/billing`,
+        success_url: `${req.headers.origin}/usage?string_session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.origin}/usage`,
       };
       const checkoutSession: Stripe.Checkout.Session =
         await stripeServer.checkout.sessions.create(params);
