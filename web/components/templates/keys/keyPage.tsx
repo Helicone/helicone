@@ -1,7 +1,9 @@
 import {
   ArrowTopRightOnSquareIcon,
+  ChevronDoubleDownIcon,
   ChevronDoubleRightIcon,
   ChevronRightIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import {
   InformationCircleIcon,
@@ -29,6 +31,8 @@ const KeyPage = (props: KeyPageProps) => {
   const [showInfo, setShowInfo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState("");
+
+  const [keyName, setKeyName] = useState("");
   const [hashedApiKey, setHashedApiKey] = useState("");
 
   useEffect(() => {
@@ -59,6 +63,7 @@ const KeyPage = (props: KeyPageProps) => {
           user_id: user?.id!,
           api_key_hash: hashedApiKey,
           api_key_preview: middleTruncString(apiKey, 8),
+          key_name: keyName,
         },
       ])
       .then((res) => {
@@ -70,6 +75,7 @@ const KeyPage = (props: KeyPageProps) => {
         }
         setApiKey("");
         setError(null);
+        setKeyName("");
         getKeys();
       });
   }
@@ -77,12 +83,12 @@ const KeyPage = (props: KeyPageProps) => {
   return (
     <div className="flex flex-col gap-2">
       {apiKeys !== undefined && apiKeys.length < 1 && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-red-600 pb-2">
           Please add an API key to get started
         </p>
       )}
-      <div className="inline-flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
-        <div className="w-2/3">
+      <div className="flex flex-col gap-6">
+        <div className="w-full sm:w-1/3">
           <label
             htmlFor="openAIKey"
             className="block text-sm font-medium text-black"
@@ -95,41 +101,72 @@ const KeyPage = (props: KeyPageProps) => {
               name="openAIKey"
               id="openAIKey"
               onChange={(e) => setApiKey(e.target.value)}
-              className="block w-full rounded-md border-gray-300 pr-12 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+              placeholder="Enter in your OpenAI API key here"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
             />
           </div>
         </div>
-        <ChevronDoubleRightIcon className="h-12 w-12 mt-4 text-black hidden sm:block" />
-        <div className="w-full">
-          <div className="flex flex-row text-sm font-medium text-black">
-            Hashed Key
-            <i
-              className="text-sm text-black flex flex-row items-center hover:cursor-pointer"
-              onClick={() => {
-                setShowInfo(!showInfo);
-              }}
-            >
-              <InformationCircleIcon className="h-5 mx-1" />
-            </i>
+        <div className="relative w-full sm:w-2/3">
+          <div
+            className="absolute inset-0 flex items-center"
+            aria-hidden="true"
+          >
+            <div className="w-full border-t border-gray-300" />
           </div>
-          <div className="relative mt-1 flex items-center">
-            <input
-              readOnly
-              value={hashedApiKey}
-              type="text"
-              name="hashedKey"
-              id="hashedKey"
-              className="block w-full p-2 rounded-md border-gray-300 pr-14 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-            />
-            <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
-              <button
-                onClick={addKey}
-                className="inline-flex items-center rounded border border-gray-200 px-2 font-sans text-sm font-medium text-white bg-black"
-              >
-                Add
-              </button>
+          <div className="relative flex justify-center ">
+            <span className="">
+              <ChevronDoubleDownIcon
+                className="ml-2.5 h-4 w-4 bg-gray-100 text-gray-400"
+                aria-hidden="true"
+              />
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row w-full sm:w-2/3 gap-4 sm:gap-0">
+          <div className="w-full">
+            <label
+              htmlFor="keyName"
+              className="block text-sm font-medium text-black"
+            >
+              Key Name
+            </label>
+            <div className="relative mt-1 flex items-center">
+              <input
+                type="text"
+                name="keyName"
+                id="keyName"
+                onChange={(e) => setKeyName(e.target.value)}
+                placeholder="Enter in a name for this key"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+              />
             </div>
           </div>
+          <div className="w-full">
+            <label
+              htmlFor="hashedKey"
+              className="block text-sm font-medium text-black pl-0 sm:pl-4"
+            >
+              Hashed Key (generated)
+            </label>
+            <div className="relative mt-1 flex items-center pl-0 sm:pl-4">
+              <input
+                readOnly
+                type="text"
+                name="hashedKey"
+                id="hashedKey"
+                value={hashedApiKey}
+                className="block w-full hover:cursor-not-allowed rounded-md bg-gray-200 border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="w-full sm:w-2/3 justify-end flex flex-row">
+          <button
+            onClick={addKey}
+            className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Add Key
+          </button>
         </div>
       </div>
 
@@ -141,7 +178,7 @@ const KeyPage = (props: KeyPageProps) => {
             API key.
           </p>
           <Link
-            href="https://docs.valyrai.com/"
+            href="https://docs.helicone.ai/getting-started/how-encryption-works"
             target="_blank"
             rel="noopener noreferrer"
             className="underline inline-flex flex-row w-fit"
@@ -159,7 +196,8 @@ const KeyPage = (props: KeyPageProps) => {
 
       <ThemedTable
         columns={[
-          { name: "Hash", key: "api_key_hash", hidden: false },
+          { name: "Name", key: "key_name", hidden: false },
+          { name: "Hash", key: "api_key_hash", hidden: true },
           { name: "Preview", key: "api_key_preview", hidden: true },
           { name: "Created", key: "created_at", hidden: false },
         ]}

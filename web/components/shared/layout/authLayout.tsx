@@ -4,10 +4,13 @@ import Image from "next/image";
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  BanknotesIcon,
   Bars3BottomLeftIcon,
   BellIcon,
   CalendarIcon,
   ChartBarIcon,
+  CubeIcon,
+  CubeTransparentIcon,
   FolderIcon,
   HomeIcon,
   InboxIcon,
@@ -39,12 +42,12 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       icon: HomeIcon,
       current: pathname === "/dashboard",
     },
-    // {
-    //   name: "Users",
-    //   href: "/users",
-    //   icon: UserGroupIcon,
-    //   current: pathname === "/users",
-    // },
+    {
+      name: "Usage",
+      href: "/usage",
+      icon: CubeIcon,
+      current: pathname === "/usage",
+    },
     {
       name: "Keys",
       href: "/keys",
@@ -210,7 +213,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
                 <Link
-                  href="https://docs.valyrai.com/"
+                  href="https://docs.helicone.ai/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={clsx(
@@ -302,9 +305,9 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                   Dashboard
                 </h1>
               </div> */}
-            <div className="mx-auto max-w-7xl px-6 bg-gray-100 min-h-[92.5vh]">
+            <div className="mx-auto px-6 bg-gray-100 min-h-[92.5vh]">
               {/* Replace with your content */}
-              <div className="py-6 ">{children}</div>
+              <div className="py-6 max-w-7xl">{children}</div>
               {/* /End replace */}
             </div>
           </main>

@@ -16,9 +16,9 @@ import KeyPage from "../components/templates/keys/keyPage";
 import BillingPage from "../components/templates/billing/billingPage";
 import MetaData from "../components/shared/metaData";
 
-interface KeysProps {}
+interface UsageProps {}
 
-const Keys = (props: KeysProps) => {
+const Usage = (props: UsageProps) => {
   const {} = props;
 
   return (
@@ -28,7 +28,7 @@ const Keys = (props: KeysProps) => {
   );
 };
 
-export default Keys;
+export default Usage;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
