@@ -25,14 +25,19 @@ type ResponseAndRequest = Omit<
 
 export interface DataTable {
   data: ResponseAndRequest[];
-  probabilities: (String | undefined)[]; 
+  probabilities: (String | undefined)[];
 }
 
-export function GetTableData({ client, limit }: { client: SupabaseClient, limit?: number }): DataTable {
+export function GetTableData({
+  client,
+  limit,
+}: {
+  client: SupabaseClient;
+  limit?: number;
+}): DataTable {
   const [data, setData] = useState<ResponseAndRequest[]>([]);
   useEffect(() => {
     const fetch = async () => {
-
       var sql = client
         .from("response_and_request_rbac")
         .select("*")
@@ -77,8 +82,8 @@ export function GetTableData({ client, limit }: { client: SupabaseClient, limit?
 
   const dataTable: DataTable = {
     data: data,
-    probabilities: probabilities
-  }
+    probabilities: probabilities,
+  };
 
   return dataTable;
 }
@@ -91,9 +96,14 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
       <div>
         <span>Showing the most recent {} </span>
         <span className="font-thin text-xs">(max 100)</span>
-        {data.data.length > 0 ? <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
-          <RequestsCSVDownloadButton client={client} />
-        </span> : null }
+        {data.data.length > 0 ? (
+          <span
+            className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs"
+            style={{ float: "right" }}
+          >
+            <RequestsCSVDownloadButton client={client} />
+          </span>
+        ) : null}
       </div>
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">

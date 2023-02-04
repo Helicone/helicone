@@ -7,13 +7,17 @@ import { GetTableData } from "./userTable";
 export function UsersCSVDownloadButton({ client }: { client: SupabaseClient }) {
   const data = GetTableData({ client });
 
-  return <CSVLink
-    data={data}
-    filename={"users.csv"}
-    className="flex"
-    target="_blank"
-  >
-    <span><ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" /></span>
-    <span>Export to CSV</span>
-  </CSVLink>;
+  return (
+    <CSVLink
+      data={data}
+      filename={"users.csv"}
+      className="flex"
+      target="_blank"
+    >
+      <span>
+        <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
+      </span>
+      <span>Export to CSV</span>
+    </CSVLink>
+  );
 }
