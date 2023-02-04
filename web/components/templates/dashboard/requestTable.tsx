@@ -3,6 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { Database } from "../../../supabase/database.types";
+import { RequestsCSVDownloadButton } from "./requestsCsvDownload";
 
 type ResponseAndRequest = Omit<
   Database["public"]["Views"]["response_and_request_rbac"]["Row"],
@@ -70,6 +71,9 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
       <div>
         <span>Showing the most recent {} </span>
         <span className="font-thin text-xs">(max 100)</span>
+        <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
+          <RequestsCSVDownloadButton client={client} />
+        </span>
       </div>
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">

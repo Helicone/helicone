@@ -2,6 +2,7 @@ import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
+import { UsersCSVDownloadButton } from "./usersCsvDownload";
 
 interface UserMetricsDB {
   user_id: string;
@@ -36,6 +37,9 @@ export function UserTable({ client }: { client: SupabaseClient }) {
       <div>
         <span>Showing the most recent {} </span>
         <span className="font-thin text-xs">(max 100)</span>
+        <span className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs" style={{float: "right"}}>
+          <UsersCSVDownloadButton client={client} />
+        </span>
       </div>
       <div className="h-full overflow-y-auto mt-3">
         <table className="w-full mt-5 table-auto ">
