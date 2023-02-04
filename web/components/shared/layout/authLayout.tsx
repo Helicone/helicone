@@ -4,10 +4,13 @@ import Image from "next/image";
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  BanknotesIcon,
   Bars3BottomLeftIcon,
   BellIcon,
   CalendarIcon,
   ChartBarIcon,
+  CubeIcon,
+  CubeTransparentIcon,
   FolderIcon,
   HomeIcon,
   InboxIcon,
@@ -39,12 +42,12 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       icon: HomeIcon,
       current: pathname === "/dashboard",
     },
-    // {
-    //   name: "Users",
-    //   href: "/users",
-    //   icon: UserGroupIcon,
-    //   current: pathname === "/users",
-    // },
+    {
+      name: "Usage",
+      href: "/usage",
+      icon: CubeIcon,
+      current: pathname === "/usage",
+    },
     {
       name: "Keys",
       href: "/keys",

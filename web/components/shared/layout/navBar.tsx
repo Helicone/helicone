@@ -43,6 +43,11 @@ const NavBar = (props: NavBarProps) => {
       active: pathname === "/dashboard",
     },
     {
+      name: "Usage",
+      path: "/usage",
+      current: pathname === "/usage",
+    },
+    {
       name: "Keys",
       path: "/keys",
       active: pathname === "/keys",
