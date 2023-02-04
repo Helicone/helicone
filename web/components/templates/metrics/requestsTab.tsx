@@ -221,7 +221,7 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Request:</p>
-                  <p className="max-w-xl">
+                  <p className="max-w-xl text-left">
                     {selectedData.request_body?.prompt
                       ? selectedData.request_body.prompt
                       : "{{no prompt }}"}
@@ -229,7 +229,7 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Response:</p>
-                  <p className="max-w-xl">
+                  <p className="max-w-xl text-left">
                     {selectedData.response_body!.choices
                       ? selectedData.response_body!.choices[0].text
                       : "{{ no reponse }}"}
@@ -265,13 +265,23 @@ export default function RequestsTab() {
               </ul>
             </div>
           </div>
-          <div className="mt-5 sm:mt-6">
+          <div className="mt-5 sm:mt-6 w-full justify-between gap-4">
+            <button
+              type="button"
+              className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
+              onClick={() => {
+                // TODO: add copy to clipboard notification
+                navigator.clipboard.writeText(JSON.stringify(selectedData));
+              }}
+            >
+              Copy
+            </button>
             <button
               type="button"
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => setOpen(false)}
             >
-              Go back to request table
+              Done
             </button>
           </div>
         </ThemedModal>
