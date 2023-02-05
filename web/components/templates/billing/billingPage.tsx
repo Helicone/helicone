@@ -174,7 +174,7 @@ const BillingPage = (props: BillingPageProps) => {
       id: 1,
       name: "Personal",
       tier: "free",
-      limit: "1000 requests",
+      limit: "1,000 requests",
       features: ["Basic Support", "User Metrics"],
       isCurrent: currentTier === "free",
     },

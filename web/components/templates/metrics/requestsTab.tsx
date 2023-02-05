@@ -11,7 +11,14 @@ type ResponseAndRequest = Omit<
   "response_body" | "request_body"
 > & {
   response_body: {
-    choices: any[] | null | undefined;
+    choices:
+      | {
+          text: string;
+          logprobs: {
+            token_logprobs: number[];
+          };
+        }[]
+      | null;
     usage:
       | {
           total_tokens: number;
@@ -21,6 +28,9 @@ type ResponseAndRequest = Omit<
   } | null;
   request_body: {
     prompt: string;
+    max_tokens: number;
+    model: string;
+    temperature: number;
   } | null;
 };
 
@@ -131,6 +141,12 @@ export default function RequestsTab() {
                       </th>
                       <th
                         scope="col"
+                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Model
+                      </th>
+                      <th
+                        scope="col"
                         className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
                       >
                         <span className="sr-only">Edit</span>
@@ -175,6 +191,10 @@ export default function RequestsTab() {
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
                           {row.request_user_id &&
                             truncString(row.request_user_id, 5)}
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                          {row.request_body?.model &&
+                            truncString(row.request_body.model, 10)}
                         </td>
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
@@ -261,6 +281,10 @@ export default function RequestsTab() {
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>User Id:</p>
                   <p>{selectedData.request_user_id}</p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                  <p>Model:</p>
+                  <p>{selectedData.request_body?.model}</p>
                 </li>
               </ul>
             </div>
