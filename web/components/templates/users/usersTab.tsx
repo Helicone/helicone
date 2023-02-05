@@ -92,7 +92,7 @@ const UsersTab = (props: UsersTabProps) => {
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
               data={data}
-              filename={"requests.csv"}
+              filename={"users.csv"}
               className="flex"
               target="_blank"
             >

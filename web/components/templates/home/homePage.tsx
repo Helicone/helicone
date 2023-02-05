@@ -7,6 +7,7 @@ import BasePage from "../../shared/layout/basePage";
 import Test from "./Details";
 import Details from "./Details";
 import AdvancedAnalytics from "./AdvancedAnalytics";
+import Footer from "./footer";
 
 interface HomePageProps {}
 
@@ -94,6 +95,9 @@ const HomePage = (props: HomePageProps) => {
       </div>
       <div id="advanced-section">
         <AdvancedAnalytics />
+      </div>
+      <div id="footer">
+        <Footer />
       </div>
     </>
   );
