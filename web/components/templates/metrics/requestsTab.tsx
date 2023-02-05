@@ -196,7 +196,7 @@ export default function RequestsTab() {
                           {row.request_body?.model &&
                             truncString(row.request_body.model, 10)}
                         </td>
-                        <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <td className="whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             className="text-sky-600 hover:text-sky-900"
                             onClick={() => selectRowHandler(row, idx)}
