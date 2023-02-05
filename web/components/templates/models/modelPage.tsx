@@ -58,10 +58,12 @@ const ModelPage = (props: ModelPageProps) => {
 
           { name: "Cost (USD)", key: "cost", hidden: false },
         ]}
-        rows={modelMetrics.map((m) => ({
-          ...m,
-          cost: modelCost(m).toFixed(5),
-        }))}
+        rows={modelMetrics
+          .filter((m) => m.model !== null)
+          .map((m) => ({
+            ...m,
+            cost: modelCost(m).toFixed(5),
+          }))}
       />
     </AuthLayout>
   );
