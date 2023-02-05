@@ -554,7 +554,7 @@ export default function RequestsTab() {
     <>
       <div className="">
         <div className="mt-4 flex flex-col">
-          <div className="">
+          <div className="overflow-hidden">
             <div className="inline-block min-w-full py-2 align-middle">
               <div className="overflow-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg h-[70vh] max-h-[70vh]">
                 <table className="min-w-full divide-y divide-gray-30">
