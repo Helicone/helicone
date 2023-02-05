@@ -655,7 +655,7 @@ export default function RequestsTab() {
                           truncString(row.request_user_id, 5)}
                       </td>
                       <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                        {row.request_body?.model}
+                        {truncString(row.request_body?.model || "n/a", 10)}
                       </td>
                       <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <button
