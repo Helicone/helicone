@@ -115,9 +115,13 @@ export function MetricsPanel() {
               }
               const is_finetuned_model = model.includes(":");
 
-              const model_prefix = is_finetuned_model ? model.split(":")[0] : model;
+              const model_prefix = is_finetuned_model
+                ? model.split(":")[0]
+                : model;
 
-              const costs = is_finetuned_model ? OPENAI_FINETUNE_COSTS : OPENAI_COSTS;
+              const costs = is_finetuned_model
+                ? OPENAI_FINETUNE_COSTS
+                : OPENAI_COSTS;
 
               const cost = Object.entries(costs).find(([key]) =>
                 model_prefix.includes(key)
