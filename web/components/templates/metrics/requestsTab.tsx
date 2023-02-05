@@ -125,7 +125,7 @@ export default function RequestsTab() {
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Token Count
+                        Tokens
                       </th>
                       <th
                         scope="col"
@@ -241,18 +241,18 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Request:</p>
-                  <p className="max-w-xl whitespace-pre-wrap">
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
                     {selectedData.request_body?.prompt
                       ? selectedData.request_body.prompt
-                      : "{{no prompt }}"}
+                      : "{{ no prompt }}"}
                   </p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Response:</p>
-                  <p className="max-w-xl whitespace-pre-wrap">
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
                     {selectedData.response_body!.choices
                       ? selectedData.response_body!.choices[0].text
-                      : "{{ no reponse }}"}
+                      : "{{ no response }}"}
                   </p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
