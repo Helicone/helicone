@@ -6,7 +6,7 @@ import { truncString } from "../../../lib/stringHelpers";
 import { Database } from "../../../supabase/database.types";
 import ThemedModal from "../../shared/themedModal";
 
-type ResponseAndRequest = Omit<
+export type ResponseAndRequest = Omit<
   Database["public"]["Views"]["response_and_request_rbac"]["Row"],
   "response_body" | "request_body"
 > & {
@@ -25,6 +25,7 @@ type ResponseAndRequest = Omit<
         }
       | null
       | undefined;
+    model: string;
   } | null;
   request_body: {
     prompt: string;
@@ -90,7 +91,7 @@ export default function RequestsTab() {
   return (
     <>
       <div className="">
-        <div className="sm:flex sm:items-center">
+        <div className="mt-4 sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
             <p className="mt-2 text-sm text-gray-700">
@@ -210,8 +211,8 @@ export default function RequestsTab() {
                             truncString(row.request_user_id, 5)}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_body?.model
-                            ? truncString(row.request_body.model, 10)
+                          {row.response_body?.model
+                            ? row.response_body.model
                             : "n/a"}
                         </td>
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

@@ -56,6 +56,12 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       current: pathname === "/requests",
     },
     {
+      name: "Models",
+      href: "/models",
+      icon: CubeTransparentIcon,
+      current: pathname === "/models",
+    },
+    {
       name: "Usage",
       href: "/usage",
       icon: CubeIcon,
