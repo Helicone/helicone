@@ -7,12 +7,14 @@ import {
   BanknotesIcon,
   Bars3BottomLeftIcon,
   BellIcon,
+  CalendarDaysIcon,
   CalendarIcon,
   ChartBarIcon,
   CubeIcon,
   CubeTransparentIcon,
   FolderIcon,
   HomeIcon,
+  InboxArrowDownIcon,
   InboxIcon,
   KeyIcon,
   TableCellsIcon,
@@ -52,7 +54,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
     {
       name: "Requests",
       href: "/requests",
-      icon: InboxIcon,
+      icon: InboxArrowDownIcon,
       current: pathname === "/requests",
     },
     {
@@ -64,7 +66,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
     {
       name: "Usage",
       href: "/usage",
-      icon: CubeIcon,
+      icon: CalendarDaysIcon,
       current: pathname === "/usage",
     },
     {
@@ -159,7 +161,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                               item.current
                                 ? "text-gray-500"
                                 : "text-gray-400 group-hover:text-gray-500",
-                              "mr-4 flex-shrink-0 h-6 w-6"
+                              "mr-4 flex-shrink-0 h-5 w-5"
                             )}
                             aria-hidden="true"
                           />
@@ -208,7 +210,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                         item.current
                           ? "text-black"
                           : "text-gray-700 group-hover:text-gray-900",
-                        "mr-3 flex-shrink-0 h-6 w-6"
+                        "mr-3 flex-shrink-0 h-5 w-5"
                       )}
                       aria-hidden="true"
                     />
