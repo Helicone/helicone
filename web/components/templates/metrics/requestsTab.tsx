@@ -601,12 +601,12 @@ export default function RequestsTab() {
                     >
                       User
                     </th>
-                    <th
+                    {/* <th
                       scope="col"
                       className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       Model
-                    </th>
+                    </th> */}
                     <th
                       scope="col"
                       className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
@@ -654,17 +654,17 @@ export default function RequestsTab() {
                         {row.request_user_id &&
                           truncString(row.request_user_id, 5)}
                       </td>
-                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                      {/* <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
                         {row.request_body?.model}
-                      </td>
+                      </td> */}
                       <td className="py-2 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                        <a
+                        <button
                           className="text-sky-600 hover:text-sky-900"
                           onClick={() => selectRowHandler(row, idx)}
                         >
                           View
                           <span className="sr-only">, {row.request_id}</span>
-                        </a>
+                        </button>
                       </td>
                     </tr>
                   ))}
