@@ -77,7 +77,7 @@ const UsersTab = (props: UsersTabProps) => {
   return (
     <>
       <div className="">
-        <div className="mt-4 sm:flex sm:items-center">
+        <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Users</h1>
             <p className="mt-2 text-sm text-gray-700">
