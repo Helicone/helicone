@@ -113,6 +113,9 @@ export interface Database {
         Row: {
           model: string | null
           sum_tokens: number | null
+          sum_prompt_tokens: number | null
+          sum_completion_tokens: number | null
+          request_count: number | null
         }
       }
       request_rbac: {
