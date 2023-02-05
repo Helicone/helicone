@@ -659,7 +659,7 @@ export default function RequestsTab() {
                       </td>
                       <td className="py-2 pl-3 pr-4 text-sm font-medium sm:pr-6">
                         <a
-                          className="flex text-sky-600 hover:text-sky-900"
+                          className="text-sky-600 hover:text-sky-900"
                           onClick={() => selectRowHandler(row, idx)}
                         >
                           View
