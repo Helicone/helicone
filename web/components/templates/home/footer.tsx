@@ -133,12 +133,8 @@ export default function Footer() {
               &copy; 2023 Helicone, Inc.{" "}
               <span className="hidden sm:inline">All rights reserved.</span>
             </p>
-            <Link href={"/privacy"} target="_blank" rel="noopener noreferrer">
-              Privacy Policy
-            </Link>
-            <Link href={"/terms"} target="_blank" rel="noopener noreferrer">
-              Terms of Use
-            </Link>
+            <Link href={"/privacy"}>Privacy Policy</Link>
+            <Link href={"/terms"}>Terms of Use</Link>
           </div>
         </div>
       </div>
