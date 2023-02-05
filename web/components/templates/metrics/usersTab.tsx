@@ -63,7 +63,7 @@ const UsersTab = (props: UsersTabProps) => {
             ).toFixed(2),
             average_tokens_per_request: row.average_tokens_per_request
               ? (+row.average_tokens_per_request).toFixed(2)
-              : "{{ no tokens found }}",
+              : "n/a",
           };
         });
         setData(cleanedData);
@@ -142,12 +142,12 @@ const UsersTab = (props: UsersTabProps) => {
                         Total Cost
                       </th>
 
-                      <th
+                      {/* <th
                         scope="col"
                         className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
                       >
                         <span className="sr-only">Edit</span>
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -174,7 +174,7 @@ const UsersTab = (props: UsersTabProps) => {
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
                           $ TBD
                         </td>
-                        <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        {/* <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             className="text-sky-600 hover:text-sky-900"
                             onClick={() => selectRowHandler(row, idx)}
@@ -182,7 +182,7 @@ const UsersTab = (props: UsersTabProps) => {
                             View
                             <span className="sr-only">, {row.user_id}</span>
                           </button>
-                        </td>
+                        </td> */}
                       </tr>
                     ))}
                   </tbody>
