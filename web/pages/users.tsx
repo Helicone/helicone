@@ -10,7 +10,8 @@ const Users = (props: UsersProps) => {
   return (
     <MetaData title="Users">
       <AuthLayout>
-        <UsersTab />
+        <p>hello world</p>
+        {/* <UsersTab /> */}
       </AuthLayout>
     </MetaData>
   );
