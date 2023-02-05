@@ -552,117 +552,128 @@ export default function RequestsTab() {
 
   return (
     <>
-      <div className="">
-        <div className="mt-4 flex flex-col">
-          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                      >
-                        Time
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Request
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Response
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Duration
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Tokens
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Log Prob
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        User
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Model
-                      </th>
-                      <th
-                        scope="col"
-                        className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
-                      >
-                        <span className="sr-only">Edit</span>
-                      </th>
+      <div className="mt-4 flex flex-col">
+        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                    >
+                      Time
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Request
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Response
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Duration
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Tokens
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Log Prob
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      User
+                    </th>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Model
+                    </th>
+                    <th
+                      scope="col"
+                      className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
+                    >
+                      <span className="sr-only">Edit</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {data.map((row, idx) => (
+                    <tr key={row.request_id}>
+                      <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
+                        {new Date(row.request_created_at!).toLocaleString()}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
+                        {row.request_body?.prompt
+                          ? truncString(row.request_body.prompt, 15)
+                          : "{{no prompt }}"}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
+                        {truncString(
+                          row.response_body!.choices
+                            ? row.response_body!.choices[0].text
+                            : "{{ no reponse }}",
+                          15
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                        {(
+                          (new Date(row.response_created_at!).getTime() -
+                            new Date(row.request_created_at!).getTime()) /
+                          1000
+                        ).toString()}{" "}
+                        s
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                        {row.response_body!.usage
+                          ? row.response_body!.usage.total_tokens
+                          : "{{ no tokens found }}"}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                        {probabilities[idx]}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                        {row.request_user_id &&
+                          truncString(row.request_user_id, 5)}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                        {row.request_body?.model}
+                      </td>
+                      <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <a href="#" className="text-sky-600 hover:text-sky-900">
+                          View
+                          <span className="sr-only">, {row.request_id}</span>
+                        </a>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {data.map((row, idx) => (
-                      <tr key={row.request_id}>
-                        {/* <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {row.company}
-                        </td> */}
-                        <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {new Date(row.request_created_at!).toLocaleString()}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
-                          {row.request_body?.prompt
-                            ? truncString(row.request_body.prompt, 15)
-                            : "n/a"}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                          {truncString(
-                            row.response_body!.choices
-                              ? row.response_body!.choices[0].text
-                              : "n/a",
-                            15
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {(
-                            (new Date(row.response_created_at!).getTime() -
-                              new Date(row.request_created_at!).getTime()) /
-                            1000
-                          ).toString()}{" "}
-                          s
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.response_body!.usage
-                            ? row.response_body!.usage.total_tokens
-                            : "n/a"}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {probabilities[idx]}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_user_id &&
-                            truncString(row.request_user_id, 5)}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_body?.model &&
-                            truncString(row.request_body.model, 10)}
-                        </td>
-                        <td className="whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      {open && selectedData !== undefined && index !== undefined && (
+        /**
+         *    <td className="whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             className="text-sky-600 hover:text-sky-900"
                             onClick={() => selectRowHandler(row, idx)}
@@ -671,16 +682,7 @@ export default function RequestsTab() {
                             <span className="sr-only">, {row.request_id}</span>
                           </button>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {open && selectedData !== undefined && index !== undefined && (
+         */
         <ThemedModal open={open} setOpen={setOpen}>
           <div>
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
