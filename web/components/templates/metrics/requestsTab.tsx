@@ -658,13 +658,13 @@ export default function RequestsTab() {
                         {row.request_body?.model}
                       </td>
                       <td className="py-2 pl-3 pr-4 text-sm font-medium sm:pr-6">
-                        <div
+                        <a
                           className="flex text-sky-600 hover:text-sky-900"
                           onClick={() => selectRowHandler(row, idx)}
                         >
                           View
                           <span className="sr-only">, {row.request_id}</span>
-                        </div>
+                        </a>
                       </td>
                     </tr>
                   ))}
