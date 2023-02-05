@@ -22,7 +22,11 @@ const Privacy = (props: PrivacyProps) => {
     <MetaData title="Privacy Policy">
       <BasePage full variant="secondary">
         <div className="py-24 max-w-3xl font-serif space-y-16">
-          <p className="text-5xl font-sans">Privacy Policy</p>
+          <div className="flex flex-col space-y-4">
+            <p className="text-5xl font-sans">Privacy Policy</p>
+            <p className="text-lg font-sans">Last updated February 5, 2023</p>
+          </div>
+
           {pageContent.map((page, index) =>
             privacyPageSection(index + 1, page.title, page.description)
           )}
