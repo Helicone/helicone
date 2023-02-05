@@ -1,4 +1,5 @@
 import {
+  ArrowRightIcon,
   LightBulbIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
@@ -353,7 +354,7 @@ const BillingPage = (props: BillingPageProps) => {
                       <div className="space-y-2">
                         {plan.features.map((feature, idx) => (
                           <div key={idx} className="flex flex-row">
-                            <WrenchScrewdriverIcon className="h-3 w-3 mt-1 mr-1 text-gray-500" />
+                            <ArrowRightIcon className="h-3 w-3 mt-1 mr-1 text-gray-500" />
                             {feature}
                           </div>
                         ))}

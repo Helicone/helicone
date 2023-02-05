@@ -1,7 +1,9 @@
 import { Dialog } from "@headlessui/react";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
 import { Database } from "../../../supabase/database.types";
 import ThemedModal from "../../shared/themedModal";
@@ -88,10 +90,31 @@ export default function RequestsTab() {
     setOpen(true);
   };
 
+  const csvData = data.map((d, i) => {
+    const latency =
+      (new Date(d.response_created_at!).getTime() -
+        new Date(d.request_created_at!).getTime()) /
+      1000;
+
+    return {
+      request_id: d.request_id,
+      response_id: d.response_id,
+      time: d.request_created_at,
+      request: d.request_body?.prompt,
+      response: d.response_body?.choices?.[0]?.text,
+      "duration (s)": latency.toString(),
+      token_count: d.request_body?.max_tokens,
+      logprobs: probabilities[i],
+      request_user_id: d.request_user_id,
+      model: d.response_body?.model,
+      temperature: d.request_body?.temperature,
+    };
+  });
+
   return (
     <>
       <div className="">
-        <div className="mt-4 sm:flex sm:items-center">
+        <div className="mt-4 flex items-center justify-between">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
             <p className="mt-2 text-sm text-gray-700">
@@ -99,13 +122,27 @@ export default function RequestsTab() {
             </p>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
+            <CSVLink
+              data={csvData}
+              filename={"requests.csv"}
+              className="flex"
+              target="_blank"
             >
-              {/* TODO: replace with CSV Export button */}
-              Export
-            </button>
+              <button
+                type="button"
+                className="inline-flex sm:hidden items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
+                Export
+              </button>
+              <button
+                type="button"
+                className="hidden sm:inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <ArrowDownTrayIcon className="mr-2 flex-shrink-0 h-4 w-4" />
+                Export to CSV
+              </button>
+            </CSVLink>
           </div>
         </div>
         <div className="mt-4 flex flex-col">

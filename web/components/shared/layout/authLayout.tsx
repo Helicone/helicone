@@ -21,6 +21,7 @@ import {
   UserCircleIcon,
   UserGroupIcon,
   UsersIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
@@ -66,7 +67,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
     {
       name: "Usage",
       href: "/usage",
-      icon: CalendarDaysIcon,
+      icon: WrenchScrewdriverIcon,
       current: pathname === "/usage",
     },
     {
@@ -180,7 +181,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col ">
+        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
             <div className="flex flex-shrink-0 items-center px-4">

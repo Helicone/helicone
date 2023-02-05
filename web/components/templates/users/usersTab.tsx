@@ -72,7 +72,11 @@ const UsersTab = (props: UsersTabProps) => {
     fetch();
   }, [client]);
 
-  const selectRowHandler = (row: UserRow, idx: number) => {};
+  const selectRowHandler = (row: UserRow, idx: number) => {
+    setIndex(idx);
+    setSelectedUser(row);
+    setOpen(true);
+  };
 
   return (
     <>
@@ -122,19 +126,19 @@ const UsersTab = (props: UsersTabProps) => {
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Total Requests
+                        Requests
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Avg Requests / Day
+                        Avg Reqs / Day
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Avg Tokens / Request
+                        Avg Tokens / Req
                       </th>
                       <th
                         scope="col"
