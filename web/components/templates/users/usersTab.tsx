@@ -47,7 +47,7 @@ const UsersTab = (props: UsersTabProps) => {
         console.log(data);
         const cleanedData = data.map((row, i) => {
           return {
-            user_id: row.user_id ? truncString(row.user_id, 11) : "NULL",
+            user_id: row.user_id ? row.user_id : "n/a",
             active_for: (
               (new Date().getTime() - new Date(row.first_active).getTime()) /
               (1000 * 3600 * 24)
@@ -158,7 +158,7 @@ const UsersTab = (props: UsersTabProps) => {
                     {data.map((row, idx) => (
                       <tr key={row.user_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {row.user_id}
+                          {truncString(row.user_id, 11)}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
                           {row.active_for} days
