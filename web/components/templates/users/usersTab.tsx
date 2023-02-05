@@ -1,7 +1,8 @@
 import { Dialog } from "@headlessui/react";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
 import ThemedModal from "../../shared/themedModal";
 
@@ -89,12 +90,27 @@ const UsersTab = (props: UsersTabProps) => {
             </p>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
+            <CSVLink
+              data={data}
+              filename={"requests.csv"}
+              className="flex"
+              target="_blank"
             >
-              Export
-            </button>
+              <button
+                type="button"
+                className="inline-flex sm:hidden items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
+                Export
+              </button>
+              <button
+                type="button"
+                className="hidden sm:inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
+              >
+                <ArrowDownTrayIcon className="mr-2 flex-shrink-0 h-4 w-4" />
+                Export to CSV
+              </button>
+            </CSVLink>
           </div>
         </div>
         <div className="mt-4 flex flex-col">
