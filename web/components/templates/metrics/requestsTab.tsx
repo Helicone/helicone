@@ -162,13 +162,13 @@ export default function RequestsTab() {
                         <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
                           {row.request_body?.prompt
                             ? truncString(row.request_body.prompt, 15)
-                            : "{{no prompt }}"}
+                            : "n/a"}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
                           {truncString(
                             row.response_body!.choices
                               ? row.response_body!.choices[0].text
-                              : "{{ no reponse }}",
+                              : "n/a",
                             15
                           )}
                         </td>
@@ -183,7 +183,7 @@ export default function RequestsTab() {
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
                           {row.response_body!.usage
                             ? row.response_body!.usage.total_tokens
-                            : "{{ no tokens found }}"}
+                            : "n/a"}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
                           {probabilities[idx]}
