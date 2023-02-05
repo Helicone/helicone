@@ -657,11 +657,14 @@ export default function RequestsTab() {
                       <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
                         {row.request_body?.model}
                       </td>
-                      <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <a href="#" className="text-sky-600 hover:text-sky-900">
+                      <td className="whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <button
+                          className="text-sky-600 hover:text-sky-900"
+                          onClick={() => selectRowHandler(row, idx)}
+                        >
                           View
                           <span className="sr-only">, {row.request_id}</span>
-                        </a>
+                        </button>
                       </td>
                     </tr>
                   ))}
