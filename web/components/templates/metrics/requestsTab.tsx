@@ -231,7 +231,7 @@ export default function RequestsTab() {
                 Request Information
               </Dialog.Title>
               <ul className="mt-4 space-y-2">
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Time:</p>
                   <p>
                     {new Date(
@@ -239,23 +239,23 @@ export default function RequestsTab() {
                     ).toLocaleString()}
                   </p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Request:</p>
-                  <p className="max-w-xl text-left whitespace-pre-wrap">
+                  <p className="max-w-xl whitespace-pre-wrap">
                     {selectedData.request_body?.prompt
                       ? selectedData.request_body.prompt
                       : "{{no prompt }}"}
                   </p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Response:</p>
-                  <p className="max-w-xl text-left whitespace-pre-wrap">
+                  <p className="max-w-xl whitespace-pre-wrap">
                     {selectedData.response_body!.choices
                       ? selectedData.response_body!.choices[0].text
                       : "{{ no reponse }}"}
                   </p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Duration:</p>
                   <p>
                     {(
@@ -266,7 +266,7 @@ export default function RequestsTab() {
                     s
                   </p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Tokens:</p>
                   <p>
                     {selectedData.response_body!.usage
@@ -274,15 +274,15 @@ export default function RequestsTab() {
                       : "{{ no tokens found }}"}
                   </p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Log Probability:</p>
                   <p>{probabilities[index]}</p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>User Id:</p>
                   <p>{selectedData.request_user_id}</p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-2 text-sm">
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Model:</p>
                   <p>{selectedData.request_body?.model}</p>
                 </li>
