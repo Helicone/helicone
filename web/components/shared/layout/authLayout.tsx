@@ -44,10 +44,16 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       current: pathname === "/dashboard",
     },
     {
-      name: "Metrics",
-      href: "/metrics",
-      icon: TableCellsIcon,
-      current: pathname === "/metrics",
+      name: "Users",
+      href: "/users",
+      icon: UsersIcon,
+      current: pathname === "/users",
+    },
+    {
+      name: "Requests",
+      href: "/requests",
+      icon: InboxIcon,
+      current: pathname === "/requests",
     },
     {
       name: "Usage",
