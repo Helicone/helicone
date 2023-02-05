@@ -91,8 +91,8 @@ export default function RequestsTab() {
     <>
       <div className="">
         <div className="mt-4 flex flex-col">
-          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+          <div className="">
+            <div className="inline-block min-w-full py-2 align-middle">
               <div className="overflow-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg max-h-[70vh]">
                 <table className="min-w-full divide-y divide-gray-30">
                   <thead className="bg-gray-50 sticky top-0 z-10">
@@ -291,6 +291,7 @@ export default function RequestsTab() {
           </div>
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
             <button
+              autoFocus={false}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => {
                 // TODO: add copy to clipboard notification
@@ -300,6 +301,7 @@ export default function RequestsTab() {
               Copy
             </button>
             <button
+              autoFocus={false}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => setOpen(false)}
             >

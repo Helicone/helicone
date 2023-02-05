@@ -49,8 +49,8 @@ const MetricsPage = (props: MetricsPageProps) => {
           tabs={tabs}
           onSelectHandler={(tab) => setSelectedTab(tab as TabType)}
         />
+        {renderTabContent()}
       </div>
-      {renderTabContent()}
     </>
   );
 };
