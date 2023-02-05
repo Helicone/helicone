@@ -1,8 +1,7 @@
 import { Dialog } from "@headlessui/react";
-import { ArrowDownTrayIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
-import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
 import ThemedModal from "../../shared/themedModal";
 
@@ -48,7 +47,7 @@ const UsersTab = (props: UsersTabProps) => {
         console.log(data);
         const cleanedData = data.map((row, i) => {
           return {
-            user_id: row.user_id,
+            user_id: row.user_id ? truncString(row.user_id, 11) : "NULL",
             active_for: (
               (new Date().getTime() - new Date(row.first_active).getTime()) /
               (1000 * 3600 * 24)
@@ -90,27 +89,12 @@ const UsersTab = (props: UsersTabProps) => {
             </p>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <CSVLink
-              data={data}
-              filename={"users.csv"}
-              className="flex"
-              target="_blank"
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
             >
-              <button
-                type="button"
-                className="inline-flex sm:hidden items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
-                Export
-              </button>
-              <button
-                type="button"
-                className="hidden sm:inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-2 flex-shrink-0 h-4 w-4" />
-                Export to CSV
-              </button>
-            </CSVLink>
+              Export
+            </button>
           </div>
         </div>
         <div className="mt-4 flex flex-col">
@@ -174,7 +158,7 @@ const UsersTab = (props: UsersTabProps) => {
                     {data.map((row, idx) => (
                       <tr key={row.user_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {truncString(row.user_id, 11)}
+                          {row.user_id}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
                           {row.active_for} days
