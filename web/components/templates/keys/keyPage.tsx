@@ -16,6 +16,7 @@ import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { hydrate } from "react-dom";
+import { DEMO_EMAIL } from "../../../lib/constants";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import { hashAuth } from "../../../lib/supabaseClient";
 import { useKeys } from "../../../lib/useKeys";
@@ -208,7 +209,7 @@ const KeyPage = (props: KeyPageProps) => {
             .delete()
             .eq("api_key_hash", row.api_key_hash)
             .then((res) => {
-              if (user?.email === "valyrdemo@gmail.com") {
+              if (user?.email === DEMO_EMAIL) {
                 setError("You can't delete keys on the demo account");
                 return;
               }

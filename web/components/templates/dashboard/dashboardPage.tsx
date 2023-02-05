@@ -13,6 +13,7 @@ import NavBar from "../../shared/layout/navBar";
 import GraphAndCharts from "./graphsAndCharts";
 import { Logs } from "./logPanel";
 import { MetricsPanel } from "./metricsPanel";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 interface DashboardPageProps {
   user: User;
@@ -26,7 +27,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   return (
     <AuthLayout>
-      {user?.email === "valyrdemo@gmail.com" && (
+      {user?.email === DEMO_EMAIL && (
         <div className="text-sm flex flex-col items-center justify-center bg-red-800 text-white p-2 mb-5">
           <div
             className="hover:bg-red-900 hover:cursor-pointer text-base underline flex flex-row items-center justify-center bg-red-800 text-white"

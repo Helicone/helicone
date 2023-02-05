@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 import Stripe from "stripe";
+import { DEMO_EMAIL } from "../../../lib/constants";
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 
@@ -17,6 +18,10 @@ export default async function handler(
   const supabase = createServerSupabaseClient({ req, res });
   const email = (await supabase.auth.getUser())?.data.user?.email;
   if (!email) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  if (email === DEMO_EMAIL) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
