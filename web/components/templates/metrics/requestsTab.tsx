@@ -241,7 +241,7 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Request:</p>
-                  <p className="max-w-xl text-left">
+                  <p className="max-w-xl text-left whitespace-pre-wrap">
                     {selectedData.request_body?.prompt
                       ? selectedData.request_body.prompt
                       : "{{no prompt }}"}
@@ -249,7 +249,7 @@ export default function RequestsTab() {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-2 text-sm">
                   <p>Response:</p>
-                  <p className="max-w-xl text-left">
+                  <p className="max-w-xl text-left whitespace-pre-wrap">
                     {selectedData.response_body!.choices
                       ? selectedData.response_body!.choices[0].text
                       : "{{ no reponse }}"}
