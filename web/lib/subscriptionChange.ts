@@ -1,7 +1,9 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRouter } from "next/router";
 import Stripe from "stripe";
 import { Tier } from "../components/templates/billing/billingPage";
 import getStripe from "../utlis/getStripe";
+import { DEMO_EMAIL } from "./constants";
 import { Result } from "./result";
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
@@ -49,8 +51,12 @@ const heliconeBillingPortalLink =
 export async function subscriptionChange(
   changeTo: Tier,
   changeFrom: Tier,
-  router: NextRouter
+  client: SupabaseClient
 ): Promise<Result<Stripe.Subscription, string>> {
+  if ((await client.auth.getUser()).data.user?.email === DEMO_EMAIL) {
+    alert("This is a demo account. You can't change your subscription.");
+    return { error: "Not implemented", data: null };
+  }
   if (changeTo === "pro") {
     if (changeFrom === "free") {
       await subscribeToPro();
