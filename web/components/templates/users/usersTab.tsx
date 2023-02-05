@@ -90,9 +90,9 @@ const UsersTab = (props: UsersTabProps) => {
             </p>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <CSVLink
+            {/* <CSVLink
               data={data}
-              filename={"requests.csv"}
+              filename={"users.csv"}
               className="flex"
               target="_blank"
             >
@@ -110,7 +110,7 @@ const UsersTab = (props: UsersTabProps) => {
                 <ArrowDownTrayIcon className="mr-2 flex-shrink-0 h-4 w-4" />
                 Export to CSV
               </button>
-            </CSVLink>
+            </CSVLink> */}
           </div>
         </div>
         <div className="mt-4 flex flex-col">
