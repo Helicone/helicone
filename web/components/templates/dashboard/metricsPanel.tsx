@@ -11,6 +11,13 @@ const OPENAI_COSTS = {
   davinci: 0.02,
 };
 
+const OPENAI_FINETUNE_COSTS = {
+  ada: 0.0016,
+  babbage: 0.0024,
+  curie: 0.012,
+  davinci: 0.12,
+};
+
 export function MetricsPanel() {
   const client = useSupabaseClient<Database>();
   interface Metrics {
@@ -106,8 +113,18 @@ export function MetricsPanel() {
                 console.error("Model is null");
                 return 0;
               }
-              const cost = Object.entries(OPENAI_COSTS).find(([key]) =>
-                model.includes(key)
+              const is_finetuned_model = model.includes(":");
+
+              const model_prefix = is_finetuned_model
+                ? model.split(":")[0]
+                : model;
+
+              const costs = is_finetuned_model
+                ? OPENAI_FINETUNE_COSTS
+                : OPENAI_COSTS;
+
+              const cost = Object.entries(costs).find(([key]) =>
+                model_prefix.includes(key)
               )?.[1];
               if (!cost) {
                 console.error("No cost found for model", model);
