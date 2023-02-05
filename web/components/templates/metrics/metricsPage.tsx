@@ -8,6 +8,7 @@ import { clsx } from "../../shared/clsx";
 import ThemedTabs from "../../shared/themedTabs";
 import { RequestTable } from "../dashboard/requestTable";
 import RequestsTab from "./requestsTab";
+import UsersTab from "./usersTab";
 
 interface MetricsPageProps {}
 
@@ -38,7 +39,7 @@ const MetricsPage = (props: MetricsPageProps) => {
       case "requests":
         return <RequestsTab />;
       case "users":
-        return <h1>Users</h1>;
+        return <UsersTab />;
     }
   };
 

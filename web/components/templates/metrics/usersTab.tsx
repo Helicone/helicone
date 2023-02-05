@@ -1,91 +1,78 @@
 import { Dialog } from "@headlessui/react";
-import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
-import { Database } from "../../../supabase/database.types";
 import ThemedModal from "../../shared/themedModal";
 
-type ResponseAndRequest = Omit<
-  Database["public"]["Views"]["response_and_request_rbac"]["Row"],
-  "response_body" | "request_body"
-> & {
-  response_body: {
-    choices:
-      | {
-          text: string;
-          logprobs: {
-            token_logprobs: number[];
-          };
-        }[]
-      | null;
-    usage:
-      | {
-          total_tokens: number;
-        }
-      | null
-      | undefined;
-  } | null;
-  request_body: {
-    prompt: string;
-    max_tokens: number;
-    model: string;
-    temperature: number;
-  } | null;
-};
+interface UsersTabProps {}
 
-export default function RequestsTab() {
-  const [data, setData] = useState<ResponseAndRequest[]>([]);
-  const [index, setIndex] = useState<number>();
-  const [selectedData, setSelectedData] = useState<ResponseAndRequest>();
+interface UserMetricsDB {
+  user_id: string;
+  first_active: string;
+  last_active: string;
+  total_requests: string;
+  average_requests_per_day_active: string;
+  average_tokens_per_request: string;
+}
+
+interface UserRow {
+  user_id: string;
+  active_for: string;
+  last_active: string;
+  total_requests: string;
+  average_requests_per_day_active: string;
+  average_tokens_per_request: string;
+}
+
+const UsersTab = (props: UsersTabProps) => {
+  const {} = props;
+
+  const [data, setData] = useState<UserRow[]>([]);
   const [open, setOpen] = useState(true);
+  const [index, setIndex] = useState<number>();
+  const [selectedUser, setSelectedUser] = useState<UserRow>();
 
   const client = useSupabaseClient();
 
   useEffect(() => {
     const fetch = async () => {
       const { data, error } = await client
-        .from("response_and_request_rbac")
+        .from("user_metrics_rbac")
         .select("*")
-        .order("request_created_at", { ascending: false })
         .limit(100);
       if (error) {
         console.log(error);
       } else {
-        setData(data as ResponseAndRequest[]);
+        console.log(data);
+        const cleanedData = data.map((row, i) => {
+          return {
+            user_id: row.user_id ? truncString(row.user_id, 11) : "NULL",
+            active_for: (
+              (new Date().getTime() - new Date(row.first_active).getTime()) /
+              (1000 * 3600 * 24)
+            ).toFixed(2),
+            last_active: new Date(row.last_active).toLocaleString(),
+            total_requests: row.total_requests,
+            average_requests_per_day_active: (
+              +row.total_requests /
+              Math.ceil(
+                (new Date().getTime() - new Date(row.first_active).getTime()) /
+                  (1000 * 3600 * 24)
+              )
+            ).toFixed(2),
+            average_tokens_per_request: row.average_tokens_per_request
+              ? (+row.average_tokens_per_request).toFixed(2)
+              : "{{ no tokens found }}",
+          };
+        });
+        setData(cleanedData);
       }
     };
     fetch();
   }, [client]);
 
-  const probabilities = data.map((d) => {
-    const choice = d.response_body?.choices
-      ? d.response_body?.choices[0]
-      : null;
-    if (!choice) {
-      return null;
-    }
-
-    let prob;
-    if (choice.logprobs !== undefined && choice.logprobs !== null) {
-      const tokenLogprobs = choice.logprobs.token_logprobs;
-      const sum = tokenLogprobs.reduce(
-        (total: any, num: any) => total + num,
-        0
-      );
-      prob = sum.toFixed(2);
-    } else {
-      prob = "";
-    }
-
-    return prob;
-  });
-
-  const selectRowHandler = (row: ResponseAndRequest, idx: number) => {
-    setIndex(idx);
-    setSelectedData(row);
-    setOpen(true);
-  };
+  const selectRowHandler = (row: UserRow, idx: number) => {};
 
   return (
     <>
@@ -93,7 +80,7 @@ export default function RequestsTab() {
         <div className="mt-4 sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <p className="mt-2 text-sm text-gray-700">
-              Showing the latest 100 requests.
+              Showing the first 100 users
             </p>
           </div>
           {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -116,50 +103,45 @@ export default function RequestsTab() {
                         scope="col"
                         className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                       >
-                        Time
+                        Id
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Request
+                        Active For
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Response
+                        Last Active
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Duration
+                        Total Requests
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Tokens
+                        Avg Requests / Day
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Log Prob
+                        Avg Tokens / Request
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        User
+                        Total Cost
                       </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Model
-                      </th>
+
                       <th
                         scope="col"
                         className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
@@ -170,47 +152,27 @@ export default function RequestsTab() {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {data.map((row, idx) => (
-                      <tr key={row.request_id}>
+                      <tr key={row.user_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {new Date(row.request_created_at!).toLocaleString()}
+                          {row.user_id}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
-                          {row.request_body?.prompt
-                            ? truncString(row.request_body.prompt, 15)
-                            : "n/a"}
+                          {row.active_for} days
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                          {truncString(
-                            row.response_body!.choices
-                              ? row.response_body!.choices[0].text
-                              : "n/a",
-                            15
-                          )}
+                          {row.last_active}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {(
-                            (new Date(row.response_created_at!).getTime() -
-                              new Date(row.request_created_at!).getTime()) /
-                            1000
-                          ).toString()}{" "}
-                          s
+                          {row.total_requests}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.response_body!.usage
-                            ? row.response_body!.usage.total_tokens
-                            : "n/a"}
+                          {row.average_requests_per_day_active}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {probabilities[idx]}
+                          {row.average_tokens_per_request}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_user_id &&
-                            truncString(row.request_user_id, 5)}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_body?.model
-                            ? truncString(row.request_body.model, 10)
-                            : "n/a"}
+                          $ TBD
                         </td>
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
@@ -218,7 +180,7 @@ export default function RequestsTab() {
                             onClick={() => selectRowHandler(row, idx)}
                           >
                             View
-                            <span className="sr-only">, {row.request_id}</span>
+                            <span className="sr-only">, {row.user_id}</span>
                           </button>
                         </td>
                       </tr>
@@ -230,11 +192,11 @@ export default function RequestsTab() {
           </div>
         </div>
       </div>
-      {open && selectedData !== undefined && index !== undefined && (
+      {/* {open && selectedUser !== undefined && index !== undefined && (
         <ThemedModal open={open} setOpen={setOpen}>
           <div>
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-              <InformationCircleIcon
+              <UserCircleIcon
                 className="h-8 w-8 text-sky-600"
                 aria-hidden="true"
               />
@@ -325,7 +287,9 @@ export default function RequestsTab() {
             </button>
           </div>
         </ThemedModal>
-      )}
+      )} */}
     </>
   );
-}
+};
+
+export default UsersTab;
