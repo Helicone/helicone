@@ -31,6 +31,7 @@ import { clsx } from "../clsx";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   const { children } = props;
@@ -234,42 +235,42 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
-            {/* {user?.email === "valyrdemo@gmail.com" && ( */}
-            <div className="flex h-full items-center px-2">
-              <div className="py-2 bg-red-600 px-2 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
-                <div className="flex flex-row gap-1 sm:gap-2">
-                  <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
-                  <p className="hidden sm:inline">
-                    Currently viewing demo. Data from:
-                  </p>
-                  <p className="inline sm:hidden">Viewing</p>
-                  <div className="flex flex-row gap-1 items-center">
-                    <Link
-                      href="https://demoapp.valyrai.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      <p className="hidden sm:inline">AI App Ideas</p>
-                      <p className="inline sm:hidden">Demo</p>
-                    </Link>
-                    <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            {user?.email === DEMO_EMAIL && (
+              <div className="flex h-full items-center px-2">
+                <div className="py-2 bg-red-600 px-2 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
+                  <div className="flex flex-row gap-1 sm:gap-2">
+                    <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
+                    <p className="hidden sm:inline">
+                      Currently viewing demo. Data from:
+                    </p>
+                    <p className="inline sm:hidden">Viewing</p>
+                    <div className="flex flex-row gap-1 items-center">
+                      <Link
+                        href="https://demoapp.valyrai.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        <p className="hidden sm:inline">AI App Ideas</p>
+                        <p className="inline sm:hidden">Demo</p>
+                      </Link>
+                      <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </div>
                   </div>
                 </div>
+                <button
+                  className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base"
+                  onClick={() =>
+                    supabaseClient.auth.signOut().then(() => {
+                      router.push("/");
+                    })
+                  }
+                >
+                  <span className="inline sm:hidden">Exit</span>
+                  <span className="hidden sm:inline">Exit Demo</span>
+                </button>
               </div>
-              <button
-                className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base"
-                onClick={() =>
-                  supabaseClient.auth.signOut().then(() => {
-                    router.push("/");
-                  })
-                }
-              >
-                <span className="inline sm:hidden">Exit</span>
-                <span className="hidden sm:inline">Exit Demo</span>
-              </button>
-            </div>
-            {/* )} */}
+            )}
 
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
