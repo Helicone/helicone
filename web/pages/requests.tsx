@@ -1,19 +1,19 @@
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import UsersTab from "../components/templates/users/usersTab";
+import RequestsTab from "../components/templates/requests/requestsTab";
 
-interface UsersProps {}
+interface RequestsProps {}
 
-const Users = (props: UsersProps) => {
+const Requests = (props: RequestsProps) => {
   const {} = props;
 
   return (
     <MetaData title="Users">
       <AuthLayout>
-        <UsersTab />
+        <RequestsTab />
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Users;
+export default Requests;

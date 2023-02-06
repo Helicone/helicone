@@ -35,7 +35,6 @@ export function GetTableData({
       const { data, error } = await client
         .from("user_metrics_rbac")
         .select("*")
-
         .limit(100);
       if (error) {
         console.log(error);

@@ -3,36 +3,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { Database } from "../../../supabase/database.types";
+import { ResponseAndRequest } from "../requests/requestsTab";
 import { RequestsCSVDownloadButton } from "./requestsCsvDownload";
-
-type ResponseAndRequest = Omit<
-  Database["public"]["Views"]["response_and_request_rbac"]["Row"],
-  "response_body" | "request_body"
-> & {
-  response_body: {
-    choices:
-      | {
-          text: string;
-          logprobs: {
-            token_logprobs: number[];
-          };
-        }[]
-      | null;
-    usage:
-      | {
-          total_tokens: number;
-        }
-      | null
-      | undefined;
-    model: string;
-  } | null;
-  request_body: {
-    prompt: string;
-    max_tokens: number;
-    model: string;
-    temperature: number;
-  } | null;
-};
 
 export interface DataTable {
   data: ResponseAndRequest[];

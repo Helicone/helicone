@@ -4,11 +4,12 @@ import NavBar from "./navBar";
 
 interface BasePageProps {
   children: ReactNode;
+  full?: boolean;
   variant?: "primary" | "secondary";
 }
 
 const BasePage = (props: BasePageProps) => {
-  const { children, variant = "primary" } = props;
+  const { children, full = false, variant = "primary" } = props;
 
   const variantTheme = () => {
     switch (variant) {
@@ -21,12 +22,24 @@ const BasePage = (props: BasePageProps) => {
     }
   };
 
+  const variantFull = () => {
+    switch (full) {
+      case true:
+        return "h-full";
+      case false:
+        return "h-screen";
+      default:
+        return "h-full";
+    }
+  };
+
   // bg-gradient-to-r from-cyan-300 to-blue-300
   return (
     <div
       className={clsx(
-        "px-4 sm:px-8 flex flex-col h-screen w-screen",
-        variantTheme()
+        "px-4 sm:px-8 flex flex-col w-screen",
+        variantTheme(),
+        variantFull()
       )}
       // style={{
       //   backgroundImage: variant === "primary" ? "url(/assets/dev.jpg" : "",
