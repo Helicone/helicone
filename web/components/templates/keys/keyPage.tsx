@@ -1,15 +1,11 @@
 import {
   ArrowTopRightOnSquareIcon,
   ChevronDoubleDownIcon,
-  ChevronDoubleRightIcon,
-  ChevronRightIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
-import {
   InformationCircleIcon,
   KeyIcon,
-  TrashIcon,
-} from "@heroicons/react/24/solid";
+  LightBulbIcon,
+} from "@heroicons/react/24/outline";
+
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
@@ -81,13 +77,12 @@ const KeyPage = (props: KeyPageProps) => {
       });
   }
 
+  const toggleInfo = () => {
+    setShowInfo(!showInfo);
+  };
+
   return (
     <div className="flex flex-col gap-2">
-      {apiKeys !== undefined && apiKeys.length < 1 && (
-        <p className="text-sm text-red-600 pb-2">
-          Please add an API key to get started
-        </p>
-      )}
       <div className="flex flex-col gap-6">
         <div className="w-full sm:w-1/3">
           <label
@@ -143,12 +138,18 @@ const KeyPage = (props: KeyPageProps) => {
             </div>
           </div>
           <div className="w-full">
-            <label
-              htmlFor="hashedKey"
-              className="block text-sm font-medium text-black pl-0 sm:pl-4"
-            >
-              Hashed Key (generated)
-            </label>
+            <div className="flex flex-row gap-1">
+              <label
+                htmlFor="hashedKey"
+                className="block text-sm font-medium text-black pl-0 sm:pl-4"
+              >
+                Hashed Key (generated){" "}
+              </label>
+              <button className="inline" onClick={toggleInfo}>
+                <InformationCircleIcon className="h-5 w-5" />
+              </button>
+            </div>
+
             <div className="relative mt-1 flex items-center pl-0 sm:pl-4">
               <input
                 readOnly
@@ -172,21 +173,22 @@ const KeyPage = (props: KeyPageProps) => {
       </div>
 
       {showInfo && (
-        <div className="text-sm text-black flex flex-col gap-2 mt-4">
+        <div className="mt-2 w-full sm:w-2/3 border-2 p-4 text-sm rounded-md flex flex-row items-center text-gray-600 border-gray-300 gap-4">
+          <LightBulbIcon className="hidden sm:flex h-8 w-8 text-gray-600" />
           <p>
             We log each request to our API using a hashed version of your API
             key. This allows us to identify your account without storing your
-            API key.
+            API key.{" "}
+            <Link
+              as="span"
+              href="https://docs.helicone.ai/getting-started/how-encryption-works"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline inline-flex flex-row w-fit"
+            >
+              <p>Learn More</p>
+            </Link>
           </p>
-          <Link
-            href="https://docs.helicone.ai/getting-started/how-encryption-works"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline inline-flex flex-row w-fit"
-          >
-            <p>Learn More</p>
-            <ArrowTopRightOnSquareIcon className="h-4 w-4 mt-0.5 ml-0.5" />
-          </Link>
         </div>
       )}
       {error && (
@@ -194,37 +196,48 @@ const KeyPage = (props: KeyPageProps) => {
           <p>{error}</p>
         </div>
       )}
+      {apiKeys !== undefined && apiKeys.length < 1 ? (
+        <div className="mt-10 relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          <div className="w-full justify-center align-middle items-center">
+            <KeyIcon className="h-10 w-10 mx-auto" />
+          </div>
 
-      <ThemedTable
-        columns={[
-          { name: "Name", key: "key_name", hidden: false },
-          { name: "Hash", key: "api_key_hash", hidden: true },
-          { name: "Preview", key: "api_key_preview", hidden: true },
-          { name: "Created", key: "created_at", hidden: false },
-        ]}
-        rows={apiKeys}
-        deleteHandler={(row) => {
-          supabaseClient
-            .from("user_api_keys")
-            .delete()
-            .eq("api_key_hash", row.api_key_hash)
-            .then((res) => {
-              if (user?.email === DEMO_EMAIL) {
-                setError("You can't delete keys on the demo account");
-                return;
-              }
+          <span className="mt-2 block text-sm font-medium text-gray-900">
+            Add a key to get started
+          </span>
+        </div>
+      ) : (
+        <ThemedTable
+          columns={[
+            { name: "Name", key: "key_name", hidden: false },
+            { name: "Hash", key: "api_key_hash", hidden: true },
+            { name: "Preview", key: "api_key_preview", hidden: true },
+            { name: "Created", key: "created_at", hidden: false },
+          ]}
+          rows={apiKeys}
+          deleteHandler={(row) => {
+            supabaseClient
+              .from("user_api_keys")
+              .delete()
+              .eq("api_key_hash", row.api_key_hash)
+              .then((res) => {
+                if (user?.email === DEMO_EMAIL) {
+                  setError("You can't delete keys on the demo account");
+                  return;
+                }
 
-              if (res.error) {
-                console.error(res.error);
-                setError(
-                  `Error deleting key - please contact us on discord!\n${res.error.message}`
-                );
-                return;
-              }
-              getKeys();
-            });
-        }}
-      />
+                if (res.error) {
+                  console.error(res.error);
+                  setError(
+                    `Error deleting key - please contact us on discord!\n${res.error.message}`
+                  );
+                  return;
+                }
+                getKeys();
+              });
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -4,20 +4,26 @@ import Image from "next/image";
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  ArrowTopRightOnSquareIcon,
   BanknotesIcon,
   Bars3BottomLeftIcon,
   BellIcon,
+  CalendarDaysIcon,
   CalendarIcon,
   ChartBarIcon,
   CubeIcon,
   CubeTransparentIcon,
+  ExclamationCircleIcon,
   FolderIcon,
   HomeIcon,
+  InboxArrowDownIcon,
   InboxIcon,
   KeyIcon,
+  TableCellsIcon,
   UserCircleIcon,
   UserGroupIcon,
   UsersIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
@@ -25,6 +31,7 @@ import { clsx } from "../clsx";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   const { children } = props;
@@ -43,6 +50,18 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       current: pathname === "/dashboard",
     },
     {
+      name: "Requests",
+      href: "/requests",
+      icon: InboxArrowDownIcon,
+      current: pathname === "/requests",
+    },
+    {
+      name: "Users",
+      href: "/users",
+      icon: UsersIcon,
+      current: pathname === "/users",
+    },
+    {
       name: "Models",
       href: "/models",
       icon: CubeTransparentIcon,
@@ -51,7 +70,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
     {
       name: "Usage",
       href: "/usage",
-      icon: CubeIcon,
+      icon: WrenchScrewdriverIcon,
       current: pathname === "/usage",
     },
     {
@@ -146,7 +165,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                               item.current
                                 ? "text-gray-500"
                                 : "text-gray-400 group-hover:text-gray-500",
-                              "mr-4 flex-shrink-0 h-6 w-6"
+                              "mr-4 flex-shrink-0 h-5 w-5"
                             )}
                             aria-hidden="true"
                           />
@@ -165,7 +184,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col ">
+        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
             <div className="flex flex-shrink-0 items-center px-4">
@@ -195,7 +214,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                         item.current
                           ? "text-black"
                           : "text-gray-700 group-hover:text-gray-900",
-                        "mr-3 flex-shrink-0 h-6 w-6"
+                        "mr-3 flex-shrink-0 h-5 w-5"
                       )}
                       aria-hidden="true"
                     />
@@ -216,28 +235,66 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
+
+            <div className="flex h-full items-center px-2">
+              <div className="py-2 bg-red-600 px-2 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
+                <div className="flex flex-row gap-1 sm:gap-2">
+                  <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
+                  <p className="hidden lg:inline">
+                    Currently viewing demo. Data from:
+                  </p>
+                  <p className="inline lg:hidden">Viewing</p>
+                  <div className="flex flex-row gap-1 items-center">
+                    <Link
+                      href="https://demoapp.valyrai.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      <p className="hidden lg:inline">AI App Ideas</p>
+                      <p className="inline lg:hidden">Demo</p>
+                    </Link>
+                    <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </div>
+                </div>
+              </div>
+              <button
+                className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base"
+                onClick={() =>
+                  supabaseClient.auth.signOut().then(() => {
+                    router.push("/");
+                  })
+                }
+              >
+                <span className="inline lg:hidden">Exit</span>
+                <span className="hidden lg:inline">Exit Demo</span>
+              </button>
+            </div>
+
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
-                <Link
-                  href="https://docs.helicone.ai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clsx(
-                    "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
-                  )}
-                >
-                  Docs
-                </Link>
-                <Link
-                  href="https://discord.gg/zsSTcH2qhG"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clsx(
-                    "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
-                  )}
-                >
-                  Discord
-                </Link>
+                <div className="hidden sm:flex">
+                  <Link
+                    href="https://docs.helicone.ai/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
+                    )}
+                  >
+                    Docs
+                  </Link>
+                  <Link
+                    href="https://discord.gg/zsSTcH2qhG"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
+                    )}
+                  >
+                    Discord
+                  </Link>
+                </div>
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
@@ -258,7 +315,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 z-50 mt-2 w-max min-w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item key="user-email">
                         {({ active }) => (
                           <p className="block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">
@@ -305,12 +362,7 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <main className="flex-1 ">
-            {/* <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Dashboard
-                </h1>
-              </div> */}
+          <main className="flex-1">
             <div className="mx-auto px-6 bg-gray-100 min-h-[92.5vh]">
               {/* Replace with your content */}
               <div className="py-6 max-w-7xl">{children}</div>
