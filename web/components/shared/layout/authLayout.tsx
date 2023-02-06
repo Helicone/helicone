@@ -257,7 +257,14 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                   </div>
                 </div>
               </div>
-              <button className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base">
+              <button
+                className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base"
+                onClick={() =>
+                  supabaseClient.auth.signOut().then(() => {
+                    router.push("/");
+                  })
+                }
+              >
                 <span className="inline sm:hidden">Exit</span>
                 <span className="hidden sm:inline">Exit Demo</span>
               </button>
