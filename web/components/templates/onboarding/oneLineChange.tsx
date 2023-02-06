@@ -203,6 +203,10 @@ const OneLineChange = (props: OneLineChangeProps) => {
           Next
         </button>
       </div>
+      <div className="sm:text-sm text-blue">
+        <span>By using our API, you agree to our </span>
+        <a href="https://www.helicone.ai/privacy" className="text-blue-500">Privacy Policy</a> and <a href="https://www.helicone.ai/terms" className="text-blue-500">Terms of Service</a> agreements
+      </div>
     </>
   );
 };
