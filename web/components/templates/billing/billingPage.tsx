@@ -264,7 +264,7 @@ const BillingPage = (props: BillingPageProps) => {
             </div>
           </div>
           <div className="border-2 p-4 text-sm rounded-md flex flex-row items-center text-gray-600 border-gray-300 w-fit gap-4">
-            <LightBulbIcon className="h-4 w-4 text-gray-600" />
+            <LightBulbIcon className="h-4 w-4 text-gray-600 hidden sm:inline" />
             We continue logging your requests after your limit is reached, you
             will just lose access to the dashboard until you upgrade.
           </div>

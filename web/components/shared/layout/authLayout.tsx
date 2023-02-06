@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  ArrowTopRightOnSquareIcon,
   BanknotesIcon,
   Bars3BottomLeftIcon,
   BellIcon,
@@ -12,6 +13,7 @@ import {
   ChartBarIcon,
   CubeIcon,
   CubeTransparentIcon,
+  ExclamationCircleIcon,
   FolderIcon,
   HomeIcon,
   InboxArrowDownIcon,
@@ -232,28 +234,54 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
+            {user?.email === "valyrdemo@gmail.com" && (
+              <div className="flex h-full items-center px-2">
+                <div className="py-2 bg-red-600 px-2 rounded-lg text-white flex flex-row gap-2 text-xs sm:text-base items-center">
+                  <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
+                  <p className="hidden sm:inline">
+                    Currently viewing demo. Data from:
+                  </p>
+                  <p className="inline sm:hidden">Viewing Demo:</p>
+                  <div className="flex flex-row gap-1 items-center">
+                    <Link
+                      href="https://demoapp.valyrai.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      <p className="hidden sm:inline"> AI App Ideas</p>
+                      <p className="inline sm:hidden"> Learn More</p>
+                    </Link>
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4 sm:mt-1" />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
-                <Link
-                  href="https://docs.helicone.ai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clsx(
-                    "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
-                  )}
-                >
-                  Docs
-                </Link>
-                <Link
-                  href="https://discord.gg/zsSTcH2qhG"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clsx(
-                    "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
-                  )}
-                >
-                  Discord
-                </Link>
+                <div className="hidden sm:flex">
+                  <Link
+                    href="https://docs.helicone.ai/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
+                    )}
+                  >
+                    Docs
+                  </Link>
+                  <Link
+                    href="https://discord.gg/zsSTcH2qhG"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
+                    )}
+                  >
+                    Discord
+                  </Link>
+                </div>
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
@@ -322,11 +350,6 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
           </div>
 
           <main className="flex-1">
-            {/* <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Dashboard
-                </h1>
-              </div> */}
             <div className="mx-auto px-6 bg-gray-100 min-h-[92.5vh]">
               {/* Replace with your content */}
               <div className="py-6 max-w-7xl">{children}</div>

@@ -8,6 +8,7 @@ interface TimeGraphWHeaderProps {
 
 interface TimeLength {
   label: string;
+  mobile: string;
   value: TimeInterval;
 }
 
@@ -18,10 +19,10 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
   const [interval, setInterval] = useState<TimeInterval>("1m");
 
   const timeLength: TimeLength[] = [
-    { label: "1 Month", value: "1m" },
-    { label: "7 Days", value: "7d" },
-    { label: "24 Hours", value: "24h" },
-    { label: "1 Hour", value: "1h" },
+    { label: "1 Month", mobile: "1mo", value: "1m" },
+    { label: "7 Days", mobile: "7d", value: "7d" },
+    { label: "24 Hours", mobile: "24hr", value: "24h" },
+    { label: "1 Hour", mobile: "1hr", value: "1h" },
   ];
 
   const actions = () => {
@@ -39,7 +40,8 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
           } shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2`}
           onClick={() => setInterval(time.value)}
         >
-          {time.label}
+          <span className="hidden sm:inline">{time.label}</span>
+          <span className="inline sm:hidden">{time.mobile}</span>
         </button>
       );
     });
