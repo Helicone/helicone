@@ -8,6 +8,7 @@ import Test from "./Details";
 import Details from "./Details";
 import AdvancedAnalytics from "./AdvancedAnalytics";
 import Footer from "./footer";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 interface HomePageProps {}
 
@@ -56,7 +57,7 @@ const HomePage = (props: HomePageProps) => {
                     supabaseClient.auth.signOut().then(() => {
                       supabaseClient.auth
                         .signInWithPassword({
-                          email: "valyrdemo@gmail.com",
+                          email: DEMO_EMAIL,
                           password: "valyrdemo",
                         })
                         .then((res) => {

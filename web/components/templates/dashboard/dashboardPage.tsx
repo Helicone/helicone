@@ -7,6 +7,7 @@ import AuthLayout from "../../shared/layout/authLayout";
 
 import { MetricsPanel } from "./metricsPanel";
 import TimeGraphWHeader from "./timeGraphWHeader";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 interface DashboardPageProps {
   user: User;
