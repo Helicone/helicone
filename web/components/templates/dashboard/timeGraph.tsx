@@ -1,6 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-
 import {
   CartesianGrid,
   Line,
@@ -19,7 +18,7 @@ import {
   getXHoursAgoFloored,
   getXMinuteasAgoFloored,
 } from "../../../lib/getXHoursAgo";
-import { classNames } from "../../../lib/tsxHelpers";
+import { TimeInterval } from "./timeGraphWHeader";
 
 const RenderLineChart = ({
   data,
@@ -33,7 +32,7 @@ const RenderLineChart = ({
     count: d.count,
   }));
   return (
-    <ResponsiveContainer width="95%" height="100%">
+    <ResponsiveContainer width="100%" height="100%">
       <LineChart data={chartData}>
         <Line type="monotone" dataKey="count" stroke="#8884d8" />
         <CartesianGrid stroke="#ccc" />
@@ -51,8 +50,7 @@ interface TimeGraphConfig {
   end: Date;
 }
 
-type TimeLength = "1m" | "7d" | "24h" | "1h";
-const timeGraphConfig: Record<TimeLength, TimeGraphConfig> = {
+const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
   "1h": {
     timeMap: (date) => date.toLocaleTimeString(),
     increment: (date) => new Date(date.getTime() + 120 * 1000), // every 2 minutes
@@ -83,20 +81,15 @@ const timeGraphConfig: Record<TimeLength, TimeGraphConfig> = {
   },
 };
 
-export function DateMetrics({ client }: { client: SupabaseClient }) {
-  const allTimeLengths: TimeLength[] = ["1m", "7d", "24h", "1h"];
-  const [timeLength, setTimeLength] = useState<TimeLength>("1m");
+interface DataMetricsProps {
+  client: SupabaseClient;
+  timeLength: TimeInterval;
+}
+
+const DateMetrics = (props: DataMetricsProps) => {
+  const { client, timeLength } = props;
   const [data, setData] = useState<TimeData[]>([]);
-  const pillStyle = "px-2 py-1 rounded-full text-xs cursor-pointer";
 
-  const selectedPillStyle = "bg-black text-white";
-  const unselectedPillStyle = "border border-black bg-white text-black";
-
-  const getStyle = (tL: TimeLength) =>
-    classNames(
-      pillStyle,
-      timeLength === tL ? selectedPillStyle : unselectedPillStyle
-    );
   useEffect(() => {
     fetchLastXTimeData(
       client,
@@ -114,24 +107,11 @@ export function DateMetrics({ client }: { client: SupabaseClient }) {
   }, [client, timeLength]);
 
   return (
-    <div className="h-full w-full flex flex-col items-center">
-      <RenderLineChart
-        data={data}
-        timeMap={timeGraphConfig[timeLength].timeMap}
-      />
-      <div className="flex flex-row gap-10">
-        {allTimeLengths.map((tL) => (
-          <div
-            className={getStyle(tL)}
-            onClick={() => {
-              setTimeLength(tL);
-            }}
-            key={tL}
-          >
-            {tL}
-          </div>
-        ))}
-      </div>
-    </div>
+    <RenderLineChart
+      data={data}
+      timeMap={timeGraphConfig[timeLength].timeMap}
+    />
   );
-}
+};
+
+export default DateMetrics;

@@ -77,15 +77,15 @@ export function MetricsPanel() {
         numberOfDaysActive && data?.total_requests
           ? (data?.total_requests / numberOfDaysActive).toFixed(3)
           : "n/a",
-      label: "Average requests per day",
+      label: "Avg Requests / day",
     },
     {
       value: data.average_response_time?.toFixed(3) ?? "n/a",
-      label: "Average response time",
+      label: "Avg Response Time (s)",
     },
     {
       value: data?.average_tokens_per_response?.toFixed(3) ?? "n/a",
-      label: "Average # of Token/response",
+      label: "Avg Token / Response",
     },
     {
       value: data?.total_cost?.toFixed(3) ?? "n/a",
@@ -138,8 +138,6 @@ export function MetricsPanel() {
               ...data,
               total_cost: total_cost,
             }));
-
-            console.log(metrics);
           }
         });
 
@@ -182,15 +180,22 @@ export function MetricsPanel() {
   }, [client]);
 
   return (
-    <div className="grid grid-cols-5 gap-2">
-      {metrics.map((m) => (
-        <React.Fragment key={m.label}>
-          <div className="col-span-3">{m.label}</div>
-          <div className="text-black font-bold text-right col-span-2">
-            {m.value}
+    <div>
+      <dl className="grid grid-cols-2 gap-2 sm:gap-5 sm:grid-cols-5">
+        {metrics.map((row) => (
+          <div
+            key={row.label as string}
+            className="overflow-hidden rounded-lg bg-white px-4 py-2 shadow"
+          >
+            <dt className="truncate text-sm font-medium text-gray-500">
+              {row.label}
+            </dt>
+            <dd className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+              {row.value}
+            </dd>
           </div>
-        </React.Fragment>
-      ))}
+        ))}
+      </dl>
     </div>
   );
 }
