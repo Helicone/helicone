@@ -263,7 +263,7 @@ const RequestsTab = (props: RequestsTabProps) => {
                 id="location"
                 name="location"
                 className="block w-full rounded-md border-gray-300 py-1.5 pl-3 pr-6 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                defaultValue="25"
+                defaultValue={router.query.page_size}
                 onChange={(e) => {
                   router.query.page_size = e.target.value;
                   router.push(router);
