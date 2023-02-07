@@ -5,33 +5,27 @@ import { Fragment, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
-  BanknotesIcon,
   Bars3BottomLeftIcon,
-  BellIcon,
-  CalendarDaysIcon,
-  CalendarIcon,
-  ChartBarIcon,
-  CubeIcon,
   CubeTransparentIcon,
-  ExclamationCircleIcon,
-  FolderIcon,
   HomeIcon,
   InboxArrowDownIcon,
-  InboxIcon,
   KeyIcon,
-  TableCellsIcon,
   UserCircleIcon,
-  UserGroupIcon,
   UsersIcon,
   WrenchScrewdriverIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import {
+  ExclamationCircleIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
+import { getKeys } from "../../../services/lib/keys";
+import { useKeys } from "../../../lib/useKeys";
 
 export default function AuthLayout(props: { children: React.ReactNode }) {
   const { children } = props;
@@ -82,6 +76,8 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
   ];
 
   const userNavigation = [...navigation];
+
+  const { apiKeys, refreshKeys } = useKeys(supabaseClient);
 
   return (
     <>
@@ -149,29 +145,61 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
                   </div>
                   <div className="mt-5 h-0 flex-1 overflow-y-auto">
                     <nav className="space-y-1 px-2">
-                      {navigation.map((item) => (
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          className={clsx(
-                            item.current
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                            "group flex items-center px-2 py-2 text-base font-medium rounded-md"
-                          )}
-                        >
-                          <item.icon
+                      {navigation.map((item) => {
+                        if (item.name === "Keys" && apiKeys.length < 1) {
+                          return (
+                            <Link
+                              key={item.name}
+                              href={item.href}
+                              className={clsx(
+                                item.current
+                                  ? "bg-gray-100 text-gray-900"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                                "group flex items-center px-2 py-2 text-base font-medium rounded-md w-full justify-between"
+                              )}
+                            >
+                              <div className="flex flex-row items-center">
+                                <item.icon
+                                  className={clsx(
+                                    item.current
+                                      ? "text-gray-500"
+                                      : "text-gray-400 group-hover:text-gray-500",
+                                    "mr-4 flex-shrink-0 h-5 w-5"
+                                  )}
+                                  aria-hidden="true"
+                                />
+                                {item.name}
+                              </div>
+                              <div>
+                                <ExclamationCircleIcon className="h-6 w-6 mr-1 text-red-500" />
+                              </div>
+                            </Link>
+                          );
+                        }
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
                             className={clsx(
                               item.current
-                                ? "text-gray-500"
-                                : "text-gray-400 group-hover:text-gray-500",
-                              "mr-4 flex-shrink-0 h-5 w-5"
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                              "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                             )}
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </a>
-                      ))}
+                          >
+                            <item.icon
+                              className={clsx(
+                                item.current
+                                  ? "text-gray-500"
+                                  : "text-gray-400 group-hover:text-gray-500",
+                                "mr-4 flex-shrink-0 h-5 w-5"
+                              )}
+                              aria-hidden="true"
+                            />
+                            {item.name}
+                          </Link>
+                        );
+                      })}
                     </nav>
                   </div>
                 </Dialog.Panel>
@@ -198,29 +226,60 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
             </div>
             <div className="mt-5 flex flex-grow flex-col">
               <nav className="flex-1 space-y-1 px-2 pb-4">
-                {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className={clsx(
-                      item.current
-                        ? "bg-gray-200 text-gray-900"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                    )}
-                  >
-                    <item.icon
+                {navigation.map((item) => {
+                  if (item.name === "Keys" && apiKeys.length < 1) {
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={clsx(
+                          item.current
+                            ? "bg-gray-200 text-gray-900"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                          "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full justify-between"
+                        )}
+                      >
+                        <div className="flex flex-row items-center">
+                          <item.icon
+                            className={clsx(
+                              item.current
+                                ? "text-black"
+                                : "text-gray-700 group-hover:text-gray-900",
+                              "mr-3 flex-shrink-0 h-5 w-5"
+                            )}
+                          />
+                          {item.name}
+                        </div>
+                        <div>
+                          <ExclamationCircleIcon className="h-5 w-5 mr-1 text-red-500" />
+                        </div>
+                      </Link>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
                       className={clsx(
                         item.current
-                          ? "text-black"
-                          : "text-gray-700 group-hover:text-gray-900",
-                        "mr-3 flex-shrink-0 h-5 w-5"
+                          ? "bg-gray-200 text-gray-900"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                       )}
-                      aria-hidden="true"
-                    />
-                    {item.name}
-                  </a>
-                ))}
+                    >
+                      <item.icon
+                        className={clsx(
+                          item.current
+                            ? "text-black"
+                            : "text-gray-700 group-hover:text-gray-900",
+                          "mr-3 flex-shrink-0 h-5 w-5"
+                        )}
+                        aria-hidden="true"
+                      />
+                      {item.name}
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
           </div>

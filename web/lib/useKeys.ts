@@ -1,34 +1,34 @@
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
+import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
 
 export function useKeys(supabaseClient: SupabaseClient) {
-  const [apiKeys, setApiKeys] =
-    useState<Database["public"]["Tables"]["user_api_keys"]["Row"][]>();
+  const client = useSupabaseClient();
+  const [apiKeys, setApiKeys] = useState<
+    Database["public"]["Tables"]["user_api_keys"]["Row"][]
+  >([]);
 
-  const getKeys = useCallback(async () => {
-    supabaseClient
-      .from("user_api_keys")
-      .select("*")
-      .then((res) => {
-        if (res.error) {
-          console.log(res.error);
-        } else {
-          const keys = res.data;
-          keys.forEach((key) => {
-            if (key.key_name === null) {
-              key.key_name = "n/a";
-            }
-            key.created_at = new Date(key.created_at).toLocaleString();
-          });
-          setApiKeys(keys);
+  const refreshKeys = useCallback(async () => {
+    const { data, error } = await getKeys(client);
+    if (error) {
+      console.log(error);
+    } else {
+      const keys = data;
+      keys?.forEach((key) => {
+        if (key.key_name === null) {
+          key.key_name = "n/a";
         }
+        key.created_at = new Date(key.created_at).toLocaleString();
       });
-  }, [supabaseClient]);
+      setApiKeys(keys || []);
+    }
+  }, [client]);
 
   useEffect(() => {
-    getKeys();
-  }, [getKeys]);
+    refreshKeys();
+  }, [refreshKeys]);
 
-  return { apiKeys, getKeys };
+  return { apiKeys, refreshKeys };
 }
