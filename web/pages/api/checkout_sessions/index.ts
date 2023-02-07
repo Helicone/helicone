@@ -17,6 +17,9 @@ export default async function handler(
 ) {
   const supabase = createServerSupabaseClient({ req, res });
   const email = (await supabase.auth.getUser())?.data.user?.email;
+
+  const discountCode = req.query.discountCode as string;
+  console.log("discountCode", discountCode);
   if (!email) {
     res.status(401).json({ error: "Unauthorized" });
     return;
@@ -27,6 +30,8 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
+    const discounts =
+      discountCode && discountCode !== "" ? [{ coupon: discountCode }] : [];
     try {
       const { data: customer, error: customerError } = await getStripeCustomer(
         email
@@ -48,6 +53,7 @@ export default async function handler(
             quantity: 1,
           },
         ],
+        discounts,
         mode: "subscription",
         customer: customer.id,
         success_url: `${req.headers.origin}/usage?string_session_id={CHECKOUT_SESSION_ID}`,
