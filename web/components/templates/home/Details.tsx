@@ -28,7 +28,7 @@ const features = [
   {
     name: "Real-time monitoring.",
     description:
-      "Track your key metrics from today, not tomorrow. With Valyr you can stay in control of costs with real-time tracking. Make informed updates to your models with actionable insights.",
+      "Track your key metrics from today, not tomorrow. With Helicone you can stay in control of costs with real-time tracking. Make informed updates to your models with actionable insights.",
     icon: ForwardIcon,
   },
 ];
