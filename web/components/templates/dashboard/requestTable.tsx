@@ -2,7 +2,7 @@ import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
-import { ResponseAndRequest } from "../../../pages/requests";
+import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { RequestsCSVDownloadButton } from "./requestsCsvDownload";
 
