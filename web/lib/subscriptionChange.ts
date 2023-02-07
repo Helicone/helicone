@@ -30,8 +30,10 @@ export async function fetchPostJSON(url: string, data?: {}) {
   }
 }
 
-const subscribeToPro = async () => {
-  const response = await fetchPostJSON("/api/checkout_sessions");
+const subscribeToPro = async (discountCode: string) => {
+  const response = await fetchPostJSON(
+    `/api/checkout_sessions?discountCode=${discountCode}`
+  );
 
   if (response.statusCode === 500) {
     console.error(response.message);
@@ -51,7 +53,8 @@ const heliconeBillingPortalLink =
 export async function subscriptionChange(
   changeTo: Tier,
   changeFrom: Tier,
-  client: SupabaseClient
+  client: SupabaseClient,
+  discountCode: string
 ): Promise<Result<Stripe.Subscription, string>> {
   if ((await client.auth.getUser()).data.user?.email === DEMO_EMAIL) {
     alert("This is a demo account. You can't change your subscription.");
@@ -59,7 +62,7 @@ export async function subscriptionChange(
   }
   if (changeTo === "pro") {
     if (changeFrom === "free") {
-      await subscribeToPro();
+      await subscribeToPro(discountCode);
     } else if (changeFrom === "enterprise") {
       window.open(heliconeContactLink, "_ blank");
     } else if (changeFrom === "pro-pending-cancel") {
