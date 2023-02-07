@@ -12,8 +12,8 @@ const MetaData = (props: MetaDataProps) => {
     <>
       <Head>
         <title>
-          {title} | Helicone - Providing meaningful and insightful analytics for
-          your GPT-3 usage
+          {`${title} | Helicone - Providing meaningful and insightful analytics for
+          your GPT-3 usage`}
         </title>
         <link rel="icon" href="/assets/heli-logo.png" />
         <meta

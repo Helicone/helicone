@@ -2,69 +2,37 @@ import { Dialog } from "@headlessui/react";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
+import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
+import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themedModal";
 
-export type ResponseAndRequest = Omit<
-  Database["public"]["Views"]["response_and_request_rbac"]["Row"],
-  "response_body" | "request_body"
-> & {
-  response_body: {
-    choices:
-      | {
-          text: string;
-          logprobs: {
-            token_logprobs: number[];
-          };
-        }[]
-      | null;
-    usage:
-      | {
-          total_tokens: number;
-        }
-      | null
-      | undefined;
-    model: string;
-  } | null;
-  request_body: {
-    prompt: string;
-    max_tokens: number;
-    model: string;
-    temperature: number;
-  } | null;
-};
+interface RequestsTabProps {
+  requests: ResponseAndRequest[];
+  error: string | null;
+  count: number | null;
+  page: number;
+  from: number;
+  to: number;
+}
 
-export default function RequestsTab() {
-  const [data, setData] = useState<ResponseAndRequest[]>([]);
+const RequestsTab = (props: RequestsTabProps) => {
+  const { requests, error, count, page, from, to } = props;
+  const router = useRouter();
+
   const [index, setIndex] = useState<number>();
   const [selectedData, setSelectedData] = useState<ResponseAndRequest>();
   const [open, setOpen] = useState(true);
 
-  const client = useSupabaseClient();
-
-  useEffect(() => {
-    const fetch = async () => {
-      const { data, error } = await client
-        .from("response_and_request_rbac")
-        .select("*")
-        .order("request_created_at", { ascending: false })
-        .limit(100);
-      if (error) {
-        console.log(error);
-      } else {
-        setData(data as ResponseAndRequest[]);
-      }
-    };
-    fetch();
-  }, [client]);
-
-  const probabilities = data.map((d) => {
-    const choice = d.response_body?.choices
-      ? d.response_body?.choices[0]
+  const probabilities = requests.map((req) => {
+    const choice = req.response_body?.choices
+      ? req.response_body?.choices[0]
       : null;
+
     if (!choice) {
       return null;
     }
@@ -90,7 +58,7 @@ export default function RequestsTab() {
     setOpen(true);
   };
 
-  const csvData = data.map((d, i) => {
+  const csvData = requests.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -111,15 +79,27 @@ export default function RequestsTab() {
     };
   });
 
+  const hasPrevious = page > 1;
+  const hasNext = to <= count!;
+
   return (
     <>
       <div className="">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
-            <p className="mt-2 text-sm text-gray-700">
+            {/* <p className="mt-2 text-sm text-gray-700">
               Showing the latest 100 requests
-            </p>
+            </p> */}
+            <div className="block mt-2">
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">{from + 1}</span> to{" "}
+                <span className="font-medium">
+                  {Math.min(to + 1, count as number)}
+                </span>{" "}
+                of <span className="font-medium">{count}</span> results
+              </p>
+            </div>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
@@ -209,7 +189,7 @@ export default function RequestsTab() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {data.map((row, idx) => (
+                    {requests.map((row, idx) => (
                       <tr key={row.request_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
                           {new Date(row.request_created_at!).toLocaleString()}
@@ -268,6 +248,65 @@ export default function RequestsTab() {
               </div>
             </div>
           </div>
+          <nav
+            className="flex items-center justify-between bg-gray-100 px-0 mt-2 sm:px-1 sm:mt-4"
+            aria-label="Pagination"
+          >
+            <div className="flex flex-row items-center gap-2">
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium text-gray-700 whitespace-nowrap"
+              >
+                Page Size:
+              </label>
+              <select
+                id="location"
+                name="location"
+                className="block w-full rounded-md border-gray-300 py-1.5 pl-3 pr-6 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                defaultValue={router.query.page_size}
+                onChange={(e) => {
+                  router.query.page_size = e.target.value;
+                  router.push(router);
+                }}
+              >
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+              </select>
+            </div>
+            <div className="flex flex-1 justify-end">
+              <button
+                onClick={() => {
+                  router.query.page = (page - 1).toString();
+                  router.push(router);
+                }}
+                disabled={!hasPrevious}
+                className={clsx(
+                  !hasPrevious
+                    ? "bg-gray-100 hover:cursor-not-allowed"
+                    : "hover:bg-gray-50",
+                  "relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => {
+                  router.query.page = (page + 1).toString();
+                  router.push(router);
+                }}
+                disabled={!hasNext}
+                className={clsx(
+                  !hasNext
+                    ? "bg-gray-100 hover:cursor-not-allowed"
+                    : "hover:bg-gray-50",
+                  "relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Next
+              </button>
+            </div>
+          </nav>
         </div>
       </div>
       {open && selectedData !== undefined && index !== undefined && (
@@ -368,4 +407,6 @@ export default function RequestsTab() {
       )}
     </>
   );
-}
+};
+
+export default RequestsTab;
