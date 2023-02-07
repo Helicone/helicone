@@ -54,6 +54,15 @@ const UsersTab = (props: UsersTabProps) => {
             {/* <p className="mt-2 text-sm text-gray-700">
               Showing the first 100 users
             </p> */}
+            <div className="block mt-2">
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">{from + 1}</span> to{" "}
+                <span className="font-medium">
+                  {Math.min(to + 1, count as number)}
+                </span>{" "}
+                of <span className="font-medium">{count}</span> results
+              </p>
+            </div>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
@@ -180,15 +189,6 @@ const UsersTab = (props: UsersTabProps) => {
             className="flex items-center justify-between bg-gray-100 px-0 mt-2 sm:px-1 sm:mt-4"
             aria-label="Pagination"
           >
-            <div className="hidden sm:block">
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{from + 1}</span> to{" "}
-                <span className="font-medium">
-                  {Math.min(to + 1, count as number)}
-                </span>{" "}
-                of <span className="font-medium">{count}</span> results
-              </p>
-            </div>
             <div className="flex flex-1 justify-between sm:justify-end">
               <button
                 onClick={() => {
