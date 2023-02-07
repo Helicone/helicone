@@ -59,12 +59,12 @@ export const getServerSideProps = async (
   const { page, page_size } = context.query;
 
   let currentPage = parseInt(page as string, 10) || 1;
-  const size = parseInt(page_size as string, 10) || 25;
+  const pageSize = parseInt(page_size as string, 10) || 25;
 
   const { data, error, count, from, to } = await getRequests(
     supabase,
     currentPage,
-    size
+    pageSize
   );
 
   return {

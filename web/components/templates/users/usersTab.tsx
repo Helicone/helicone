@@ -189,6 +189,28 @@ const UsersTab = (props: UsersTabProps) => {
             className="flex items-center justify-between bg-gray-100 px-0 mt-2 sm:px-1 sm:mt-4"
             aria-label="Pagination"
           >
+            <div className="flex flex-row items-center gap-2">
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium text-gray-700 whitespace-nowrap"
+              >
+                Page Size:
+              </label>
+              <select
+                id="location"
+                name="location"
+                className="block w-full rounded-md border-gray-300 py-1.5 pl-3 pr-6 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                defaultValue={router.query.page_size}
+                onChange={(e) => {
+                  router.query.page_size = e.target.value;
+                  router.push(router);
+                }}
+              >
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+              </select>
+            </div>
             <div className="flex flex-1 justify-between sm:justify-end">
               <button
                 onClick={() => {
