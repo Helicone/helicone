@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
-import { ResponseAndRequest } from "../../../pages/requests";
+import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themedModal";

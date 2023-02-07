@@ -1,12 +1,22 @@
 import { Dialog } from "@headlessui/react";
 import { ArrowDownTrayIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
+import { UserRow } from "../../../services/lib/users";
+import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themedModal";
 
-interface UsersTabProps {}
+interface UsersTabProps {
+  users: UserRow[];
+  error: string | null;
+  count: number | null;
+  page: number;
+  from: number;
+  to: number;
+}
 
 interface UserMetricsDB {
   user_id: string;
@@ -17,61 +27,14 @@ interface UserMetricsDB {
   average_tokens_per_request: string;
 }
 
-interface UserRow {
-  user_id: string;
-  active_for: string;
-  last_active: string;
-  total_requests: string;
-  average_requests_per_day_active: string;
-  average_tokens_per_request: string;
-}
-
 const UsersTab = (props: UsersTabProps) => {
-  const {} = props;
+  const { users, error, count, page, from, to } = props;
 
-  const [data, setData] = useState<UserRow[]>([]);
+  const router = useRouter();
+
   const [open, setOpen] = useState(true);
   const [index, setIndex] = useState<number>();
   const [selectedUser, setSelectedUser] = useState<UserRow>();
-
-  const client = useSupabaseClient();
-
-  useEffect(() => {
-    const fetch = async () => {
-      const { data, error } = await client
-        .from("user_metrics_rbac")
-        .select("*")
-        .limit(100);
-      if (error) {
-        console.log(error);
-      } else {
-        console.log(data);
-        const cleanedData = data.map((row, i) => {
-          return {
-            user_id: row.user_id ? row.user_id : "n/a",
-            active_for: (
-              (new Date().getTime() - new Date(row.first_active).getTime()) /
-              (1000 * 3600 * 24)
-            ).toFixed(2),
-            last_active: new Date(row.last_active).toLocaleString(),
-            total_requests: row.total_requests,
-            average_requests_per_day_active: (
-              +row.total_requests /
-              Math.ceil(
-                (new Date().getTime() - new Date(row.first_active).getTime()) /
-                  (1000 * 3600 * 24)
-              )
-            ).toFixed(2),
-            average_tokens_per_request: row.average_tokens_per_request
-              ? (+row.average_tokens_per_request).toFixed(2)
-              : "n/a",
-          };
-        });
-        setData(cleanedData);
-      }
-    };
-    fetch();
-  }, [client]);
 
   const selectRowHandler = (row: UserRow, idx: number) => {
     setIndex(idx);
@@ -79,19 +42,22 @@ const UsersTab = (props: UsersTabProps) => {
     setOpen(true);
   };
 
+  const hasPrevious = page > 1;
+  const hasNext = to <= count!;
+
   return (
     <>
       <div className="">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Users</h1>
-            <p className="mt-2 text-sm text-gray-700">
+            {/* <p className="mt-2 text-sm text-gray-700">
               Showing the first 100 users
-            </p>
+            </p> */}
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
-              data={data}
+              data={users}
               filename={"users.csv"}
               className="flex"
               target="_blank"
@@ -171,7 +137,7 @@ const UsersTab = (props: UsersTabProps) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {data.map((row, idx) => (
+                    {users.map((row, idx) => (
                       <tr key={row.user_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
                           {truncString(row.user_id, 11)}
@@ -210,6 +176,52 @@ const UsersTab = (props: UsersTabProps) => {
               </div>
             </div>
           </div>
+          <nav
+            className="flex items-center justify-between bg-gray-100 px-0 mt-2 sm:px-1 sm:mt-4"
+            aria-label="Pagination"
+          >
+            <div className="hidden sm:block">
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">{from + 1}</span> to{" "}
+                <span className="font-medium">
+                  {Math.min(to + 1, count as number)}
+                </span>{" "}
+                of <span className="font-medium">{count}</span> results
+              </p>
+            </div>
+            <div className="flex flex-1 justify-between sm:justify-end">
+              <button
+                onClick={() => {
+                  router.query.page = (page - 1).toString();
+                  router.push(router);
+                }}
+                disabled={!hasPrevious}
+                className={clsx(
+                  !hasPrevious
+                    ? "bg-gray-100 hover:cursor-not-allowed"
+                    : "hover:bg-gray-50",
+                  "relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => {
+                  router.query.page = (page + 1).toString();
+                  router.push(router);
+                }}
+                disabled={!hasNext}
+                className={clsx(
+                  !hasNext
+                    ? "bg-gray-100 hover:cursor-not-allowed"
+                    : "hover:bg-gray-50",
+                  "relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Next
+              </button>
+            </div>
+          </nav>
         </div>
       </div>
       {open && selectedUser !== undefined && index !== undefined && (

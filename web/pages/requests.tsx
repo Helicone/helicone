@@ -4,7 +4,7 @@ import { getPagination } from "../components/shared/getPagination";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import RequestsTab from "../components/templates/requests/requestsTab";
-import { getRequests } from "../services/lib/requests";
+import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 import { Database } from "../supabase/database.types";
 
 interface RequestsProps {
@@ -39,35 +39,6 @@ const Requests = (props: RequestsProps) => {
 
 export default Requests;
 
-export type ResponseAndRequest = Omit<
-  Database["public"]["Views"]["response_and_request_rbac"]["Row"],
-  "response_body" | "request_body"
-> & {
-  response_body: {
-    choices:
-      | {
-          text: string;
-          logprobs: {
-            token_logprobs: number[];
-          };
-        }[]
-      | null;
-    usage:
-      | {
-          total_tokens: number;
-        }
-      | null
-      | undefined;
-    model: string;
-  } | null;
-  request_body: {
-    prompt: string;
-    max_tokens: number;
-    model: string;
-    temperature: number;
-  } | null;
-};
-
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
@@ -89,9 +60,11 @@ export const getServerSideProps = async (
 
   const pageSize = 25;
 
-  const { from, to } = getPagination(currentPage - 1, pageSize);
-
-  const { data, error, count } = await getRequests(supabase, from, to);
+  const { data, error, count, from, to } = await getRequests(
+    supabase,
+    currentPage,
+    pageSize
+  );
 
   return {
     props: {
