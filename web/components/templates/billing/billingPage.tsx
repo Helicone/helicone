@@ -114,7 +114,8 @@ const BillingPage = (props: BillingPageProps) => {
   );
   const [requestsCount, setRequestsCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [discountCode, setDiscountCode] = useState<string>("");
+  const [showCoupon, setShowCoupon] = useState(false);
 
   useEffect(() => {
     fetch("/api/user_settings")
@@ -212,7 +213,9 @@ const BillingPage = (props: BillingPageProps) => {
           disabled
           type="button"
           className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-          onClick={() => subscriptionChange(tier, currentTier, client)}
+          onClick={() =>
+            subscriptionChange(tier, currentTier, client, discountCode)
+          }
         >
           Select<span className="sr-only">, {name}</span>
         </button>
@@ -222,7 +225,9 @@ const BillingPage = (props: BillingPageProps) => {
         <button
           type="button"
           className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-          onClick={() => subscriptionChange(tier, currentTier, client)}
+          onClick={() =>
+            subscriptionChange(tier, currentTier, client, discountCode)
+          }
         >
           Renew<span className="sr-only">, {name}</span>
         </button>
@@ -232,7 +237,9 @@ const BillingPage = (props: BillingPageProps) => {
         <button
           type="button"
           className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-          onClick={() => subscriptionChange("enterprise", currentTier, client)}
+          onClick={() =>
+            subscriptionChange("enterprise", currentTier, client, discountCode)
+          }
         >
           Select<span className="sr-only">, {name}</span>
         </button>
@@ -374,7 +381,12 @@ const BillingPage = (props: BillingPageProps) => {
                           className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                           disabled={plan.isCurrent}
                           onClick={() =>
-                            subscriptionChange(plan.tier, currentTier, client)
+                            subscriptionChange(
+                              plan.tier,
+                              currentTier,
+                              client,
+                              discountCode
+                            )
                           }
                         >
                           Select<span className="sr-only">, {plan.name}</span>
@@ -389,6 +401,28 @@ const BillingPage = (props: BillingPageProps) => {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="w-full items-end justify-end text-end mt-2 flex">
+            {showCoupon ? (
+              <input
+                type="text"
+                name="coupon"
+                id="coupon"
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md max-w-xs"
+                placeholder="Enter coupon code"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value)}
+              />
+            ) : (
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                disabled={currentTier === "pro-pending-cancel"}
+                onClick={() => setShowCoupon(true)}
+              >
+                Enter Coupon
+              </button>
+            )}
           </div>
         </div>
       </div>
