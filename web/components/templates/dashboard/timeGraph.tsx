@@ -35,11 +35,12 @@ const RenderLineChart = ({
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={chartData}>
-        <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
+        <CartesianGrid vertical={false} opacity={50} strokeOpacity={0.5} />
         <Line
           type="monotone"
           dataKey="count"
           stroke="#8884d8"
+          strokeWidth={1}
           animationDuration={0}
         />
         <XAxis dataKey="time" />
