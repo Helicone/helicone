@@ -22,15 +22,19 @@ import {
 import { clsx } from "../clsx";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { getKeys } from "../../../services/lib/keys";
 import { useKeys } from "../../../lib/useKeys";
 
-export default function AuthLayout(props: { children: React.ReactNode }) {
-  const { children } = props;
+interface AuthLayoutProps {
+  children: React.ReactNode;
+  user: User;
+}
+
+const AuthLayout = (props: AuthLayoutProps) => {
+  const { children, user } = props;
   const router = useRouter();
-  const user = useUser();
   const supabaseClient = useSupabaseClient();
   const { pathname } = router;
 
@@ -433,4 +437,6 @@ export default function AuthLayout(props: { children: React.ReactNode }) {
       </div>
     </>
   );
-}
+};
+
+export default AuthLayout;

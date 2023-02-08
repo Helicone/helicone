@@ -1,4 +1,7 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import {
+  createServerSupabaseClient,
+  User,
+} from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
@@ -6,6 +9,7 @@ import UsersTab from "../components/templates/users/usersTab";
 import { getUsers, UserRow } from "../services/lib/users";
 
 interface UsersProps {
+  user: User;
   data: UserRow[];
   error: string | null;
   count: number | null;
@@ -15,11 +19,11 @@ interface UsersProps {
 }
 
 const Users = (props: UsersProps) => {
-  const { data, error, count, page, from, to } = props;
+  const { user, data, error, count, page, from, to } = props;
 
   return (
     <MetaData title="Users">
-      <AuthLayout>
+      <AuthLayout user={user}>
         <UsersTab
           users={data}
           error={error}

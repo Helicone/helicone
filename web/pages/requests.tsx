@@ -8,7 +8,6 @@ import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 import { Database } from "../supabase/database.types";
 
 interface RequestsProps {
-  initialSession: any;
   user: any;
   error: string | null;
   data: ResponseAndRequest[];
@@ -19,11 +18,11 @@ interface RequestsProps {
 }
 
 const Requests = (props: RequestsProps) => {
-  const { data, error, count, page, from, to } = props;
+  const { user, data, error, count, page, from, to } = props;
 
   return (
     <MetaData title="Users">
-      <AuthLayout>
+      <AuthLayout user={user}>
         <RequestsTab
           requests={data}
           error={error}

@@ -16,14 +16,16 @@ import KeyPage from "../components/templates/keys/keyPage";
 import BillingPage from "../components/templates/billing/billingPage";
 import MetaData from "../components/shared/metaData";
 
-interface UsageProps {}
+interface UsageProps {
+  user: User;
+}
 
 const Usage = (props: UsageProps) => {
-  const {} = props;
+  const { user } = props;
 
   return (
     <MetaData title="Billing">
-      <BillingPage />
+      <BillingPage user={user} />
     </MetaData>
   );
 };

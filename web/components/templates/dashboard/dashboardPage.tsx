@@ -14,8 +14,7 @@ interface DashboardPageProps {
 }
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const {} = props;
-  const user = useUser();
+  const { user } = props;
   const client = useSupabaseClient();
   const router = useRouter();
 
@@ -28,7 +27,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   ];
 
   return (
-    <AuthLayout>
+    <AuthLayout user={user}>
       <div className="space-y-16">
         <MetricsPanel />
         {/* <div className="h-20 bg-yellow-500">
