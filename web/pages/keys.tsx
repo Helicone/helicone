@@ -17,14 +17,16 @@ import BasePage from "../components/shared/layout/basePage";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 
-interface KeysProps {}
+interface KeysProps {
+  user: User;
+}
 
 const Keys = (props: KeysProps) => {
-  const {} = props;
+  const { user } = props;
 
   return (
     <MetaData title="Keys">
-      <AuthLayout>
+      <AuthLayout user={user}>
         <KeyPage />
       </AuthLayout>
     </MetaData>

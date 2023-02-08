@@ -7,9 +7,11 @@ import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
 import { UserRow } from "../../../services/lib/users";
 import { clsx } from "../../shared/clsx";
+import Notification from "../../shared/notification/Notification";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themedModal";
 
-interface UsersTabProps {
+interface UsersPageProps {
   users: UserRow[];
   error: string | null;
   count: number | null;
@@ -18,16 +20,7 @@ interface UsersTabProps {
   to: number;
 }
 
-interface UserMetricsDB {
-  user_id: string;
-  first_active: string;
-  last_active: string;
-  total_requests: string;
-  average_requests_per_day_active: string;
-  average_tokens_per_request: string;
-}
-
-const UsersTab = (props: UsersTabProps) => {
+const UsersPage = (props: UsersPageProps) => {
   const { users, error, count, page, from, to } = props;
 
   const router = useRouter();
@@ -211,7 +204,7 @@ const UsersTab = (props: UsersTabProps) => {
                 <option>100</option>
               </select>
             </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
+            <div className="flex flex-1 justify-end">
               <button
                 onClick={() => {
                   router.query.page = (page - 1).toString();
@@ -301,6 +294,7 @@ const UsersTab = (props: UsersTabProps) => {
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
             <button
               type="button"
+              tabIndex={-1}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => {
                 // TODO: add copy to clipboard notification
@@ -311,6 +305,7 @@ const UsersTab = (props: UsersTabProps) => {
             </button>
             <button
               type="button"
+              tabIndex={-1}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => setOpen(false)}
             >
@@ -323,4 +318,4 @@ const UsersTab = (props: UsersTabProps) => {
   );
 };
 
-export default UsersTab;
+export default UsersPage;

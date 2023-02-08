@@ -11,7 +11,7 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themedModal";
 
-interface RequestsTabProps {
+interface RequestsPageProps {
   requests: ResponseAndRequest[];
   error: string | null;
   count: number | null;
@@ -20,7 +20,7 @@ interface RequestsTabProps {
   to: number;
 }
 
-const RequestsTab = (props: RequestsTabProps) => {
+const RequestsPage = (props: RequestsPageProps) => {
   const { requests, error, count, page, from, to } = props;
   const router = useRouter();
 
@@ -406,7 +406,8 @@ const RequestsTab = (props: RequestsTabProps) => {
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
             <button
               type="button"
-              className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
+              tabIndex={-1}
+              className=" inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => {
                 // TODO: add copy to clipboard notification
                 navigator.clipboard.writeText(JSON.stringify(selectedData));
@@ -416,6 +417,7 @@ const RequestsTab = (props: RequestsTabProps) => {
             </button>
             <button
               type="button"
+              tabIndex={-1}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => setOpen(false)}
             >
@@ -428,4 +430,4 @@ const RequestsTab = (props: RequestsTabProps) => {
   );
 };
 
-export default RequestsTab;
+export default RequestsPage;

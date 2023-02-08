@@ -22,8 +22,7 @@ interface ModelPageProps {
 type ModelMetrics = Database["public"]["Views"]["model_metrics"]["Row"];
 
 const ModelPage = (props: ModelPageProps) => {
-  const {} = props;
-  const user = useUser();
+  const { user } = props;
   const client = useSupabaseClient<Database>();
   const router = useRouter();
   const [modelMetrics, setModelMetrics] = useState<ModelMetrics[]>([]);
@@ -43,7 +42,7 @@ const ModelPage = (props: ModelPageProps) => {
   }, [client]);
 
   return (
-    <AuthLayout>
+    <AuthLayout user={user}>
       <ThemedTable
         columns={[
           { name: "Model", key: "model", hidden: false },

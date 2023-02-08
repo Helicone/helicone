@@ -4,7 +4,7 @@ import {
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import { Database } from "../../../supabase/database.types";
 
@@ -44,7 +44,9 @@ export async function fetchPostJSON(url: string, data?: {}) {
   }
 }
 
-interface BillingPageProps {}
+interface BillingPageProps {
+  user: User;
+}
 
 const CurrentSubscriptionStatus = ({
   subscription,
@@ -107,6 +109,7 @@ interface PlanProps {
 }
 
 const BillingPage = (props: BillingPageProps) => {
+  const { user } = props;
   const client = useSupabaseClient<Database>();
 
   const [userSettings, setUserSettings] = useState<UserSettingsResponse | null>(
@@ -157,7 +160,7 @@ const BillingPage = (props: BillingPageProps) => {
 
   if (userSettings === null) {
     return (
-      <AuthLayout>
+      <AuthLayout user={user}>
         <div className="animate-pulse w-full h-40 bg-white p-10 text-gray-500">
           {error === null ? (
             "Fetching your billing information..."
@@ -248,7 +251,7 @@ const BillingPage = (props: BillingPageProps) => {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout user={user}>
       <div className="flex flex-col space-y-12">
         <div className="flex flex-col space-y-4">
           <div className="text-xl font-bold">Usage this month</div>
