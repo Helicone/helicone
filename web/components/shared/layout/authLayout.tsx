@@ -150,7 +150,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   <div className="mt-5 h-0 flex-1 overflow-y-auto">
                     <nav className="space-y-1 px-2">
                       {navigation.map((item) => {
-                        if (item.name === "Keys" && apiKeys.length < 1) {
+                        if (
+                          item.name === "Keys" &&
+                          apiKeys &&
+                          apiKeys.length < 1
+                        ) {
                           return (
                             <Link
                               key={item.name}
@@ -231,7 +235,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             <div className="mt-5 flex flex-grow flex-col">
               <nav className="flex-1 space-y-1 px-2 pb-4">
                 {navigation.map((item) => {
-                  if (item.name === "Keys" && apiKeys.length < 1) {
+                  if (item.name === "Keys" && apiKeys && apiKeys.length < 1) {
                     return (
                       <Link
                         key={item.name}

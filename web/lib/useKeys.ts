@@ -6,9 +6,8 @@ import { Database } from "../supabase/database.types";
 
 export function useKeys(supabaseClient: SupabaseClient) {
   const client = useSupabaseClient();
-  const [apiKeys, setApiKeys] = useState<
-    Database["public"]["Tables"]["user_api_keys"]["Row"][]
-  >([]);
+  const [apiKeys, setApiKeys] =
+    useState<Database["public"]["Tables"]["user_api_keys"]["Row"][]>();
 
   const refreshKeys = useCallback(async () => {
     const { data, error } = await getKeys(client);
