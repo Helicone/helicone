@@ -5,6 +5,7 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -34,15 +35,15 @@ const RenderLineChart = ({
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={chartData}>
+        <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
         <Line
           type="monotone"
-          dot={false}
           dataKey="count"
           stroke="#8884d8"
           animationDuration={0}
         />
-        <CartesianGrid stroke="#ccc" />
         <XAxis dataKey="time" />
+        <Tooltip />
         <YAxis />
       </LineChart>
     </ResponsiveContainer>
