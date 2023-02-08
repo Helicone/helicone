@@ -204,7 +204,7 @@ const UsersPage = (props: UsersPageProps) => {
                 <option>100</option>
               </select>
             </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
+            <div className="flex flex-1 justify-end">
               <button
                 onClick={() => {
                   router.query.page = (page - 1).toString();
