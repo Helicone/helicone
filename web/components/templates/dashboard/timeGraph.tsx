@@ -36,6 +36,7 @@ const RenderLineChart = ({
       <LineChart data={chartData}>
         <Line
           type="monotone"
+          dot={false}
           dataKey="count"
           stroke="#8884d8"
           animationDuration={0}
