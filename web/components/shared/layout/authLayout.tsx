@@ -14,6 +14,7 @@ import {
   UsersIcon,
   WrenchScrewdriverIcon,
   XMarkIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import {
   ExclamationCircleIcon,
@@ -50,7 +51,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Requests",
       href: "/requests",
-      icon: InboxArrowDownIcon,
+      icon: TableCellsIcon,
       current: pathname === "/requests",
     },
     {

@@ -410,7 +410,9 @@ const RequestsPage = (props: RequestsPageProps) => {
               className=" inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => {
                 // TODO: add copy to clipboard notification
-                navigator.clipboard.writeText(JSON.stringify(selectedData));
+                navigator.clipboard.writeText(
+                  JSON.stringify(selectedData, null, 2)
+                );
               }}
             >
               Copy
