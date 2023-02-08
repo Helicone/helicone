@@ -12,13 +12,14 @@ interface TimeLength {
   value: TimeInterval;
 }
 
-export type TimeInterval = "1m" | "7d" | "24h" | "1h";
+export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h";
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
   const { client } = props;
   const [interval, setInterval] = useState<TimeInterval>("1m");
 
   const timeLength: TimeLength[] = [
+    { label: "3 Months", mobile: "3mo", value: "3m" },
     { label: "1 Month", mobile: "1mo", value: "1m" },
     { label: "7 Days", mobile: "7d", value: "7d" },
     { label: "24 Hours", mobile: "24hr", value: "24h" },
