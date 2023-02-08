@@ -1,14 +1,11 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import { getPagination } from "../components/shared/getPagination";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import RequestsTab from "../components/templates/requests/requestsTab";
+import RequestsPage from "../components/templates/requests/requestsPage";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
-import { Database } from "../supabase/database.types";
 
 interface RequestsProps {
-  initialSession: any;
   user: any;
   error: string | null;
   data: ResponseAndRequest[];
@@ -19,12 +16,12 @@ interface RequestsProps {
 }
 
 const Requests = (props: RequestsProps) => {
-  const { data, error, count, page, from, to } = props;
+  const { user, data, error, count, page, from, to } = props;
 
   return (
-    <MetaData title="Users">
-      <AuthLayout>
-        <RequestsTab
+    <MetaData title="Requests">
+      <AuthLayout user={user}>
+        <RequestsPage
           requests={data}
           error={error}
           count={count}

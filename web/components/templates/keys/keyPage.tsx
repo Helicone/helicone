@@ -17,6 +17,7 @@ import { middleTruncString } from "../../../lib/stringHelpers";
 import { hashAuth } from "../../../lib/supabaseClient";
 import { useKeys } from "../../../lib/useKeys";
 import { Database } from "../../../supabase/database.types";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedTable from "../../shared/themedTable";
 
 interface KeyPageProps {}
@@ -42,7 +43,8 @@ const KeyPage = (props: KeyPageProps) => {
     });
   }, [apiKey]);
 
-  const { apiKeys, getKeys } = useKeys(supabaseClient);
+  const { apiKeys, refreshKeys } = useKeys(supabaseClient);
+  const { setNotification } = useNotification();
 
   async function addKey() {
     if (hashedApiKey === "") {
@@ -66,14 +68,14 @@ const KeyPage = (props: KeyPageProps) => {
       .then((res) => {
         if (res.error) {
           console.error(res.error);
-          setError(
-            `Error saving key - please contact us on discord!\n${res.error.message}`
-          );
+          setNotification("Error saving key", "error");
+          return;
         }
+        setNotification("Key saved", "success");
         setApiKey("");
         setError(null);
         setKeyName("");
-        getKeys();
+        refreshKeys();
       });
   }
 
@@ -84,41 +86,25 @@ const KeyPage = (props: KeyPageProps) => {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-6">
-        <div className="w-full sm:w-1/3">
-          <label
-            htmlFor="openAIKey"
-            className="block text-sm font-medium text-black"
-          >
-            OpenAI Key
-          </label>
-          <div className="relative mt-1 flex items-center">
-            <input
-              type="text"
-              name="openAIKey"
-              id="openAIKey"
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter in your OpenAI API key here"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-            />
-          </div>
-        </div>
-        <div className="relative w-full sm:w-2/3">
-          <div
-            className="absolute inset-0 flex items-center"
-            aria-hidden="true"
-          >
-            <div className="w-full border-t border-gray-300" />
-          </div>
-          <div className="relative flex justify-center ">
-            <span className="">
-              <ChevronDoubleDownIcon
-                className="ml-2.5 h-4 w-4 bg-gray-100 text-gray-400"
-                aria-hidden="true"
+        <div className="flex flex-col sm:flex-row w-full sm:w-2/3 gap-4">
+          <div className="w-full">
+            <label
+              htmlFor="openAIKey"
+              className="block text-sm font-medium text-black"
+            >
+              OpenAI Key
+            </label>
+            <div className="relative mt-1 flex items-center">
+              <input
+                type="text"
+                name="openAIKey"
+                id="openAIKey"
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter in your OpenAI API key here"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
               />
-            </span>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col sm:flex-row w-full sm:w-2/3 gap-4 sm:gap-0">
           <div className="w-full">
             <label
               htmlFor="keyName"
@@ -137,11 +123,29 @@ const KeyPage = (props: KeyPageProps) => {
               />
             </div>
           </div>
+        </div>
+        <div className="relative w-full sm:w-2/3">
+          <div
+            className="absolute inset-0 flex items-center"
+            aria-hidden="true"
+          >
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center ">
+            <span className="">
+              <ChevronDoubleDownIcon
+                className="h-4 w-4 bg-gray-100 text-gray-400"
+                aria-hidden="true"
+              />
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row w-full sm:w-2/3 gap-4 sm:gap-0">
           <div className="w-full">
             <div className="flex flex-row gap-1">
               <label
                 htmlFor="hashedKey"
-                className="block text-sm font-medium text-black pl-0 sm:pl-4"
+                className="block text-sm font-medium text-black pl-0"
               >
                 Hashed Key (generated){" "}
               </label>
@@ -150,7 +154,7 @@ const KeyPage = (props: KeyPageProps) => {
               </button>
             </div>
 
-            <div className="relative mt-1 flex items-center pl-0 sm:pl-4">
+            <div className="relative mt-1 flex items-center pl-0">
               <input
                 readOnly
                 type="text"
@@ -165,9 +169,9 @@ const KeyPage = (props: KeyPageProps) => {
         <div className="w-full sm:w-2/3 justify-end flex flex-row">
           <button
             onClick={addKey}
-            className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="rounded-md bg-black px-3.5 py-1.5 text-base font-medium leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            Add Key
+            Add Hashed Key
           </button>
         </div>
       </div>
@@ -197,13 +201,13 @@ const KeyPage = (props: KeyPageProps) => {
         </div>
       )}
       {apiKeys !== undefined && apiKeys.length < 1 ? (
-        <div className="mt-10 relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+        <div className="mt-10 relative block w-full rounded-lg border-2 border-dashed border-red-300 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
           <div className="w-full justify-center align-middle items-center">
-            <KeyIcon className="h-10 w-10 mx-auto" />
+            <KeyIcon className="h-10 w-10 mx-auto text-red-500" />
           </div>
 
-          <span className="mt-2 block text-sm font-medium text-gray-900">
-            Add a key to get started
+          <span className="mt-2 block text-sm font-medium text-red-500">
+            Add a key to get started using Helicone
           </span>
         </div>
       ) : (
@@ -233,7 +237,7 @@ const KeyPage = (props: KeyPageProps) => {
                   );
                   return;
                 }
-                getKeys();
+                refreshKeys();
               });
           }}
         />

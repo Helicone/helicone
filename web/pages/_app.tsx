@@ -1,16 +1,11 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import {
-  Session,
-  SessionContextProvider,
-  useSupabaseClient,
-  useUser,
-} from "@supabase/auth-helpers-react";
+import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { AppProps } from "next/app";
 import { useState } from "react";
 import "../styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
-import { useRouter } from "next/router";
-import NavBar from "../components/shared/layout/navBar";
+import { NotificationProvider } from "../components/shared/notification/NotificationContext";
+import Notification from "../components/shared/notification/Notification";
 
 export default function MyApp({
   Component,
@@ -30,7 +25,10 @@ export default function MyApp({
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <Component {...pageProps} />
+        <NotificationProvider>
+          <Notification />
+          <Component {...pageProps} />
+        </NotificationProvider>
       </SessionContextProvider>
       <Analytics />
     </>
