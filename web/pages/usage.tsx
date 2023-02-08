@@ -24,7 +24,7 @@ const Usage = (props: UsageProps) => {
   const { user } = props;
 
   return (
-    <MetaData title="Billing">
+    <MetaData title="Usage">
       <BillingPage user={user} />
     </MetaData>
   );

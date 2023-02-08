@@ -19,7 +19,7 @@ const Requests = (props: RequestsProps) => {
   const { user, data, error, count, page, from, to } = props;
 
   return (
-    <MetaData title="Users">
+    <MetaData title="Requests">
       <AuthLayout user={user}>
         <RequestsPage
           requests={data}
