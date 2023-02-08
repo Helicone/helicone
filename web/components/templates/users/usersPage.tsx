@@ -1,18 +1,16 @@
 import { Dialog } from "@headlessui/react";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { ArrowDownTrayIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
-import { ResponseAndRequest } from "../../../services/lib/requests";
-import { Database } from "../../../supabase/database.types";
+import { UserRow } from "../../../services/lib/users";
 import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themedModal";
 
-interface RequestsTabProps {
-  requests: ResponseAndRequest[];
+interface UsersPageProps {
+  users: UserRow[];
   error: string | null;
   count: number | null;
   page: number;
@@ -20,64 +18,20 @@ interface RequestsTabProps {
   to: number;
 }
 
-const RequestsTab = (props: RequestsTabProps) => {
-  const { requests, error, count, page, from, to } = props;
+const UsersPage = (props: UsersPageProps) => {
+  const { users, error, count, page, from, to } = props;
+
   const router = useRouter();
 
-  const [index, setIndex] = useState<number>();
-  const [selectedData, setSelectedData] = useState<ResponseAndRequest>();
   const [open, setOpen] = useState(true);
+  const [index, setIndex] = useState<number>();
+  const [selectedUser, setSelectedUser] = useState<UserRow>();
 
-  const probabilities = requests.map((req) => {
-    const choice = req.response_body?.choices
-      ? req.response_body?.choices[0]
-      : null;
-
-    if (!choice) {
-      return null;
-    }
-
-    let prob;
-    if (choice.logprobs !== undefined && choice.logprobs !== null) {
-      const tokenLogprobs = choice.logprobs.token_logprobs;
-      const sum = tokenLogprobs.reduce(
-        (total: any, num: any) => total + num,
-        0
-      );
-      prob = sum.toFixed(2);
-    } else {
-      prob = "";
-    }
-
-    return prob;
-  });
-
-  const selectRowHandler = (row: ResponseAndRequest, idx: number) => {
+  const selectRowHandler = (row: UserRow, idx: number) => {
     setIndex(idx);
-    setSelectedData(row);
+    setSelectedUser(row);
     setOpen(true);
   };
-
-  const csvData = requests.map((d, i) => {
-    const latency =
-      (new Date(d.response_created_at!).getTime() -
-        new Date(d.request_created_at!).getTime()) /
-      1000;
-
-    return {
-      request_id: d.request_id,
-      response_id: d.response_id,
-      time: d.request_created_at,
-      request: d.request_body?.prompt,
-      response: d.response_body?.choices?.[0]?.text,
-      "duration (s)": latency.toString(),
-      token_count: d.request_body?.max_tokens,
-      logprobs: probabilities[i],
-      request_user_id: d.request_user_id,
-      model: d.response_body?.model,
-      temperature: d.request_body?.temperature,
-    };
-  });
 
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
@@ -87,9 +41,9 @@ const RequestsTab = (props: RequestsTabProps) => {
       <div className="">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
-            <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Users</h1>
             {/* <p className="mt-2 text-sm text-gray-700">
-              Showing the latest 100 requests
+              Showing the first 100 users
             </p> */}
             <div className="block mt-2">
               <p className="text-sm text-gray-700">
@@ -103,8 +57,8 @@ const RequestsTab = (props: RequestsTabProps) => {
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
-              data={csvData}
-              filename={"requests.csv"}
+              data={users}
+              filename={"users.csv"}
               className="flex"
               target="_blank"
             >
@@ -136,101 +90,75 @@ const RequestsTab = (props: RequestsTabProps) => {
                         scope="col"
                         className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                       >
-                        Time
+                        Id
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Request
+                        Active For
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Response
+                        Last Active
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Duration
+                        Requests
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Tokens
+                        Avg Reqs / Day
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Log Prob
+                        Avg Tokens / Req
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        User
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Model
+                        Total Cost
                       </th>
                       <th
                         scope="col"
                         className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
                       >
-                        <span className="sr-only">Edit</span>
+                        <span className="sr-only">View</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {requests.map((row, idx) => (
-                      <tr key={row.request_id}>
+                    {users.map((row, idx) => (
+                      <tr key={row.user_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {new Date(row.request_created_at!).toLocaleString()}
+                          {truncString(row.user_id, 11)}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
-                          {row.request_body?.prompt
-                            ? truncString(row.request_body.prompt, 15)
-                            : "n/a"}
+                          {row.active_for} days
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                          {truncString(
-                            row.response_body!.choices
-                              ? row.response_body!.choices[0].text
-                              : "n/a",
-                            15
-                          )}
+                          {row.last_active}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {(
-                            (new Date(row.response_created_at!).getTime() -
-                              new Date(row.request_created_at!).getTime()) /
-                            1000
-                          ).toString()}{" "}
-                          s
+                          {row.total_requests}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.response_body!.usage
-                            ? row.response_body!.usage.total_tokens
-                            : "n/a"}
+                          {row.average_requests_per_day_active}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {probabilities[idx]}
+                          {row.average_tokens_per_request}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_user_id &&
-                            truncString(row.request_user_id, 5)}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.response_body?.model
-                            ? row.response_body.model
-                            : "n/a"}
+                          $ TBD
                         </td>
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
@@ -238,7 +166,7 @@ const RequestsTab = (props: RequestsTabProps) => {
                             onClick={() => selectRowHandler(row, idx)}
                           >
                             View
-                            <span className="sr-only">, {row.request_id}</span>
+                            <span className="sr-only">, {row.user_id}</span>
                           </button>
                         </td>
                       </tr>
@@ -274,7 +202,7 @@ const RequestsTab = (props: RequestsTabProps) => {
                 <option>100</option>
               </select>
             </div>
-            <div className="flex flex-1 justify-end">
+            <div className="flex flex-1 justify-between sm:justify-end">
               <button
                 onClick={() => {
                   router.query.page = (page - 1).toString();
@@ -309,11 +237,11 @@ const RequestsTab = (props: RequestsTabProps) => {
           </nav>
         </div>
       </div>
-      {open && selectedData !== undefined && index !== undefined && (
+      {open && selectedUser !== undefined && index !== undefined && (
         <ThemedModal open={open} setOpen={setOpen}>
           <div>
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-              <InformationCircleIcon
+              <UserCircleIcon
                 className="h-8 w-8 text-sky-600"
                 aria-hidden="true"
               />
@@ -327,59 +255,36 @@ const RequestsTab = (props: RequestsTabProps) => {
               </Dialog.Title>
               <ul className="mt-4 space-y-2">
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Time:</p>
-                  <p>
-                    {new Date(
-                      selectedData.request_created_at!
-                    ).toLocaleString()}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Request:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedData.request_body?.prompt
-                      ? selectedData.request_body.prompt
-                      : "{{ no prompt }}"}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Response:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedData.response_body!.choices
-                      ? selectedData.response_body!.choices[0].text
-                      : "{{ no response }}"}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Duration:</p>
-                  <p>
-                    {(
-                      (new Date(selectedData.response_created_at!).getTime() -
-                        new Date(selectedData.request_created_at!).getTime()) /
-                      1000
-                    ).toString()}{" "}
-                    s
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Tokens:</p>
-                  <p>
-                    {selectedData.response_body!.usage
-                      ? selectedData.response_body!.usage.total_tokens
-                      : "{{ no tokens found }}"}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Log Probability:</p>
-                  <p>{probabilities[index]}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>User Id:</p>
-                  <p>{selectedData.request_user_id}</p>
+                  <p>{selectedUser.user_id}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Model:</p>
-                  <p>{selectedData.request_body?.model}</p>
+                  <p>Active For:</p>
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
+                    {selectedUser.active_for} days
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Last Active:</p>
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
+                    {selectedUser.last_active}
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Total Requests:</p>
+                  <p>{selectedUser.total_requests}</p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Average Requests per day:</p>
+                  <p>{selectedUser.average_requests_per_day_active}</p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Tokens per request:</p>
+                  <p> {selectedUser.average_tokens_per_request}</p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Total Cost:</p>
+                  <p className="italic">(coming soon)</p>
                 </li>
               </ul>
             </div>
@@ -387,16 +292,18 @@ const RequestsTab = (props: RequestsTabProps) => {
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
             <button
               type="button"
+              tabIndex={-1}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => {
                 // TODO: add copy to clipboard notification
-                navigator.clipboard.writeText(JSON.stringify(selectedData));
+                navigator.clipboard.writeText(JSON.stringify(selectedUser));
               }}
             >
               Copy
             </button>
             <button
               type="button"
+              tabIndex={-1}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => setOpen(false)}
             >
@@ -409,4 +316,4 @@ const RequestsTab = (props: RequestsTabProps) => {
   );
 };
 
-export default RequestsTab;
+export default UsersPage;

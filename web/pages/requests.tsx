@@ -1,11 +1,9 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import { getPagination } from "../components/shared/getPagination";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import RequestsTab from "../components/templates/requests/requestsTab";
+import RequestsPage from "../components/templates/requests/requestsPage";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
-import { Database } from "../supabase/database.types";
 
 interface RequestsProps {
   user: any;
@@ -23,7 +21,7 @@ const Requests = (props: RequestsProps) => {
   return (
     <MetaData title="Users">
       <AuthLayout user={user}>
-        <RequestsTab
+        <RequestsPage
           requests={data}
           error={error}
           count={count}

@@ -5,7 +5,7 @@ import {
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import UsersTab from "../components/templates/users/usersTab";
+import UsersPage from "../components/templates/users/usersPage";
 import { getUsers, UserRow } from "../services/lib/users";
 
 interface UsersProps {
@@ -24,7 +24,7 @@ const Users = (props: UsersProps) => {
   return (
     <MetaData title="Users">
       <AuthLayout user={user}>
-        <UsersTab
+        <UsersPage
           users={data}
           error={error}
           count={count}

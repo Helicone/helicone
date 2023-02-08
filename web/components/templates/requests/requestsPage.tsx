@@ -1,16 +1,18 @@
 import { Dialog } from "@headlessui/react";
-import { ArrowDownTrayIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
-import { UserRow } from "../../../services/lib/users";
+import { ResponseAndRequest } from "../../../services/lib/requests";
+import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themedModal";
 
-interface UsersTabProps {
-  users: UserRow[];
+interface RequestsPageProps {
+  requests: ResponseAndRequest[];
   error: string | null;
   count: number | null;
   page: number;
@@ -18,29 +20,64 @@ interface UsersTabProps {
   to: number;
 }
 
-interface UserMetricsDB {
-  user_id: string;
-  first_active: string;
-  last_active: string;
-  total_requests: string;
-  average_requests_per_day_active: string;
-  average_tokens_per_request: string;
-}
-
-const UsersTab = (props: UsersTabProps) => {
-  const { users, error, count, page, from, to } = props;
-
+const RequestsPage = (props: RequestsPageProps) => {
+  const { requests, error, count, page, from, to } = props;
   const router = useRouter();
 
-  const [open, setOpen] = useState(true);
   const [index, setIndex] = useState<number>();
-  const [selectedUser, setSelectedUser] = useState<UserRow>();
+  const [selectedData, setSelectedData] = useState<ResponseAndRequest>();
+  const [open, setOpen] = useState(true);
 
-  const selectRowHandler = (row: UserRow, idx: number) => {
+  const probabilities = requests.map((req) => {
+    const choice = req.response_body?.choices
+      ? req.response_body?.choices[0]
+      : null;
+
+    if (!choice) {
+      return null;
+    }
+
+    let prob;
+    if (choice.logprobs !== undefined && choice.logprobs !== null) {
+      const tokenLogprobs = choice.logprobs.token_logprobs;
+      const sum = tokenLogprobs.reduce(
+        (total: any, num: any) => total + num,
+        0
+      );
+      prob = sum.toFixed(2);
+    } else {
+      prob = "";
+    }
+
+    return prob;
+  });
+
+  const selectRowHandler = (row: ResponseAndRequest, idx: number) => {
     setIndex(idx);
-    setSelectedUser(row);
+    setSelectedData(row);
     setOpen(true);
   };
+
+  const csvData = requests.map((d, i) => {
+    const latency =
+      (new Date(d.response_created_at!).getTime() -
+        new Date(d.request_created_at!).getTime()) /
+      1000;
+
+    return {
+      request_id: d.request_id,
+      response_id: d.response_id,
+      time: d.request_created_at,
+      request: d.request_body?.prompt,
+      response: d.response_body?.choices?.[0]?.text,
+      "duration (s)": latency.toString(),
+      token_count: d.request_body?.max_tokens,
+      logprobs: probabilities[i],
+      request_user_id: d.request_user_id,
+      model: d.response_body?.model,
+      temperature: d.request_body?.temperature,
+    };
+  });
 
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
@@ -50,9 +87,9 @@ const UsersTab = (props: UsersTabProps) => {
       <div className="">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
-            <h1 className="text-xl font-semibold text-gray-900">Users</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
             {/* <p className="mt-2 text-sm text-gray-700">
-              Showing the first 100 users
+              Showing the latest 100 requests
             </p> */}
             <div className="block mt-2">
               <p className="text-sm text-gray-700">
@@ -66,8 +103,8 @@ const UsersTab = (props: UsersTabProps) => {
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
-              data={users}
-              filename={"users.csv"}
+              data={csvData}
+              filename={"requests.csv"}
               className="flex"
               target="_blank"
             >
@@ -99,75 +136,101 @@ const UsersTab = (props: UsersTabProps) => {
                         scope="col"
                         className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                       >
-                        Id
+                        Time
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Active For
+                        Request
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Last Active
+                        Response
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Requests
+                        Duration
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Avg Reqs / Day
+                        Tokens
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Avg Tokens / Req
+                        Log Prob
                       </th>
                       <th
                         scope="col"
                         className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Total Cost
+                        User
+                      </th>
+                      <th
+                        scope="col"
+                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Model
                       </th>
                       <th
                         scope="col"
                         className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
                       >
-                        <span className="sr-only">View</span>
+                        <span className="sr-only">Edit</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {users.map((row, idx) => (
-                      <tr key={row.user_id}>
+                    {requests.map((row, idx) => (
+                      <tr key={row.request_id}>
                         <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {truncString(row.user_id, 11)}
+                          {new Date(row.request_created_at!).toLocaleString()}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
-                          {row.active_for} days
+                          {row.request_body?.prompt
+                            ? truncString(row.request_body.prompt, 15)
+                            : "n/a"}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                          {row.last_active}
+                          {truncString(
+                            row.response_body!.choices
+                              ? row.response_body!.choices[0].text
+                              : "n/a",
+                            15
+                          )}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.total_requests}
+                          {(
+                            (new Date(row.response_created_at!).getTime() -
+                              new Date(row.request_created_at!).getTime()) /
+                            1000
+                          ).toString()}{" "}
+                          s
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.average_requests_per_day_active}
+                          {row.response_body!.usage
+                            ? row.response_body!.usage.total_tokens
+                            : "n/a"}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.average_tokens_per_request}
+                          {probabilities[idx]}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          $ TBD
+                          {row.request_user_id &&
+                            truncString(row.request_user_id, 5)}
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                          {row.response_body?.model
+                            ? row.response_body.model
+                            : "n/a"}
                         </td>
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
@@ -175,7 +238,7 @@ const UsersTab = (props: UsersTabProps) => {
                             onClick={() => selectRowHandler(row, idx)}
                           >
                             View
-                            <span className="sr-only">, {row.user_id}</span>
+                            <span className="sr-only">, {row.request_id}</span>
                           </button>
                         </td>
                       </tr>
@@ -211,7 +274,7 @@ const UsersTab = (props: UsersTabProps) => {
                 <option>100</option>
               </select>
             </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
+            <div className="flex flex-1 justify-end">
               <button
                 onClick={() => {
                   router.query.page = (page - 1).toString();
@@ -246,11 +309,11 @@ const UsersTab = (props: UsersTabProps) => {
           </nav>
         </div>
       </div>
-      {open && selectedUser !== undefined && index !== undefined && (
+      {open && selectedData !== undefined && index !== undefined && (
         <ThemedModal open={open} setOpen={setOpen}>
           <div>
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-              <UserCircleIcon
+              <InformationCircleIcon
                 className="h-8 w-8 text-sky-600"
                 aria-hidden="true"
               />
@@ -264,36 +327,59 @@ const UsersTab = (props: UsersTabProps) => {
               </Dialog.Title>
               <ul className="mt-4 space-y-2">
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Time:</p>
+                  <p>
+                    {new Date(
+                      selectedData.request_created_at!
+                    ).toLocaleString()}
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Request:</p>
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
+                    {selectedData.request_body?.prompt
+                      ? selectedData.request_body.prompt
+                      : "{{ no prompt }}"}
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Response:</p>
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
+                    {selectedData.response_body!.choices
+                      ? selectedData.response_body!.choices[0].text
+                      : "{{ no response }}"}
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Duration:</p>
+                  <p>
+                    {(
+                      (new Date(selectedData.response_created_at!).getTime() -
+                        new Date(selectedData.request_created_at!).getTime()) /
+                      1000
+                    ).toString()}{" "}
+                    s
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Tokens:</p>
+                  <p>
+                    {selectedData.response_body!.usage
+                      ? selectedData.response_body!.usage.total_tokens
+                      : "{{ no tokens found }}"}
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Log Probability:</p>
+                  <p>{probabilities[index]}</p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>User Id:</p>
-                  <p>{selectedUser.user_id}</p>
+                  <p>{selectedData.request_user_id}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Active For:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedUser.active_for} days
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Last Active:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedUser.last_active}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Total Requests:</p>
-                  <p>{selectedUser.total_requests}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Average Requests per day:</p>
-                  <p>{selectedUser.average_requests_per_day_active}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Tokens per request:</p>
-                  <p> {selectedUser.average_tokens_per_request}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Total Cost:</p>
-                  <p className="italic">(coming soon)</p>
+                  <p>Model:</p>
+                  <p>{selectedData.request_body?.model}</p>
                 </li>
               </ul>
             </div>
@@ -301,16 +387,18 @@ const UsersTab = (props: UsersTabProps) => {
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
             <button
               type="button"
-              className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
+              tabIndex={-1}
+              className=" inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => {
                 // TODO: add copy to clipboard notification
-                navigator.clipboard.writeText(JSON.stringify(selectedUser));
+                navigator.clipboard.writeText(JSON.stringify(selectedData));
               }}
             >
               Copy
             </button>
             <button
               type="button"
+              tabIndex={-1}
               className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
               onClick={() => setOpen(false)}
             >
@@ -323,4 +411,4 @@ const UsersTab = (props: UsersTabProps) => {
   );
 };
 
-export default UsersTab;
+export default RequestsPage;
