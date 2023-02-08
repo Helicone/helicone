@@ -200,11 +200,22 @@ const RequestsPage = (props: RequestsPageProps) => {
                             : "n/a"}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                          {truncString(
-                            row.response_body!.choices
-                              ? row.response_body!.choices[0].text
-                              : "n/a",
-                            15
+                          {row.response_body!.choices ? (
+                            <>
+                              {truncString(
+                                row.response_body!.choices[0].text,
+                                25
+                              )}
+                            </>
+                          ) : row.response_body!.error ? (
+                            <div className="text-red-500">
+                              {truncString(
+                                `error: ${row.response_body!.error.type}`,
+                                25
+                              )}
+                            </div>
+                          ) : (
+                            "{{ no error }}"
                           )}
                         </td>
                         <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
@@ -340,6 +351,14 @@ const RequestsPage = (props: RequestsPageProps) => {
                     {selectedData.request_body?.prompt
                       ? selectedData.request_body.prompt
                       : "{{ no prompt }}"}
+                  </p>
+                </li>
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Error:</p>
+                  <p className="max-w-xl whitespace-pre-wrap text-left">
+                    {selectedData.response_body!.error
+                      ? JSON.stringify(selectedData.response_body!.error)
+                      : "{{ no error }}"}
                   </p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
