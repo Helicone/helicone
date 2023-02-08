@@ -22,6 +22,7 @@ export type ResponseAndRequest = Omit<
       | null
       | undefined;
     model: string;
+    error?: any;
   } | null;
   request_body: {
     prompt: string;
