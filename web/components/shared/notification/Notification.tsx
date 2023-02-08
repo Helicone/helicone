@@ -46,25 +46,25 @@ const Notification = () => {
     switch (variant) {
       case "success":
         return (
-          <CheckCircleIcon className="h-4 w-4 text-white" aria-hidden="true" />
+          <CheckCircleIcon className="h-5 w-5 text-white" aria-hidden="true" />
         );
       case "info":
         return (
           <InformationCircleIcon
-            className="h-4 w-4 text-white"
+            className="h-5 w-5 text-white"
             aria-hidden="true"
           />
         );
       case "error":
         return (
           <ExclamationCircleIcon
-            className="h-4 w-4 text-white"
+            className="h-5 w-5 text-white"
             aria-hidden="true"
           />
         );
       default:
         return (
-          <CheckCircleIcon className="h-4 w-4 text-white" aria-hidden="true" />
+          <CheckCircleIcon className="h-5 w-5 text-white" aria-hidden="true" />
         );
     }
   };
@@ -95,17 +95,7 @@ const Notification = () => {
             >
               <div className="flex flex-wrap items-center justify-between">
                 <div className="flex w-0 flex-1 items-center">
-                  <span
-                    className={clsx(
-                      variantIconBgColor(),
-                      "flex rounded-lg p-2"
-                    )}
-                  >
-                    <MegaphoneIcon
-                      className="h-4 w-4 text-white"
-                      aria-hidden="true"
-                    />
-                  </span>
+                  <span className="flex rounded-lg p-2">{variantIcon()}</span>
                   <p className="ml-3 truncate font-medium text-white text-sm">
                     <span>{title}</span>
                   </p>

@@ -17,6 +17,7 @@ import { middleTruncString } from "../../../lib/stringHelpers";
 import { hashAuth } from "../../../lib/supabaseClient";
 import { useKeys } from "../../../lib/useKeys";
 import { Database } from "../../../supabase/database.types";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedTable from "../../shared/themedTable";
 
 interface KeyPageProps {}
@@ -43,6 +44,7 @@ const KeyPage = (props: KeyPageProps) => {
   }, [apiKey]);
 
   const { apiKeys, refreshKeys } = useKeys(supabaseClient);
+  const { setNotification } = useNotification();
 
   async function addKey() {
     if (hashedApiKey === "") {
@@ -66,10 +68,10 @@ const KeyPage = (props: KeyPageProps) => {
       .then((res) => {
         if (res.error) {
           console.error(res.error);
-          setError(
-            `Error saving key - please contact us on discord!\n${res.error.message}`
-          );
+          setNotification("Error saving key", "error");
+          return;
         }
+        setNotification("Key saved", "success");
         setApiKey("");
         setError(null);
         setKeyName("");
@@ -167,7 +169,7 @@ const KeyPage = (props: KeyPageProps) => {
         <div className="w-full sm:w-2/3 justify-end flex flex-row">
           <button
             onClick={addKey}
-            className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="rounded-md bg-black px-3.5 py-1.5 text-base font-medium leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Add Hashed Key
           </button>
