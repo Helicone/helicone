@@ -38,6 +38,7 @@ const RenderLineChart = ({
         <CartesianGrid vertical={false} opacity={50} strokeOpacity={0.5} />
         <Line
           type="monotone"
+          dot={false}
           dataKey="count"
           stroke="#8884d8"
           strokeWidth={1.5}

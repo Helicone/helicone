@@ -2,8 +2,8 @@ import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
+import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
-import { ResponseAndRequest } from "../requests/requestsTab";
 import { RequestsCSVDownloadButton } from "./requestsCsvDownload";
 
 export interface DataTable {
@@ -39,7 +39,8 @@ export function GetTableData({
       }
     };
     fetch();
-  }, [client]);
+  }, [client, limit]);
+
   const probabilities = data.map((d) => {
     const choice = d.response_body?.choices
       ? d.response_body?.choices[0]
