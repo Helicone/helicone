@@ -1,9 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
+import { FilterNode } from "./dashboardPage";
 import DateMetrics from "./timeGraph";
 
 interface TimeGraphWHeaderProps {
   client: SupabaseClient;
+  filter: FilterNode;
 }
 
 interface TimeLength {
@@ -15,7 +17,7 @@ interface TimeLength {
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h";
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
-  const { client } = props;
+  const { client, filter } = props;
   const [interval, setInterval] = useState<TimeInterval>("1m");
 
   const timeLength: TimeLength[] = [

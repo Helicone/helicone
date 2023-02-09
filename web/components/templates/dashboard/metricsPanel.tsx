@@ -3,6 +3,7 @@ import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { MetricsDB } from "../../../schema/metrics";
 import { Database } from "../../../supabase/database.types";
+import { FilterNode } from "./dashboardPage";
 
 const OPENAI_COSTS = {
   ada: 0.0004,
@@ -47,7 +48,7 @@ export function modelCost(
   return (cost * tokens) / 1000;
 }
 
-export function MetricsPanel() {
+export function MetricsPanel({ filter }: { filter: FilterNode }) {
   const client = useSupabaseClient<Database>();
   interface Metrics {
     average_requests_per_day?: number;
@@ -100,6 +101,9 @@ export function MetricsPanel() {
     const fetch = async () => {
       client
         .from("request_rbac")
+        .headers({
+          Authorization: `Bearer ${client.auth.session()?.access_token}`,
+        })
         .select("*", { count: "exact" })
         .then((res) => {
           setData((data) => ({ ...data, total_requests: res.count ?? 0 }));
