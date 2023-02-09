@@ -6,6 +6,8 @@ import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
+  BeakerIcon,
+  CogIcon,
   CubeTransparentIcon,
   HomeIcon,
   InboxArrowDownIcon,
@@ -66,21 +68,24 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: CubeTransparentIcon,
       current: pathname === "/models",
     },
+  ];
+
+  const accountNav = [
     {
       name: "Usage",
+      mobile: "View Usage",
       href: "/usage",
-      icon: WrenchScrewdriverIcon,
+      icon: BeakerIcon,
       current: pathname === "/usage",
     },
     {
       name: "Keys",
+      mobile: "Manage Keys",
       href: "/keys",
       icon: KeyIcon,
       current: pathname === "/keys",
     },
   ];
-
-  const userNavigation = [...navigation];
 
   const { apiKeys, refreshKeys } = useKeys(supabaseClient);
 
@@ -233,8 +238,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 alt="Helicone-full-logo"
               />
             </div>
-            <div className="mt-5 flex flex-grow flex-col">
-              <nav className="flex-1 space-y-1 px-2 pb-4">
+            <div className="mt-5 flex flex-grow flex-col bg-y-el">
+              <nav className="flex-1 space-y-1 px-2 pb-4 pt-2">
+                {/* <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wide pt-4">
+                  METRICS
+                </p> */}
                 {navigation.map((item) => {
                   if (item.name === "Keys" && apiKeys && apiKeys.length < 1) {
                     return (
@@ -243,7 +251,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         href={item.href}
                         className={clsx(
                           item.current
-                            ? "bg-gray-200 text-gray-900"
+                            ? "bg-gray-200 text-black"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
                           "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full justify-between"
                         )}
@@ -253,7 +261,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             className={clsx(
                               item.current
                                 ? "text-black"
-                                : "text-gray-700 group-hover:text-gray-900",
+                                : "text-gray-600 group-hover:text-gray-900",
                               "mr-3 flex-shrink-0 h-5 w-5"
                             )}
                           />
@@ -271,7 +279,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       href={item.href}
                       className={clsx(
                         item.current
-                          ? "bg-gray-200 text-gray-900"
+                          ? "bg-gray-200 text-black"
                           : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
                         "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                       )}
@@ -280,7 +288,64 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         className={clsx(
                           item.current
                             ? "text-black"
-                            : "text-gray-700 group-hover:text-gray-900",
+                            : "text-gray-600 group-hover:text-gray-900",
+                          "mr-3 flex-shrink-0 h-5 w-5"
+                        )}
+                        aria-hidden="true"
+                      />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+                <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
+                  Account
+                </p>
+                {accountNav.map((item) => {
+                  if (item.name === "Keys" && apiKeys && apiKeys.length < 1) {
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={clsx(
+                          item.current
+                            ? "bg-gray-200 text-black"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                          "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full justify-between"
+                        )}
+                      >
+                        <div className="flex flex-row items-center">
+                          <item.icon
+                            className={clsx(
+                              item.current
+                                ? "text-black"
+                                : "text-gray-600 group-hover:text-gray-900",
+                              "mr-3 flex-shrink-0 h-5 w-5"
+                            )}
+                          />
+                          {item.name}
+                        </div>
+                        <div>
+                          <ExclamationCircleIcon className="h-5 w-5 mr-1 text-red-500" />
+                        </div>
+                      </Link>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={clsx(
+                        item.current
+                          ? "bg-gray-200 text-black"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                      )}
+                    >
+                      <item.icon
+                        className={clsx(
+                          item.current
+                            ? "text-black"
+                            : "text-gray-600 group-hover:text-gray-900",
                           "mr-3 flex-shrink-0 h-5 w-5"
                         )}
                         aria-hidden="true"
@@ -342,7 +407,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
-                <div className="hidden sm:flex">
+                <div className="hidden sm:flex text-gray-500">
                   <Link
                     href="https://docs.helicone.ai/"
                     target="_blank"
@@ -392,17 +457,17 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           </p>
                         )}
                       </Menu.Item>
-                      {userNavigation.map((item) => (
+                      {accountNav.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <a
                               href={item.href}
                               className={clsx(
                                 active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm text-gray-700"
+                                "block px-4 py-2 text-sm text-gray-600"
                               )}
                             >
-                              {item.name}
+                              {item.mobile}
                             </a>
                           )}
                         </Menu.Item>
@@ -432,9 +497,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
 
           <main className="flex-1">
-            <div className="mx-auto px-6 bg-gray-100 min-h-[92.5vh]">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 min-h-[92.5vh]">
               {/* Replace with your content */}
-              <div className="py-6 max-w-7xl">{children}</div>
+              <div className="py-4 sm:py-8 max-w-7xl">{children}</div>
               {/* /End replace */}
             </div>
           </main>
