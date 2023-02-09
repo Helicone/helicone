@@ -1,5 +1,8 @@
 import { Dialog } from "@headlessui/react";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ClipboardDocumentIcon,
+} from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
@@ -9,6 +12,7 @@ import { truncString } from "../../../lib/stringHelpers";
 import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themedModal";
 
 interface RequestsPageProps {
@@ -23,6 +27,7 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { requests, error, count, page, from, to } = props;
   const router = useRouter();
+  const { setNotification } = useNotification();
 
   const [index, setIndex] = useState<number>();
   const [selectedData, setSelectedData] = useState<ResponseAndRequest>();
@@ -322,20 +327,32 @@ const RequestsPage = (props: RequestsPageProps) => {
       </div>
       {open && selectedData !== undefined && index !== undefined && (
         <ThemedModal open={open} setOpen={setOpen}>
-          <div>
+          <div className="sm:w-[600px] sm:max-w-[600px]">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
               <InformationCircleIcon
                 className="h-8 w-8 text-sky-600"
                 aria-hidden="true"
               />
             </div>
-            <div className="mt-3 text-center sm:mt-5">
+            <div className="mt-1 text-center sm:mt-3">
               <Dialog.Title
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
                 Request Information
               </Dialog.Title>
+              <button
+                type="button"
+                tabIndex={-1}
+                className="inline-flex w-full justify-center text-base font-medium text-gray-500 sm:text-sm items-center"
+                onClick={() => {
+                  setNotification("Copied to clipboard", "success");
+                  navigator.clipboard.writeText(JSON.stringify(selectedData));
+                }}
+              >
+                Copy this request{" "}
+                <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
+              </button>
               <ul className="mt-4 space-y-2">
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Time:</p>
@@ -346,27 +363,11 @@ const RequestsPage = (props: RequestsPageProps) => {
                   </p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Request:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedData.request_body?.prompt
-                      ? selectedData.request_body.prompt
-                      : "{{ no prompt }}"}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Error:</p>
                   <p className="max-w-xl whitespace-pre-wrap text-left">
                     {selectedData.response_body!.error
                       ? JSON.stringify(selectedData.response_body!.error)
                       : "{{ no error }}"}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Response:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedData.response_body!.choices
-                      ? selectedData.response_body!.choices[0].text
-                      : "{{ no response }}"}
                   </p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
@@ -400,21 +401,28 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.request_body?.model}</p>
                 </li>
+                <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
+                  <div className="w-full flex flex-col text-left space-y-1">
+                    <p>Request:</p>
+                    <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[250px] max-h-[250px] overflow-auto">
+                      {selectedData.request_body?.prompt
+                        ? selectedData.request_body.prompt
+                        : "{{ no prompt }}"}
+                    </p>
+                  </div>
+                  <div className="w-full flex flex-col text-left space-y-1">
+                    <p>Response:</p>
+                    <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[250px] max-h-[250px] overflow-auto">
+                      {selectedData.response_body!.choices
+                        ? selectedData.response_body!.choices[0].text
+                        : "{{ no response }}"}
+                    </p>
+                  </div>
+                </div>
               </ul>
             </div>
           </div>
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
-            <button
-              type="button"
-              tabIndex={-1}
-              className=" inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
-              onClick={() => {
-                // TODO: add copy to clipboard notification
-                navigator.clipboard.writeText(JSON.stringify(selectedData));
-              }}
-            >
-              Copy
-            </button>
             <button
               type="button"
               tabIndex={-1}
