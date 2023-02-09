@@ -26,8 +26,8 @@ export default function MyApp({
         initialSession={pageProps.initialSession}
       >
         <NotificationProvider>
-          <Notification />
           <Component {...pageProps} />
+          <Notification />
         </NotificationProvider>
       </SessionContextProvider>
       <Analytics />
