@@ -362,14 +362,17 @@ const RequestsPage = (props: RequestsPageProps) => {
                     ).toLocaleString()}
                   </p>
                 </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Error:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedData.response_body!.error
-                      ? JSON.stringify(selectedData.response_body!.error)
-                      : "{{ no error }}"}
-                  </p>
-                </li>
+                {selectedData.response_body!.error && (
+                  <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                    <p>Error:</p>
+                    <p className="max-w-xl whitespace-pre-wrap text-left">
+                      {selectedData.response_body!.error
+                        ? JSON.stringify(selectedData.response_body!.error)
+                        : "{{ no error }}"}
+                    </p>
+                  </li>
+                )}
+
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Duration:</p>
                   <p>
