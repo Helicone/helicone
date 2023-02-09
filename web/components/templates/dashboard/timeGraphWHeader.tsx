@@ -50,7 +50,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
 
   return (
     <div className="h-full w-full">
-      <div className="border-b border-gray-200 pb-4 sm:flex sm:items-center sm:justify-between">
+      <div className="sm:flex sm:items-center sm:justify-between">
         <h3 className="text-lg font-medium leading-6 text-gray-900">
           Requests over time
         </h3>

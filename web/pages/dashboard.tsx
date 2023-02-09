@@ -3,17 +3,20 @@ import { User, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
+import { getKeys } from "../services/lib/keys";
+import { Database } from "../supabase/database.types";
 
 interface DashboardProps {
   user: User;
+  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user } = props;
+  const { user, keys } = props;
 
   return (
     <MetaData title="Dashboard">
-      <DashboardPage user={user} />
+      <DashboardPage user={user} keys={keys} />
     </MetaData>
   );
 };
@@ -36,10 +39,13 @@ export const getServerSideProps = async (
       },
     };
 
+  const { data, error, count } = await getKeys(supabase);
+
   return {
     props: {
       initialSession: session,
       user: session.user,
+      keys: data,
     },
   };
 };
