@@ -2,9 +2,9 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { FilterNode } from "../../lib/api/metrics/filters";
-import { getMetrics, Metrics } from "../../lib/api/metrics/metrics";
-import { Result } from "../../lib/result";
+import { FilterNode } from "../../../lib/api/metrics/filters";
+import { getMetrics, Metrics } from "../../../lib/api/metrics/metrics";
+import { Result } from "../../../lib/result";
 
 export default async function handler(
   req: NextApiRequest,

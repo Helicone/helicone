@@ -1,7 +1,12 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { User } from "@supabase/supabase-js";
-import { useState } from "react";
-import { FilterNode } from "../../../lib/api/metrics/filters";
+import { SupabaseClient, User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
+import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
+import { Result } from "../../../lib/result";
+import {
+  TimeData,
+  TimeIncrement,
+} from "../../../lib/timeCalculations/fetchTimeData";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
@@ -14,11 +19,71 @@ interface DashboardPageProps {
   user: User;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
+async function fetchGraphData(
+  client: SupabaseClient,
+  filter: FilterNode,
+  dbIncrement: TimeIncrement
+) {
+  return await fetch("/api/metrics/requestsGraph", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      filter,
+      dbIncrement,
+    }),
+  }).then((res) => res.json() as Promise<Result<TimeData[], string>>);
+}
+
+const validTimeWindow = (filter: FilterNode): boolean => {
+  const start = (filter as FilterLeaf).request?.created_at?.gte;
+  const end = (filter as FilterLeaf).request?.created_at?.lte;
+  return start !== undefined && end !== undefined;
+};
+
+const getTimeInterval = (filter: FilterNode): TimeIncrement => {
+  const start = (filter as FilterLeaf).request?.created_at?.gte;
+  const end = (filter as FilterLeaf).request?.created_at?.lte;
+  if (!validTimeWindow(filter)) {
+    throw new Error("Invalid filter");
+  }
+  const startD = new Date(start!);
+  const endD = new Date(end!);
+  const diff = endD.getTime() - startD.getTime();
+  if (diff < 1000 * 60 * 60) {
+    return "min";
+  } else if (diff < 1000 * 60 * 60 * 24) {
+    return "hour";
+  } else if (diff < 1000 * 60 * 60 * 24 * 7) {
+    return "day";
+  } else if (diff < 1000 * 60 * 60 * 24 * 30) {
+    return "week";
+  } else {
+    return "month";
+  }
+};
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
   const client = useSupabaseClient();
+  const [data, setData] = useState<TimeData[]>([]);
   const [filter, setFilter] = useState<FilterNode>("all");
+  useEffect(() => {
+    if (validTimeWindow(filter)) {
+      console.log("fetching data");
+      fetchGraphData(client, filter, getTimeInterval(filter)).then(
+        ({ data, error }) => {
+          if (error !== null) {
+            console.error(error);
+          } else {
+            setData(data.map((d) => ({ ...d, time: new Date(d.time) })));
+          }
+        }
+      );
+    }
+  }, [client, filter]);
+  console.log(data);
 
   return (
     <AuthLayout user={user}>
@@ -29,11 +94,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
       <div className="space-y-16">
         <MetricsPanel filters={filter} />
-        <TimeGraphWHeader
-          client={client}
-          filter={filter}
-          setFilter={setFilter}
-        />
+        <TimeGraphWHeader data={data} setFilter={setFilter} />
       </div>
     </AuthLayout>
   );

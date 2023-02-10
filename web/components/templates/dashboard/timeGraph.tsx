@@ -11,18 +11,11 @@ import {
 } from "recharts";
 import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
 import {
-  fetchLastXTimeData,
   TimeData,
   TimeIncrement,
-} from "../../../lib/fetchTimeData";
-import {
-  getXDaysAgoFloored,
-  getXHoursAgoFloored,
-  getXMinuteasAgoFloored,
-} from "../../../lib/getXHoursAgo";
-import { TimeInterval } from "./timeGraphWHeader";
+} from "../../../lib/timeCalculations/fetchTimeData";
 
-const RenderLineChart = ({
+export const RenderLineChart = ({
   data,
   timeMap,
 }: {
@@ -52,102 +45,3 @@ const RenderLineChart = ({
     </ResponsiveContainer>
   );
 };
-interface TimeGraphConfig {
-  timeMap: (date: Date) => string;
-  increment: (date: Date) => Date;
-  dbIncrement: TimeIncrement;
-  start: Date;
-  end: Date;
-}
-
-const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
-  "1h": {
-    timeMap: (date) => date.toLocaleTimeString(),
-    increment: (date) => new Date(date.getTime() + 60 * 1000 * 5), // every 5 minutes
-    dbIncrement: "min",
-    start: getXMinuteasAgoFloored(60),
-    end: getXMinuteasAgoFloored(0),
-  },
-  "24h": {
-    timeMap: (date) =>
-      date.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-      }),
-    increment: (date) => new Date(date.getTime() + 60 * 60 * 1000), // every 2 hours
-    dbIncrement: "hour",
-    start: getXHoursAgoFloored(24),
-    end: getXHoursAgoFloored(0),
-  },
-  "7d": {
-    timeMap: (date) =>
-      date.toLocaleDateString(undefined, {
-        dateStyle: "short",
-      }),
-    increment: (date) => new Date(date.getTime() + 24 * 60 * 60 * 1000), // every day
-    dbIncrement: "day",
-    start: getXDaysAgoFloored(7),
-    end: getXDaysAgoFloored(0),
-  },
-  "1m": {
-    timeMap: (date) =>
-      date.toLocaleDateString(undefined, {
-        year: "2-digit",
-        month: "2-digit",
-        day: "2-digit",
-      }),
-    increment: (date) => new Date(date.getTime() + 24 * 60 * 60 * 1000), // every day
-    dbIncrement: "day",
-    start: getXDaysAgoFloored(30),
-    end: getXHoursAgoFloored(0),
-  },
-  "3m": {
-    timeMap: (date) =>
-      date.toLocaleDateString(undefined, {
-        year: "2-digit",
-        month: "2-digit",
-        day: "2-digit",
-      }),
-    increment: (date) => new Date(date.getTime() + 24 * 60 * 60 * 7 * 1000), // every week
-    dbIncrement: "day",
-    start: getXDaysAgoFloored(30 * 3),
-    end: getXHoursAgoFloored(0),
-  },
-};
-
-interface DataMetricsProps {
-  client: SupabaseClient;
-  timeLength: TimeInterval;
-  filter: FilterNode;
-  setFilter: Dispatch<SetStateAction<FilterNode>>;
-}
-
-const DateMetrics = (props: DataMetricsProps) => {
-  const { client, timeLength, filter, setFilter } = props;
-
-  const [data, setData] = useState<TimeData[]>([]);
-
-  useEffect(() => {
-    fetchLastXTimeData(
-      client,
-      timeGraphConfig[timeLength].dbIncrement,
-      timeGraphConfig[timeLength].increment,
-      timeGraphConfig[timeLength].start,
-      timeGraphConfig[timeLength].end
-    ).then(({ data, error }) => {
-      if (error !== null) {
-        console.error(error);
-      } else {
-        setData(data);
-      }
-    });
-  }, [client, timeLength]);
-
-  return (
-    <RenderLineChart
-      data={data}
-      timeMap={timeGraphConfig[timeLength].timeMap}
-    />
-  );
-};
-
-export default DateMetrics;
