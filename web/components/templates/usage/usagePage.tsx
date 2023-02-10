@@ -8,7 +8,6 @@ import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import { Database } from "../../../supabase/database.types";
 
-import Subscriptions from "./subscriptions";
 import { subscriptionChange } from "../../../lib/subscriptionChange";
 import AuthLayout from "../../shared/layout/authLayout";
 import { UserSettingsResponse } from "../../../pages/api/user_settings";
