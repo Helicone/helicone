@@ -6,7 +6,8 @@ export async function dbExecute<T>(
 ): Promise<Result<T[], string>> {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production",
+    // Need to add ssl
+    // ssl: process.env.NODE_ENV === "production",
   });
   try {
     await client.connect();
