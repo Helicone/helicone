@@ -17,13 +17,12 @@ function timeBackfill(
 
   while (current < end) {
     const nextTime = increment(current);
+    const count = data
+      .filter(
+        (d) => d.created_at_trunc >= current && d.created_at_trunc < nextTime
+      )
+      .reduce((acc, d) => acc + d.count, 0);
 
-    const count =
-      data.find(
-        (d) =>
-          nextTime.getTime() >= d.created_at_trunc.getTime() &&
-          d.created_at_trunc.getTime() > current.getTime()
-      )?.count ?? 0;
     result.push({ time: nextTime, count });
     current = nextTime;
   }
