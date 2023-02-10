@@ -62,7 +62,7 @@ async function syncSettingsWithStripe(
     const isPendingCancellation =
       activeSubscription?.cancel_at_period_end === true;
     if (isPendingCancellation) {
-      const tier: Tier = "pro-pending-cancel";
+      const tier: Tier = "startup-pending-cancel";
       const userSetting = await supabaseServer
         .from("user_settings")
         .update({
@@ -77,7 +77,7 @@ async function syncSettingsWithStripe(
         return { data: undefined, error: null };
       }
     } else {
-      const tier: Tier = activeSubscription ? "pro" : "free";
+      const tier: Tier = activeSubscription ? "startup" : "free";
       const userSetting = await supabaseServer
         .from("user_settings")
         .update({
