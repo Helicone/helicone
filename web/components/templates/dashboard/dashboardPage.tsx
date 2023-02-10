@@ -51,16 +51,12 @@ const getTimeInterval = (filter: FilterNode): TimeIncrement => {
   const startD = new Date(start!);
   const endD = new Date(end!);
   const diff = endD.getTime() - startD.getTime();
-  if (diff < 1000 * 60 * 60) {
+  if (diff < 1000 * 60 * 60 * 2) {
     return "min";
-  } else if (diff < 1000 * 60 * 60 * 24) {
-    return "hour";
   } else if (diff < 1000 * 60 * 60 * 24 * 7) {
-    return "day";
-  } else if (diff < 1000 * 60 * 60 * 24 * 30) {
-    return "week";
+    return "hour";
   } else {
-    return "month";
+    return "day";
   }
 };
 
@@ -77,12 +73,15 @@ const DashboardPage = (props: DashboardPageProps) => {
           if (error !== null) {
             console.error(error);
           } else {
-            setData(data.map((d) => ({ ...d, time: new Date(d.time) })));
+            console.log("data", data);
+            setData(
+              data.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+            );
           }
         }
       );
     }
-  }, [client, filter]);
+  }, [client, filter, setFilter]);
   console.log(data);
 
   return (

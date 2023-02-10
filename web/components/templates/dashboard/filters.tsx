@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import { FilterNode } from "../../../lib/api/metrics/filters";
 
 export function Filters({
@@ -13,7 +14,7 @@ export function Filters({
     key_name: string | null;
   }[];
   filter: FilterNode;
-  setFilter: (filter: FilterNode) => void;
+  setFilter: Dispatch<SetStateAction<FilterNode>>;
 }) {
   return (
     <div className="flex flex-row items-center gap-2">
@@ -29,8 +30,30 @@ export function Filters({
         className="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
         defaultValue={"all"}
         onChange={(e) => {
-          if (e.target.value !== "all") {
-            setFilter({
+          setFilter((f) => {
+            if (e.target.value === "all" && f !== "all") {
+              return {
+                ...f,
+                user_api_keys: undefined,
+              };
+            }
+
+            if (f === "all") {
+              return {
+                user_api_keys: {
+                  api_key_hash: {
+                    equals: {
+                      api_key_hash: [e.target.value],
+                    },
+                  },
+                },
+              };
+            }
+            if ("left" in f) {
+              throw new Error("Not implemented");
+            }
+            return {
+              ...f,
               user_api_keys: {
                 api_key_hash: {
                   equals: {
@@ -38,10 +61,8 @@ export function Filters({
                   },
                 },
               },
-            });
-          } else {
-            setFilter("all");
-          }
+            };
+          });
         }}
       >
         <option value={"all"}>All</option>

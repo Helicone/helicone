@@ -33,7 +33,7 @@ export async function getTimeData(
   const query = `
 SELECT
   DATE_TRUNC('${time_increment}', request.created_at) as created_at_trunc,
-  COUNT(*)
+  COUNT(*)::bigint as count
 FROM  request
    LEFT JOIN response ON response.request = request.id
    LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
@@ -49,5 +49,8 @@ ORDER BY created_at_trunc
   if (error !== null) {
     return { data: null, error: error };
   }
-  return { data: data, error: null };
+  return {
+    data: data.map((d) => ({ ...d, count: Number(d.count) })),
+    error: null,
+  };
 }

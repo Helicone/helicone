@@ -31,6 +31,7 @@ const getIncrement = (totalTime: number) => {
   if (totalTime < 1000 * 60 * 60 * 24 * 30 * 2) {
     // less than 32 days
     // Increment by 1 day
+    // console.log("incrementing by 1 day");
     return 1000 * 60 * 60 * 24;
   }
   if (totalTime < 1000 * 60 * 60 * 24 * 30 * 6) {
@@ -53,8 +54,7 @@ export function timeBackfill(
   const totalTime = end.getTime() - current.getTime();
   const increment = (date: Date) =>
     new Date(date.getTime() + getIncrement(totalTime));
-  console.log("totalTime", totalTime);
-
+  console.log("DATA", data);
   while (current < end) {
     const nextTime = increment(current);
     const count = data
