@@ -24,6 +24,7 @@
     "eslint": "8.28.0",
     "eslint-config-next": "13.0.5",
     "next": "13.0.5",
+    "pg": "^8.9.0",
     "react": "18.2.0",
     "react-csv": "2.2.2",
     "react-dom": "18.2.0",
@@ -33,13 +34,13 @@
     "typescript": "4.9.3"
   },
   "devDependencies": {
+    "@types/pg": "^8.6.6",
     "@types/react-csv": "^1.1.3",
     "autoprefixer": "^10.4.13",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "postcss": "^8.4.19",
     "prettier": "^2.8.0",
-    "prisma": "^4.10.0",
     "tailwindcss": "^3.2.4"
   }
 }

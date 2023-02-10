@@ -1,4 +1,4 @@
-import { FilterNode } from "./dashboardPage";
+import { FilterNode } from "../../../lib/api/metrics/filters";
 
 export function Filters({
   keys,
@@ -27,10 +27,26 @@ export function Filters({
         id="location"
         name="location"
         className="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        defaultValue={"all"}
+        onChange={(e) => {
+          if (e.target.value !== "all") {
+            setFilter({
+              user_api_keys: {
+                api_key_hash: {
+                  equals: {
+                    api_key_hash: [e.target.value],
+                  },
+                },
+              },
+            });
+          } else {
+            setFilter("all");
+          }
+        }}
       >
-        <option selected={true}>All</option>
+        <option value={"all"}>All</option>
         {keys.map((key) => (
-          <option key={key.api_key_hash}>
+          <option key={key.api_key_hash} value={key.api_key_hash}>
             {key.key_name === "" ? key.api_key_preview : key.key_name}
           </option>
         ))}

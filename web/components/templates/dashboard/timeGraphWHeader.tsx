@@ -6,6 +6,7 @@ import DateMetrics from "./timeGraph";
 interface TimeGraphWHeaderProps {
   client: SupabaseClient;
   filter: FilterNode;
+  setFilter: (filter: FilterNode) => void;
 }
 
 interface TimeLength {
@@ -17,7 +18,7 @@ interface TimeLength {
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h";
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
-  const { client, filter } = props;
+  const { client, filter, setFilter } = props;
   const [interval, setInterval] = useState<TimeInterval>("1m");
 
   const timeLength: TimeLength[] = [
@@ -61,7 +62,12 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         </div>
       </div>
       <div className="w-full h-72 mt-8">
-        <DateMetrics client={client} timeLength={interval} />
+        <DateMetrics
+          client={client}
+          timeLength={interval}
+          filter={filter}
+          setFilter={setFilter}
+        />
       </div>
     </div>
   );

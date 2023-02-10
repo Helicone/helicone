@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState, Dispatch } from "react";
 import {
   CartesianGrid,
   Line,
@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
 import {
   fetchLastXTimeData,
   TimeData,
@@ -116,10 +117,13 @@ const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
 interface DataMetricsProps {
   client: SupabaseClient;
   timeLength: TimeInterval;
+  filter: FilterNode;
+  setFilter: Dispatch<SetStateAction<FilterNode>>;
 }
 
 const DateMetrics = (props: DataMetricsProps) => {
-  const { client, timeLength } = props;
+  const { client, timeLength, filter, setFilter } = props;
+
   const [data, setData] = useState<TimeData[]>([]);
 
   useEffect(() => {
