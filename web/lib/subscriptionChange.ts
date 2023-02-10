@@ -65,7 +65,7 @@ export async function subscriptionChange(
       await subscribeToPro(discountCode);
     } else if (changeFrom === "enterprise") {
       window.open(heliconeContactLink, "_ blank");
-    } else if (changeFrom === "startup-pending-cancel") {
+    } else if (changeFrom === "starter-pending-cancel") {
       window.open(heliconeBillingPortalLink, "_ blank");
     }
   } else if (changeTo === "enterprise") {

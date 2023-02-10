@@ -11,8 +11,8 @@ if (!stripePriceId) {
   throw new Error("Missing Stripe Price ID");
 }
 
-export const stripeStartupPriceId = process.env.STRIPE_STARTUP_PRICE_ID;
-if (!stripeStartupPriceId) {
+export const stripeStarterPriceId = process.env.STRIPE_STARTER_PRICE_ID;
+if (!stripeStarterPriceId) {
   throw new Error("Missing Stripe Price ID");
 }
 
@@ -54,7 +54,7 @@ export default async function handler(
         payment_method_types: ["card"],
         line_items: [
           {
-            price: stripeStartupPriceId,
+            price: stripeStarterPriceId,
             quantity: 1,
           },
         ],

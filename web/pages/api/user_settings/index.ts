@@ -11,7 +11,7 @@ import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
 import { Tier } from "../../../components/templates/usage/usagePage";
-import { stripePriceId, stripeStartupPriceId } from "../checkout_sessions";
+import { stripePriceId, stripeStarterPriceId } from "../checkout_sessions";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
 export type UserSettingsResponse = {
@@ -58,7 +58,7 @@ async function syncSettingsWithStripe(
     const activeSubscription = subscriptions.find((subscription) => {
       if (subscription.status === "active") {
         if (
-          (subscription as any)?.plan?.id === stripeStartupPriceId ||
+          (subscription as any)?.plan?.id === stripeStarterPriceId ||
           (subscription as any)?.plan?.id === stripePriceId
         ) {
           return true;
@@ -68,7 +68,7 @@ async function syncSettingsWithStripe(
     const isPendingCancellation =
       activeSubscription?.cancel_at_period_end === true;
     if (isPendingCancellation) {
-      const tier: Tier = "startup-pending-cancel";
+      const tier: Tier = "starter-pending-cancel";
       const userSetting = await supabaseServer
         .from("user_settings")
         .update({
@@ -88,7 +88,7 @@ async function syncSettingsWithStripe(
         .from("user_settings")
         .update({
           tier: tier,
-          request_limit: tier === "startup" ? 50000 : 1000,
+          request_limit: tier === "starter" ? 50000 : 1000,
         })
         .eq("user", userSettings.user)
         .select("*")

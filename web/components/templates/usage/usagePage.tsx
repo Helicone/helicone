@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getUserSettings } from "../../../services/lib/user";
 
-export type Tier = "free" | "starter" | "enterprise" | "startup-pending-cancel";
+export type Tier = "free" | "starter" | "enterprise" | "starter-pending-cancel";
 
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
@@ -59,17 +59,17 @@ const CurrentSubscriptionStatus = ({
     return (
       <div className="mt-2 text-sm text-gray-700">
         You are currently on the our free hobby tier. You can upgrade to the
-        startup tier to get more requests per month.
+        starter tier to get more requests per month.
       </div>
     );
-  } else if (tier === "startup") {
+  } else if (tier === "starter") {
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You are currently on the startup tier. You can upgrade to the enterprise
+        You are currently on the starter tier. You can upgrade to the enterprise
         tier to get unlimited requests and advanced features
       </div>
     );
-  } else if (tier === "startup-pending-cancel") {
+  } else if (tier === "starter-pending-cancel") {
     const endingDate = new Date(
       subscription?.current_period_end! * 1000
     ).toLocaleDateString();
@@ -82,7 +82,7 @@ const CurrentSubscriptionStatus = ({
     );
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You startup account is still active until {endingDate} ({daysLeft} days
+        You starter account is still active until {endingDate} ({daysLeft} days
         left). You can upgrade to the enterprise tier to get more requests per
         month.
       </div>
@@ -197,7 +197,7 @@ const UsagePage = (props: UsagePageProps) => {
         "Rate Limits and Analytics",
       ],
       isCurrent:
-        currentTier === "starter" || currentTier === "startup-pending-cancel",
+        currentTier === "starter" || currentTier === "starter-pending-cancel",
     },
     {
       id: 3,
@@ -224,7 +224,7 @@ const UsagePage = (props: UsagePageProps) => {
           Select<span className="sr-only">, {name}</span>
         </button>
       );
-    } else if (tier === "startup") {
+    } else if (tier === "starter") {
       return (
         <button
           type="button"
@@ -391,7 +391,7 @@ const UsagePage = (props: UsagePageProps) => {
                         "relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
                       )}
                     >
-                      {currentTier === "startup-pending-cancel" ? (
+                      {currentTier === "starter-pending-cancel" ? (
                         renderPendingPlans(plan.tier, plan.name)
                       ) : (
                         <button
@@ -435,7 +435,7 @@ const UsagePage = (props: UsagePageProps) => {
               <button
                 type="button"
                 className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={currentTier === "startup-pending-cancel"}
+                disabled={currentTier === "starter-pending-cancel"}
                 onClick={() => setShowCoupon(true)}
               >
                 Enter Coupon

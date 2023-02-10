@@ -1,5 +1,4 @@
 import { UserSettingsResponse } from "../../pages/api/user_settings";
-import axios from "axios";
 
 const getUserSettings = async () => {
   fetch("/api/user_settings").then((res) => {
