@@ -11,6 +11,7 @@ import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
 import { Tier } from "../../../components/templates/usage/usagePage";
+import { stripePriceId, stripeStartupPriceId } from "../checkout_sessions";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
 export type UserSettingsResponse = {
@@ -56,7 +57,12 @@ async function syncSettingsWithStripe(
   } else {
     const activeSubscription = subscriptions.find((subscription) => {
       if (subscription.status === "active") {
-        return true;
+        if (
+          (subscription as any)?.plan?.id === stripeStartupPriceId ||
+          (subscription as any)?.plan?.id === stripePriceId
+        ) {
+          return true;
+        }
       }
     });
     const isPendingCancellation =
