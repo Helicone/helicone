@@ -15,6 +15,8 @@ Install supabase https://supabase.com/docs/guides/cli
 brew install supabase/tap/supabase
 ```
 
+hi
+
 ## Running
 
 ```bash
