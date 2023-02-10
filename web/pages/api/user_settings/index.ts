@@ -88,6 +88,7 @@ async function syncSettingsWithStripe(
         .from("user_settings")
         .update({
           tier: tier,
+          request_limit: tier === "startup" ? 50000 : 1000,
         })
         .eq("user", userSettings.user)
         .select("*")
