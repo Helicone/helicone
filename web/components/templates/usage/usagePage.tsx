@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getUserSettings } from "../../../services/lib/user";
 
-export type Tier = "free" | "startup" | "enterprise" | "startup-pending-cancel";
+export type Tier = "free" | "starter" | "enterprise" | "startup-pending-cancel";
 
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
@@ -187,8 +187,8 @@ const UsagePage = (props: UsagePageProps) => {
     },
     {
       id: 2,
-      name: "Startup",
-      tier: "startup",
+      name: "Starter",
+      tier: "starter",
       price: "$50",
       limit: "50,000 requests per month",
       features: [
@@ -197,7 +197,7 @@ const UsagePage = (props: UsagePageProps) => {
         "Rate Limits and Analytics",
       ],
       isCurrent:
-        currentTier === "startup" || currentTier === "startup-pending-cancel",
+        currentTier === "starter" || currentTier === "startup-pending-cancel",
     },
     {
       id: 3,

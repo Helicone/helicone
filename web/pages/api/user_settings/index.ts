@@ -83,7 +83,7 @@ async function syncSettingsWithStripe(
         return { data: undefined, error: null };
       }
     } else {
-      const tier: Tier = activeSubscription ? "startup" : "free";
+      const tier: Tier = activeSubscription ? "starter" : "free";
       const userSetting = await supabaseServer
         .from("user_settings")
         .update({
