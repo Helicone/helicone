@@ -1,12 +1,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { useState } from "react";
-import { FilterNode } from "./dashboardPage";
+import { SetStateAction, useState, Dispatch } from "react";
+import { FilterNode } from "../../../lib/api/metrics/filters";
+
 import DateMetrics from "./timeGraph";
 
 interface TimeGraphWHeaderProps {
   client: SupabaseClient;
   filter: FilterNode;
-  setFilter: (filter: FilterNode) => void;
+  setFilter: Dispatch<SetStateAction<FilterNode>>;
 }
 
 interface TimeLength {
