@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRouter } from "next/router";
 import Stripe from "stripe";
-import { Tier } from "../components/templates/billing/billingPage";
+import { Tier } from "../components/templates/usage/usagePage";
 import getStripe from "../utlis/getStripe";
 import { DEMO_EMAIL } from "./constants";
 import { Result } from "./result";

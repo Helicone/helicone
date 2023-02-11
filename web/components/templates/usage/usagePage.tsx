@@ -15,6 +15,7 @@ import Stripe from "stripe";
 import { clsx } from "../../shared/clsx";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { getUserSettings } from "../../../services/lib/user";
 
 export type Tier = "free" | "starter" | "enterprise" | "starter-pending-cancel";
 
@@ -43,7 +44,7 @@ export async function fetchPostJSON(url: string, data?: {}) {
   }
 }
 
-interface BillingPageProps {
+interface UsagePageProps {
   user: User;
 }
 
@@ -89,8 +90,8 @@ const CurrentSubscriptionStatus = ({
   } else if (tier === "enterprise") {
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You are currently on the enterprise tier. You can downgrade to the pro
-        tier to get less requests per month.
+        You are currently on the enterprise tier. Please contact us if you need
+        specific features or more requests.
       </div>
     );
   } else {
@@ -102,12 +103,13 @@ interface PlanProps {
   id: number;
   name: string;
   tier: Tier;
+  price: string;
   limit: string;
   features: string[];
   isCurrent: boolean;
 }
 
-const BillingPage = (props: BillingPageProps) => {
+const UsagePage = (props: UsagePageProps) => {
   const { user } = props;
   const client = useSupabaseClient<Database>();
 
@@ -176,9 +178,10 @@ const BillingPage = (props: BillingPageProps) => {
   const plans: PlanProps[] = [
     {
       id: 1,
-      name: "Personal",
+      name: "Free",
       tier: "free",
-      limit: "1,000 requests",
+      price: "$0",
+      limit: "1,000 requests per month",
       features: ["Basic Support", "User Metrics"],
       isCurrent: currentTier === "free",
     },
@@ -191,7 +194,7 @@ const BillingPage = (props: BillingPageProps) => {
       features: [
         "Priority Support",
         "Advanced Insights",
-        "Early Access to New Features",
+        "Rate Limits and Analytics",
       ],
       isCurrent:
         currentTier === "starter" || currentTier === "starter-pending-cancel",
@@ -200,12 +203,9 @@ const BillingPage = (props: BillingPageProps) => {
       id: 3,
       name: "Enterprise",
       tier: "enterprise",
-      limit: "unlimited requests",
-      features: [
-        "Prompt Discovery",
-        "Dedicated Support",
-        "Design Consultation",
-      ],
+      price: "Contact Us",
+      limit: "Over 50,000 requests per month",
+      features: ["Design Consultation", "Caching", "Custom Features"],
       isCurrent: currentTier === "enterprise",
     },
   ];
@@ -304,6 +304,12 @@ const BillingPage = (props: BillingPageProps) => {
                     scope="col"
                     className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
                   >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
+                  >
                     Limit
                   </th>
                   <th
@@ -342,11 +348,18 @@ const BillingPage = (props: BillingPageProps) => {
                             <div key={idx}>{feature}</div>
                           ))}
                         </div>
-                        {/* <span className="hidden sm:inline">·</span> */}
                       </div>
                       {planIdx !== 0 ? (
                         <div className="absolute right-0 left-6 -top-px h-px bg-gray-200" />
                       ) : null}
+                    </td>
+                    <td
+                      className={clsx(
+                        planIdx === 0 ? "" : "border-t border-gray-200",
+                        "hidden px-3 py-3.5 text-sm text-gray-500 lg:table-cell"
+                      )}
+                    >
+                      {plan.price}
                     </td>
                     <td
                       className={clsx(
@@ -371,6 +384,7 @@ const BillingPage = (props: BillingPageProps) => {
                         ))}
                       </div>
                     </td>
+
                     <td
                       className={clsx(
                         planIdx === 0 ? "" : "border-t border-transparent",
@@ -434,4 +448,4 @@ const BillingPage = (props: BillingPageProps) => {
   );
 };
 
-export default BillingPage;
+export default UsagePage;
