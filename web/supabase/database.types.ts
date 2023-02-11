@@ -18,6 +18,7 @@ export interface Database {
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
+          properties: Record<string, string> | null
         }
         Insert: {
           id?: string
@@ -27,6 +28,7 @@ export interface Database {
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
+          properties?: Record<string, string> | null
         }
         Update: {
           id?: string
@@ -36,6 +38,7 @@ export interface Database {
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
+          properties?: Record<string, string> | null
         }
       }
       response: {
@@ -126,6 +129,7 @@ export interface Database {
           path: string | null
           auth_hash: string | null
           user_id: string | null
+          properties: Record<string, string> | null
         }
       }
       response_and_request_rbac: {
@@ -140,6 +144,7 @@ export interface Database {
           request_user_id: string | null
           api_key_preview: string | null
           user_id: string | null
+          properties: Record<string, string> | null
         }
       }
       response_rbac: {

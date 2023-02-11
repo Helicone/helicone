@@ -22,6 +22,7 @@ interface RequestsPageProps {
 
 const RequestsPage = (props: RequestsPageProps) => {
   const { requests, error, count, page, from, to } = props;
+  console.log("REQUESTS PAGE HI", requests)
   const router = useRouter();
 
   const [index, setIndex] = useState<number>();
@@ -76,8 +77,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
+      properties: d.request_properties,
     };
   });
+
+  console.log(csvData)
 
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
