@@ -12,7 +12,7 @@ const ThemedTable = (props: ThemedTableProps) => {
   const { columns, rows, deleteHandler } = props;
 
   return (
-    <div className="ring-1 ring-gray-300 rounded-lg bg-white">
+    <div className="mt-10 ring-1 ring-gray-300 rounded-lg bg-white">
       <table className="min-w-full divide-y divide-gray-300">
         <thead>
           <tr>
