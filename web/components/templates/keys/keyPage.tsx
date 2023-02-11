@@ -71,7 +71,7 @@ const KeyPage = (props: KeyPageProps) => {
           setNotification("Error saving key", "error");
           return;
         }
-        setNotification("Key saved", "success");
+        setNotification("Key Created", "success");
         setApiKey("");
         setError(null);
         setKeyName("");
@@ -99,6 +99,7 @@ const KeyPage = (props: KeyPageProps) => {
                 type="text"
                 name="openAIKey"
                 id="openAIKey"
+                value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Enter in your OpenAI API key here"
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
@@ -117,6 +118,7 @@ const KeyPage = (props: KeyPageProps) => {
                 type="text"
                 name="keyName"
                 id="keyName"
+                value={keyName}
                 onChange={(e) => setKeyName(e.target.value)}
                 placeholder="Enter in a name for this key"
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
@@ -226,17 +228,16 @@ const KeyPage = (props: KeyPageProps) => {
               .eq("api_key_hash", row.api_key_hash)
               .then((res) => {
                 if (user?.email === DEMO_EMAIL) {
-                  setError("You can't delete keys on the demo account");
+                  setNotification("Demo key can not be deleted", "error");
                   return;
                 }
 
                 if (res.error) {
                   console.error(res.error);
-                  setError(
-                    `Error deleting key - please contact us on discord!\n${res.error.message}`
-                  );
+                  setNotification("Error deleting key", "error");
                   return;
                 }
+                setNotification("Key successfully deleted", "success");
                 refreshKeys();
               });
           }}

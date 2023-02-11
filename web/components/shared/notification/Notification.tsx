@@ -75,7 +75,7 @@ const Notification = () => {
 
   if (variant && title && show) {
     return (
-      <div className="fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-20">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-20">
         <div className="mx-auto max-w-sm px-2 sm:px-6 lg:px-8">
           <Transition
             show={show}
@@ -83,7 +83,7 @@ const Notification = () => {
             enter="transform ease-out duration-500 transition"
             enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
             enterTo="translate-y-0 opacity-100 sm:translate-x-0"
-            leave="transition ease-in duration-100"
+            leave="transition ease-in duration-500"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
@@ -102,6 +102,7 @@ const Notification = () => {
                 </div>
                 <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-2">
                   <button
+                    tabIndex={-1}
                     onClick={() => setShow(false)}
                     type="button"
                     className={clsx(
