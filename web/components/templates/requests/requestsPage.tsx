@@ -22,10 +22,11 @@ interface RequestsPageProps {
   page: number;
   from: number;
   to: number;
+  properties: string[];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to } = props;
+  const { requests, error, count, page, from, to, properties } = props;
   console.log("REQUESTS PAGE HI", requests)
   const router = useRouter();
   const { setNotification } = useNotification();
@@ -85,11 +86,25 @@ const RequestsPage = (props: RequestsPageProps) => {
       properties: d.request_properties,
     };
   });
-
-  console.log(csvData)
+  console.log("THE FINAL DATA", csvData, properties)
 
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
+
+  const makeColumn = (name: string) => {
+    return <th
+      scope="col"
+      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+    >
+      {name}
+    </th>
+  }
+
+  const makeValue = (val: string) => {
+    return <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+      {val}
+    </td>
+  }
 
   return (
     <>
@@ -189,6 +204,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                       >
                         Model
                       </th>
+                      {properties.map((p) => makeColumn(p))}
                       <th
                         scope="col"
                         className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
@@ -252,6 +268,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                             ? row.response_body.model
                             : "n/a"}
                         </td>
+                        {properties.map((p) => makeValue(row.request_properties[p]))}
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             className="text-sky-600 hover:text-sky-900"

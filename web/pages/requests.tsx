@@ -3,6 +3,8 @@ import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import RequestsPage from "../components/templates/requests/requestsPage";
+import { getProperties } from "../lib/api/properties/properties";
+import { unwrapAsync } from "../lib/result";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 
 interface RequestsProps {
@@ -13,10 +15,12 @@ interface RequestsProps {
   page: number;
   from: number;
   to: number;
+  properties: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to } = props;
+  const { user, data, error, count, page, from, to, properties } = props;
+  console.log("REQUESTS PAGE")
 
   return (
     <MetaData title="Requests">
@@ -28,6 +32,7 @@ const Requests = (props: RequestsProps) => {
           page={page}
           from={from}
           to={to}
+          properties={properties}
         />
       </AuthLayout>
     </MetaData>
@@ -40,12 +45,14 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const supabase = createServerSupabaseClient(context);
+  const user = await supabase.auth.getUser();
+  console.log("USER", user)
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (!session)
+  if (!session || !user.data || !user.data.user)
     return {
       redirect: {
         destination: "/login",
@@ -64,6 +71,22 @@ export const getServerSideProps = async (
     pageSize
   );
 
+  // get all the properties for this user
+  console.log("USER ID", user.data.user.id)
+
+  const allProperties = (await unwrapAsync(getProperties(user.data.user.id)))
+    .map((property) => {
+      return property.property;
+    })
+
+
+  console.log("ALL PROPERTIES", allProperties)
+
+  // const allProperties = await unwrapAsync(getProperties(user.data.user.id))
+  // console.log("ALL PROPERTIES", allProperties)
+
+  console.log("AM I EVER CALLED")
+
   return {
     props: {
       initialSession: session,
@@ -74,6 +97,7 @@ export const getServerSideProps = async (
       page: currentPage,
       from: from,
       to: to,
+      properties: allProperties,
     },
   };
 };
