@@ -1,6 +1,6 @@
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { SparklesIcon } from "@heroicons/react/24/solid";
-import { Tier } from "./usagePage";
+import { Tier } from "./billingPage";
 
 const pricing: {
   tiers: {

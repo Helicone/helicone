@@ -10,7 +10,7 @@ import { deleteSubscription } from "../../../lib/api/subscription/delete";
 import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
-import { Tier } from "../../../components/templates/usage/usagePage";
+import { Tier } from "../../../components/templates/billing/billingPage";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
 export type UserSettingsResponse = {

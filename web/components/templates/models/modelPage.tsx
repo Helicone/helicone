@@ -14,13 +14,15 @@ import ThemedTable from "../../shared/themedTable";
 import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { modelCost } from "../dashboard/metricsPanel";
-import AuthHeader from "../../shared/authHeader";
 
-interface ModelPageProps {}
+interface ModelPageProps {
+  user: User;
+}
 
 type ModelMetrics = Database["public"]["Views"]["model_metrics"]["Row"];
 
 const ModelPage = (props: ModelPageProps) => {
+  const { user } = props;
   const client = useSupabaseClient<Database>();
   const router = useRouter();
   const [modelMetrics, setModelMetrics] = useState<ModelMetrics[]>([]);
@@ -40,8 +42,7 @@ const ModelPage = (props: ModelPageProps) => {
   }, [client]);
 
   return (
-    <>
-      <AuthHeader title={"Models"} />
+    <AuthLayout user={user}>
       <ThemedTable
         columns={[
           { name: "Model", key: "model", hidden: false },
@@ -63,7 +64,7 @@ const ModelPage = (props: ModelPageProps) => {
             cost: modelCost(m).toFixed(5),
           }))}
       />
-    </>
+    </AuthLayout>
   );
 };
 
