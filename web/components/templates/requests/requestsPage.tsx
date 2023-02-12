@@ -179,6 +179,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "request_user_id",
       label: "User",
+      format: (value: string) => (value ? truncString(value, 15) : value),
     },
     {
       key: "model",
