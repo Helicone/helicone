@@ -67,6 +67,8 @@ export async function subscriptionChange(
       window.open(heliconeContactLink, "_ blank");
     } else if (changeFrom === "starter-pending-cancel") {
       window.open(heliconeBillingPortalLink, "_ blank");
+    } else if (changeFrom === "starter") {
+      window.open(heliconeBillingPortalLink, "_ blank");
     }
   } else if (changeTo === "enterprise") {
     window.open(heliconeContactLink, "_ blank");
