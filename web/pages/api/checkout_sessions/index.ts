@@ -6,9 +6,22 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 
-const stripePriceId = process.env.STRIPE_PRICE_ID;
-if (!stripePriceId) {
+export const stripeStarterPriceId = process.env.STRIPE_STARTER_PRICE_ID;
+if (!stripeStarterPriceId) {
   throw new Error("Missing Stripe Price ID");
+}
+
+export const stripeStarterProductId = process.env.STRIPE_STARTER_PRODUCT_ID;
+
+if (!stripeStarterProductId) {
+  throw new Error("Missing Stripe Starter Product ID");
+}
+
+export const stripeEnterpriseProductId =
+  process.env.STRIPE_ENTERPRISE_PRODUCT_ID;
+
+if (!stripeEnterpriseProductId) {
+  throw new Error("Missing Stripe Enterprise Product ID");
 }
 
 export default async function handler(
@@ -49,7 +62,7 @@ export default async function handler(
         payment_method_types: ["card"],
         line_items: [
           {
-            price: stripePriceId,
+            price: stripeStarterPriceId,
             quantity: 1,
           },
         ],
