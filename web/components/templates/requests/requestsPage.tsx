@@ -287,7 +287,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                             : "n/a"}
                         </td>
                         {properties.map((p) =>
-                          makeValue(row.request_properties[p])
+                          makeValue(row.request_properties![p])
                         )}
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
@@ -446,7 +446,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>{selectedData.request_body?.model}</p>
                 </li>
                 {properties.map((p) =>
-                  makeCardProperty(p, selectedData.request_properties[p])
+                  makeCardProperty(p, selectedData.request_properties![p])
                 )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                   <div className="w-full flex flex-col text-left space-y-1">
