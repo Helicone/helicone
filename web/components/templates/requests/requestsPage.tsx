@@ -4,6 +4,7 @@ import {
   ClipboardDocumentIcon,
 } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { duration } from "@mui/material";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themedModal";
+import StickyHeadTable, { Column } from "../../test";
 
 interface RequestsPageProps {
   requests: ResponseAndRequest[];
@@ -24,13 +26,41 @@ interface RequestsPageProps {
   to: number;
 }
 
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 const RequestsPage = (props: RequestsPageProps) => {
   const { requests, error, count, page, from, to } = props;
   const router = useRouter();
   const { setNotification } = useNotification();
 
   const [index, setIndex] = useState<number>();
-  const [selectedData, setSelectedData] = useState<ResponseAndRequest>();
+  const [selectedData, setSelectedData] = useState<{
+    request_id: string | null;
+    response_id: string | null;
+    error?: any;
+    time: string | null;
+    request: string | undefined;
+    response: string | undefined;
+    "duration (s)": string;
+    token_count: number | undefined;
+    logprobs: any;
+    request_user_id: string | null;
+    model: string | undefined;
+    temperature: number | undefined;
+  }>();
   const [open, setOpen] = useState(true);
 
   const probabilities = requests.map((req) => {
@@ -57,7 +87,22 @@ const RequestsPage = (props: RequestsPageProps) => {
     return prob;
   });
 
-  const selectRowHandler = (row: ResponseAndRequest, idx: number) => {
+  const selectRowHandler = (
+    row: {
+      request_id: string | null;
+      response_id: string | null;
+      time: string | null;
+      request: string | undefined;
+      response: string | undefined;
+      "duration (s)": string;
+      token_count: number | undefined;
+      logprobs: any;
+      request_user_id: string | null;
+      model: string | undefined;
+      temperature: number | undefined;
+    },
+    idx: number
+  ) => {
     setIndex(idx);
     setSelectedData(row);
     setOpen(true);
@@ -72,9 +117,12 @@ const RequestsPage = (props: RequestsPageProps) => {
     return {
       request_id: d.request_id,
       response_id: d.response_id,
+      error: d.response_body!.error,
       time: d.request_created_at,
       request: d.request_body?.prompt,
-      response: d.response_body?.choices?.[0]?.text,
+      response: d.response_body!.error
+        ? `error: ${d.response_body!.error.type}`
+        : d.response_body?.choices?.[0]?.text,
       "duration (s)": latency.toString(),
       token_count: d.request_body?.max_tokens,
       logprobs: probabilities[i],
@@ -87,24 +135,64 @@ const RequestsPage = (props: RequestsPageProps) => {
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
 
+  const getUSDate = (value: string) => {
+    const date = new Date(value);
+    const month = monthNames[date.getMonth()];
+    const day = date.getDate();
+    return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
+      .toLocaleTimeString()
+      .slice(-2)}`;
+  };
+
+  const columns: readonly Column[] = [
+    {
+      key: "time",
+      label: "Time",
+      minWidth: 140,
+      format: (value: string) => getUSDate(value),
+    },
+    {
+      key: "request",
+      label: "Request",
+      minWidth: 140,
+      format: (value: string) => truncString(value, 15),
+    },
+    {
+      key: "response",
+      label: "Response",
+      minWidth: 140,
+      format: (value: string) => (value ? truncString(value, 15) : value),
+    },
+    {
+      key: "duration (s)",
+      label: "Duration",
+      format: (value: string) => `${value} s`,
+    },
+    {
+      key: "token_count",
+      label: "Tokens",
+    },
+    {
+      key: "logprobs",
+      label: "Log Prob",
+    },
+    {
+      key: "request_user_id",
+      label: "User",
+    },
+    {
+      key: "model",
+      label: "Model",
+      minWidth: 170,
+    },
+  ];
+
   return (
     <>
       <div className="">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
-            {/* <p className="mt-2 text-sm text-gray-700">
-              Showing the latest 100 requests
-            </p> */}
-            <div className="block mt-2">
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{from + 1}</span> to{" "}
-                <span className="font-medium">
-                  {Math.min(to + 1, count as number)}
-                </span>{" "}
-                of <span className="font-medium">{count}</span> results
-              </p>
-            </div>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
@@ -130,199 +218,17 @@ const RequestsPage = (props: RequestsPageProps) => {
             </CSVLink>
           </div>
         </div>
-        <div className="mt-4 flex flex-col">
-          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-white">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                      >
-                        Time
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Request
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Response
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Duration
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Tokens
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Log Prob
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        User
-                      </th>
-                      <th
-                        scope="col"
-                        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Model
-                      </th>
-                      <th
-                        scope="col"
-                        className="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6"
-                      >
-                        <span className="sr-only">Edit</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {requests.map((row, idx) => (
-                      <tr key={row.request_id}>
-                        <td className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {new Date(row.request_created_at!).toLocaleString()}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm font-medium text-gray-900">
-                          {row.request_body?.prompt
-                            ? truncString(row.request_body.prompt, 15)
-                            : "n/a"}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-900">
-                          {row.response_body!.choices ? (
-                            <>
-                              {truncString(
-                                row.response_body!.choices[0].text,
-                                25
-                              )}
-                            </>
-                          ) : row.response_body!.error ? (
-                            <div className="text-red-500">
-                              {truncString(
-                                `error: ${row.response_body!.error.type}`,
-                                25
-                              )}
-                            </div>
-                          ) : (
-                            "{{ no error }}"
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {(
-                            (new Date(row.response_created_at!).getTime() -
-                              new Date(row.request_created_at!).getTime()) /
-                            1000
-                          ).toString()}{" "}
-                          s
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.response_body!.usage
-                            ? row.response_body!.usage.total_tokens
-                            : "n/a"}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {probabilities[idx]}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.request_user_id &&
-                            truncString(row.request_user_id, 5)}
-                        </td>
-                        <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-                          {row.response_body?.model
-                            ? row.response_body.model
-                            : "n/a"}
-                        </td>
-                        <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                          <button
-                            className="text-sky-600 hover:text-sky-900"
-                            onClick={() => selectRowHandler(row, idx)}
-                          >
-                            View
-                            <span className="sr-only">, {row.request_id}</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <nav
-            className="flex items-center justify-between bg-gray-100 px-0 mt-2 sm:px-1 sm:mt-4"
-            aria-label="Pagination"
-          >
-            <div className="flex flex-row items-center gap-2">
-              <label
-                htmlFor="location"
-                className="block text-sm font-medium text-gray-700 whitespace-nowrap"
-              >
-                Page Size:
-              </label>
-              <select
-                id="location"
-                name="location"
-                className="block w-full rounded-md border-gray-300 py-1.5 pl-3 pr-6 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                defaultValue={router.query.page_size}
-                onChange={(e) => {
-                  router.query.page_size = e.target.value;
-                  router.push(router);
-                }}
-              >
-                <option>25</option>
-                <option>50</option>
-                <option>100</option>
-              </select>
-            </div>
-            <div className="flex flex-1 justify-end">
-              <button
-                onClick={() => {
-                  router.query.page = (page - 1).toString();
-                  router.push(router);
-                }}
-                disabled={!hasPrevious}
-                className={clsx(
-                  !hasPrevious
-                    ? "bg-gray-100 hover:cursor-not-allowed"
-                    : "hover:bg-gray-50",
-                  "relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                )}
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => {
-                  router.query.page = (page + 1).toString();
-                  router.push(router);
-                }}
-                disabled={!hasNext}
-                className={clsx(
-                  !hasNext
-                    ? "bg-gray-100 hover:cursor-not-allowed"
-                    : "hover:bg-gray-50",
-                  "relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                )}
-              >
-                Next
-              </button>
-            </div>
-          </nav>
+        <div className="mt-4">
+          <StickyHeadTable
+            condensed
+            columns={columns}
+            rows={csvData}
+            count={count}
+            page={page}
+            from={from}
+            to={to}
+            onSelectHandler={selectRowHandler}
+          />
         </div>
       </div>
       {open && selectedData !== undefined && index !== undefined && (
@@ -356,18 +262,15 @@ const RequestsPage = (props: RequestsPageProps) => {
               <ul className="mt-4 space-y-2">
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Time:</p>
-                  <p>
-                    {new Date(
-                      selectedData.request_created_at!
-                    ).toLocaleString()}
-                  </p>
+                  <p>{new Date(selectedData.time || "").toLocaleString()}</p>
                 </li>
-                {selectedData.response_body!.error && (
+
+                {selectedData.error && (
                   <li className="w-full flex flex-row justify-between gap-4 text-sm">
                     <p>Error:</p>
                     <p className="max-w-xl whitespace-pre-wrap text-left">
-                      {selectedData.response_body!.error
-                        ? JSON.stringify(selectedData.response_body!.error)
+                      {selectedData.error
+                        ? JSON.stringify(selectedData.error)
                         : "{{ no error }}"}
                     </p>
                   </li>
@@ -375,22 +278,11 @@ const RequestsPage = (props: RequestsPageProps) => {
 
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Duration:</p>
-                  <p>
-                    {(
-                      (new Date(selectedData.response_created_at!).getTime() -
-                        new Date(selectedData.request_created_at!).getTime()) /
-                      1000
-                    ).toString()}{" "}
-                    s
-                  </p>
+                  <p>{selectedData["duration (s)"]}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Tokens:</p>
-                  <p>
-                    {selectedData.response_body!.usage
-                      ? selectedData.response_body!.usage.total_tokens
-                      : "{{ no tokens found }}"}
-                  </p>
+                  <p>{selectedData.token_count}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Log Probability:</p>
@@ -402,23 +294,19 @@ const RequestsPage = (props: RequestsPageProps) => {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Model:</p>
-                  <p>{selectedData.request_body?.model}</p>
+                  <p>{selectedData.model}</p>
                 </li>
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                   <div className="w-full flex flex-col text-left space-y-1">
                     <p>Request:</p>
                     <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[250px] max-h-[250px] overflow-auto">
-                      {selectedData.request_body?.prompt
-                        ? selectedData.request_body.prompt
-                        : "{{ no prompt }}"}
+                      {selectedData.request}
                     </p>
                   </div>
                   <div className="w-full flex flex-col text-left space-y-1">
                     <p>Response:</p>
                     <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[250px] max-h-[250px] overflow-auto">
-                      {selectedData.response_body!.choices
-                        ? selectedData.response_body!.choices[0].text
-                        : "{{ no response }}"}
+                      {selectedData.response}
                     </p>
                   </div>
                 </div>
