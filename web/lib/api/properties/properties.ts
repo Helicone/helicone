@@ -24,8 +24,5 @@ FROM (
   if (error !== null) {
     return { data: null, error: error };
   }
-  if (data.length === 0) {
-    return { data: null, error: "No data getting last request" };
-  }
   return { data: data, error: null };
 }

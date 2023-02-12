@@ -44,13 +44,12 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const supabase = createServerSupabaseClient(context);
-  const user = await supabase.auth.getUser();
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (!session || !user.data || !user.data.user)
+  if (!session)
     return {
       redirect: {
         destination: "/login",
@@ -69,11 +68,11 @@ export const getServerSideProps = async (
     pageSize
   );
 
-  const allProperties = (
-    await unwrapAsync(getProperties(user.data.user.id))
-  ).map((property) => {
-    return property.property;
-  });
+  const allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
+    (property) => {
+      return property.property;
+    }
+  );
 
   return {
     props: {
