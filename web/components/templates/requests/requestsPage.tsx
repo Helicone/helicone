@@ -72,7 +72,7 @@ const RequestsPage = (props: RequestsPageProps) => {
 
     const updated_request_properties = Object.assign(
       {},
-      ...properties.map((p) => ({ [p]: d.request_properties[p] || null }))
+      ...properties.map((p) => ({ [p]: d.request_properties != null ? d.request_properties[p] : null }))
     );
 
     return {
