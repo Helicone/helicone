@@ -148,19 +148,19 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "time",
       label: "Time",
-      minWidth: 140,
+      minWidth: 170,
       format: (value: string) => getUSDate(value),
     },
     {
       key: "request",
       label: "Request",
-      minWidth: 140,
+      minWidth: 170,
       format: (value: string) => truncString(value, 15),
     },
     {
       key: "response",
       label: "Response",
-      minWidth: 140,
+      minWidth: 170,
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
     {
@@ -179,6 +179,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "request_user_id",
       label: "User",
+      minWidth: 170,
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
     {
