@@ -144,7 +144,7 @@ export interface Database {
           request_user_id: string | null
           api_key_preview: string | null
           user_id: string | null
-          properties: Record<string, string> | null
+          request_properties: Record<string, string> | null
         }
       }
       response_rbac: {
