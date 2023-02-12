@@ -74,7 +74,6 @@ export function GetTableData({
 
 export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
   const data = GetTableData({ client });
-  console.log("aLKFJELFKJAEFLKJAEFLKJ")
 
   return (
     <div className="h-full">

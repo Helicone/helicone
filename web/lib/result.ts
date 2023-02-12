@@ -21,7 +21,6 @@ export function isSuccess<T, K>(
 }
 
 export function unwrap<T, K>(result: Result<T, K>): T {
-  console.log("UNWRAP")
   if (isError(result)) {
     throw new Error(JSON.stringify(result.error));
   }

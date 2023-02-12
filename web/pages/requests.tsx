@@ -20,7 +20,6 @@ interface RequestsProps {
 
 const Requests = (props: RequestsProps) => {
   const { user, data, error, count, page, from, to, properties } = props;
-  console.log("REQUESTS PAGE")
 
   return (
     <MetaData title="Requests">
@@ -46,7 +45,6 @@ export const getServerSideProps = async (
 ) => {
   const supabase = createServerSupabaseClient(context);
   const user = await supabase.auth.getUser();
-  console.log("USER", user)
 
   const {
     data: { session },
@@ -71,21 +69,10 @@ export const getServerSideProps = async (
     pageSize
   );
 
-  // get all the properties for this user
-  console.log("USER ID", user.data.user.id)
-
   const allProperties = (await unwrapAsync(getProperties(user.data.user.id)))
     .map((property) => {
       return property.property;
     })
-
-
-  console.log("ALL PROPERTIES", allProperties)
-
-  // const allProperties = await unwrapAsync(getProperties(user.data.user.id))
-  // console.log("ALL PROPERTIES", allProperties)
-
-  console.log("AM I EVER CALLED")
 
   return {
     props: {
