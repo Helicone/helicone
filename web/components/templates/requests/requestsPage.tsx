@@ -27,7 +27,6 @@ interface RequestsPageProps {
 
 const RequestsPage = (props: RequestsPageProps) => {
   const { requests, error, count, page, from, to, properties } = props;
-  console.log("REQUESTS PAGE HI", requests)
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -71,6 +70,8 @@ const RequestsPage = (props: RequestsPageProps) => {
         new Date(d.request_created_at!).getTime()) /
       1000;
 
+    const updated_request_properties = Object.assign({}, ...properties.map(p => ({[p]: d.request_properties[p] || null})));
+
     return {
       request_id: d.request_id,
       response_id: d.response_id,
@@ -83,10 +84,9 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
-      properties: d.request_properties,
+      ...updated_request_properties
     };
   });
-  console.log("THE FINAL DATA", csvData, properties)
 
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
@@ -104,6 +104,13 @@ const RequestsPage = (props: RequestsPageProps) => {
     return <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
       {val}
     </td>
+  }
+
+  const makeCardProperty = (name: string, val: string) => {
+    return <li className="w-full flex flex-row justify-between gap-4 text-sm">
+      <p>{name}:</p>
+      <p>{val == null ? "{NULL}" : val}</p>
+    </li> 
   }
 
   return (
@@ -425,6 +432,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.request_body?.model}</p>
                 </li>
+                {properties.map((p) => makeCardProperty(p, selectedData.request_properties[p]))}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                   <div className="w-full flex flex-col text-left space-y-1">
                     <p>Request:</p>
