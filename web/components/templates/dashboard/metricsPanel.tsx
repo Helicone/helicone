@@ -33,6 +33,10 @@ export function modelCost(
   }
   const is_finetuned_model = model.includes(":");
 
+  if (!is_finetuned_model && model.includes("code")) {
+    return 0;
+  }
+
   const model_prefix = is_finetuned_model ? model.split(":")[0] : model;
 
   const costs = is_finetuned_model ? OPENAI_FINETUNE_COSTS : OPENAI_COSTS;
