@@ -70,7 +70,10 @@ const RequestsPage = (props: RequestsPageProps) => {
         new Date(d.request_created_at!).getTime()) /
       1000;
 
-    const updated_request_properties = Object.assign({}, ...properties.map(p => ({[p]: d.request_properties[p] || null})));
+    const updated_request_properties = Object.assign(
+      {},
+      ...properties.map((p) => ({ [p]: d.request_properties[p] || null }))
+    );
 
     return {
       request_id: d.request_id,
@@ -84,7 +87,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
-      ...updated_request_properties
+      ...updated_request_properties,
     };
   });
 
@@ -92,26 +95,32 @@ const RequestsPage = (props: RequestsPageProps) => {
   const hasNext = to <= count!;
 
   const makeColumn = (name: string) => {
-    return <th
-      scope="col"
-      className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-    >
-      {name}
-    </th>
-  }
+    return (
+      <th
+        scope="col"
+        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+      >
+        {name}
+      </th>
+    );
+  };
 
   const makeValue = (val: string) => {
-    return <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-      {val}
-    </td>
-  }
+    return (
+      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+        {val}
+      </td>
+    );
+  };
 
   const makeCardProperty = (name: string, val: string) => {
-    return <li className="w-full flex flex-row justify-between gap-4 text-sm">
-      <p>{name}:</p>
-      <p>{val == null ? "{NULL}" : val}</p>
-    </li> 
-  }
+    return (
+      <li className="w-full flex flex-row justify-between gap-4 text-sm">
+        <p>{name}:</p>
+        <p>{val == null ? "{NULL}" : val}</p>
+      </li>
+    );
+  };
 
   return (
     <>
@@ -275,7 +284,9 @@ const RequestsPage = (props: RequestsPageProps) => {
                             ? row.response_body.model
                             : "n/a"}
                         </td>
-                        {properties.map((p) => makeValue(row.request_properties[p]))}
+                        {properties.map((p) =>
+                          makeValue(row.request_properties[p])
+                        )}
                         <td className="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             className="text-sky-600 hover:text-sky-900"
@@ -432,7 +443,9 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.request_body?.model}</p>
                 </li>
-                {properties.map((p) => makeCardProperty(p, selectedData.request_properties[p]))}
+                {properties.map((p) =>
+                  makeCardProperty(p, selectedData.request_properties[p])
+                )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                   <div className="w-full flex flex-col text-left space-y-1">
                     <p>Request:</p>

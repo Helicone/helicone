@@ -69,10 +69,11 @@ export const getServerSideProps = async (
     pageSize
   );
 
-  const allProperties = (await unwrapAsync(getProperties(user.data.user.id)))
-    .map((property) => {
-      return property.property;
-    })
+  const allProperties = (
+    await unwrapAsync(getProperties(user.data.user.id))
+  ).map((property) => {
+    return property.property;
+  });
 
   return {
     props: {
