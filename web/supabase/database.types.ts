@@ -18,6 +18,8 @@ export interface Database {
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
+          formatted_prompt_id: string | null
+          prompt_values: Json | null
         }
         Insert: {
           id?: string
@@ -27,6 +29,8 @@ export interface Database {
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
+          formatted_prompt_id?: string | null
+          prompt_values?: Json | null
         }
         Update: {
           id?: string
@@ -36,6 +40,8 @@ export interface Database {
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
+          formatted_prompt_id?: string | null
+          prompt_values?: Json | null
         }
       }
       response: {
@@ -99,6 +105,23 @@ export interface Database {
           created_at?: string | null
           request_limit?: number
           tier?: string
+        }
+      }
+      prompt: {
+        Row: {
+          id: string
+          created_at: string
+          prompt: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          prompt: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          prompt?: string
         }
       }
     }

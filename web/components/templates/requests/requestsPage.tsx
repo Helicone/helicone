@@ -23,6 +23,7 @@ interface RequestsPageProps {
   page: number;
   from: number;
   to: number;
+  values: string[];
 }
 
 const monthNames = [
@@ -41,7 +42,7 @@ const monthNames = [
 ];
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to } = props;
+  const { requests, error, count, page, from, to, values } = props;
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -113,6 +114,13 @@ const RequestsPage = (props: RequestsPageProps) => {
         new Date(d.request_created_at!).getTime()) /
       1000;
 
+    const updated_request_properties = Object.assign(
+      {},
+      ...values.map((p) => ({
+        [p]: d.prompt_values != null ? d.prompt_values[p] : null,
+      }))
+    );
+
     return {
       request_id: d.request_id,
       response_id: d.response_id,
@@ -128,6 +136,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
+      ...updated_request_properties,
     };
   });
 

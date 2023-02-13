@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { fillPromptRegex, formatBody, updateContentLength } from "./prompt_discovery";
+import { extractPrompt, Prompt } from "./prompt_discovery";
 // import bcrypt from "bcrypt";
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -35,6 +35,35 @@ function forwardRequestToOpenAi(
       });
 }
 
+async function getPromptId(
+  dbClient: SupabaseClient,
+  prompt: Prompt
+): Promise<Result> {
+  // First, get the prompt id if there's a match in the prompt table
+  const { data, error } = await dbClient
+    .from("prompt")
+    .select("id")
+    .eq("prompt", prompt.prompt)
+    .limit(1);
+  if (error !== null) {
+    return { data: null, error: error.message }; 
+  }
+  if (data !== null && data.length > 0) {
+    return { data: data[0].id, error: null };
+  } else {
+    // If there's no match, insert the prompt and get the id
+    const { data, error } = await dbClient
+      .from("prompt")
+      .insert([{ prompt: prompt.prompt }])
+      .select("id")
+      .single();
+    if (error !== null) {
+      return { data: null, error: error.message };
+    }
+    return { data: data.id, error: null };
+  }
+}
+
 async function logRequest({
   dbClient,
   request,
@@ -43,6 +72,7 @@ async function logRequest({
   requestId,
   auth,
   body,
+  prompt,
 }: {
   dbClient: SupabaseClient;
   request: Request;
@@ -51,8 +81,17 @@ async function logRequest({
   requestId?: string;
   auth: string;
   body?: string;
+  prompt?: Prompt;
 }): Promise<Result> {
   const json = body ? JSON.parse(body) : {};
+
+  const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt) : null;
+  if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
+    return { data: null, error: formattedPromptResult.error };
+  }
+  const formattedPromptId = formattedPromptResult !== null ? formattedPromptResult.data : null;
+
+  const prompt_values = prompt !== undefined ? prompt.values : null;
 
   const { data, error } = requestId
     ? await dbClient
@@ -65,6 +104,8 @@ async function logRequest({
             auth_hash: await hash(auth),
             user_id: userId,
             prompt_id: promptId,
+            formatted_prompt_id: formattedPromptId,
+            prompt_values: prompt_values,
           },
         ])
         .select("id")
@@ -78,6 +119,8 @@ async function logRequest({
             auth_hash: await hash(auth),
             user_id: userId,
             prompt_id: promptId,
+            formatted_prompt_id: formattedPromptId,
+            prompt_values: prompt_values,
           },
         ])
         .select("id")
@@ -142,11 +185,12 @@ export default {
       return new Response("No authorization header found!", { status: 401 });
     }
 
-    const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
-    const clone = request.clone();
-    const body = isPromptRegexOn ? formatBody(await clone.text()) : await request.text();
-    const formattedRequest = isPromptRegexOn ? updateContentLength(clone, body) : request;
-    
+    const {
+      request: formattedRequest, 
+      body, 
+      prompt,
+    } = await extractPrompt(request);
+
     const dbClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
@@ -168,6 +212,7 @@ export default {
           ?.substring(0, 128),
         auth,
         body: body === "" ? undefined : body,
+        prompt,
       }),
     ]);
     const responseBody = await response.text();

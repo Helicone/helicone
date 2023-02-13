@@ -1,21 +1,27 @@
 
-interface Prompt {
+export interface Prompt {
     prompt: string;
     values: { [key: string]: string };
+}
+ 
+interface PromptResult {
+    request: Request,
+    body: string,
+    prompt?: Prompt,
 }
 
 function formatPrompt(prompt: Prompt): string {
     let formattedString = prompt.prompt;
 
     for (const key in prompt.values) {
-        const placeholder = new RegExp(`{${key}}`, 'g');
+        const placeholder = new RegExp(`{{${key}}}`, 'g');
         formattedString = formattedString.replace(placeholder, prompt.values[key]);
     }
 
     return formattedString;
 }
 
-export function updateContentLength(clone: Request, text: string): Request {
+function updateContentLength(clone: Request, text: string): Request {
     const body = new TextEncoder().encode(text);
     const headers = new Headers(clone.headers);
     headers.set("Content-Length", `${body.byteLength}`);
@@ -27,15 +33,30 @@ export function updateContentLength(clone: Request, text: string): Request {
     });
 }
 
-export function fillPromptRegex(jsonString: string): string {
-    const parsedData = JSON.parse(jsonString)
+export async function extractPrompt(
+    request: Request,
+): Promise<PromptResult> {
+    const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
 
-    return formatPrompt(parsedData)
-}
- 
-export function formatBody(body: string): string {
-    const json = body ? JSON.parse(body) : {};
-    const prompt = fillPromptRegex(json["prompt"]);
-    json["prompt"] = prompt
-    return JSON.stringify(json);
+    if (isPromptRegexOn) {
+        const cloneRequest = request.clone();
+        const cloneBody = await cloneRequest.text();
+        const json = cloneBody ? JSON.parse(cloneBody) : {};
+        const prompt = JSON.parse(json["prompt"])
+        const stringPrompt = formatPrompt(prompt);
+        json["prompt"] = stringPrompt
+        const body = JSON.stringify(json);
+        const formattedRequest = updateContentLength(cloneRequest, body);
+
+        return {
+            request: formattedRequest,
+            body: body,
+            prompt: prompt,
+        }
+    } else {
+        return {
+            request: request,
+            body: await request.text(),
+        }
+    }
 }
