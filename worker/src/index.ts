@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { fillPromptRegex, formatBody } from "./prompt_discovery";
+import { fillPromptRegex, formatBody, updateContentLength } from "./prompt_discovery";
 // import bcrypt from "bcrypt";
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -143,24 +143,27 @@ export default {
     }
 
     const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
-    const body = isPromptRegexOn ? formatBody(await request.text()) : await request.text();
+    const clone = request.clone();
+    const body = isPromptRegexOn ? formatBody(await clone.text()) : await request.text();
+    const formattedRequest = isPromptRegexOn ? updateContentLength(clone, body) : request;
+    
     const dbClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
 
     const [response, requestResult] = await Promise.all([
-      forwardRequestToOpenAi(request, body),
+      forwardRequestToOpenAi(formattedRequest, body),
       logRequest({
         dbClient,
         request,
         userId:
-          request.headers.get("Helicone-User-Id")?.substring(0, 128) ??
-          request.headers.get("User-Id")?.substring(0, 128) ??
+          formattedRequest.headers.get("Helicone-User-Id")?.substring(0, 128) ??
+          formattedRequest.headers.get("User-Id")?.substring(0, 128) ??
           null,
         promptId:
-          request.headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
-        requestId: request.headers
+          formattedRequest.headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
+        requestId: formattedRequest.headers
           .get("Helicone-Request-Id")
           ?.substring(0, 128),
         auth,
