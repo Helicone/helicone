@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { fillPromptRegex, formatBody } from "./prompt_discovery";
 // import bcrypt from "bcrypt";
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -138,10 +139,11 @@ export default {
   ): Promise<Response> {
     const auth = request.headers.get("Authorization");
     if (auth === null) {
-      return new Response("Not authorization header found!", { status: 401 });
+      return new Response("No authorization header found!", { status: 401 });
     }
 
-    const body = await request.text();
+    const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
+    const body = isPromptRegexOn ? formatBody(await request.text()) : await request.text();
     const dbClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
