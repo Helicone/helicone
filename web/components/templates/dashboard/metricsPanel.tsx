@@ -20,7 +20,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
   const { filters, metrics: metricsData } = props;
   const { setNotification } = useNotification();
   if (metricsData !== "loading" && metricsData.error !== null) {
-    setNotification(metricsData.error, "error");
+    // setNotification(metricsData.error, "error"); Do nothing, we need to support an empty set
   }
 
   const loading = metricsData === "loading";
