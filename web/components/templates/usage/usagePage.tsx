@@ -8,7 +8,6 @@ import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import { Database } from "../../../supabase/database.types";
 
-import Subscriptions from "./subscriptions";
 import { subscriptionChange } from "../../../lib/subscriptionChange";
 import AuthLayout from "../../shared/layout/authLayout";
 import { UserSettingsResponse } from "../../../pages/api/user_settings";
@@ -16,8 +15,9 @@ import Stripe from "stripe";
 import { clsx } from "../../shared/clsx";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { getUserSettings } from "../../../services/lib/user";
 
-export type Tier = "free" | "pro" | "enterprise" | "pro-pending-cancel";
+export type Tier = "free" | "starter" | "enterprise" | "starter-pending-cancel";
 
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
@@ -44,7 +44,7 @@ export async function fetchPostJSON(url: string, data?: {}) {
   }
 }
 
-interface BillingPageProps {
+interface UsagePageProps {
   user: User;
 }
 
@@ -58,18 +58,18 @@ const CurrentSubscriptionStatus = ({
   if (tier === "free") {
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You are currently on the free tier. You can upgrade to the pro tier to
-        get more requests per month.
+        You are currently on the our free free tier. You can upgrade to the
+        starter tier to get more requests per month.
       </div>
     );
-  } else if (tier === "pro") {
+  } else if (tier === "starter") {
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You are currently on the pro tier. You can upgrade to the enterprise
-        tier to get more requests per month.
+        You are currently on the starter tier. You can upgrade to the enterprise
+        tier to get unlimited requests and advanced features
       </div>
     );
-  } else if (tier === "pro-pending-cancel") {
+  } else if (tier === "starter-pending-cancel") {
     const endingDate = new Date(
       subscription?.current_period_end! * 1000
     ).toLocaleDateString();
@@ -82,7 +82,7 @@ const CurrentSubscriptionStatus = ({
     );
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You pro account is still active until {endingDate} ({daysLeft} days
+        You starter account is still active until {endingDate} ({daysLeft} days
         left). You can upgrade to the enterprise tier to get more requests per
         month.
       </div>
@@ -90,8 +90,8 @@ const CurrentSubscriptionStatus = ({
   } else if (tier === "enterprise") {
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You are currently on the enterprise tier. You can downgrade to the pro
-        tier to get less requests per month.
+        You are currently on the enterprise tier. Please contact us if you need
+        specific features or more requests.
       </div>
     );
   } else {
@@ -103,12 +103,13 @@ interface PlanProps {
   id: number;
   name: string;
   tier: Tier;
+  price: string;
   limit: string;
   features: string[];
   isCurrent: boolean;
 }
 
-const BillingPage = (props: BillingPageProps) => {
+const UsagePage = (props: UsagePageProps) => {
   const { user } = props;
   const client = useSupabaseClient<Database>();
 
@@ -177,34 +178,34 @@ const BillingPage = (props: BillingPageProps) => {
   const plans: PlanProps[] = [
     {
       id: 1,
-      name: "Personal",
+      name: "Free",
       tier: "free",
-      limit: "1,000 requests",
+      price: "$0",
+      limit: "1,000 requests per month",
       features: ["Basic Support", "User Metrics"],
       isCurrent: currentTier === "free",
     },
     {
       id: 2,
-      name: "Professional",
-      tier: "pro",
-      limit: "1,000,000 requests",
+      name: "Starter",
+      tier: "starter",
+      price: "$50",
+      limit: "50,000 requests per month",
       features: [
         "Priority Support",
         "Advanced Insights",
-        "Early Access to New Features",
+        "Rate Limits and Analytics",
       ],
-      isCurrent: currentTier === "pro" || currentTier === "pro-pending-cancel",
+      isCurrent:
+        currentTier === "starter" || currentTier === "starter-pending-cancel",
     },
     {
       id: 3,
       name: "Enterprise",
       tier: "enterprise",
-      limit: "unlimited requests",
-      features: [
-        "Prompt Discovery",
-        "Dedicated Support",
-        "Design Consultation",
-      ],
+      price: "Contact Us",
+      limit: "Over 50,000 requests per month",
+      features: ["Design Consultation", "Caching", "Custom Features"],
       isCurrent: currentTier === "enterprise",
     },
   ];
@@ -223,7 +224,7 @@ const BillingPage = (props: BillingPageProps) => {
           Select<span className="sr-only">, {name}</span>
         </button>
       );
-    } else if (tier === "pro") {
+    } else if (tier === "starter") {
       return (
         <button
           type="button"
@@ -303,6 +304,12 @@ const BillingPage = (props: BillingPageProps) => {
                     scope="col"
                     className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
                   >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
+                  >
                     Limit
                   </th>
                   <th
@@ -341,11 +348,18 @@ const BillingPage = (props: BillingPageProps) => {
                             <div key={idx}>{feature}</div>
                           ))}
                         </div>
-                        {/* <span className="hidden sm:inline">·</span> */}
                       </div>
                       {planIdx !== 0 ? (
                         <div className="absolute right-0 left-6 -top-px h-px bg-gray-200" />
                       ) : null}
+                    </td>
+                    <td
+                      className={clsx(
+                        planIdx === 0 ? "" : "border-t border-gray-200",
+                        "hidden px-3 py-3.5 text-sm text-gray-500 lg:table-cell"
+                      )}
+                    >
+                      {plan.price}
                     </td>
                     <td
                       className={clsx(
@@ -370,19 +384,20 @@ const BillingPage = (props: BillingPageProps) => {
                         ))}
                       </div>
                     </td>
+
                     <td
                       className={clsx(
                         planIdx === 0 ? "" : "border-t border-transparent",
                         "relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
                       )}
                     >
-                      {currentTier === "pro-pending-cancel" ? (
+                      {currentTier === "starter-pending-cancel" ? (
                         renderPendingPlans(plan.tier, plan.name)
                       ) : (
                         <button
                           type="button"
                           className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                          disabled={plan.isCurrent}
+                          disabled={plan.isCurrent && currentTier === "free"}
                           onClick={() =>
                             subscriptionChange(
                               plan.tier,
@@ -392,7 +407,8 @@ const BillingPage = (props: BillingPageProps) => {
                             )
                           }
                         >
-                          Select<span className="sr-only">, {plan.name}</span>
+                          {plan.isCurrent ? "Cancel" : "Select"}
+                          <span className="sr-only">, {plan.name}</span>
                         </button>
                       )}
 
@@ -420,7 +436,7 @@ const BillingPage = (props: BillingPageProps) => {
               <button
                 type="button"
                 className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={currentTier === "pro-pending-cancel"}
+                disabled={currentTier === "starter-pending-cancel"}
                 onClick={() => setShowCoupon(true)}
               >
                 Enter Coupon
@@ -433,4 +449,4 @@ const BillingPage = (props: BillingPageProps) => {
   );
 };
 
-export default BillingPage;
+export default UsagePage;
