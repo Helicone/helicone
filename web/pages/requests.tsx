@@ -1,8 +1,10 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
+import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import RequestsPage from "../components/templates/requests/requestsPage";
+import StickyHeadTable from "../components/test";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 
 interface RequestsProps {

@@ -13,11 +13,14 @@ import {
 import { GetServerSidePropsContext } from "next";
 import { useKeys } from "../lib/useKeys";
 import KeyPage from "../components/templates/keys/keyPage";
-import BillingPage from "../components/templates/billing/billingPage";
+import BillingPage from "../components/templates/usage/usagePage";
 import MetaData from "../components/shared/metaData";
+import { getUserSettings } from "../services/lib/user";
+import { UserSettingsResponse } from "./api/user_settings";
 
 interface UsageProps {
   user: User;
+  userSettings: UserSettingsResponse;
 }
 
 const Usage = (props: UsageProps) => {
@@ -48,10 +51,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
+  // const data = await getUserSettings();
+
   return {
     props: {
       initialSession: session,
       user: session.user,
+      // userSettings: data,
     },
   };
 };
