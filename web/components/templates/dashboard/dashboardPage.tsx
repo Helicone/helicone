@@ -72,13 +72,11 @@ async function getDashboardData(
   if (validTimeWindow(filter)) {
     setMetrics("loading");
     setData("loading");
-    console.log("fetching data");
     fetchGraphData(filter, getTimeInterval(filter)).then(({ data, error }) => {
       if (error !== null) {
         console.error(error);
         setData({ error, data: null });
       } else {
-        console.log("data", data);
         setData({
           data: data.map((d) => ({ count: +d.count, time: new Date(d.time) })),
           error: null,
@@ -137,7 +135,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   useEffect(() => {
-    console.log("client:", client);
     getDashboardData(filter, setMetrics, setTimeData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

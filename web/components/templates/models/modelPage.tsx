@@ -22,7 +22,6 @@ type ModelMetrics = Database["public"]["Views"]["model_metrics"]["Row"];
 
 const ModelPage = (props: ModelPageProps) => {
   const client = useSupabaseClient<Database>();
-  const router = useRouter();
   const [modelMetrics, setModelMetrics] = useState<ModelMetrics[]>([]);
 
   useEffect(() => {

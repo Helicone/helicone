@@ -8,6 +8,7 @@ import { Result } from "../../../lib/result";
 import { MetricsDB } from "../../../schema/metrics";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 import { Loading } from "./dashboardPage";
 
 interface MetricsPanelProps {
@@ -17,13 +18,16 @@ interface MetricsPanelProps {
 
 export function MetricsPanel(props: MetricsPanelProps) {
   const { filters, metrics: metricsData } = props;
-
+  const { setNotification } = useNotification();
   if (metricsData !== "loading" && metricsData.error !== null) {
-    return <div>Error: {metricsData.error}</div>;
+    setNotification(metricsData.error, "error");
   }
 
   const loading = metricsData === "loading";
-  const data = metricsData === "loading" ? null : metricsData.data;
+  const data =
+    metricsData === "loading" || metricsData.error !== null
+      ? null
+      : metricsData.data;
 
   const numberOfDaysActive = !data?.first_request
     ? null

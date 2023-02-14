@@ -9,6 +9,7 @@ import {
 } from "../../../lib/timeCalculations/fetchTimeData";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 import { Loading } from "./dashboardPage";
 import { TimeActions } from "./timeActions";
 
@@ -23,12 +24,13 @@ interface TimeGraphWHeaderProps {
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
   const { data: timeData, setFilter, interval, setInterval } = props;
-
+  const { setNotification } = useNotification();
   if (timeData !== "loading" && timeData.error !== null) {
-    return <div>Error: {timeData.error}</div>;
+    setNotification(timeData.error, "error");
   }
 
-  const data = timeData === "loading" ? [] : timeData.data;
+  const data =
+    timeData === "loading" || timeData.error !== null ? [] : timeData.data;
 
   return (
     <div className="h-full w-full">
