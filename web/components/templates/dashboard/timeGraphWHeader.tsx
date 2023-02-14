@@ -1,52 +1,36 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { useState } from "react";
-import DateMetrics from "./timeGraph";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
+import { Result } from "../../../lib/result";
+import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
+import {
+  TimeData,
+  TimeIncrement,
+} from "../../../lib/timeCalculations/fetchTimeData";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import { Loading } from "./dashboardPage";
+import { TimeActions } from "./timeActions";
+
+import { RenderLineChart } from "./timeGraph";
 
 interface TimeGraphWHeaderProps {
-  client: SupabaseClient;
+  data: Loading<Result<TimeData[], string>>;
+  setFilter: Dispatch<SetStateAction<FilterNode>>;
+  interval: TimeInterval;
+  setInterval: Dispatch<SetStateAction<TimeInterval>>;
 }
-
-interface TimeLength {
-  label: string;
-  mobile: string;
-  value: TimeInterval;
-}
-
-export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h";
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
-  const { client } = props;
-  const [interval, setInterval] = useState<TimeInterval>("1m");
+  const { data: timeData, setFilter, interval, setInterval } = props;
+  const { setNotification } = useNotification();
+  if (timeData !== "loading" && timeData.error !== null) {
+    setNotification(timeData.error, "error");
+  }
 
-  const timeLength: TimeLength[] = [
-    { label: "3 Months", mobile: "3mo", value: "3m" },
-    { label: "1 Month", mobile: "1mo", value: "1m" },
-    { label: "7 Days", mobile: "7d", value: "7d" },
-    { label: "24 Hours", mobile: "24hr", value: "24h" },
-    { label: "1 Hour", mobile: "1hr", value: "1h" },
-  ];
-
-  const actions = () => {
-    return timeLength.map((time) => {
-      return (
-        <button
-          key={time.value}
-          type="button"
-          className={`inline-flex items-center rounded-md border ${
-            interval === time.value
-              ? "border-transparent bg-black"
-              : "border-black bg-white hover:bg-gray-200"
-          } px-4 py-2 text-sm font-medium ${
-            interval === time.value ? "text-white" : "text-black"
-          } shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2`}
-          onClick={() => setInterval(time.value)}
-        >
-          <span className="hidden sm:inline">{time.label}</span>
-          <span className="inline sm:hidden">{time.mobile}</span>
-        </button>
-      );
-    });
-  };
+  const data =
+    timeData === "loading" || timeData.error !== null ? [] : timeData.data;
 
   return (
     <div className="h-full w-full">
@@ -55,11 +39,46 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
           Requests over time
         </h3>
         <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-row gap-4">
-          {actions()}
+          <TimeActions
+            setFilter={setFilter}
+            interval={interval}
+            setInterval={setInterval}
+            onIntervalChange={(newInterval) => {
+              setInterval(newInterval);
+              setFilter((prev) => {
+                const newFilter: FilterLeaf = {
+                  request: {
+                    created_at: {
+                      gte: timeGraphConfig[newInterval].start.toISOString(),
+                      lte: timeGraphConfig[newInterval].end.toISOString(),
+                    },
+                  },
+                };
+                if (prev === "all") {
+                  return newFilter;
+                }
+                if ("left" in prev) {
+                  throw new Error("Not implemented");
+                }
+                return {
+                  ...prev,
+                  ...newFilter,
+                };
+              });
+            }}
+          />
         </div>
       </div>
-      <div className="w-full h-72 mt-8">
-        <DateMetrics client={client} timeLength={interval} />
+      <div
+        className={clsx(
+          "w-full h-72 mt-8",
+          timeData === "loading" ? "animate-pulse" : ""
+        )}
+      >
+        <RenderLineChart
+          data={data}
+          timeMap={timeGraphConfig[interval].timeMap}
+        />
       </div>
     </div>
   );

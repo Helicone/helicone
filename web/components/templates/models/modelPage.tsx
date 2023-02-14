@@ -13,7 +13,7 @@ import NavBar from "../../shared/layout/navBar";
 import ThemedTable from "../../shared/themedTable";
 import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
-import { modelCost } from "../dashboard/metricsPanel";
+import { modelCost } from "../../../lib/api/metrics/costCalc";
 import AuthHeader from "../../shared/authHeader";
 
 interface ModelPageProps {}
@@ -22,7 +22,6 @@ type ModelMetrics = Database["public"]["Views"]["model_metrics"]["Row"];
 
 const ModelPage = (props: ModelPageProps) => {
   const client = useSupabaseClient<Database>();
-  const router = useRouter();
   const [modelMetrics, setModelMetrics] = useState<ModelMetrics[]>([]);
 
   useEffect(() => {
@@ -60,7 +59,7 @@ const ModelPage = (props: ModelPageProps) => {
           .filter((m) => m.model !== null)
           .map((m) => ({
             ...m,
-            cost: modelCost(m).toFixed(5),
+            cost: modelCost(m as any).toFixed(5),
           }))}
       />
     </>
