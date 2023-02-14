@@ -23,7 +23,7 @@ interface RequestsPageProps {
   page: number;
   from: number;
   to: number;
-  values: string[];
+  properties: string[];
 }
 
 const monthNames = [
@@ -42,7 +42,7 @@ const monthNames = [
 ];
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to, values } = props;
+  const { requests, error, count, page, from, to, properties } = props;
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -116,8 +116,8 @@ const RequestsPage = (props: RequestsPageProps) => {
 
     const updated_request_properties = Object.assign(
       {},
-      ...values.map((p) => ({
-        [p]: d.prompt_values != null ? d.prompt_values[p] : null,
+      ...properties.map((p) => ({
+        [p]: d.request_properties != null ? d.request_properties[p] : null,
       }))
     );
 
@@ -306,6 +306,14 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
+                {properties.map((p) =>
+                  makeCardProperty(
+                    p,
+                    selectedData.request_properties !== null
+                      ? selectedData.request_properties[p]
+                      : "{NULL}"
+                  )
+                )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                   <div className="w-full flex flex-col text-left space-y-1">
                     <p>Request:</p>

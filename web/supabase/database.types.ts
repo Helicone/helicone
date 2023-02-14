@@ -18,8 +18,12 @@ export interface Database {
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
+<<<<<<< HEAD
           formatted_prompt_id: string | null
           prompt_values: Json | null
+=======
+          properties: Record<string, string> | null
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
         }
         Insert: {
           id?: string
@@ -29,8 +33,12 @@ export interface Database {
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
+<<<<<<< HEAD
           formatted_prompt_id?: string | null
           prompt_values?: Json | null
+=======
+          properties?: Record<string, string> | null
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
         }
         Update: {
           id?: string
@@ -40,8 +48,12 @@ export interface Database {
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
+<<<<<<< HEAD
           formatted_prompt_id?: string | null
           prompt_values?: Json | null
+=======
+          properties?: Record<string, string> | null
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
         }
       }
       response: {
@@ -149,6 +161,7 @@ export interface Database {
           path: string | null
           auth_hash: string | null
           user_id: string | null
+          properties: Record<string, string> | null
         }
       }
       response_and_request_rbac: {
@@ -163,6 +176,7 @@ export interface Database {
           request_user_id: string | null
           api_key_preview: string | null
           user_id: string | null
+          request_properties: Record<string, string> | null
         }
       }
       response_rbac: {

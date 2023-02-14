@@ -72,7 +72,11 @@ async function logRequest({
   requestId,
   auth,
   body,
+<<<<<<< HEAD
   prompt,
+=======
+  properties,
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
 }: {
   dbClient: SupabaseClient;
   request: Request;
@@ -81,7 +85,11 @@ async function logRequest({
   requestId?: string;
   auth: string;
   body?: string;
+<<<<<<< HEAD
   prompt?: Prompt;
+=======
+  properties?: Record<string, string>;
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
 }): Promise<Result> {
   const json = body ? JSON.parse(body) : {};
 
@@ -104,8 +112,12 @@ async function logRequest({
             auth_hash: await hash(auth),
             user_id: userId,
             prompt_id: promptId,
+<<<<<<< HEAD
             formatted_prompt_id: formattedPromptId,
             prompt_values: prompt_values,
+=======
+            properties: properties,
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
           },
         ])
         .select("id")
@@ -119,12 +131,18 @@ async function logRequest({
             auth_hash: await hash(auth),
             user_id: userId,
             prompt_id: promptId,
+<<<<<<< HEAD
             formatted_prompt_id: formattedPromptId,
             prompt_values: prompt_values,
+=======
+            properties: properties,
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
           },
         ])
         .select("id")
         .single();
+
+  
 
   if (error !== null) {
     return { data: null, error: error.message };
@@ -196,6 +214,12 @@ export default {
       env.SUPABASE_SERVICE_ROLE_KEY
     );
 
+    const properties = Object.fromEntries(
+      [...request.headers.entries()].filter(([key, _]) =>
+        key.startsWith("helicone-property-") && key.length > 18
+      ).map(([key, value]) => [key.substring(18), value])
+    );
+
     const [response, requestResult] = await Promise.all([
       forwardRequestToOpenAi(formattedRequest, body),
       logRequest({
@@ -212,7 +236,11 @@ export default {
           ?.substring(0, 128),
         auth,
         body: body === "" ? undefined : body,
+<<<<<<< HEAD
         prompt,
+=======
+        properties: Object.keys(properties).length === 0 ? undefined : properties,
+>>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
       }),
     ]);
     const responseBody = await response.text();
