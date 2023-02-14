@@ -4,12 +4,9 @@ import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import RequestsPage from "../components/templates/requests/requestsPage";
-<<<<<<< HEAD
-import StickyHeadTable from "../components/test";
-=======
 import { getProperties } from "../lib/api/properties/properties";
 import { unwrapAsync } from "../lib/result";
->>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
+import StickyHeadTable from "../components/test";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 
 interface RequestsProps {

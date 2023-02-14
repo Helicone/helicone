@@ -18,12 +18,9 @@ export interface Database {
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
-<<<<<<< HEAD
           formatted_prompt_id: string | null
-          prompt_values: Json | null
-=======
+          prompt_values: Record<string, string> | null
           properties: Record<string, string> | null
->>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
         }
         Insert: {
           id?: string
@@ -33,12 +30,9 @@ export interface Database {
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
-<<<<<<< HEAD
           formatted_prompt_id?: string | null
-          prompt_values?: Json | null
-=======
+          prompt_values?: Record<string, string> | null
           properties?: Record<string, string> | null
->>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
         }
         Update: {
           id?: string
@@ -48,12 +42,9 @@ export interface Database {
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
-<<<<<<< HEAD
           formatted_prompt_id?: string | null
-          prompt_values?: Json | null
-=======
+          prompt_values?: Record<string, string> | null
           properties?: Record<string, string> | null
->>>>>>> 4a7b38425f27f7ebaec4fc340355b231f5a49131
         }
       }
       response: {
