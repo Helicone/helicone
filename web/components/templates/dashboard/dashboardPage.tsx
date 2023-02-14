@@ -129,29 +129,18 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   });
   const setFilter = (f: SetStateAction<FilterNode>) => {
-    console.log("setting filter1", filter);
-    console.log("setting filter2", f);
     if (typeof f === "function") {
-      console.log("setting filter3", f(filter));
       f = f(filter);
     }
     _setFilter(f);
-    console.log("setting filter", f);
-
     getDashboardData(f, setMetrics, setTimeData);
   };
-
-  // console.log("HELLO", metrics);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     console.log("client:", client);
     getDashboardData(filter, setMetrics, setTimeData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // useEffect(() => {}, [client, filter, setFilter]);
-  // console.log(timeData);
 
   return (
     <AuthLayout user={user}>
