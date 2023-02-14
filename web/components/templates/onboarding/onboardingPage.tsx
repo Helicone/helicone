@@ -21,15 +21,21 @@ interface OnboardingPageProps {
 
 const OnboardingPage = (props: OnboardingPageProps) => {
   const { origin, step: currentStep } = props;
-  const router = useRouter();
+
   const supabaseClient = useSupabaseClient();
-  const user = useUser();
 
   const [step, setStep] = useState<number>(currentStep || 1);
   const [authError, setAuthError] = useState<string>();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [keyError, setKeyError] = useState<string>(); // add api key error callback
+  const router = useRouter();
+  const {
+    query: { step: stepQuery },
+  } = router;
+  if (stepQuery && typeof stepQuery === "string") {
+    const step = parseInt(stepQuery);
+    if (step !== currentStep) {
+      setStep(step);
+    }
+  }
 
   const previousStep = () => {
     setStep(step - 1);
