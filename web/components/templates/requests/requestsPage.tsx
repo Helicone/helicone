@@ -60,6 +60,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
+    [properties: string]: any;
   }>();
   const [open, setOpen] = useState(true);
 
@@ -100,8 +101,9 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
+      [properties: string]: any;
     },
-    idx: number
+    idx: number,
   ) => {
     setIndex(idx);
     setSelectedData(row);
@@ -183,7 +185,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     return {
       key: p,
       label: p,
-      minWidth: 170,
       format: (value: string) => value,
     };
   });
@@ -223,15 +224,14 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "request_user_id",
       label: "User",
-      minWidth: 170,
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
+    ...propertiesColumns,
     {
       key: "model",
       label: "Model",
       minWidth: 170,
     },
-    ...propertiesColumns,
   ];
 
   return (
@@ -343,11 +343,11 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
-                {properties.map((p) =>
+                {properties.map((p) => 
                   makeCardProperty(
                     p,
-                    selectedData.request_properties !== null
-                      ? selectedData.request_properties[p]
+                    selectedData[p] !== null
+                      ? selectedData[p]
                       : "{NULL}"
                   )
                 )}
