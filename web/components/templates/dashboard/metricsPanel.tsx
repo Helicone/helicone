@@ -7,15 +7,23 @@ import { Metrics } from "../../../lib/api/metrics/metrics";
 import { Result } from "../../../lib/result";
 import { MetricsDB } from "../../../schema/metrics";
 import { Database } from "../../../supabase/database.types";
+import { clsx } from "../../shared/clsx";
+import { Loading } from "./dashboardPage";
 
 interface MetricsPanelProps {
   filters: FilterNode;
+  metrics: Loading<Result<Metrics, string>>;
 }
 
 export function MetricsPanel(props: MetricsPanelProps) {
-  const { filters } = props;
+  const { filters, metrics: metricsData } = props;
 
-  const [data, setData] = useState<Metrics | null>(null);
+  if (metricsData !== "loading" && metricsData.error !== null) {
+    return <div>Error: {metricsData.error}</div>;
+  }
+
+  const loading = metricsData === "loading";
+  const data = metricsData === "loading" ? null : metricsData.data;
 
   const numberOfDaysActive = !data?.first_request
     ? null
@@ -50,27 +58,6 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Total requests",
     },
   ];
-  useEffect(() => {
-    fetch("/api/metrics", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(filters),
-    })
-      .then((res) => res.json() as Promise<Result<Metrics, string>>)
-      .then(({ data, error }) => {
-        if (error !== null) {
-          console.error(error);
-          return;
-        }
-        setData({
-          ...data,
-          last_request: new Date(data.last_request),
-          first_request: new Date(data.first_request),
-        });
-      });
-  }, [filters]);
 
   return (
     <div>
@@ -83,8 +70,13 @@ export function MetricsPanel(props: MetricsPanelProps) {
             <dt className="truncate text-sm font-medium text-gray-500">
               {row.label}
             </dt>
-            <dd className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
-              {row.value}
+            <dd
+              className={clsx(
+                "mt-1 text-lg font-semibold tracking-tight text-gray-900",
+                loading ? "animate-pulse text-gray-400" : ""
+              )}
+            >
+              {loading ? "Loading" : row.value}
             </dd>
           </div>
         ))}

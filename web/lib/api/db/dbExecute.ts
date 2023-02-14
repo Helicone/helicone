@@ -10,9 +10,18 @@ export async function dbExecute<T>(
     // ssl: process.env.NODE_ENV === "production",
   });
   try {
+    // Let's print out the time it takes to execute the query
+    const start = Date.now();
     await client.connect();
+    console.log(`Connected to database in ${Date.now() - start}ms`);
     const result = await client.query(query);
+    console.log(`Query executed in ${Date.now() - start}ms`);
     await client.end();
+    console.log(
+      `Disconnected from database in ${Date.now() - start}ms \n ${query} , \n ${
+        result.rows
+      }`
+    );
     return { data: result.rows, error: null };
   } catch (err) {
     console.error(err);

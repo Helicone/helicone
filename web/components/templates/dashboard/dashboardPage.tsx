@@ -1,12 +1,15 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient, User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
+import { Metrics } from "../../../lib/api/metrics/metrics";
 import { Result } from "../../../lib/result";
+import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
 import {
   TimeData,
   TimeIncrement,
 } from "../../../lib/timeCalculations/fetchTimeData";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
@@ -19,8 +22,7 @@ interface DashboardPageProps {
   user: User;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
-async function fetchGraphData(
-  client: SupabaseClient,
+export async function fetchGraphData(
   filter: FilterNode,
   dbIncrement: TimeIncrement
 ) {
@@ -42,7 +44,7 @@ const validTimeWindow = (filter: FilterNode): boolean => {
   return start !== undefined && end !== undefined;
 };
 
-const getTimeInterval = (filter: FilterNode): TimeIncrement => {
+export const getTimeInterval = (filter: FilterNode): TimeIncrement => {
   const start = (filter as FilterLeaf).request?.created_at?.gte;
   const end = (filter as FilterLeaf).request?.created_at?.lte;
   if (!validTimeWindow(filter)) {
@@ -60,29 +62,96 @@ const getTimeInterval = (filter: FilterNode): TimeIncrement => {
   }
 };
 
+export type Loading<T> = T | "loading";
+
+async function getDashboardData(
+  filter: FilterNode,
+  setMetrics: (m: Loading<Result<Metrics, string>>) => void,
+  setData: (d: Loading<Result<TimeData[], string>>) => void
+) {
+  if (validTimeWindow(filter)) {
+    setMetrics("loading");
+    setData("loading");
+    console.log("fetching data");
+    fetchGraphData(filter, getTimeInterval(filter)).then(({ data, error }) => {
+      if (error !== null) {
+        console.error(error);
+        setData({ error, data: null });
+      } else {
+        console.log("data", data);
+        setData({
+          data: data.map((d) => ({ count: +d.count, time: new Date(d.time) })),
+          error: null,
+        });
+      }
+    });
+    fetch("/api/metrics", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(filter),
+    })
+      .then((res) => res.json() as Promise<Result<Metrics, string>>)
+      .then(({ data, error }) => {
+        if (error !== null) {
+          console.error(error);
+          setMetrics({ error, data: null });
+        } else {
+          setMetrics({
+            data: {
+              ...data,
+              last_request: new Date(data.last_request),
+              first_request: new Date(data.first_request),
+            },
+            error: null,
+          });
+        }
+      });
+  }
+}
+
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
   const client = useSupabaseClient();
-  const [data, setData] = useState<TimeData[]>([]);
-  const [filter, setFilter] = useState<FilterNode>("all");
-  useEffect(() => {
-    if (validTimeWindow(filter)) {
-      console.log("fetching data");
-      fetchGraphData(client, filter, getTimeInterval(filter)).then(
-        ({ data, error }) => {
-          if (error !== null) {
-            console.error(error);
-          } else {
-            console.log("data", data);
-            setData(
-              data.map((d) => ({ count: +d.count, time: new Date(d.time) }))
-            );
-          }
-        }
-      );
+  const [timeData, setTimeData] =
+    useState<Loading<Result<TimeData[], string>>>("loading");
+
+  const [metrics, setMetrics] =
+    useState<Loading<Result<Metrics, string>>>("loading");
+  const [interval, setInterval] = useState<TimeInterval>("1m");
+  const [filter, _setFilter] = useState<FilterNode>({
+    request: {
+      created_at: {
+        gte: timeGraphConfig["1m"].start.toISOString(),
+        lte: timeGraphConfig["1m"].end.toISOString(),
+      },
+    },
+  });
+  const setFilter = (f: SetStateAction<FilterNode>) => {
+    console.log("setting filter1", filter);
+    console.log("setting filter2", f);
+    if (typeof f === "function") {
+      console.log("setting filter3", f(filter));
+      f = f(filter);
     }
-  }, [client, filter, setFilter]);
-  console.log(data);
+    _setFilter(f);
+    console.log("setting filter", f);
+
+    getDashboardData(f, setMetrics, setTimeData);
+  };
+
+  // console.log("HELLO", metrics);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    console.log("client:", client);
+    getDashboardData(filter, setMetrics, setTimeData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // useEffect(() => {}, [client, filter, setFilter]);
+  // console.log(timeData);
 
   return (
     <AuthLayout user={user}>
@@ -92,8 +161,13 @@ const DashboardPage = (props: DashboardPageProps) => {
       />
 
       <div className="space-y-16">
-        <MetricsPanel filters={filter} />
-        <TimeGraphWHeader data={data} setFilter={setFilter} />
+        <MetricsPanel filters={filter} metrics={metrics} />
+        <TimeGraphWHeader
+          data={timeData}
+          setFilter={setFilter}
+          interval={interval}
+          setInterval={setInterval}
+        />
       </div>
     </AuthLayout>
   );
