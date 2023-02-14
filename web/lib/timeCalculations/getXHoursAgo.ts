@@ -1,4 +1,4 @@
-export function getXMinuteasAgoFloored(minutes: number): Date {
+export function getXMinutesAgoFloored(minutes: number): Date {
   const now = new Date();
   return new Date(
     now.getFullYear(),
@@ -61,4 +61,29 @@ export function getXMonthsAgoFloored(months: number): Date {
     0,
     0
   );
+}
+
+export function getXMinutesAgoCeiling(minutes: number): Date {
+  const now = getXMinutesAgoFloored(minutes);
+  return new Date(now.getTime() + 60 * 1000);
+}
+
+export function getXHoursAgoCeiling(hours: number): Date {
+  const now = getXHoursAgoFloored(hours);
+  return new Date(now.getTime() + 60 * 60 * 1000);
+}
+
+export function getXDaysAgoCeiling(days: number): Date {
+  const now = getXDaysAgoFloored(days);
+  return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+}
+
+export function getXWeeksAgoCeiling(weeks: number): Date {
+  const now = getXWeeksAgoFloored(weeks);
+  return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+}
+
+export function getXMonthsAgoCeiling(months: number): Date {
+  const now = getXMonthsAgoFloored(months);
+  return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 }
