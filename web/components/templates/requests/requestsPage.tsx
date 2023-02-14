@@ -60,7 +60,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
-    [properties: string]: any;
+    [keys: string]: any;
   }>();
   const [open, setOpen] = useState(true);
 
@@ -101,10 +101,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
-      [properties: string]: any;
+      [keys: string]: any;
     },
     idx: number,
   ) => {
+    console.log("ROW", row)
     setIndex(idx);
     setSelectedData(row);
     setOpen(true);

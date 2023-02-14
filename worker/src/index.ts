@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { extractPrompt, Prompt } from "./prompt_discovery";
+import { extractPrompt, Prompt } from "./prompt";
 // import bcrypt from "bcrypt";
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
