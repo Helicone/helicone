@@ -60,6 +60,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
+    [properties: string]: any;
   }>();
   const [open, setOpen] = useState(true);
 
@@ -100,8 +101,9 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
+      [properties: string]: any;
     },
-    idx: number
+    idx: number,
   ) => {
     setIndex(idx);
     setSelectedData(row);
@@ -143,6 +145,33 @@ const RequestsPage = (props: RequestsPageProps) => {
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
 
+  const makeColumn = (name: string) => {
+    return (
+      <th
+        scope="col"
+        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
+      >
+        {name}
+      </th>
+    );
+  };
+
+  const makeValue = (val: string) => {
+    return (
+      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+        {val}
+      </td>
+    );
+  };
+
+  const makeCardProperty = (name: string, val: string) => {
+    return (
+      <li className="w-full flex flex-row justify-between gap-4 text-sm">
+        <p>{name}:</p>
+        <p>{val || "{NULL}"}</p>
+      </li>
+    );
+  };
   const getUSDate = (value: string) => {
     const date = new Date(value);
     const month = monthNames[date.getMonth()];
@@ -151,6 +180,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       .toLocaleTimeString()
       .slice(-2)}`;
   };
+
+  const propertiesColumns = properties.map((p) => {
+    return {
+      key: p,
+      label: p,
+      format: (value: string) => value,
+    };
+  });
 
   const columns: readonly Column[] = [
     {
@@ -187,9 +224,9 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "request_user_id",
       label: "User",
-      minWidth: 170,
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
+    ...propertiesColumns,
     {
       key: "model",
       label: "Model",
@@ -306,11 +343,11 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
-                {properties.map((p) =>
+                {properties.map((p) => 
                   makeCardProperty(
                     p,
-                    selectedData.request_properties !== null
-                      ? selectedData.request_properties[p]
+                    selectedData[p] !== null
+                      ? selectedData[p]
                       : "{NULL}"
                   )
                 )}
