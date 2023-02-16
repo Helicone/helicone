@@ -199,11 +199,13 @@ const RequestsPage = (props: RequestsPageProps) => {
       minWidth: 170,
       format: (value: string) => getUSDate(value),
     },
-    includePrompt ? {
-      key: "prompt_name",
-      label: "Prompt Name",
-      format: (value: string) => value,
-    } : null,
+    includePrompt
+      ? {
+          key: "prompt_name",
+          label: "Prompt Name",
+          format: (value: string) => value,
+        }
+      : null,
     {
       key: "request",
       label: "Request",
@@ -243,8 +245,14 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   ].filter((column) => column !== null) as Column[];
 
-  console.log("PROPERTIES", values)
-  console.log("MY THING", values.filter((v) => {console.log(csvData[0]); return csvData[0][v] != null;}));
+  console.log("PROPERTIES", values);
+  console.log(
+    "MY THING",
+    values.filter((v) => {
+      console.log(csvData[0]);
+      return csvData[0][v] != null;
+    })
+  );
 
   return (
     <>
@@ -355,23 +363,15 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
-                {properties.filter((v) => selectedData[v] != null).map((p) =>
-                  makeCardProperty(
-                    p,
-                    selectedData[p] !== null ? selectedData[p] : "{NULL}"
-                  )
-                )}
-                {/* {selectedData.prompt_name && <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Prompt Name:</p>
-                  <p>{selectedData.prompt_name}</p>
-                </li>} */}
-                {/* {values.filter((v) => selectedData[v] != null).map((v) =>
-                  makeCardProperty(
-                    v,
-                    selectedData[v] !== null ? selectedData[v] : "{NULL}"
-                  )
-                )} */}
-                { !selectedData.prompt_regex ?
+                {properties
+                  .filter((v) => selectedData[v] != null)
+                  .map((p) =>
+                    makeCardProperty(
+                      p,
+                      selectedData[p] !== null ? selectedData[p] : "{NULL}"
+                    )
+                  )}
+                {!selectedData.prompt_regex ? (
                   <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                     <div className="w-full flex flex-col text-left space-y-1">
                       <p>Request:</p>
@@ -385,32 +385,40 @@ const RequestsPage = (props: RequestsPageProps) => {
                         {selectedData.response}
                       </p>
                     </div>
-                  </div> : <>
-                  <div>
-                    <div className="w-full flex flex-col text-left space-y-1 text-sm">
-                      <p>{selectedData.prompt_name}:</p>
-                      <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
-                        {selectedData.prompt_regex}
-                      </p>
-                    </div> 
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
-                    {values.filter((v) => selectedData[v] != null).map((v) => 
+                ) : (
+                  <>
+                    <div>
                       <div className="w-full flex flex-col text-left space-y-1 text-sm">
-                        <p>{v}:</p>
-                        <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[100px] overflow-auto">
-                          {selectedData[v]}
+                        <p>{selectedData.prompt_name}:</p>
+                        <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
+                          {selectedData.prompt_regex}
                         </p>
-                      </div>)}
-                  </div>
-                  <div className="w-full flex flex-col text-left space-y-1 text-sm">
-                    <p>Response:</p>
-                    <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
-                      {selectedData.response}
-                    </p>
-                  </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
+                      {values
+                        .filter((v) => selectedData[v] != null)
+                        .map((v) => (
+                          <div
+                            className="w-full flex flex-col text-left space-y-1 text-sm"
+                            key={v}
+                          >
+                            <p>{v}:</p>
+                            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[100px] overflow-auto">
+                              {selectedData[v]}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                    <div className="w-full flex flex-col text-left space-y-1 text-sm">
+                      <p>Response:</p>
+                      <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
+                        {selectedData.response}
+                      </p>
+                    </div>
                   </>
-                }
+                )}
               </ul>
             </div>
           </div>

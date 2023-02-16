@@ -23,7 +23,8 @@ interface RequestsProps {
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to, properties, values } = props;
+  const { user, data, error, count, page, from, to, properties, values } =
+    props;
 
   return (
     <MetaData title="Requests">
