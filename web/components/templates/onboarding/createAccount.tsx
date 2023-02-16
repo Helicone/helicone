@@ -1,6 +1,6 @@
 import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
-import ProgressBar from "./progressBar";
+import ProgressBar from "../home/progressBar";
 
 interface CreateAccountProps {
   onNextHandler: (email: string, password: string) => void;

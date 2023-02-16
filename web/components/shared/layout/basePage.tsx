@@ -14,7 +14,7 @@ const BasePage = (props: BasePageProps) => {
   const variantTheme = () => {
     switch (variant) {
       case "primary":
-        return "bg-gradient-to-r from-sky-200 to-purple-200";
+        return "bg-gray-200";
       case "secondary":
         return "bg-white";
       default:

@@ -50,16 +50,18 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
 
   return (
     <>
-      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-r from-sky-200 to-purple-200 text-black">
+      <div className="flex h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-r bg-white text-black">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center items-center justify-center space-y-4">
           <button onClick={() => router.push("/")}>
-            <Image
-              className="rounded-md mx-auto"
-              src="/assets/heli-full-logo.png"
-              width={250}
-              height={200}
-              alt="Helicone-full-logo"
-            />
+            <div>
+              <Image
+                className="rounded-md mx-auto -mb-8"
+                src="/assets/logos/logo-black.png"
+                width={300}
+                height={200}
+                alt="Helicone-full-logo"
+              />
+            </div>
           </button>
 
           <p className="text-xl sm:text-2xl font-sans font-light">
@@ -81,7 +83,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md p-4">
-          <div className="bg-gray-400 py-8 px-4 shadow rounded-lg sm:px-10 border border-black text-black">
+          <div className="bg-gray-50 py-8 px-4 shadow rounded-lg sm:px-10 border border-black text-black">
             <div className="space-y-6">
               {formType === "resetPassword" && (
                 <div>
