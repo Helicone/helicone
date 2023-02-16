@@ -35,7 +35,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, StarIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import Details from "./details";
 import AdvancedAnalytics from "./AdvancedAnalytics";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -45,6 +44,7 @@ import Link from "next/link";
 import ThemedModal from "../../shared/themedModal";
 import Onboarding from "./onboarding";
 import Login from "./login";
+import Details from "./details";
 
 const navigation = [
   {
