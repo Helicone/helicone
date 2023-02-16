@@ -22,16 +22,26 @@ function forwardRequestToOpenAi(
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
-  return request.method === "GET"
-    ? fetch(new_url.href, {
-        method: request.method,
-        headers: request.headers,
-      })
-    : fetch(new_url.href, {
-        method: request.method,
-        headers: request.headers,
-        body,
-      });
+  const headers = removeHeliconeHeaders(request.headers);
+  const method = request.method;
+  const baseInit = { method, headers };
+  const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+  return fetch(new_url.href, init);
+}
+
+type HeliconeRequest = {
+  dbClient: SupabaseClient;
+  request: Request;
+
+  auth: string;
+  body?: string;
+} & HeliconeHeaders;
+
+interface HeliconeHeaders {
+  requestId: string;
+  userId: string | null;
+  promptId: string | null;
+  properties?: Record<string, string>;
 }
 
 async function logRequest({
@@ -43,48 +53,24 @@ async function logRequest({
   auth,
   body,
   properties,
-}: {
-  dbClient: SupabaseClient;
-  request: Request;
-  userId: string | null;
-  promptId: string | null;
-  requestId?: string;
-  auth: string;
-  body?: string;
-  properties?: Record<string, string>;
-}): Promise<Result> {
+}: HeliconeRequest): Promise<Result> {
   const json = body ? JSON.parse(body) : {};
 
-  const { data, error } = requestId
-    ? await dbClient
-        .from("request")
-        .insert([
-          {
-            id: requestId,
-            path: request.url,
-            body: json,
-            auth_hash: await hash(auth),
-            user_id: userId,
-            prompt_id: promptId,
-            properties: properties,
-          },
-        ])
-        .select("id")
-        .single()
-    : await dbClient
-        .from("request")
-        .insert([
-          {
-            path: request.url,
-            body: json,
-            auth_hash: await hash(auth),
-            user_id: userId,
-            prompt_id: promptId,
-            properties: properties,
-          },
-        ])
-        .select("id")
-        .single();
+  const { data, error } = await dbClient
+    .from("request")
+    .insert([
+      {
+        id: requestId,
+        path: request.url,
+        body: json,
+        auth_hash: await hash(auth),
+        user_id: userId,
+        prompt_id: promptId,
+        properties: properties,
+      },
+    ])
+    .select("id")
+    .single();
 
   if (error !== null) {
     return { data: null, error: error.message };
@@ -134,60 +120,92 @@ async function hash(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
+function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
+  const propTag = "helicone-property-";
+  const properties = Object.fromEntries(
+    [...headers.entries()]
+      .filter(
+        ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
+      )
+      .map(([key, value]) => [key.substring(propTag.length), value])
+  );
+  return {
+    userId:
+      headers.get("Helicone-User-Id")?.substring(0, 128) ??
+      headers.get("User-Id")?.substring(0, 128) ??
+      null,
+    promptId: headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
+    requestId:
+      headers.get("Helicone-Request-Id")?.substring(0, 128) ??
+      crypto.randomUUID(),
+    properties: Object.keys(properties).length === 0 ? undefined : properties,
+  };
+}
+
+function removeHeliconeHeaders(request: Headers): Headers {
+  const newHeaders = new Headers();
+  for (const [key, value] of request.entries()) {
+    if (!key.startsWith("Helicone-")) {
+      newHeaders.set(key, value);
+    }
+  }
+  return newHeaders;
+}
+
+async function forwardAndLog(
+  body: string,
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
+  const auth = request.headers.get("Authorization");
+  if (auth === null) {
+    return new Response("No authorization header found!", { status: 401 });
+  }
+
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  const [response, requestResult] = await Promise.all([
+    forwardRequestToOpenAi(request, body),
+    logRequest({
+      dbClient,
+      request,
+      auth,
+      body: body === "" ? undefined : body,
+      ...getHeliconeHeaders(request.headers),
+    }),
+  ]);
+  const responseBody = await response.text();
+  if (requestResult.data !== null) {
+    ctx.waitUntil(logResponse(dbClient, requestResult.data, responseBody));
+  } else {
+    console.error(requestResult.error);
+  }
+
+  return new Response(responseBody, {
+    ...response,
+    headers: {
+      ...heliconeHeaders(requestResult),
+      ...response.headers,
+    },
+  });
+}
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const auth = request.headers.get("Authorization");
-    if (auth === null) {
-      return new Response("Not authorization header found!", { status: 401 });
-    }
-
     const body = await request.text();
-    const dbClient = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
-    const propTag = "helicone-property-"
-    const properties = Object.fromEntries(
-      [...request.headers.entries()].filter(([key, _]) =>
-        key.startsWith(propTag) && key.length > propTag.length
-      ).map(([key, value]) => [key.substring(18), value])
-    );
-
-    const [response, requestResult] = await Promise.all([
-      forwardRequestToOpenAi(request, body),
-      logRequest({
-        dbClient,
-        request,
-        userId:
-          request.headers.get("Helicone-User-Id")?.substring(0, 128) ??
-          request.headers.get("User-Id")?.substring(0, 128) ??
-          null,
-        promptId:
-          request.headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
-        requestId: request.headers
-          .get("Helicone-Request-Id")
-          ?.substring(0, 128),
-        auth,
-        body: body === "" ? undefined : body,
-        properties: Object.keys(properties).length === 0 ? undefined : properties,
-      }),
-    ]);
-    const responseBody = await response.text();
-    if (requestResult.data !== null) {
-      ctx.waitUntil(logResponse(dbClient, requestResult.data, responseBody));
+    try {
+      return await forwardAndLog(body, request, env, ctx);
+    } catch (e) {
+      console.error(e);
+      return forwardRequestToOpenAi(request, body);
     }
-
-    return new Response(responseBody, {
-      ...response,
-      headers: {
-        ...heliconeHeaders(requestResult),
-        ...response.headers,
-      },
-    });
   },
 };
