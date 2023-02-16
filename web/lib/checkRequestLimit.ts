@@ -19,10 +19,10 @@ export async function requestOverLimit(client: SupabaseClient<Database>) {
     ]);
 
   if (userSettingsError !== null || userSettings === null) {
-    throw new Error("Failed to get user settings");
+    return false;
   }
   if (error !== null || count === null) {
-    throw new Error("Failed to get request count");
+    return false;
   }
 
   return count > userSettings.request_limit;
