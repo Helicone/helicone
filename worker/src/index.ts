@@ -86,8 +86,6 @@ async function logRequest({
         .select("id")
         .single();
 
-  
-
   if (error !== null) {
     return { data: null, error: error.message };
   } else {

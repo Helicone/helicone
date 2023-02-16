@@ -53,10 +53,6 @@ export function timeBackfill(
   const totalTime = end.getTime() - current.getTime();
   const increment = (date: Date) =>
     new Date(date.getTime() + getIncrement(totalTime));
-<<<<<<< HEAD
-  console.log("DATA", data);
-=======
->>>>>>> dfeaf401f21b61899c0f32472a3184e3a88a958c
   while (current < end) {
     const nextTime = increment(current);
     const count = data

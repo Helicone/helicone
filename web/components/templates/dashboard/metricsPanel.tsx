@@ -13,14 +13,6 @@ import { Loading } from "./dashboardPage";
 
 interface MetricsPanelProps {
   filters: FilterNode;
-<<<<<<< HEAD
-}
-
-export function MetricsPanel(props: MetricsPanelProps) {
-  const { filters } = props;
-
-  const [data, setData] = useState<Metrics | null>(null);
-=======
   metrics: Loading<Result<Metrics, string>>;
 }
 
@@ -36,7 +28,6 @@ export function MetricsPanel(props: MetricsPanelProps) {
     metricsData === "loading" || metricsData.error !== null
       ? null
       : metricsData.data;
->>>>>>> dfeaf401f21b61899c0f32472a3184e3a88a958c
 
   const numberOfDaysActive = !data?.first_request
     ? null

@@ -60,7 +60,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
-    [properties: string]: any;
+    [keys: string]: any;
   }>();
   const [open, setOpen] = useState(true);
 
@@ -101,10 +101,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
-      [properties: string]: any;
+      [keys: string]: any;
     },
-    idx: number,
+    idx: number
   ) => {
+    console.log("ROW", row);
     setIndex(idx);
     setSelectedData(row);
     setOpen(true);
@@ -343,12 +344,10 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
-                {properties.map((p) => 
+                {properties.map((p) =>
                   makeCardProperty(
                     p,
-                    selectedData[p] !== null
-                      ? selectedData[p]
-                      : "{NULL}"
+                    selectedData[p] !== null ? selectedData[p] : "{NULL}"
                   )
                 )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">

@@ -50,35 +50,18 @@ export default async function handler(
     return;
   }
 
-<<<<<<< HEAD
-  const metrics = await getTimeData(filter, user.data.user.id, dbIncrement);
-=======
   const metrics = await getRequestsGraph(
     filter,
     user.data.user.id,
     dbIncrement
   );
->>>>>>> dfeaf401f21b61899c0f32472a3184e3a88a958c
   if (metrics.error !== null) {
     res.status(500).json(metrics);
     return;
   }
 
-<<<<<<< HEAD
-  let start = null;
-  console.log(filter);
-
-  // console.log(metrics);
-  res.status(200).json({
-    data: timeBackfill(
-      metrics.data,
-      new Date(filter!.request!.created_at!.gte!),
-      new Date(filter!.request!.created_at!.lte!)
-    ),
-=======
   res.status(200).json({
     data: metrics.data,
->>>>>>> dfeaf401f21b61899c0f32472a3184e3a88a958c
     error: null,
   });
 }
