@@ -54,35 +54,38 @@ async function logRequest({
   body,
   properties,
 }: HeliconeRequest): Promise<Result> {
-  const json = body ? JSON.parse(body) : {};
+  try {
+    const json = body ? JSON.parse(body) : {};
 
-  const { data, error } = await dbClient
-    .from("request")
-    .insert([
-      {
-        id: requestId,
-        path: request.url,
-        body: json,
-        auth_hash: await hash(auth),
-        user_id: userId,
-        prompt_id: promptId,
-        properties: properties,
-      },
-    ])
-    .select("id")
-    .single();
+    const { data, error } = await dbClient
+      .from("request")
+      .insert([
+        {
+          id: requestId,
+          path: request.url,
+          body: json,
+          auth_hash: await hash(auth),
+          user_id: userId,
+          prompt_id: promptId,
+          properties: properties,
+        },
+      ])
+      .select("id")
+      .single();
 
-  if (error !== null) {
-    return { data: null, error: error.message };
-  } else {
-    return { data: data.id, error: null };
+    if (error !== null) {
+      return { data: null, error: error.message };
+    } else {
+      return { data: data.id, error: null };
+    }
+  } catch (e) {
+    return { data: null, error: JSON.stringify(e) };
   }
 }
 
 async function logResponse(
   dbClient: SupabaseClient,
   requestId: string,
-
   body: string
 ): Promise<void> {
   const { data, error } = await dbClient
@@ -201,11 +204,6 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     const body = await request.text();
-    try {
-      return await forwardAndLog(body, request, env, ctx);
-    } catch (e) {
-      console.error(e);
-      return forwardRequestToOpenAi(request, body);
-    }
+    return await forwardAndLog(body, request, env, ctx);
   },
 };
