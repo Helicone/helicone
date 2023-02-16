@@ -62,10 +62,38 @@ async function getPromptId(
   if (data !== null && data.length > 0) {
     return { data: data[0].id, error: null };
   } else {
+
+    // First, query the database to find the highest prompt name suffix
+    const { data: highestSuffixData, error: highestSuffixError } = await dbClient
+    .from("prompt")
+    .select("name")
+    .order("name", { ascending: false })
+    .like("name", "Prompt (%)")
+    .limit(1)
+    .single();
+
+    // Extract the highest suffix number from the highest prompt name suffix found
+    let highestSuffix = 0;
+    if (highestSuffixData) {
+      const matches = highestSuffixData.name.match(/\((\d+)\)/);
+      if (matches) {
+        highestSuffix = parseInt(matches[1]);
+      }
+    }
+
+    // Increment the highest suffix to get the new suffix for the new prompt name
+    const newSuffix = highestSuffix + 1;
+
+    // Construct the new prompt name with the new suffix
+    const newPromptName = `Prompt (${newSuffix})`;
+    console.log("NEW PROMPT NAME", newPromptName);
+    console.log("NEW SUFFIX", newSuffix);
+
+
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
       .from("prompt")
-      .insert([{ prompt: prompt.prompt }])
+      .insert([{ prompt: prompt.prompt, name: newPromptName }])
       .select("id")
       .single();
     if (error !== null) {

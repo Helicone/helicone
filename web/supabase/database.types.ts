@@ -115,16 +115,19 @@ export interface Database {
           id: string
           created_at: string
           prompt: string
+          name: string
         }
         Insert: {
           id?: string
           created_at?: string
           prompt: string
+          name: string
         }
         Update: {
           id?: string
           created_at?: string
           prompt?: string
+          name: string
         }
       }
     }
@@ -170,6 +173,8 @@ export interface Database {
           request_properties: Record<string, string> | null
           prompt_values: Record<string, string> | null
           formatted_prompt_id: string | null
+          prompt_name: string | null
+          prompt_regex: string | null
         }
       }
       response_rbac: {
