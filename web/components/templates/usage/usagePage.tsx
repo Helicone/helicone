@@ -1,10 +1,15 @@
 import {
   ArrowRightIcon,
   LightBulbIcon,
+  ExclamationCircleIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
+import {
+  SupabaseClient,
+  User,
+  useSupabaseClient,
+} from "@supabase/auth-helpers-react";
 
 import { Database } from "../../../supabase/database.types";
 
@@ -274,10 +279,25 @@ const UsagePage = (props: UsagePageProps) => {
               {requestsCount} / {userLimit} requests
             </div>
           </div>
-          <div className="border-2 p-4 text-sm rounded-md flex flex-row items-center text-gray-600 border-gray-300 w-fit gap-4">
-            <LightBulbIcon className="h-4 w-4 text-gray-600 hidden sm:inline" />
-            We continue logging your requests after your limit is reached, you
-            will just lose access to the dashboard until you upgrade.
+          <div className="border-2 p-4 text-sm rounded-md flex flex-col text-gray-600 border-gray-300 w-fit gap-4">
+            <div className="flex flex-row items-center text-gray-600 w-fit gap-4">
+              <LightBulbIcon className="h-4 w-4 text-gray-600 hidden sm:inline" />
+              We continue logging your requests after your limit is reached, you
+              will just lose access to the dashboard until you upgrade.
+            </div>
+            {requestsCount > userLimit && (
+              <div className="flex flex-row items-center text-red-500 w-fit gap-4">
+                <ExclamationCircleIcon className="h-4 w-4 text-red-600 hidden sm:inline" />
+                <div className="">
+                  You have exceeded your request limit, please upgrade your
+                  plan. Please email{" "}
+                  <a href="mailto:sales@helicone.ai" className="text-red-700">
+                    sales@helicone.ai
+                  </a>{" "}
+                  if you have any questions.
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="">
