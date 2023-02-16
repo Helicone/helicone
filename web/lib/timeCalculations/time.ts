@@ -31,7 +31,6 @@ const getIncrement = (totalTime: number) => {
   if (totalTime < 1000 * 60 * 60 * 24 * 30 * 2) {
     // less than 32 days
     // Increment by 1 day
-
     return 1000 * 60 * 60 * 24;
   }
   if (totalTime < 1000 * 60 * 60 * 24 * 30 * 6) {

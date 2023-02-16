@@ -23,6 +23,7 @@ interface RequestsPageProps {
   page: number;
   from: number;
   to: number;
+  properties: string[];
 }
 
 const monthNames = [
@@ -41,7 +42,7 @@ const monthNames = [
 ];
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to } = props;
+  const { requests, error, count, page, from, to, properties } = props;
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -59,6 +60,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
+    [keys: string]: any;
   }>();
   const [open, setOpen] = useState(true);
 
@@ -99,6 +101,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
+      [keys: string]: any;
     },
     idx: number
   ) => {
@@ -112,6 +115,13 @@ const RequestsPage = (props: RequestsPageProps) => {
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
       1000;
+
+    const updated_request_properties = Object.assign(
+      {},
+      ...properties.map((p) => ({
+        [p]: d.request_properties != null ? d.request_properties[p] : null,
+      }))
+    );
 
     return {
       request_id: d.request_id,
@@ -128,12 +138,18 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
+      ...updated_request_properties,
     };
   });
 
-  const hasPrevious = page > 1;
-  const hasNext = to <= count!;
-
+  const makeCardProperty = (name: string, val: string) => {
+    return (
+      <li className="w-full flex flex-row justify-between gap-4 text-sm">
+        <p>{name}:</p>
+        <p>{val || "{NULL}"}</p>
+      </li>
+    );
+  };
   const getUSDate = (value: string) => {
     const date = new Date(value);
     const month = monthNames[date.getMonth()];
@@ -142,6 +158,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       .toLocaleTimeString()
       .slice(-2)}`;
   };
+
+  const propertiesColumns = properties.map((p) => {
+    return {
+      key: p,
+      label: p,
+      format: (value: string) => value,
+    };
+  });
 
   const columns: readonly Column[] = [
     {
@@ -178,9 +202,9 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "request_user_id",
       label: "User",
-      minWidth: 170,
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
+    ...propertiesColumns,
     {
       key: "model",
       label: "Model",
@@ -297,6 +321,12 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
+                {properties.map((p) =>
+                  makeCardProperty(
+                    p,
+                    selectedData[p] !== null ? selectedData[p] : "{NULL}"
+                  )
+                )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
                   <div className="w-full flex flex-col text-left space-y-1">
                     <p>Request:</p>

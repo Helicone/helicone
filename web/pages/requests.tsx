@@ -4,6 +4,8 @@ import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import RequestsPage from "../components/templates/requests/requestsPage";
+import { getProperties } from "../lib/api/properties/properties";
+import { unwrapAsync } from "../lib/result";
 import StickyHeadTable from "../components/test";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 
@@ -15,10 +17,11 @@ interface RequestsProps {
   page: number;
   from: number;
   to: number;
+  properties: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to } = props;
+  const { user, data, error, count, page, from, to, properties } = props;
 
   return (
     <MetaData title="Requests">
@@ -30,6 +33,7 @@ const Requests = (props: RequestsProps) => {
           page={page}
           from={from}
           to={to}
+          properties={properties}
         />
       </AuthLayout>
     </MetaData>
@@ -66,6 +70,18 @@ export const getServerSideProps = async (
     pageSize
   );
 
+  var allProperties: string[] = [];
+  try {
+    allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
+      (property) => {
+        return property.property;
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    allProperties = [];
+  }
+
   return {
     props: {
       initialSession: session,
@@ -76,6 +92,7 @@ export const getServerSideProps = async (
       page: currentPage,
       from: from,
       to: to,
+      properties: allProperties,
     },
   };
 };
