@@ -196,6 +196,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => getUSDate(value),
     },
     {
+      key: "prompt_id",
+      label: "Prompt ID",
+      format: (value: string) => value,
+    },
+    {
       key: "request",
       label: "Request",
       minWidth: 170,
@@ -349,6 +354,10 @@ const RequestsPage = (props: RequestsPageProps) => {
                     selectedData[p] !== null ? selectedData[p] : "{NULL}"
                   )
                 )}
+                <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                  <p>Prompt ID:</p>
+                  <p>{selectedData.prompt_id}</p>
+                </li>
                 {values.map((v) =>
                   makeCardProperty(
                     v,
