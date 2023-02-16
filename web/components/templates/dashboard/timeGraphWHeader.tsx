@@ -8,41 +8,29 @@ import {
   TimeIncrement,
 } from "../../../lib/timeCalculations/fetchTimeData";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import { Loading } from "./dashboardPage";
 import { TimeActions } from "./timeActions";
 
 import { RenderLineChart } from "./timeGraph";
 
 interface TimeGraphWHeaderProps {
-  data: TimeData[];
+  data: Loading<Result<TimeData[], string>>;
   setFilter: Dispatch<SetStateAction<FilterNode>>;
+  interval: TimeInterval;
+  setInterval: Dispatch<SetStateAction<TimeInterval>>;
 }
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
-  const { data, setFilter } = props;
-  const [interval, setInterval] = useState<TimeInterval>("1m");
+  const { data: timeData, setFilter, interval, setInterval } = props;
+  const { setNotification } = useNotification();
+  if (timeData !== "loading" && timeData.error !== null) {
+    setNotification(timeData.error, "error");
+  }
 
-  useEffect(() => {
-    setFilter((prev) => {
-      const newFilter: FilterLeaf = {
-        request: {
-          created_at: {
-            gte: timeGraphConfig[interval].start.toISOString(),
-            lte: timeGraphConfig[interval].end.toISOString(),
-          },
-        },
-      };
-      if (prev === "all") {
-        return newFilter;
-      }
-      if ("left" in prev) {
-        throw new Error("Not implemented");
-      }
-      return {
-        ...prev,
-        ...newFilter,
-      };
-    });
-  }, [interval, setFilter]);
+  const data =
+    timeData === "loading" || timeData.error !== null ? [] : timeData.data;
 
   return (
     <div className="h-full w-full">
@@ -57,11 +45,36 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
             setInterval={setInterval}
             onIntervalChange={(newInterval) => {
               setInterval(newInterval);
+              setFilter((prev) => {
+                const newFilter: FilterLeaf = {
+                  request: {
+                    created_at: {
+                      gte: timeGraphConfig[newInterval].start.toISOString(),
+                      lte: timeGraphConfig[newInterval].end.toISOString(),
+                    },
+                  },
+                };
+                if (prev === "all") {
+                  return newFilter;
+                }
+                if ("left" in prev) {
+                  throw new Error("Not implemented");
+                }
+                return {
+                  ...prev,
+                  ...newFilter,
+                };
+              });
             }}
           />
         </div>
       </div>
-      <div className="w-full h-72 mt-8">
+      <div
+        className={clsx(
+          "w-full h-72 mt-8",
+          timeData === "loading" ? "animate-pulse" : ""
+        )}
+      >
         <RenderLineChart
           data={data}
           timeMap={timeGraphConfig[interval].timeMap}

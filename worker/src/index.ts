@@ -121,12 +121,13 @@ async function hash(key: string): Promise<string> {
 }
 
 function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
+  const propTag = "helicone-property-";
   const properties = Object.fromEntries(
     [...headers.entries()]
       .filter(
-        ([key, _]) => key.startsWith("helicone-property-") && key.length > 18
+        ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
       )
-      .map(([key, value]) => [key.substring(18), value])
+      .map(([key, value]) => [key.substring(propTag.length), value])
   );
   return {
     userId:
