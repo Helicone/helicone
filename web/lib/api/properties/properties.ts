@@ -12,7 +12,6 @@ export async function getProperties(
   user_id: string
 ): Promise<Result<Property[], string>> {
   const query = `
-
 SELECT DISTINCT keys AS property
 FROM request r
 JOIN user_api_keys u ON r.auth_hash = u.api_key_hash

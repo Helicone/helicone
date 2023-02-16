@@ -33,9 +33,9 @@ function forwardRequestToOpenAi(
 type HeliconeRequest = {
   dbClient: SupabaseClient;
   request: Request;
-
   auth: string;
   body?: string;
+  prompt?: Prompt;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
@@ -43,6 +43,7 @@ interface HeliconeHeaders {
   userId: string | null;
   promptId: string | null;
   properties?: Record<string, string>;
+  isPromptRegexOn: boolean;
 }
 
 async function getPromptId(
@@ -83,8 +84,19 @@ async function logRequest({
   auth,
   body,
   properties,
+  prompt,
+  isPromptRegexOn,
 }: HeliconeRequest): Promise<Result> {
   const json = body ? JSON.parse(body) : {};
+  console.log("PROMPT", prompt)
+
+  const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt) : null;
+  if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
+    return { data: null, error: formattedPromptResult.error };
+  }
+  const formattedPromptId = formattedPromptResult !== null ? formattedPromptResult.data : null;
+  const prompt_values = prompt !== undefined ? prompt.values : null;
+  console.log("PROMPT VALUES AND PROMPT ID", prompt_values, formattedPromptId)
 
   const { data, error } = await dbClient
     .from("request")
@@ -97,6 +109,8 @@ async function logRequest({
         user_id: userId,
         prompt_id: promptId,
         properties: properties,
+        formatted_prompt_id: formattedPromptId,
+        prompt_values: prompt_values,
       },
     ])
     .select("id")
@@ -171,6 +185,7 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       headers.get("Helicone-Request-Id")?.substring(0, 128) ??
       crypto.randomUUID(),
     properties: Object.keys(properties).length === 0 ? undefined : properties,
+    isPromptRegexOn: headers.get("Helicone-Prompt-Format") !== null,
   };
 }
 
@@ -188,7 +203,8 @@ async function forwardAndLog(
   body: string,
   request: Request,
   env: Env,
-  ctx: ExecutionContext
+  ctx: ExecutionContext,
+  prompt?: Prompt,
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
   if (auth === null) {
@@ -207,6 +223,7 @@ async function forwardAndLog(
       request,
       auth,
       body: body === "" ? undefined : body,
+      prompt: prompt,
       ...getHeliconeHeaders(request.headers),
     }),
   ]);
@@ -232,12 +249,17 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const body = await request.text();
+    const {
+      request: formattedRequest, 
+      body: body, 
+      prompt
+    } = await extractPrompt(request);
+
     try {
-      return await forwardAndLog(body, request, env, ctx);
+      return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
     } catch (e) {
       console.error(e);
-      return forwardRequestToOpenAi(request, body);
+      return forwardRequestToOpenAi(formattedRequest, body);
     }
   },
 };

@@ -24,6 +24,7 @@ interface RequestsPageProps {
   from: number;
   to: number;
   properties: string[];
+  values: string[];
 }
 
 const monthNames = [
@@ -42,7 +43,7 @@ const monthNames = [
 ];
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to, properties } = props;
+  const { requests, error, count, page, from, to, properties, values } = props;
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -60,6 +61,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
+    prompt_id: number | undefined;
     [keys: string]: any;
   }>();
   const [open, setOpen] = useState(true);
@@ -101,11 +103,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
+      prompt_id: number | undefined;
       [keys: string]: any;
     },
-    idx: number,
+    idx: number
   ) => {
-    console.log("ROW", row)
     setIndex(idx);
     setSelectedData(row);
     setOpen(true);
@@ -117,12 +119,21 @@ const RequestsPage = (props: RequestsPageProps) => {
         new Date(d.request_created_at!).getTime()) /
       1000;
 
-    const updated_request_properties = Object.assign(
+    var updated_request_properties = Object.assign(
       {},
       ...properties.map((p) => ({
         [p]: d.request_properties != null ? d.request_properties[p] : null,
       }))
     );
+
+    if (values != null) {
+      updated_request_properties = Object.assign(
+        updated_request_properties,
+        ...values.map((p) => ({
+          [p]: d.prompt_values != null ? d.prompt_values[p] : null,
+        }))
+      );
+    }
 
     return {
       request_id: d.request_id,
@@ -139,6 +150,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
+      prompt_id: d.formatted_prompt_id,
       ...updated_request_properties,
     };
   });
@@ -164,7 +176,15 @@ const RequestsPage = (props: RequestsPageProps) => {
     return {
       key: p,
       label: p,
-      format: (value: string) => value,
+      format: (value: string) => (value ? truncString(value, 15) : value),
+    };
+  });
+
+  const valuesColumns = values.map((p) => {
+    return {
+      key: p,
+      label: p,
+      format: (value: string) => (value ? truncString(value, 15) : value),
     };
   });
 
@@ -181,6 +201,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       minWidth: 170,
       format: (value: string) => truncString(value, 15),
     },
+    ...valuesColumns,
     {
       key: "response",
       label: "Response",
@@ -326,6 +347,12 @@ const RequestsPage = (props: RequestsPageProps) => {
                   makeCardProperty(
                     p,
                     selectedData[p] !== null ? selectedData[p] : "{NULL}"
+                  )
+                )}
+                {values.map((v) =>
+                  makeCardProperty(
+                    v,
+                    selectedData[v] !== null ? selectedData[v] : "{NULL}"
                   )
                 )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">

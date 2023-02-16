@@ -19,6 +19,8 @@ export interface Database {
           user_id: string | null
           prompt_id: string | null
           properties: Record<string, string> | null
+          formatted_prompt_id: string | null
+          prompt_values: Record<string, string> | null
         }
         Insert: {
           id?: string
@@ -29,6 +31,8 @@ export interface Database {
           user_id?: string | null
           prompt_id?: string | null
           properties?: Record<string, string> | null
+          formatted_prompt_id?: string | null
+          prompt_values?: Record<string, string> | null
         }
         Update: {
           id?: string
@@ -39,6 +43,8 @@ export interface Database {
           user_id?: string | null
           prompt_id?: string | null
           properties?: Record<string, string> | null
+          formatted_prompt_id?: string | null
+          prompt_values?: Record<string, string> | null
         }
       }
       response: {
@@ -162,6 +168,8 @@ export interface Database {
           api_key_preview: string | null
           user_id: string | null
           request_properties: Record<string, string> | null
+          prompt_values: Record<string, string> | null
+          formatted_prompt_id: string | null
         }
       }
       response_rbac: {

@@ -4,7 +4,7 @@ export interface Prompt {
     values: { [key: string]: string };
 }
  
-interface PromptResult {
+export interface PromptResult {
     request: Request,
     body: string,
     prompt?: Prompt,
@@ -36,24 +36,31 @@ function updateContentLength(clone: Request, text: string): Request {
 export async function extractPrompt(
     request: Request,
 ): Promise<PromptResult> {
-    const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
+    try {
+        const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
 
-    if (isPromptRegexOn) {
-        const cloneRequest = request.clone();
-        const cloneBody = await cloneRequest.text();
-        const json = cloneBody ? JSON.parse(cloneBody) : {};
-        const prompt = JSON.parse(json["prompt"])
-        const stringPrompt = formatPrompt(prompt);
-        json["prompt"] = stringPrompt
-        const body = JSON.stringify(json);
-        const formattedRequest = updateContentLength(cloneRequest, body);
+        if (isPromptRegexOn) {
+            const cloneRequest = request.clone();
+            const cloneBody = await cloneRequest.text();
+            const json = cloneBody ? JSON.parse(cloneBody) : {};
+            const prompt = JSON.parse(json["prompt"])
+            const stringPrompt = formatPrompt(prompt);
+            json["prompt"] = stringPrompt
+            const body = JSON.stringify(json);
+            const formattedRequest = updateContentLength(cloneRequest, body);
 
-        return {
-            request: formattedRequest,
-            body: body,
-            prompt: prompt,
+            return {
+                request: formattedRequest,
+                body: body,
+                prompt: prompt,
+            }
+        } else {
+            return {
+                request: request,
+                body: await request.text(),
+            }
         }
-    } else {
+    } catch (error) {
         return {
             request: request,
             body: await request.text(),
