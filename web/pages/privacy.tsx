@@ -1,6 +1,5 @@
 import BasePage from "../components/shared/layout/basePage";
 import MetaData from "../components/shared/metaData";
-import Footer from "../components/templates/home/footer";
 
 interface PrivacyProps {}
 
@@ -32,7 +31,7 @@ const Privacy = (props: PrivacyProps) => {
           )}
         </div>
       </BasePage>
-      <Footer />
+      {/* <Footer /> */}
     </MetaData>
   );
 };

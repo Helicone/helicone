@@ -1,6 +1,5 @@
 import BasePage from "../components/shared/layout/basePage";
 import MetaData from "../components/shared/metaData";
-import Footer from "../components/templates/home/footer";
 
 interface TermsProps {}
 
@@ -32,7 +31,7 @@ const Terms = (props: TermsProps) => {
           )}
         </div>
       </BasePage>
-      <Footer />
+      {/* <Footer /> */}
     </MetaData>
   );
 };
