@@ -220,7 +220,29 @@ const KeyPage = (props: KeyPageProps) => {
             { name: "Preview", key: "api_key_preview", hidden: true },
             { name: "Created", key: "created_at", hidden: false },
           ]}
-          rows={apiKeys}
+          rows={apiKeys?.map((key) => {
+            return {
+              ...key,
+              key_name: (
+                <input
+                  type="string"
+                  defaultValue={key.key_name ?? "No Name"}
+                  className="max-w-sm border-none outline-none"
+                  onChange={(e) => {
+                    supabaseClient
+                      .from("user_api_keys")
+                      .update({
+                        key_name: e.target.value,
+                      })
+                      .eq("api_key_hash", key.api_key_hash)
+                      .then((res) => {
+                        console.log(res);
+                      });
+                  }}
+                />
+              ),
+            };
+          })}
           deleteHandler={(row) => {
             supabaseClient
               .from("user_api_keys")
