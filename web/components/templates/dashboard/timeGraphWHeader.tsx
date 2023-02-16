@@ -49,8 +49,8 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
                 const newFilter: FilterLeaf = {
                   request: {
                     created_at: {
-                      gte: timeGraphConfig[newInterval].start.toISOString(),
-                      lte: timeGraphConfig[newInterval].end.toISOString(),
+                      gte: timeGraphConfig[newInterval].start.toUTCString(),
+                      lte: timeGraphConfig[newInterval].end.toUTCString(),
                     },
                   },
                 };

@@ -121,8 +121,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [filter, _setFilter] = useState<FilterNode>({
     request: {
       created_at: {
-        gte: timeGraphConfig["1m"].start.toISOString(),
-        lte: timeGraphConfig["1m"].end.toISOString(),
+        gte: timeGraphConfig["1m"].start.toUTCString(),
+        lte: timeGraphConfig["1m"].end.toUTCString(),
       },
     },
   });
