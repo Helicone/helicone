@@ -72,7 +72,7 @@ const navigation = [
   {
     name: "Contact",
     description: "Have a question? We're here to help!",
-    href: process.env.NEXT_PUBLIC_HELICONE_CONTACT_LINK,
+    href: process.env.NEXT_PUBLIC_HELICONE_CONTACT_LINK || "#",
     icon: QuestionMarkCircleIcon,
   },
 ];
