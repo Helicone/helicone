@@ -36,3 +36,13 @@ export async function unwrapAsync<T, K>(
 export function unwrapList<T extends unknown, K>(results: Result<T, K>[]): T[] {
   return results.map((result) => unwrap(result));
 }
+
+export function resultMap<T, K, Z>(
+  result: Result<T, K>,
+  f: (data: T) => Z
+): Result<Z, K> {
+  if (isError(result)) {
+    return result;
+  }
+  return { data: f(result.data), error: null };
+}
