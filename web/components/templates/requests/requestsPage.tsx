@@ -105,7 +105,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
     idx: number
   ) => {
-    console.log("ROW", row);
     setIndex(idx);
     setSelectedData(row);
     setOpen(true);

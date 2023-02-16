@@ -70,11 +70,17 @@ export const getServerSideProps = async (
     pageSize
   );
 
-  const allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
-    (property) => {
-      return property.property;
-    }
-  );
+  var allProperties: string[] = [];
+  try {
+    allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
+      (property) => {
+        return property.property;
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    allProperties = [];
+  }
 
   return {
     props: {

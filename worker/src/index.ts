@@ -151,9 +151,10 @@ export default {
       env.SUPABASE_SERVICE_ROLE_KEY
     );
 
+    const propTag = "helicone-property-"
     const properties = Object.fromEntries(
       [...request.headers.entries()].filter(([key, _]) =>
-        key.startsWith("helicone-property-") && key.length > 18
+        key.startsWith(propTag) && key.length > propTag.length
       ).map(([key, value]) => [key.substring(18), value])
     );
 
