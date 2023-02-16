@@ -11,6 +11,9 @@
     "dark": "#111827",
     "anchors": { "from": "#69B3E7", "to": "#4BA3E3" }
   },
+  "modeToggle": {
+    "default": "light"
+  },
   "topbarCtaButton": {
     "name": "Sign In",
     "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
