@@ -18,8 +18,6 @@ export interface Database {
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
-          formatted_prompt_id: string | null
-          prompt_values: Record<string, string> | null
           properties: Record<string, string> | null
         }
         Insert: {
@@ -30,8 +28,6 @@ export interface Database {
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
-          formatted_prompt_id?: string | null
-          prompt_values?: Record<string, string> | null
           properties?: Record<string, string> | null
         }
         Update: {
@@ -42,8 +38,6 @@ export interface Database {
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
-          formatted_prompt_id?: string | null
-          prompt_values?: Record<string, string> | null
           properties?: Record<string, string> | null
         }
       }

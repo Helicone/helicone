@@ -143,28 +143,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     };
   });
 
-  const hasPrevious = page > 1;
-  const hasNext = to <= count!;
-
-  const makeColumn = (name: string) => {
-    return (
-      <th
-        scope="col"
-        className="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        {name}
-      </th>
-    );
-  };
-
-  const makeValue = (val: string) => {
-    return (
-      <td className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
-        {val}
-      </td>
-    );
-  };
-
   const makeCardProperty = (name: string, val: string) => {
     return (
       <li className="w-full flex flex-row justify-between gap-4 text-sm">
@@ -344,12 +322,10 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <p>Model:</p>
                   <p>{selectedData.model}</p>
                 </li>
-                {properties.map((p) => 
+                {properties.map((p) =>
                   makeCardProperty(
                     p,
-                    selectedData[p] !== null
-                      ? selectedData[p]
-                      : "{NULL}"
+                    selectedData[p] !== null ? selectedData[p] : "{NULL}"
                   )
                 )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
