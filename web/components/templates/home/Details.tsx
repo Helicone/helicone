@@ -33,7 +33,7 @@ const features = [
 
 type DetailViews = "dashboard" | "requests" | "model";
 
-export default function Details() {
+const Details = () => {
   const [view, setView] = useState<DetailViews>("dashboard");
 
   return (
@@ -104,4 +104,6 @@ export default function Details() {
       </div>
     </div>
   );
-}
+};
+
+export default Details;
