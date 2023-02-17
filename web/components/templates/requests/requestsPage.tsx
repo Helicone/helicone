@@ -61,7 +61,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     request_user_id: string | null;
     model: string | undefined;
     temperature: number | undefined;
-    prompt_id: number | undefined;
     [keys: string]: any;
   }>();
   const [open, setOpen] = useState(true);
@@ -103,7 +102,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       request_user_id: string | null;
       model: string | undefined;
       temperature: number | undefined;
-      prompt_id: number | undefined;
       prompt_regex: string | undefined;
       [keys: string]: any;
     },
@@ -136,6 +134,12 @@ const RequestsPage = (props: RequestsPageProps) => {
       );
     }
 
+    if (d.prompt_regex) {
+      updated_request_properties = Object.assign(updated_request_properties, {
+        prompt_regex: d.prompt_regex,
+      });
+    }
+
     return {
       request_id: d.request_id,
       response_id: d.response_id,
@@ -152,7 +156,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
       prompt_name: d.prompt_name,
-      prompt_regex: d.prompt_regex,
       ...updated_request_properties,
     };
   });
