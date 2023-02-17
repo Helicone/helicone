@@ -83,7 +83,7 @@ const Details = () => {
               />
               <div className="mx-auto max-w-2xl sm:mx-0 sm:max-w-none">
                 <img
-                  src="https://tailwindui.com/img/component-images/project-app-screenshot.png"
+                  src={`/assets/${view}V1.png`}
                   alt="Product screenshot"
                   width={2432}
                   height={1442}
