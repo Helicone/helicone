@@ -41,7 +41,7 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-indigo-400 mix-blend-multiply" />
               </div>
-              <div className="relative py-16 px-6 sm:py-24 lg:py-32 lg:px-8">
+              <div className="relative py-8 px-6 sm:py-16 lg:py-24 lg:px-8">
                 <h1 className="text-center text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                   <span className="block text-white">
                     Observability for your
@@ -53,7 +53,7 @@ export default function HomePage() {
                   We&apos;re an open-source observability platform that helps
                   you better understand your GPT-3 application.
                 </p>
-                <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
+                <div className="mx-auto mt-10 max-w-sm sm:flex sm:flex-col sm:max-w-none sm:justify-center">
                   <div className="space-y-4 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5 sm:space-y-0">
                     <OnboardingButton
                       full
@@ -77,6 +77,12 @@ export default function HomePage() {
                     >
                       View Demo
                     </button>
+                  </div>
+                  <div className="bottom-0 w-full justify-center flex mx-auto text-white mt-12">
+                    <p className="text-xl font-semibold">
+                      Backed by{" "}
+                      <span className="text-orange-500">Y Combinator</span>
+                    </p>
                   </div>
                 </div>
               </div>
