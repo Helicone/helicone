@@ -94,7 +94,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <Link
                 href={item.href as string}
                 target={item.target}
-                key={item.name}
+                key={`desktop-${item.name}`}
                 className="text-base font-medium text-gray-500 hover:text-gray-900"
                 rel="noopener noreferrer"
               >
@@ -152,7 +152,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                   <nav className="grid grid-cols-1 gap-7">
                     {navigation.map((item) => (
                       <a
-                        key={item.name}
+                        key={`mobile-${item.name}`}
                         href={item.href}
                         className="-m-3 flex items-center rounded-lg p-3 hover:bg-gray-50"
                       >
