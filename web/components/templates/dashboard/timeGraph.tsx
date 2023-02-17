@@ -1,5 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { SetStateAction, useEffect, useState, Dispatch } from "react";
 import {
   CartesianGrid,
   Line,
@@ -9,22 +7,22 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
-import {
-  TimeData,
-  TimeIncrement,
-} from "../../../lib/timeCalculations/fetchTimeData";
+
+export interface LineChartData {
+  time: Date;
+  value: number;
+}
 
 export const RenderLineChart = ({
   data,
   timeMap,
 }: {
-  data: TimeData[];
+  data: LineChartData[];
   timeMap: (date: Date) => string;
 }) => {
   const chartData = data.map((d) => ({
+    ...d,
     time: timeMap(d.time),
-    count: d.count,
   }));
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -33,7 +31,7 @@ export const RenderLineChart = ({
         <Line
           type="monotone"
           dot={false}
-          dataKey="count"
+          dataKey="value"
           stroke="#8884d8"
           strokeWidth={1.5}
           animationDuration={0}

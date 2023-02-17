@@ -1,9 +1,14 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
-import { Result } from "../../result";
+import { Result, unwrap } from "../../result";
+import {
+  isValidTimeIncrement,
+  isValidTimeZoneDifference,
+} from "../../sql/timeHelpers";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbExecute } from "../db/dbExecute";
 import { buildFilter, FilterNode } from "./filters";
+import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export interface GetTimeDataOptions {
   filter: FilterNode;
@@ -20,39 +25,31 @@ export interface DateCountDBModel {
   count: number;
 }
 
-export async function getTimeData(
-  filter: FilterNode,
-  user_id: string,
-  time_increment: TimeIncrement,
-  timeZoneDifference: number
-): Promise<Result<DateCountDBModel[], string>> {
-  const validIncrements = ["min", "hour", "day", "week", "month", "year"];
-  if (!validIncrements.includes(time_increment)) {
+export async function getTotalRequestsOverTime({
+  filter,
+  userId,
+  dbIncrement,
+  timeZoneDifference,
+}: DataOverTimeRequest): Promise<Result<DateCountDBModel[], string>> {
+  if (!isValidTimeIncrement(dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }
-  if (isNaN(timeZoneDifference)) {
+  if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const minutesInDay = 24 * 60;
-  if (timeZoneDifference < -minutesInDay || timeZoneDifference > minutesInDay) {
-    return { data: null, error: "Invalid time zone difference" };
-  }
-
+  const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT
-  DATE_TRUNC(
-    '${time_increment}',
-    request.created_at + INTERVAL '${timeZoneDifference} minutes'
-  ) as created_at_trunc,
+  ${dateTrunc} as created_at_trunc,
   COUNT(*)::bigint as count
 FROM request
    LEFT JOIN response ON response.request = request.id
    LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
 WHERE (
-  user_api_keys.user_id = '${user_id}'
+  user_api_keys.user_id = '${userId}'
   AND (${buildFilter(filter)})
 )
-GROUP BY DATE_TRUNC('${time_increment}', request.created_at + INTERVAL '${timeZoneDifference} minutes')
+GROUP BY ${dateTrunc}
 ORDER BY created_at_trunc
 `;
 
@@ -63,7 +60,7 @@ ORDER BY created_at_trunc
   return {
     data: data.map((d) => ({
       created_at_trunc: new Date(
-        d.created_at_trunc.getTime() - timeZoneDifference * 60 * 1000 // TODO fix this calculation
+        d.created_at_trunc.getTime() - timeZoneDifference * 60 * 1000
       ),
       count: Number(d.count),
     })),
