@@ -56,9 +56,9 @@ const Details = () => {
               </p>
               <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
                 {features.map((feature) => (
-                  <>
+                  <div key={feature.name}>
                     <button
-                      key={feature.name}
+                      key={`desktop-${feature.name}`}
                       onClick={() => setView(feature.name as DetailViews)}
                       className={clsx(
                         view === feature.name
@@ -73,7 +73,7 @@ const Details = () => {
                       <dd className="inline">{feature.description}</dd>
                     </button>
                     <button
-                      key={feature.name}
+                      key={`mobile-${feature.name}`}
                       onClick={() => setView(feature.name as DetailViews)}
                       className={clsx(
                         "block sm:hidden border border-gray-500 shadow-sm text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
@@ -84,7 +84,7 @@ const Details = () => {
                       </dt>{" "}
                       <dd className="inline">{feature.description}</dd>
                     </button>
-                  </>
+                  </div>
                 ))}
               </dl>
             </div>
