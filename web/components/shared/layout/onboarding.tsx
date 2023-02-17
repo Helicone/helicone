@@ -275,7 +275,7 @@ const Onboarding = (props: OnboardingProps) => {
         );
       case 3:
         return (
-          <div className="flex flex-col border border-black rounded-lg p-8 items-center text-center justify-center text-black text-lg sm:text-lg bg-gray-200 max-w-[425px]">
+          <div className="flex flex-col border border-black rounded-lg p-8 items-center text-center justify-center text-black text-lg sm:text-lg bg-gray-200 max-w-[450px]">
             <InboxArrowDownIcon className="w-12 h-12 mb-4 animate-bounce" />
             <p>
               Check your email ({email}) for a confirmation link. If you
@@ -285,6 +285,57 @@ const Onboarding = (props: OnboardingProps) => {
         );
       default:
         return <div>hello</div>;
+    }
+  };
+
+  const renderStepActions = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="bottom-0 relative flex flex-row justify-end flex-1 pt-8">
+            <button
+              onClick={() => setCurrentStep(currentStep + 1)}
+              className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Next
+            </button>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
+            <button
+              onClick={() => setCurrentStep(currentStep - 1)}
+              className="rounded-md bg-gray-100 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => signUpHandler(email, password)}
+              className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {loading ? (
+                <div className="flex flex-row items-center">
+                  <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                  Creating...
+                </div>
+              ) : (
+                <div className="flex flex-row items-center">Create</div>
+              )}
+            </button>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="bottom-0 relative flex flex-row justify-start flex-1 pt-8">
+            <button
+              onClick={() => setCurrentStep(currentStep - 1)}
+              className="rounded-md bg-gray-100 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Back
+            </button>
+          </div>
+        );
     }
   };
 
@@ -300,37 +351,7 @@ const Onboarding = (props: OnboardingProps) => {
         <div className="h-full flex flex-col w-full pt-2">
           <div className="pt-2 w-full flex-auto">{renderStep()}</div>
         </div>
-        <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
-          <button
-            onClick={() => setCurrentStep(currentStep - 1)}
-            disabled={currentStep === 1}
-            className="rounded-md bg-gray-100 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            Back
-          </button>
-          {currentStep === 2 ? (
-            <button
-              onClick={() => signUpHandler(email, password)}
-              className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              {loading ? (
-                <div className="flex flex-row items-center">
-                  <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-                  Creating...
-                </div>
-              ) : (
-                <div className="flex flex-row items-center">Create</div>
-              )}
-            </button>
-          ) : (
-            <button
-              onClick={() => setCurrentStep(currentStep + 1)}
-              className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              Next
-            </button>
-          )}
-        </div>
+        {renderStepActions()}
       </div>
     </div>
   );
