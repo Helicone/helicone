@@ -7,8 +7,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useState } from "react";
-import { clsx } from "../../shared/clsx";
-import ProgressBar from "./progressBar";
+import { clsx } from "../clsx";
+import ProgressBar from "../../templates/home/progressBar";
 
 interface OnboardingProps {
   currentStep: number;
@@ -298,7 +298,7 @@ const Onboarding = (props: OnboardingProps) => {
           <ProgressBar currentStep={currentStep} />
         </div>
         <div className="h-full flex flex-col w-full pt-2">
-          <div className="sm:pl-4 pt-2 w-full flex-auto">{renderStep()}</div>
+          <div className="pt-2 w-full flex-auto">{renderStep()}</div>
         </div>
         <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
           <button
