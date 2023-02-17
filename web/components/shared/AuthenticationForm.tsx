@@ -87,8 +87,7 @@ const AuthenticationForm = (props: AuthenticationFormProps) => {
             <div className="space-y-6">
               {formType === "resetPassword" && (
                 <div>
-                  <div>Change password for</div>
-                  <div>{resetEmail}</div>
+                  <div>Change password for: {resetEmail}</div>
                 </div>
               )}
               {(formType === "reset" ||
