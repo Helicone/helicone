@@ -1,4 +1,4 @@
-import { TimeGraphConfig, TimeInterval } from "./time";
+import { getIncrement, TimeGraphConfig, TimeInterval } from "./time";
 import {
   getXDaysAgoFloored,
   getXHoursAgoFloored,
@@ -11,7 +11,6 @@ import {
 export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
   "1h": {
     timeMap: (date) => date.toLocaleTimeString(),
-    increment: (date) => new Date(date.getTime() + 60 * 1000 * 5), // every 5 minutes
     dbIncrement: "min",
     start: getXMinutesAgoFloored(60),
     end: getXMinutesAgoFloored(0),
@@ -21,7 +20,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
       date.toLocaleTimeString(undefined, {
         hour: "2-digit",
       }),
-    increment: (date) => new Date(date.getTime() + 60 * 60 * 1000), // every 2 hours
+
     dbIncrement: "hour",
     start: getXHoursAgoFloored(24),
     end: getXMinutesAgoFloored(0),
@@ -31,7 +30,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
       date.toLocaleDateString(undefined, {
         dateStyle: "short",
       }),
-    increment: (date) => new Date(date.getTime() + 24 * 60 * 60 * 1000), // every day
+
     dbIncrement: "day",
     start: getXDaysAgoFloored(7),
     end: getXMinutesAgoFloored(0),
@@ -43,7 +42,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
         month: "2-digit",
         day: "2-digit",
       }),
-    increment: (date) => new Date(date.getTime() + 24 * 60 * 60 * 1000), // every day
+
     dbIncrement: "day",
     start: getXDaysAgoFloored(30),
     end: getXMinutesAgoFloored(0),
@@ -51,7 +50,9 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
   "3m": {
     timeMap: (startDate) => {
       // returns a format like 01/01 - 01/07
-      const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000 * 7);
+      const increment = getIncrement(30 * 3 * 24 * 60 * 60 * 1000);
+
+      const endDate = new Date(startDate.getTime() + increment - 1);
       return `${startDate.toLocaleDateString(undefined, {
         month: "2-digit",
         day: "2-digit",
@@ -60,7 +61,6 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
         day: "2-digit",
       })}`;
     },
-    increment: (date) => new Date(date.getTime() + 24 * 60 * 60 * 7 * 1000), // every week
     dbIncrement: "day",
     start: getXDaysAgoFloored(30 * 3),
     end: getXMinutesAgoFloored(0),

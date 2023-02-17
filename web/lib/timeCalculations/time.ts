@@ -4,15 +4,12 @@ import { TimeData, TimeIncrement } from "./fetchTimeData";
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h";
 export interface TimeGraphConfig {
   timeMap: (date: Date) => string;
-  increment: (date: Date) => Date;
   dbIncrement: TimeIncrement;
   start: Date;
   end: Date;
 }
 
-const NUMBER_OF_BINS = 100;
-
-const getIncrement = (totalTime: number) => {
+export const getIncrement = (totalTime: number) => {
   if (totalTime < 1000 * 60 * 60 * 2) {
     // less than 1 hour
     // Increment by 5 minutes
@@ -29,7 +26,7 @@ const getIncrement = (totalTime: number) => {
     return 1000 * 60 * 60 * 24;
   }
   if (totalTime < 1000 * 60 * 60 * 24 * 30 * 2) {
-    // less than 32 days
+    // less than 60 days
     // Increment by 1 day
     return 1000 * 60 * 60 * 24;
   }
@@ -38,6 +35,7 @@ const getIncrement = (totalTime: number) => {
     // Increment by 7 days
     return 1000 * 60 * 60 * 24 * 7;
   }
+
   //default to 1 month
   return 1000 * 60 * 60 * 24 * 30;
 };

@@ -26,8 +26,6 @@ export async function getRequestsGraph(
   if (error !== null) {
     return { data: null, error: error };
   }
-  console.log("GTE", filter!.request!.created_at!.gte!);
-  console.log("LTE", filter!.request!.created_at!.lte!);
   return {
     data: timeBackfill(
       data,
@@ -65,7 +63,6 @@ export default async function handler(
     dbIncrement,
     timeZoneDifference
   );
-  console.log("TZ", timeZoneDifference);
   if (metrics.error !== null) {
     res.status(500).json(metrics);
     return;

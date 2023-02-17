@@ -80,7 +80,6 @@ async function getDashboardData(
       } else {
         setData({
           data: data.map((d) => ({ count: +d.count, time: new Date(d.time) })),
-          // .filter((d) => d.time <= new Date())
           error: null,
         });
       }
