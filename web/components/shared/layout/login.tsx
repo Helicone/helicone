@@ -91,7 +91,7 @@ const Login = (props: LoginProps) => {
                 </div>
               ) : (
                 <div className="w-full max-w-md space-y-8">
-                  <form className="space-y-4" action="#" method="POST">
+                  <div className="space-y-4">
                     <input type="hidden" name="remember" defaultValue="true" />
                     <div className="-space-y-px rounded-md shadow-sm">
                       <div>
@@ -129,6 +129,7 @@ const Login = (props: LoginProps) => {
                     <div className="flex items-center justify-end">
                       <div className="text-sm">
                         <button
+                          type="button"
                           onClick={() => setFormState("reset")}
                           className="font-medium text-sky-600 hover:text-sky-500"
                         >
@@ -141,44 +142,46 @@ const Login = (props: LoginProps) => {
                         <p>{authError}</p>
                       </div>
                     )}
-                  </form>
-                  <button
-                    onClick={() => {
-                      if (email === "") {
-                        setAuthError("Email is required");
-                        return;
-                      }
-                      if (password === "") {
-                        setAuthError("Password is required");
-                        return;
-                      }
-                      setLoading(true);
-                      supabaseClient.auth
-                        .signInWithPassword({
-                          email,
-                          password,
-                        })
-                        .then((res) => {
-                          if (res.error) {
-                            setAuthError(res.error.message);
-                          } else {
-                            router.push("/dashboard");
-                          }
-                          setLoading(false);
-                        });
-                    }}
-                    type="submit"
-                    className="flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500  py-2 px-4 text-md font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    {loading ? (
-                      <div className="flex flex-row items-center">
-                        <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-                        Logging in...
-                      </div>
-                    ) : (
-                      <div className="flex flex-row items-center">Sign In</div>
-                    )}
-                  </button>
+                    <button
+                      onClick={() => {
+                        if (email === "") {
+                          return;
+                        }
+                        if (password === "") {
+                          return;
+                        }
+                        setLoading(true);
+
+                        supabaseClient.auth
+                          .signInWithPassword({
+                            email,
+                            password,
+                          })
+                          .then((res) => {
+                            console.log(res);
+                            if (res.error) {
+                              setAuthError(res.error.message);
+                            } else {
+                              router.push("/dashboard");
+                            }
+                            setLoading(false);
+                          });
+                      }}
+                      type="button"
+                      className="flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500  py-2 px-4 text-md font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      {loading ? (
+                        <div className="flex flex-row items-center">
+                          <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                          Logging in...
+                        </div>
+                      ) : (
+                        <div className="flex flex-row items-center">
+                          Sign In
+                        </div>
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
