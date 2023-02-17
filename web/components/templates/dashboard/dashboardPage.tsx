@@ -34,6 +34,7 @@ export async function fetchGraphData(
     body: JSON.stringify({
       filter,
       dbIncrement,
+      timeZoneDifference: new Date().getTimezoneOffset(),
     }),
   }).then((res) => res.json() as Promise<Result<TimeData[], string>>);
 }

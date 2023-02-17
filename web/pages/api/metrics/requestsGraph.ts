@@ -14,9 +14,15 @@ import { timeBackfill } from "../../../lib/timeCalculations/time";
 export async function getRequestsGraph(
   filter: FilterLeaf,
   userId: string,
-  dbIncrement: TimeIncrement
+  dbIncrement: TimeIncrement,
+  timeZoneDifference: number
 ): Promise<Result<TimeData[], string>> {
-  const { data, error } = await getTimeData(filter, userId, dbIncrement);
+  const { data, error } = await getTimeData(
+    filter,
+    userId,
+    dbIncrement,
+    timeZoneDifference
+  );
   if (error !== null) {
     return { data: null, error: error };
   }
@@ -40,9 +46,10 @@ export default async function handler(
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const { filter, dbIncrement } = req.body as {
+  const { filter, dbIncrement, timeZoneDifference } = req.body as {
     filter: FilterLeaf;
     dbIncrement: TimeIncrement;
+    timeZoneDifference: number;
   };
 
   if (!filter || !dbIncrement) {
@@ -53,7 +60,8 @@ export default async function handler(
   const metrics = await getRequestsGraph(
     filter,
     user.data.user.id,
-    dbIncrement
+    dbIncrement,
+    timeZoneDifference
   );
   if (metrics.error !== null) {
     res.status(500).json(metrics);
