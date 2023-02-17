@@ -1,4 +1,5 @@
 import BasePage from "../components/shared/layout/basePage";
+import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 
 interface PrivacyProps {}
@@ -19,18 +20,20 @@ const Privacy = (props: PrivacyProps) => {
 
   return (
     <MetaData title="Privacy Policy">
-      <BasePage full variant="secondary">
-        <div className="py-24 max-w-3xl font-serif space-y-16">
-          <div className="flex flex-col space-y-4">
-            <p className="text-5xl font-sans">Privacy Policy</p>
-            <p className="text-lg font-sans">Last updated February 5, 2023</p>
-          </div>
+      <BasePageV2>
+        <div className="mx-auto flex max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8">
+          <div className="py-24 max-w-3xl font-serif space-y-16">
+            <div className="flex flex-col space-y-4">
+              <p className="text-5xl font-sans">Privacy Policy</p>
+              <p className="text-lg font-sans">Last updated February 5, 2023</p>
+            </div>
 
-          {pageContent.map((page, index) =>
-            privacyPageSection(index + 1, page.title, page.description)
-          )}
+            {pageContent.map((page, index) =>
+              privacyPageSection(index + 1, page.title, page.description)
+            )}
+          </div>
         </div>
-      </BasePage>
+      </BasePageV2>
       {/* <Footer /> */}
     </MetaData>
   );

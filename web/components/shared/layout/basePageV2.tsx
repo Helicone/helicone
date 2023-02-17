@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { SVGProps, useState } from "react";
-import Login from "./login";
-import Onboarding from "./onboarding";
 import ThemedModal from "../themedModal";
+import Login from "./login";
 import NavBarV2 from "./navBarV2";
+import Onboarding from "./onboarding";
 
 const footerNavigation = {
   social: [
@@ -46,7 +46,10 @@ const BasePageV2 = (props: BasePageV2Props) => {
   return (
     <>
       <div className="bg-white">
-        <NavBarV2 setOpenLogin={setOpenLogin} />
+        <NavBarV2
+          setOpenLogin={setOpenLogin}
+          setOpenOnboarding={setOpenOnboarding}
+        />
 
         <main>{children}</main>
         <footer className="bg-gray-50" aria-labelledby="footer-heading">
