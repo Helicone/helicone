@@ -67,10 +67,6 @@ const Details = () => {
                     )}
                   >
                     <dt className="inline font-semibold text-gray-900">
-                      {/* <feature.icon
-                        className="relative top-1 left-1 h-5 w-5 text-indigo-600"
-                        aria-hidden="true"
-                      /> */}
                       {feature.label}
                     </dt>{" "}
                     <dd className="inline">{feature.description}</dd>
