@@ -34,6 +34,7 @@ export async function fetchGraphData(
     body: JSON.stringify({
       filter,
       dbIncrement,
+      timeZoneDifference: new Date().getTimezoneOffset(),
     }),
   }).then((res) => res.json() as Promise<Result<TimeData[], string>>);
 }
@@ -79,6 +80,7 @@ async function getDashboardData(
       } else {
         setData({
           data: data.map((d) => ({ count: +d.count, time: new Date(d.time) })),
+          // .filter((d) => d.time <= new Date())
           error: null,
         });
       }
@@ -121,8 +123,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [filter, _setFilter] = useState<FilterNode>({
     request: {
       created_at: {
-        gte: timeGraphConfig["1m"].start.toUTCString(),
-        lte: timeGraphConfig["1m"].end.toUTCString(),
+        gte: timeGraphConfig["1m"].start.toISOString(),
+        lte: timeGraphConfig["1m"].end.toISOString(),
       },
     },
   });

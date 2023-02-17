@@ -22,6 +22,7 @@ export const RenderLineChart = ({
   data: TimeData[];
   timeMap: (date: Date) => string;
 }) => {
+  console.log(data);
   const chartData = data.map((d) => ({
     time: timeMap(d.time),
     count: d.count,

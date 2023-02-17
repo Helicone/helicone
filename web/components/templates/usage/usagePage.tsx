@@ -154,7 +154,7 @@ const UsagePage = (props: UsagePageProps) => {
     client
       .from("request_rbac")
       .select("*", { count: "exact" })
-      .gte("created_at", startOfThisMonth.toUTCString())
+      .gte("created_at", startOfThisMonth.toISOString())
       .then((res) => {
         if (res.error !== null) {
           console.error(res.error);

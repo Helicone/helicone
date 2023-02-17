@@ -61,7 +61,7 @@ export function timeBackfill(
       )
       .reduce((acc, d) => acc + d.count, 0);
 
-    result.push({ time: nextTime, count });
+    result.push({ time: current, count });
     current = nextTime;
   }
   return result;
