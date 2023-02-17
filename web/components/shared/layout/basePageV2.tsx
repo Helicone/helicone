@@ -72,8 +72,13 @@ const BasePageV2 = (props: BasePageV2Props) => {
                   </a>
                 ))}
               </div>
-              <div className="mt-8 text-base text-gray-400 md:order-1 md:mt-0 flex flex-row gap-4">
-                &copy; 2023 Helicone, Inc. All rights reserved.
+              <div className="mt-8 text-xs sm:text-base text-gray-400 md:order-1 md:mt-0 flex flex-row gap-4">
+                <span className="hidden sm:inline">
+                  &copy; 2023 Helicone, Inc. All rights reserved.
+                </span>
+                <span className="inline sm:hidden">
+                  &copy; 2023 Helicone, Inc.
+                </span>
                 <Link href={"/privacy"} className="hover:text-black">
                   Privacy Policy
                 </Link>
