@@ -245,15 +245,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   ].filter((column) => column !== null) as Column[];
 
-  console.log("PROPERTIES", values);
-  console.log(
-    "MY THING",
-    values.filter((v) => {
-      console.log(csvData[0]);
-      return csvData[0][v] != null;
-    })
-  );
-
   return (
     <>
       <div className="">

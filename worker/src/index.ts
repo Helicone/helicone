@@ -86,9 +86,6 @@ async function getPromptId(
 
     // Construct the new prompt name with the new suffix
     const newPromptName = `Prompt (${newSuffix})`;
-    console.log("NEW PROMPT NAME", newPromptName);
-    console.log("NEW SUFFIX", newSuffix);
-
 
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
