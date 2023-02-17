@@ -44,7 +44,7 @@ import Link from "next/link";
 import ThemedModal from "../../shared/themedModal";
 import Onboarding from "./onboarding";
 import Login from "./login";
-import Details from "./details";
+import Details from "./detailsV2";
 
 const navigation = [
   {
