@@ -15,7 +15,7 @@ interface ErrorResult {
   error: string;
 }
 
-type Result = SuccessResult | ErrorResult;
+export type Result = SuccessResult | ErrorResult;
 
 interface GenericSuccessResult<T> {
   data: T;
@@ -50,11 +50,13 @@ interface HeliconeHeaders {
   promptId: string | null;
   properties?: Record<string, string>;
   isPromptRegexOn: boolean;
+  promptName: string | null;
 }
 
 async function getPromptId(
   dbClient: SupabaseClient,
-  prompt: Prompt
+  prompt: Prompt,
+  name: string | null
 ): Promise<Result> {
   // First, get the prompt id if there's a match in the prompt table
   const { data, error } = await dbClient
@@ -68,30 +70,34 @@ async function getPromptId(
   if (data !== null && data.length > 0) {
     return { data: data[0].id, error: null };
   } else {
+    let newPromptName;
+    if (name) {
+      newPromptName = name;
+    } else {
+      // First, query the database to find the highest prompt name suffix
+      const { data: highestSuffixData, error: highestSuffixError } = await dbClient
+      .from("prompt")
+      .select("name")
+      .order("name", { ascending: false })
+      .like("name", "Prompt (%)")
+      .limit(1)
+      .single();
 
-    // First, query the database to find the highest prompt name suffix
-    const { data: highestSuffixData, error: highestSuffixError } = await dbClient
-    .from("prompt")
-    .select("name")
-    .order("name", { ascending: false })
-    .like("name", "Prompt (%)")
-    .limit(1)
-    .single();
-
-    // Extract the highest suffix number from the highest prompt name suffix found
-    let highestSuffix = 0;
-    if (highestSuffixData) {
-      const matches = highestSuffixData.name.match(/\((\d+)\)/);
-      if (matches) {
-        highestSuffix = parseInt(matches[1]);
+      // Extract the highest suffix number from the highest prompt name suffix found
+      let highestSuffix = 0;
+      if (highestSuffixData) {
+        const matches = highestSuffixData.name.match(/\((\d+)\)/);
+        if (matches) {
+          highestSuffix = parseInt(matches[1]);
+        }
       }
+
+      // Increment the highest suffix to get the new suffix for the new prompt name
+      const newSuffix = highestSuffix + 1;
+
+      // Construct the new prompt name with the new suffix
+      newPromptName = `Prompt (${newSuffix})`;
     }
-
-    // Increment the highest suffix to get the new suffix for the new prompt name
-    const newSuffix = highestSuffix + 1;
-
-    // Construct the new prompt name with the new suffix
-    const newPromptName = `Prompt (${newSuffix})`;
 
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
@@ -117,11 +123,12 @@ async function logRequest({
   properties,
   prompt,
   isPromptRegexOn,
+  promptName,
 }: HeliconeRequest): Promise<Result> {
   try {
     const json = body ? JSON.parse(body) : {};
 
-    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt) : null;
+    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt, promptName) : null;
     if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
       return { data: null, error: formattedPromptResult.error };
     }
@@ -216,13 +223,14 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       crypto.randomUUID(),
     properties: Object.keys(properties).length === 0 ? undefined : properties,
     isPromptRegexOn: headers.get("Helicone-Prompt-Format") !== null,
+    promptName: headers.get("Helicone-Prompt-Name")?.substring(0, 128) ?? null,
   };
 }
 
 function removeHeliconeHeaders(request: Headers): Headers {
   const newHeaders = new Headers();
   for (const [key, value] of request.entries()) {
-    if (!key.startsWith("Helicone-")) {
+    if (!key.toLowerCase().startsWith("helicone-")) {
       newHeaders.set(key, value);
     }
   }

@@ -1,4 +1,4 @@
-import { GenericResult } from ".";
+import { GenericResult, Result } from ".";
 
 export interface Prompt {
     prompt: string;
@@ -11,15 +11,48 @@ interface PromptResult {
     prompt?: Prompt,
 }
 
-function formatPrompt(prompt: Prompt): string {
+function formatPrompt(prompt: Prompt): Result {
     let formattedString = prompt.prompt;
+    const missingValues = [];
 
     for (const key in prompt.values) {
         const placeholder = new RegExp(`{{${key}}}`, 'g');
-        formattedString = formattedString.replace(placeholder, prompt.values[key]);
+        if (!formattedString.includes(`{{${key}}}`)) {
+            missingValues.push(key);
+        } else {
+            formattedString = formattedString.replace(placeholder, prompt.values[key]);
+        }
     }
 
-    return formattedString;
+    if (missingValues.length > 0) {
+        return {
+            data: null,
+            error: `Missing values in the prompt: ${missingValues.join(', ')}`,
+        };
+    }
+
+    const regex = /{{([^{}]+)}}/g;
+    let match = regex.exec(formattedString);
+    const missingPlaceholders = [];
+
+    while (match) {
+        if (!prompt.values.hasOwnProperty(match[1])) {
+            missingPlaceholders.push(match[1]);
+        }
+        match = regex.exec(formattedString);
+    }
+
+    if (missingPlaceholders.length > 0) {
+        return {
+            data: null,
+            error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
+        };
+    }
+
+    return {
+        data: formattedString,
+        error: null,
+    };
 }
 
 function updateContentLength(clone: Request, text: string): Request {
@@ -45,7 +78,14 @@ export async function extractPrompt(
             const cloneBody = await cloneRequest.text();
             const json = cloneBody ? JSON.parse(cloneBody) : {};
             const prompt = JSON.parse(json["prompt"]);
-            const stringPrompt = formatPrompt(prompt);
+            const stringPromptResult = formatPrompt(prompt);
+            if (stringPromptResult.error !== null) {
+                return {
+                    data: null,
+                    error: stringPromptResult.error,
+                };
+            }
+            const stringPrompt = stringPromptResult.data;
             json["prompt"] = stringPrompt;
             const body = JSON.stringify(json);
             const formattedRequest = updateContentLength(cloneRequest, body);
