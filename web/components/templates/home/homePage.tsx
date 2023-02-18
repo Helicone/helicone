@@ -43,7 +43,7 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-indigo-400 mix-blend-multiply" />
               </div>
-              <div className="relative py-8 px-6 sm:py-16 lg:py-24 lg:px-8">
+              <div className="relative pt-12 pb-8 px-6 sm:pt-24 sm:pb-16 lg:pt-28 lg:pb-20 lg:px-8">
                 <h1 className="text-center text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                   <span className="block text-white">
                     Observability for your
