@@ -146,7 +146,6 @@ const DashboardPage = (props: DashboardPageProps) => {
         title={"Dashboard"}
         actions={<Filters keys={keys} filter={filter} setFilter={setFilter} />}
       />
-
       <div className="space-y-16">
         <MetricsPanel filters={filter} metrics={metrics} />
         <TimeGraphWHeader

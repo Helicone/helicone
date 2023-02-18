@@ -2,6 +2,7 @@ import { Popover, Transition } from "@headlessui/react";
 import {
   BanknotesIcon,
   Bars3Icon,
+  BookOpenIcon,
   ChatBubbleLeftRightIcon,
   CodeBracketIcon,
   QuestionMarkCircleIcon,
@@ -20,6 +21,13 @@ const navigation = [
     href: "/pricing",
     icon: BanknotesIcon,
     target: "_self",
+  },
+  {
+    name: "Docs",
+    description: "Learn how to use Helicone to its fullest potential.",
+    href: "https://docs.helicone.ai/",
+    icon: BookOpenIcon,
+    target: "_target",
   },
   {
     name: "Github",
