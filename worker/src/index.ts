@@ -279,11 +279,16 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const {
-      request: formattedRequest, 
-      body: body, 
-      prompt
-    } = await extractPrompt(request);
-    return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
-  },
+    const result = await extractPrompt(request);
+    if (result.data !== null) {
+      const {
+        request: formattedRequest, 
+        body: body, 
+        prompt
+      } = result.data;
+      return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
+    } else {
+      return new Response(result.error, { status: 400 });
+    }
+  }
 };

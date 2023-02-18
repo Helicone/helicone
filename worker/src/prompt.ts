@@ -59,6 +59,7 @@ export async function extractPrompt(
                 error: null,
             };
         } catch (error) {
+            console.error(error);
             return {
                 data: null,
                 error: `Error parsing prompt: ${error}`,
