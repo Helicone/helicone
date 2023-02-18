@@ -86,7 +86,7 @@ export const getServerSideProps = async (
     allProperties = [];
   }
 
-  var allValues: string[] = [];
+  let allValues: string[] = [];
   try {
     allValues = (await unwrapAsync(getPromptValues(session.user.id))).map(
       (value) => {
