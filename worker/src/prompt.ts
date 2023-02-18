@@ -1,10 +1,11 @@
+import { GenericResult } from ".";
 
 export interface Prompt {
     prompt: string;
     values: { [key: string]: string };
 }
  
-export interface PromptResult {
+interface PromptResult {
     request: Request,
     body: string,
     prompt?: Prompt,
@@ -35,35 +36,41 @@ function updateContentLength(clone: Request, text: string): Request {
 
 export async function extractPrompt(
     request: Request,
-): Promise<PromptResult> {
-    try {
-        const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
-
-        if (isPromptRegexOn) {
+): Promise<GenericResult<PromptResult>> {
+    const isPromptRegexOn = request.headers.get("Helicone-Prompt-Format") !== null;
+	
+    if (isPromptRegexOn) {
+        try {
             const cloneRequest = request.clone();
             const cloneBody = await cloneRequest.text();
             const json = cloneBody ? JSON.parse(cloneBody) : {};
-            const prompt = JSON.parse(json["prompt"])
+            const prompt = JSON.parse(json["prompt"]);
             const stringPrompt = formatPrompt(prompt);
-            json["prompt"] = stringPrompt
+            json["prompt"] = stringPrompt;
             const body = JSON.stringify(json);
             const formattedRequest = updateContentLength(cloneRequest, body);
 
             return {
-                request: formattedRequest,
-                body: body,
-                prompt: prompt,
-            }
-        } else {
+                data: {
+                    request: formattedRequest,
+                    body: body,
+                    prompt: prompt,
+                },
+                error: null,
+            };
+        } catch (error) {
             return {
-                request: request,
-                body: await request.text(),
+                data: null,
+                error: `Error parsing prompt: ${error}`,
             }
         }
-    } catch (error) {
+    } else {
         return {
-            request: request,
-            body: await request.text(),
+            data: {
+                request: request,
+                body: await request.text(),
+            },
+            error: null,
         }
     }
 }

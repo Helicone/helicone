@@ -118,7 +118,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         new Date(d.request_created_at!).getTime()) /
       1000;
 
-    var updated_request_properties = Object.assign(
+    let updated_request_properties = Object.assign(
       {},
       ...properties.map((p) => ({
         [p]: d.request_properties != null ? d.request_properties[p] : null,

@@ -17,6 +17,12 @@ interface ErrorResult {
 
 type Result = SuccessResult | ErrorResult;
 
+interface GenericSuccessResult<T> {
+  data: T;
+  error: null;
+}
+export type GenericResult<T> = GenericSuccessResult<T> | ErrorResult;
+
 function forwardRequestToOpenAi(
   request: Request,
   body?: string
