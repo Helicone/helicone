@@ -6,6 +6,7 @@ import {
   PreviewData,
 } from "next";
 import { ParsedUrlQuery } from "querystring";
+import { DEMO_EMAIL } from "./constants";
 
 export type SSRContext =
   | GetServerSidePropsContext<ParsedUrlQuery, PreviewData>
@@ -20,6 +21,11 @@ export function redirectIfLoggedIn(
     const {
       data: { session },
     } = await supabase.auth.getSession();
+    if (session?.user?.email === DEMO_EMAIL) {
+      supabase.auth.signOut();
+      return await getServerSideProps(ctx);
+    }
+
     if (session) {
       return {
         redirect: {
