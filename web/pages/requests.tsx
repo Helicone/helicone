@@ -62,7 +62,7 @@ export const getServerSideProps = async (
   const { page, page_size, sort } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 5;
+  const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = sort as string;
 
   const { data, error, count, from, to } = await getRequests(
