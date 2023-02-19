@@ -2,7 +2,8 @@ create table "public"."prompt" (
     "created_at" timestamp with time zone default now(),
     "prompt" text not null,
     "name" text not null,
-    "id" uuid not null
+    "id" uuid not null,
+    "auth_hash" text not null
 );
 
 
@@ -12,13 +13,9 @@ alter table "public"."request" add column "formatted_prompt_id" uuid;
 
 alter table "public"."request" add column "prompt_values" jsonb;
 
-CREATE UNIQUE INDEX prompt_name_key ON public.prompt USING btree (name);
-
 CREATE UNIQUE INDEX prompt_pkey ON public.prompt USING btree (id);
 
 alter table "public"."prompt" add constraint "prompt_pkey" PRIMARY KEY using index "prompt_pkey";
-
-alter table "public"."prompt" add constraint "prompt_name_key" UNIQUE using index "prompt_name_key";
 
 alter table "public"."request" add constraint "request_formatted_prompt_id_fkey" FOREIGN KEY (formatted_prompt_id) REFERENCES prompt(id) not valid;
 

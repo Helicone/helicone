@@ -56,12 +56,15 @@ interface HeliconeHeaders {
 async function getPromptId(
   dbClient: SupabaseClient,
   prompt: Prompt,
-  name: string | null
+  name: string | null,
+  auth: string
 ): Promise<Result> {
   // First, get the prompt id if there's a match in the prompt table
+  const auth_hash = await hash(auth);
   const { data, error } = await dbClient
     .from("prompt")
     .select("id")
+    .eq("auth_hash", auth_hash)
     .eq("prompt", prompt.prompt)
     .limit(1);
   if (error !== null) {
@@ -80,6 +83,7 @@ async function getPromptId(
       .select("name")
       .order("name", { ascending: false })
       .like("name", "Prompt (%)")
+      .eq("auth_hash", auth_hash)
       .limit(1)
       .single();
 
@@ -102,7 +106,7 @@ async function getPromptId(
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
       .from("prompt")
-      .insert([{ id: crypto.randomUUID(), prompt: prompt.prompt, name: newPromptName }])
+      .insert([{ id: crypto.randomUUID(), prompt: prompt.prompt, name: newPromptName, auth_hash: auth_hash }])
       .select("id")
       .single();
     if (error !== null) {
@@ -128,7 +132,7 @@ async function logRequest({
   try {
     const json = body ? JSON.parse(body) : {};
 
-    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt, promptName) : null;
+    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt, promptName, auth) : null;
     if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
       return { data: null, error: formattedPromptResult.error };
     }
