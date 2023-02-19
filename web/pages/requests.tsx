@@ -59,18 +59,20 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size } = context.query;
+  const { page, page_size, sort } = context.query;
 
-  let currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 25;
+  const currentPage = parseInt(page as string, 10) || 1;
+  const pageSize = parseInt(page_size as string, 10) || 5;
+  const sortBy = sort as string;
 
   const { data, error, count, from, to } = await getRequests(
     supabase,
     currentPage,
-    pageSize
+    pageSize,
+    sortBy
   );
 
-  var allProperties: string[] = [];
+  let allProperties: string[] = [];
   try {
     allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
       (property) => {

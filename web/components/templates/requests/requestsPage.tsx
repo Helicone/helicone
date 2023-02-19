@@ -13,6 +13,7 @@ import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
+import ThemedFilter from "../../shared/themedFilter";
 import ThemedModal from "../../shared/themedModal";
 import StickyHeadTable, { Column } from "../../test";
 
@@ -243,17 +244,20 @@ const RequestsPage = (props: RequestsPageProps) => {
             </CSVLink>
           </div>
         </div>
-        <div className="mt-4">
-          <StickyHeadTable
-            condensed
-            columns={columns}
-            rows={csvData}
-            count={count}
-            page={page}
-            from={from}
-            to={to}
-            onSelectHandler={selectRowHandler}
-          />
+        <div className="mt-4 space-y-2">
+          <div className="space-y-4">
+            <ThemedFilter count={count} from={from} to={to} />
+            <StickyHeadTable
+              condensed
+              columns={columns}
+              rows={csvData}
+              count={count}
+              page={page}
+              from={from}
+              to={to}
+              onSelectHandler={selectRowHandler}
+            />
+          </div>
         </div>
       </div>
       {open && selectedData !== undefined && index !== undefined && (

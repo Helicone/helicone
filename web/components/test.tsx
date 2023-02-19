@@ -40,30 +40,18 @@ export default function StickyHeadTable(props: ThemedTableProps) {
     condensed = false,
     onSelectHandler,
   } = props;
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const router = useRouter();
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    // setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(+event.target.value);
-    // setPage(0);
-  };
 
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
 
   return (
     <>
-      <p className="text-sm text-gray-700 pb-2 pl-1">
+      {/* <p className="text-sm text-gray-700 pb-2 pl-1">
         Showing <span className="font-medium">{from + 1}</span> to{" "}
         <span className="font-medium">{Math.min(to + 1, count as number)}</span>{" "}
         of <span className="font-medium">{count}</span> results
-      </p>
+      </p> */}
       <Paper
         sx={{
           width: "100%",

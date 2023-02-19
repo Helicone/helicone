@@ -100,7 +100,7 @@ const Notification = () => {
                     <span>{title}</span>
                   </p>
                 </div>
-                <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-2">
+                {/* <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-2">
                   <button
                     tabIndex={-1}
                     onClick={() => setShow(false)}
@@ -116,7 +116,7 @@ const Notification = () => {
                       aria-hidden="true"
                     />
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </Transition>

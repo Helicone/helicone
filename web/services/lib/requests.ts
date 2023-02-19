@@ -35,15 +35,25 @@ export type ResponseAndRequest = Omit<
 const getRequests = async (
   client: SupabaseClient<any, "public", any>,
   currentPage: number,
-  pageSize: number
+  pageSize: number,
+  sortBy: string
 ) => {
   const { from, to } = getPagination(currentPage - 1, pageSize);
 
-  const { data, error, count } = await client
+  let query = client
     .from("response_and_request_rbac")
-    .select("*", { count: "exact" })
-    .order("request_created_at", { ascending: false })
-    .range(from, to);
+    .select("*", { count: "exact" });
+
+  if (sortBy === "request_time_desc") {
+    query = query.order("request_created_at", { ascending: false });
+  }
+  if (sortBy === "request_time_asc") {
+    query = query.order("request_created_at", { ascending: true });
+  }
+
+  query = query.range(from, to);
+
+  const { data, error, count } = await query;
 
   return { data, error, count, from, to };
 };
