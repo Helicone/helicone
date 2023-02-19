@@ -102,7 +102,7 @@ async function getPromptId(
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
       .from("prompt")
-      .insert([{ prompt: prompt.prompt, name: newPromptName }])
+      .insert([{ id: crypto.randomUUID(), prompt: prompt.prompt, name: newPromptName }])
       .select("id")
       .single();
     if (error !== null) {
