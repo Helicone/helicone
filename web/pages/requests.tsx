@@ -63,7 +63,7 @@ export const getServerSideProps = async (
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
-  const sortBy = sort as string;
+  const sortBy = (sort as string) || "request_time_desc";
 
   const { data, error, count, from, to } = await getRequests(
     supabase,
