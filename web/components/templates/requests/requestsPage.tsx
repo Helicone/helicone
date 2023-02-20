@@ -25,6 +25,8 @@ interface RequestsPageProps {
   from: number;
   to: number;
   properties: string[];
+  sortBy: string;
+  timeFilter: string | null;
 }
 
 const monthNames = [
@@ -43,8 +45,17 @@ const monthNames = [
 ];
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to, properties } = props;
-  const router = useRouter();
+  const {
+    requests,
+    error,
+    count,
+    page,
+    from,
+    to,
+    properties,
+    sortBy,
+    timeFilter,
+  } = props;
   const { setNotification } = useNotification();
 
   const [index, setIndex] = useState<number>();
@@ -246,7 +257,13 @@ const RequestsPage = (props: RequestsPageProps) => {
         </div>
         <div className="mt-4 space-y-2">
           <div className="space-y-4">
-            <ThemedFilter count={count} from={from} to={to} />
+            <ThemedFilter
+              count={count}
+              from={from}
+              to={to}
+              sortBy={sortBy}
+              timeFilter={timeFilter}
+            />
             <StickyHeadTable
               condensed
               columns={columns}

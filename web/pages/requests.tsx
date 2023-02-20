@@ -17,11 +17,24 @@ interface RequestsProps {
   page: number;
   from: number;
   to: number;
+  sortBy: string;
   properties: string[];
+  timeFilter: string | null;
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to, properties } = props;
+  const {
+    user,
+    data,
+    error,
+    count,
+    page,
+    from,
+    to,
+    sortBy,
+    timeFilter,
+    properties,
+  } = props;
 
   return (
     <MetaData title="Requests">
@@ -33,6 +46,8 @@ const Requests = (props: RequestsProps) => {
           page={page}
           from={from}
           to={to}
+          sortBy={sortBy}
+          timeFilter={timeFilter}
           properties={properties}
         />
       </AuthLayout>
@@ -59,17 +74,19 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size, sort } = context.query;
+  const { page, page_size, sort, time } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = (sort as string) || "request_time_desc";
+  const timeFilter = (time as string) || null;
 
   const { data, error, count, from, to } = await getRequests(
     supabase,
     currentPage,
     pageSize,
-    sortBy
+    sortBy,
+    timeFilter
   );
 
   let allProperties: string[] = [];
@@ -94,6 +111,8 @@ export const getServerSideProps = async (
       page: currentPage,
       from: from,
       to: to,
+      sortBy: sortBy,
+      timeFilter: timeFilter,
       properties: allProperties,
     },
   };

@@ -31,39 +31,14 @@ import { useRouter } from "next/router";
 
 const filters = [
   {
-    id: "category",
-    name: "Category",
+    id: "request_time",
+    name: "Request Time",
+    filterType: "radio",
     options: [
-      { value: "tees", label: "Tees" },
-      { value: "crewnecks", label: "Crewnecks" },
-      { value: "hats", label: "Hats" },
-    ],
-  },
-  {
-    id: "brand",
-    name: "Brand",
-    options: [
-      { value: "clothing-company", label: "Clothing Company" },
-      { value: "fashion-inc", label: "Fashion Inc." },
-      { value: "shoes-n-more", label: "Shoes 'n More" },
-    ],
-  },
-  {
-    id: "color",
-    name: "Color",
-    options: [
-      { value: "white", label: "White" },
-      { value: "black", label: "Black" },
-      { value: "grey", label: "Grey" },
-    ],
-  },
-  {
-    id: "sizes",
-    name: "Sizes",
-    options: [
-      { value: "s", label: "S" },
-      { value: "m", label: "M" },
-      { value: "l", label: "L" },
+      { value: "day", label: "24 hours" },
+      { value: "wk", label: "Last week" },
+      { value: "mo", label: "Last month" },
+      { value: "3mo", label: "Last 3 months" },
     ],
   },
 ];
@@ -72,24 +47,26 @@ export default function ThemedFilter(props: {
   from: number;
   to: number;
   count: number | null;
+  sortBy: string;
+  timeFilter: string | null;
 }) {
-  const { from, to, count } = props;
+  const { from, to, count, sortBy, timeFilter } = props;
   const [open, setOpen] = useState(false);
-  const [currentSort, setCurrentSort] = useState<number>(1);
+  // TODO: make these persistent - pass through serverside props
+  const [currentSort, setCurrentSort] = useState<string>(sortBy);
+  const [currentTime, setCurrentTime] = useState<string | null>(timeFilter);
   const router = useRouter();
 
   const sortOptions = [
     {
-      sortId: 1,
       name: "Descending (request time)",
       sortBy: "request_time_desc",
-      current: currentSort === 1,
+      current: currentSort === "request_time_desc",
     },
     {
-      sortId: 2,
       name: "Ascending (request time)",
       sortBy: "request_time_asc",
-      current: currentSort === 2,
+      current: currentSort === "request_time_asc",
     },
   ];
 
@@ -122,7 +99,26 @@ export default function ThemedFilter(props: {
             >
               <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-6 shadow-xl">
                 <div className="flex items-center justify-between px-4">
-                  <h2 className="text-lg font-medium text-gray-900">Filters</h2>
+                  <div className="flex items-center flex-row space-x-4 divide-x divide-gray-300">
+                    <h2 className="text-lg font-medium text-gray-900">
+                      Filters
+                    </h2>
+                    <button
+                      className="pl-4 text-gray-600 text-sm"
+                      onClick={() => {
+                        let copy = { ...router.query };
+                        delete copy.time;
+                        router.replace({
+                          query: copy,
+                        });
+
+                        setCurrentTime(null);
+                      }}
+                    >
+                      Clear All
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     className="-mr-2 flex h-10 w-10 items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -140,6 +136,7 @@ export default function ThemedFilter(props: {
                       as="div"
                       key={section.name}
                       className="border-t border-gray-200 px-4 py-6"
+                      defaultOpen={true}
                     >
                       {({ open }) => (
                         <>
@@ -169,8 +166,17 @@ export default function ThemedFilter(props: {
                                   <input
                                     id={`filter-mobile-${section.id}-${optionIdx}`}
                                     name={`${section.id}[]`}
-                                    defaultValue={option.value}
-                                    type="checkbox"
+                                    checked={currentTime === option.value}
+                                    type={section.filterType || "checkbox"}
+                                    onChange={() => {
+                                      router.replace({
+                                        query: {
+                                          ...router.query,
+                                          time: option.value,
+                                        },
+                                      });
+                                      setCurrentTime(option.value);
+                                    }}
                                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                   />
                                   <label
@@ -201,13 +207,18 @@ export default function ThemedFilter(props: {
           </h2>
 
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">{from + 1}</span> to{" "}
-              <span className="font-medium">
-                {Math.min(to + 1, count as number)}
-              </span>{" "}
-              of <span className="font-medium">{count}</span> results
-            </p>
+            {count && count > 0 ? (
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">{from + 1}</span> to{" "}
+                <span className="font-medium">
+                  {Math.min(to + 1, count as number)}
+                </span>{" "}
+                of <span className="font-medium">{count}</span> results
+              </p>
+            ) : (
+              <p className="text-sm text-gray-700">No results found</p>
+            )}
+
             <div className="flex items-center flex-row space-x-4 divide-x divide-gray-300">
               <Menu as="div" className="relative inline-block text-left">
                 <div>
@@ -236,9 +247,15 @@ export default function ThemedFilter(props: {
                           {({ active }) => (
                             <button
                               onClick={() => {
-                                router.query.sort = option.sortBy;
-                                router.push(router);
-                                setCurrentSort(option.sortId);
+                                // router.query.sort = option.sortBy;
+                                // router.push(router);
+                                router.replace({
+                                  query: {
+                                    ...router.query,
+                                    sort: option.sortBy,
+                                  },
+                                });
+                                setCurrentSort(option.sortBy);
                               }}
                               className={clsx(
                                 option.current ? "bg-gray-200" : "",
