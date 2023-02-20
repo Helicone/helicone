@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { extractPrompt, Prompt } from "./prompt";
 // import bcrypt from "bcrypt";
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -14,7 +15,13 @@ interface ErrorResult {
   error: string;
 }
 
-type Result = SuccessResult | ErrorResult;
+export type Result = SuccessResult | ErrorResult;
+
+interface GenericSuccessResult<T> {
+  data: T;
+  error: null;
+}
+export type GenericResult<T> = GenericSuccessResult<T> | ErrorResult;
 
 function forwardRequestToOpenAi(
   request: Request,
@@ -32,9 +39,9 @@ function forwardRequestToOpenAi(
 type HeliconeRequest = {
   dbClient: SupabaseClient;
   request: Request;
-
   auth: string;
   body?: string;
+  prompt?: Prompt;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
@@ -42,6 +49,71 @@ interface HeliconeHeaders {
   userId: string | null;
   promptId: string | null;
   properties?: Record<string, string>;
+  isPromptRegexOn: boolean;
+  promptName: string | null;
+}
+
+async function getPromptId(
+  dbClient: SupabaseClient,
+  prompt: Prompt,
+  name: string | null,
+  auth: string
+): Promise<Result> {
+  // First, get the prompt id if there's a match in the prompt table
+  const auth_hash = await hash(auth);
+  const { data, error } = await dbClient
+    .from("prompt")
+    .select("id")
+    .eq("auth_hash", auth_hash)
+    .eq("prompt", prompt.prompt)
+    .limit(1);
+  if (error !== null) {
+    return { data: null, error: error.message }; 
+  }
+  if (data !== null && data.length > 0) {
+    return { data: data[0].id, error: null };
+  } else {
+    let newPromptName;
+    if (name) {
+      newPromptName = name;
+    } else {
+      // First, query the database to find the highest prompt name suffix
+      const { data: highestSuffixData, error: highestSuffixError } = await dbClient
+      .from("prompt")
+      .select("name")
+      .order("name", { ascending: false })
+      .like("name", "Prompt (%)")
+      .eq("auth_hash", auth_hash)
+      .limit(1)
+      .single();
+
+      // Extract the highest suffix number from the highest prompt name suffix found
+      let highestSuffix = 0;
+      if (highestSuffixData) {
+        const matches = highestSuffixData.name.match(/\((\d+)\)/);
+        if (matches) {
+          highestSuffix = parseInt(matches[1]);
+        }
+      }
+
+      // Increment the highest suffix to get the new suffix for the new prompt name
+      const newSuffix = highestSuffix + 1;
+
+      // Construct the new prompt name with the new suffix
+      newPromptName = `Prompt (${newSuffix})`;
+    }
+
+    // If there's no match, insert the prompt and get the id
+    const { data, error } = await dbClient
+      .from("prompt")
+      .insert([{ id: crypto.randomUUID(), prompt: prompt.prompt, name: newPromptName, auth_hash: auth_hash }])
+      .select("id")
+      .single();
+    if (error !== null) {
+      return { data: null, error: error.message };
+    }
+    return { data: data.id, error: null };
+  }
 }
 
 async function logRequest({
@@ -53,9 +125,19 @@ async function logRequest({
   auth,
   body,
   properties,
+  prompt,
+  isPromptRegexOn,
+  promptName,
 }: HeliconeRequest): Promise<Result> {
   try {
     const json = body ? JSON.parse(body) : {};
+
+    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt, promptName, auth) : null;
+    if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
+      return { data: null, error: formattedPromptResult.error };
+    }
+    const formattedPromptId = formattedPromptResult !== null ? formattedPromptResult.data : null;
+    const prompt_values = prompt !== undefined ? prompt.values : null;
 
     const { data, error } = await dbClient
       .from("request")
@@ -68,6 +150,8 @@ async function logRequest({
           user_id: userId,
           prompt_id: promptId,
           properties: properties,
+          formatted_prompt_id: formattedPromptId,
+          prompt_values: prompt_values,
         },
       ])
       .select("id")
@@ -142,13 +226,15 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       headers.get("Helicone-Request-Id")?.substring(0, 128) ??
       crypto.randomUUID(),
     properties: Object.keys(properties).length === 0 ? undefined : properties,
+    isPromptRegexOn: headers.get("Helicone-Prompt-Format") !== null,
+    promptName: headers.get("Helicone-Prompt-Name")?.substring(0, 128) ?? null,
   };
 }
 
 function removeHeliconeHeaders(request: Headers): Headers {
   const newHeaders = new Headers();
   for (const [key, value] of request.entries()) {
-    if (!key.startsWith("Helicone-")) {
+    if (!key.toLowerCase().startsWith("helicone-")) {
       newHeaders.set(key, value);
     }
   }
@@ -159,7 +245,8 @@ async function forwardAndLog(
   body: string,
   request: Request,
   env: Env,
-  ctx: ExecutionContext
+  ctx: ExecutionContext,
+  prompt?: Prompt,
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
   if (auth === null) {
@@ -178,6 +265,7 @@ async function forwardAndLog(
       request,
       auth,
       body: body === "" ? undefined : body,
+      prompt: prompt,
       ...getHeliconeHeaders(request.headers),
     }),
   ]);
@@ -203,7 +291,16 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const body = await request.text();
-    return await forwardAndLog(body, request, env, ctx);
-  },
+    const result = await extractPrompt(request);
+    if (result.data !== null) {
+      const {
+        request: formattedRequest, 
+        body: body, 
+        prompt
+      } = result.data;
+      return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
+    } else {
+      return new Response(result.error, { status: 400 });
+    }
+  }
 };

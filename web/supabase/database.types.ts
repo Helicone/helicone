@@ -19,6 +19,8 @@ export interface Database {
           user_id: string | null
           prompt_id: string | null
           properties: Record<string, string> | null
+          formatted_prompt_id: string | null
+          prompt_values: Record<string, string> | null
         }
         Insert: {
           id?: string
@@ -29,6 +31,8 @@ export interface Database {
           user_id?: string | null
           prompt_id?: string | null
           properties?: Record<string, string> | null
+          formatted_prompt_id?: string | null
+          prompt_values?: Record<string, string> | null
         }
         Update: {
           id?: string
@@ -39,6 +43,8 @@ export interface Database {
           user_id?: string | null
           prompt_id?: string | null
           properties?: Record<string, string> | null
+          formatted_prompt_id?: string | null
+          prompt_values?: Record<string, string> | null
         }
       }
       response: {
@@ -104,6 +110,26 @@ export interface Database {
           tier?: string
         }
       }
+      prompt: {
+        Row: {
+          id: string
+          created_at: string
+          prompt: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          prompt: string
+          name: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          prompt?: string
+          name: string
+        }
+      }
     }
     Views: {
       metrics_rbac: {
@@ -145,6 +171,10 @@ export interface Database {
           api_key_preview: string | null
           user_id: string | null
           request_properties: Record<string, string> | null
+          prompt_values: Record<string, string> | null
+          formatted_prompt_id: string | null
+          prompt_name: string | null
+          prompt_regex: string | null
         }
       }
       response_rbac: {
