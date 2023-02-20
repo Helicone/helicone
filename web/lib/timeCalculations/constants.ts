@@ -13,7 +13,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
     timeMap: (date) => date.toLocaleTimeString(),
     dbIncrement: "min",
     start: getXMinutesAgoFloored(60),
-    end: getXMinutesAgoFloored(0),
+    end: getXMinutesAgoFloored(-1),
   },
   "24h": {
     timeMap: (date) =>
@@ -23,7 +23,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
 
     dbIncrement: "hour",
     start: getXHoursAgoFloored(24),
-    end: getXMinutesAgoFloored(0),
+    end: getXMinutesAgoFloored(-1),
   },
   "7d": {
     timeMap: (date) =>
@@ -33,7 +33,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
 
     dbIncrement: "day",
     start: getXDaysAgoFloored(7),
-    end: getXMinutesAgoFloored(0),
+    end: getXMinutesAgoFloored(-1),
   },
   "1m": {
     timeMap: (date) =>
@@ -45,7 +45,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
 
     dbIncrement: "day",
     start: getXDaysAgoFloored(30),
-    end: getXMinutesAgoFloored(0),
+    end: getXMinutesAgoFloored(-1),
   },
   "3m": {
     timeMap: (startDate) => {
@@ -63,6 +63,6 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
     },
     dbIncrement: "day",
     start: getXDaysAgoFloored(30 * 3),
-    end: getXMinutesAgoFloored(0),
+    end: getXMinutesAgoFloored(-1),
   },
 };
