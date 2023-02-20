@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 // import bcrypt from "bcrypt";
 export interface Env {
@@ -68,7 +69,7 @@ async function getPromptId(
     .eq("prompt", prompt.prompt)
     .limit(1);
   if (error !== null) {
-    return { data: null, error: error.message }; 
+    return { data: null, error: error.message };
   }
   if (data !== null && data.length > 0) {
     return { data: data[0].id, error: null };
@@ -78,14 +79,15 @@ async function getPromptId(
       newPromptName = name;
     } else {
       // First, query the database to find the highest prompt name suffix
-      const { data: highestSuffixData, error: highestSuffixError } = await dbClient
-      .from("prompt")
-      .select("name")
-      .order("name", { ascending: false })
-      .like("name", "Prompt (%)")
-      .eq("auth_hash", auth_hash)
-      .limit(1)
-      .single();
+      const { data: highestSuffixData, error: highestSuffixError } =
+        await dbClient
+          .from("prompt")
+          .select("name")
+          .order("name", { ascending: false })
+          .like("name", "Prompt (%)")
+          .eq("auth_hash", auth_hash)
+          .limit(1)
+          .single();
 
       // Extract the highest suffix number from the highest prompt name suffix found
       let highestSuffix = 0;
@@ -106,7 +108,14 @@ async function getPromptId(
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
       .from("prompt")
-      .insert([{ id: crypto.randomUUID(), prompt: prompt.prompt, name: newPromptName, auth_hash: auth_hash }])
+      .insert([
+        {
+          id: crypto.randomUUID(),
+          prompt: prompt.prompt,
+          name: newPromptName,
+          auth_hash: auth_hash,
+        },
+      ])
       .select("id")
       .single();
     if (error !== null) {
@@ -132,11 +141,18 @@ async function logRequest({
   try {
     const json = body ? JSON.parse(body) : {};
 
-    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt, promptName, auth) : null;
-    if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
+    const formattedPromptResult =
+      prompt !== undefined
+        ? await getPromptId(dbClient, prompt, promptName, auth)
+        : null;
+    if (
+      formattedPromptResult !== null &&
+      formattedPromptResult.error !== null
+    ) {
       return { data: null, error: formattedPromptResult.error };
     }
-    const formattedPromptId = formattedPromptResult !== null ? formattedPromptResult.data : null;
+    const formattedPromptId =
+      formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
     const { data, error } = await dbClient
@@ -246,7 +262,7 @@ async function forwardAndLog(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-  prompt?: Prompt,
+  prompt?: Prompt
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
   if (auth === null) {
@@ -285,22 +301,42 @@ async function forwardAndLog(
   });
 }
 
+async function uncachedRequest(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
+  const result = await extractPrompt(request);
+  if (result.data !== null) {
+    const { request: formattedRequest, body: body, prompt } = result.data;
+    return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
+  } else {
+    return new Response(result.error, { status: 400 });
+  }
+}
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const result = await extractPrompt(request);
-    if (result.data !== null) {
-      const {
-        request: formattedRequest, 
-        body: body, 
-        prompt
-      } = result.data;
-      return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
-    } else {
-      return new Response(result.error, { status: 400 });
+    const cacheSettings = getCacheSettings(request);
+    if (cacheSettings.shouldReadFromCache) {
+      const cache = caches.default;
+      const cacheKey = new Request(request.url, request);
+      const cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
-  }
+
+    const response = await uncachedRequest(request, env, ctx);
+    if (cacheSettings.shouldSaveToCache) {
+      const cache = caches.default;
+      const cacheKey = new Request(request.url, request);
+      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    }
+    return response;
+  },
 };
