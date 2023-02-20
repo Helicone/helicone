@@ -8,6 +8,7 @@ import { getProperties } from "../lib/api/properties/properties";
 import { unwrapAsync } from "../lib/result";
 import StickyHeadTable from "../components/test";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
+import { getPromptValues } from "../lib/api/prompts/prompts";
 
 interface RequestsProps {
   user: any;
@@ -18,10 +19,12 @@ interface RequestsProps {
   from: number;
   to: number;
   properties: string[];
+  values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to, properties } = props;
+  const { user, data, error, count, page, from, to, properties, values } =
+    props;
 
   return (
     <MetaData title="Requests">
@@ -34,6 +37,7 @@ const Requests = (props: RequestsProps) => {
           from={from}
           to={to}
           properties={properties}
+          values={values}
         />
       </AuthLayout>
     </MetaData>
@@ -82,6 +86,18 @@ export const getServerSideProps = async (
     allProperties = [];
   }
 
+  let allValues: string[] = [];
+  try {
+    allValues = (await unwrapAsync(getPromptValues(session.user.id))).map(
+      (value) => {
+        return value.value;
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    allValues = [];
+  }
+
   return {
     props: {
       initialSession: session,
@@ -93,6 +109,7 @@ export const getServerSideProps = async (
       from: from,
       to: to,
       properties: allProperties,
+      values: allValues,
     },
   };
 };
