@@ -4,6 +4,14 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { GetTableData } from "./requestTable";
 
+function escapeCSVString(s: string | undefined): string | undefined {
+  if (s === undefined) {
+    return undefined;
+  }
+  const escaped = s.replace(/"/g, '""');
+  return `"${escaped}"`;
+}
+
 export function RequestsCSVDownloadButton({
   client,
 }: {
@@ -22,10 +30,10 @@ export function RequestsCSVDownloadButton({
       request_id: d.request_id,
       response_id: d.response_id,
       time: d.request_created_at,
-      request: d.request_body?.prompt,
-      response: d.response_body?.choices?.[0]?.text,
+      request: escapeCSVString(d.request_body?.prompt),
+      response: escapeCSVString(d.response_body?.choices?.[0]?.text),
       "duration (s)": latency[i],
-      token_count: d.request_body?.max_tokens,
+      total_tokens: d.response_body?.usage?.total_tokens,
       logprobs: tableData.probabilities[i],
       request_user_id: d.request_user_id,
       model: d.response_body?.model,

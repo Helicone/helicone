@@ -42,6 +42,13 @@ const monthNames = [
   "Dec",
 ];
 
+function escapeCSVString(s: string | undefined): string | undefined {
+  if (s === undefined) {
+    return undefined;
+  }
+  return s.replace(/"/g, '""');
+}
+
 const RequestsPage = (props: RequestsPageProps) => {
   const { requests, error, count, page, from, to, properties, values } = props;
   const router = useRouter();
@@ -56,7 +63,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     request: string | undefined;
     response: string | undefined;
     "duration (s)": string;
-    token_count: number | undefined;
+    total_tokens: number | undefined;
     logprobs: any;
     request_user_id: string | null;
     model: string | undefined;
@@ -97,7 +104,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       request: string | undefined;
       response: string | undefined;
       "duration (s)": string;
-      token_count: number | undefined;
+      total_tokens: number | undefined;
       logprobs: any;
       request_user_id: string | null;
       model: string | undefined;
@@ -150,7 +157,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         ? `error: ${d.response_body!.error.type}`
         : d.response_body?.choices?.[0]?.text,
       "duration (s)": latency.toString(),
-      token_count: d.request_body?.max_tokens,
+      total_tokens: d.response_body?.usage?.total_tokens,
       logprobs: probabilities[i],
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
@@ -228,8 +235,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => `${value} s`,
     },
     {
-      key: "token_count",
-      label: "Tokens",
+      key: "total_tokens",
+      label: "Total Tokens",
     },
     {
       key: "logprobs",
@@ -257,18 +264,15 @@ const RequestsPage = (props: RequestsPageProps) => {
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
-              data={csvData}
+              data={csvData.map((d) => ({
+                ...d,
+                request: escapeCSVString(d.request),
+                response: escapeCSVString(d.response),
+              }))}
               filename={"requests.csv"}
               className="flex"
               target="_blank"
             >
-              <button
-                type="button"
-                className="inline-flex sm:hidden items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
-                Export
-              </button>
               <button
                 type="button"
                 className="hidden sm:inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
@@ -343,7 +347,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Tokens:</p>
-                  <p>{selectedData.token_count}</p>
+                  <p>{selectedData.total_tokens}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Log Probability:</p>
