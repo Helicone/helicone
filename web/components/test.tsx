@@ -9,10 +9,12 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { clsx } from "./shared/clsx";
 import { useRouter } from "next/router";
+import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 
 export interface Column {
   key: string;
   label: string;
+  sortBy?: string;
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
   format?: (value: any) => string;
@@ -47,11 +49,6 @@ export default function StickyHeadTable(props: ThemedTableProps) {
 
   return (
     <>
-      {/* <p className="text-sm text-gray-700 pb-2 pl-1">
-        Showing <span className="font-medium">{from + 1}</span> to{" "}
-        <span className="font-medium">{Math.min(to + 1, count as number)}</span>{" "}
-        of <span className="font-medium">{count}</span> results
-      </p> */}
       <Paper
         sx={{
           width: "100%",
@@ -76,14 +73,50 @@ export default function StickyHeadTable(props: ThemedTableProps) {
                     align={column.align}
                     style={{ minWidth: column.minWidth }}
                   >
-                    <p
-                      className={clsx(
-                        condensed ? "py-2" : "",
-                        "whitespace-nowrap font-semibold text-black font-sans text-sm"
-                      )}
-                    >
-                      {column.label}
-                    </p>
+                    {column.sortBy ? (
+                      <button
+                        onClick={() => {
+                          if (
+                            !router.query.sort ||
+                            router.query.sort.includes("desc")
+                          ) {
+                            router.replace({
+                              query: {
+                                ...router.query,
+                                sort: `${column.key}_asc`,
+                              },
+                            });
+                            return;
+                          }
+                          router.replace({
+                            query: {
+                              ...router.query,
+                              sort: `${column.key}_desc`,
+                            },
+                          });
+                        }}
+                        className={clsx(
+                          condensed ? "py-2" : "",
+                          "whitespace-nowrap font-semibold text-gray-700 font-sans text-sm flex flex-row items-center hover:text-black hover:scale-105 transition ease-in-out delay-150 duration-300"
+                        )}
+                      >
+                        {column.label}
+                        {router.query.sort?.includes("asc") ? (
+                          <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300" />
+                        ) : (
+                          <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300" />
+                        )}
+                      </button>
+                    ) : (
+                      <p
+                        className={clsx(
+                          condensed ? "py-2" : "",
+                          "whitespace-nowrap font-semibold text-gray-700 font-sans text-sm"
+                        )}
+                      >
+                        {column.label}
+                      </p>
+                    )}
                   </TableCell>
                 ))}
               </TableRow>

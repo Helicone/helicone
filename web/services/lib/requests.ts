@@ -36,7 +36,7 @@ const getRequests = async (
   client: SupabaseClient<any, "public", any>,
   currentPage: number,
   pageSize: number,
-  sortBy: string,
+  sortBy: string | null,
   timeFilter: string | null
 ) => {
   const { from, to } = getPagination(currentPage - 1, pageSize);
@@ -47,11 +47,19 @@ const getRequests = async (
 
   let date = new Date();
 
-  if (sortBy === "request_time_desc") {
+  if (sortBy === "time_desc" || sortBy === null) {
     query = query.order("request_created_at", { ascending: false });
   }
-  if (sortBy === "request_time_asc") {
+  if (sortBy === "time_asc") {
     query = query.order("request_created_at", { ascending: true });
+  }
+  if (timeFilter?.includes("custom:")) {
+    const timeRange = timeFilter?.split("custom:")[1].split("_");
+    const startTime = timeRange[0];
+    const endTime = timeRange[1];
+
+    query = query.gte("request_created_at", startTime);
+    query = query.lte("request_created_at", endTime);
   }
   if (timeFilter === "day") {
     date = new Date(date.getTime() - 24 * 60 * 60 * 1000);

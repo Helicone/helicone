@@ -230,7 +230,7 @@ const Onboarding = (props: OnboardingProps) => {
         return (
           <div className="flex min-h-full items-center justify-center">
             <div className="w-full max-w-md space-y-8">
-              <form className="space-y-4" action="#" method="POST">
+              <div className="space-y-4">
                 <input type="hidden" name="remember" defaultValue="true" />
                 <div className="-space-y-px rounded-md shadow-sm">
                   <div>
@@ -269,7 +269,7 @@ const Onboarding = (props: OnboardingProps) => {
                     <p>{authError}</p>
                   </div>
                 )}
-              </form>
+              </div>
             </div>
           </div>
         );

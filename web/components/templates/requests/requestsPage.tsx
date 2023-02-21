@@ -25,7 +25,7 @@ interface RequestsPageProps {
   from: number;
   to: number;
   properties: string[];
-  sortBy: string;
+  sortBy: string | null;
   timeFilter: string | null;
 }
 
@@ -128,7 +128,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         new Date(d.request_created_at!).getTime()) /
       1000;
 
-    const updated_request_properties = Object.assign(
+    const updated_request_properties: any = Object.assign(
       {},
       ...properties.map((p) => ({
         [p]: d.request_properties != null ? d.request_properties[p] : null,
@@ -184,6 +184,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "time",
       label: "Time",
       minWidth: 170,
+      sortBy: "request_created_at",
       format: (value: string) => getUSDate(value),
     },
     {
@@ -231,7 +232,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
               data={csvData}
               filename={"requests.csv"}
@@ -253,17 +254,11 @@ const RequestsPage = (props: RequestsPageProps) => {
                 Export to CSV
               </button>
             </CSVLink>
-          </div>
+          </div> */}
         </div>
         <div className="mt-4 space-y-2">
-          <div className="space-y-4">
-            <ThemedFilter
-              count={count}
-              from={from}
-              to={to}
-              sortBy={sortBy}
-              timeFilter={timeFilter}
-            />
+          <div className="space-y-0">
+            <ThemedFilter data={csvData} />
             <StickyHeadTable
               condensed
               columns={columns}

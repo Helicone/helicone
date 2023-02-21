@@ -17,7 +17,7 @@ interface RequestsProps {
   page: number;
   from: number;
   to: number;
-  sortBy: string;
+  sortBy: string | null;
   properties: string[];
   timeFilter: string | null;
 }
@@ -78,7 +78,7 @@ export const getServerSideProps = async (
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
-  const sortBy = (sort as string) || "request_time_desc";
+  const sortBy = (sort as string) || null;
   const timeFilter = (time as string) || null;
 
   const { data, error, count, from, to } = await getRequests(

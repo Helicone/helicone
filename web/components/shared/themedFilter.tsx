@@ -13,277 +13,291 @@
   ```
 */
 import { Fragment, useState } from "react";
-import {
-  Dialog,
-  Disclosure,
-  Menu,
-  Popover,
-  Transition,
-} from "@headlessui/react";
-import {
-  AdjustmentsHorizontalIcon,
-  FunnelIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { clsx } from "./clsx";
+import {
+  ArrowDownTrayIcon,
+  CalendarDaysIcon,
+  ChevronDownIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import { CSVLink } from "react-csv";
+import useNotification from "./notification/useNotification";
 
-const filters = [
-  {
-    id: "request_time",
-    name: "Request Time",
-    filterType: "radio",
-    options: [
-      { value: "day", label: "24 hours" },
-      { value: "wk", label: "Last week" },
-      { value: "mo", label: "Last month" },
-      { value: "3mo", label: "Last 3 months" },
-    ],
-  },
+const timeFilterOptions = [
+  { value: "day", label: "day" },
+  { value: "wk", label: "wk" },
+  { value: "mo", label: "mo" },
+  { value: "3mo", label: "3mo" },
 ];
 
-export default function ThemedFilter(props: {
-  from: number;
-  to: number;
-  count: number | null;
-  sortBy: string;
-  timeFilter: string | null;
-}) {
-  const { from, to, count, sortBy, timeFilter } = props;
-  const [open, setOpen] = useState(false);
-  // TODO: make these persistent - pass through serverside props
-  const [currentSort, setCurrentSort] = useState<string>(sortBy);
-  const [currentTime, setCurrentTime] = useState<string | null>(timeFilter);
-  const router = useRouter();
+const sortOptions = [
+  { name: "Most Popular", href: "#", current: true },
+  { name: "Best Rating", href: "#", current: false },
+  { name: "Newest", href: "#", current: false },
+];
 
-  const sortOptions = [
-    {
-      name: "Descending (request time)",
-      sortBy: "request_time_desc",
-      current: currentSort === "request_time_desc",
-    },
-    {
-      name: "Ascending (request time)",
-      sortBy: "request_time_asc",
-      current: currentSort === "request_time_asc",
-    },
-  ];
+interface ThemedFilterProps {
+  data: any[];
+}
+
+export default function ThemedFilter(props: ThemedFilterProps) {
+  const { data } = props;
+  const router = useRouter();
+  const { setNotification } = useNotification();
+
+  const [startDate, setStartDate] = useState<string>();
+  const [endDate, setEndDate] = useState<string>();
 
   return (
     <div className="">
-      {/* Mobile filter dialog */}
-      <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-40" onClose={setOpen}>
-          <Transition.Child
-            as={Fragment}
-            enter="transition-opacity ease-linear duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity ease-linear duration-300"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 z-40 flex">
-            <Transition.Child
-              as={Fragment}
-              enter="transition ease-in-out duration-300 transform"
-              enterFrom="translate-x-full"
-              enterTo="translate-x-0"
-              leave="transition ease-in-out duration-300 transform"
-              leaveFrom="translate-x-0"
-              leaveTo="translate-x-full"
-            >
-              <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-6 shadow-xl">
-                <div className="flex items-center justify-between px-4">
-                  <div className="flex items-center flex-row space-x-4 divide-x divide-gray-300">
-                    <h2 className="text-lg font-medium text-gray-900">
-                      Filters
-                    </h2>
-                    <button
-                      className="pl-4 text-gray-600 text-sm"
-                      onClick={() => {
-                        let copy = { ...router.query };
-                        delete copy.time;
-                        router.replace({
-                          query: copy,
-                        });
-
-                        setCurrentTime(null);
-                      }}
+      {/* Filters */}
+      <Disclosure
+        as="section"
+        aria-labelledby="filter-heading"
+        className="grid items-center"
+      >
+        {({ open }) => (
+          <>
+            <h2 id="filter-heading" className="sr-only">
+              Filters
+            </h2>
+            <div className="flex flex-row justify-between items-center pb-3">
+              <span className="isolate inline-flex rounded-md shadow-sm z-10">
+                <Menu as="div" className="relative inline-block text-left">
+                  <div>
+                    <Menu.Button
+                      className={clsx(
+                        router.query.time?.includes("custom:")
+                          ? "bg-sky-200 text-black border-sky-300"
+                          : "bg-white text-gray-500 hover:bg-sky-50 border-gray-300",
+                        "relative inline-flex items-center rounded-l-md border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                      )}
                     >
-                      Clear All
-                    </button>
+                      <CalendarDaysIcon className="h-5 mr-2" />
+                      Custom
+                    </Menu.Button>
                   </div>
 
-                  <button
-                    type="button"
-                    className="-mr-2 flex h-10 w-10 items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    onClick={() => setOpen(false)}
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
                   >
-                    <span className="sr-only">Close menu</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
-                </div>
-
-                {/* Filters */}
-                <form className="mt-4">
-                  {filters.map((section) => (
-                    <Disclosure
-                      as="div"
-                      key={section.name}
-                      className="border-t border-gray-200 px-4 py-6"
-                      defaultOpen={true}
-                    >
-                      {({ open }) => (
-                        <>
-                          <h3 className="-mx-2 -my-3 flow-root">
-                            <Disclosure.Button className="flex w-full items-center justify-between bg-white px-2 py-3 text-sm text-gray-400">
-                              <span className="font-medium text-gray-900">
-                                {section.name}
-                              </span>
-                              <span className="ml-6 flex items-center">
-                                <ChevronDownIcon
-                                  className={clsx(
-                                    open ? "-rotate-180" : "rotate-0",
-                                    "h-5 w-5 transform"
-                                  )}
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            </Disclosure.Button>
-                          </h3>
-                          <Disclosure.Panel className="pt-6">
-                            <div className="space-y-6">
-                              {section.options.map((option, optionIdx) => (
-                                <div
-                                  key={option.value}
-                                  className="flex items-center"
-                                >
-                                  <input
-                                    id={`filter-mobile-${section.id}-${optionIdx}`}
-                                    name={`${section.id}[]`}
-                                    checked={currentTime === option.value}
-                                    type={section.filterType || "checkbox"}
-                                    onChange={() => {
-                                      router.replace({
-                                        query: {
-                                          ...router.query,
-                                          time: option.value,
-                                        },
-                                      });
-                                      setCurrentTime(option.value);
-                                    }}
-                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                  />
-                                  <label
-                                    htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
-                                    className="ml-3 text-sm text-gray-500"
-                                  >
-                                    {option.label}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </Disclosure.Panel>
-                        </>
-                      )}
-                    </Disclosure>
-                  ))}
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition.Root>
-
-      <div className="text-center mt-8">
-        <section aria-labelledby="filter-heading" className="">
-          <h2 id="filter-heading" className="sr-only">
-            Product filters
-          </h2>
-
-          <div className="flex items-center justify-between">
-            {count && count > 0 ? (
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{from + 1}</span> to{" "}
-                <span className="font-medium">
-                  {Math.min(to + 1, count as number)}
-                </span>{" "}
-                of <span className="font-medium">{count}</span> results
-              </p>
-            ) : (
-              <p className="text-sm text-gray-700">No results found</p>
-            )}
-
-            <div className="flex items-center flex-row space-x-4 divide-x divide-gray-300">
-              <Menu as="div" className="relative inline-block text-left">
-                <div>
-                  <Menu.Button className="pl-4 text-sm font-medium text-gray-700 hover:text-black flex flex-row items-center">
-                    <AdjustmentsHorizontalIcon
-                      className="h-5 w-5 mr-2"
-                      aria-hidden="true"
-                    />
-                    Sort
-                  </Menu.Button>
-                </div>
-
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="absolute right-0 z-10 mt-2 w-max origin-top-left rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <div className="py-1">
-                      {sortOptions.map((option) => (
-                        <Menu.Item key={option.name}>
-                          {({ active }) => (
-                            <button
-                              onClick={() => {
-                                // router.query.sort = option.sortBy;
-                                // router.push(router);
-                                router.replace({
-                                  query: {
-                                    ...router.query,
-                                    sort: option.sortBy,
-                                  },
-                                });
-                                setCurrentSort(option.sortBy);
-                              }}
-                              className={clsx(
-                                option.current ? "bg-gray-200" : "",
-                                "block px-4 py-2 text-sm font-medium text-gray-900"
-                              )}
+                    <Menu.Items className="absolute left-0 mt-2 w-fit -ml-2 px-1.5 py-3 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div className="px-4 py-2 flex flex-col space-y-4">
+                        <div className="flex flex-row gap-4">
+                          <div>
+                            <label
+                              htmlFor="startDate"
+                              className="block text-xs font-medium text-gray-700"
                             >
-                              {option.name}
-                            </button>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
+                              Start Date
+                            </label>
+                            <div className="mt-1">
+                              <input
+                                type="datetime-local"
+                                name="startDate"
+                                id="startDate"
+                                onChange={(e) => {
+                                  setStartDate(e.target.value);
+                                }}
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="endDate"
+                              className="block text-xs font-medium text-gray-700"
+                            >
+                              End Date
+                            </label>
+                            <div className="mt-1">
+                              <input
+                                type="datetime-local"
+                                name="endDate"
+                                id="endDate"
+                                onChange={(e) => {
+                                  setEndDate(e.target.value);
+                                }}
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-row justify-end gap-4">
+                          <button
+                            className="block w-max items-center justify-center text-sm font-medium text-gray-500 hover:text-black"
+                            onClick={() => {}}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="block w-max items-center justify-center rounded-md border border-transparent bg-sky-600 bg-origin-border px-2 py-1 text-sm font-medium text-white shadow-sm hover:bg-sky-700"
+                            onClick={() => {
+                              if (!startDate || !endDate) {
+                                setNotification(
+                                  "Please select a start and end date",
+                                  "error"
+                                );
+                                return;
+                              }
+                              if (endDate && startDate > endDate) {
+                                setNotification(
+                                  "Start date must be before end date",
+                                  "error"
+                                );
 
-              <button
-                type="button"
-                className="pl-4 text-sm font-medium text-gray-700 hover:text-black flex flex-row items-center"
-                onClick={() => setOpen(true)}
-              >
-                <FunnelIcon className="h-5 w-5 mr-2" />
-                Filters
-              </button>
+                                return;
+                              }
+                              if (startDate && startDate < startDate) {
+                                setNotification(
+                                  "End date must be after start date",
+                                  "error"
+                                );
+                                return;
+                              }
+                              const start = new Date(startDate as string);
+                              const end = new Date(endDate as string);
+                              router.replace({
+                                query: {
+                                  ...router.query,
+                                  time: `custom:${start.toISOString()}_${end.toISOString()}`,
+                                },
+                              });
+                            }}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+
+                {timeFilterOptions.map((option, idx) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      router.replace({
+                        query: {
+                          ...router.query,
+                          time: option.value,
+                        },
+                      });
+                    }}
+                    className={clsx(
+                      router.query.time === option.value
+                        ? "bg-sky-200 text-black border-sky-300"
+                        : "bg-white text-gray-500 hover:bg-sky-50 border-gray-300",
+                      idx === timeFilterOptions.length - 1
+                        ? "rounded-r-md"
+                        : "",
+                      "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </span>
+              {/* TODO: Add back this uncommented code once filters is functional */}
+              {/* <div className="flex flex-row space-x-2 divide-x-2 divide-gray-200 items-center pr-2"> */}
+              <div className="flex flex-row items-center pr-2">
+                {/* <div className="text-sm">
+                  <div className="mx-auto flex">
+                    <div>
+                      <Disclosure.Button
+                        className={clsx(
+                          open
+                            ? "bg-sky-100 text-sky-900"
+                            : "hover:bg-sky-100 hover:text-sky-900",
+                          "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
+                        )}
+                      >
+                        <FunnelIcon
+                          className={clsx(
+                            open
+                              ? "bg-sky-100 text-sky-900"
+                              : "hover:bg-sky-100 hover:text-sky-900",
+                            "mr-2 h-5 flex-none"
+                          )}
+                          aria-hidden="true"
+                        />
+                        <p className="text-sm">
+                          {open ? "Hide Filters" : "Show Filters"}
+                        </p>
+                      </Disclosure.Button>
+                    </div>
+                  </div>
+                </div> */}
+                <div className="pl-2">
+                  <div className="mx-auto flex">
+                    <Menu as="div" className="relative inline-block">
+                      <CSVLink
+                        data={data}
+                        filename={"requests.csv"}
+                        className="flex"
+                        target="_blank"
+                      >
+                        <button className="group inline-flex items-center justify-center text-sm font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
+                          <ArrowDownTrayIcon
+                            className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                            aria-hidden="true"
+                          />
+                          Export
+                        </button>
+                      </CSVLink>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <div className="py-1">
+                            {sortOptions.map((option) => (
+                              <Menu.Item key={option.name}>
+                                {({ active }) => (
+                                  <a
+                                    href={option.href}
+                                    className={clsx(
+                                      option.current
+                                        ? "font-medium text-gray-900"
+                                        : "text-gray-500",
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm"
+                                    )}
+                                  >
+                                    {option.name}
+                                  </a>
+                                )}
+                              </Menu.Item>
+                            ))}
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
+
+            <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg px-4 py-2 mt-2 mb-4 shadow-sm">
+              <p className="text-sm">Filters</p>
+            </Disclosure.Panel>
+          </>
+        )}
+      </Disclosure>
     </div>
   );
 }
