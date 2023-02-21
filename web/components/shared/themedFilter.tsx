@@ -107,6 +107,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                                 onChange={(e) => {
                                   setStartDate(e.target.value);
                                 }}
+                                value={startDate}
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                               />
                             </div>
@@ -126,6 +127,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                                 onChange={(e) => {
                                   setEndDate(e.target.value);
                                 }}
+                                value={endDate}
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                               />
                             </div>
