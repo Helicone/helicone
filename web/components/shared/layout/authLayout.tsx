@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
@@ -382,23 +382,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
-            {apiKeys && apiKeys.length < 1 && (
-              <div className="flex h-full items-center px-2">
-                <div className="py-2 bg-red-600 px-4 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
-                  <ExclamationCircleIcon className="h-4 w-4 mr-2 hidden sm:inline" />
-                  <p className="hidden sm:inline">
-                    Go to the{" "}
-                    <Link href="/keys" className="underline">
-                      Keys page
-                    </Link>{" "}
-                    to add your OpenAI API key
-                  </p>
-                  <Link href="/keys" className="underline inline sm:hidden">
-                    Add your API Key
-                  </Link>
-                </div>
-              </div>
-            )}
             {user?.email === DEMO_EMAIL && (
               <div className="flex h-full items-center px-2">
                 <div className="py-2 bg-red-600 px-4 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
