@@ -13,6 +13,7 @@ import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
+import ThemedFilter from "../../shared/themedFilter";
 import ThemedModal from "../../shared/themedModal";
 import StickyHeadTable, { Column } from "../../test";
 
@@ -24,6 +25,8 @@ interface RequestsPageProps {
   from: number;
   to: number;
   properties: string[];
+  sortBy: string | null;
+  timeFilter: string | null;
   values: string[];
 }
 
@@ -50,7 +53,19 @@ function escapeCSVString(s: string | undefined): string | undefined {
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { requests, error, count, page, from, to, properties, values } = props;
+  const {
+    requests,
+    error,
+    count,
+    page,
+    from,
+    to,
+    properties,
+    sortBy,
+    timeFilter,
+    values,
+  } = props;
+
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -132,7 +147,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       }))
     );
 
-    if (values != null) {
+    if (values !== null) {
       updated_request_properties = Object.assign(
         updated_request_properties,
         ...values.map((p) => ({
@@ -207,6 +222,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "time",
       label: "Time",
       minWidth: 170,
+      sortBy: "request_created_at",
       format: (value: string) => getUSDate(value),
     },
     includePrompt
@@ -262,7 +278,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <CSVLink
               data={csvData.map((d) => ({
                 ...d,
@@ -288,19 +304,22 @@ const RequestsPage = (props: RequestsPageProps) => {
                 Export to CSV
               </button>
             </CSVLink>
-          </div>
+          </div> */}
         </div>
-        <div className="mt-4">
-          <StickyHeadTable
-            condensed
-            columns={columns}
-            rows={csvData}
-            count={count}
-            page={page}
-            from={from}
-            to={to}
-            onSelectHandler={selectRowHandler}
-          />
+        <div className="mt-4 space-y-2">
+          <div className="space-y-0">
+            <ThemedFilter data={csvData} />
+            <StickyHeadTable
+              condensed
+              columns={columns}
+              rows={csvData}
+              count={count}
+              page={page}
+              from={from}
+              to={to}
+              onSelectHandler={selectRowHandler}
+            />
+          </div>
         </div>
       </div>
       {open && selectedData !== undefined && index !== undefined && (

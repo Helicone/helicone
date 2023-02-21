@@ -18,13 +18,26 @@ interface RequestsProps {
   page: number;
   from: number;
   to: number;
+  sortBy: string | null;
   properties: string[];
+  timeFilter: string | null;
   values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to, properties, values } =
-    props;
+  const {
+    user,
+    data,
+    error,
+    count,
+    page,
+    from,
+    to,
+    properties,
+    sortBy,
+    timeFilter,
+    values,
+  } = props;
 
   return (
     <MetaData title="Requests">
@@ -36,6 +49,8 @@ const Requests = (props: RequestsProps) => {
           page={page}
           from={from}
           to={to}
+          sortBy={sortBy}
+          timeFilter={timeFilter}
           properties={properties}
           values={values}
         />
@@ -63,18 +78,22 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size } = context.query;
+  const { page, page_size, sort, time } = context.query;
 
-  let currentPage = parseInt(page as string, 10) || 1;
+  const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
+  const sortBy = (sort as string) || null;
+  const timeFilter = (time as string) || null;
 
   const { data, error, count, from, to } = await getRequests(
     supabase,
     currentPage,
-    pageSize
+    pageSize,
+    sortBy,
+    timeFilter
   );
 
-  var allProperties: string[] = [];
+  let allProperties: string[] = [];
   try {
     allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
       (property) => {
@@ -108,6 +127,8 @@ export const getServerSideProps = async (
       page: currentPage,
       from: from,
       to: to,
+      sortBy: sortBy,
+      timeFilter: timeFilter,
       properties: allProperties,
       values: allValues,
     },
