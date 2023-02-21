@@ -8,6 +8,7 @@ import { getProperties } from "../lib/api/properties/properties";
 import { unwrapAsync } from "../lib/result";
 import StickyHeadTable from "../components/test";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
+import { getPromptValues } from "../lib/api/prompts/prompts";
 
 interface RequestsProps {
   user: any;
@@ -20,6 +21,7 @@ interface RequestsProps {
   sortBy: string | null;
   properties: string[];
   timeFilter: string | null;
+  values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
@@ -31,9 +33,10 @@ const Requests = (props: RequestsProps) => {
     page,
     from,
     to,
+    properties,
     sortBy,
     timeFilter,
-    properties,
+    values,
   } = props;
 
   return (
@@ -49,6 +52,7 @@ const Requests = (props: RequestsProps) => {
           sortBy={sortBy}
           timeFilter={timeFilter}
           properties={properties}
+          values={values}
         />
       </AuthLayout>
     </MetaData>
@@ -101,6 +105,18 @@ export const getServerSideProps = async (
     allProperties = [];
   }
 
+  let allValues: string[] = [];
+  try {
+    allValues = (await unwrapAsync(getPromptValues(session.user.id))).map(
+      (value) => {
+        return value.value;
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    allValues = [];
+  }
+
   return {
     props: {
       initialSession: session,
@@ -114,6 +130,7 @@ export const getServerSideProps = async (
       sortBy: sortBy,
       timeFilter: timeFilter,
       properties: allProperties,
+      values: allValues,
     },
   };
 };
