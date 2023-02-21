@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import BasePage from "../components/shared/layout/basePage";
+import BasePageV2 from "../components/shared/layout/basePageV2";
 import NavBar from "../components/shared/layout/navBar";
 import MetaData from "../components/shared/metaData";
 
@@ -13,8 +14,8 @@ const Error = (props: ErrorProps) => {
 
   return (
     <MetaData title="404">
-      <BasePage>
-        <div className="h-full sm:h-4/5 justify-center align-middle items-center flex flex-col sm:flex-row gap-8">
+      <BasePageV2>
+        <div className="mx-auto flex max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8 h-[80vh]">
           <div className="flex flex-col space-y-4">
             <p className="text-5xl sm:text-6xl">Oops!</p>
             <p className="text-3xl sm:text-4xl font-sans font-light">
@@ -60,7 +61,7 @@ const Error = (props: ErrorProps) => {
             />
           </div>
         </div>
-      </BasePage>
+      </BasePageV2>
     </MetaData>
   );
 };

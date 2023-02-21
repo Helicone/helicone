@@ -41,9 +41,6 @@ const BasePage = (props: BasePageProps) => {
         variantTheme(),
         variantFull()
       )}
-      // style={{
-      //   backgroundImage: variant === "primary" ? "url(/assets/dev.jpg" : "",
-      // }}
     >
       <NavBar />
       <div className="h-full">{children}</div>

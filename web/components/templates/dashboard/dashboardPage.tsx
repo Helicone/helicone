@@ -1,5 +1,11 @@
+import {
+  ArrowTopRightOnSquareIcon,
+  ExclamationCircleIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { User } from "@supabase/supabase-js";
+import { SupabaseClient, User } from "@supabase/supabase-js";
+import Link from "next/link";
 import { SetStateAction, useEffect, useState } from "react";
 import { FilterNode } from "../../../lib/api/metrics/filters";
 import { Metrics } from "../../../lib/api/metrics/metrics";
@@ -63,16 +69,55 @@ const DashboardPage = (props: DashboardPageProps) => {
         title={"Dashboard"}
         actions={<Filters keys={keys} filter={filter} setFilter={setFilter} />}
       />
-
-      <div className="space-y-16">
-        <MetricsPanel filters={filter} metrics={metrics} />
-        <TimeGraphWHeader
-          data={timeData}
-          setFilter={setFilter}
-          interval={interval}
-          setInterval={setInterval}
-        />
-      </div>
+      {keys.length === 0 ? (
+        <div className="space-y-16">
+          <div className="text-center mt-24">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                vectorEffect="non-scaling-stroke"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+              />
+            </svg>
+            <h3 className="mt-2 text-xl font-medium text-gray-900">
+              No OpenAI API Keys found
+            </h3>
+            <p className="mt-1 text-lg text-gray-500">
+              Go to the keys page to add a key and get started.
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/keys"
+                className="inline-flex items-center rounded-md bg-gradient-to-r from-sky-600 to-indigo-500 bg-origin-border px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <ArrowTopRightOnSquareIcon
+                  className="-ml-1 mr-2 h-5 w-5"
+                  aria-hidden="true"
+                />
+                Key Page
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-16">
+          <MetricsPanel filters={filter} metrics={metrics} />
+          <TimeGraphWHeader
+            data={timeData}
+            setFilter={setFilter}
+            interval={interval}
+            setInterval={setInterval}
+          />
+        </div>
+      )}
     </AuthLayout>
   );
 };

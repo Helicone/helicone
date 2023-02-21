@@ -8,6 +8,7 @@ import { getProperties } from "../lib/api/properties/properties";
 import { unwrapAsync } from "../lib/result";
 import StickyHeadTable from "../components/test";
 import { getRequests, ResponseAndRequest } from "../services/lib/requests";
+import { getPromptValues } from "../lib/api/prompts/prompts";
 
 interface RequestsProps {
   user: any;
@@ -17,11 +18,26 @@ interface RequestsProps {
   page: number;
   from: number;
   to: number;
+  sortBy: string | null;
   properties: string[];
+  timeFilter: string | null;
+  values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, data, error, count, page, from, to, properties } = props;
+  const {
+    user,
+    data,
+    error,
+    count,
+    page,
+    from,
+    to,
+    properties,
+    sortBy,
+    timeFilter,
+    values,
+  } = props;
 
   return (
     <MetaData title="Requests">
@@ -33,7 +49,10 @@ const Requests = (props: RequestsProps) => {
           page={page}
           from={from}
           to={to}
+          sortBy={sortBy}
+          timeFilter={timeFilter}
           properties={properties}
+          values={values}
         />
       </AuthLayout>
     </MetaData>
@@ -59,18 +78,22 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size } = context.query;
+  const { page, page_size, sort, time } = context.query;
 
-  let currentPage = parseInt(page as string, 10) || 1;
+  const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
+  const sortBy = (sort as string) || null;
+  const timeFilter = (time as string) || null;
 
   const { data, error, count, from, to } = await getRequests(
     supabase,
     currentPage,
-    pageSize
+    pageSize,
+    sortBy,
+    timeFilter
   );
 
-  var allProperties: string[] = [];
+  let allProperties: string[] = [];
   try {
     allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
       (property) => {
@@ -80,6 +103,18 @@ export const getServerSideProps = async (
   } catch (err) {
     console.error(err);
     allProperties = [];
+  }
+
+  let allValues: string[] = [];
+  try {
+    allValues = (await unwrapAsync(getPromptValues(session.user.id))).map(
+      (value) => {
+        return value.value;
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    allValues = [];
   }
 
   return {
@@ -92,7 +127,10 @@ export const getServerSideProps = async (
       page: currentPage,
       from: from,
       to: to,
+      sortBy: sortBy,
+      timeFilter: timeFilter,
       properties: allProperties,
+      values: allValues,
     },
   };
 };

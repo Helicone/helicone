@@ -53,21 +53,18 @@ export default function AdvancedAnalytics() {
           </div>
         </div>
       </div>
-      <div className="mx-auto px-6 lg:px-8 xl:grid xl:grid-flow-col-dense xl:grid-cols-2 xl:gap-x-8">
+      <div className="mx-auto max-w-4xl px-6 lg:max-w-7xl lg:px-8 xl:grid xl:grid-flow-col-dense xl:grid-cols-2 xl:gap-x-8">
         <div className="relative pt-12 pb-64 sm:pt-24 sm:pb-64 xl:col-start-1 xl:pb-24">
-          <h2 className="text-base font-semibold text-sky-300">
+          <h2 className="text-lg font-semibold text-sky-400">
             Advanced Analytics
           </h2>
           <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-            We help businesses use large language models in production.
+            Helicone helps businesses use large language models in production.
           </p>
           <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-6 sm:grid-cols-2">
             {metrics.map((item) => (
               <p key={item.id} className="border border-white p-4 rounded-lg">
                 <item.icon className="text-white h-8 w-8" />
-                {/* <span className="block text-2xl font-bold text-white">
-                  {item.icon}
-                </span> */}
                 <span className="mt-1 block text-md text-gray-300">
                   <span className="font-medium text-white">
                     {item.emphasis}
@@ -77,13 +74,6 @@ export default function AdvancedAnalytics() {
               </p>
             ))}
           </div>
-          <button
-            onClick={() => router.push("/onboarding")}
-            className="mt-16 rounded-md bg-gray-50 px-3.5 py-1.5 text-base font-semibold leading-7 text-black shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            Get started{" "}
-            <span className="hidden sm:inline-flex">with Helicone</span>
-          </button>
         </div>
       </div>
     </div>

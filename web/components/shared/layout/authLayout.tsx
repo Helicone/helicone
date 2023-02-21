@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
@@ -230,13 +230,27 @@ const AuthLayout = (props: AuthLayoutProps) => {
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
             <div className="flex flex-shrink-0 items-center px-4">
-              <Image
-                className="rounded-md"
-                src="/assets/heli-full-logo.png"
-                width={150}
-                height={75}
-                alt="Helicone-full-logo"
-              />
+              <button
+                onClick={() => {
+                  supabaseClient.auth.getUser().then((user) => {
+                    if (user.data.user?.email === DEMO_EMAIL) {
+                      supabaseClient.auth.signOut().then(() => {
+                        router.push("/");
+                      });
+                    } else {
+                      router.push("/dashboard");
+                    }
+                  });
+                }}
+              >
+                <Image
+                  className="rounded-md"
+                  src="/assets/heli-full-logo.png"
+                  width={150}
+                  height={75}
+                  alt="Helicone-full-logo"
+                />
+              </button>
             </div>
             <div className="mt-5 flex flex-grow flex-col bg-y-el">
               <nav className="flex-1 space-y-1 px-2 pb-4 pt-2">
@@ -370,7 +384,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </button>
             {user?.email === DEMO_EMAIL && (
               <div className="flex h-full items-center px-2">
-                <div className="py-2 bg-red-600 px-2 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
+                <div className="py-2 bg-red-600 px-4 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
                   <div className="flex flex-row gap-1 sm:gap-2">
                     <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
                     <p className="hidden lg:inline">
