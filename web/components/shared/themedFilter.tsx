@@ -211,7 +211,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
               </span>
               {/* TODO: Add back this uncommented code once filters is functional */}
               {/* <div className="flex flex-row space-x-2 divide-x-2 divide-gray-200 items-center pr-2"> */}
-              <div className="flex flex-row items-center pr-2">
+              <div className="flex flex-row items-center">
                 {/* <div className="text-sm">
                   <div className="mx-auto flex">
                     <div>

@@ -278,37 +278,17 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="sm:flex-auto">
             <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
           </div>
-          {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <CSVLink
-              data={csvData.map((d) => ({
-                ...d,
-                request: escapeCSVString(d.request),
-                response: escapeCSVString(d.response),
-              }))}
-              filename={"requests.csv"}
-              className="flex"
-              target="_blank"
-            >
-              <button
-                type="button"
-                className="inline-flex sm:hidden items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
-                Export
-              </button>
-              <button
-                type="button"
-                className="hidden sm:inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-2 flex-shrink-0 h-4 w-4" />
-                Export to CSV
-              </button>
-            </CSVLink>
-          </div> */}
         </div>
         <div className="mt-4 space-y-2">
-          <div className="space-y-0">
+          <div className="space-y-2">
             <ThemedFilter data={csvData} />
+            <p className="text-sm text-gray-700">
+              Showing <span className="font-medium">{from + 1}</span> to{" "}
+              <span className="font-medium">
+                {Math.min(to + 1, count as number)}
+              </span>{" "}
+              of <span className="font-medium">{count}</span> results
+            </p>
             <StickyHeadTable
               condensed
               columns={columns}
