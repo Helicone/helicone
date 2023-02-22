@@ -48,101 +48,94 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="z-20 absolute left-0 mt-10 w-fit px-1.5 py-3 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <Menu.Item>
-            {({ close }) => (
-              <div className="px-4 py-2 flex flex-col space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div>
-                    <label
-                      htmlFor="startDate"
-                      className="block text-xs font-medium text-gray-700"
-                    >
-                      Start Date
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="datetime-local"
-                        name="startDate"
-                        id="startDate"
-                        onChange={(e) => {
-                          setStartDate(e.target.value);
-                        }}
-                        value={startDate}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="endDate"
-                      className="block text-xs font-medium text-gray-700"
-                    >
-                      End Date
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="datetime-local"
-                        name="endDate"
-                        id="endDate"
-                        onChange={(e) => {
-                          setEndDate(e.target.value);
-                        }}
-                        value={endDate}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-row justify-end gap-4">
-                  <button
-                    className="block w-max items-center justify-center text-sm font-medium text-gray-500 hover:text-black"
-                    onClick={() => {}}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="block w-max items-center justify-center rounded-md border border-transparent bg-sky-600 bg-origin-border px-2 py-1 text-sm font-medium text-white shadow-sm hover:bg-sky-700"
-                    onClick={() => {
-                      if (!startDate || !endDate) {
-                        setNotification(
-                          "Please select a start and end date",
-                          "error"
-                        );
-                        return;
-                      }
-                      if (endDate && startDate > endDate) {
-                        setNotification(
-                          "Start date must be before end date",
-                          "error"
-                        );
-
-                        return;
-                      }
-                      if (startDate && startDate < startDate) {
-                        setNotification(
-                          "End date must be after start date",
-                          "error"
-                        );
-                        return;
-                      }
-                      const start = new Date(startDate as string);
-                      const end = new Date(endDate as string);
-                      setActive("custom");
-                      close();
-                      // router.replace({
-                      //   query: {
-                      //     ...router.query,
-                      //     time: `custom:${start.toISOString()}_${end.toISOString()}`,
-                      //   },
-                      // });
+          <div className="px-4 py-2 flex flex-col space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div>
+                <label
+                  htmlFor="startDate"
+                  className="block text-xs font-medium text-gray-700"
+                >
+                  Start Date
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="datetime-local"
+                    name="startDate"
+                    id="startDate"
+                    onChange={(e) => {
+                      setStartDate(e.target.value);
                     }}
-                  >
-                    Save
-                  </button>
+                    value={startDate}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
                 </div>
               </div>
-            )}
-          </Menu.Item>
+              <div>
+                <label
+                  htmlFor="endDate"
+                  className="block text-xs font-medium text-gray-700"
+                >
+                  End Date
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="datetime-local"
+                    name="endDate"
+                    id="endDate"
+                    onChange={(e) => {
+                      setEndDate(e.target.value);
+                    }}
+                    value={endDate}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-row justify-end gap-4">
+              <button
+                className="block w-max items-center justify-center text-sm font-medium text-gray-500 hover:text-black"
+                onClick={() => {}}
+              >
+                Cancel
+              </button>
+              <button
+                className="block w-max items-center justify-center rounded-md border border-transparent bg-sky-600 bg-origin-border px-2 py-1 text-sm font-medium text-white shadow-sm hover:bg-sky-700"
+                onClick={() => {
+                  if (!startDate || !endDate) {
+                    setNotification(
+                      "Please select a start and end date",
+                      "error"
+                    );
+                    return;
+                  }
+                  if (endDate && startDate > endDate) {
+                    setNotification(
+                      "Start date must be before end date",
+                      "error"
+                    );
+
+                    return;
+                  }
+                  if (startDate && startDate < startDate) {
+                    setNotification(
+                      "End date must be after start date",
+                      "error"
+                    );
+                    return;
+                  }
+                  const start = new Date(startDate as string);
+                  const end = new Date(endDate as string);
+                  setActive("custom");
+                  onSelect(
+                    "custom",
+                    `custom:${start.toISOString()}_${end.toISOString()}`
+                  );
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </Menu.Items>
       </Transition>
       {timeFilterOptions.map((option, idx) => (

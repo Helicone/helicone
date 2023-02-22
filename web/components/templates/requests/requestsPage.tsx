@@ -79,24 +79,19 @@ const RequestsPage = (props: RequestsPageProps) => {
   );
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests"],
-    queryFn: async () => {
-      console.log(currentTimeFilter);
-      return getRequests(supabase, 1, 25, sortBy, currentTimeFilter).then(
+    queryKey: ["requests", currentTimeFilter],
+    queryFn: async (timeFilter) => {
+      return getRequests(supabase, 1, 25, sortBy, timeFilter.queryKey[1]).then(
         (result) => (result.data as ResponseAndRequest[]) || []
       );
     },
     initialData: requests,
-    // refetchInterval: 10,
   });
 
-  const onTimeSelectHandler = (key: string, value: string) => {
-    setCurrentTimeFilter(key);
-    console.log(key);
+  const onTimeSelectHandler = async (key: string, value: string) => {
+    setCurrentTimeFilter(value);
     refetch();
   };
-
-  console.log(data);
 
   const [index, setIndex] = useState<number>();
   const [selectedData, setSelectedData] = useState<{
@@ -321,7 +316,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               </span>{" "}
               of <span className="font-medium">{count}</span> results
             </p>
-            {isLoading ? (
+            {isLoading || isRefetching ? (
               <p>Loading...</p>
             ) : (
               <StickyHeadTable
