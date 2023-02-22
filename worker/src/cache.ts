@@ -1,5 +1,5 @@
 import { Result } from "./index";
-const MAX_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
+const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 export interface CacheSettings {
   shouldSaveToCache: boolean;
   shouldReadFromCache: boolean;
