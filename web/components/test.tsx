@@ -27,6 +27,8 @@ interface ThemedTableProps {
   from: number;
   to: number;
   count: number | null;
+  onPageChangeHandler?: (page: number) => void;
+  onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
   condensed?: boolean;
 }
@@ -41,6 +43,8 @@ export default function StickyHeadTable(props: ThemedTableProps) {
     count,
     condensed = false,
     onSelectHandler,
+    onPageChangeHandler,
+    onPageSizeChangeHandler,
   } = props;
   const router = useRouter();
 
@@ -178,6 +182,8 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               onChange={(e) => {
                 router.query.page_size = e.target.value;
                 router.push(router);
+                onPageSizeChangeHandler &&
+                  onPageSizeChangeHandler(parseInt(e.target.value, 10));
               }}
             >
               <option>25</option>
@@ -190,6 +196,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               onClick={() => {
                 router.query.page = (page - 1).toString();
                 router.push(router);
+                onPageChangeHandler && onPageChangeHandler(page - 1);
               }}
               disabled={!hasPrevious}
               className={clsx(
@@ -205,6 +212,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               onClick={() => {
                 router.query.page = (page + 1).toString();
                 router.push(router);
+                onPageChangeHandler && onPageChangeHandler(page + 1);
               }}
               disabled={!hasNext}
               className={clsx(

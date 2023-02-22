@@ -27,6 +27,7 @@ interface RequestsPageProps {
   error: string | null;
   count: number | null;
   page: number;
+  pageSize: number;
   from: number;
   to: number;
   properties: string[];
@@ -63,6 +64,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     error,
     count,
     page,
+    pageSize,
     from,
     to,
     properties,
@@ -78,13 +80,19 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState<number>(page);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests", currentTimeFilter],
+    queryKey: ["requests", currentTimeFilter, currentPage, currentPageSize],
     queryFn: async (timeFilter) => {
-      return getRequests(supabase, 1, 25, sortBy, timeFilter.queryKey[1]).then(
-        (result) => (result.data as ResponseAndRequest[]) || []
-      );
+      return getRequests(
+        supabase,
+        currentPage,
+        currentPageSize,
+        sortBy, // TODO: add sortBy functionality
+        timeFilter.queryKey[1] as string | null
+      ).then((result) => (result.data as ResponseAndRequest[]) || []);
     },
     refetchOnWindowFocus: false,
     initialData: requests,
@@ -92,6 +100,16 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const onTimeSelectHandler = async (key: string, value: string) => {
     setCurrentTimeFilter(value);
+    refetch();
+  };
+
+  const onPageSizeChangeHandler = async (newPageSize: number) => {
+    setCurrentPageSize(newPageSize);
+    refetch();
+  };
+
+  const onPageChangeHandler = async (newPageNumber: number) => {
+    setCurrentPage(newPageNumber);
     refetch();
   };
 
@@ -331,6 +349,8 @@ const RequestsPage = (props: RequestsPageProps) => {
                 from={from}
                 to={to}
                 onSelectHandler={selectRowHandler}
+                onPageChangeHandler={onPageChangeHandler}
+                onPageSizeChangeHandler={onPageSizeChangeHandler}
               />
             )}
           </div>

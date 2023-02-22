@@ -16,6 +16,7 @@ interface RequestsProps {
   data: ResponseAndRequest[];
   count: number | null;
   page: number;
+  pageSize: number;
   from: number;
   to: number;
   sortBy: string | null;
@@ -31,6 +32,7 @@ const Requests = (props: RequestsProps) => {
     error,
     count,
     page,
+    pageSize,
     from,
     to,
     properties,
@@ -47,6 +49,7 @@ const Requests = (props: RequestsProps) => {
           error={error}
           count={count}
           page={page}
+          pageSize={pageSize}
           from={from}
           to={to}
           sortBy={sortBy}
@@ -81,7 +84,7 @@ export const getServerSideProps = async (
   const { page, page_size, sort, time } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 25;
+  const pageSize = parseInt(page_size as string, 10) || 5;
   const sortBy = (sort as string) || null;
   const timeFilter = (time as string) || null;
 
@@ -125,6 +128,7 @@ export const getServerSideProps = async (
       data: (data as ResponseAndRequest[]) || [],
       count: count,
       page: currentPage,
+      pageSize: pageSize,
       from: from,
       to: to,
       sortBy: sortBy,
