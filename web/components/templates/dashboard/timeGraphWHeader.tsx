@@ -36,7 +36,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
     <div className="h-full w-full">
       <div className="sm:flex sm:items-center sm:justify-between">
         <h3 className="text-lg font-medium leading-6 text-gray-900">
-          Requests over time
+          OpenAI Requests over time
         </h3>
         <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-row gap-4">
           <TimeActions
