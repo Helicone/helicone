@@ -12,13 +12,8 @@ import { getPromptValues } from "../lib/api/prompts/prompts";
 
 interface RequestsProps {
   user: any;
-  error: string | null;
-  data: ResponseAndRequest[];
-  count: number | null;
   page: number;
   pageSize: number;
-  from: number;
-  to: number;
   sortBy: string | null;
   properties: string[];
   timeFilter: string | null;
@@ -26,32 +21,15 @@ interface RequestsProps {
 }
 
 const Requests = (props: RequestsProps) => {
-  const {
-    user,
-    data,
-    error,
-    count,
-    page,
-    pageSize,
-    from,
-    to,
-    properties,
-    sortBy,
-    timeFilter,
-    values,
-  } = props;
+  const { user, page, pageSize, properties, sortBy, timeFilter, values } =
+    props;
 
   return (
     <MetaData title="Requests">
       <AuthLayout user={user}>
         <RequestsPage
-          requests={data}
-          error={error}
-          count={count}
           page={page}
           pageSize={pageSize}
-          from={from}
-          to={to}
           sortBy={sortBy}
           timeFilter={timeFilter}
           properties={properties}
@@ -84,17 +62,9 @@ export const getServerSideProps = async (
   const { page, page_size, sort, time } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 5;
+  const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = (sort as string) || null;
   const timeFilter = (time as string) || null;
-
-  const { data, error, count, from, to } = await getRequests(
-    supabase,
-    currentPage,
-    pageSize,
-    sortBy,
-    timeFilter
-  );
 
   let allProperties: string[] = [];
   try {
@@ -124,13 +94,8 @@ export const getServerSideProps = async (
     props: {
       initialSession: session,
       user: session.user,
-      error: error?.message || null,
-      data: (data as ResponseAndRequest[]) || [],
-      count: count,
       page: currentPage,
       pageSize: pageSize,
-      from: from,
-      to: to,
       sortBy: sortBy,
       timeFilter: timeFilter,
       properties: allProperties,

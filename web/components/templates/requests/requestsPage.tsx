@@ -22,20 +22,6 @@ import ThemedFilter from "../../shared/themedFilter";
 import ThemedModal from "../../shared/themedModal";
 import StickyHeadTable, { Column } from "../../test";
 
-interface RequestsPageProps {
-  requests: ResponseAndRequest[];
-  error: string | null;
-  count: number | null;
-  page: number;
-  pageSize: number;
-  from: number;
-  to: number;
-  properties: string[];
-  sortBy: string | null;
-  timeFilter: string | null;
-  values: string[];
-}
-
 const monthNames = [
   "Jan",
   "Feb",
@@ -58,22 +44,26 @@ function escapeCSVString(s: string | undefined): string | undefined {
   return s.replace(/"/g, '""');
 }
 
+interface RequestsPageProps {
+  page: number;
+  pageSize: number;
+  properties: string[];
+  sortBy: string | null;
+  timeFilter: string | null;
+  values: string[];
+}
+
 const RequestsPage = (props: RequestsPageProps) => {
   const {
-    requests,
-    error,
-    count,
     page,
     pageSize,
-    from,
-    to,
+
     properties,
     sortBy,
     timeFilter,
     values,
   } = props;
 
-  const router = useRouter();
   const { setNotification } = useNotification();
   const supabase = useSupabaseClient();
 
@@ -92,11 +82,15 @@ const RequestsPage = (props: RequestsPageProps) => {
         currentPageSize,
         sortBy, // TODO: add sortBy functionality
         timeFilter.queryKey[1] as string | null
-      ).then((result) => (result.data as ResponseAndRequest[]) || []);
+      ).then((res) => res);
     },
     refetchOnWindowFocus: false,
-    initialData: requests,
   });
+  const requests = data?.data;
+  const count = data?.count;
+  const from = data?.from;
+  const to = data?.to;
+  const error = data?.error;
 
   const onTimeSelectHandler = async (key: string, value: string) => {
     setCurrentTimeFilter(value);
@@ -131,7 +125,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   }>();
   const [open, setOpen] = useState(true);
 
-  const probabilities = data.map((req) => {
+  const probabilities = requests?.map((req) => {
     const choice = req.response_body?.choices
       ? req.response_body?.choices[0]
       : null;
@@ -178,7 +172,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  const csvData = data.map((d, i) => {
+  const csvData = requests?.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -217,7 +211,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         : d.response_body?.choices?.[0]?.text,
       "duration (s)": latency.toString(),
       total_tokens: d.response_body?.usage?.total_tokens,
-      logprobs: probabilities[i],
+      logprobs: probabilities ? probabilities[i] : null,
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
@@ -326,25 +320,21 @@ const RequestsPage = (props: RequestsPageProps) => {
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
             <ThemedFilter
-              data={csvData}
+              data={csvData || []}
               onTimeSelectHandler={onTimeSelectHandler}
             />
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">{from + 1}</span> to{" "}
-              <span className="font-medium">
-                {Math.min(to + 1, count as number)}
-              </span>{" "}
-              of <span className="font-medium">{count}</span> results
-            </p>
 
-            {isLoading || isRefetching ? (
+            {isLoading ||
+            isRefetching ||
+            from === undefined ||
+            to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <StickyHeadTable
                 condensed
                 columns={columns}
-                rows={csvData}
-                count={count}
+                rows={csvData || []}
+                count={count || 0}
                 page={page}
                 from={from}
                 to={to}
@@ -411,7 +401,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Log Probability:</p>
-                  <p>{probabilities[index]}</p>
+                  <p>{probabilities ? probabilities[index] : 0}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>User Id:</p>
