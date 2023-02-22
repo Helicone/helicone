@@ -329,7 +329,9 @@ async function buildCachedRequest(request: Request): Promise<Request> {
   );
   const cacheUrl = new URL(request.url);
 
-  cacheUrl.pathname = "/posts" + cacheUrl.pathname + cacheKey;
+  const pathName = cacheUrl.pathname.replaceAll("/", "_");
+  cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
+  console.log("PATHNAME", cacheUrl.pathname);
 
   return new Request(cacheUrl, {
     method: "GET",
@@ -370,6 +372,24 @@ async function getCachedResponse(request: Request): Promise<Response | null> {
   }
 }
 
+async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
+  const requestId = headers.get("helicone-id");
+  if (!requestId) {
+    console.error("No request id found in cache hit");
+    return;
+  }
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const { error } = await dbClient
+    .from("cache_hits")
+    .insert({ request_id: requestId });
+  if (error) {
+    console.error(error);
+  }
+}
+
 export default {
   async fetch(
     request: Request,
@@ -385,6 +405,7 @@ export default {
     if (cacheSettings.shouldReadFromCache) {
       const cachedResponse = await getCachedResponse(request.clone());
       if (cachedResponse) {
+        ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
         return cachedResponse;
       }
     }
