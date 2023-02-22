@@ -32,18 +32,18 @@ function buildCacheControl(cacheControl: string): string {
 
 interface CacheHeaders {
   cacheEnabled: boolean;
-  cacheSaveOnly: boolean;
-  cacheReadOnly: boolean;
+  cacheSave: boolean;
+  cacheRead: boolean;
 }
 
 function getCacheState(headers: Headers): CacheHeaders {
   return {
     cacheEnabled:
       (headers.get("Helicone-Cache-Enabled") ?? "").toLowerCase() === "true",
-    cacheSaveOnly:
-      (headers.get("Helicone-Cache-Save-Only") ?? "").toLowerCase() === "true",
-    cacheReadOnly:
-      (headers.get("Helicone-Cache-Read-Only") ?? "").toLowerCase() === "true",
+    cacheSave:
+      (headers.get("Helicone-Cache-Save") ?? "").toLowerCase() === "true",
+    cacheRead:
+      (headers.get("Helicone-Cache-Read") ?? "").toLowerCase() === "true",
   };
 }
 
@@ -52,19 +52,9 @@ export function getCacheSettings(
 ): Result<CacheSettings, string> {
   const cacheHeaders = getCacheState(headers);
 
-  if (cacheHeaders.cacheSaveOnly && cacheHeaders.cacheReadOnly) {
-    return {
-      error:
-        "Helicone-Cache-Save-Only and Helicone-Cache-Read-Only cannot both be true. Instead, only set Helicone-Cache-Enabled to true.",
-      data: null,
-    };
-  }
-  const shouldSaveToCache =
-    (cacheHeaders.cacheEnabled && !cacheHeaders.cacheReadOnly) ||
-    cacheHeaders.cacheSaveOnly;
+  const shouldSaveToCache = cacheHeaders.cacheEnabled || cacheHeaders.cacheSave;
   const shouldReadFromCache =
-    (cacheHeaders.cacheEnabled && !cacheHeaders.cacheSaveOnly) ||
-    cacheHeaders.cacheReadOnly;
+    cacheHeaders.cacheEnabled || cacheHeaders.cacheRead;
 
   const cacheControl = buildCacheControl(headers.get("Cache-Control") ?? "");
 
