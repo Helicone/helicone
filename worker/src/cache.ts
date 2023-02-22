@@ -1,5 +1,5 @@
 import { Result } from "./index";
-
+const MAX_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
 export interface CacheSettings {
   shouldSaveToCache: boolean;
   shouldReadFromCache: boolean;
@@ -9,8 +9,22 @@ export interface CacheSettings {
 function buildCacheControl(cacheControl: string): string {
   const sMaxAge = cacheControl.match(/s-maxage=(\d+)/)?.[1];
   const maxAge = cacheControl.match(/max-age=(\d+)/)?.[1];
+
   if (sMaxAge || maxAge) {
-    return `public, max-age=${sMaxAge ?? maxAge}`;
+    let sMaxAgeInSeconds = 0;
+    try {
+      sMaxAgeInSeconds = sMaxAge
+        ? parseInt(sMaxAge)
+        : maxAge
+        ? parseInt(maxAge)
+        : 0;
+    } catch (e) {
+      console.error("Error parsing s-maxage or max-age", e);
+    }
+    if (sMaxAgeInSeconds > MAX_CACHE_AGE) {
+      return `public, max-age=${MAX_CACHE_AGE}`;
+    }
+    return `public, max-age=${sMaxAgeInSeconds}`;
   } else {
     return "public, max-age=0";
   }
