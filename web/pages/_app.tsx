@@ -6,6 +6,7 @@ import "../styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import Notification from "../components/shared/notification/Notification";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export default function MyApp({
   Component,
@@ -13,6 +14,8 @@ export default function MyApp({
 }: AppProps<{
   initialSession: Session;
 }>) {
+  const queryClient = new QueryClient();
+
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
   if (typeof window !== "undefined") {
@@ -25,10 +28,12 @@ export default function MyApp({
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <NotificationProvider>
-          <Component {...pageProps} />
-          <Notification />
-        </NotificationProvider>
+        <QueryClientProvider client={queryClient}>
+          <NotificationProvider>
+            <Component {...pageProps} />
+            <Notification />
+          </NotificationProvider>
+        </QueryClientProvider>
       </SessionContextProvider>
       <Analytics />
     </>

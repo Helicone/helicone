@@ -5,11 +5,15 @@ import {
 } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
-import { ResponseAndRequest } from "../../../services/lib/requests";
+import {
+  getRequests,
+  ResponseAndRequest,
+} from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
@@ -68,6 +72,31 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const router = useRouter();
   const { setNotification } = useNotification();
+  const supabase = useSupabaseClient();
+
+  const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
+    null
+  );
+
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["requests"],
+    queryFn: async () => {
+      console.log(currentTimeFilter);
+      return getRequests(supabase, 1, 25, sortBy, currentTimeFilter).then(
+        (result) => (result.data as ResponseAndRequest[]) || []
+      );
+    },
+    initialData: requests,
+    // refetchInterval: 10,
+  });
+
+  const onTimeSelectHandler = (key: string, value: string) => {
+    setCurrentTimeFilter(key);
+    console.log(key);
+    refetch();
+  };
+
+  console.log(data);
 
   const [index, setIndex] = useState<number>();
   const [selectedData, setSelectedData] = useState<{
@@ -87,7 +116,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   }>();
   const [open, setOpen] = useState(true);
 
-  const probabilities = requests.map((req) => {
+  const probabilities = data.map((req) => {
     const choice = req.response_body?.choices
       ? req.response_body?.choices[0]
       : null;
@@ -134,7 +163,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  const csvData = requests.map((d, i) => {
+  const csvData = data.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -281,7 +310,10 @@ const RequestsPage = (props: RequestsPageProps) => {
         </div>
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
-            <ThemedFilter data={csvData} />
+            <ThemedFilter
+              data={csvData}
+              onTimeSelectHandler={onTimeSelectHandler}
+            />
             <p className="text-sm text-gray-700">
               Showing <span className="font-medium">{from + 1}</span> to{" "}
               <span className="font-medium">
@@ -289,16 +321,20 @@ const RequestsPage = (props: RequestsPageProps) => {
               </span>{" "}
               of <span className="font-medium">{count}</span> results
             </p>
-            <StickyHeadTable
-              condensed
-              columns={columns}
-              rows={csvData}
-              count={count}
-              page={page}
-              from={from}
-              to={to}
-              onSelectHandler={selectRowHandler}
-            />
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <StickyHeadTable
+                condensed
+                columns={columns}
+                rows={csvData}
+                count={count}
+                page={page}
+                from={from}
+                to={to}
+                onSelectHandler={selectRowHandler}
+              />
+            )}
           </div>
         </div>
       </div>

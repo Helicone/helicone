@@ -69,7 +69,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
-                    key={column.key}
+                    key={column.label}
                     align={column.align}
                     style={{ minWidth: column.minWidth }}
                   >
@@ -128,7 +128,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
                     hover
                     role="checkbox"
                     tabIndex={-1}
-                    key={row.code}
+                    key={`row-${idx}`}
                     onClick={() => onSelectHandler && onSelectHandler(row, idx)}
                     className="hover:cursor-pointer"
                   >
@@ -136,7 +136,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
                       const value = row[column.key];
                       return (
                         <TableCell
-                          key={column.key}
+                          key={`cell-${column.key}`}
                           align={column.align || "left"}
                         >
                           <p
