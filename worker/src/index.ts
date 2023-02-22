@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 // import bcrypt from "bcrypt";
 export interface Env {
@@ -6,22 +7,16 @@ export interface Env {
   SUPABASE_URL: string;
 }
 
-interface SuccessResult {
-  data: string;
-  error: null;
-}
-interface ErrorResult {
-  data: null;
-  error: string;
-}
-
-export type Result = SuccessResult | ErrorResult;
-
-interface GenericSuccessResult<T> {
+interface SuccessResult<T> {
   data: T;
   error: null;
 }
-export type GenericResult<T> = GenericSuccessResult<T> | ErrorResult;
+interface ErrorResult<T> {
+  data: null;
+  error: T;
+}
+
+export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
 function forwardRequestToOpenAi(
   request: Request,
@@ -58,7 +53,7 @@ async function getPromptId(
   prompt: Prompt,
   name: string | null,
   auth: string
-): Promise<Result> {
+): Promise<Result<string, string>> {
   // First, get the prompt id if there's a match in the prompt table
   const auth_hash = await hash(auth);
   const { data, error } = await dbClient
@@ -68,7 +63,7 @@ async function getPromptId(
     .eq("prompt", prompt.prompt)
     .limit(1);
   if (error !== null) {
-    return { data: null, error: error.message }; 
+    return { data: null, error: error.message };
   }
   if (data !== null && data.length > 0) {
     return { data: data[0].id, error: null };
@@ -78,14 +73,15 @@ async function getPromptId(
       newPromptName = name;
     } else {
       // First, query the database to find the highest prompt name suffix
-      const { data: highestSuffixData, error: highestSuffixError } = await dbClient
-      .from("prompt")
-      .select("name")
-      .order("name", { ascending: false })
-      .like("name", "Prompt (%)")
-      .eq("auth_hash", auth_hash)
-      .limit(1)
-      .single();
+      const { data: highestSuffixData, error: highestSuffixError } =
+        await dbClient
+          .from("prompt")
+          .select("name")
+          .order("name", { ascending: false })
+          .like("name", "Prompt (%)")
+          .eq("auth_hash", auth_hash)
+          .limit(1)
+          .single();
 
       // Extract the highest suffix number from the highest prompt name suffix found
       let highestSuffix = 0;
@@ -106,7 +102,14 @@ async function getPromptId(
     // If there's no match, insert the prompt and get the id
     const { data, error } = await dbClient
       .from("prompt")
-      .insert([{ id: crypto.randomUUID(), prompt: prompt.prompt, name: newPromptName, auth_hash: auth_hash }])
+      .insert([
+        {
+          id: crypto.randomUUID(),
+          prompt: prompt.prompt,
+          name: newPromptName,
+          auth_hash: auth_hash,
+        },
+      ])
       .select("id")
       .single();
     if (error !== null) {
@@ -128,15 +131,22 @@ async function logRequest({
   prompt,
   isPromptRegexOn,
   promptName,
-}: HeliconeRequest): Promise<Result> {
+}: HeliconeRequest): Promise<Result<string, string>> {
   try {
     const json = body ? JSON.parse(body) : {};
 
-    const formattedPromptResult = prompt !== undefined ? await getPromptId(dbClient, prompt, promptName, auth) : null;
-    if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
+    const formattedPromptResult =
+      prompt !== undefined
+        ? await getPromptId(dbClient, prompt, promptName, auth)
+        : null;
+    if (
+      formattedPromptResult !== null &&
+      formattedPromptResult.error !== null
+    ) {
       return { data: null, error: formattedPromptResult.error };
     }
-    const formattedPromptId = formattedPromptResult !== null ? formattedPromptResult.data : null;
+    const formattedPromptId =
+      formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
     const { data, error } = await dbClient
@@ -181,7 +191,9 @@ async function logResponse(
   }
 }
 
-function heliconeHeaders(requestResult: Result): Record<string, string> {
+function heliconeHeaders(
+  requestResult: Result<string, string>
+): Record<string, string> {
   if (requestResult.error !== null) {
     console.error(requestResult.error);
     return {
@@ -246,7 +258,7 @@ async function forwardAndLog(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-  prompt?: Prompt,
+  prompt?: Prompt
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
   if (auth === null) {
@@ -285,22 +297,136 @@ async function forwardAndLog(
   });
 }
 
+async function uncachedRequest(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
+  const result = await extractPrompt(request);
+  if (result.data !== null) {
+    const { request: formattedRequest, body: body, prompt } = result.data;
+    return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
+  } else {
+    return new Response(result.error, { status: 400 });
+  }
+}
+
+async function buildCachedRequest(request: Request): Promise<Request> {
+  const headers = new Headers();
+  for (const [key, value] of request.headers.entries()) {
+    if (key.toLowerCase().startsWith("helicone-")) {
+      headers.set(key, value);
+    }
+    if (key.toLowerCase() === "authorization") {
+      headers.set(key, value);
+    }
+  }
+
+  const cacheKey = await hash(
+    request.url +
+      (await request.text()) +
+      JSON.stringify([...headers.entries()])
+  );
+  const cacheUrl = new URL(request.url);
+
+  const pathName = cacheUrl.pathname.replaceAll("/", "_");
+  cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
+  console.log("PATHNAME", cacheUrl.pathname);
+
+  return new Request(cacheUrl, {
+    method: "GET",
+    headers: headers,
+  });
+}
+async function saveToCache(
+  request: Request,
+  response: Response,
+  cacheControl: string
+): Promise<void> {
+  console.log("Saving to cache");
+  const cache = caches.default;
+  const responseClone = response.clone();
+  const responseHeaders = new Headers(responseClone.headers);
+  responseHeaders.append("Cache-Control", cacheControl);
+  const cacheResponse = new Response(responseClone.body, {
+    ...responseClone,
+    headers: responseHeaders,
+  });
+  console.log("cache response", response.headers);
+  cache.put(await buildCachedRequest(request), cacheResponse);
+}
+
+async function getCachedResponse(request: Request): Promise<Response | null> {
+  const cache = caches.default;
+  const requestCache = await buildCachedRequest(request.clone());
+  const cachedResponse = await cache.match(requestCache);
+  if (cachedResponse) {
+    const cachedResponseHeaders = new Headers(cachedResponse.headers);
+    cachedResponseHeaders.append("Helicone-Cache", "HIT");
+    return new Response(cachedResponse.body, {
+      ...cachedResponse,
+      headers: cachedResponseHeaders,
+    });
+  } else {
+    return null;
+  }
+}
+
+async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
+  const requestId = headers.get("helicone-id");
+  if (!requestId) {
+    console.error("No request id found in cache hit");
+    return;
+  }
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const { error } = await dbClient
+    .from("cache_hits")
+    .insert({ request_id: requestId });
+  if (error) {
+    console.error(error);
+  }
+}
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const result = await extractPrompt(request);
-    if (result.data !== null) {
-      const {
-        request: formattedRequest, 
-        body: body, 
-        prompt
-      } = result.data;
-      return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
-    } else {
-      return new Response(result.error, { status: 400 });
+    const { data: cacheSettings, error: cacheError } = getCacheSettings(
+      request.headers
+    );
+    if (cacheError !== null) {
+      return new Response(cacheError, { status: 400 });
     }
-  }
+    if (cacheSettings.shouldReadFromCache) {
+      const cachedResponse = await getCachedResponse(request.clone());
+      if (cachedResponse) {
+        ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
+        return cachedResponse;
+      }
+    }
+
+    let requestClone = cacheSettings.shouldSaveToCache ? request.clone() : null;
+
+    const response = await uncachedRequest(request, env, ctx);
+
+    if (cacheSettings.shouldSaveToCache && requestClone) {
+      ctx.waitUntil(
+        saveToCache(requestClone, response, cacheSettings.cacheControl)
+      );
+    }
+    const responseHeaders = new Headers(response.headers);
+    if (cacheSettings.shouldReadFromCache) {
+      responseHeaders.append("Helicone-Cache", "MISS");
+    }
+
+    return new Response(response.body, {
+      ...response,
+      headers: responseHeaders,
+    });
+  },
 };
