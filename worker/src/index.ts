@@ -344,14 +344,11 @@ async function saveToCache(
   console.log("Saving to cache");
   const cache = caches.default;
   const responseClone = response.clone();
-  const headers = new Headers();
-  for (const [key, value] of responseClone.headers.entries()) {
-    headers.set(key, value);
-  }
-  headers.set("Cache-Control", cacheControl);
+  const responseHeaders = new Headers(responseClone.headers);
+  responseHeaders.append("Cache-Control", cacheControl);
   const cacheResponse = new Response(responseClone.body, {
     ...responseClone,
-    headers,
+    headers: responseHeaders,
   });
   console.log("cache response", response.headers);
   cache.put(await buildCachedRequest(request), cacheResponse);
@@ -362,12 +359,11 @@ async function getCachedResponse(request: Request): Promise<Response | null> {
   const requestCache = await buildCachedRequest(request.clone());
   const cachedResponse = await cache.match(requestCache);
   if (cachedResponse) {
+    const cachedResponseHeaders = new Headers(cachedResponse.headers);
+    cachedResponseHeaders.append("Helicone-Cache", "HIT");
     return new Response(cachedResponse.body, {
       ...cachedResponse,
-      headers: {
-        ...cachedResponse.headers,
-        "Helicone-Cache": "HIT",
-      },
+      headers: cachedResponseHeaders,
     });
   } else {
     return null;
@@ -402,13 +398,14 @@ export default {
         saveToCache(requestClone, response, cacheSettings.cacheControl)
       );
     }
+    const responseHeaders = new Headers(response.headers);
+    if (cacheSettings.shouldReadFromCache) {
+      responseHeaders.append("Helicone-Cache", "MISS");
+    }
+
     return new Response(response.body, {
       ...response,
-      headers: {
-        ...response.headers,
-        "Cache-Control": cacheSettings.cacheControl,
-        "Helicone-Cache": "MISS",
-      },
+      headers: responseHeaders,
     });
   },
 };
