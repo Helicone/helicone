@@ -86,6 +86,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         (result) => (result.data as ResponseAndRequest[]) || []
       );
     },
+    refetchOnWindowFocus: false,
     initialData: requests,
   });
 
