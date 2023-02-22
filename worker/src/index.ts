@@ -7,22 +7,16 @@ export interface Env {
   SUPABASE_URL: string;
 }
 
-interface SuccessResult {
-  data: string;
-  error: null;
-}
-interface ErrorResult {
-  data: null;
-  error: string;
-}
-
-export type Result = SuccessResult | ErrorResult;
-
-interface GenericSuccessResult<T> {
+interface SuccessResult<T> {
   data: T;
   error: null;
 }
-export type GenericResult<T> = GenericSuccessResult<T> | ErrorResult;
+interface ErrorResult<T> {
+  data: null;
+  error: T;
+}
+
+export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
 function forwardRequestToOpenAi(
   request: Request,
@@ -59,7 +53,7 @@ async function getPromptId(
   prompt: Prompt,
   name: string | null,
   auth: string
-): Promise<Result> {
+): Promise<Result<string, string>> {
   // First, get the prompt id if there's a match in the prompt table
   const auth_hash = await hash(auth);
   const { data, error } = await dbClient
@@ -137,7 +131,7 @@ async function logRequest({
   prompt,
   isPromptRegexOn,
   promptName,
-}: HeliconeRequest): Promise<Result> {
+}: HeliconeRequest): Promise<Result<string, string>> {
   try {
     const json = body ? JSON.parse(body) : {};
 
@@ -197,7 +191,9 @@ async function logResponse(
   }
 }
 
-function heliconeHeaders(requestResult: Result): Record<string, string> {
+function heliconeHeaders(
+  requestResult: Result<string, string>
+): Record<string, string> {
   if (requestResult.error !== null) {
     console.error(requestResult.error);
     return {
@@ -315,28 +311,94 @@ async function uncachedRequest(
   }
 }
 
+async function buildCachedRequest(request: Request): Promise<Request> {
+  const headers = new Headers();
+  for (const [key, value] of request.headers.entries()) {
+    headers.set(key, value);
+  }
+  const cacheKey = await hash(request.url + (await request.text()));
+  const cacheUrl = new URL(request.url);
+
+  cacheUrl.pathname = "/posts" + cacheUrl.pathname + cacheKey;
+
+  return new Request(cacheUrl, {
+    method: "GET",
+    headers: headers,
+  });
+}
+async function saveToCache(
+  request: Request,
+  response: Response,
+  cacheControl: string
+): Promise<void> {
+  console.log("Saving to cache");
+  const cache = caches.default;
+  const responseClone = response.clone();
+  const headers = new Headers();
+  for (const [key, value] of responseClone.headers.entries()) {
+    headers.set(key, value);
+  }
+  headers.set("Cache-Control", cacheControl);
+  const cacheResponse = new Response(responseClone.body, {
+    ...responseClone,
+    headers,
+  });
+  console.log("cache response", response.headers);
+  cache.put(await buildCachedRequest(request), cacheResponse);
+}
+
+async function getCachedResponse(request: Request): Promise<Response | null> {
+  const cache = caches.default;
+  const requestCache = await buildCachedRequest(request.clone());
+  const cachedResponse = await cache.match(requestCache);
+  if (cachedResponse) {
+    return new Response(cachedResponse.body, {
+      ...cachedResponse,
+      headers: {
+        ...cachedResponse.headers,
+        "Helicone-Cache": "HIT",
+      },
+    });
+  } else {
+    return null;
+  }
+}
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const cacheSettings = getCacheSettings(request);
+    const { data: cacheSettings, error: cacheError } = getCacheSettings(
+      request.headers
+    );
+    if (cacheError !== null) {
+      return new Response(cacheError, { status: 400 });
+    }
     if (cacheSettings.shouldReadFromCache) {
-      const cache = caches.default;
-      const cacheKey = new Request(request.url, request);
-      const cachedResponse = await cache.match(cacheKey);
+      const cachedResponse = await getCachedResponse(request.clone());
       if (cachedResponse) {
         return cachedResponse;
       }
     }
 
+    let requestClone = cacheSettings.shouldSaveToCache ? request.clone() : null;
+
     const response = await uncachedRequest(request, env, ctx);
-    if (cacheSettings.shouldSaveToCache) {
-      const cache = caches.default;
-      const cacheKey = new Request(request.url, request);
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+
+    if (cacheSettings.shouldSaveToCache && requestClone) {
+      ctx.waitUntil(
+        saveToCache(requestClone, response, cacheSettings.cacheControl)
+      );
     }
-    return response;
+    return new Response(response.body, {
+      ...response,
+      headers: {
+        ...response.headers,
+        "Cache-Control": cacheSettings.cacheControl,
+        "Helicone-Cache": "MISS",
+      },
+    });
   },
 };
