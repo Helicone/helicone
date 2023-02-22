@@ -74,7 +74,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
       </div>
       <div
         className={clsx(
-          "w-full mt-8",
+          "flex flex-col w-full h-full mt-8",
           requestsOverTime === "loading" ? "animate-pulse" : ""
         )}
       >
@@ -96,7 +96,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
           timeMap={timeGraphConfig[interval].timeMap}
         />
 
-        {/* Errors over time */}
+        {/* Errors */}
         <RenderLineChart
           data={unwrapDefaultEmpty(errorOverTime).map((r) => ({
             ...r,

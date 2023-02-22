@@ -63,7 +63,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
             <h2 id="filter-heading" className="sr-only">
               Filters
             </h2>
-            <div className="flex flex-row justify-between items-center pb-3">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
               <span className="isolate inline-flex rounded-md shadow-sm z-10">
                 <Menu as="div" className="relative inline-block text-left">
                   <div>
@@ -91,7 +91,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                   >
                     <Menu.Items className="absolute left-0 mt-2 w-fit -ml-2 px-1.5 py-3 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <div className="px-4 py-2 flex flex-col space-y-4">
-                        <div className="flex flex-row gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                           <div>
                             <label
                               htmlFor="startDate"
@@ -239,7 +239,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                     </div>
                   </div>
                 </div> */}
-                <div className="pl-2">
+                <div className="pl-0 sm:pl-2">
                   <div className="mx-auto flex">
                     <Menu as="div" className="relative inline-block">
                       <CSVLink
