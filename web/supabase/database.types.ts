@@ -9,6 +9,43 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      cache_hits: {
+        Row: {
+          created_at: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          request_id?: string
+        }
+      }
+      prompt: {
+        Row: {
+          created_at: string | null
+          prompt: string
+          name: string
+          id: string
+          auth_hash: string
+        }
+        Insert: {
+          created_at?: string | null
+          prompt: string
+          name: string
+          id: string
+          auth_hash: string
+        }
+        Update: {
+          created_at?: string | null
+          prompt?: string
+          name?: string
+          id?: string
+          auth_hash?: string
+        }
+      }
       request: {
         Row: {
           id: string
@@ -18,9 +55,9 @@ export interface Database {
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
-          properties: Record<string, string> | null
+          properties: Json | null
           formatted_prompt_id: string | null
-          prompt_values: Record<string, string> | null
+          prompt_values: Json | null
         }
         Insert: {
           id?: string
@@ -30,9 +67,9 @@ export interface Database {
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
-          properties?: Record<string, string> | null
+          properties?: Json | null
           formatted_prompt_id?: string | null
-          prompt_values?: Record<string, string> | null
+          prompt_values?: Json | null
         }
         Update: {
           id?: string
@@ -42,9 +79,9 @@ export interface Database {
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
-          properties?: Record<string, string> | null
+          properties?: Json | null
           formatted_prompt_id?: string | null
-          prompt_values?: Record<string, string> | null
+          prompt_values?: Json | null
         }
       }
       response: {
@@ -110,26 +147,6 @@ export interface Database {
           tier?: string
         }
       }
-      prompt: {
-        Row: {
-          id: string
-          created_at: string
-          prompt: string
-          name: string
-        }
-        Insert: {
-          id?: string
-          created_at?: string
-          prompt: string
-          name: string
-        }
-        Update: {
-          id?: string
-          created_at?: string
-          prompt?: string
-          name: string
-        }
-      }
     }
     Views: {
       metrics_rbac: {
@@ -147,6 +164,21 @@ export interface Database {
           request_count: number | null
         }
       }
+      request_cache_rbac: {
+        Row: {
+          id: string | null
+          created_at: string | null
+          body: Json | null
+          path: string | null
+          auth_hash: string | null
+          user_id: string | null
+          prompt_id: string | null
+          properties: Json | null
+          formatted_prompt_id: string | null
+          prompt_values: Json | null
+          cached_created_at: string | null
+        }
+      }
       request_rbac: {
         Row: {
           id: string | null
@@ -155,7 +187,8 @@ export interface Database {
           path: string | null
           auth_hash: string | null
           user_id: string | null
-          properties: Record<string, string> | null
+          properties: Json | null
+          cached_created_at: string | null
         }
       }
       response_and_request_rbac: {
@@ -170,11 +203,12 @@ export interface Database {
           request_user_id: string | null
           api_key_preview: string | null
           user_id: string | null
-          request_properties: Record<string, string> | null
-          prompt_values: Record<string, string> | null
+          request_properties: Json | null
           formatted_prompt_id: string | null
+          prompt_values: Json | null
           prompt_name: string | null
           prompt_regex: string | null
+          is_cached: boolean | null
         }
       }
       response_rbac: {
