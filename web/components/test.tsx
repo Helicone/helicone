@@ -68,7 +68,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
             "0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 0.5px 1px 0 rgba(0, 0, 0, 0.1)",
         }}
       >
-        <TableContainer sx={{ maxHeight: "70vh", paddingX: 1 }}>
+        <TableContainer sx={{ maxHeight: "65vh", paddingX: 1 }}>
           <Table
             stickyHeader
             aria-label="sticky table"
