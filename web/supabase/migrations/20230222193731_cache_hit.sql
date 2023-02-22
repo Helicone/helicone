@@ -7,7 +7,11 @@ CREATE TABLE IF NOT EXISTS public.cache_hits
 (
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     request_id uuid NOT NULL,
-    CONSTRAINT cache_hits_pkey PRIMARY KEY (created_at, request_id)
+    CONSTRAINT cache_hits_pkey PRIMARY KEY (created_at, request_id),
+    CONSTRAINT cache_hits_request_id_fkey FOREIGN KEY (request_id)
+        REFERENCES public.request (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 )
 
 TABLESPACE pg_default;
