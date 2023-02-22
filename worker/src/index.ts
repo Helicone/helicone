@@ -314,9 +314,19 @@ async function uncachedRequest(
 async function buildCachedRequest(request: Request): Promise<Request> {
   const headers = new Headers();
   for (const [key, value] of request.headers.entries()) {
-    headers.set(key, value);
+    if (key.toLowerCase().startsWith("helicone-")) {
+      headers.set(key, value);
+    }
+    if (key.toLowerCase() === "authorization") {
+      headers.set(key, value);
+    }
   }
-  const cacheKey = await hash(request.url + (await request.text()));
+
+  const cacheKey = await hash(
+    request.url +
+      (await request.text()) +
+      JSON.stringify([...headers.entries()])
+  );
   const cacheUrl = new URL(request.url);
 
   cacheUrl.pathname = "/posts" + cacheUrl.pathname + cacheKey;
