@@ -16,6 +16,7 @@ import {
 } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedFilter from "../../shared/themedFilter";
 import ThemedModal from "../../shared/themedModal";
@@ -316,8 +317,9 @@ const RequestsPage = (props: RequestsPageProps) => {
               </span>{" "}
               of <span className="font-medium">{count}</span> results
             </p>
+
             {isLoading || isRefetching ? (
-              <p>Loading...</p>
+              <LoadingAnimation title="Getting your requests" />
             ) : (
               <StickyHeadTable
                 condensed
