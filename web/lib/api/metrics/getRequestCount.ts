@@ -7,7 +7,8 @@ export interface Count {
 }
 export async function getRequestCount(
   filter: FilterNode,
-  user_id: string
+  user_id: string,
+  cached: boolean
 ): Promise<Result<number, string>> {
   const query = `
 SELECT 
@@ -15,6 +16,7 @@ SELECT
  FROM request
    LEFT JOIN response ON response.request = request.id
    LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
+  ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
 WHERE (
   user_api_keys.user_id = '${user_id}'
   AND (${buildFilter(filter)})
