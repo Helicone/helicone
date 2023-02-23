@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useState } from "react";
 
-const ALERT_TIME = 2000;
+const ALERT_TIME = 3000;
 const initialState = {
   variant: "", //  variant?: "success" | "info" | "error";
   title: "",
