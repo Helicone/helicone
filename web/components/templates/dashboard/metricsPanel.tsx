@@ -69,7 +69,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
         {metrics.map((row) => (
           <div
             key={row.label as string}
-            className="flex flex-col bg-gray-200 p-2 border border-gray-200 shadow-sm"
+            className="flex flex-col bg-white p-2 border border-gray-300 shadow-sm rounded-lg"
           >
             <dt className="text-sm font-semibold text-gray-600">{row.label}</dt>
             <dd
