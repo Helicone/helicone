@@ -1,5 +1,6 @@
 import { Result } from "./index";
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
+const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
 export interface CacheSettings {
   shouldSaveToCache: boolean;
   shouldReadFromCache: boolean;
@@ -26,7 +27,7 @@ function buildCacheControl(cacheControl: string): string {
     }
     return `public, max-age=${sMaxAgeInSeconds}`;
   } else {
-    return "public, max-age=0";
+    return `public, max-age=${DEFAULT_CACHE_AGE}`;
   }
 }
 
