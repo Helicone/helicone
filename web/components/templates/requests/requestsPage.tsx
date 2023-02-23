@@ -69,7 +69,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const supabase = useSupabaseClient();
 
   const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
-    null
+    "day"
   );
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);

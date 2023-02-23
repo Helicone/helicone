@@ -13,7 +13,7 @@ interface ThemedTimeFilterProps {
 const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   const { timeFilterOptions, onSelect, custom = false } = props;
   const { setNotification } = useNotification();
-  const [active, setActive] = useState<string>();
+  const [active, setActive] = useState<string>("day");
 
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
