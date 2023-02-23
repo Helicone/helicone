@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
+import { useRequests } from "../../../services/hooks/requests";
 import {
   getRequests,
   ResponseAndRequest,
@@ -50,23 +51,13 @@ interface RequestsPageProps {
   pageSize: number;
   properties: string[];
   sortBy: string | null;
-  timeFilter: string | null;
   values: string[];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const {
-    page,
-    pageSize,
-
-    properties,
-    sortBy,
-    timeFilter,
-    values,
-  } = props;
+  const { page, pageSize, properties, sortBy, values } = props;
 
   const { setNotification } = useNotification();
-  const supabase = useSupabaseClient();
 
   const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
     "day"
@@ -74,24 +65,8 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests", currentTimeFilter, currentPage, currentPageSize],
-    queryFn: async (timeFilter) => {
-      return getRequests(
-        supabase,
-        currentPage,
-        currentPageSize,
-        sortBy, // TODO: add sortBy functionality
-        timeFilter.queryKey[1] as string | null
-      ).then((res) => res);
-    },
-    refetchOnWindowFocus: false,
-  });
-  const requests = data?.data;
-  const count = data?.count;
-  const from = data?.from;
-  const to = data?.to;
-  const error = data?.error;
+  const { requests, count, from, to, isLoading, refetch, isRefetching } =
+    useRequests(currentTimeFilter, currentPage, currentPageSize, sortBy);
 
   const onTimeSelectHandler = async (key: string, value: string) => {
     setCurrentTimeFilter(value);
