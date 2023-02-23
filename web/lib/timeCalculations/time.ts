@@ -1,5 +1,7 @@
-import { DateCountDBModel } from "../api/metrics/getTimeData";
-import { TimeData, TimeIncrement } from "./fetchTimeData";
+import { FilterLeaf, FilterNode } from "../api/metrics/filters";
+import { ModelUsageOverTime } from "../api/metrics/getModelUsageOverTime";
+import { DateCountDBModel } from "../api/metrics/getRequestOverTime";
+import { RequestsOverTime, TimeIncrement } from "./fetchTimeData";
 
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h";
 export interface TimeGraphConfig {
@@ -40,12 +42,14 @@ export const getIncrement = (totalTime: number) => {
   return 1000 * 60 * 60 * 24 * 30;
 };
 
-export function timeBackfill(
-  data: DateCountDBModel[],
+export function timeBackfill<T, K>(
+  data: (T & { created_at_trunc: Date })[],
   start: Date,
-  end: Date
-): TimeData[] {
-  const result: TimeData[] = [];
+  end: Date,
+  reducer: (acc: K, d: T) => K,
+  initial: K
+): (K & { time: Date })[] {
+  const result: (K & { time: Date })[] = [];
   let current = start;
 
   const totalTime = end.getTime() - current.getTime();
@@ -53,14 +57,38 @@ export function timeBackfill(
     new Date(date.getTime() + getIncrement(totalTime));
   while (current < end) {
     const nextTime = increment(current);
-    const count = data
+    const val = data
       .filter(
         (d) => d.created_at_trunc >= current && d.created_at_trunc < nextTime
       )
-      .reduce((acc, d) => acc + d.count, 0);
+      .reduce((acc, d) => reducer(acc, d), initial);
 
-    result.push({ time: current, count });
+    result.push({ time: current, ...val });
     current = nextTime;
   }
   return result;
 }
+
+export const validTimeWindow = (filter: FilterNode): boolean => {
+  const start = (filter as FilterLeaf).request?.created_at?.gte;
+  const end = (filter as FilterLeaf).request?.created_at?.lte;
+  return start !== undefined && end !== undefined;
+};
+
+export const getTimeInterval = (filter: FilterNode): TimeIncrement => {
+  const start = (filter as FilterLeaf).request?.created_at?.gte;
+  const end = (filter as FilterLeaf).request?.created_at?.lte;
+  if (!validTimeWindow(filter)) {
+    throw new Error("Invalid filter");
+  }
+  const startD = new Date(start!);
+  const endD = new Date(end!);
+  const diff = endD.getTime() - startD.getTime();
+  if (diff < 1000 * 60 * 60 * 2) {
+    return "min";
+  } else if (diff < 1000 * 60 * 60 * 24 * 7) {
+    return "hour";
+  } else {
+    return "day";
+  }
+};

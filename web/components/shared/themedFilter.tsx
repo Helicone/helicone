@@ -24,13 +24,11 @@ import {
 import { useRouter } from "next/router";
 import { CSVLink } from "react-csv";
 import useNotification from "./notification/useNotification";
-
-const timeFilterOptions = [
-  { value: "day", label: "day" },
-  { value: "wk", label: "wk" },
-  { value: "mo", label: "mo" },
-  { value: "3mo", label: "3mo" },
-];
+import ThemedTimeFilter from "./themedTimeFilter";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { getRequests } from "../../services/lib/requests";
 
 const sortOptions = [
   { name: "Most Popular", href: "#", current: true },
@@ -40,6 +38,8 @@ const sortOptions = [
 
 interface ThemedFilterProps {
   data: any[];
+  isFetching: boolean;
+  onTimeSelectHandler: (key: string, value: string) => void;
 }
 
 function escapeCSVString(s: string | undefined): string | undefined {
@@ -50,12 +50,14 @@ function escapeCSVString(s: string | undefined): string | undefined {
 }
 
 export default function ThemedFilter(props: ThemedFilterProps) {
-  const { data } = props;
-  const router = useRouter();
-  const { setNotification } = useNotification();
+  const { data, onTimeSelectHandler, isFetching } = props;
 
-  const [startDate, setStartDate] = useState<string>();
-  const [endDate, setEndDate] = useState<string>();
+  const timeFilterOptions = [
+    { key: "day", value: "day" },
+    { key: "wk", value: "wk" },
+    { key: "mo", value: "mo" },
+    // { key: "3mo", value: "3mo" },
+  ];
 
   return (
     <div className="">
@@ -70,155 +72,17 @@ export default function ThemedFilter(props: ThemedFilterProps) {
             <h2 id="filter-heading" className="sr-only">
               Filters
             </h2>
-            <div className="flex flex-row justify-between items-center pb-3">
-              <span className="isolate inline-flex rounded-md shadow-sm z-10">
-                <Menu as="div" className="relative inline-block text-left">
-                  <div>
-                    <Menu.Button
-                      className={clsx(
-                        router.query.time?.includes("custom:")
-                          ? "bg-sky-200 text-black border-sky-300"
-                          : "bg-white text-gray-500 hover:bg-sky-50 border-gray-300",
-                        "relative inline-flex items-center rounded-l-md border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                      )}
-                    >
-                      <CalendarDaysIcon className="h-5 mr-2" />
-                      Custom
-                    </Menu.Button>
-                  </div>
-
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute left-0 mt-2 w-fit -ml-2 px-1.5 py-3 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div className="px-4 py-2 flex flex-col space-y-4">
-                        <div className="flex flex-row gap-4">
-                          <div>
-                            <label
-                              htmlFor="startDate"
-                              className="block text-xs font-medium text-gray-700"
-                            >
-                              Start Date
-                            </label>
-                            <div className="mt-1">
-                              <input
-                                type="datetime-local"
-                                name="startDate"
-                                id="startDate"
-                                onChange={(e) => {
-                                  setStartDate(e.target.value);
-                                }}
-                                value={startDate}
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label
-                              htmlFor="endDate"
-                              className="block text-xs font-medium text-gray-700"
-                            >
-                              End Date
-                            </label>
-                            <div className="mt-1">
-                              <input
-                                type="datetime-local"
-                                name="endDate"
-                                id="endDate"
-                                onChange={(e) => {
-                                  setEndDate(e.target.value);
-                                }}
-                                value={endDate}
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-row justify-end gap-4">
-                          <button
-                            className="block w-max items-center justify-center text-sm font-medium text-gray-500 hover:text-black"
-                            onClick={() => {}}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="block w-max items-center justify-center rounded-md border border-transparent bg-sky-600 bg-origin-border px-2 py-1 text-sm font-medium text-white shadow-sm hover:bg-sky-700"
-                            onClick={() => {
-                              if (!startDate || !endDate) {
-                                setNotification(
-                                  "Please select a start and end date",
-                                  "error"
-                                );
-                                return;
-                              }
-                              if (endDate && startDate > endDate) {
-                                setNotification(
-                                  "Start date must be before end date",
-                                  "error"
-                                );
-
-                                return;
-                              }
-                              if (startDate && startDate < startDate) {
-                                setNotification(
-                                  "End date must be after start date",
-                                  "error"
-                                );
-                                return;
-                              }
-                              const start = new Date(startDate as string);
-                              const end = new Date(endDate as string);
-                              router.replace({
-                                query: {
-                                  ...router.query,
-                                  time: `custom:${start.toISOString()}_${end.toISOString()}`,
-                                },
-                              });
-                            }}
-                          >
-                            Save
-                          </button>
-                        </div>
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-
-                {timeFilterOptions.map((option, idx) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      router.replace({
-                        query: {
-                          ...router.query,
-                          time: option.value,
-                        },
-                      });
-                    }}
-                    className={clsx(
-                      router.query.time === option.value
-                        ? "bg-sky-200 text-black border-sky-300"
-                        : "bg-white text-gray-500 hover:bg-sky-50 border-gray-300",
-                      idx === timeFilterOptions.length - 1
-                        ? "rounded-r-md"
-                        : "",
-                      "relative -ml-px inline-flex items-center border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </span>
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
+              <ThemedTimeFilter
+                timeFilterOptions={timeFilterOptions}
+                isFetching={isFetching}
+                onSelect={(key, value) => onTimeSelectHandler(key, value)}
+                defaultValue="day"
+                custom
+              />
               {/* TODO: Add back this uncommented code once filters is functional */}
               {/* <div className="flex flex-row space-x-2 divide-x-2 divide-gray-200 items-center pr-2"> */}
-              <div className="flex flex-row items-center pr-2">
+              <div className="flex flex-row items-center">
                 {/* <div className="text-sm">
                   <div className="mx-auto flex">
                     <div>
@@ -246,7 +110,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                     </div>
                   </div>
                 </div> */}
-                <div className="pl-2">
+                <div className="pl-0 sm:pl-2">
                   <div className="mx-auto flex">
                     <Menu as="div" className="relative inline-block">
                       <CSVLink
@@ -267,7 +131,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                           Export
                         </button>
                       </CSVLink>
-                      <Transition
+                      {/* <Transition
                         as={Fragment}
                         enter="transition ease-out duration-100"
                         enterFrom="transform opacity-0 scale-95"
@@ -281,7 +145,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                             {sortOptions.map((option) => (
                               <Menu.Item key={option.name}>
                                 {({ active }) => (
-                                  <a
+                                  <Link
                                     href={option.href}
                                     className={clsx(
                                       option.current
@@ -292,13 +156,13 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                                     )}
                                   >
                                     {option.name}
-                                  </a>
+                                  </Link>
                                 )}
                               </Menu.Item>
                             ))}
                           </div>
                         </Menu.Items>
-                      </Transition>
+                      </Transition> */}
                     </Menu>
                   </div>
                 </div>
