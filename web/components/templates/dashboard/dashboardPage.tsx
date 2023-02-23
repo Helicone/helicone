@@ -41,12 +41,12 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [metrics, setMetrics] =
     useState<Loading<Result<Metrics, string>>>("loading");
-  const [interval, setInterval] = useState<TimeInterval>("1m");
+  const [interval, setInterval] = useState<TimeInterval>("24h");
   const [filter, _setFilter] = useState<FilterNode>({
     request: {
       created_at: {
-        gte: timeGraphConfig["1m"].start.toISOString(),
-        lte: timeGraphConfig["1m"].end.toISOString(),
+        gte: timeGraphConfig["24h"].start.toISOString(),
+        lte: timeGraphConfig["24h"].end.toISOString(),
       },
     },
   });
@@ -119,6 +119,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         <div className="space-y-8">
           <ThemedTimeFilter
             timeFilterOptions={timeIntervalOptions}
+            defaultValue={"24h"}
             onSelect={(key: string, value: string) => {
               setInterval(key as TimeInterval);
               setFilter((prev) => {

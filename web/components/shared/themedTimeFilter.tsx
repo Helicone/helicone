@@ -7,13 +7,14 @@ import useNotification from "./notification/useNotification";
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
   onSelect: (key: string, value: string) => void;
+  defaultValue: string;
   custom?: boolean;
 }
 
 const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
-  const { timeFilterOptions, onSelect, custom = false } = props;
+  const { timeFilterOptions, onSelect, defaultValue, custom = false } = props;
   const { setNotification } = useNotification();
-  const [active, setActive] = useState<string>("day");
+  const [active, setActive] = useState<string>(defaultValue);
 
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();

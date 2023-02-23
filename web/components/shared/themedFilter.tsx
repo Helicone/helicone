@@ -75,6 +75,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
               <ThemedTimeFilter
                 timeFilterOptions={timeFilterOptions}
                 onSelect={(key, value) => onTimeSelectHandler(key, value)}
+                defaultValue="day"
                 custom
               />
               {/* TODO: Add back this uncommented code once filters is functional */}
