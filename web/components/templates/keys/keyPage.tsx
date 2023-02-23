@@ -18,7 +18,7 @@ import { hashAuth } from "../../../lib/supabaseClient";
 import { useKeys } from "../../../lib/useKeys";
 import { Database } from "../../../supabase/database.types";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedTable from "../../shared/themedTable";
+import ThemedTable from "../../shared/themed/themedTable";
 
 interface KeyPageProps {}
 

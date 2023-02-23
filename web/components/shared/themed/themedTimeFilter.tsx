@@ -1,8 +1,8 @@
 import { Menu, Transition } from "@headlessui/react";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Fragment, useState } from "react";
-import { clsx } from "./clsx";
-import useNotification from "./notification/useNotification";
+import { clsx } from "../clsx";
+import useNotification from "../notification/useNotification";
 
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];

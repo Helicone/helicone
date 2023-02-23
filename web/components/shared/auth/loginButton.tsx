@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ThemedModal from "../themedModal";
+import ThemedModal from "../themed/themedModal";
 import Login from "./login";
 
 interface LoginButtonProps {

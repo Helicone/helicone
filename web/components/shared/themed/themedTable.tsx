@@ -1,6 +1,6 @@
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { middleTruncString } from "../../lib/stringHelpers";
-import { clsx } from "./clsx";
+import { middleTruncString } from "../../../lib/stringHelpers";
+import { clsx } from "../clsx";
 
 interface ThemedTableProps {
   columns: { name: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
