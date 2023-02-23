@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { SVGProps, useState } from "react";
-import ThemedModal from "../themedModal";
-import Login from "./login";
+import ThemedModal from "../themed/themedModal";
+import Login from "../auth/login";
 import NavBarV2 from "./navBarV2";
-import Onboarding from "./onboarding";
+import Onboarding from "../auth/onboarding";
 
 const footerNavigation = {
   social: [

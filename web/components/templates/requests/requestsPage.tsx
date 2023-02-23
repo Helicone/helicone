@@ -1,27 +1,18 @@
 import { Dialog } from "@headlessui/react";
-import {
-  ArrowDownTrayIcon,
-  ClipboardDocumentIcon,
-} from "@heroicons/react/24/outline";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { CSVLink } from "react-csv";
+
+import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
-import {
-  getRequests,
-  ResponseAndRequest,
-} from "../../../services/lib/requests";
-import { Database, Json } from "../../../supabase/database.types";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { useRequests } from "../../../services/hooks/requests";
+import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
-import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedFilter from "../../shared/themedFilter";
-import ThemedModal from "../../shared/themedModal";
-import StickyHeadTable, { Column } from "../../test";
+import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedModal from "../../shared/themed/themedModal";
+import ThemedTableV2, { Column } from "../../ThemedTableV2";
 
 const monthNames = [
   "Jan",
@@ -50,50 +41,22 @@ interface RequestsPageProps {
   pageSize: number;
   properties: string[];
   sortBy: string | null;
-  timeFilter: string | null;
   values: string[];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const {
-    page,
-    pageSize,
-
-    properties,
-    sortBy,
-    timeFilter,
-    values,
-  } = props;
+  const { page, pageSize, properties, sortBy, values } = props;
 
   const { setNotification } = useNotification();
-  const supabase = useSupabaseClient();
 
-  const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
-    "day"
-  );
+  const [currentTimeFilter, setCurrentTimeFilter] = useState<string>("day");
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests", currentTimeFilter, currentPage, currentPageSize],
-    queryFn: async (timeFilter) => {
-      return getRequests(
-        supabase,
-        currentPage,
-        currentPageSize,
-        sortBy, // TODO: add sortBy functionality
-        timeFilter.queryKey[1] as string | null
-      ).then((res) => res);
-    },
-    refetchOnWindowFocus: false,
-  });
-  const requests = data?.data;
-  const count = data?.count;
-  const from = data?.from;
-  const to = data?.to;
-  const error = data?.error;
+  const { requests, count, from, to, isLoading, refetch, isRefetching } =
+    useRequests(currentTimeFilter, currentPage, currentPageSize, sortBy);
 
-  const onTimeSelectHandler = async (key: string, value: string) => {
+  const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setCurrentTimeFilter(value);
     refetch();
   };
@@ -334,6 +297,14 @@ const RequestsPage = (props: RequestsPageProps) => {
               data={csvData || []}
               isFetching={isLoading || isRefetching}
               onTimeSelectHandler={onTimeSelectHandler}
+              timeFilterOptions={[
+                { key: "24h", value: "day" },
+                { key: "7d", value: "wk" },
+                { key: "1m", value: "mo" },
+                // { key: "3m", value: "3mo" },
+              ]}
+              customTimeFilter
+              fileName="requests.csv"
             />
 
             {isLoading ||
@@ -342,7 +313,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
-              <StickyHeadTable
+              <ThemedTableV2
                 condensed
                 columns={columns}
                 rows={csvData || []}
@@ -383,7 +354,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                   navigator.clipboard.writeText(JSON.stringify(selectedData));
                 }}
               >
-                Copy this request{" "}
+                Copy to clipboard
                 <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
               </button>
               <ul className="mt-4 space-y-2">

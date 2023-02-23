@@ -1,4 +1,3 @@
-import BasePage from "../components/shared/layout/basePage";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 

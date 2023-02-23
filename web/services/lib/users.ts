@@ -13,17 +13,23 @@ export interface UserRow {
 const getUsers = async (
   client: SupabaseClient<any, "public", any>,
   currentPage: number,
-  pageSize: number
+  pageSize: number,
+  textSearch?: {
+    column: string;
+    value: string;
+  }
 ) => {
   const { from, to } = getPagination(currentPage - 1, pageSize);
-  const {
-    data: rawData,
-    error,
-    count,
-  } = await client
-    .from("user_metrics_rbac")
-    .select("*", { count: "exact" })
-    .range(from, to);
+
+  let query = client.from("user_metrics_rbac").select("*", { count: "exact" });
+
+  if (textSearch) {
+    query = query.textSearch(textSearch.column, textSearch.value);
+  }
+
+  query = query.range(from, to);
+
+  const { data: rawData, error, count } = await query;
 
   const data =
     rawData?.map((row, i) => {

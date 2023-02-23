@@ -13,11 +13,11 @@ import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
-import ThemedModal from "../../shared/themedModal";
-import Onboarding from "../../shared/layout/onboarding";
-import Login from "../../shared/layout/login";
+import ThemedModal from "../../shared/themed/themedModal";
+import Onboarding from "../../shared/auth/onboarding";
+import Login from "../../shared/auth/login";
 import BasePageV2 from "../../shared/layout/basePageV2";
-import OnboardingButton from "../../shared/layout/onboardingButton";
+import OnboardingButton from "../../shared/auth/onboardingButton";
 
 const frequencies = [
   { value: "monthly", label: "Monthly", priceSuffix: "/month" },

@@ -1,8 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import BasePage from "../components/shared/layout/basePage";
 import BasePageV2 from "../components/shared/layout/basePageV2";
-import NavBar from "../components/shared/layout/navBar";
 import MetaData from "../components/shared/metaData";
 
 interface ErrorProps {}
