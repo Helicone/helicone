@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import { hashAuth } from "../../../lib/supabaseClient";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import NavBar from "../../shared/layout/navBar";
 import AddAPIKey from "./addAPIKey";
 import ConfirmEmail from "./ConfirmEmail";
 import CreateAccount from "./createAccount";
@@ -12,7 +11,6 @@ import OneLineChange from "./oneLineChange";
 import ProgressBar from "../home/progressBar";
 import { NextRequest } from "next/server";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
-import BasePage from "../../shared/layout/basePage";
 import BasePageV2 from "../../shared/layout/basePageV2";
 
 interface OnboardingPageProps {
