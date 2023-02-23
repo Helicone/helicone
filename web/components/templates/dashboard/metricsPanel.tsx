@@ -65,7 +65,25 @@ export function MetricsPanel(props: MetricsPanelProps) {
 
   return (
     <div>
-      <dl className="grid grid-cols-2 gap-2 sm:gap-5 sm:grid-cols-5">
+      <dl className="grid grid-cols-1 max-w-7xl gap-0.5 overflow-hidden rounded-lg text-center sm:grid-cols-2 lg:grid-cols-4">
+        {metrics.map((row) => (
+          <div
+            key={row.label as string}
+            className="flex flex-col bg-gray-200 p-2"
+          >
+            <dt className="text-sm font-semibold text-gray-600">{row.label}</dt>
+            <dd
+              className={clsx(
+                loading ? "animate-pulse text-gray-400" : "",
+                "order-first text-lg font-semibold tracking-tight text-gray-900"
+              )}
+            >
+              {loading ? "Loading" : row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {/* <dl className="grid grid-cols-2 gap-2 sm:gap-5 sm:grid-cols-5">
         {metrics.map((row) => (
           <div
             key={row.label as string}
@@ -84,7 +102,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
             </dd>
           </div>
         ))}
-      </dl>
+      </dl> */}
     </div>
   );
 }

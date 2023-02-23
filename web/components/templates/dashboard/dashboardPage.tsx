@@ -7,7 +7,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { SetStateAction, useEffect, useState } from "react";
-import { FilterNode } from "../../../lib/api/metrics/filters";
+import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
 import { Metrics } from "../../../lib/api/metrics/metrics";
 import {
   getDashboardData,
@@ -20,6 +20,7 @@ import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
+import ThemedTimeFilter from "../../shared/themedTimeFilter";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
@@ -34,7 +35,6 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const client = useSupabaseClient();
   const [timeData, setTimeData] = useState<GraphDataState>(
     initialGraphDataState
   );
@@ -62,6 +62,14 @@ const DashboardPage = (props: DashboardPageProps) => {
     getDashboardData(filter, setMetrics, setTimeData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const timeIntervalOptions = [
+    { key: "1h", value: "hour" },
+    { key: "24h", value: "day" },
+    { key: "7d", value: "wk" },
+    { key: "1m", value: "mo" },
+    { key: "3m", value: "3mo" },
+  ];
 
   return (
     <AuthLayout user={user}>
@@ -108,7 +116,37 @@ const DashboardPage = (props: DashboardPageProps) => {
           </div>
         </div>
       ) : (
-        <div className="space-y-16">
+        <div className="space-y-8">
+          <ThemedTimeFilter
+            timeFilterOptions={timeIntervalOptions}
+            onSelect={(key: string, value: string) => {
+              setInterval(key as TimeInterval);
+              setFilter((prev) => {
+                const newFilter: FilterLeaf = {
+                  request: {
+                    created_at: {
+                      gte: timeGraphConfig[
+                        key as TimeInterval
+                      ].start.toISOString(),
+                      lte: timeGraphConfig[
+                        key as TimeInterval
+                      ].end.toISOString(),
+                    },
+                  },
+                };
+                if (prev === "all") {
+                  return newFilter;
+                }
+                if ("left" in prev) {
+                  throw new Error("Not implemented");
+                }
+                return {
+                  ...prev,
+                  ...newFilter,
+                };
+              });
+            }}
+          />
           <MetricsPanel filters={filter} metrics={metrics} />
           <TimeGraphWHeader
             data={timeData}

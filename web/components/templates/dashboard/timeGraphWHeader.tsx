@@ -5,6 +5,7 @@ import { Result } from "../../../lib/result";
 import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { clsx } from "../../shared/clsx";
+import ThemedTimeFilter from "../../shared/themedTimeFilter";
 import { Loading } from "./dashboardPage";
 import { TimeActions } from "./timeActions";
 
@@ -37,73 +38,53 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
 
   return (
     <div className="h-full w-full">
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <h3 className="text-lg font-medium leading-6 text-gray-900">
-          Requests over time
-        </h3>
-        <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-row gap-4">
-          <TimeActions
-            setFilter={setFilter}
-            interval={interval}
-            setInterval={setInterval}
-            onIntervalChange={(newInterval) => {
-              setInterval(newInterval);
-              setFilter((prev) => {
-                const newFilter: FilterLeaf = {
-                  request: {
-                    created_at: {
-                      gte: timeGraphConfig[newInterval].start.toISOString(),
-                      lte: timeGraphConfig[newInterval].end.toISOString(),
-                    },
-                  },
-                };
-                if (prev === "all") {
-                  return newFilter;
-                }
-                if ("left" in prev) {
-                  throw new Error("Not implemented");
-                }
-                return {
-                  ...prev,
-                  ...newFilter,
-                };
-              });
-            }}
-          />
-        </div>
-      </div>
       <div
         className={clsx(
-          "flex flex-col w-full h-full mt-8",
+          "grid grid-cols-1 lg:grid-cols-2 w-full h-full mt-8 gap-8",
           requestsOverTime === "loading" ? "animate-pulse" : ""
         )}
       >
         {/* Requests over time */}
-        <RenderLineChart
-          data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
-            ...r,
-            value: r.count,
-          }))}
-          timeMap={timeGraphConfig[interval].timeMap}
-        />
+        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
+          <h3 className="text-lg font-medium text-gray-900 text-center">
+            Requests over time
+          </h3>
+          <RenderLineChart
+            data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
+              ...r,
+              value: r.count,
+            }))}
+            timeMap={timeGraphConfig[interval].timeMap}
+          />
+        </div>
 
         {/* Costs over time */}
-        <RenderLineChart
-          data={unwrapDefaultEmpty(costOverTime).map((r) => ({
-            ...r,
-            value: r.cost,
-          }))}
-          timeMap={timeGraphConfig[interval].timeMap}
-        />
+        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
+          <h3 className="text-lg font-medium text-gray-900 text-center">
+            Costs over time
+          </h3>
+          <RenderLineChart
+            data={unwrapDefaultEmpty(costOverTime).map((r) => ({
+              ...r,
+              value: r.cost,
+            }))}
+            timeMap={timeGraphConfig[interval].timeMap}
+          />
+        </div>
 
         {/* Errors */}
-        <RenderLineChart
-          data={unwrapDefaultEmpty(errorOverTime).map((r) => ({
-            ...r,
-            value: r.count,
-          }))}
-          timeMap={timeGraphConfig[interval].timeMap}
-        />
+        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
+          <h3 className="text-lg font-medium text-gray-900 text-center">
+            Errors over time
+          </h3>
+          <RenderLineChart
+            data={unwrapDefaultEmpty(errorOverTime).map((r) => ({
+              ...r,
+              value: r.count,
+            }))}
+            timeMap={timeGraphConfig[interval].timeMap}
+          />
+        </div>
       </div>
     </div>
   );
