@@ -61,7 +61,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         {/* Costs over time */}
         <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
           <h3 className="text-lg font-medium text-gray-900 text-center">
-            Costs over time
+            Costs over time (USD)
           </h3>
           <RenderLineChart
             data={unwrapDefaultEmpty(costOverTime).map((r) => ({
