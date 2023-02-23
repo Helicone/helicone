@@ -111,9 +111,8 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-8">
           <ThemedFilter
-            data={[]}
+            data={null}
             isFetching={metrics === "loading"}
-            hasTimeFilter
             timeFilterOptions={[
               { key: "1h", value: "hour" },
               { key: "24h", value: "day" },

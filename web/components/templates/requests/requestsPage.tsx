@@ -297,7 +297,6 @@ const RequestsPage = (props: RequestsPageProps) => {
               data={csvData || []}
               isFetching={isLoading || isRefetching}
               onTimeSelectHandler={onTimeSelectHandler}
-              hasTimeFilter
               timeFilterOptions={[
                 { key: "24h", value: "day" },
                 { key: "7d", value: "wk" },
@@ -305,6 +304,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 // { key: "3m", value: "3mo" },
               ]}
               customTimeFilter
+              fileName="requests.csv"
             />
 
             {isLoading ||
