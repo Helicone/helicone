@@ -62,6 +62,16 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Total requests",
     },
   ];
+  if (data?.total_cached_requests ?? 0 > 0) {
+    metrics.push({
+      value: data?.total_cached_savings?.toFixed(3) ?? "n/a",
+      label: "Cache Savings (USD)",
+    });
+    metrics.push({
+      value: data?.total_cached_requests ?? "n/a",
+      label: "Cached Requests",
+    });
+  }
 
   return (
     <div>

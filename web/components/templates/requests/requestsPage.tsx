@@ -14,7 +14,7 @@ import {
   getRequests,
   ResponseAndRequest,
 } from "../../../services/lib/requests";
-import { Database } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -173,6 +173,9 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
+  type JsonDict = {
+    [key: string]: Json;
+  };
   const csvData = requests?.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
@@ -182,7 +185,10 @@ const RequestsPage = (props: RequestsPageProps) => {
     let updated_request_properties = Object.assign(
       {},
       ...properties.map((p) => ({
-        [p]: d.request_properties != null ? d.request_properties[p] : null,
+        [p]:
+          d.request_properties != null
+            ? (d.request_properties as JsonDict)[p]
+            : null,
       }))
     );
 
@@ -190,7 +196,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       updated_request_properties = Object.assign(
         updated_request_properties,
         ...values.map((p) => ({
-          [p]: d.prompt_values != null ? d.prompt_values[p] : null,
+          [p]:
+            d.prompt_values != null ? (d.prompt_values as JsonDict)[p] : null,
         }))
       );
     }
@@ -217,6 +224,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
       prompt_name: d.prompt_name,
+      isCached: d.is_cached,
       ...updated_request_properties,
     };
   });
@@ -307,6 +315,12 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "model",
       label: "Model",
       minWidth: 170,
+    },
+    {
+      key: "isCached",
+      label: "Cache",
+      minWidth: 170,
+      format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
 
