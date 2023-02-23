@@ -332,6 +332,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="space-y-2">
             <ThemedFilter
               data={csvData || []}
+              isFetching={isLoading || isRefetching}
               onTimeSelectHandler={onTimeSelectHandler}
             />
 

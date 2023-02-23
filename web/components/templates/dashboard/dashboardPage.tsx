@@ -120,6 +120,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           <ThemedTimeFilter
             timeFilterOptions={timeIntervalOptions}
             defaultValue={"24h"}
+            isFetching={metrics === "loading"}
             onSelect={(key: string, value: string) => {
               setInterval(key as TimeInterval);
               setFilter((prev) => {

@@ -7,12 +7,19 @@ import useNotification from "./notification/useNotification";
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
   onSelect: (key: string, value: string) => void;
+  isFetching: boolean;
   defaultValue: string;
   custom?: boolean;
 }
 
 const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
-  const { timeFilterOptions, onSelect, defaultValue, custom = false } = props;
+  const {
+    timeFilterOptions,
+    onSelect,
+    defaultValue,
+    isFetching,
+    custom = false,
+  } = props;
   const { setNotification } = useNotification();
   const [active, setActive] = useState<string>(defaultValue);
 
@@ -31,6 +38,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
       {custom && (
         <>
           <Menu.Button
+            disabled={isFetching}
             className={clsx(
               isActive("custom")
                 ? "bg-sky-200 text-black border-sky-300"
@@ -149,6 +157,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
         <button
           key={option.key}
           type="button"
+          disabled={isFetching}
           onClick={() => {
             setActive(option.key);
             onSelect(option.key, option.value);

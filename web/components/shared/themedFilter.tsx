@@ -38,6 +38,7 @@ const sortOptions = [
 
 interface ThemedFilterProps {
   data: any[];
+  isFetching: boolean;
   onTimeSelectHandler: (key: string, value: string) => void;
 }
 
@@ -49,7 +50,7 @@ function escapeCSVString(s: string | undefined): string | undefined {
 }
 
 export default function ThemedFilter(props: ThemedFilterProps) {
-  const { data, onTimeSelectHandler } = props;
+  const { data, onTimeSelectHandler, isFetching } = props;
 
   const timeFilterOptions = [
     { key: "day", value: "day" },
@@ -74,6 +75,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
               <ThemedTimeFilter
                 timeFilterOptions={timeFilterOptions}
+                isFetching={isFetching}
                 onSelect={(key, value) => onTimeSelectHandler(key, value)}
                 defaultValue="day"
                 custom
