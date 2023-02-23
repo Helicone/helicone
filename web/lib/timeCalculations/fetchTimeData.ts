@@ -1,4 +1,4 @@
-export interface TimeData {
+export interface RequestsOverTime {
   time: Date;
   count: number;
 }

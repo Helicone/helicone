@@ -5,30 +5,23 @@ import {
 } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
-import { ResponseAndRequest } from "../../../services/lib/requests";
+import {
+  getRequests,
+  ResponseAndRequest,
+} from "../../../services/lib/requests";
 import { Database, Json } from "../../../supabase/database.types";
+import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedFilter from "../../shared/themedFilter";
 import ThemedModal from "../../shared/themedModal";
 import StickyHeadTable, { Column } from "../../test";
-
-interface RequestsPageProps {
-  requests: ResponseAndRequest[];
-  error: string | null;
-  count: number | null;
-  page: number;
-  from: number;
-  to: number;
-  properties: string[];
-  sortBy: string | null;
-  timeFilter: string | null;
-  values: string[];
-}
 
 const monthNames = [
   "Jan",
@@ -52,22 +45,68 @@ function escapeCSVString(s: string | undefined): string | undefined {
   return s.replace(/"/g, '""');
 }
 
+interface RequestsPageProps {
+  page: number;
+  pageSize: number;
+  properties: string[];
+  sortBy: string | null;
+  timeFilter: string | null;
+  values: string[];
+}
+
 const RequestsPage = (props: RequestsPageProps) => {
   const {
-    requests,
-    error,
-    count,
     page,
-    from,
-    to,
+    pageSize,
+
     properties,
     sortBy,
     timeFilter,
     values,
   } = props;
 
-  const router = useRouter();
   const { setNotification } = useNotification();
+  const supabase = useSupabaseClient();
+
+  const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
+    "day"
+  );
+  const [currentPage, setCurrentPage] = useState<number>(page);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ["requests", currentTimeFilter, currentPage, currentPageSize],
+    queryFn: async (timeFilter) => {
+      return getRequests(
+        supabase,
+        currentPage,
+        currentPageSize,
+        sortBy, // TODO: add sortBy functionality
+        timeFilter.queryKey[1] as string | null
+      ).then((res) => res);
+    },
+    refetchOnWindowFocus: false,
+  });
+  const requests = data?.data;
+  const count = data?.count;
+  const from = data?.from;
+  const to = data?.to;
+  const error = data?.error;
+
+  const onTimeSelectHandler = async (key: string, value: string) => {
+    setCurrentTimeFilter(value);
+    refetch();
+  };
+
+  const onPageSizeChangeHandler = async (newPageSize: number) => {
+    setCurrentPageSize(newPageSize);
+    refetch();
+  };
+
+  const onPageChangeHandler = async (newPageNumber: number) => {
+    setCurrentPage(newPageNumber);
+    refetch();
+  };
 
   const [index, setIndex] = useState<number>();
   const [selectedData, setSelectedData] = useState<{
@@ -87,7 +126,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   }>();
   const [open, setOpen] = useState(true);
 
-  const probabilities = requests.map((req) => {
+  const probabilities = requests?.map((req) => {
     const choice = req.response_body?.choices
       ? req.response_body?.choices[0]
       : null;
@@ -137,7 +176,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   type JsonDict = {
     [key: string]: Json;
   };
-  const csvData = requests.map((d, i) => {
+  const csvData = requests?.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -180,7 +219,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         : d.response_body?.choices?.[0]?.text,
       "duration (s)": latency.toString(),
       total_tokens: d.response_body?.usage?.total_tokens,
-      logprobs: probabilities[i],
+      logprobs: probabilities ? probabilities[i] : null,
       request_user_id: d.request_user_id,
       model: d.response_body?.model,
       temperature: d.request_body?.temperature,
@@ -287,52 +326,35 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   return (
     <>
+      <AuthHeader title={"Requests"} />
       <div className="">
-        <div className="sm:flex sm:items-center">
-          <div className="sm:flex-auto">
-            <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
-          </div>
-          {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <CSVLink
-              data={csvData.map((d) => ({
-                ...d,
-                request: escapeCSVString(d.request),
-                response: escapeCSVString(d.response),
-              }))}
-              filename={"requests.csv"}
-              className="flex"
-              target="_blank"
-            >
-              <button
-                type="button"
-                className="inline-flex sm:hidden items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-1 flex-shrink-0 h-4 w-4" />
-                Export
-              </button>
-              <button
-                type="button"
-                className="hidden sm:inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto"
-              >
-                <ArrowDownTrayIcon className="mr-2 flex-shrink-0 h-4 w-4" />
-                Export to CSV
-              </button>
-            </CSVLink>
-          </div> */}
-        </div>
         <div className="mt-4 space-y-2">
-          <div className="space-y-0">
-            <ThemedFilter data={csvData} />
-            <StickyHeadTable
-              condensed
-              columns={columns}
-              rows={csvData}
-              count={count}
-              page={page}
-              from={from}
-              to={to}
-              onSelectHandler={selectRowHandler}
+          <div className="space-y-2">
+            <ThemedFilter
+              data={csvData || []}
+              isFetching={isLoading || isRefetching}
+              onTimeSelectHandler={onTimeSelectHandler}
             />
+
+            {isLoading ||
+            isRefetching ||
+            from === undefined ||
+            to === undefined ? (
+              <LoadingAnimation title="Getting your requests" />
+            ) : (
+              <StickyHeadTable
+                condensed
+                columns={columns}
+                rows={csvData || []}
+                count={count || 0}
+                page={page}
+                from={from}
+                to={to}
+                onSelectHandler={selectRowHandler}
+                onPageChangeHandler={onPageChangeHandler}
+                onPageSizeChangeHandler={onPageSizeChangeHandler}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -391,7 +413,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Log Probability:</p>
-                  <p>{probabilities[index]}</p>
+                  <p>{probabilities ? probabilities[index] : 0}</p>
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>User Id:</p>

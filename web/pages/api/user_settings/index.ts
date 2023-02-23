@@ -101,7 +101,6 @@ async function syncSettingsWithStripe(
   userSettings: UserSettings,
   subscriptions: Subscription[]
 ): Promise<Result<undefined, string>> {
-  console.log("syncSettingsWithStripe", userSettings, subscriptions);
   const [activeSubscription, currentTier] =
     getHighestSubscription(subscriptions);
   if (currentTier === userSettings.tier) {

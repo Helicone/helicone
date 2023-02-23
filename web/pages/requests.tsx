@@ -12,12 +12,8 @@ import { getPromptValues } from "../lib/api/prompts/prompts";
 
 interface RequestsProps {
   user: any;
-  error: string | null;
-  data: ResponseAndRequest[];
-  count: number | null;
   page: number;
-  from: number;
-  to: number;
+  pageSize: number;
   sortBy: string | null;
   properties: string[];
   timeFilter: string | null;
@@ -25,30 +21,15 @@ interface RequestsProps {
 }
 
 const Requests = (props: RequestsProps) => {
-  const {
-    user,
-    data,
-    error,
-    count,
-    page,
-    from,
-    to,
-    properties,
-    sortBy,
-    timeFilter,
-    values,
-  } = props;
+  const { user, page, pageSize, properties, sortBy, timeFilter, values } =
+    props;
 
   return (
     <MetaData title="Requests">
       <AuthLayout user={user}>
         <RequestsPage
-          requests={data}
-          error={error}
-          count={count}
           page={page}
-          from={from}
-          to={to}
+          pageSize={pageSize}
           sortBy={sortBy}
           timeFilter={timeFilter}
           properties={properties}
@@ -85,14 +66,6 @@ export const getServerSideProps = async (
   const sortBy = (sort as string) || null;
   const timeFilter = (time as string) || null;
 
-  const { data, error, count, from, to } = await getRequests(
-    supabase,
-    currentPage,
-    pageSize,
-    sortBy,
-    timeFilter
-  );
-
   let allProperties: string[] = [];
   try {
     allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
@@ -121,12 +94,8 @@ export const getServerSideProps = async (
     props: {
       initialSession: session,
       user: session.user,
-      error: error?.message || null,
-      data: (data as ResponseAndRequest[]) || [],
-      count: count,
       page: currentPage,
-      from: from,
-      to: to,
+      pageSize: pageSize,
       sortBy: sortBy,
       timeFilter: timeFilter,
       properties: allProperties,
