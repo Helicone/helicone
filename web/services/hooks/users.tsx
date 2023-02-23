@@ -17,11 +17,13 @@ const useUsers = (currentPage: number, currentPageSize: number) => {
     refetchOnWindowFocus: false,
   });
 
-  //   const { data, error, count, from, to } = await getUsers(
-  //     supabase,
-  //     currentPage,
-  //     pageSize
-  //   );
+  const users = data?.data || [];
+  const count = data?.count;
+  const from = data?.from;
+  const to = data?.to;
+  const error = data?.error;
+
+  return { users, count, from, to, error, isLoading, refetch, isRefetching };
 };
 
 export { useUsers };

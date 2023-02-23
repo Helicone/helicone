@@ -5,27 +5,25 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { truncString } from "../../../lib/stringHelpers";
+import { useUsers } from "../../../services/hooks/users";
 import { UserRow } from "../../../services/lib/users";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import Notification from "../../shared/notification/Notification";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2 from "../../ThemedTableV2";
 
 interface UsersPageProps {
-  users: UserRow[];
-  error: string | null;
-  count: number | null;
   page: number;
-  from: number;
-  to: number;
+  pageSize: number;
 }
 
 const UsersPage = (props: UsersPageProps) => {
-  const { users, error, count, page, from, to } = props;
+  const { page, pageSize } = props;
 
-  const router = useRouter();
+  const { users, count, from, isLoading, to } = useUsers(page, pageSize);
 
   const [open, setOpen] = useState(true);
   const [index, setIndex] = useState<number>();
@@ -36,9 +34,6 @@ const UsersPage = (props: UsersPageProps) => {
     setSelectedUser(row);
     setOpen(true);
   };
-
-  const hasPrevious = page > 1;
-  const hasNext = to <= count!;
 
   return (
     <>
@@ -69,45 +64,49 @@ const UsersPage = (props: UsersPageProps) => {
         }
       />
       <div className="">
-        <ThemedTableV2
-          columns={[
-            {
-              key: "user_id",
-              label: "Id",
-            },
-            {
-              key: "active_for",
-              label: "Active For",
-            },
-            {
-              key: "last_active",
-              label: "Last Active",
-            },
-            {
-              key: "total_requests",
-              label: "Requests",
-            },
-            {
-              key: "average_requests_per_day_active",
-              label: "Avg Reqs / Day",
-            },
-            {
-              key: "average_tokens_per_request",
-              label: "Avg Tokens / Req",
-            },
-            {
-              key: "total_cost",
-              label: "Total Cost",
-              format: (value: any) => `$TBD`,
-            },
-          ]}
-          rows={users}
-          page={page}
-          from={from}
-          to={to}
-          count={count}
-          onSelectHandler={selectRowHandler}
-        />
+        {isLoading || from === undefined || to === undefined ? (
+          <LoadingAnimation title="Getting your requests" />
+        ) : (
+          <ThemedTableV2
+            columns={[
+              {
+                key: "user_id",
+                label: "Id",
+              },
+              {
+                key: "active_for",
+                label: "Active For",
+              },
+              {
+                key: "last_active",
+                label: "Last Active",
+              },
+              {
+                key: "total_requests",
+                label: "Requests",
+              },
+              {
+                key: "average_requests_per_day_active",
+                label: "Avg Reqs / Day",
+              },
+              {
+                key: "average_tokens_per_request",
+                label: "Avg Tokens / Req",
+              },
+              {
+                key: "total_cost",
+                label: "Total Cost",
+                format: (value: any) => `$TBD`,
+              },
+            ]}
+            rows={users}
+            page={page}
+            from={from}
+            to={to}
+            count={count || 0}
+            onSelectHandler={selectRowHandler}
+          />
+        )}
       </div>
       {open && selectedUser !== undefined && index !== undefined && (
         <ThemedModal open={open} setOpen={setOpen}>
