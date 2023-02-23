@@ -145,38 +145,6 @@ const DashboardPage = (props: DashboardPageProps) => {
               });
             }}
           />
-          {/* <ThemedTimeFilter
-            timeFilterOptions={timeIntervalOptions}
-            defaultValue={"24h"}
-            isFetching={metrics === "loading"}
-            onSelect={(key: string, value: string) => {
-              setInterval(key as TimeInterval);
-              setFilter((prev) => {
-                const newFilter: FilterLeaf = {
-                  request: {
-                    created_at: {
-                      gte: timeGraphConfig[
-                        key as TimeInterval
-                      ].start.toISOString(),
-                      lte: timeGraphConfig[
-                        key as TimeInterval
-                      ].end.toISOString(),
-                    },
-                  },
-                };
-                if (prev === "all") {
-                  return newFilter;
-                }
-                if ("left" in prev) {
-                  throw new Error("Not implemented");
-                }
-                return {
-                  ...prev,
-                  ...newFilter,
-                };
-              });
-            }}
-          /> */}
           <MetricsPanel filters={filter} metrics={metrics} />
           <TimeGraphWHeader
             data={timeData}
