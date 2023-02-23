@@ -1,13 +1,10 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import RequestsPage from "../components/templates/requests/requestsPage";
 import { getProperties } from "../lib/api/properties/properties";
 import { unwrapAsync } from "../lib/result";
-import StickyHeadTable from "../components/test";
-import { getRequests, ResponseAndRequest } from "../services/lib/requests";
 import { getPromptValues } from "../lib/api/prompts/prompts";
 
 interface RequestsProps {
@@ -16,13 +13,11 @@ interface RequestsProps {
   pageSize: number;
   sortBy: string | null;
   properties: string[];
-  timeFilter: string | null;
   values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, page, pageSize, properties, sortBy, timeFilter, values } =
-    props;
+  const { user, page, pageSize, properties, sortBy, values } = props;
 
   return (
     <MetaData title="Requests">
@@ -31,7 +26,6 @@ const Requests = (props: RequestsProps) => {
           page={page}
           pageSize={pageSize}
           sortBy={sortBy}
-          timeFilter={timeFilter}
           properties={properties}
           values={values}
         />
@@ -59,12 +53,11 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size, sort, time } = context.query;
+  const { page, page_size, sort } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = (sort as string) || null;
-  const timeFilter = (time as string) || null;
 
   let allProperties: string[] = [];
   try {
@@ -97,7 +90,6 @@ export const getServerSideProps = async (
       page: currentPage,
       pageSize: pageSize,
       sortBy: sortBy,
-      timeFilter: timeFilter,
       properties: allProperties,
       values: allValues,
     },

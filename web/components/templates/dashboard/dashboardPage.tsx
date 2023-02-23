@@ -20,7 +20,8 @@ import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
-import ThemedTimeFilter from "../../shared/themedTimeFilter";
+import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
@@ -62,14 +63,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     getDashboardData(filter, setMetrics, setTimeData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const timeIntervalOptions = [
-    { key: "1h", value: "hour" },
-    { key: "24h", value: "day" },
-    { key: "7d", value: "wk" },
-    { key: "1m", value: "mo" },
-    { key: "3m", value: "3mo" },
-  ];
 
   return (
     <AuthLayout user={user}>
@@ -117,22 +110,24 @@ const DashboardPage = (props: DashboardPageProps) => {
         </div>
       ) : (
         <div className="space-y-8">
-          <ThemedTimeFilter
-            timeFilterOptions={timeIntervalOptions}
-            defaultValue={"24h"}
+          <ThemedFilter
+            data={null}
             isFetching={metrics === "loading"}
-            onSelect={(key: string, value: string) => {
-              setInterval(key as TimeInterval);
+            timeFilterOptions={[
+              { key: "1h", value: "hour" },
+              { key: "24h", value: "day" },
+              { key: "7d", value: "wk" },
+              { key: "1m", value: "mo" },
+              { key: "3m", value: "3mo" },
+            ]}
+            onTimeSelectHandler={(key: TimeInterval, value: string) => {
+              setInterval(key);
               setFilter((prev) => {
                 const newFilter: FilterLeaf = {
                   request: {
                     created_at: {
-                      gte: timeGraphConfig[
-                        key as TimeInterval
-                      ].start.toISOString(),
-                      lte: timeGraphConfig[
-                        key as TimeInterval
-                      ].end.toISOString(),
+                      gte: timeGraphConfig[key].start.toISOString(),
+                      lte: timeGraphConfig[key].end.toISOString(),
                     },
                   },
                 };

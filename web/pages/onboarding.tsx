@@ -2,7 +2,6 @@ import { ArrowDownIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import NavBar from "../components/shared/layout/navBar";
 import MetaData from "../components/shared/metaData";
 import OnboardingPage from "../components/templates/onboarding/onboardingPage";
 

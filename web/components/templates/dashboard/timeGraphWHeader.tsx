@@ -5,7 +5,7 @@ import { Result } from "../../../lib/result";
 import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { clsx } from "../../shared/clsx";
-import ThemedTimeFilter from "../../shared/themedTimeFilter";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Loading } from "./dashboardPage";
 import { TimeActions } from "./timeActions";
 

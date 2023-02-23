@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { clsx } from "../clsx";
-import ThemedModal from "../themedModal";
+import ThemedModal from "../themed/themedModal";
 import Onboarding from "./onboarding";
 
 interface OnboardingButtonProps {
