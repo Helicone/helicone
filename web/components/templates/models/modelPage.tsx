@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import BasePage from "../../shared/layout/basePage";
 import AuthLayout from "../../shared/layout/authLayout";
 import NavBar from "../../shared/layout/navBar";
-import ThemedTable from "../../shared/themedTable";
+import ThemedTable from "../../shared/themed/themedTable";
 import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { modelCost } from "../../../lib/api/metrics/costCalc";

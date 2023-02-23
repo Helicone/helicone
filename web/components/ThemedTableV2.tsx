@@ -20,7 +20,7 @@ export interface Column {
   format?: (value: any) => string;
 }
 
-interface ThemedTableProps {
+interface ThemedTableV2Props {
   columns: readonly Column[];
   rows: readonly any[];
   page: number;
@@ -33,7 +33,7 @@ interface ThemedTableProps {
   condensed?: boolean;
 }
 
-export default function StickyHeadTable(props: ThemedTableProps) {
+export default function ThemedTableV2(props: ThemedTableV2Props) {
   const {
     columns,
     rows,
@@ -52,7 +52,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
   const hasNext = to <= count!;
 
   return (
-    <>
+    <div className="space-y-2">
       <p className="text-sm text-gray-700">
         Showing <span className="font-medium">{from + 1}</span> to{" "}
         <span className="font-medium">{Math.min(to + 1, count as number)}</span>{" "}
@@ -232,6 +232,6 @@ export default function StickyHeadTable(props: ThemedTableProps) {
           </div>
         </div>
       </Paper>
-    </>
+    </div>
   );
 }

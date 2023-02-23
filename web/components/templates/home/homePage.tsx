@@ -20,7 +20,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import Details from "./detailsV2";
 import BasePageV2 from "../../shared/layout/basePageV2";
-import OnboardingButton from "../../shared/layout/onboardingButton";
+import OnboardingButton from "../../shared/auth/onboardingButton";
 import { useState } from "react";
 
 export default function HomePage() {

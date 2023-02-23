@@ -20,7 +20,7 @@ import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
-import ThemedTimeFilter from "../../shared/themedTimeFilter";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";

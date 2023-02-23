@@ -1,28 +1,17 @@
 import { Dialog } from "@headlessui/react";
-import {
-  ArrowDownTrayIcon,
-  ClipboardDocumentIcon,
-} from "@heroicons/react/24/outline";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { CSVLink } from "react-csv";
+
+import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { useRequests } from "../../../services/hooks/requests";
-import {
-  getRequests,
-  ResponseAndRequest,
-} from "../../../services/lib/requests";
-import { Database, Json } from "../../../supabase/database.types";
+import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
-import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedFilter from "../../shared/themedFilter";
-import ThemedModal from "../../shared/themedModal";
-import StickyHeadTable, { Column } from "../../test";
+import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedModal from "../../shared/themed/themedModal";
+import ThemedTableV2, { Column } from "../../ThemedTableV2";
 
 const monthNames = [
   "Jan",
@@ -317,7 +306,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
-              <StickyHeadTable
+              <ThemedTableV2
                 condensed
                 columns={columns}
                 rows={csvData || []}
