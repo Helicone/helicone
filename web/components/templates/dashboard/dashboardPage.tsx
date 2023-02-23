@@ -20,6 +20,7 @@ import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
+import ThemedFilter from "../../shared/themed/themedFilter";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Filters } from "./filters";
 
@@ -62,14 +63,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     getDashboardData(filter, setMetrics, setTimeData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const timeIntervalOptions = [
-    { key: "1h", value: "hour" },
-    { key: "24h", value: "day" },
-    { key: "7d", value: "wk" },
-    { key: "1m", value: "mo" },
-    { key: "3m", value: "3mo" },
-  ];
 
   return (
     <AuthLayout user={user}>
@@ -117,7 +110,42 @@ const DashboardPage = (props: DashboardPageProps) => {
         </div>
       ) : (
         <div className="space-y-8">
-          <ThemedTimeFilter
+          <ThemedFilter
+            data={[]}
+            isFetching={metrics === "loading"}
+            hasTimeFilter
+            timeFilterOptions={[
+              { key: "1h", value: "hour" },
+              { key: "24h", value: "day" },
+              { key: "7d", value: "wk" },
+              { key: "1m", value: "mo" },
+              { key: "3m", value: "3mo" },
+            ]}
+            onTimeSelectHandler={(key: TimeInterval, value: string) => {
+              setInterval(key);
+              setFilter((prev) => {
+                const newFilter: FilterLeaf = {
+                  request: {
+                    created_at: {
+                      gte: timeGraphConfig[key].start.toISOString(),
+                      lte: timeGraphConfig[key].end.toISOString(),
+                    },
+                  },
+                };
+                if (prev === "all") {
+                  return newFilter;
+                }
+                if ("left" in prev) {
+                  throw new Error("Not implemented");
+                }
+                return {
+                  ...prev,
+                  ...newFilter,
+                };
+              });
+            }}
+          />
+          {/* <ThemedTimeFilter
             timeFilterOptions={timeIntervalOptions}
             defaultValue={"24h"}
             isFetching={metrics === "loading"}
@@ -148,7 +176,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 };
               });
             }}
-          />
+          /> */}
           <MetricsPanel filters={filter} metrics={metrics} />
           <TimeGraphWHeader
             data={timeData}

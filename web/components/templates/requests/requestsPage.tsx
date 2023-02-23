@@ -4,6 +4,7 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useRequests } from "../../../services/hooks/requests";
 import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
@@ -48,16 +49,14 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const { setNotification } = useNotification();
 
-  const [currentTimeFilter, setCurrentTimeFilter] = useState<string | null>(
-    "day"
-  );
+  const [currentTimeFilter, setCurrentTimeFilter] = useState<string>("day");
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
   const { requests, count, from, to, isLoading, refetch, isRefetching } =
     useRequests(currentTimeFilter, currentPage, currentPageSize, sortBy);
 
-  const onTimeSelectHandler = async (key: string, value: string) => {
+  const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setCurrentTimeFilter(value);
     refetch();
   };
@@ -298,6 +297,14 @@ const RequestsPage = (props: RequestsPageProps) => {
               data={csvData || []}
               isFetching={isLoading || isRefetching}
               onTimeSelectHandler={onTimeSelectHandler}
+              hasTimeFilter
+              timeFilterOptions={[
+                { key: "24h", value: "day" },
+                { key: "7d", value: "wk" },
+                { key: "1m", value: "mo" },
+                // { key: "3m", value: "3mo" },
+              ]}
+              customTimeFilter
             />
 
             {isLoading ||
@@ -347,7 +354,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                   navigator.clipboard.writeText(JSON.stringify(selectedData));
                 }}
               >
-                Copy this request{" "}
+                Copy to clipboard
                 <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
               </button>
               <ul className="mt-4 space-y-2">

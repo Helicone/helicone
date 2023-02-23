@@ -1,5 +1,9 @@
 import { Dialog } from "@headlessui/react";
-import { ArrowDownTrayIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ClipboardDocumentIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -15,6 +19,21 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2 from "../../ThemedTableV2";
 
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 interface UsersPageProps {
   page: number;
   pageSize: number;
@@ -24,6 +43,7 @@ const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
   const { users, count, from, isLoading, to } = useUsers(page, pageSize);
+  const { setNotification } = useNotification();
 
   const [open, setOpen] = useState(true);
   const [index, setIndex] = useState<number>();
@@ -33,6 +53,15 @@ const UsersPage = (props: UsersPageProps) => {
     setIndex(idx);
     setSelectedUser(row);
     setOpen(true);
+  };
+
+  const getUSDate = (value: string) => {
+    const date = new Date(value);
+    const month = monthNames[date.getMonth()];
+    const day = date.getDate();
+    return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
+      .toLocaleTimeString()
+      .slice(-2)}`;
   };
 
   return (
@@ -72,14 +101,18 @@ const UsersPage = (props: UsersPageProps) => {
               {
                 key: "user_id",
                 label: "Id",
+                minWidth: 170,
               },
               {
                 key: "active_for",
                 label: "Active For",
+                format: (value: string) => `${value} days`,
               },
               {
                 key: "last_active",
                 label: "Last Active",
+                minWidth: 170,
+                format: (value: string) => getUSDate(value),
               },
               {
                 key: "total_requests",
@@ -122,8 +155,20 @@ const UsersPage = (props: UsersPageProps) => {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Request Information
+                User Information
               </Dialog.Title>
+              <button
+                type="button"
+                tabIndex={-1}
+                className="inline-flex w-full justify-center text-base font-medium text-gray-500 sm:text-sm items-center"
+                onClick={() => {
+                  setNotification("Copied to clipboard", "success");
+                  navigator.clipboard.writeText(JSON.stringify(selectedUser));
+                }}
+              >
+                Copy to clipboard
+                <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
+              </button>
               <ul className="mt-4 space-y-2">
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>User Id:</p>
@@ -161,17 +206,6 @@ const UsersPage = (props: UsersPageProps) => {
             </div>
           </div>
           <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
-            <button
-              type="button"
-              tabIndex={-1}
-              className="inline-flex w-full justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-base font-medium text-black shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:text-sm"
-              onClick={() => {
-                // TODO: add copy to clipboard notification
-                navigator.clipboard.writeText(JSON.stringify(selectedUser));
-              }}
-            >
-              Copy
-            </button>
             <button
               type="button"
               tabIndex={-1}
