@@ -75,7 +75,7 @@ const Notification = () => {
 
   if (variant && title && show) {
     return (
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-20">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-30">
         <div className="mx-auto max-w-sm px-2 sm:px-6 lg:px-8">
           <Transition
             show={show}

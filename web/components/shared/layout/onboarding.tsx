@@ -1,6 +1,7 @@
 import {
   ArrowPathIcon,
   CheckIcon,
+  ClipboardDocumentListIcon,
   EnvelopeIcon,
   InboxArrowDownIcon,
   LockClosedIcon,
@@ -9,6 +10,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import { clsx } from "../clsx";
 import ProgressBar from "../../templates/home/progressBar";
+import useNotification from "../notification/useNotification";
 
 interface OnboardingProps {
   currentStep: number;
@@ -24,6 +26,7 @@ const Onboarding = (props: OnboardingProps) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const supabaseClient = useSupabaseClient();
+  const { setNotification } = useNotification();
 
   const setLangHandler = (lang: "python" | "curl" | "node") => {
     setLang(lang);
@@ -43,7 +46,8 @@ const Onboarding = (props: OnboardingProps) => {
               <p className="text-red-500">import </p>
               <p className="text-gray-300">openai </p>
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2 -ml-4 bg-green-900">
+              <p className="text-green-700 pl-1 -mr-1 bg-green-900">+</p>
               <p className="text-gray-300">openai.api_base</p>
               <p className="text-blue-300">=</p>
               <p className="text-blue-400">
@@ -65,7 +69,8 @@ const Onboarding = (props: OnboardingProps) => {
             <div className="flex flex-row gap-2 mt-4">
               <p className="text-gray-300">with Helicone</p>
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2 -ml-4 bg-green-900">
+              <p className="text-green-700 pl-1 -mr-1 bg-green-900">+</p>
               <p className="text-purple-500">POST </p>
               <p className="text-green-500">https://oai.hconeai.com/v1</p>
             </div>
@@ -135,7 +140,7 @@ const Onboarding = (props: OnboardingProps) => {
           </>
         );
       default:
-        return <div>c</div>;
+        return <div></div>;
     }
   };
 
@@ -182,48 +187,78 @@ const Onboarding = (props: OnboardingProps) => {
     setCurrentStep(currentStep + 1);
   };
 
+  const copyLineHandler = () => {
+    switch (lang) {
+      case "node":
+        navigator.clipboard.writeText(
+          `basePath: "https://oai.hconeai.com/v1" `
+        );
+        setNotification("Copied Node code to clipboard", "success");
+        break;
+      case "python":
+        navigator.clipboard.writeText(
+          `openai.api_base="https://oai.hconeai.com/v1"`
+        );
+        setNotification("Copied Python code to clipboard", "success");
+        break;
+      case "curl":
+        navigator.clipboard.writeText(`https://oai.hconeai.com/v1`);
+        setNotification("Copied cURL code to clipboard", "success");
+        break;
+      default:
+        navigator.clipboard.writeText("hello");
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="overflow-hidden rounded-md bg-gray-900 ring-1 ring-white/10">
-            <div className="flex bg-gray-800/40 ring-1 ring-white/5">
-              <div className="-mb-px flex text-sm font-medium leading-6 text-gray-400">
-                <button
-                  onClick={() => setLangHandler("node")}
-                  className={clsx(
-                    lang === "node"
-                      ? "border-b border-r border-b-white/20 border-r-white/10 bg-white/5 py-2 px-4 text-white"
-                      : "border-r border-gray-600/10 py-2 px-4"
-                  )}
-                >
-                  Node.js
-                </button>
-                <button
-                  onClick={() => setLangHandler("python")}
-                  className={clsx(
-                    lang === "python"
-                      ? "border-b border-r border-b-white/20 border-r-white/10 bg-white/5 py-2 px-4 text-white"
-                      : "border-r border-gray-600/10 py-2 px-4"
-                  )}
-                >
-                  Python
-                </button>
-                <button
-                  onClick={() => setLangHandler("curl")}
-                  className={clsx(
-                    lang === "curl"
-                      ? "border-b border-r border-b-white/20 border-r-white/10 bg-white/5 py-2 px-4 text-white"
-                      : "border-r border-gray-600/10 py-2 px-4"
-                  )}
-                >
-                  Curl
-                </button>
+          <div className="space-y-4">
+            <span className="isolate inline-flex rounded-md shadow-sm w-full">
+              <button
+                onClick={() => setLangHandler("node")}
+                type="button"
+                className={clsx(
+                  lang === "node" ? "bg-gray-200" : "",
+                  "w-full text-center justify-center relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                )}
+              >
+                Node.js
+              </button>
+              <button
+                onClick={() => setLangHandler("python")}
+                type="button"
+                className={clsx(
+                  lang === "python" ? "bg-gray-200" : "",
+                  "w-full text-center justify-center relative -ml-px inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                )}
+              >
+                Python
+              </button>
+              <button
+                onClick={() => setLangHandler("curl")}
+                type="button"
+                className={clsx(
+                  lang === "curl" ? "bg-gray-200" : "",
+                  "w-full text-center justify-center relative -ml-px inline-flex items-center rounded-r-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                )}
+              >
+                Curl
+              </button>
+            </span>
+            <div className="overflow-hidden rounded-md bg-gray-900 ring-1 ring-white/10">
+              <div className="px-6 pt-6 pb-8 min-h-[20em] flex flex-col gap-4 font-mono text-[10px] sm:text-sm">
+                {codeSnippet()}
               </div>
             </div>
-            <div className="px-6 pt-6 pb-8 min-h-[20em] flex flex-col gap-4 font-mono text-[10px] sm:text-sm">
-              {codeSnippet()}
-            </div>
+            <button
+              onClick={copyLineHandler}
+              className="flex flex-row w-full justify-center items-center rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <ClipboardDocumentListIcon className="w-5 h-5 mr-2" />
+              Copy
+            </button>
           </div>
         );
       case 2:
@@ -306,7 +341,7 @@ const Onboarding = (props: OnboardingProps) => {
           <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
             <button
               onClick={() => setCurrentStep(currentStep - 1)}
-              className="rounded-md bg-gray-100 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Back
             </button>
@@ -330,7 +365,7 @@ const Onboarding = (props: OnboardingProps) => {
           <div className="bottom-0 relative flex flex-row justify-start flex-1 pt-8">
             <button
               onClick={() => setCurrentStep(currentStep - 1)}
-              className="rounded-md bg-gray-100 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Back
             </button>
@@ -340,14 +375,14 @@ const Onboarding = (props: OnboardingProps) => {
   };
 
   return (
-    <div className="sm:max-w-2xl flex flex-col space-y-0 w-full min-w-[300px] sm:min-w-[450px]">
-      <div className="w-full border-b border-gray-300 pb-2 justify-between flex flex-row items-center text-center">
+    <div className="sm:max-w-2xl flex flex-col space-y-2 w-full min-w-[300px] sm:min-w-[450px]">
+      <div className="w-full border-b border-gray-300 pb-4 justify-between flex flex-col items-center text-center space-y-4">
         <p className="text-lg font-medium w-full">{`Step ${currentStep}: ${renderStepMessage()}`}</p>
-      </div>
-      <div className="flex flex-col space-y-2">
-        <div className="w-full justify-center items-center mx-auto flex mt-6">
+        <div className="w-full justify-center items-center mx-auto flex">
           <ProgressBar currentStep={currentStep} />
         </div>
+      </div>
+      <div className="flex flex-col space-y-2">
         <div className="h-full flex flex-col w-full pt-2">
           <div className="pt-2 w-full flex-auto">{renderStep()}</div>
         </div>
