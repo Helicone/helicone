@@ -15,6 +15,7 @@ import {
   ResponseAndRequest,
 } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
+import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
@@ -311,12 +312,8 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   return (
     <>
+      <AuthHeader title={"Requests"} />
       <div className="">
-        <div className="sm:flex sm:items-center">
-          <div className="sm:flex-auto">
-            <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
-          </div>
-        </div>
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
             <ThemedFilter
