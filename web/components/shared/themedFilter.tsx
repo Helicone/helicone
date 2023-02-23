@@ -42,6 +42,13 @@ interface ThemedFilterProps {
   data: any[];
 }
 
+function escapeCSVString(s: string | undefined): string | undefined {
+  if (s === undefined) {
+    return undefined;
+  }
+  return s.replace(/"/g, '""');
+}
+
 export default function ThemedFilter(props: ThemedFilterProps) {
   const { data } = props;
   const router = useRouter();
@@ -243,7 +250,11 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                   <div className="mx-auto flex">
                     <Menu as="div" className="relative inline-block">
                       <CSVLink
-                        data={data}
+                        data={data.map((d) => ({
+                          ...d,
+                          request: escapeCSVString(d.request),
+                          response: escapeCSVString(d.response),
+                        }))}
                         filename={"requests.csv"}
                         className="flex"
                         target="_blank"
