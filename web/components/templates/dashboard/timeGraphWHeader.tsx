@@ -45,7 +45,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         )}
       >
         {/* Requests over time */}
-        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
+        <div className="col-span-1 h-80 border border-gray-200 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1 bg-gray-200">
           <h3 className="text-lg font-medium text-gray-900 text-center">
             Requests over time
           </h3>
@@ -59,7 +59,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         </div>
 
         {/* Costs over time */}
-        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
+        <div className="col-span-1 h-80 border border-gray-200 bg-gray-200 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
           <h3 className="text-lg font-medium text-gray-900 text-center">
             Costs over time
           </h3>
@@ -73,7 +73,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         </div>
 
         {/* Errors */}
-        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
+        <div className="col-span-1 h-80 border border-gray-200 bg-gray-200 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
           <h3 className="text-lg font-medium text-gray-900 text-center">
             Errors over time
           </h3>
