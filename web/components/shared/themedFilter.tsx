@@ -55,7 +55,6 @@ export default function ThemedFilter(props: ThemedFilterProps) {
     { key: "day", value: "day" },
     { key: "wk", value: "wk" },
     { key: "mo", value: "mo" },
-    { key: "3mo", value: "3mo" },
   ];
 
   return (
