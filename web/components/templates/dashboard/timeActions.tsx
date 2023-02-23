@@ -12,10 +12,9 @@ interface TimeLength {
 export const TimeActions = (props: {
   setFilter: Dispatch<SetStateAction<FilterNode>>;
   interval: TimeInterval;
-  setInterval: Dispatch<SetStateAction<TimeInterval>>;
   onIntervalChange: (interval: TimeInterval) => void;
 }) => {
-  const { setFilter, interval, setInterval, onIntervalChange } = props;
+  const { setFilter, interval, onIntervalChange } = props;
   const timeLength: TimeLength[] = [
     { label: "3 Months", mobile: "3mo", value: "3m" },
     { label: "1 Month", mobile: "1mo", value: "1m" },

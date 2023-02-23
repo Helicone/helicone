@@ -27,6 +27,8 @@ interface ThemedTableProps {
   from: number;
   to: number;
   count: number | null;
+  onPageChangeHandler?: (page: number) => void;
+  onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
   condensed?: boolean;
 }
@@ -41,6 +43,8 @@ export default function StickyHeadTable(props: ThemedTableProps) {
     count,
     condensed = false,
     onSelectHandler,
+    onPageChangeHandler,
+    onPageSizeChangeHandler,
   } = props;
   const router = useRouter();
 
@@ -49,6 +53,11 @@ export default function StickyHeadTable(props: ThemedTableProps) {
 
   return (
     <>
+      <p className="text-sm text-gray-700">
+        Showing <span className="font-medium">{from + 1}</span> to{" "}
+        <span className="font-medium">{Math.min(to + 1, count as number)}</span>{" "}
+        of <span className="font-medium">{count}</span> results
+      </p>
       <Paper
         sx={{
           width: "100%",
@@ -59,7 +68,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
             "0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 0.5px 1px 0 rgba(0, 0, 0, 0.1)",
         }}
       >
-        <TableContainer sx={{ maxHeight: "70vh", paddingX: 1 }}>
+        <TableContainer sx={{ maxHeight: "65vh", paddingX: 1 }}>
           <Table
             stickyHeader
             aria-label="sticky table"
@@ -69,7 +78,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
-                    key={column.key}
+                    key={column.label}
                     align={column.align}
                     style={{ minWidth: column.minWidth }}
                   >
@@ -128,7 +137,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
                     hover
                     role="checkbox"
                     tabIndex={-1}
-                    key={row.code}
+                    key={`row-${idx}`}
                     onClick={() => onSelectHandler && onSelectHandler(row, idx)}
                     className="hover:cursor-pointer"
                   >
@@ -136,7 +145,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
                       const value = row[column.key];
                       return (
                         <TableCell
-                          key={column.key}
+                          key={`cell-${column.key}`}
                           align={column.align || "left"}
                         >
                           <p
@@ -178,6 +187,8 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               onChange={(e) => {
                 router.query.page_size = e.target.value;
                 router.push(router);
+                onPageSizeChangeHandler &&
+                  onPageSizeChangeHandler(parseInt(e.target.value, 10));
               }}
             >
               <option>25</option>
@@ -190,6 +201,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               onClick={() => {
                 router.query.page = (page - 1).toString();
                 router.push(router);
+                onPageChangeHandler && onPageChangeHandler(page - 1);
               }}
               disabled={!hasPrevious}
               className={clsx(
@@ -205,6 +217,7 @@ export default function StickyHeadTable(props: ThemedTableProps) {
               onClick={() => {
                 router.query.page = (page + 1).toString();
                 router.push(router);
+                onPageChangeHandler && onPageChangeHandler(page + 1);
               }}
               disabled={!hasNext}
               className={clsx(

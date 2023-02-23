@@ -61,21 +61,37 @@ export function MetricsPanel(props: MetricsPanelProps) {
       value: data?.total_requests ?? "n/a",
       label: "Total requests",
     },
-  ];
-  if (data?.total_cached_requests ?? 0 > 0) {
-    metrics.push({
+    {
       value: data?.total_cached_savings?.toFixed(3) ?? "n/a",
       label: "Cache Savings (USD)",
-    });
-    metrics.push({
+    },
+    {
       value: data?.total_cached_requests ?? "n/a",
       label: "Cached Requests",
-    });
-  }
+    },
+  ];
 
   return (
     <div>
-      <dl className="grid grid-cols-2 gap-2 sm:gap-5 sm:grid-cols-5">
+      <dl className="grid grid-cols-1 max-w-7xl gap-0.5 overflow-hidden rounded-lg text-center sm:grid-cols-2 lg:grid-cols-4">
+        {metrics.map((row) => (
+          <div
+            key={row.label as string}
+            className="flex flex-col bg-white p-2 border border-gray-300 shadow-sm rounded-lg"
+          >
+            <dt className="text-sm font-semibold text-gray-600">{row.label}</dt>
+            <dd
+              className={clsx(
+                loading ? "animate-pulse text-gray-400" : "",
+                "order-first text-lg font-semibold tracking-tight text-gray-900"
+              )}
+            >
+              {loading ? "Loading" : row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {/* <dl className="grid grid-cols-2 gap-2 sm:gap-5 sm:grid-cols-5">
         {metrics.map((row) => (
           <div
             key={row.label as string}
@@ -94,7 +110,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
             </dd>
           </div>
         ))}
-      </dl>
+      </dl> */}
     </div>
   );
 }
