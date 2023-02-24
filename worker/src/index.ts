@@ -134,6 +134,7 @@ async function logRequest({
 }: HeliconeRequest): Promise<Result<string, string>> {
   try {
     const json = body ? JSON.parse(body) : {};
+    const jsonUserId = json.user;
 
     const formattedPromptResult =
       prompt !== undefined
@@ -157,7 +158,7 @@ async function logRequest({
           path: request.url,
           body: json,
           auth_hash: await hash(auth),
-          user_id: userId,
+          user_id: jsonUserId ?? userId,
           prompt_id: promptId,
           properties: properties,
           formatted_prompt_id: formattedPromptId,
