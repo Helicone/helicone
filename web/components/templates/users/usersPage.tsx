@@ -53,7 +53,7 @@ const UsersPage = (props: UsersPageProps) => {
     }[]
   >();
 
-  const { users, count, from, isLoading, to, refetch } = useUsers(
+  const { users, count, from, isLoading, to } = useUsers(
     page,
     pageSize,
     advancedFilters

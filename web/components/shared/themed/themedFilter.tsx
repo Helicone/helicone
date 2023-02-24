@@ -149,7 +149,10 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                             aria-hidden="true"
                           />
                           <p className="text-sm">
-                            {open ? "Hide Filters" : "Show Filters"}
+                            {open ? `Hide Filters` : `Show Filters`}{" "}
+                            {advancedFilters.length > 0
+                              ? `(${advancedFilters.length})`
+                              : ""}
                           </p>
                         </Disclosure.Button>
                       </div>
@@ -236,7 +239,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                 </button>
                 <div className="w-full flex justify-end gap-4">
                   <button
-                    onClick={() => console.log(advancedFilters)}
+                    onClick={() => onAdvancedFilter([])}
                     className="block bg-black text-white p-2 rounded-lg"
                   >
                     Clear Filters
