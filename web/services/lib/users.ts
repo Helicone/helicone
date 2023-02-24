@@ -28,8 +28,6 @@ const getUsers = async (
   let query = client.from("user_metrics_rbac").select("*", { count: "exact" });
 
   if (advancedFilter) {
-    // iterate through the filters
-    console.log(advancedFilter);
     advancedFilter.forEach((filter) => {
       if (filter.type === "text") {
         query = query.textSearch(

@@ -143,18 +143,18 @@ const UsersPage = (props: UsersPageProps) => {
     <>
       <AuthHeader title={"Users"} />
       <div className="space-y-2">
+        <ThemedFilter
+          data={users}
+          isFetching={isLoading}
+          fileName="users.csv"
+          columns={columns}
+          advancedFilter={advancedFilters}
+          onAdvancedFilter={onAdvancedFilter}
+        />
         {isLoading || from === undefined || to === undefined ? (
           <LoadingAnimation title="Getting your requests" />
         ) : (
           <>
-            <ThemedFilter
-              data={users}
-              isFetching={isLoading}
-              fileName="users.csv"
-              columns={columns}
-              advancedFilter={advancedFilters}
-              onAdvancedFilter={onAdvancedFilter}
-            />
             <ThemedTableV2
               columns={columns}
               rows={users}
