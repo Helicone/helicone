@@ -53,7 +53,7 @@ const UsersPage = (props: UsersPageProps) => {
     }[]
   >();
 
-  const { users, count, from, isLoading, to } = useUsers(
+  const { users, count, from, isLoading, to, refetch } = useUsers(
     page,
     pageSize,
     advancedFilters
@@ -139,8 +139,6 @@ const UsersPage = (props: UsersPageProps) => {
     },
   ];
 
-  console.log(advancedFilters);
-
   return (
     <>
       <AuthHeader title={"Users"} />
@@ -154,6 +152,7 @@ const UsersPage = (props: UsersPageProps) => {
               isFetching={isLoading}
               fileName="users.csv"
               columns={columns}
+              advancedFilter={advancedFilters}
               onAdvancedFilter={onAdvancedFilter}
             />
             <ThemedTableV2

@@ -43,6 +43,13 @@ interface ThemedFilterProps {
   customTimeFilter?: boolean; // if true, then we show the custom time filter
   fileName?: string; // if undefined, then we use the default file name
   columns?: Column[]; // if undefined, don't show the show filters button
+  advancedFilter?: {
+    idx: number;
+    type?: "number" | "text" | "datetime-local" | undefined;
+    supabaseKey?: string | undefined;
+    value?: string | undefined;
+    column?: Column | undefined;
+  }[];
   onAdvancedFilter?: (
     advancedFilters: {
       idx: number;
@@ -63,6 +70,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
     customTimeFilter = false,
     fileName = "export.csv",
     columns,
+    advancedFilter,
     onAdvancedFilter,
   } = props;
 
@@ -74,7 +82,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
       value?: string;
       column?: Column;
     }[]
-  >([]);
+  >(advancedFilter || []);
 
   const handleFilterChange = (
     idx: number,
