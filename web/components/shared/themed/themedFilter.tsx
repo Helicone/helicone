@@ -239,7 +239,10 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                 </button>
                 <div className="w-full flex justify-end gap-4">
                   <button
-                    onClick={() => onAdvancedFilter([])}
+                    onClick={() => {
+                      onAdvancedFilter([]);
+                      setAdvancedFilters([]);
+                    }}
                     className="block bg-black text-white p-2 rounded-lg"
                   >
                     Clear Filters
