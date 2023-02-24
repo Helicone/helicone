@@ -40,18 +40,19 @@ interface UsersPageProps {
   pageSize: number;
 }
 
+export type AdvancedFilterType = {
+  idx: number;
+  type?: "number" | "text" | "datetime-local" | undefined;
+  supabaseKey?: string | undefined;
+  value?: string | undefined;
+  column?: Column | undefined;
+};
+
 const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<
-    {
-      idx: number;
-      type?: "number" | "text" | "datetime-local" | undefined;
-      supabaseKey?: string | undefined;
-      value?: string | undefined;
-      column?: Column | undefined;
-    }[]
-  >();
+  const [advancedFilters, setAdvancedFilters] =
+    useState<AdvancedFilterType[]>();
 
   const { users, count, from, isLoading, to } = useUsers(
     page,
@@ -80,15 +81,7 @@ const UsersPage = (props: UsersPageProps) => {
       .slice(-2)}`;
   };
 
-  const onAdvancedFilter = (
-    advancedFilter: {
-      idx: number;
-      type?: "number" | "text" | "datetime-local" | undefined;
-      supabaseKey?: string | undefined;
-      value?: string | undefined;
-      column?: Column | undefined;
-    }[]
-  ) => {
+  const onAdvancedFilter = (advancedFilter: AdvancedFilterType[]) => {
     setAdvancedFilters(advancedFilter);
   };
 

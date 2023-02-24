@@ -18,11 +18,13 @@ import {
   ArrowDownTrayIcon,
   FunnelIcon,
   PlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { CSVLink } from "react-csv";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { AdvancedFilterType } from "../../templates/users/usersPage";
 import { Column } from "../../ThemedTableV2";
 import { clsx } from "../clsx";
 import ThemedDropdown from "./themedDropdown";
@@ -43,22 +45,8 @@ interface ThemedFilterProps {
   customTimeFilter?: boolean; // if true, then we show the custom time filter
   fileName?: string; // if undefined, then we use the default file name
   columns?: Column[]; // if undefined, don't show the show filters button
-  advancedFilter?: {
-    idx: number;
-    type?: "number" | "text" | "datetime-local" | undefined;
-    supabaseKey?: string | undefined;
-    value?: string | undefined;
-    column?: Column | undefined;
-  }[];
-  onAdvancedFilter?: (
-    advancedFilters: {
-      idx: number;
-      type?: "number" | "text" | "datetime-local" | undefined;
-      supabaseKey?: string | undefined;
-      value?: string | undefined;
-      column?: Column | undefined;
-    }[]
-  ) => void;
+  advancedFilter?: AdvancedFilterType[];
+  onAdvancedFilter?: (advancedFilters: AdvancedFilterType[]) => void;
 }
 
 export default function ThemedFilter(props: ThemedFilterProps) {
@@ -74,26 +62,27 @@ export default function ThemedFilter(props: ThemedFilterProps) {
     onAdvancedFilter,
   } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<
-    {
-      idx: number;
-      type?: "text" | "number" | "datetime-local";
-      supabaseKey?: string;
-      value?: string;
-      column?: Column;
-    }[]
-  >(advancedFilter || []);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterType[]>(
+    advancedFilter || []
+  );
 
-  const handleFilterChange = (
-    idx: number,
-    type: "text" | "number" | "datetime-local",
-    key: string,
-    value: string,
-    column: Column
-  ) => {
+  const handleFilterChange = (filter: AdvancedFilterType) => {
+    const { idx, type, supabaseKey, value, column } = filter;
     const newFilters = [...advancedFilters];
-    newFilters[idx] = { idx, type, supabaseKey: key, value, column };
+    newFilters[idx] = { idx, type, supabaseKey, value, column };
     setAdvancedFilters(newFilters);
+  };
+
+  const onDeleteHandler = (idx: number) => {
+    const newFilters = [...advancedFilters];
+    const filtered = newFilters.filter((filter) => {
+      return filter.idx !== idx;
+    });
+    const remappedFiltered = filtered.map((filter, idx) => {
+      filter.idx = idx;
+      return filter;
+    });
+    setAdvancedFilters(remappedFiltered);
   };
 
   return (
@@ -109,6 +98,9 @@ export default function ThemedFilter(props: ThemedFilterProps) {
             <h2 id="filter-heading" className="sr-only">
               Filters
             </h2>
+            <button onClick={() => console.log(advancedFilters)}>
+              Click Me
+            </button>
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
               <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
                 {timeFilterOptions && onTimeSelectHandler && (
@@ -195,7 +187,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                 <div className="space-y-4 ml-4">
                   {advancedFilters.map((filter) => (
                     <div
-                      className="max-w-2xl flex flex-row items-center space-x-2"
+                      className="max-w-2xl justify-between flex flex-row items-center space-x-4"
                       key={filter.idx}
                     >
                       <div className="w-full">
@@ -203,17 +195,24 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                           options={columns}
                           idx={filter.idx}
                           onChange={(idx, type, key, value, column) =>
-                            handleFilterChange(idx, type, key, value, column)
+                            handleFilterChange({
+                              idx,
+                              column,
+                              supabaseKey: key,
+                              type,
+                              value,
+                            })
                           }
                           onTypeChange={(idx, column) => {
-                            handleFilterChange(
+                            handleFilterChange({
                               idx,
-                              column.type || "text",
-                              "",
-                              "",
-                              column
-                            );
+                              type: column.type || "text",
+                              supabaseKey: "",
+                              value: "",
+                              column,
+                            });
                           }}
+                          onDelete={onDeleteHandler}
                           initialSelected={filter.column}
                           initialValue={filter.value}
                         />

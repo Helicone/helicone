@@ -3,6 +3,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
 import { Column } from "../../ThemedTableV2";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface ThemedDropdownProps {
   idx: number;
@@ -15,6 +16,7 @@ interface ThemedDropdownProps {
     column: Column
   ) => void;
   onTypeChange: (idx: number, column: Column) => void;
+  onDelete: (idx: number) => void;
   initialSelected?: Column;
   initialValue?: string;
 }
@@ -25,6 +27,7 @@ export default function ThemedDropdown(props: ThemedDropdownProps) {
     options,
     onChange,
     onTypeChange,
+    onDelete,
     initialSelected,
     initialValue,
   } = props;
@@ -184,9 +187,25 @@ export default function ThemedDropdown(props: ThemedDropdownProps) {
         <>
           <p className="">is</p>
           {renderType(selected, selected.type || "text")}
+          <button
+            type="button"
+            className="inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+            onClick={() => onDelete(idx)}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
         </>
       ) : (
-        <div className="w-full" />
+        <>
+          <button
+            type="button"
+            className="inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+            onClick={() => onDelete(idx)}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
+          <div className="w-full" />
+        </>
       )}
     </div>
   );
