@@ -14,10 +14,18 @@
 */
 
 import { Disclosure, Menu } from "@headlessui/react";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  FunnelIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { CSVLink } from "react-csv";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { Column } from "../../ThemedTableV2";
+import { clsx } from "../clsx";
+import ThemedDropdown from "./themedDropdown";
 import ThemedTimeFilter from "./themedTimeFilter";
 
 function escapeCSVString(s: string | undefined): string | undefined {
@@ -34,6 +42,16 @@ interface ThemedFilterProps {
   timeFilterOptions?: { key: string; value: string }[]; // if undefined, then we don't show the timeFilter dropdown
   customTimeFilter?: boolean; // if true, then we show the custom time filter
   fileName?: string; // if undefined, then we use the default file name
+  columns?: Column[]; // if undefined, don't show the show filters button
+  onAdvancedFilter?: (
+    advancedFilters: {
+      idx: number;
+      type?: "number" | "text" | "datetime-local" | undefined;
+      supabaseKey?: string | undefined;
+      value?: string | undefined;
+      column?: Column | undefined;
+    }[]
+  ) => void;
 }
 
 export default function ThemedFilter(props: ThemedFilterProps) {
@@ -44,7 +62,31 @@ export default function ThemedFilter(props: ThemedFilterProps) {
     timeFilterOptions,
     customTimeFilter = false,
     fileName = "export.csv",
+    columns,
+    onAdvancedFilter,
   } = props;
+
+  const [advancedFilters, setAdvancedFilters] = useState<
+    {
+      idx: number;
+      type?: "text" | "number" | "datetime-local";
+      supabaseKey?: string;
+      value?: string;
+      column?: Column;
+    }[]
+  >([]);
+
+  const handleFilterChange = (
+    idx: number,
+    type: "text" | "number" | "datetime-local",
+    key: string,
+    value: string,
+    column: Column
+  ) => {
+    const newFilters = [...advancedFilters];
+    newFilters[idx] = { idx, type, supabaseKey: key, value, column };
+    setAdvancedFilters(newFilters);
+  };
 
   return (
     <div className="">
@@ -72,39 +114,41 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                     custom={customTimeFilter}
                   />
                 )}
-                {/* <h1>hello world</h1> */}
               </div>
 
               {/* TODO: Add back this uncommented code once filters is functional */}
-              {/* <div className="flex flex-row space-x-2 divide-x-2 divide-gray-200 items-center pr-2"> */}
-              <div className="flex flex-row items-center">
-                {/* <div className="text-sm">
-                  <div className="mx-auto flex">
-                    <div>
-                      <Disclosure.Button
-                        className={clsx(
-                          open
-                            ? "bg-sky-100 text-sky-900"
-                            : "hover:bg-sky-100 hover:text-sky-900",
-                          "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-                        )}
-                      >
-                        <FunnelIcon
+
+              <div className="flex flex-row space-x-2 items-center pr-2">
+                {columns && (
+                  <div className="text-sm">
+                    <div className="mx-auto flex">
+                      <div>
+                        <Disclosure.Button
                           className={clsx(
                             open
                               ? "bg-sky-100 text-sky-900"
                               : "hover:bg-sky-100 hover:text-sky-900",
-                            "mr-2 h-5 flex-none"
+                            "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
                           )}
-                          aria-hidden="true"
-                        />
-                        <p className="text-sm">
-                          {open ? "Hide Filters" : "Show Filters"}
-                        </p>
-                      </Disclosure.Button>
+                        >
+                          <FunnelIcon
+                            className={clsx(
+                              open
+                                ? "bg-sky-100 text-sky-900"
+                                : "hover:bg-sky-100 hover:text-sky-900",
+                              "mr-2 h-5 flex-none"
+                            )}
+                            aria-hidden="true"
+                          />
+                          <p className="text-sm">
+                            {open ? "Hide Filters" : "Show Filters"}
+                          </p>
+                        </Disclosure.Button>
+                      </div>
                     </div>
                   </div>
-                </div> */}
+                )}
+
                 {data !== null && (
                   <div className="pl-0 sm:pl-2">
                     <div className="mx-auto flex">
@@ -134,9 +178,70 @@ export default function ThemedFilter(props: ThemedFilterProps) {
               </div>
             </div>
 
-            <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg px-4 py-2 mt-2 mb-4 shadow-sm">
-              <p className="text-sm">Filters</p>
-            </Disclosure.Panel>
+            {columns && onAdvancedFilter && (
+              <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4">
+                <p className="text-sm text-gray-500">Filters</p>
+                <div className="space-y-4 ml-4">
+                  {advancedFilters.map((filter) => (
+                    <div
+                      className="max-w-2xl flex flex-row items-center space-x-2"
+                      key={filter.idx}
+                    >
+                      <div className="w-full">
+                        <ThemedDropdown
+                          options={columns}
+                          idx={filter.idx}
+                          onChange={(idx, type, key, value, column) =>
+                            handleFilterChange(idx, type, key, value, column)
+                          }
+                          onTypeChange={(idx, column) => {
+                            handleFilterChange(
+                              idx,
+                              column.type || "text",
+                              "",
+                              "",
+                              column
+                            );
+                          }}
+                          initialSelected={filter.column}
+                          initialValue={filter.value}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setAdvancedFilters([
+                      ...advancedFilters,
+                      { idx: advancedFilters.length },
+                    ])
+                  }
+                  className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
+                >
+                  <PlusIcon
+                    className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                    aria-hidden="true"
+                  />
+                  Add Filter
+                </button>
+                <div className="w-full flex justify-end gap-4">
+                  <button
+                    onClick={() => console.log(advancedFilters)}
+                    className="block bg-black text-white p-2 rounded-lg"
+                  >
+                    Clear Filters
+                  </button>
+                  <button
+                    onClick={() => onAdvancedFilter(advancedFilters)}
+                    className="block bg-black text-white p-2 rounded-lg"
+                  >
+                    Save
+                  </button>
+                </div>
+              </Disclosure.Panel>
+            )}
           </>
         )}
       </Disclosure>

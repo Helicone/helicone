@@ -1,25 +1,35 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
+import { Column } from "../../components/ThemedTableV2";
 import { getUsers } from "../lib/users";
 
 const useUsers = (
   currentPage: number,
   currentPageSize: number,
-  textSearch?: {
-    column: string;
-    value: string;
-  }
+  advancedFilter?: {
+    idx: number;
+    type?: "number" | "text" | "datetime-local" | undefined;
+    supabaseKey?: string | undefined;
+    value?: string | undefined;
+    column?: Column | undefined;
+  }[]
 ) => {
   const supabase = useSupabaseClient();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["users", currentPage, currentPageSize, textSearch],
+    queryKey: ["users", currentPage, currentPageSize, advancedFilter],
     queryFn: async (query) => {
       return getUsers(
         supabase,
         query.queryKey[1] as number,
         query.queryKey[2] as number,
-        query.queryKey[3] as { column: string; value: string } | undefined
+        query.queryKey[3] as {
+          idx: number;
+          type?: "number" | "text" | "datetime-local" | undefined;
+          supabaseKey?: string | undefined;
+          value?: string | undefined;
+          column?: Column | undefined;
+        }[]
       ).then((res) => res);
     },
     refetchOnWindowFocus: false,

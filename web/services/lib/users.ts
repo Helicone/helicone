@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { getPagination } from "../../components/shared/getPagination";
+import { Column } from "../../components/ThemedTableV2";
 
 export interface UserRow {
   user_id: string;
@@ -14,17 +15,34 @@ const getUsers = async (
   client: SupabaseClient<any, "public", any>,
   currentPage: number,
   pageSize: number,
-  textSearch?: {
-    column: string;
-    value: string;
-  }
+  advancedFilter?: {
+    idx: number;
+    type?: "number" | "text" | "datetime-local" | undefined;
+    supabaseKey?: string | undefined;
+    value?: string | undefined;
+    column?: Column | undefined;
+  }[]
 ) => {
   const { from, to } = getPagination(currentPage - 1, pageSize);
 
   let query = client.from("user_metrics_rbac").select("*", { count: "exact" });
 
-  if (textSearch) {
-    query = query.textSearch(textSearch.column, textSearch.value);
+  if (advancedFilter) {
+    // iterate through the filters
+    console.log(advancedFilter);
+    advancedFilter.forEach((filter) => {
+      if (filter.type === "text") {
+        query = query.textSearch(
+          filter.supabaseKey as string,
+          filter.value as string
+        );
+      } else if (filter.type === "number") {
+        query = query.eq(
+          filter.supabaseKey as string,
+          parseInt(filter.value as string, 10)
+        );
+      }
+    });
   }
 
   query = query.range(from, to);
