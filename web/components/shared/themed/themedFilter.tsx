@@ -98,9 +98,6 @@ export default function ThemedFilter(props: ThemedFilterProps) {
             <h2 id="filter-heading" className="sr-only">
               Filters
             </h2>
-            <button onClick={() => console.log(advancedFilters)}>
-              Click Me
-            </button>
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
               <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
                 {timeFilterOptions && onTimeSelectHandler && (
@@ -242,13 +239,17 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                       onAdvancedFilter([]);
                       setAdvancedFilters([]);
                     }}
-                    className="block bg-black text-white p-2 rounded-lg"
+                    className={clsx(
+                      "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                    )}
                   >
-                    Clear Filters
+                    Clear
                   </button>
                   <button
                     onClick={() => onAdvancedFilter(advancedFilters)}
-                    className="block bg-black text-white p-2 rounded-lg"
+                    className={clsx(
+                      "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
+                    )}
                   >
                     Save
                   </button>
