@@ -18,9 +18,12 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { CSVLink } from "react-csv";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { UserRow } from "../../../services/lib/users";
+import { Database } from "../../../supabase/database.types";
+import { CsvData } from "../../templates/requests/requestsPage";
 import ThemedTimeFilter from "./themedTimeFilter";
 
-function escapeCSVString(s: string | undefined): string | undefined {
+export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
     return undefined;
   }
@@ -28,7 +31,7 @@ function escapeCSVString(s: string | undefined): string | undefined {
 }
 
 interface ThemedFilterProps {
-  data: any[] | null; // if data is null, then we don't show the export button
+  data: CsvData[] | null | UserRow[]; // if data is null, then we don't show the export button
   isFetching: boolean; // if fetching, we disable other time select buttons
   onTimeSelectHandler?: (key: TimeInterval, value: string) => void;
   timeFilterOptions?: { key: string; value: string }[]; // if undefined, then we don't show the timeFilter dropdown
@@ -110,11 +113,17 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                     <div className="mx-auto flex">
                       <Menu as="div" className="relative inline-block">
                         <CSVLink
-                          data={data.map((d) => ({
-                            ...d,
-                            request: escapeCSVString(d.request),
-                            response: escapeCSVString(d.response),
-                          }))}
+                          data={data.map((d) => {
+                            if ("request" in d) {
+                              return {
+                                ...d,
+                                request: escapeCSVString(d.request),
+                                response: escapeCSVString(d.response),
+                              };
+                            } else {
+                              return d;
+                            }
+                          })}
                           filename={fileName}
                           className="flex"
                           target="_blank"

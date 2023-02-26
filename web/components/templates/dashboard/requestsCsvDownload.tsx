@@ -3,14 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { GetTableData } from "./requestTable";
-
-function escapeCSVString(s: string | undefined): string | undefined {
-  if (s === undefined) {
-    return undefined;
-  }
-  const escaped = s.replace(/"/g, '""');
-  return `"${escaped}"`;
-}
+import { escapeCSVString } from "../../shared/themed/themedFilter";
 
 export function RequestsCSVDownloadButton({
   client,
