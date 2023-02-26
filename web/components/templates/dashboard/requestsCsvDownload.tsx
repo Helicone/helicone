@@ -3,14 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { GetTableData } from "./requestTable";
-
-function escapeCSVString(s: string | undefined): string | undefined {
-  if (s === undefined) {
-    return undefined;
-  }
-  const escaped = s.replace(/"/g, '""');
-  return `"${escaped}"`;
-}
+import { escapeCSVString } from "../../shared/themed/themedFilter";
 
 export function RequestsCSVDownloadButton({
   client,
@@ -30,8 +23,8 @@ export function RequestsCSVDownloadButton({
       request_id: d.request_id,
       response_id: d.response_id,
       time: d.request_created_at,
-      request: escapeCSVString(d.request_body?.prompt),
-      response: escapeCSVString(d.response_body?.choices?.[0]?.text),
+      request: "hello,", //escapeCSVString(d.request_body?.prompt),
+      response: "hello:", //escapeCSVString(d.response_body?.choices?.[0]?.text),
       "duration (s)": latency[i],
       total_tokens: d.response_body?.usage?.total_tokens,
       logprobs: tableData.probabilities[i],

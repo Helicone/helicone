@@ -18,9 +18,11 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { CSVLink } from "react-csv";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { CsvData } from "../../templates/requests/requestsPage";
 import ThemedTimeFilter from "./themedTimeFilter";
 
-function escapeCSVString(s: string | undefined): string | undefined {
+export function escapeCSVString(s: string | undefined): string | undefined {
+  console.log("THIS IS S", s);
   if (s === undefined) {
     return undefined;
   }
@@ -28,7 +30,7 @@ function escapeCSVString(s: string | undefined): string | undefined {
 }
 
 interface ThemedFilterProps {
-  data: any[] | null; // if data is null, then we don't show the export button
+  data: CsvData[] | null; // if data is null, then we don't show the export button
   isFetching: boolean; // if fetching, we disable other time select buttons
   onTimeSelectHandler?: (key: TimeInterval, value: string) => void;
   timeFilterOptions?: { key: string; value: string }[]; // if undefined, then we don't show the timeFilter dropdown
