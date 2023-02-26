@@ -198,10 +198,10 @@ const RequestsPage = (props: RequestsPageProps) => {
       "duration (s)": latency.toString(),
       total_tokens: d.response_body?.usage?.total_tokens ?? 0,
       logprobs: probabilities ? probabilities[i] : null,
-      request_user_id: d.request_user_id ?? "Cannot find user id",
-      model: d.response_body?.model ?? "Cannot find model",
+      request_user_id: d.request_user_id ?? "",
+      model: d.response_body?.model ?? "",
       temperature: d.request_body?.temperature ?? null,
-      prompt_name: d.prompt_name ?? "Cannot find prompt name",
+      prompt_name: d.prompt_name ?? "",
       isCached: d.is_cached ?? false,
       ...updated_request_properties,
     };
