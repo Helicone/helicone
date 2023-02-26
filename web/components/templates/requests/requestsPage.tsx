@@ -193,9 +193,8 @@ const RequestsPage = (props: RequestsPageProps) => {
         ? JSON.stringify(d.request_body?.prompt)
         : "Cannot find prompt",
       response: d.response_body?.choices?.[0]?.text
-        ? `error: ${JSON.stringify(d.response_body?.error)}`
-        : JSON.stringify(d.response_body?.choices?.[0]?.text) ??
-          "Cannot find response",
+        ? JSON.stringify(d.response_body?.choices?.[0]?.text)
+        : `error: ${JSON.stringify(d.response_body?.error)}`,
       "duration (s)": latency.toString(),
       total_tokens: d.response_body?.usage?.total_tokens ?? 0,
       logprobs: probabilities ? probabilities[i] : null,
