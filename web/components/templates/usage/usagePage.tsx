@@ -63,8 +63,8 @@ const CurrentSubscriptionStatus = ({
   if (tier === "free") {
     return (
       <div className="mt-2 text-sm text-gray-700">
-        You are currently on the our free free tier. You can upgrade to the
-        starter tier to get more requests per month.
+        You are currently on the free tier. You can upgrade to the starter tier
+        to get more requests per month.
       </div>
     );
   } else if (tier === "starter") {
