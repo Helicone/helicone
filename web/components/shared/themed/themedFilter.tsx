@@ -22,7 +22,6 @@ import { CsvData } from "../../templates/requests/requestsPage";
 import ThemedTimeFilter from "./themedTimeFilter";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
-  console.log("THIS IS S", s);
   if (s === undefined) {
     return undefined;
   }
