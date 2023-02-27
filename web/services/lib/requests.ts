@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { getPagination } from "../../components/shared/getPagination";
+import { Column } from "../../components/ThemedTableV2";
 import { Database } from "../../supabase/database.types";
 
 export type ResponseAndRequest = Omit<
@@ -37,7 +38,15 @@ const getRequests = async (
   currentPage: number,
   pageSize: number,
   sortBy: string | null,
-  timeFilter: string | null
+  timeFilter: string | null,
+  advancedFilter?: {
+    idx: number;
+    type?: "number" | "text" | "datetime-local" | undefined;
+    supabaseKey?: string | undefined;
+    value?: string | undefined;
+    column?: Column | undefined;
+    operator?: "eq" | "gt" | "lt";
+  }[]
 ) => {
   const { from, to } = getPagination(currentPage - 1, pageSize);
 
@@ -76,6 +85,55 @@ const getRequests = async (
   if (timeFilter === "3mo") {
     date = new Date(date.getTime() - 90 * 24 * 60 * 60 * 1000);
     query = query.gte("request_created_at", date.toISOString());
+  }
+
+  if (advancedFilter) {
+    advancedFilter.forEach((filter) => {
+      if (filter.type === "text") {
+        if (filter.operator === "eq") {
+          query = query.textSearch(
+            filter.supabaseKey as string,
+            filter.value as string
+          );
+        } else {
+          // do nothing for gt and lt
+        }
+      } else if (filter.type === "number") {
+        if (filter.operator === "eq") {
+          query = query.eq(
+            filter.supabaseKey as string,
+            parseInt(filter.value as string, 10)
+          );
+        } else if (filter.operator === "gt") {
+          query = query.gt(
+            filter.supabaseKey as string,
+            parseInt(filter.value as string, 10)
+          );
+        } else if (filter.operator === "lt") {
+          query = query.lt(
+            filter.supabaseKey as string,
+            parseInt(filter.value as string, 10)
+          );
+        }
+      } else if (filter.type === "datetime-local") {
+        if (filter.operator === "eq") {
+          query = query.eq(
+            filter.supabaseKey as string,
+            new Date(filter.value as string).toISOString()
+          );
+        } else if (filter.operator === "gt") {
+          query = query.gt(
+            filter.supabaseKey as string,
+            new Date(filter.value as string).toISOString()
+          );
+        } else if (filter.operator === "lt") {
+          query = query.lt(
+            filter.supabaseKey as string,
+            new Date(filter.value as string).toISOString()
+          );
+        }
+      }
+    });
   }
 
   query = query.range(from, to);

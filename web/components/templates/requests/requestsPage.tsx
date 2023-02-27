@@ -13,6 +13,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedFilter from "../../shared/themed/themedFilter";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
+import { AdvancedFilterType } from "../users/usersPage";
 
 const monthNames = [
   "Jan",
@@ -52,9 +53,17 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentTimeFilter, setCurrentTimeFilter] = useState<string>("day");
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const [advancedFilters, setAdvancedFilters] =
+    useState<AdvancedFilterType[]>();
 
   const { requests, count, from, to, isLoading, refetch, isRefetching } =
-    useRequests(currentTimeFilter, currentPage, currentPageSize, sortBy);
+    useRequests(
+      currentTimeFilter,
+      currentPage,
+      currentPageSize,
+      sortBy,
+      advancedFilters
+    );
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setCurrentTimeFilter(value);
@@ -227,12 +236,13 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const includePrompt = valuesColumns.length > 0;
 
-  const columns: readonly Column[] = [
+  const columns: Column[] = [
     {
       key: "time",
       label: "Time",
       minWidth: 170,
       sortBy: "request_created_at",
+      type: "date",
       format: (value: string) => getUSDate(value),
     },
     includePrompt
@@ -240,12 +250,15 @@ const RequestsPage = (props: RequestsPageProps) => {
           key: "prompt_name",
           label: "Prompt Name",
           format: (value: string) => value,
+          type: "text",
+          filter: true,
         }
       : null,
     {
       key: "request",
       label: "Request",
       minWidth: 170,
+      type: "text",
       format: (value: string) => truncString(value, 15),
     },
     ...valuesColumns,
@@ -253,30 +266,41 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "response",
       label: "Response",
       minWidth: 170,
+      type: "text",
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
     {
       key: "duration (s)",
       label: "Duration",
       format: (value: string) => `${value} s`,
+      type: "number",
+      filter: true,
     },
     {
       key: "total_tokens",
       label: "Total Tokens",
+      type: "number",
+      filter: true,
     },
     {
       key: "logprobs",
       label: "Log Prob",
+      type: "number",
+      filter: true,
     },
     {
       key: "request_user_id",
       label: "User",
       format: (value: string) => (value ? truncString(value, 15) : value),
+      type: "text",
+      filter: true,
     },
     ...propertiesColumns,
     {
       key: "model",
       label: "Model",
+      filter: true,
+      type: "text",
       minWidth: 170,
     },
     {
@@ -286,6 +310,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
+
+  console.log(advancedFilters);
 
   return (
     <>
@@ -305,6 +331,9 @@ const RequestsPage = (props: RequestsPageProps) => {
               ]}
               customTimeFilter
               fileName="requests.csv"
+              columns={columns}
+              advancedFilter={advancedFilters}
+              onAdvancedFilter={setAdvancedFilters}
             />
 
             {isLoading ||
