@@ -67,11 +67,13 @@ export default function ThemedFilter(props: ThemedFilterProps) {
   );
 
   const handleFilterChange = (filter: AdvancedFilterType) => {
-    const { idx, type, supabaseKey, value, column } = filter;
+    const { idx, type, supabaseKey, value, column, operator } = filter;
     const newFilters = [...advancedFilters];
-    newFilters[idx] = { idx, type, supabaseKey, value, column };
+    newFilters[idx] = { idx, type, supabaseKey, value, column, operator };
     setAdvancedFilters(newFilters);
   };
+
+  console.log(advancedFilters);
 
   const onDeleteHandler = (idx: number) => {
     const newFilters = [...advancedFilters];
@@ -184,32 +186,45 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                 <div className="space-y-4 ml-4">
                   {advancedFilters.map((filter) => (
                     <div
-                      className="max-w-2xl justify-between flex flex-row items-center space-x-4"
+                      className="w-full justify-between flex flex-row items-center space-x-4"
                       key={filter.idx}
                     >
                       <div className="w-full">
                         <ThemedDropdown
                           options={columns}
                           idx={filter.idx}
-                          onChange={(idx, type, key, value, column) =>
+                          onChange={(idx, type, key, value, column, operator) =>
                             handleFilterChange({
                               idx,
                               column,
                               supabaseKey: key,
                               type,
                               value,
+                              operator,
                             })
                           }
                           onTypeChange={(idx, column) => {
                             handleFilterChange({
                               idx,
                               type: column.type || "text",
-                              supabaseKey: "",
+                              supabaseKey: column.key,
                               value: "",
                               column,
+                              operator: "eq",
+                            });
+                          }}
+                          onOperatorChange={(idx, operator) => {
+                            handleFilterChange({
+                              idx,
+                              operator,
+                              type: filter.type || "text",
+                              supabaseKey: filter.supabaseKey,
+                              value: filter.value,
+                              column: filter.column,
                             });
                           }}
                           onDelete={onDeleteHandler}
+                          initialOperator={filter.operator}
                           initialSelected={filter.column}
                           initialValue={filter.value}
                         />
@@ -222,7 +237,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                   onClick={() =>
                     setAdvancedFilters([
                       ...advancedFilters,
-                      { idx: advancedFilters.length },
+                      { idx: advancedFilters.length, operator: "eq" },
                     ])
                   }
                   className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"

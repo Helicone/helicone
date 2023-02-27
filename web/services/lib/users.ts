@@ -21,6 +21,7 @@ const getUsers = async (
     supabaseKey?: string | undefined;
     value?: string | undefined;
     column?: Column | undefined;
+    operator?: "eq" | "gt" | "lt";
   }[]
 ) => {
   const { from, to } = getPagination(currentPage - 1, pageSize);
@@ -30,15 +31,48 @@ const getUsers = async (
   if (advancedFilter) {
     advancedFilter.forEach((filter) => {
       if (filter.type === "text") {
-        query = query.textSearch(
-          filter.supabaseKey as string,
-          filter.value as string
-        );
+        if (filter.operator === "eq") {
+          query = query.textSearch(
+            filter.supabaseKey as string,
+            filter.value as string
+          );
+        } else {
+          // do nothing for gt and lt
+        }
       } else if (filter.type === "number") {
-        query = query.eq(
-          filter.supabaseKey as string,
-          parseInt(filter.value as string, 10)
-        );
+        if (filter.operator === "eq") {
+          query = query.eq(
+            filter.supabaseKey as string,
+            parseInt(filter.value as string, 10)
+          );
+        } else if (filter.operator === "gt") {
+          query = query.gt(
+            filter.supabaseKey as string,
+            parseInt(filter.value as string, 10)
+          );
+        } else if (filter.operator === "lt") {
+          query = query.lt(
+            filter.supabaseKey as string,
+            parseInt(filter.value as string, 10)
+          );
+        }
+      } else if (filter.type === "datetime-local") {
+        if (filter.operator === "eq") {
+          query = query.eq(
+            filter.supabaseKey as string,
+            new Date(filter.value as string).toISOString()
+          );
+        } else if (filter.operator === "gt") {
+          query = query.gt(
+            filter.supabaseKey as string,
+            new Date(filter.value as string).toISOString()
+          );
+        } else if (filter.operator === "lt") {
+          query = query.lt(
+            filter.supabaseKey as string,
+            new Date(filter.value as string).toISOString()
+          );
+        }
       }
     });
   }

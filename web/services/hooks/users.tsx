@@ -12,6 +12,7 @@ const useUsers = (
     supabaseKey?: string | undefined;
     value?: string | undefined;
     column?: Column | undefined;
+    operator?: "eq" | "gt" | "lt";
   }[]
 ) => {
   const supabase = useSupabaseClient();
@@ -29,6 +30,7 @@ const useUsers = (
           supabaseKey?: string | undefined;
           value?: string | undefined;
           column?: Column | undefined;
+          operator?: "eq" | "gt" | "lt";
         }[]
       ).then((res) => res);
     },

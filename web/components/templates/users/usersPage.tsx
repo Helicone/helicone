@@ -43,6 +43,7 @@ interface UsersPageProps {
 export type AdvancedFilterType = {
   idx: number;
   type?: "number" | "text" | "datetime-local" | undefined;
+  operator?: "eq" | "gt" | "lt";
   supabaseKey?: string | undefined;
   value?: string | undefined;
   column?: Column | undefined;
@@ -79,10 +80,6 @@ const UsersPage = (props: UsersPageProps) => {
     return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
       .toLocaleTimeString()
       .slice(-2)}`;
-  };
-
-  const onAdvancedFilter = (advancedFilter: AdvancedFilterType[]) => {
-    setAdvancedFilters(advancedFilter);
   };
 
   const columns: Column[] = [
@@ -142,7 +139,7 @@ const UsersPage = (props: UsersPageProps) => {
           fileName="users.csv"
           columns={columns}
           advancedFilter={advancedFilters}
-          onAdvancedFilter={onAdvancedFilter}
+          onAdvancedFilter={setAdvancedFilters}
         />
         {isLoading || from === undefined || to === undefined ? (
           <LoadingAnimation title="Getting your requests" />
