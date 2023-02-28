@@ -18,7 +18,7 @@ import Notification from "../../shared/notification/Notification";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedFilter from "../../shared/themed/themedFilter";
 import ThemedModal from "../../shared/themed/themedModal";
-import ThemedTableV2 from "../../ThemedTableV2";
+import ThemedTableV2, { Column } from "../../ThemedTableV2";
 
 const monthNames = [
   "Jan",
@@ -40,10 +40,27 @@ interface UsersPageProps {
   pageSize: number;
 }
 
+export type AdvancedFilterType = {
+  idx: number;
+  type?: "number" | "text" | "datetime-local" | undefined;
+  operator?: "eq" | "gt" | "lt";
+  supabaseKey?: string | undefined;
+  value?: string | undefined;
+  column?: Column | undefined;
+};
+
 const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
-  const { users, count, from, isLoading, to } = useUsers(page, pageSize);
+  const [advancedFilters, setAdvancedFilters] =
+    useState<AdvancedFilterType[]>();
+
+  const { users, count, from, isLoading, to } = useUsers(
+    page,
+    pageSize,
+    advancedFilters
+  );
+
   const { setNotification } = useNotification();
 
   const [open, setOpen] = useState(true);
@@ -65,55 +82,71 @@ const UsersPage = (props: UsersPageProps) => {
       .slice(-2)}`;
   };
 
+  const columns: Column[] = [
+    {
+      key: "user_id",
+      label: "Id",
+      type: "text",
+      filter: true,
+      minWidth: 170,
+    },
+    {
+      key: "active_for",
+      label: "Active For",
+      filter: false,
+      format: (value: string) => `${value} days`,
+    },
+    {
+      key: "last_active",
+      label: "Last Active",
+      type: "datetime-local",
+      filter: true,
+      minWidth: 170,
+      format: (value: string) => getUSDate(value),
+    },
+    {
+      key: "total_requests",
+      label: "Requests",
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "average_requests_per_day_active",
+      label: "Avg Reqs / Day",
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "average_tokens_per_request",
+      label: "Avg Tokens / Req",
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "total_cost",
+      label: "Total Cost",
+      format: (value: any) => `$TBD`,
+    },
+  ];
+
   return (
     <>
       <AuthHeader title={"Users"} />
       <div className="space-y-2">
+        <ThemedFilter
+          data={users}
+          isFetching={isLoading}
+          fileName="users.csv"
+          columns={columns}
+          advancedFilter={advancedFilters}
+          onAdvancedFilter={setAdvancedFilters}
+        />
         {isLoading || from === undefined || to === undefined ? (
           <LoadingAnimation title="Getting your requests" />
         ) : (
           <>
-            <ThemedFilter
-              data={users}
-              isFetching={isLoading}
-              fileName="users.csv"
-            />
             <ThemedTableV2
-              columns={[
-                {
-                  key: "user_id",
-                  label: "Id",
-                  minWidth: 170,
-                },
-                {
-                  key: "active_for",
-                  label: "Active For",
-                  format: (value: string) => `${value} days`,
-                },
-                {
-                  key: "last_active",
-                  label: "Last Active",
-                  minWidth: 170,
-                  format: (value: string) => getUSDate(value),
-                },
-                {
-                  key: "total_requests",
-                  label: "Requests",
-                },
-                {
-                  key: "average_requests_per_day_active",
-                  label: "Avg Reqs / Day",
-                },
-                {
-                  key: "average_tokens_per_request",
-                  label: "Avg Tokens / Req",
-                },
-                {
-                  key: "total_cost",
-                  label: "Total Cost",
-                  format: (value: any) => `$TBD`,
-                },
-              ]}
+              columns={columns}
               rows={users}
               page={page}
               from={from}
