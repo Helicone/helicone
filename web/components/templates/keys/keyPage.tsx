@@ -21,24 +21,10 @@ const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
 
   const supabaseClient = useSupabaseClient<Database>();
-  // const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState("");
-  const [keyName, setKeyName] = useState("");
-  const [hashedApiKey, setHashedApiKey] = useState("");
   const [selectedKey, setSelectedKey] =
     useState<Database["public"]["Tables"]["user_api_keys"]["Row"]>();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-
-  useEffect(() => {
-    if (apiKey === "") {
-      setHashedApiKey("");
-      return;
-    }
-    hashAuth(apiKey).then((hash) => {
-      setHashedApiKey(hash);
-    });
-  }, [apiKey]);
 
   const onDeleteHandler = (
     key: Database["public"]["Tables"]["user_api_keys"]["Row"]
@@ -51,39 +37,6 @@ const KeyPage = (props: KeyPageProps) => {
   const { deleteKey, error } = useDeleteKey();
 
   const { setNotification } = useNotification();
-
-  async function addKey() {
-    if (hashedApiKey === "") {
-      // setError("Please enter a key");
-      return;
-    }
-    if (!user?.id) {
-      // setError("Please login to add a key");
-      return;
-    }
-    supabaseClient
-      .from("user_api_keys")
-      .insert([
-        {
-          user_id: user?.id!,
-          api_key_hash: hashedApiKey,
-          api_key_preview: middleTruncString(apiKey, 8),
-          key_name: keyName,
-        },
-      ])
-      .then((res) => {
-        if (res.error) {
-          console.error(res.error);
-          setNotification("Error saving key", "error");
-          return;
-        }
-        setNotification("Key Created", "success");
-        setApiKey("");
-        // setError(null);
-        setKeyName("");
-        refetch();
-      });
-  }
 
   const renderKeyTable = () => {
     if (count < 1) {
@@ -159,95 +112,6 @@ const KeyPage = (props: KeyPageProps) => {
             </Link>
           </p>
         </div>
-        {/* <div className="flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row w-full gap-4">
-            <div className="w-full">
-              <label
-                htmlFor="openAIKey"
-                className="block text-sm font-medium text-black"
-              >
-                OpenAI Key
-              </label>
-              <div className="relative mt-1 flex items-center">
-                <input
-                  type="text"
-                  name="openAIKey"
-                  id="openAIKey"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter in your OpenAI API key here"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-                />
-              </div>
-            </div>
-            <div className="w-full">
-              <label
-                htmlFor="keyName"
-                className="block text-sm font-medium text-black"
-              >
-                Key Name
-              </label>
-              <div className="relative mt-1 flex items-center">
-                <input
-                  type="text"
-                  name="keyName"
-                  id="keyName"
-                  value={keyName}
-                  onChange={(e) => setKeyName(e.target.value)}
-                  placeholder="Enter in a name for this key"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="relative w-full">
-            <div
-              className="absolute inset-0 flex items-center"
-              aria-hidden="true"
-            >
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center ">
-              <span className="">
-                <ChevronDoubleDownIcon
-                  className="h-4 w-4 bg-gray-100 text-gray-400"
-                  aria-hidden="true"
-                />
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-0">
-            <div className="w-full">
-              <div className="flex flex-row gap-1">
-                <label
-                  htmlFor="hashedKey"
-                  className="block text-sm font-medium text-black pl-0"
-                >
-                  Hashed Key (generated){" "}
-                </label>
-              </div>
-
-              <div className="relative mt-1 flex items-center pl-0">
-                <input
-                  readOnly
-                  type="text"
-                  name="hashedKey"
-                  id="hashedKey"
-                  value={hashedApiKey}
-                  className="block w-full hover:cursor-not-allowed rounded-md bg-gray-200 border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="w-full justify-end flex flex-row">
-            <button
-              onClick={addKey}
-              className="rounded-md bg-black px-3.5 py-1.5 text-base font-medium leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              Add Hashed Key
-            </button>
-          </div>
-        </div> */}
         {isLoading ? (
           <LoadingAnimation title={"Loading your keys..."} />
         ) : (
