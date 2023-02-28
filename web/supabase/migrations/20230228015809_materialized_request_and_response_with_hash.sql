@@ -2,27 +2,30 @@
 -- For the circular dependencies, the order in which Schema Diff writes the objects is not very sophisticated
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
+DROP MATERIALIZED VIEW IF EXISTS public.materialized_response_and_request;
+
 CREATE MATERIALIZED VIEW IF NOT EXISTS public.materialized_response_and_request TABLESPACE pg_default AS
 SELECT
-    response.body AS response_body,
     response.id AS response_id,
     CASE
         WHEN request.cached_created_at IS NOT NULL THEN request.cached_created_at
         ELSE response.created_at
     END AS response_created_at,
+    response.body AS response_body,
     request.id AS request_id,
-    request.body AS request_body,
-    request.path AS request_path,
     CASE
         WHEN request.cached_created_at IS NOT NULL THEN request.cached_created_at
         ELSE request.created_at
     END AS request_created_at,
+    request.body AS request_body,
+    request.path AS request_path,
     request.user_id AS request_user_id,
-    user_api_keys.api_key_preview,
-    user_api_keys.user_id,
     request.properties AS request_properties,
-    request.formatted_prompt_id,
-    request.prompt_values,
+    request.formatted_prompt_id as request_formatted_prompt_id,
+    request.prompt_values as request_prompt_values,
+    user_api_keys.api_key_preview as user_api_key_preview,
+    user_api_keys.user_id as user_api_key_user_id,
+    user_api_keys.api_key_hash as user_api_key_hash,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
     request.cached_created_at IS NOT NULL AS is_cached
