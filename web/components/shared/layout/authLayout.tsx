@@ -27,8 +27,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { getKeys } from "../../../services/lib/keys";
-import { useKeys } from "../../../lib/useKeys";
+import { useGetKeys } from "../../../services/hooks/keys";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -87,7 +86,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     },
   ];
 
-  const { apiKeys, refreshKeys } = useKeys(supabaseClient);
+  const { count, isLoading, keys, refetch } = useGetKeys();
 
   return (
     <>
@@ -156,11 +155,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   <div className="mt-5 h-0 flex-1 overflow-y-auto">
                     <nav className="space-y-1 px-2">
                       {navigation.map((item) => {
-                        if (
-                          item.name === "Keys" &&
-                          apiKeys &&
-                          apiKeys.length < 1
-                        ) {
+                        if (item.name === "Keys" && !isLoading && count < 1) {
                           return (
                             <Link
                               key={item.name}
@@ -258,7 +253,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   METRICS
                 </p> */}
                 {navigation.map((item) => {
-                  if (item.name === "Keys" && apiKeys && apiKeys.length < 1) {
+                  if (item.name === "Keys" && !isLoading && count < 1) {
                     return (
                       <Link
                         key={item.name}
@@ -315,7 +310,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   Account
                 </p>
                 {accountNav.map((item) => {
-                  if (item.name === "Keys" && apiKeys && apiKeys.length < 1) {
+                  if (item.name === "Keys" && !isLoading && count < 1) {
                     return (
                       <Link
                         key={item.name}

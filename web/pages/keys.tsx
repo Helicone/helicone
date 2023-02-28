@@ -4,6 +4,7 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 
 import { GetServerSidePropsContext } from "next";
+import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import KeyPage from "../components/templates/keys/keyPage";
@@ -18,6 +19,7 @@ const Keys = (props: KeysProps) => {
   return (
     <MetaData title="Keys">
       <AuthLayout user={user}>
+        <AuthHeader title="API Keys" />
         <KeyPage />
       </AuthLayout>
     </MetaData>
