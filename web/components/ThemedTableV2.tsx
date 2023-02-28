@@ -14,6 +14,8 @@ import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 export interface Column {
   key: string;
   label: string;
+  type?: "text" | "number" | "datetime-local";
+  filter?: boolean;
   sortBy?: string;
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
