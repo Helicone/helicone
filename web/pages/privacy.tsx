@@ -24,7 +24,9 @@ const Privacy = (props: PrivacyProps) => {
           <div className="py-24 max-w-3xl font-serif space-y-16">
             <div className="flex flex-col space-y-4">
               <p className="text-5xl font-sans">Privacy Policy</p>
-              <p className="text-lg font-sans">Last updated February 5, 2023</p>
+              <p className="text-lg font-sans">
+                Last updated February 28, 2023
+              </p>
             </div>
 
             {pageContent.map((page, index) =>
@@ -274,12 +276,10 @@ We also encourage you to review the Google's policy for safeguarding your data: 
 Cloudflare analytics
 Cloudflare analytics is a web analytics service operated by Cloudflare Inc. Read the Privacy Policy here: https://www.cloudflare.com/privacypolicy/ 
  
-Mixpanel
-Mixpanel is provided by Mixpanel Inc.
- 
-You can prevent Mixpanel from using your information for analytics purposes by opting-out. To opt-out of Mixpanel service, please visit this page: https://mixpanel.com/optout/
- 
-For more information on what type of information Mixpanel collects, please visit the Terms of Use page of Mixpanel: https://mixpanel.com/terms/
+PostHog
+PostHog is a product analytics platform built for the modern enterprise, with the differentiators of being open source and having a broader view of the tools needed to make a product successful.
+
+For more information about PostHog, please visit their Privacy Policy: https://posthog.com/privacy
     `,
   },
   {

@@ -23,6 +23,14 @@ import BasePageV2 from "../../shared/layout/basePageV2";
 import OnboardingButton from "../../shared/auth/onboardingButton";
 import { useState } from "react";
 
+import posthog from "posthog-js";
+
+if (typeof window !== "undefined" && process.env.POSTHOG_API_KEY) {
+  posthog.init(process.env.POSTHOG_API_KEY, {
+    api_host: "https://app.posthog.com",
+  });
+}
+
 export default function HomePage() {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
