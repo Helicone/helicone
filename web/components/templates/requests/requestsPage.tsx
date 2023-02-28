@@ -344,9 +344,9 @@ const RequestsPage = (props: RequestsPageProps) => {
               ]}
               customTimeFilter
               fileName="requests.csv"
-              columns={columns}
-              advancedFilter={advancedFilters}
-              onAdvancedFilter={setAdvancedFilters}
+              // columns={columns}
+              // advancedFilter={advancedFilters}
+              // onAdvancedFilter={setAdvancedFilters}
             />
 
             {isLoading ||
