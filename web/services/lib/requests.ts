@@ -10,7 +10,7 @@ export type ResponseAndRequest = Omit<
   response_body: {
     choices:
       | {
-          text: string;
+          text: any;
           logprobs: {
             token_logprobs: number[];
           };

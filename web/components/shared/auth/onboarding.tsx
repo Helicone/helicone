@@ -172,7 +172,7 @@ const Onboarding = (props: OnboardingProps) => {
       email,
       password,
       options: {
-        emailRedirectTo: `https://${origin}/keys`,
+        emailRedirectTo: `https://${origin}/dashboard`,
       },
     });
 

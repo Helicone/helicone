@@ -15,6 +15,24 @@ import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { AdvancedFilterType } from "../users/usersPage";
 
+export type CsvData = {
+  request_id: string;
+  response_id: string;
+  error: string;
+  time: string;
+  request: string;
+  response: string;
+  total_tokens: number;
+  logprobs: number | null;
+  request_user_id: string;
+  model: string;
+  temperature: number | null;
+  prompt_name: string;
+  isCached: boolean;
+} & {
+  [keys: string]: string | number | null | boolean;
+};
+
 const monthNames = [
   "Jan",
   "Feb",
@@ -29,13 +47,6 @@ const monthNames = [
   "Nov",
   "Dec",
 ];
-
-function escapeCSVString(s: string | undefined): string | undefined {
-  if (s === undefined) {
-    return undefined;
-  }
-  return s.replace(/"/g, '""');
-}
 
 interface RequestsPageProps {
   page: number;
@@ -99,8 +110,8 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [open, setOpen] = useState(true);
 
   const probabilities = requests?.map((req) => {
-    const choice = req.response_body?.choices
-      ? req.response_body?.choices[0]
+    const choice = (req.response_body as any)?.choices
+      ? (req.response_body as any)?.choices[0]
       : null;
 
     if (!choice) {
@@ -148,13 +159,16 @@ const RequestsPage = (props: RequestsPageProps) => {
   type JsonDict = {
     [key: string]: Json;
   };
-  const csvData = requests?.map((d, i) => {
+
+  const csvData: CsvData[] = requests?.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
       1000;
 
-    let updated_request_properties = Object.assign(
+    let updated_request_properties: {
+      [keys: string]: string;
+    } = Object.assign(
       {},
       ...properties.map((p) => ({
         [p]:
@@ -179,24 +193,25 @@ const RequestsPage = (props: RequestsPageProps) => {
         prompt_regex: d.prompt_regex,
       });
     }
-
     return {
-      request_id: d.request_id,
-      response_id: d.response_id,
-      error: d.response_body!.error,
-      time: d.request_created_at,
-      request: d.request_body?.prompt,
-      response: d.response_body!.error
-        ? `error: ${d.response_body!.error.type}`
-        : d.response_body?.choices?.[0]?.text,
+      request_id: d.request_id ?? "Cannot find request id",
+      response_id: d.response_id ?? "Cannot find response id",
+      error: d.response_body?.error ?? "unknown error",
+      time: d.request_created_at ?? "Cannot find time",
+      request: d.request_body?.prompt
+        ? JSON.stringify(d.request_body?.prompt)
+        : "Cannot find prompt",
+      response: d.response_body?.choices?.[0]?.text
+        ? JSON.stringify(d.response_body?.choices?.[0]?.text)
+        : `error: ${JSON.stringify(d.response_body?.error)}`,
       "duration (s)": latency.toString(),
-      total_tokens: d.response_body?.usage?.total_tokens,
+      total_tokens: d.response_body?.usage?.total_tokens ?? 0,
       logprobs: probabilities ? probabilities[i] : null,
-      request_user_id: d.request_user_id,
-      model: d.response_body?.model,
-      temperature: d.request_body?.temperature,
-      prompt_name: d.prompt_name,
-      isCached: d.is_cached,
+      request_user_id: d.request_user_id ?? "",
+      model: d.response_body?.model ?? "",
+      temperature: d.request_body?.temperature ?? null,
+      prompt_name: d.prompt_name ?? "",
+      isCached: d.is_cached ?? false,
       ...updated_request_properties,
     };
   });
