@@ -115,9 +115,6 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                   />
                 )}
               </div>
-
-              {/* TODO: Add back this uncommented code once filters is functional */}
-
               <div className="flex flex-row space-x-2 items-center pr-2">
                 {columns && (
                   <div className="text-sm">

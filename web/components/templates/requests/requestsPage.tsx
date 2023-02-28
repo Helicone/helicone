@@ -12,6 +12,7 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedFilter from "../../shared/themed/themedFilter";
 import ThemedModal from "../../shared/themed/themedModal";
+import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { AdvancedFilterType } from "../users/usersPage";
 
@@ -32,21 +33,6 @@ export type CsvData = {
 } & {
   [keys: string]: string | number | null | boolean;
 };
-
-const monthNames = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
 
 interface RequestsPageProps {
   page: number;
@@ -223,14 +209,6 @@ const RequestsPage = (props: RequestsPageProps) => {
         <p>{val || "{NULL}"}</p>
       </li>
     );
-  };
-  const getUSDate = (value: string) => {
-    const date = new Date(value);
-    const month = monthNames[date.getMonth()];
-    const day = date.getDate();
-    return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
-      .toLocaleTimeString()
-      .slice(-2)}`;
   };
 
   const propertiesColumns = properties.map((p) => {
