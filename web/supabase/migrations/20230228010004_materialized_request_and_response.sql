@@ -43,7 +43,9 @@ FROM
             request r
     ) request ON request.id = response.request
     LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
-    LEFT JOIN prompt ON request.formatted_prompt_id = prompt.id WITH DATA;
+    LEFT JOIN prompt ON request.formatted_prompt_id = prompt.id WITH DATA
+WHERE
+    user_api_keys.user_id = 'e6bb0213-3808-4219-bd3e-4fc4b4725a53';
 
 ALTER TABLE
     IF EXISTS public.materialized_response_and_request OWNER TO postgres;
