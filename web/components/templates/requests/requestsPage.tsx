@@ -311,8 +311,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   ].filter((column) => column !== null) as Column[];
 
-  console.log(advancedFilters);
-
   return (
     <>
       <AuthHeader title={"Requests"} />

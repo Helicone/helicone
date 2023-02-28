@@ -73,8 +73,6 @@ export default function ThemedFilter(props: ThemedFilterProps) {
     setAdvancedFilters(newFilters);
   };
 
-  console.log(advancedFilters);
-
   const onDeleteHandler = (idx: number) => {
     const newFilters = [...advancedFilters];
     const filtered = newFilters.filter((filter) => {
