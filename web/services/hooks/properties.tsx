@@ -11,8 +11,6 @@ const useGetProperties = () => {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data?.data);
-
   const allProperties: string[] = data?.data.map((property: Property) => {
     return property.property;
   });

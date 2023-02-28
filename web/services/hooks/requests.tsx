@@ -20,29 +20,15 @@ const useGetRequests = (
   const supabase = useSupabaseClient();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: [
-      "requests",
-      currentTimeFilter,
-      currentPage,
-      currentPageSize,
-      sortBy,
-      advancedFilters,
-    ],
-    queryFn: async (query) => {
+    queryKey: ["requests"],
+    queryFn: async () => {
       return getRequests(
         supabase,
-        query.queryKey[2] as number,
-        query.queryKey[3] as number,
-        query.queryKey[4] as string | null,
-        query.queryKey[1] as string | null,
-        query.queryKey[5] as {
-          idx: number;
-          type?: "number" | "text" | "datetime-local" | undefined;
-          supabaseKey?: string | undefined;
-          value?: string | undefined;
-          column?: Column | undefined;
-          operator?: "eq" | "gt" | "lt";
-        }[]
+        currentPage,
+        currentPageSize,
+        sortBy,
+        currentTimeFilter,
+        advancedFilters
       ).then((res) => res);
     },
     refetchOnWindowFocus: false,

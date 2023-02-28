@@ -58,18 +58,6 @@ export const getServerSideProps = async (
   const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = (sort as string) || null;
 
-  // let allProperties: string[] = [];
-  // try {
-  // allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
-  //   (property) => {
-  //     return property.property;
-  //   }
-  // );
-  // } catch (err) {
-  //   console.error(err);
-  //   allProperties = [];
-  // }
-
   let allValues: string[] = [];
   try {
     allValues = (await unwrapAsync(getPromptValues(session.user.id))).map(
