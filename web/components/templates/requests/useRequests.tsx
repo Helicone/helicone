@@ -33,6 +33,8 @@ const useRequests = (
     advancedFilters
   );
 
+  console.log(requests);
+
   const {
     properties,
     error,

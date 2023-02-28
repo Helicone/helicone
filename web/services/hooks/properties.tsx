@@ -11,7 +11,13 @@ const useGetProperties = () => {
     refetchOnWindowFocus: false,
   });
 
-  return { properties: (data?.data as string[]) || [], isLoading, error };
+  console.log(data?.data);
+
+  const allProperties: string[] = data?.data.map((property: Property) => {
+    return property.property;
+  });
+
+  return { properties: allProperties || [], isLoading, error };
 };
 
 export { useGetProperties };
