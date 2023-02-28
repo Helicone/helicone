@@ -5,7 +5,8 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
-import { useRequests } from "../../../services/hooks/requests";
+import { useGetProperties } from "../../../services/hooks/properties";
+import { useGetRequests } from "../../../services/hooks/requests";
 import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -15,6 +16,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { AdvancedFilterType } from "../users/usersPage";
+import useRequests from "./useRequests";
 
 export type CsvData = {
   request_id: string;
@@ -37,13 +39,13 @@ export type CsvData = {
 interface RequestsPageProps {
   page: number;
   pageSize: number;
-  properties: string[];
+  // properties: string[];
   sortBy: string | null;
   values: string[];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, properties, sortBy, values } = props;
+  const { page, pageSize, sortBy, values } = props;
 
   const { setNotification } = useNotification();
 
@@ -53,14 +55,24 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [advancedFilters, setAdvancedFilters] =
     useState<AdvancedFilterType[]>();
 
-  const { requests, count, from, to, isLoading, refetch, isRefetching } =
-    useRequests(
-      currentTimeFilter,
-      currentPage,
-      currentPageSize,
-      sortBy,
-      advancedFilters
-    );
+  const {
+    count,
+    error,
+    from,
+    isPropertiesLoading,
+    isRefetching,
+    isRequestsLoading,
+    properties,
+    refetch,
+    requests,
+    to,
+  } = useRequests(
+    currentTimeFilter,
+    currentPage,
+    currentPageSize,
+    sortBy,
+    advancedFilters
+  );
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setCurrentTimeFilter(value);
@@ -312,22 +324,21 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="space-y-2">
             <ThemedFilter
               data={csvData || []}
-              isFetching={isLoading || isRefetching}
+              isFetching={
+                isRequestsLoading || isPropertiesLoading || isRefetching
+              }
               onTimeSelectHandler={onTimeSelectHandler}
               timeFilterOptions={[
                 { key: "24h", value: "day" },
                 { key: "7d", value: "wk" },
                 { key: "1m", value: "mo" },
-                // { key: "3m", value: "3mo" },
               ]}
               customTimeFilter
               fileName="requests.csv"
-              // columns={columns}
-              // advancedFilter={advancedFilters}
-              // onAdvancedFilter={setAdvancedFilters}
             />
 
-            {isLoading ||
+            {isRequestsLoading ||
+            isPropertiesLoading ||
             isRefetching ||
             from === undefined ||
             to === undefined ? (

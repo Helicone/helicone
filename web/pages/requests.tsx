@@ -12,12 +12,12 @@ interface RequestsProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
-  properties: string[];
+  // properties: string[];
   values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, page, pageSize, properties, sortBy, values } = props;
+  const { user, page, pageSize, sortBy, values } = props;
 
   return (
     <MetaData title="Requests">
@@ -26,7 +26,6 @@ const Requests = (props: RequestsProps) => {
           page={page}
           pageSize={pageSize}
           sortBy={sortBy}
-          properties={properties}
           values={values}
         />
       </AuthLayout>
@@ -59,17 +58,17 @@ export const getServerSideProps = async (
   const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = (sort as string) || null;
 
-  let allProperties: string[] = [];
-  try {
-    allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
-      (property) => {
-        return property.property;
-      }
-    );
-  } catch (err) {
-    console.error(err);
-    allProperties = [];
-  }
+  // let allProperties: string[] = [];
+  // try {
+  //   allProperties = (await unwrapAsync(getProperties(session.user.id))).map(
+  //     (property) => {
+  //       return property.property;
+  //     }
+  //   );
+  // } catch (err) {
+  //   console.error(err);
+  //   allProperties = [];
+  // }
 
   let allValues: string[] = [];
   try {
@@ -90,7 +89,7 @@ export const getServerSideProps = async (
       page: currentPage,
       pageSize: pageSize,
       sortBy: sortBy,
-      properties: allProperties,
+      // properties: allProperties,
       values: allValues,
     },
   };

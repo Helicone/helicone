@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Column } from "../../components/ThemedTableV2";
 import { getRequests } from "../lib/requests";
 
-const useRequests = (
+const useGetRequests = (
   currentTimeFilter: string | null,
   currentPage: number,
   currentPageSize: number,
   sortBy: string | null,
-  advancedFilter?: {
+  advancedFilters?: {
     idx: number;
     type?: "number" | "text" | "datetime-local" | undefined;
     supabaseKey?: string | undefined;
@@ -26,7 +26,7 @@ const useRequests = (
       currentPage,
       currentPageSize,
       sortBy,
-      advancedFilter,
+      advancedFilters,
     ],
     queryFn: async (query) => {
       return getRequests(
@@ -57,4 +57,4 @@ const useRequests = (
   return { requests, count, from, to, error, isLoading, refetch, isRefetching };
 };
 
-export { useRequests };
+export { useGetRequests };
