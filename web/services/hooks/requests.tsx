@@ -1,18 +1,12 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-<<<<<<< HEAD
 import { Column } from "../../components/ThemedTableV2";
 import { getRequests } from "../lib/requests";
-=======
-import { Database } from "../../supabase/database.types";
-import { getRequests, ResponseAndRequest } from "../lib/requests";
->>>>>>> origin/main
 
 const useRequests = (
   currentTimeFilter: string | null,
   currentPage: number,
   currentPageSize: number,
-<<<<<<< HEAD
   sortBy: string | null,
   advancedFilter?: {
     idx: number;
@@ -24,20 +18,6 @@ const useRequests = (
   }[]
 ) => {
   const supabase = useSupabaseClient();
-=======
-  sortBy: string | null
-): {
-  requests: ResponseAndRequest[];
-  count: number;
-  from: number;
-  to: number;
-  error: string;
-  isLoading: boolean;
-  refetch: () => void;
-  isRefetching: boolean;
-} => {
-  const supabase = useSupabaseClient<Database>();
->>>>>>> origin/main
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
