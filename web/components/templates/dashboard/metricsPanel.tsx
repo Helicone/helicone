@@ -41,16 +41,16 @@ export function MetricsPanel(props: MetricsPanelProps) {
     {
       value:
         numberOfDaysActive && data?.total_requests
-          ? (data?.total_requests / numberOfDaysActive).toFixed(3)
+          ? (data?.total_requests / numberOfDaysActive).toFixed(2)
           : "n/a",
       label: "Avg Requests / day",
     },
     {
-      value: data?.average_response_time?.toFixed(3) ?? "n/a",
+      value: data?.average_response_time?.toFixed(2) ?? "n/a",
       label: "Avg Response Time (s)",
     },
     {
-      value: data?.average_tokens_per_response?.toFixed(3) ?? "n/a",
+      value: data?.average_tokens_per_response?.toFixed(2) ?? "n/a",
       label: "Avg Token / Response",
     },
     {
@@ -62,7 +62,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Total requests",
     },
     {
-      value: data?.total_cached_savings?.toFixed(3) ?? "n/a",
+      value: data?.total_cached_savings?.toFixed(2) ?? "n/a",
       label: "Cache Savings (USD)",
     },
     {
@@ -91,26 +91,6 @@ export function MetricsPanel(props: MetricsPanelProps) {
           </div>
         ))}
       </dl>
-      {/* <dl className="grid grid-cols-2 gap-2 sm:gap-5 sm:grid-cols-5">
-        {metrics.map((row) => (
-          <div
-            key={row.label as string}
-            className="overflow-hidden rounded-lg bg-white px-4 py-2 shadow"
-          >
-            <dt className="truncate text-sm font-medium text-gray-500">
-              {row.label}
-            </dt>
-            <dd
-              className={clsx(
-                "mt-1 text-lg font-semibold tracking-tight text-gray-900",
-                loading ? "animate-pulse text-gray-400" : ""
-              )}
-            >
-              {loading ? "Loading" : row.value}
-            </dd>
-          </div>
-        ))}
-      </dl> */}
     </div>
   );
 }

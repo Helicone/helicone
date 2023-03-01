@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 export interface LineChartData {
   time: Date;
@@ -16,17 +17,17 @@ export interface LineChartData {
 export const RenderLineChart = ({
   data,
   timeMap,
+  valueFormatter,
 }: {
   data: LineChartData[];
   timeMap: (date: Date) => string;
+  valueFormatter?: (value: ValueType) => string | string[];
 }) => {
   const chartData = data.map((d) => ({
     ...d,
     value: d.value.toFixed(2),
     time: timeMap(d.time),
   }));
-
-  console.log(chartData);
 
   return (
     <ResponsiveContainer className="w-full h-full">
@@ -41,7 +42,11 @@ export const RenderLineChart = ({
           animationDuration={0}
         />
         <XAxis dataKey="time" />
-        <Tooltip />
+        <Tooltip
+          formatter={(value) =>
+            valueFormatter ? valueFormatter(value) : value
+          }
+        />
         <YAxis />
       </LineChart>
     </ResponsiveContainer>
