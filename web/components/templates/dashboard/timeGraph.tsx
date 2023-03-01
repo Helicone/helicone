@@ -26,7 +26,7 @@ export const RenderLineChart = ({
 }) => {
   const chartData = data.map((d) => ({
     ...d,
-    value: d.value.toFixed(2),
+    // value: d.value.toFixed(2),
     time: timeMap(d.time),
   }));
 
