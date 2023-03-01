@@ -26,11 +26,8 @@ export const RenderLineChart = ({
 }) => {
   const chartData = data.map((d) => ({
     ...d,
-    // value: d.value.toFixed(2),
     time: timeMap(d.time),
   }));
-
-  console.log(data);
 
   return (
     <ResponsiveContainer className="w-full h-full">
