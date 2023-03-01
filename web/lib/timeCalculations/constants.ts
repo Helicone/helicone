@@ -28,8 +28,7 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
   "7d": {
     timeMap: (date) =>
       date.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
+        dateStyle: "short",
       }),
 
     dbIncrement: "day",
@@ -39,8 +38,9 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
   "1m": {
     timeMap: (date) =>
       date.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
+        year: "2-digit",
+        month: "2-digit",
+        day: "2-digit",
       }),
 
     dbIncrement: "day",
@@ -49,15 +49,16 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
   },
   "3m": {
     timeMap: (startDate) => {
+      // returns a format like 01/01 - 01/07
       const increment = getIncrement(30 * 3 * 24 * 60 * 60 * 1000);
 
       const endDate = new Date(startDate.getTime() + increment - 1);
       return `${startDate.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
+        month: "2-digit",
+        day: "2-digit",
       })} - ${endDate.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
+        month: "2-digit",
+        day: "2-digit",
       })}`;
     },
     dbIncrement: "day",
