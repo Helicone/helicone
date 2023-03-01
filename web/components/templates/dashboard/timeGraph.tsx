@@ -30,6 +30,8 @@ export const RenderLineChart = ({
     time: timeMap(d.time),
   }));
 
+  console.log(data);
+
   return (
     <ResponsiveContainer className="w-full h-full">
       <LineChart data={chartData}>
