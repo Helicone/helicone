@@ -8,6 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import { ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
 
 export interface LineChartData {
   time: Date;
