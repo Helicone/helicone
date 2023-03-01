@@ -43,12 +43,12 @@ export const RenderLineChart = ({
           animationDuration={0}
         />
         <XAxis dataKey="time" />
+        <YAxis />
         <Tooltip
           formatter={(value) =>
             valueFormatter ? valueFormatter(value) : value
           }
         />
-        <YAxis />
       </LineChart>
     </ResponsiveContainer>
   );
