@@ -12,22 +12,15 @@ interface RequestsProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
-  // properties: string[];
-  values: string[];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, page, pageSize, sortBy, values } = props;
+  const { user, page, pageSize, sortBy } = props;
 
   return (
     <MetaData title="Requests">
       <AuthLayout user={user}>
-        <RequestsPage
-          page={page}
-          pageSize={pageSize}
-          sortBy={sortBy}
-          values={values}
-        />
+        <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} />
       </AuthLayout>
     </MetaData>
   );
@@ -58,18 +51,6 @@ export const getServerSideProps = async (
   const pageSize = parseInt(page_size as string, 10) || 25;
   const sortBy = (sort as string) || null;
 
-  let allValues: string[] = [];
-  try {
-    allValues = (await unwrapAsync(getPromptValues(session.user.id))).map(
-      (value) => {
-        return value.value;
-      }
-    );
-  } catch (err) {
-    console.error(err);
-    allValues = [];
-  }
-
   return {
     props: {
       initialSession: session,
@@ -77,8 +58,6 @@ export const getServerSideProps = async (
       page: currentPage,
       pageSize: pageSize,
       sortBy: sortBy,
-      // properties: allProperties,
-      values: allValues,
     },
   };
 };

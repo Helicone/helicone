@@ -16,7 +16,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { AdvancedFilterType } from "../users/usersPage";
-import useRequests from "./useRequests";
+import useRequestsPage from "./useRequestsPage";
 
 export type CsvData = {
   request_id: string;
@@ -39,13 +39,11 @@ export type CsvData = {
 interface RequestsPageProps {
   page: number;
   pageSize: number;
-  // properties: string[];
   sortBy: string | null;
-  values: string[];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, sortBy, values } = props;
+  const { page, pageSize, sortBy } = props;
 
   const { setNotification } = useNotification();
 
@@ -55,24 +53,14 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [advancedFilters, setAdvancedFilters] =
     useState<AdvancedFilterType[]>();
 
-  const {
-    count,
-    error,
-    from,
-    isPropertiesLoading,
-    isRefetching,
-    isRequestsLoading,
-    properties,
-    refetch,
-    requests,
-    to,
-  } = useRequests(
-    currentTimeFilter,
-    currentPage,
-    currentPageSize,
-    sortBy,
-    advancedFilters
-  );
+  const { count, values, from, isLoading, properties, refetch, requests, to } =
+    useRequestsPage(
+      currentTimeFilter,
+      currentPage,
+      currentPageSize,
+      sortBy,
+      advancedFilters
+    );
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setCurrentTimeFilter(value);
@@ -324,9 +312,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="space-y-2">
             <ThemedFilter
               data={csvData || []}
-              isFetching={
-                isRequestsLoading || isPropertiesLoading || isRefetching
-              }
+              isFetching={isLoading}
               onTimeSelectHandler={onTimeSelectHandler}
               timeFilterOptions={[
                 { key: "24h", value: "day" },
@@ -337,11 +323,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               fileName="requests.csv"
             />
 
-            {isRequestsLoading ||
-            isPropertiesLoading ||
-            isRefetching ||
-            from === undefined ||
-            to === undefined ? (
+            {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <ThemedTableV2

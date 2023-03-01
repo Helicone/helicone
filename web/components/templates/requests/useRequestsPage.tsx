@@ -1,9 +1,10 @@
+import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { Column } from "../../ThemedTableV2";
 import { AdvancedFilterType } from "../users/usersPage";
 
-const useRequests = (
+const useRequestsPage = (
   currentTimeFilter: string,
   currentPage: number,
   currentPageSize: number,
@@ -33,26 +34,27 @@ const useRequests = (
     advancedFilters
   );
 
-  console.log(requests);
-
   const {
     properties,
-    error,
+
     isLoading: isPropertiesLoading,
   } = useGetProperties();
+
+  const { values, isLoading: isValuesLoading } = useGetPromptValues();
+
+  const isLoading =
+    isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
 
   return {
     requests,
     count,
     from,
     to,
-    isRequestsLoading,
+    isLoading,
     refetch,
-    isRefetching,
     properties,
-    error,
-    isPropertiesLoading,
+    values,
   };
 };
 
-export default useRequests;
+export default useRequestsPage;
