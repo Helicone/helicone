@@ -70,7 +70,10 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               value: r.cost,
             }))}
             timeMap={timeGraphConfig[interval].timeMap}
-            valueFormatter={(v) => [`$${v}`, "cost"]}
+            valueFormatter={(v) => [
+              `$${parseInt(v.toString()).toFixed(2)}`,
+              "cost",
+            ]}
           />
         </div>
 
