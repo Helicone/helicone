@@ -85,7 +85,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               value: r.count,
             }))}
             timeMap={timeGraphConfig[interval].timeMap}
-            valueFormatter={(v) => [v.toString(), "errors"]}
+            // valueFormatter={(v) => [v.toString(), "errors"]}
           />
         </div>
       </div>
