@@ -54,7 +54,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Avg Token / Response",
     },
     {
-      value: data?.total_cost?.toFixed(3) ?? "n/a",
+      value: data?.total_cost?.toFixed(2) ?? "n/a",
       label: "Total cost (USD)",
     },
     {

@@ -5,8 +5,6 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
-import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetRequests } from "../../../services/hooks/requests";
 import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";

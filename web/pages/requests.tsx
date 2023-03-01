@@ -6,6 +6,7 @@ import RequestsPage from "../components/templates/requests/requestsPage";
 import { getProperties } from "../lib/api/properties/properties";
 import { unwrapAsync } from "../lib/result";
 import { getPromptValues } from "../lib/api/prompts/prompts";
+import LoadingAnimation from "../components/shared/loadingAnimation";
 
 interface RequestsProps {
   user: any;
@@ -20,7 +21,8 @@ const Requests = (props: RequestsProps) => {
   return (
     <MetaData title="Requests">
       <AuthLayout user={user}>
-        <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} />
+        <LoadingAnimation title="this is a test" />
+        {/* <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} /> */}
       </AuthLayout>
     </MetaData>
   );
