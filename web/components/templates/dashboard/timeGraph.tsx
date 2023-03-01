@@ -44,12 +44,30 @@ export const RenderLineChart = ({
         />
         <XAxis dataKey="time" />
         <Tooltip
-          formatter={(value) =>
-            valueFormatter ? valueFormatter(value) : value
-          }
+        // formatter={(value) =>
+        //   valueFormatter ? valueFormatter(value) : value
+        // }
         />
         <YAxis />
       </LineChart>
     </ResponsiveContainer>
+    /**
+    <ResponsiveContainer className="w-full h-full">
+      <LineChart data={chartData}>
+        <CartesianGrid vertical={false} opacity={50} strokeOpacity={0.5} />
+        <Line
+          type="monotone"
+          dot={false}
+          dataKey="value"
+          stroke="#8884d8"
+          strokeWidth={1.5}
+          animationDuration={0}
+        />
+        <XAxis dataKey="time" />
+        <Tooltip />
+        <YAxis />
+      </LineChart>
+    </ResponsiveContainer>
+     */
   );
 };
