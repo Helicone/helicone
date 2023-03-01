@@ -44,7 +44,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               </label>
               <div className="relative mt-1 flex items-center">
                 <input
-                  type="text"
+                  type="password"
                   name="openAIKey"
                   id="openAIKey"
                   value={apiKey}
