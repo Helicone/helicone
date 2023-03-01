@@ -1,3 +1,4 @@
+import { PlusIcon } from "@heroicons/react/20/solid";
 import { KeyIcon } from "@heroicons/react/24/outline";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
@@ -120,9 +121,10 @@ const KeyPage = (props: KeyPageProps) => {
             <div className="w-full flex justify-end">
               <button
                 onClick={() => setAddOpen(true)}
-                className="rounded-md bg-black px-3.5 py-1.5 text-base font-medium leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="items-center rounded-md bg-black px-3.5 py-1.5 text-base font-medium leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Add Hashed Key
+                <PlusIcon className="h-5 w-5 inline mb-0.5" />
+                Add Key
               </button>
             </div>
           </>

@@ -18,20 +18,13 @@ const useUsers = (
   const supabase = useSupabaseClient();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["users", currentPage, currentPageSize, advancedFilter],
-    queryFn: async (query) => {
+    queryKey: ["users"],
+    queryFn: async () => {
       return getUsers(
         supabase,
-        query.queryKey[1] as number,
-        query.queryKey[2] as number,
-        query.queryKey[3] as {
-          idx: number;
-          type?: "number" | "text" | "datetime-local" | undefined;
-          supabaseKey?: string | undefined;
-          value?: string | undefined;
-          column?: Column | undefined;
-          operator?: "eq" | "gt" | "lt";
-        }[]
+        currentPage,
+        currentPageSize,
+        advancedFilter
       ).then((res) => res);
     },
     refetchOnWindowFocus: false,
