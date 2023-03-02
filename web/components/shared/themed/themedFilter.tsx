@@ -350,10 +350,12 @@ function AdvancedFilterRow({
 
   useEffect(() => {
     setColumn(columnsEntries ? columnsEntries[0][0] : "");
+    setValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table]);
   useEffect(() => {
     setOperator(operatorsEntries ? operatorsEntries[0][0] : "");
+    setValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [column]);
 
