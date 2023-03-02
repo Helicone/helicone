@@ -2,6 +2,8 @@
 
 # Helicone.ai
 
+![Twitter Follow](https://img.shields.io/twitter/follow/Helicone_ai?style=social)
+
 Helicone is the observability platform for GPT-3 users. Companies save on their OpenAI bills and identify application issues by monitoring their usage, latency, and costs on Helicone.
 
 You know that LLMs are being used in more and more software companies today but what you may not realize is that compared to their traditional software, companies don’t have any way to monitor how they are working.
