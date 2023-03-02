@@ -8,7 +8,6 @@ interface CompletionRegexProps {
   [keys: string]: any;
 }
 
-// A react component
 export const CompletionRegex = (props: CompletionRegexProps) => {
   const { prompt_name, prompt_regex, response, values, keys } = props;
   console.log("KEYS", keys);

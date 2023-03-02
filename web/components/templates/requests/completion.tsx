@@ -5,7 +5,6 @@ interface CompletionProps {
   response?: string;
 }
 
-// A react component
 export const Completion = (props: CompletionProps) => {
   const { request, response } = props;
 

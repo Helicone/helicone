@@ -4,7 +4,6 @@ interface ChatProps {
   chatProperties: ChatProperties;
 }
 
-// A react component
 export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
   let messages = request ? request : [];
