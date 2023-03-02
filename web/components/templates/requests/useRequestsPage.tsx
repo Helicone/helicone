@@ -2,7 +2,6 @@ import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { Column } from "../../ThemedTableV2";
-import { AdvancedFilterType } from "../users/usersPage";
 
 const useRequestsPage = (
   currentTimeFilter: string,

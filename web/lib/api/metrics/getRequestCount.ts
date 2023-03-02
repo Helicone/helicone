@@ -1,6 +1,7 @@
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilter } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
 import { dbExecute } from "../db/dbExecute";
-import { buildFilter, FilterNode } from "./filters";
 
 export interface Count {
   count: number;

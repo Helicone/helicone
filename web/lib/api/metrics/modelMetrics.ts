@@ -1,5 +1,6 @@
 import { dbExecute } from "../db/dbExecute";
-import { buildFilter, FilterNode } from "./filters";
+import { buildFilter } from "../../../services/lib/filters/filters";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export interface ModelMetrics {
   model: string;
