@@ -104,7 +104,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                 )}
               </div>
               <div className="flex flex-row space-x-2 items-center pr-2">
-                {columns && (
+                {filterMap && onAdvancedFilter && (
                   <div className="text-sm">
                     <div className="mx-auto flex">
                       <div>
@@ -172,7 +172,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
               </div>
             </div>
 
-            {columns && onAdvancedFilter && (
+            {filterMap && onAdvancedFilter && (
               <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4">
                 <p className="text-sm text-gray-500">Filters</p>
                 <div className="space-y-4 ml-4">

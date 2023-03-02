@@ -5,6 +5,7 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { UserMetricsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -316,6 +317,10 @@ const RequestsPage = (props: RequestsPageProps) => {
               ]}
               customTimeFilter
               fileName="requests.csv"
+              filterMap={UserMetricsTableFilter}
+              onAdvancedFilter={() => {
+                console.log("hello");
+              }}
             />
 
             {isLoading || from === undefined || to === undefined ? (
