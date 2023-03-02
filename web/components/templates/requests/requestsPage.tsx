@@ -196,8 +196,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       });
     }
     const is_chat = d.request_path?.includes("/chat/") ?? false;
-    console.log("is_chat", is_chat);
-    console.log(d);
 
     let request;
     let response;
@@ -221,17 +219,11 @@ const RequestsPage = (props: RequestsPageProps) => {
         systemMessage = null;
       }
       request = last_request_message
-        ? JSON.stringify(last_request_message)
+        ? last_request_message
         : "Cannot find prompt";
       response = response_content
-        ? JSON.stringify(response_content)
+        ? response_content
         : `error: ${JSON.stringify(d.response_body?.error)}`;
-
-      // // Combine request_messages and response_message into a new list `messages`
-      // let messages = request_messages ? request_messages : []
-      // if (response_message) {
-      //   messages.push(response_blob)
-      // }
 
       chatProperties = {
         system: systemMessage,
@@ -241,10 +233,14 @@ const RequestsPage = (props: RequestsPageProps) => {
     } else {
       chatProperties = null;
       request = d.request_body?.prompt
-        ? JSON.stringify(d.request_body?.prompt)
+        ? typeof d.request_body?.prompt === "string"
+          ? d.request_body?.prompt
+          : JSON.stringify(d.request_body?.prompt)
         : "Cannot find prompt";
       response = d.response_body?.choices?.[0]?.text
-        ? JSON.stringify(d.response_body?.choices?.[0]?.text)
+        ? d.response_body?.choices?.length === 1
+          ? d.response_body?.choices?.[0]?.text
+          : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
         : `error: ${JSON.stringify(d.response_body?.error)}`;
     }
     console.log("REQUEST", request);
