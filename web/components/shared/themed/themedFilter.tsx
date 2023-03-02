@@ -58,6 +58,7 @@ interface ThemedFilterProps {
   fileName?: string; // if undefined, then we use the default file name
   columns?: Column[]; // if undefined, don't show the show filters button
   filterMap?: TableFilterMap;
+  defaultTimeFilter?: TimeInterval;
   onAdvancedFilter?: (advancedFilters: Filter[]) => void;
 }
 
@@ -70,6 +71,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
     customTimeFilter = false,
     fileName = "export.csv",
     columns,
+    defaultTimeFilter,
     filterMap,
     onAdvancedFilter,
   } = props;
@@ -98,7 +100,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                     onSelect={(key, value) => {
                       onTimeSelectHandler(key as TimeInterval, value);
                     }}
-                    defaultValue="1m"
+                    defaultValue={defaultTimeFilter ?? "all"}
                     custom={customTimeFilter}
                   />
                 )}

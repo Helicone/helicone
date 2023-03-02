@@ -2,6 +2,7 @@ import { FilterBranch, FilterLeaf, FilterNode } from "./filterDefs";
 
 export function buildFilterHaving(filter: FilterLeaf): string[] {
   let filters: string[] = [];
+
   if (filter.user_metrics) {
     if (filter.user_metrics.last_active) {
       if (filter.user_metrics.last_active.gte) {
@@ -45,7 +46,24 @@ export function buildFilterHaving(filter: FilterLeaf): string[] {
 
 export function buildFilterLeaf(filter: FilterLeaf): string[] {
   let filters: string[] = [];
-
+  console.log("filter: ", filter);
+  if (filter.properties) {
+    console.log("HELLO");
+    for (const [key, value] of Object.entries(filter.properties)) {
+      if (value.equals) {
+        if (key.includes("'") || value.equals.includes('"')) {
+          throw new Error("Invalid property key or value");
+        }
+        // check that key is only alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(key)) {
+          throw new Error("Invalid property key");
+        }
+        filters = filters.concat(
+          `quote_literal(properties ->>'${key}') = quote_literal('${value.equals}')`
+        );
+      }
+    }
+  }
   if (filter.user_metrics) {
     if (filter.user_metrics.user_id?.equals) {
       if (filter.user_metrics.user_id.equals.includes("'")) {

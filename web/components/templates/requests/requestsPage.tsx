@@ -9,7 +9,10 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  FilterNode,
+  getPropertyFilters,
+} from "../../../services/lib/filters/filterDefs";
 import {
   RequestsTableFilter,
   UserMetricsTableFilter,
@@ -163,6 +166,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   };
 
   const csvData: CsvData[] = requests?.map((d, i) => {
+    console.log("d.request_properties", d.request_properties);
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -173,10 +177,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     } = Object.assign(
       {},
       ...properties.map((p) => ({
-        [p]:
-          d.request_properties != null
-            ? (JSON.parse(d.request_properties) as JsonDict)[p]
-            : null,
+        [p]: d.request_properties != null ? d.request_properties[p] : null,
       }))
     );
 
@@ -185,9 +186,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         updated_request_properties,
         ...values.map((p) => ({
           [p]:
-            d.request_prompt_values != null
-              ? (JSON.parse(d.request_prompt_values) as JsonDict)[p]
-              : null,
+            d.request_prompt_values != null ? d.request_prompt_values[p] : null,
         }))
       );
     }
@@ -327,6 +326,12 @@ const RequestsPage = (props: RequestsPageProps) => {
   ].filter((column) => column !== null) as Column[];
   const router = useRouter();
 
+  const propertyFilterMap = {
+    properties: {
+      label: "Properties",
+      columns: getPropertyFilters(properties),
+    },
+  };
   return (
     <>
       <AuthHeader title={"Requests"} />
@@ -345,7 +350,10 @@ const RequestsPage = (props: RequestsPageProps) => {
               ]}
               customTimeFilter
               fileName="requests.csv"
-              filterMap={RequestsTableFilter}
+              filterMap={{
+                ...RequestsTableFilter,
+                ...propertyFilterMap,
+              }}
               onAdvancedFilter={(_filters) => {
                 router.query.page = "1";
                 router.push(router);

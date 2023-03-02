@@ -14,7 +14,6 @@ import { RenderLineChart } from "./timeGraph";
 
 interface TimeGraphWHeaderProps {
   data: GraphDataState;
-  setFilter: Dispatch<SetStateAction<FilterNode>>;
   interval: TimeInterval;
   setInterval: Dispatch<SetStateAction<TimeInterval>>;
 }
@@ -32,7 +31,6 @@ function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
   const {
     data: { requestsOverTime, costOverTime, errorOverTime },
-    setFilter,
     interval,
     setInterval,
   } = props;

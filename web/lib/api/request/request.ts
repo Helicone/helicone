@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 import { buildFilter } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
@@ -15,9 +15,13 @@ export interface HeliconeRequest {
   request_body: any;
   request_path: string;
   request_user_id: string;
-  request_properties: string;
+  request_properties: {
+    [key: string]: Json;
+  };
   request_formatted_prompt_id: string;
-  request_prompt_values: string;
+  request_prompt_values: {
+    [key: string]: Json;
+  };
   user_api_key_preview: string;
   user_api_key_user_id: string;
   user_api_key_hash: string;
@@ -68,6 +72,7 @@ export async function getRequests(
 `;
 
   const { data, error } = await dbExecute<HeliconeRequest>(query);
+  console.log("OUTPUT: getRequests -> data", data);
   if (error !== null) {
     return { data: null, error: error };
   }

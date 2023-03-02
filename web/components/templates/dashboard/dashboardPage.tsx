@@ -16,16 +16,23 @@ import {
 } from "../../../lib/dashboardGraphs";
 import { Result } from "../../../lib/result";
 import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
-import { TimeInterval } from "../../../lib/timeCalculations/time";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
+import { useGetProperties } from "../../../services/hooks/properties";
 import {
   FilterLeaf,
   FilterNode,
+  getPropertyFilters,
 } from "../../../services/lib/filters/filterDefs";
+import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
-import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+import useRequestsPage from "../requests/useRequestsPage";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
@@ -46,28 +53,31 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [metrics, setMetrics] =
     useState<Loading<Result<Metrics, string>>>("loading");
-  const [interval, setInterval] = useState<TimeInterval>("24h");
-  const [filter, _setFilter] = useState<FilterNode>({
+  const [interval, setInterval] = useState<TimeInterval>("1m");
+  const [filter, setFilter] = useState<FilterNode>("all");
+  const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
-        gte: timeGraphConfig["24h"].start.toISOString(),
-        lte: timeGraphConfig["24h"].end.toISOString(),
+        gte: timeGraphConfig["1m"].start.toISOString(),
+        lte: timeGraphConfig["1m"].end.toISOString(),
       },
     },
   });
-  const setFilter = (f: SetStateAction<FilterNode>) => {
-    if (typeof f === "function") {
-      f = f(filter);
-    }
-    _setFilter(f);
-    getDashboardData(f, setMetrics, setTimeData);
-  };
+
+  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
   useEffect(() => {
-    getDashboardData(filter, setMetrics, setTimeData);
+    console.log("getting dashboard data", timeFilter, filter);
+    getDashboardData(timeFilter, filter, setMetrics, setTimeData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [timeFilter, filter]);
 
+  const propertyFilterMap = {
+    properties: {
+      label: "Properties",
+      columns: getPropertyFilters(properties),
+    },
+  };
   return (
     <AuthLayout user={user}>
       <AuthHeader
@@ -117,6 +127,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           <ThemedFilter
             data={null}
             isFetching={metrics === "loading"}
+            customTimeFilter
             timeFilterOptions={[
               { key: "1h", value: "hour" },
               { key: "24h", value: "day" },
@@ -124,34 +135,59 @@ const DashboardPage = (props: DashboardPageProps) => {
               { key: "1m", value: "mo" },
               { key: "3m", value: "3mo" },
             ]}
+            defaultTimeFilter={interval}
+            filterMap={{
+              ...RequestsTableFilter,
+              ...propertyFilterMap,
+            }}
+            onAdvancedFilter={(_filters: Filter[]) => {
+              const filters = _filters.filter((f) => f) as FilterNode[];
+              if (filters.length === 0) {
+                setFilter("all");
+              } else {
+                const firstFilter = filters[0];
+                setFilter(
+                  filters.slice(1).reduce((acc, curr) => {
+                    return {
+                      left: acc,
+                      operator: "and",
+                      right: curr,
+                    };
+                  }, firstFilter)
+                );
+              }
+            }}
             onTimeSelectHandler={(key: TimeInterval, value: string) => {
-              setInterval(key);
-              setFilter((prev) => {
-                const newFilter: FilterLeaf = {
+              if ((key as string) === "custom") {
+                console.log("CUSTOM", value);
+                value = value.replace("custom:", "");
+                const start = new Date(value.split("_")[0]);
+                const end = new Date(value.split("_")[1]);
+                console.log("CUSTOM", start, end);
+                setTimeFilter({
                   request: {
                     created_at: {
-                      gte: timeGraphConfig[key].start.toISOString(),
-                      lte: timeGraphConfig[key].end.toISOString(),
+                      gte: start.toISOString(),
+                      lte: end.toISOString(),
                     },
                   },
-                };
-                if (prev === "all") {
-                  return newFilter;
-                }
-                if ("left" in prev) {
-                  throw new Error("Not implemented");
-                }
-                return {
-                  ...prev,
-                  ...newFilter,
-                };
-              });
+                });
+              } else {
+                console.log("KEY", key, value);
+                setTimeFilter({
+                  request: {
+                    created_at: {
+                      gte: getTimeIntervalAgo(key).toISOString(),
+                      lte: new Date().toISOString(),
+                    },
+                  },
+                });
+              }
             }}
           />
           <MetricsPanel filters={filter} metrics={metrics} />
           <TimeGraphWHeader
             data={timeData}
-            setFilter={setFilter}
             interval={interval}
             setInterval={setInterval}
           />
