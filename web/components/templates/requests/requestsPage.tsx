@@ -372,7 +372,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
-
   return (
     <>
       <AuthHeader title={"Requests"} />
@@ -496,7 +495,16 @@ const RequestsPage = (props: RequestsPageProps) => {
                   <CompletionRegex
                     prompt_regex={selectedData.prompt_regex}
                     prompt_name={selectedData.prompt_name}
-                    keys={selectedData.keys}
+                    // keys is the values for all the keys in `values`
+                    keys={values.reduce((acc, key) => {
+                      if (selectedData.hasOwnProperty(key)) {
+                        return {
+                          ...acc,
+                          [key]: selectedData[key],
+                        };
+                      }
+                      return acc;
+                    }, {})}
                     response={selectedData.response}
                     values={values}
                   />
