@@ -181,10 +181,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       error: d.response_body?.error ?? "unknown error",
       time: d.request_created_at ?? "Cannot find time",
       request: d.request_body?.prompt
-        ? JSON.stringify(d.request_body?.prompt)
+        ? typeof d.request_body?.prompt === "string"
+          ? d.request_body?.prompt
+          : JSON.stringify(d.request_body?.prompt)
         : "Cannot find prompt",
       response: d.response_body?.choices?.[0]?.text
-        ? JSON.stringify(d.response_body?.choices?.[0]?.text)
+        ? d.response_body?.choices?.length === 1
+          ? d.response_body?.choices?.[0]?.text
+          : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
         : `error: ${JSON.stringify(d.response_body?.error)}`,
       "duration (s)": latency.toString(),
       total_tokens: d.response_body?.usage?.total_tokens ?? 0,
