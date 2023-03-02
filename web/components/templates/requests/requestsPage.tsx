@@ -46,7 +46,7 @@ export type CsvData = {
   isChat: boolean;
   chatProperties: ChatProperties | null;
 } & {
-  [keys: string]: string | number | null | boolean;
+  [keys: string]: string | number | null | boolean | ChatProperties;
 };
 
 interface RequestsPageProps {
@@ -161,7 +161,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     [key: string]: Json;
   };
 
-  const csvData = requests?.map((d, i) => {
+  const csvData: CsvData[] = requests?.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
