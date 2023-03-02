@@ -6,15 +6,11 @@ interface ChatProps {
 
 // A react component
 export const Chat = (props: ChatProps) => {
-  const { system, request, response } = props.chatProperties;
+  const { request, response } = props.chatProperties;
   let messages = request ? request : [];
   if (response) {
     messages = messages.concat([response]);
   }
-  console.log("CHAT PROPERTIES", props.chatProperties);
-
-  // Return a three boxes: the system message in a box on top, the requests in a box below
-  // and the response in a box below that
 
   return (
     <div className="gap-4 text-sm w-full p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap overflow-auto leading-6">

@@ -25,7 +25,6 @@ type Message = {
 };
 
 export type ChatProperties = {
-  system: string | null;
   request: Message[] | null;
   response: Message | null;
 };
@@ -162,7 +161,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     [key: string]: Json;
   };
 
-  const csvData: CsvData[] = requests?.map((d, i) => {
+  const csvData = requests?.map((d, i) => {
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -208,16 +207,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       const response_blob = d.response_body?.choices?.[0];
       const response_content = response_blob?.message?.content;
 
-      let systemMessage: string | null;
-
-      if (
-        request_messages?.length > 0 &&
-        request_messages[0].role === "system"
-      ) {
-        systemMessage = request_messages[0].content;
-      } else {
-        systemMessage = null;
-      }
       request = last_request_message
         ? last_request_message
         : "Cannot find prompt";
@@ -226,7 +215,6 @@ const RequestsPage = (props: RequestsPageProps) => {
         : `error: ${JSON.stringify(d.response_body?.error)}`;
 
       chatProperties = {
-        system: systemMessage,
         request: request_messages,
         response: response_blob?.message,
       };
@@ -243,8 +231,6 @@ const RequestsPage = (props: RequestsPageProps) => {
           : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
         : `error: ${JSON.stringify(d.response_body?.error)}`;
     }
-    console.log("REQUEST", request);
-    console.log("RESPONSE", response);
 
     return {
       request_id: d.request_id ?? "Cannot find request id",
@@ -449,19 +435,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                         <p>{selectedData.request_user_id}</p>
                       </li>
                     </div>
-                    {selectedData.error &&
-                      selectedData.error != "unknown error" && (
-                        <div className="border-b border-gray-500 overflow-auto">
-                          <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                            <p>Error:</p>
-                            <p className="max-w-xl whitespace-pre-wrap text-left">
-                              {selectedData.error
-                                ? JSON.stringify(selectedData.error)
-                                : "{{ no error }}"}
-                            </p>
-                          </li>
-                        </div>
-                      )}
                     {probabilities[index] && (
                       <div className="md:border-b-0">
                         <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
@@ -471,6 +444,19 @@ const RequestsPage = (props: RequestsPageProps) => {
                       </div>
                     )}
                   </div>
+                  {selectedData.error &&
+                    selectedData.error != "unknown error" && (
+                      <div className="px-4 border-gray-500 overflow-auto text-red-500">
+                        <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+                          <p>Error:</p>
+                          <p className="max-w-xl whitespace-pre-wrap text-left">
+                            {selectedData.error
+                              ? JSON.stringify(selectedData.error)
+                              : "{{ no error }}"}
+                          </p>
+                        </li>
+                      </div>
+                    )}
                 </div>
                 {properties
                   .filter((v) => selectedData[v] != null)
