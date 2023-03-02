@@ -421,19 +421,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                         </p>
                       </li>
                     </div>
-                    {selectedData.error &&
-                      selectedData.error != "unknown error" && (
-                        <div className="border-b border-gray-500">
-                          <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                            <p>Error:</p>
-                            <p className="max-w-xl whitespace-pre-wrap text-left">
-                              {selectedData.error
-                                ? JSON.stringify(selectedData.error)
-                                : "{{ no error }}"}
-                            </p>
-                          </li>
-                        </div>
-                      )}
                     <div className="border-gray-500">
                       <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
                         <p>Duration:</p>
@@ -462,6 +449,19 @@ const RequestsPage = (props: RequestsPageProps) => {
                         <p>{selectedData.request_user_id}</p>
                       </li>
                     </div>
+                    {selectedData.error &&
+                      selectedData.error != "unknown error" && (
+                        <div className="border-b border-gray-500 overflow-auto">
+                          <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+                            <p>Error:</p>
+                            <p className="max-w-xl whitespace-pre-wrap text-left">
+                              {selectedData.error
+                                ? JSON.stringify(selectedData.error)
+                                : "{{ no error }}"}
+                            </p>
+                          </li>
+                        </div>
+                      )}
                     {probabilities[index] && (
                       <div className="md:border-b-0">
                         <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
