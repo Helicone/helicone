@@ -2,7 +2,7 @@
 
 # Helicone.ai
 
-![Twitter Follow (https://img.shields.io/twitter/follow/Helicone_ai?style=social)](https://twitter.com/helicone_ai)
+![Twitter Follow](https://img.shields.io/twitter/follow/Helicone_ai?style=social)(https://twitter.com/helicone_ai)
 
 Helicone is the observability platform for GPT-3 users. Companies save on their OpenAI bills and identify application issues by monitoring their usage, latency, and costs on Helicone.
 
