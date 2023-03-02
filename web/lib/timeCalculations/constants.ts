@@ -65,4 +65,22 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
     start: getXDaysAgoFloored(30 * 3),
     end: getXMinutesAgoFloored(-1),
   },
+  all: {
+    timeMap: (startDate) => {
+      // returns a format like 01/01 - 01/07
+      const increment = getIncrement(30 * 3 * 24 * 60 * 60 * 1000);
+
+      const endDate = new Date(startDate.getTime() + increment - 1);
+      return `${startDate.toLocaleDateString(undefined, {
+        month: "2-digit",
+        day: "2-digit",
+      })} - ${endDate.toLocaleDateString(undefined, {
+        month: "2-digit",
+        day: "2-digit",
+      })}`;
+    },
+    dbIncrement: "week",
+    start: getXDaysAgoFloored(30 * 3),
+    end: getXMinutesAgoFloored(-1),
+  },
 };
