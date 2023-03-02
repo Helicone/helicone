@@ -76,156 +76,157 @@ export default function ThemedFilter(props: ThemedFilterProps) {
   } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   return (
     <div className="">
       {/* Filters */}
-      <Disclosure
-        as="section"
-        aria-labelledby="filter-heading"
-        className="grid items-center"
-      >
-        {({ open }) => (
-          <>
-            <h2 id="filter-heading" className="sr-only">
-              Filters
-            </h2>
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
-              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
-                {timeFilterOptions && onTimeSelectHandler && (
-                  <ThemedTimeFilter
-                    timeFilterOptions={timeFilterOptions}
-                    isFetching={isFetching}
-                    onSelect={(key, value) =>
-                      onTimeSelectHandler(key as TimeInterval, value)
-                    }
-                    defaultValue="24h"
-                    custom={customTimeFilter}
-                  />
-                )}
-              </div>
-              <div className="flex flex-row space-x-2 items-center pr-2">
-                {columns && (
-                  <div className="text-sm">
-                    <div className="mx-auto flex">
-                      <div>
-                        <Disclosure.Button
-                          className={clsx(
-                            open
-                              ? "bg-sky-100 text-sky-900"
-                              : "hover:bg-sky-100 hover:text-sky-900",
-                            "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-                          )}
-                        >
-                          <FunnelIcon
-                            className={clsx(
-                              open
-                                ? "bg-sky-100 text-sky-900"
-                                : "hover:bg-sky-100 hover:text-sky-900",
-                              "mr-2 h-5 flex-none"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <p className="text-sm">
-                            {open ? `Hide Filters` : `Show Filters`}{" "}
-                            {advancedFilters.length > 0
-                              ? `(${advancedFilters.length})`
-                              : ""}
-                          </p>
-                        </Disclosure.Button>
-                      </div>
-                    </div>
+      <div aria-labelledby="filter-heading" className="grid items-center">
+        <h2 id="filter-heading" className="sr-only">
+          Filters
+        </h2>
+        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
+            {timeFilterOptions && onTimeSelectHandler && (
+              <ThemedTimeFilter
+                timeFilterOptions={timeFilterOptions}
+                isFetching={isFetching}
+                onSelect={(key, value) =>
+                  onTimeSelectHandler(key as TimeInterval, value)
+                }
+                defaultValue="24h"
+                custom={customTimeFilter}
+              />
+            )}
+          </div>
+          <div className="flex flex-row space-x-2 items-center pr-2">
+            {columns && (
+              <div className="text-sm">
+                <div className="mx-auto flex">
+                  <div>
+                    <button
+                      onClick={() =>
+                        setShowAdvancedFilters(!showAdvancedFilters)
+                      }
+                      className={clsx(
+                        showAdvancedFilters
+                          ? "bg-sky-100 text-sky-900"
+                          : "hover:bg-sky-100 hover:text-sky-900",
+                        "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
+                      )}
+                    >
+                      <FunnelIcon
+                        className={clsx(
+                          showAdvancedFilters
+                            ? "bg-sky-100 text-sky-900"
+                            : "hover:bg-sky-100 hover:text-sky-900",
+                          "mr-2 h-5 flex-none"
+                        )}
+                        aria-hidden="true"
+                      />
+                      <p className="text-sm">
+                        {showAdvancedFilters ? `Hide Filters` : `Show Filters`}{" "}
+                        {advancedFilters.length > 0
+                          ? `(${advancedFilters.length})`
+                          : ""}
+                      </p>
+                    </button>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                {data !== null && (
-                  <div className="pl-0 sm:pl-2">
-                    <div className="mx-auto flex">
-                      <Menu as="div" className="relative inline-block">
-                        <CSVLink
-                          data={data.map((d) => {
-                            if ("request" in d) {
-                              return {
-                                ...d,
-                                request: escapeCSVString(d.request),
-                                response: escapeCSVString(d.response),
-                              };
-                            } else {
-                              return d;
-                            }
-                          })}
-                          filename={fileName}
-                          className="flex"
-                          target="_blank"
-                        >
-                          <button className="group inline-flex items-center justify-center text-sm font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
-                            <ArrowDownTrayIcon
-                              className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                              aria-hidden="true"
-                            />
-                            Export
-                          </button>
-                        </CSVLink>
-                      </Menu>
-                    </div>
-                  </div>
-                )}
+            {data !== null && (
+              <div className="pl-0 sm:pl-2">
+                <div className="mx-auto flex">
+                  <Menu as="div" className="relative inline-block">
+                    <CSVLink
+                      data={data.map((d) => {
+                        if ("request" in d) {
+                          return {
+                            ...d,
+                            request: escapeCSVString(d.request),
+                            response: escapeCSVString(d.response),
+                          };
+                        } else {
+                          return d;
+                        }
+                      })}
+                      filename={fileName}
+                      className="flex"
+                      target="_blank"
+                    >
+                      <button className="group inline-flex items-center justify-center text-sm font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
+                        <ArrowDownTrayIcon
+                          className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                          aria-hidden="true"
+                        />
+                        Export
+                      </button>
+                    </CSVLink>
+                  </Menu>
+                </div>
               </div>
+            )}
+          </div>
+        </div>
+
+        {columns && onAdvancedFilter && (
+          <div
+            className={clsx(
+              showAdvancedFilters ? "block" : "hidden",
+              "border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4"
+            )}
+          >
+            <div className="text-sm text-gray-500">Filters</div>
+            <div className="space-y-4 ml-0 sm:ml-4">
+              {filterMap && (
+                <AdvancedFilters
+                  filterMap={filterMap}
+                  filters={advancedFilters}
+                  setAdvancedFilters={setAdvancedFilters}
+                />
+              )}
             </div>
 
-            {columns && onAdvancedFilter && (
-              <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4">
-                <p className="text-sm text-gray-500">Filters</p>
-                <div className="space-y-4 ml-0 sm:ml-4">
-                  {filterMap && (
-                    <AdvancedFilters
-                      filterMap={filterMap}
-                      filters={advancedFilters}
-                      setAdvancedFilters={setAdvancedFilters}
-                    />
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setAdvancedFilters((prev) => {
-                      return [...prev, { id: crypto.randomUUID() }];
-                    });
-                  }}
-                  className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
-                >
-                  <PlusIcon
-                    className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                    aria-hidden="true"
-                  />
-                  Add Filter
-                </button>
-                <div className="w-full flex justify-end gap-4">
-                  <button
-                    onClick={() => {
-                      setAdvancedFilters([]);
-                      onAdvancedFilter(advancedFilters);
-                    }}
-                    className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                    )}
-                  >
-                    Clear
-                  </button>
-                  <button
-                    onClick={() => onAdvancedFilter(advancedFilters)}
-                    className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
-                    )}
-                  >
-                    Save
-                  </button>
-                </div>
-              </Disclosure.Panel>
-            )}
-          </>
+            <button
+              onClick={() => {
+                setAdvancedFilters((prev) => {
+                  return [...prev, { id: crypto.randomUUID() }];
+                });
+              }}
+              className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
+            >
+              <PlusIcon
+                className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                aria-hidden="true"
+              />
+              Add Filter
+            </button>
+            <div className="w-full flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setAdvancedFilters([]);
+                  onAdvancedFilter(advancedFilters);
+                }}
+                className={clsx(
+                  "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => onAdvancedFilter(advancedFilters)}
+                className={clsx(
+                  "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
+                )}
+              >
+                Save
+              </button>
+            </div>
+          </div>
         )}
-      </Disclosure>
+      </div>
     </div>
   );
 }
