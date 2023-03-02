@@ -15,6 +15,20 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { AdvancedFilterType } from "../users/usersPage";
+import { Chat } from "./chat";
+import { Completion } from "./completion";
+import { CompletionRegex } from "./completionRegex";
+
+type Message = {
+  role: string;
+  content: string;
+}
+
+export type ChatProperties = {
+  system: string | null;
+  request: Message[] | null;
+  response: Message | null; 
+}
 
 export type CsvData = {
   request_id: string;
@@ -30,6 +44,8 @@ export type CsvData = {
   temperature: number | null;
   prompt_name: string;
   isCached: boolean;
+  isChat: boolean;
+  chatProperties: ChatProperties | null;
 } & {
   [keys: string]: string | number | null | boolean;
 };
@@ -133,6 +149,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       model: string | undefined;
       temperature: number | undefined;
       prompt_regex: string | undefined;
+      isChat: boolean;
+      chatProperties: ChatProperties | null;
       [keys: string]: any;
     },
     idx: number
@@ -179,17 +197,60 @@ const RequestsPage = (props: RequestsPageProps) => {
         prompt_regex: d.prompt_regex,
       });
     }
+    const is_chat = d.request_path?.includes("/chat/") ?? false;
+    console.log("is_chat", is_chat)
+    console.log(d)
+
+    let request;
+    let response;
+    let chatProperties: ChatProperties | null = null;
+
+    if (is_chat) {
+      const request_messages = d.request_body?.messages
+      const last_request_message = request_messages?.[request_messages.length - 1].content
+      const response_blob = d.response_body?.choices?.[0]
+      const response_content = response_blob?.message?.content
+
+      let systemMessage: string | null;
+
+      if ((request_messages?.length > 0) && (request_messages[0].role === "system")) {
+        systemMessage = request_messages[0].content
+      } else {
+        systemMessage = null
+      }
+      request = last_request_message ? JSON.stringify(last_request_message) : "Cannot find prompt";
+      response = response_content ? JSON.stringify(response_content) : `error: ${JSON.stringify(d.response_body?.error)}`;
+
+      // // Combine request_messages and response_message into a new list `messages`
+      // let messages = request_messages ? request_messages : []
+      // if (response_message) {
+      //   messages.push(response_blob)
+      // }
+
+      chatProperties = {
+        system: systemMessage,
+        request: request_messages,
+        response: response_blob?.message,
+      }
+    } else {
+      chatProperties = null
+      request = d.request_body?.prompt
+        ? JSON.stringify(d.request_body?.prompt)
+        : "Cannot find prompt";
+      response = d.response_body?.choices?.[0]?.text
+        ? JSON.stringify(d.response_body?.choices?.[0]?.text)
+        : `error: ${JSON.stringify(d.response_body?.error)}`;
+    }
+    console.log("REQUEST", request)
+    console.log("RESPONSE", response)
+
     return {
       request_id: d.request_id ?? "Cannot find request id",
       response_id: d.response_id ?? "Cannot find response id",
       error: d.response_body?.error ?? "unknown error",
       time: d.request_created_at ?? "Cannot find time",
-      request: d.request_body?.prompt
-        ? JSON.stringify(d.request_body?.prompt)
-        : "Cannot find prompt",
-      response: d.response_body?.choices?.[0]?.text
-        ? JSON.stringify(d.response_body?.choices?.[0]?.text)
-        : `error: ${JSON.stringify(d.response_body?.error)}`,
+      request: request,
+      response: response,
       "duration (s)": latency.toString(),
       total_tokens: d.response_body?.usage?.total_tokens ?? 0,
       logprobs: probabilities ? probabilities[i] : null,
@@ -198,6 +259,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       temperature: d.request_body?.temperature ?? null,
       prompt_name: d.prompt_name ?? "",
       isCached: d.is_cached ?? false,
+      isChat: is_chat,
+      chatProperties: chatProperties,
       ...updated_request_properties,
     };
   });
@@ -351,20 +414,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       </div>
       {open && selectedData !== undefined && index !== undefined && (
         <ThemedModal open={open} setOpen={setOpen}>
-          <div className="sm:w-[600px] sm:max-w-[600px]">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-              <InformationCircleIcon
-                className="h-8 w-8 text-sky-600"
-                aria-hidden="true"
-              />
-            </div>
+          <div className="sm:w-[750px] sm:max-w-[750px]">
             <div className="mt-1 text-center sm:mt-3">
-              <Dialog.Title
-                as="h3"
-                className="text-lg font-medium leading-6 text-gray-900"
-              >
-                Request Information
-              </Dialog.Title>
               <button
                 type="button"
                 tabIndex={-1}
@@ -378,42 +429,62 @@ const RequestsPage = (props: RequestsPageProps) => {
                 <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
               </button>
               <ul className="mt-4 space-y-2">
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Time:</p>
-                  <p>{new Date(selectedData.time || "").toLocaleString()}</p>
-                </li>
-
-                {selectedData.error && (
-                  <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                    <p>Error:</p>
-                    <p className="max-w-xl whitespace-pre-wrap text-left">
-                      {selectedData.error
-                        ? JSON.stringify(selectedData.error)
-                        : "{{ no error }}"}
-                    </p>
-                  </li>
-                )}
-
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Duration:</p>
-                  <p>{selectedData["duration (s)"]}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Tokens:</p>
-                  <p>{selectedData.total_tokens}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Log Probability:</p>
-                  <p>{probabilities ? probabilities[index] : 0}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>User Id:</p>
-                  <p>{selectedData.request_user_id}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Model:</p>
-                  <p>{selectedData.model}</p>
-                </li>
+              <div className="flex flex-wrap">
+  <div className="w-full md:w-1/3 px-4">
+    <div className="border-b border-gray-300">
+      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+        <p>Time:</p>
+        <p>{new Date(selectedData.time || "").toLocaleString()}</p>
+      </li>
+    </div>
+    {selectedData.error && selectedData.error != "unknown error" && (
+      <div className="border-b border-gray-500">
+        <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+          <p>Error:</p>
+          <p className="max-w-xl whitespace-pre-wrap text-left">
+            {selectedData.error
+              ? JSON.stringify(selectedData.error)
+              : "{{ no error }}"}
+          </p>
+        </li>
+      </div>
+    )}
+    <div className="border-gray-500">
+      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+        <p>Duration:</p>
+        <p>{selectedData["duration (s)"]}s</p>
+      </li>
+    </div>
+  </div>
+  <div className="w-full md:w-1/3 px-4">
+    <div className="border-b border-gray-300">
+      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+        <p>Tokens:</p>
+        <p>{selectedData.total_tokens}</p>
+      </li>
+    </div>
+    <div className="border-gray-500">
+      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+        <p>Model:</p>
+        <p>{selectedData.model}</p>
+      </li>
+    </div>
+  </div>
+  <div className="w-full md:w-1/3 px-4">
+    <div className="border-b border-gray-300">
+      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+        <p>User Id:</p>
+        <p>{selectedData.request_user_id}</p>
+      </li>
+    </div>
+    {probabilities[index] && <div className="md:border-b-0">
+      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
+        <p>Log Probability:</p>
+        <p>{probabilities ? probabilities[index] : 0}</p>
+      </li>
+    </div>}
+  </div>
+</div>
                 {properties
                   .filter((v) => selectedData[v] != null)
                   .map((p) =>
@@ -422,53 +493,19 @@ const RequestsPage = (props: RequestsPageProps) => {
                       selectedData[p] !== null ? selectedData[p] : "{NULL}"
                     )
                   )}
-                {!selectedData.prompt_regex ? (
-                  <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
-                    <div className="w-full flex flex-col text-left space-y-1">
-                      <p>Request:</p>
-                      <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[250px] max-h-[250px] overflow-auto">
-                        {selectedData.request}
-                      </p>
-                    </div>
-                    <div className="w-full flex flex-col text-left space-y-1">
-                      <p>Response:</p>
-                      <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[250px] max-h-[250px] overflow-auto">
-                        {selectedData.response}
-                      </p>
-                    </div>
-                  </div>
+                {selectedData.isChat ? (
+                  <Chat chatProperties={selectedData.chatProperties} />
+                )
+                : !selectedData.prompt_regex ? (
+                  <Completion request={selectedData.request} response={selectedData.response} />
                 ) : (
-                  <>
-                    <div>
-                      <div className="w-full flex flex-col text-left space-y-1 text-sm">
-                        <p>{selectedData.prompt_name}:</p>
-                        <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
-                          {selectedData.prompt_regex}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-4 text-sm w-full">
-                      {values
-                        .filter((v) => selectedData[v] != null)
-                        .map((v) => (
-                          <div
-                            className="w-full flex flex-col text-left space-y-1 text-sm"
-                            key={v}
-                          >
-                            <p>{v}:</p>
-                            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[100px] overflow-auto">
-                              {selectedData[v]}
-                            </p>
-                          </div>
-                        ))}
-                    </div>
-                    <div className="w-full flex flex-col text-left space-y-1 text-sm">
-                      <p>Response:</p>
-                      <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
-                        {selectedData.response}
-                      </p>
-                    </div>
-                  </>
+                  <CompletionRegex 
+                    prompt_regex={selectedData.prompt_regex} 
+                    prompt_name={selectedData.prompt_name} 
+                    keys={selectedData.keys} 
+                    response={selectedData.response} 
+                    values={values} 
+                  />
                 )}
               </ul>
             </div>
