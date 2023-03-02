@@ -9,11 +9,10 @@ import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
 import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
-import { AdvancedFilterType } from "../users/usersPage";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
@@ -63,8 +62,6 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentTimeFilter, setCurrentTimeFilter] = useState<string>("day");
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [advancedFilters, setAdvancedFilters] =
-    useState<AdvancedFilterType[]>();
 
   const { count, values, from, isLoading, properties, refetch, requests, to } =
     useRequestsPage(
@@ -72,7 +69,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       currentPage,
       currentPageSize,
       sortBy,
-      advancedFilters
+      []
     );
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {

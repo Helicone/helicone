@@ -7,7 +7,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { SetStateAction, useEffect, useState } from "react";
-import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
+
 import { Metrics } from "../../../lib/api/metrics/metrics";
 import {
   getDashboardData,
@@ -17,6 +17,10 @@ import {
 import { Result } from "../../../lib/result";
 import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import {
+  FilterLeaf,
+  FilterNode,
+} from "../../../services/lib/filters/filterDefs";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
