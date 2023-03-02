@@ -1,14 +1,32 @@
-![Helicone Logo](https://github.com/Helicone/helicone/blob/main/web/public/assets/logos/logo-transparent.png)
+![Helicone Logo](https://github.com/Helicone/helicone/blob/main/web/public/assets/logos/logo-black.png)
 
 # Helicone.ai
 
 Helicone is the observability platform for GPT-3 users. Companies save on their OpenAI bills and identify application issues by monitoring their usage, latency, and costs on Helicone.
 
+You know that LLMs are being used in more and more software companies today but what you may not realize is that compared to their traditional software, companies don’t have any way to monitor how they are working…
+
+We are solving that problem by offering an open source observability platform that developers can implement in one line of code.
+
 ## Founders
 
-- [@chitalian](https://www.github.com/chitalian)
-- [@scottmktn](https://www.github.com/scottmktn)
-- [@BarakOshri](https://www.github.com/BarakOshri)
+- [@BarakOshri](https://www.github.com/BarakOshri) (formerly at Sisu and Stanford)
+- [@chitalian](https://www.github.com/chitalian) (formerly at Apple, Intel, and Sisu)
+- [@scottmktn](https://www.github.com/scottmktn) (formerly at Tesla, DraftKings, and Bain Capital)
+
+## Community
+
+Keep up to date with what we're working on by joining our [Discord](https://discord.gg/zsSTcH2qhG). We're more than happy to answer any questions you may have or to discuss the current state of the AI industry.
+
+We use GitHub issues for tracking requests and bugs and we strive to abide by industry-standard best practices in open-source software development.
+
+## Roadmap
+
+- Full support for ChatGPT API
+- Advanced filtering for data
+- Exponential backoff
+- Exports to Looker, Mixpanel, etc.
+- Alerting to stay on top of costs and model downtime
 
 ## Get Started Locally
 
