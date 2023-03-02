@@ -5,7 +5,6 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
-import { useRequests } from "../../../services/hooks/requests";
 import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -18,6 +17,7 @@ import { AdvancedFilterType } from "../users/usersPage";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
+import useRequestsPage from "./useRequestsPage";
 
 type Message = {
   role: string;
@@ -53,13 +53,11 @@ export type CsvData = {
 interface RequestsPageProps {
   page: number;
   pageSize: number;
-  properties: string[];
   sortBy: string | null;
-  values: string[];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, properties, sortBy, values } = props;
+  const { page, pageSize, sortBy } = props;
 
   const { setNotification } = useNotification();
 
@@ -69,8 +67,8 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [advancedFilters, setAdvancedFilters] =
     useState<AdvancedFilterType[]>();
 
-  const { requests, count, from, to, isLoading, refetch, isRefetching } =
-    useRequests(
+  const { count, values, from, isLoading, properties, refetch, requests, to } =
+    useRequestsPage(
       currentTimeFilter,
       currentPage,
       currentPageSize,
@@ -383,25 +381,18 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="space-y-2">
             <ThemedFilter
               data={csvData || []}
-              isFetching={isLoading || isRefetching}
+              isFetching={isLoading}
               onTimeSelectHandler={onTimeSelectHandler}
               timeFilterOptions={[
                 { key: "24h", value: "day" },
                 { key: "7d", value: "wk" },
                 { key: "1m", value: "mo" },
-                // { key: "3m", value: "3mo" },
               ]}
               customTimeFilter
               fileName="requests.csv"
-              // columns={columns}
-              // advancedFilter={advancedFilters}
-              // onAdvancedFilter={setAdvancedFilters}
             />
 
-            {isLoading ||
-            isRefetching ||
-            from === undefined ||
-            to === undefined ? (
+            {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <ThemedTableV2

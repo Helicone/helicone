@@ -55,6 +55,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               value: r.count,
             }))}
             timeMap={timeGraphConfig[interval].timeMap}
+            valueFormatter={(v) => [v.toString(), "requests"]}
           />
         </div>
 
@@ -69,6 +70,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               value: r.cost,
             }))}
             timeMap={timeGraphConfig[interval].timeMap}
+            valueFormatter={(v) => [`$${v.toString()}`, "cost"]}
           />
         </div>
 
@@ -83,6 +85,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               value: r.count,
             }))}
             timeMap={timeGraphConfig[interval].timeMap}
+            valueFormatter={(v) => [v.toString(), "errors"]}
           />
         </div>
       </div>
