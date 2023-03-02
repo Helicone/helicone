@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
-import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
 import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 interface TimeLength {
   label: string;

@@ -10,11 +10,10 @@ import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
 import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
-import { AdvancedFilterType } from "../users/usersPage";
 
 export type CsvData = {
   request_id: string;
@@ -50,17 +49,10 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentTimeFilter, setCurrentTimeFilter] = useState<string>("day");
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [advancedFilters, setAdvancedFilters] =
-    useState<AdvancedFilterType[]>();
+  const [advancedFilters, setAdvancedFilters] = useState<Filter[]>();
 
   const { requests, count, from, to, isLoading, refetch, isRefetching } =
-    useRequests(
-      currentTimeFilter,
-      currentPage,
-      currentPageSize,
-      sortBy,
-      advancedFilters
-    );
+    useRequests(currentTimeFilter, currentPage, currentPageSize, sortBy, []);
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setCurrentTimeFilter(value);

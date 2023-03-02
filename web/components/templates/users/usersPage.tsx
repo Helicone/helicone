@@ -8,8 +8,11 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
+
 import { truncString } from "../../../lib/stringHelpers";
 import { useUsers } from "../../../services/hooks/users";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { UserMetricsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import { UserRow } from "../../../services/lib/users";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
@@ -40,26 +43,17 @@ interface UsersPageProps {
   pageSize: number;
 }
 
-export type AdvancedFilterType = {
-  idx: number;
-  type?: "number" | "text" | "datetime-local" | undefined;
-  operator?: "eq" | "gt" | "lt";
-  supabaseKey?: string | undefined;
-  value?: string | undefined;
-  column?: Column | undefined;
-};
-
 const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
-  const [advancedFilters, setAdvancedFilters] =
-    useState<AdvancedFilterType[]>();
+  const [advancedFilters, setAdvancedFilters] = useState<FilterNode>("all");
 
   const { users, count, from, isLoading, to } = useUsers(
     page,
     pageSize,
     advancedFilters
   );
+  const router = useRouter();
 
   const { setNotification } = useNotification();
 
@@ -138,8 +132,26 @@ const UsersPage = (props: UsersPageProps) => {
           isFetching={isLoading}
           fileName="users.csv"
           columns={columns}
-          advancedFilter={advancedFilters}
-          onAdvancedFilter={setAdvancedFilters}
+          filterMap={UserMetricsTableFilter}
+          onAdvancedFilter={(_filters) => {
+            router.query.page = "1";
+            router.push(router);
+            const filters = _filters.filter((f) => f) as FilterNode[];
+            if (filters.length === 0) {
+              setAdvancedFilters("all");
+            } else {
+              const firstFilter = filters[0];
+              setAdvancedFilters(
+                filters.slice(1).reduce((acc, curr) => {
+                  return {
+                    left: acc,
+                    operator: "and",
+                    right: curr,
+                  };
+                }, firstFilter)
+              );
+            }
+          }}
         />
         {isLoading || from === undefined || to === undefined ? (
           <LoadingAnimation title="Getting your requests" />

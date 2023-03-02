@@ -1,9 +1,10 @@
 import { Dispatch, SetStateAction } from "react";
-import { FilterLeaf, FilterNode } from "../../../lib/api/metrics/filters";
+
 import { GraphDataState } from "../../../lib/dashboardGraphs";
 import { Result } from "../../../lib/result";
 import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { clsx } from "../../shared/clsx";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Loading } from "./dashboardPage";

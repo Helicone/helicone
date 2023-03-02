@@ -6,7 +6,7 @@ import {
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
 import { dbExecute } from "../db/dbExecute";
-import { buildFilter } from "./filters";
+import { buildFilter } from "../../../services/lib/filters/filters";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export interface AuthClient {

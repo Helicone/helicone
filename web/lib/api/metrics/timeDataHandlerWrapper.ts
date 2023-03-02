@@ -1,9 +1,9 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
+import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import { Result } from "../../result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { timeBackfill } from "../../timeCalculations/time";
-import { FilterLeaf } from "./filters";
 
 export interface DataOverTimeRequest {
   filter: FilterLeaf;
