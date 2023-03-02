@@ -44,7 +44,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               </label>
               <div className="relative mt-1 flex items-center">
                 <input
-                  type="text"
+                  type="password"
                   name="openAIKey"
                   id="openAIKey"
                   value={apiKey}
@@ -106,7 +106,10 @@ const AddKeyModal = (props: AddKeyModalProps) => {
             </div>
             <div className="w-full flex flex-row justify-between">
               <button
-                onClick={() => setStep("addKey")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setStep("addKey");
+                }}
                 type="button"
                 className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >

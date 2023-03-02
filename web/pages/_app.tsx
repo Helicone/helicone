@@ -8,6 +8,14 @@ import { NotificationProvider } from "../components/shared/notification/Notifica
 import Notification from "../components/shared/notification/Notification";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import posthog from "posthog-js";
+
+if (typeof window !== "undefined") {
+  posthog.init("phc_jeluwNoJNpc7zEzkQrPbjyMOqdnJQjFAVr849LaEaPG", {
+    api_host: "https://app.posthog.com",
+  });
+}
+
 export default function MyApp({
   Component,
   pageProps,
