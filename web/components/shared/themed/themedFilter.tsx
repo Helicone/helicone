@@ -16,6 +16,7 @@
 import { Disclosure, Menu } from "@headlessui/react";
 import {
   ArrowDownTrayIcon,
+  Bars3Icon,
   FunnelIcon,
   PlusIcon,
   TrashIcon,
@@ -175,7 +176,7 @@ export default function ThemedFilter(props: ThemedFilterProps) {
             {columns && onAdvancedFilter && (
               <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4">
                 <p className="text-sm text-gray-500">Filters</p>
-                <div className="space-y-4 ml-4">
+                <div className="space-y-4 ml-0 sm:ml-4">
                   {filterMap && (
                     <AdvancedFilters
                       filterMap={filterMap}
@@ -202,8 +203,8 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                 <div className="w-full flex justify-end gap-4">
                   <button
                     onClick={() => {
-                      // onAdvancedFilter([]);
                       setAdvancedFilters([]);
+                      onAdvancedFilter(advancedFilters);
                     }}
                     className={clsx(
                       "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
@@ -329,7 +330,9 @@ function AdvancedFilterRow({
   const [table, setTable] = useState(tables[0][0]);
 
   const columns = tables.find((t) => t[0] === table)?.[1].columns;
+
   const columnsEntries = columns ? Object.entries(columns) : null;
+
   const [column, setColumn] = useState(
     columnsEntries && columnsEntries[0] ? columnsEntries[0][0] : ""
   );
@@ -337,9 +340,11 @@ function AdvancedFilterRow({
   const operators =
     (columnsEntries && columnsEntries.find((c) => c[0] === column)?.[1]) ??
     null;
+
   const operatorsEntries = operators
     ? Object.entries(operators.operations)
     : [];
+
   const [operator, setOperator] = useState(
     operatorsEntries && operatorsEntries[0] ? operatorsEntries[0][0] : ""
   );
@@ -353,84 +358,99 @@ function AdvancedFilterRow({
     setValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table]);
+
   useEffect(() => {
     setOperator(operatorsEntries ? operatorsEntries[0][0] : "");
     setValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [column]);
 
+  const operatorMap = (operator: string) => {
+    switch (operator) {
+      case "equals":
+        return "equals";
+      case "gte":
+        return "greater than or equal to";
+      case "lte":
+        return "less than or equal to";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <div className="w-full justify-between flex flex-row items-center space-x-4">
-      <div className="w-full grid grid-cols-12 gap-4">
+    <div className="w-full flex flex-col sm:flex-row gap-2 items-left sm:items-center ">
+      <ThemedDropdownV2
+        options={tables.map((table) => {
+          return {
+            value: table[0],
+            label: table[1].label,
+          };
+        })}
+        selectedValue={table}
+        onSelect={(selected) => {
+          setTable(selected);
+        }}
+        className="w-full sm:w-fit"
+        label="Table"
+      />
+      {columnsEntries && (
         <ThemedDropdownV2
-          options={tables.map((table) => {
+          options={columnsEntries.map((column) => {
             return {
-              value: table[0],
-              label: table[1].label,
+              value: column[0],
+              label: column[1].label,
             };
           })}
-          selectedValue={table}
+          selectedValue={column}
           onSelect={(selected) => {
-            setTable(selected);
+            setColumn(selected);
           }}
-          className="col-span-2"
+          className="w-full sm:w-fit"
+          label="Column"
         />
-        {columnsEntries && (
-          <ThemedDropdownV2
-            options={columnsEntries.map((column) => {
-              return {
-                value: column[0],
-                label: column[1].label,
-              };
-            })}
-            selectedValue={column}
-            onSelect={(selected) => {
-              setColumn(selected);
-            }}
-            className="col-span-3"
-          />
-        )}
+      )}
 
-        {column && (
-          <ThemedDropdownV2
-            options={operatorsEntries.map((operator) => {
-              return {
-                value: operator[0],
-                label: operator[0],
-              };
-            })}
-            selectedValue={operator}
-            onSelect={(selected) => {
-              setOperator(selected);
+      {column && (
+        <ThemedDropdownV2
+          options={operatorsEntries.map((operator) => {
+            return {
+              value: operator[0],
+              label: operatorMap(operator[0]),
+            };
+          })}
+          selectedValue={operator}
+          onSelect={(selected) => {
+            setOperator(selected);
+          }}
+          className="w-full sm:w-fit"
+        />
+      )}
+      {selectedOperator && (
+        <div className="w-full sm:w-fit">
+          <AdvancedFilterInput
+            type={selectedOperator.type}
+            value={value}
+            onChange={(value) => {
+              let filter: any = {};
+              filter[table] = {};
+              filter[table][column] = {};
+              filter[table][column][operator] = value;
+              handleFilterChange(filter);
+              setValue(value);
             }}
-            className="col-span-2"
           />
-        )}
-        {selectedOperator && (
-          <div className="col-span-3">
-            <AdvancedFilterInput
-              type={selectedOperator.type}
-              value={value}
-              onChange={(value) => {
-                let filter: any = {};
-                filter[table] = {};
-                filter[table][column] = {};
-                filter[table][column][operator] = value;
-                handleFilterChange(filter);
-                setValue(value);
-              }}
-            />
-          </div>
-        )}
-        <div className="col-span-2">
-          <button
-            type="button"
-            className="inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-            onClick={() => onDeleteHandler()}
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
         </div>
+      )}
+
+      <div className="w-full sm:w-fit border-b pb-4 sm:border-b-0 sm:pb-0 justify-end flex sm:justify-center">
+        <button
+          type="button"
+          className="inline-flex items-center rounded-md bg-red-600 p-1.5 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+          onClick={() => onDeleteHandler()}
+        >
+          <TrashIcon className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );

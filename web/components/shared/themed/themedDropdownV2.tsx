@@ -15,10 +15,11 @@ interface ThemedDropdownProps<T> {
   selectedValue: T;
   onSelect: (option: T) => void;
   className?: string;
+  label?: string;
 }
 
 export default function ThemedDropdownV2<T>(props: ThemedDropdownProps<T>) {
-  const { options, selectedValue, onSelect, className } = props;
+  const { options, selectedValue, onSelect, className, label } = props;
   const selected = options.find((option) => option.value === selectedValue);
 
   return (
@@ -27,7 +28,16 @@ export default function ThemedDropdownV2<T>(props: ThemedDropdownProps<T>) {
         {({ open }) => (
           <>
             <div className="relative">
-              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
+                {label && (
+                  <label
+                    htmlFor="name"
+                    className="absolute -top-2 sm:-top-2.5 left-2 inline-block bg-white px-0.5 text-[0.55rem] font-light text-gray-600"
+                  >
+                    {label}
+                  </label>
+                )}
+
                 <span className="block truncate">
                   {selected?.label || "Select a column"}
                 </span>
@@ -46,13 +56,13 @@ export default function ThemedDropdownV2<T>(props: ThemedDropdownProps<T>) {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full min-w-[200px] overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                   {options.map((option, i) => (
                     <Listbox.Option
                       key={i}
                       className={({ active }) =>
                         clsx(
-                          active ? "text-white bg-indigo-600" : "text-gray-900",
+                          active ? "text-white bg-sky-600" : "text-gray-900",
                           "relative cursor-default select-none py-2 pl-3 pr-9"
                         )
                       }
@@ -72,7 +82,7 @@ export default function ThemedDropdownV2<T>(props: ThemedDropdownProps<T>) {
                           {selected ? (
                             <span
                               className={clsx(
-                                active ? "text-white" : "text-indigo-600",
+                                active ? "text-white" : "text-sky-600",
                                 "absolute inset-y-0 right-0 flex items-center pr-4"
                               )}
                             >
