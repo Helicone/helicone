@@ -95,10 +95,10 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                   <ThemedTimeFilter
                     timeFilterOptions={timeFilterOptions}
                     isFetching={isFetching}
-                    onSelect={(key, value) =>
-                      onTimeSelectHandler(key as TimeInterval, value)
-                    }
-                    defaultValue="24h"
+                    onSelect={(key, value) => {
+                      onTimeSelectHandler(key as TimeInterval, value);
+                    }}
+                    defaultValue="1m"
                     custom={customTimeFilter}
                   />
                 )}
@@ -305,7 +305,7 @@ function AdvancedFilterInput({
         <input
           type="datetime-local"
           name="search-field-start"
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(new Date(e.target.value).toISOString())}
           placeholder={"date..."}
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />

@@ -1,11 +1,19 @@
 import { Dialog } from "@headlessui/react";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/router";
 
 import { useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
-import { TimeInterval } from "../../../lib/timeCalculations/time";
-import { UserMetricsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  RequestsTableFilter,
+  UserMetricsTableFilter,
+} from "../../../services/lib/filters/frontendFilterDefs";
 import { Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -45,21 +53,33 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const { setNotification } = useNotification();
 
-  const [currentTimeFilter, setCurrentTimeFilter] = useState<string>("day");
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
 
+  const [timeFilter, setTimeFilter] = useState<FilterNode>({
+    request: {
+      created_at: {
+        gte: new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString(),
+      },
+    },
+  });
   const { count, values, from, isLoading, properties, refetch, requests, to } =
-    useRequestsPage(
-      currentTimeFilter,
-      currentPage,
-      currentPageSize,
-      sortBy,
-      []
-    );
+    useRequestsPage(currentPage, currentPageSize, {
+      left: timeFilter,
+      operator: "and",
+      right: advancedFilter,
+    });
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
-    setCurrentTimeFilter(value);
+    setTimeFilter({
+      request: {
+        created_at: {
+          gte: getTimeIntervalAgo(key).toISOString(),
+        },
+      },
+    });
+
     refetch();
   };
 
@@ -155,7 +175,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       ...properties.map((p) => ({
         [p]:
           d.request_properties != null
-            ? (d.request_properties as JsonDict)[p]
+            ? (JSON.parse(d.request_properties) as JsonDict)[p]
             : null,
       }))
     );
@@ -165,7 +185,9 @@ const RequestsPage = (props: RequestsPageProps) => {
         updated_request_properties,
         ...values.map((p) => ({
           [p]:
-            d.prompt_values != null ? (d.prompt_values as JsonDict)[p] : null,
+            d.request_prompt_values != null
+              ? (JSON.parse(d.request_prompt_values) as JsonDict)[p]
+              : null,
         }))
       );
     }
@@ -303,6 +325,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
+  const router = useRouter();
 
   return (
     <>
@@ -318,12 +341,29 @@ const RequestsPage = (props: RequestsPageProps) => {
                 { key: "24h", value: "day" },
                 { key: "7d", value: "wk" },
                 { key: "1m", value: "mo" },
+                { key: "all", value: "all" },
               ]}
               customTimeFilter
               fileName="requests.csv"
-              filterMap={UserMetricsTableFilter}
-              onAdvancedFilter={() => {
-                console.log("hello");
+              filterMap={RequestsTableFilter}
+              onAdvancedFilter={(_filters) => {
+                router.query.page = "1";
+                router.push(router);
+                const filters = _filters.filter((f) => f) as FilterNode[];
+                if (filters.length === 0) {
+                  setAdvancedFilter("all");
+                } else {
+                  const firstFilter = filters[0];
+                  setAdvancedFilter(
+                    filters.slice(1).reduce((acc, curr) => {
+                      return {
+                        left: acc,
+                        operator: "and",
+                        right: curr,
+                      };
+                    }, firstFilter)
+                  );
+                }
               }}
             />
 
