@@ -6,6 +6,7 @@ const OPENAI_COSTS = {
   babbage: 0.0005,
   curie: 0.002,
   davinci: 0.02,
+  "gpt-3.5-turbo": 0.002,
 };
 
 const OPENAI_FINETUNE_COSTS = {

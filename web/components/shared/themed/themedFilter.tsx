@@ -16,6 +16,7 @@
 import { Disclosure, Menu } from "@headlessui/react";
 import {
   ArrowDownTrayIcon,
+  Bars3Icon,
   FunnelIcon,
   PlusIcon,
   TrashIcon,
@@ -77,156 +78,157 @@ export default function ThemedFilter(props: ThemedFilterProps) {
   } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   return (
     <div className="">
       {/* Filters */}
-      <Disclosure
-        as="section"
-        aria-labelledby="filter-heading"
-        className="grid items-center"
-      >
-        {({ open }) => (
-          <>
-            <h2 id="filter-heading" className="sr-only">
-              Filters
-            </h2>
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
-              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
-                {timeFilterOptions && onTimeSelectHandler && (
-                  <ThemedTimeFilter
-                    timeFilterOptions={timeFilterOptions}
-                    isFetching={isFetching}
-                    onSelect={(key, value) => {
-                      onTimeSelectHandler(key as TimeInterval, value);
-                    }}
-                    defaultValue={defaultTimeFilter ?? "all"}
-                    custom={customTimeFilter}
-                  />
-                )}
-              </div>
-              <div className="flex flex-row space-x-2 items-center pr-2">
-                {filterMap && onAdvancedFilter && (
-                  <div className="text-sm">
-                    <div className="mx-auto flex">
-                      <div>
-                        <Disclosure.Button
-                          className={clsx(
-                            open
-                              ? "bg-sky-100 text-sky-900"
-                              : "hover:bg-sky-100 hover:text-sky-900",
-                            "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-                          )}
-                        >
-                          <FunnelIcon
-                            className={clsx(
-                              open
-                                ? "bg-sky-100 text-sky-900"
-                                : "hover:bg-sky-100 hover:text-sky-900",
-                              "mr-2 h-5 flex-none"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <p className="text-sm">
-                            {open ? `Hide Filters` : `Show Filters`}{" "}
-                            {advancedFilters.length > 0
-                              ? `(${advancedFilters.length})`
-                              : ""}
-                          </p>
-                        </Disclosure.Button>
-                      </div>
-                    </div>
+      <div aria-labelledby="filter-heading" className="grid items-center">
+        <h2 id="filter-heading" className="sr-only">
+          Filters
+        </h2>
+        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-0 justify-between sm:items-center pb-3">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
+            {timeFilterOptions && onTimeSelectHandler && (
+              <ThemedTimeFilter
+                timeFilterOptions={timeFilterOptions}
+                isFetching={isFetching}
+                onSelect={(key, value) =>
+                  onTimeSelectHandler(key as TimeInterval, value)
+                }
+                defaultValue={defaultTimeFilter ?? "all"}
+                custom={customTimeFilter}
+              />
+            )}
+          </div>
+          <div className="flex flex-row space-x-2 items-center pr-2">
+            {onAdvancedFilter && (
+              <div className="text-sm">
+                <div className="mx-auto flex">
+                  <div>
+                    <button
+                      onClick={() =>
+                        setShowAdvancedFilters(!showAdvancedFilters)
+                      }
+                      className={clsx(
+                        showAdvancedFilters
+                          ? "bg-sky-100 text-sky-900"
+                          : "hover:bg-sky-100 hover:text-sky-900",
+                        "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
+                      )}
+                    >
+                      <FunnelIcon
+                        className={clsx(
+                          showAdvancedFilters
+                            ? "bg-sky-100 text-sky-900"
+                            : "hover:bg-sky-100 hover:text-sky-900",
+                          "mr-2 h-5 flex-none"
+                        )}
+                        aria-hidden="true"
+                      />
+                      <p className="text-sm">
+                        {showAdvancedFilters ? `Hide Filters` : `Show Filters`}{" "}
+                        {advancedFilters.length > 0
+                          ? `(${advancedFilters.length})`
+                          : ""}
+                      </p>
+                    </button>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                {data !== null && (
-                  <div className="pl-0 sm:pl-2">
-                    <div className="mx-auto flex">
-                      <Menu as="div" className="relative inline-block">
-                        <CSVLink
-                          data={data.map((d) => {
-                            if ("request" in d) {
-                              return {
-                                ...d,
-                                request: escapeCSVString(d.request),
-                                response: escapeCSVString(d.response),
-                              };
-                            } else {
-                              return d;
-                            }
-                          })}
-                          filename={fileName}
-                          className="flex"
-                          target="_blank"
-                        >
-                          <button className="group inline-flex items-center justify-center text-sm font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
-                            <ArrowDownTrayIcon
-                              className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                              aria-hidden="true"
-                            />
-                            Export
-                          </button>
-                        </CSVLink>
-                      </Menu>
-                    </div>
-                  </div>
-                )}
+            {data !== null && (
+              <div className="pl-0 sm:pl-2">
+                <div className="mx-auto flex">
+                  <Menu as="div" className="relative inline-block">
+                    <CSVLink
+                      data={data.map((d) => {
+                        if ("request" in d) {
+                          return {
+                            ...d,
+                            request: escapeCSVString(d.request),
+                            response: escapeCSVString(d.response),
+                          };
+                        } else {
+                          return d;
+                        }
+                      })}
+                      filename={fileName}
+                      className="flex"
+                      target="_blank"
+                    >
+                      <button className="group inline-flex items-center justify-center text-sm font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
+                        <ArrowDownTrayIcon
+                          className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                          aria-hidden="true"
+                        />
+                        Export
+                      </button>
+                    </CSVLink>
+                  </Menu>
+                </div>
               </div>
+            )}
+          </div>
+        </div>
+
+        {onAdvancedFilter && (
+          <div
+            className={clsx(
+              showAdvancedFilters ? "block" : "hidden",
+              "border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4"
+            )}
+          >
+            <div className="text-sm text-gray-500">Filters</div>
+            <div className="space-y-4 ml-0 sm:ml-4">
+              {filterMap && (
+                <AdvancedFilters
+                  filterMap={filterMap}
+                  filters={advancedFilters}
+                  setAdvancedFilters={setAdvancedFilters}
+                />
+              )}
             </div>
 
-            {filterMap && onAdvancedFilter && (
-              <Disclosure.Panel className="border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4">
-                <p className="text-sm text-gray-500">Filters</p>
-                <div className="space-y-4 ml-4">
-                  {filterMap && (
-                    <AdvancedFilters
-                      filterMap={filterMap}
-                      filters={advancedFilters}
-                      setAdvancedFilters={setAdvancedFilters}
-                    />
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setAdvancedFilters((prev) => {
-                      return [...prev, { id: crypto.randomUUID() }];
-                    });
-                  }}
-                  className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
-                >
-                  <PlusIcon
-                    className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                    aria-hidden="true"
-                  />
-                  Add Filter
-                </button>
-                <div className="w-full flex justify-end gap-4">
-                  <button
-                    onClick={() => {
-                      // onAdvancedFilter([]);
-                      setAdvancedFilters([]);
-                    }}
-                    className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                    )}
-                  >
-                    Clear
-                  </button>
-                  <button
-                    onClick={() => onAdvancedFilter(advancedFilters)}
-                    className={clsx(
-                      "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
-                    )}
-                  >
-                    Save
-                  </button>
-                </div>
-              </Disclosure.Panel>
-            )}
-          </>
+            <button
+              onClick={() => {
+                setAdvancedFilters((prev) => {
+                  return [...prev, { id: crypto.randomUUID() }];
+                });
+              }}
+              className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
+            >
+              <PlusIcon
+                className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                aria-hidden="true"
+              />
+              Add Filter
+            </button>
+            <div className="w-full flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setAdvancedFilters([]);
+                  onAdvancedFilter(advancedFilters);
+                }}
+                className={clsx(
+                  "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => onAdvancedFilter(advancedFilters)}
+                className={clsx(
+                  "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
+                )}
+              >
+                Save
+              </button>
+            </div>
+          </div>
         )}
-      </Disclosure>
+      </div>
     </div>
   );
 }
@@ -241,7 +243,7 @@ function AdvancedFilters({
   setAdvancedFilters: Dispatch<SetStateAction<Filter[]>>;
 }) {
   return (
-    <>
+    <div className="">
       {filters.map((_filter, index) => {
         return (
           <div key={_filter.id}>
@@ -268,7 +270,7 @@ function AdvancedFilters({
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
 
@@ -307,7 +309,7 @@ function AdvancedFilterInput({
         <input
           type="datetime-local"
           name="search-field-start"
-          onChange={(e) => onChange(new Date(e.target.value).toISOString())}
+          onChange={(e) => onChange(e.target.value)}
           placeholder={"date..."}
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
@@ -331,7 +333,9 @@ function AdvancedFilterRow({
   const [table, setTable] = useState(tables[0][0]);
 
   const columns = tables.find((t) => t[0] === table)?.[1].columns;
+
   const columnsEntries = columns ? Object.entries(columns) : null;
+
   const [column, setColumn] = useState(
     columnsEntries && columnsEntries[0] ? columnsEntries[0][0] : ""
   );
@@ -339,9 +343,11 @@ function AdvancedFilterRow({
   const operators =
     (columnsEntries && columnsEntries.find((c) => c[0] === column)?.[1]) ??
     null;
+
   const operatorsEntries = operators
     ? Object.entries(operators.operations)
     : [];
+
   const [operator, setOperator] = useState(
     operatorsEntries && operatorsEntries[0] ? operatorsEntries[0][0] : ""
   );
@@ -355,84 +361,99 @@ function AdvancedFilterRow({
     setValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table]);
+
   useEffect(() => {
     setOperator(operatorsEntries ? operatorsEntries[0][0] : "");
     setValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [column]);
 
+  const operatorMap = (operator: string) => {
+    switch (operator) {
+      case "equals":
+        return "equals";
+      case "gte":
+        return "greater than or equal to";
+      case "lte":
+        return "less than or equal to";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <div className="w-full justify-between flex flex-row items-center space-x-4">
-      <div className="w-full grid grid-cols-12 gap-4">
+    <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center ">
+      <ThemedDropdownV2
+        options={tables.map((table) => {
+          return {
+            value: table[0],
+            label: table[1].label,
+          };
+        })}
+        selectedValue={table}
+        onSelect={(selected) => {
+          setTable(selected);
+        }}
+        className="w-full lg:w-fit"
+        label="Table"
+      />
+      {columnsEntries && (
         <ThemedDropdownV2
-          options={tables.map((table) => {
+          options={columnsEntries.map((column) => {
             return {
-              value: table[0],
-              label: table[1].label,
+              value: column[0],
+              label: column[1].label,
             };
           })}
-          selectedValue={table}
+          selectedValue={column}
           onSelect={(selected) => {
-            setTable(selected);
+            setColumn(selected);
           }}
-          className="col-span-2"
+          className="w-full lg:w-fit"
+          label="Column"
         />
-        {columnsEntries && (
-          <ThemedDropdownV2
-            options={columnsEntries.map((column) => {
-              return {
-                value: column[0],
-                label: column[1].label,
-              };
-            })}
-            selectedValue={column}
-            onSelect={(selected) => {
-              setColumn(selected);
-            }}
-            className="col-span-3"
-          />
-        )}
+      )}
 
-        {column && (
-          <ThemedDropdownV2
-            options={operatorsEntries.map((operator) => {
-              return {
-                value: operator[0],
-                label: operator[0],
-              };
-            })}
-            selectedValue={operator}
-            onSelect={(selected) => {
-              setOperator(selected);
+      {column && (
+        <ThemedDropdownV2
+          options={operatorsEntries.map((operator) => {
+            return {
+              value: operator[0],
+              label: operatorMap(operator[0]),
+            };
+          })}
+          selectedValue={operator}
+          onSelect={(selected) => {
+            setOperator(selected);
+          }}
+          className="w-full lg:w-fit"
+        />
+      )}
+      {selectedOperator && (
+        <div className="w-full lg:w-fit">
+          <AdvancedFilterInput
+            type={selectedOperator.type}
+            value={value}
+            onChange={(value) => {
+              let filter: any = {};
+              filter[table] = {};
+              filter[table][column] = {};
+              filter[table][column][operator] = value;
+              handleFilterChange(filter);
+              setValue(value);
             }}
-            className="col-span-2"
           />
-        )}
-        {selectedOperator && (
-          <div className="col-span-3">
-            <AdvancedFilterInput
-              type={selectedOperator.type}
-              value={value}
-              onChange={(value) => {
-                let filter: any = {};
-                filter[table] = {};
-                filter[table][column] = {};
-                filter[table][column][operator] = value;
-                handleFilterChange(filter);
-                setValue(value);
-              }}
-            />
-          </div>
-        )}
-        <div className="col-span-2">
-          <button
-            type="button"
-            className="inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-            onClick={() => onDeleteHandler()}
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
         </div>
+      )}
+
+      <div className="w-full lg:w-fit border-b pb-4 lg:border-b-0 lg:pb-0 justify-end flex lg:justify-center">
+        <button
+          type="button"
+          className="inline-flex items-center rounded-md bg-red-600 p-1.5 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+          onClick={() => onDeleteHandler()}
+        >
+          <TrashIcon className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );

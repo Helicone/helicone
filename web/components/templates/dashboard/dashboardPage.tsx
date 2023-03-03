@@ -1,12 +1,7 @@
-import {
-  ArrowTopRightOnSquareIcon,
-  ExclamationCircleIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Metrics } from "../../../lib/api/metrics/metrics";
 import {
@@ -34,8 +29,6 @@ import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
 import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
-import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
-import useRequestsPage from "../requests/useRequestsPage";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";

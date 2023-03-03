@@ -1,3 +1,9 @@
+import Lottie from "react-lottie";
+import * as chicky from "../../public/lottie/Polite Chicky.json";
+import * as hamster from "../../public/lottie/Aniki Hamster.json";
+import * as plane from "../../public/lottie/Paper Airplane.json";
+import { useEffect, useState } from "react";
+
 interface LoadingAnimationProps {
   title: string;
   height?: number;
@@ -6,36 +12,49 @@ interface LoadingAnimationProps {
 
 const LoadingAnimation = (props: LoadingAnimationProps) => {
   const { title, height = 300, width = 300 } = props;
+  const [animation, setAnimation] = useState<
+    typeof chicky | typeof hamster | typeof plane
+  >();
 
   function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  const randomInt = randomIntFromInterval(1, 5);
-
-  const getLottieId = () => {
-    switch (randomInt) {
-      case 1:
-        return "9844";
-      case 2:
-        return "629";
-      case 3:
-        return "99274";
-      case 4:
-        return "28444";
-      case 5:
-        return "14592";
-    }
-  };
+  useEffect(() => {
+    if (animation !== undefined) return;
+    const randomInt = randomIntFromInterval(1, 3);
+    const getLottieId = () => {
+      switch (randomInt) {
+        case 1:
+          setAnimation(chicky);
+          return;
+        case 2:
+          setAnimation(hamster);
+          return;
+        case 3:
+          setAnimation(plane);
+          return;
+      }
+    };
+    getLottieId();
+  }, [animation]);
 
   return (
     <div className="flex flex-col items-center justify-center align-middle w-full space-y-4">
-      <iframe
-        src={`https://embed.lottiefiles.com/animation/${getLottieId()}`}
-        className="w-full h-full bg-gray-100"
+      <Lottie
+        options={{
+          loop: true,
+          autoplay: true,
+          animationData: animation,
+          rendererSettings: {
+            preserveAspectRatio: "xMidYMid slice",
+          },
+        }}
+        height={300}
+        width={300}
+        isStopped={false}
+        isPaused={false}
         style={{
-          height: `${height}px`,
-          width: `${width}px`,
           pointerEvents: "none",
           background: "transparent",
         }}

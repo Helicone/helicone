@@ -3,7 +3,6 @@ import { Loading } from "../components/templates/dashboard/dashboardPage";
 import { CostOverTime } from "../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../pages/api/metrics/errorOverTime";
 import { FilterLeaf, FilterNode } from "../services/lib/filters/filterDefs";
-
 import { ErrorCountOverTime } from "./api/metrics/getErrorOverTime";
 import { Metrics } from "./api/metrics/metrics";
 import { Result } from "./result";

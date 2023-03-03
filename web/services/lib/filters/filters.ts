@@ -2,7 +2,6 @@ import { FilterBranch, FilterLeaf, FilterNode } from "./filterDefs";
 
 export function buildFilterHaving(filter: FilterLeaf): string[] {
   let filters: string[] = [];
-
   if (filter.user_metrics) {
     if (filter.user_metrics.last_active) {
       if (filter.user_metrics.last_active.gte) {
@@ -46,9 +45,8 @@ export function buildFilterHaving(filter: FilterLeaf): string[] {
 
 export function buildFilterLeaf(filter: FilterLeaf): string[] {
   let filters: string[] = [];
-  console.log("filter: ", filter);
+
   if (filter.properties) {
-    console.log("HELLO");
     for (const [key, value] of Object.entries(filter.properties)) {
       if (value.equals) {
         if (key.includes("'") || value.equals.includes('"')) {

@@ -83,6 +83,8 @@ const UsersPage = (props: UsersPageProps) => {
       type: "text",
       filter: true,
       minWidth: 170,
+      format: (value: string) =>
+        value ? truncString(value, 10) : "No user ID",
     },
     {
       key: "active_for",
@@ -103,18 +105,21 @@ const UsersPage = (props: UsersPageProps) => {
       label: "Requests",
       type: "number",
       filter: true,
+      format: (value: string) => Number(value).toFixed(2),
     },
     {
       key: "average_requests_per_day_active",
       label: "Avg Reqs / Day",
       type: "number",
       filter: true,
+      format: (value: string) => Number(value).toFixed(2),
     },
     {
       key: "average_tokens_per_request",
       label: "Avg Tokens / Req",
       type: "number",
       filter: true,
+      format: (value: string) => Number(value).toFixed(2),
     },
     {
       key: "total_cost",
