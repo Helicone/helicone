@@ -2,6 +2,7 @@ import Lottie from "react-lottie";
 import * as chicky from "../../public/lottie/Polite Chicky.json";
 import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
+import { useEffect, useState } from "react";
 
 interface LoadingAnimationProps {
   title: string;
@@ -11,6 +12,9 @@ interface LoadingAnimationProps {
 
 const LoadingAnimation = (props: LoadingAnimationProps) => {
   const { title, height = 300, width = 300 } = props;
+  const [animation, setAnimation] = useState<
+    typeof chicky | typeof hamster | typeof plane
+  >();
 
   function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -29,13 +33,29 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
     }
   };
 
+  useEffect(() => {
+    if (animation !== undefined) return;
+    const randomInt = randomIntFromInterval(1, 3);
+    const getLottieId = () => {
+      switch (randomInt) {
+        case 1:
+          setAnimation(chicky);
+        case 2:
+          setAnimation(hamster);
+        case 3:
+          setAnimation(plane);
+      }
+    };
+    getLottieId();
+  }, [animation]);
+
   return (
     <div className="flex flex-col items-center justify-center align-middle w-full space-y-4">
       <Lottie
         options={{
           loop: true,
           autoplay: true,
-          animationData: getLottieId(),
+          animationData: animation,
           rendererSettings: {
             preserveAspectRatio: "xMidYMid slice",
           },
