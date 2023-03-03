@@ -1,4 +1,4 @@
-import { FilterLeaf, FilterNode } from "../api/metrics/filters";
+import { FilterLeaf, FilterNode } from "../../services/lib/filters/filterDefs";
 import { ModelUsageOverTime } from "../api/metrics/getModelUsageOverTime";
 import { DateCountDBModel } from "../api/metrics/getRequestOverTime";
 import { RequestsOverTime, TimeIncrement } from "./fetchTimeData";

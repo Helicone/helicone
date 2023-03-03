@@ -1,9 +1,10 @@
 import { SupabaseClient, User, UserResponse } from "@supabase/supabase-js";
 import { Data } from "react-csv/components/CommonPropTypes";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { Database } from "../../../supabase/database.types";
 import { isError, Result, unwrap, unwrapAsync, unwrapList } from "../../result";
 import { modelCost } from "./costCalc";
-import { FilterNode } from "./filters";
+
 import { getRequestCount } from "./getRequestCount";
 import { getXRequestDate } from "./getXRequestDate";
 import { getModelMetrics, ModelMetrics } from "./modelMetrics";

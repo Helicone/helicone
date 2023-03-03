@@ -1,14 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import type { NextApiRequest, NextApiResponse } from "next";
-
-import { getMetrics, Metrics } from "../../../lib/api/metrics/metrics";
+import { getPromptValues, Value } from "../../../lib/api/prompts/prompts";
 import { Result } from "../../../lib/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<Metrics, string>>
+  res: NextApiResponse<Result<Value[], string>>
 ) {
   const client = createServerSupabaseClient({ req, res });
   const user = await client.auth.getUser();
@@ -16,21 +14,6 @@ export default async function handler(
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const filter = req.body as FilterNode;
-
-  if (!filter) {
-    res.status(400).json({ error: "Bad request", data: null });
-    return;
-  }
-
-  const metrics = await getMetrics(
-    {
-      client,
-      user: user.data.user,
-    },
-    {
-      filter,
-    }
-  );
-  res.status(200).json(metrics);
+  const values = await getPromptValues(user.data.user.id);
+  res.status(values.error === null ? 200 : 500).json(values);
 }

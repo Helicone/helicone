@@ -42,18 +42,6 @@ const addKey = async (
   ]);
 
   return { data, error };
-  // .then((res) => {
-  //   if (res.error) {
-  //     console.error(res.error);
-  //     setNotification("Error saving key", "error");
-  //     return;
-  //   }
-  //   setNotification("Key Created", "success");
-  //   setApiKey("");
-  //   // setError(null);
-  //   setKeyName("");
-  //   refetch();
-  // });
 };
 
 export { getKeys, deleteKey, addKey };

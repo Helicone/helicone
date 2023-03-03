@@ -1,4 +1,6 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilter } from "../../../services/lib/filters/filters";
 
 import { Result, unwrap } from "../../result";
 import {
@@ -7,7 +9,7 @@ import {
 } from "../../sql/timeHelpers";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbExecute } from "../db/dbExecute";
-import { buildFilter, FilterNode } from "./filters";
+
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 export interface GetTimeDataOptions {
