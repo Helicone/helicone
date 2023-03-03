@@ -21,7 +21,8 @@ const Requests = (props: RequestsProps) => {
   return (
     <MetaData title="Requests">
       <AuthLayout user={user}>
-        <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} />
+        <LoadingAnimation title={"this is a test"} />
+        {/* <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} /> */}
       </AuthLayout>
     </MetaData>
   );

@@ -1,3 +1,8 @@
+import Lottie from "react-lottie";
+import * as chicky from "../../public/lottie/Polite Chicky.json";
+import * as hamster from "../../public/lottie/Aniki Hamster.json";
+import * as plane from "../../public/lottie/Paper Airplane.json";
+
 interface LoadingAnimationProps {
   title: string;
   height?: number;
@@ -11,31 +16,35 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  const randomInt = randomIntFromInterval(1, 5);
+  const randomInt = randomIntFromInterval(1, 3);
 
   const getLottieId = () => {
     switch (randomInt) {
       case 1:
-        return "9844";
+        return chicky;
       case 2:
-        return "629";
+        return hamster;
       case 3:
-        return "99274";
-      case 4:
-        return "28444";
-      case 5:
-        return "14592";
+        return plane;
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center align-middle w-full space-y-4">
-      <iframe
-        src={`https://embed.lottiefiles.com/animation/${getLottieId()}`}
-        className="w-full h-full bg-gray-100"
+      <Lottie
+        options={{
+          loop: true,
+          autoplay: true,
+          animationData: getLottieId(),
+          rendererSettings: {
+            preserveAspectRatio: "xMidYMid slice",
+          },
+        }}
+        height={300}
+        width={300}
+        isStopped={false}
+        isPaused={false}
         style={{
-          height: `${height}px`,
-          width: `${width}px`,
           pointerEvents: "none",
           background: "transparent",
         }}
