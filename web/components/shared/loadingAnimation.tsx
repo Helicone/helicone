@@ -20,19 +20,6 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  const randomInt = randomIntFromInterval(1, 3);
-
-  const getLottieId = () => {
-    switch (randomInt) {
-      case 1:
-        return chicky;
-      case 2:
-        return hamster;
-      case 3:
-        return plane;
-    }
-  };
-
   useEffect(() => {
     if (animation !== undefined) return;
     const randomInt = randomIntFromInterval(1, 3);
@@ -40,10 +27,13 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
       switch (randomInt) {
         case 1:
           setAnimation(chicky);
+          return;
         case 2:
           setAnimation(hamster);
+          return;
         case 3:
           setAnimation(plane);
+          return;
       }
     };
     getLottieId();
