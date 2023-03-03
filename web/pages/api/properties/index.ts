@@ -2,13 +2,15 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { getMetrics, Metrics } from "../../../lib/api/metrics/metrics";
+import {
+  getProperties,
+  Property,
+} from "../../../lib/api/properties/properties";
 import { Result } from "../../../lib/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<Metrics, string>>
+  res: NextApiResponse<Result<Property[], string>>
 ) {
   const client = createServerSupabaseClient({ req, res });
   const user = await client.auth.getUser();
@@ -16,21 +18,6 @@ export default async function handler(
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const filter = req.body as FilterNode;
-
-  if (!filter) {
-    res.status(400).json({ error: "Bad request", data: null });
-    return;
-  }
-
-  const metrics = await getMetrics(
-    {
-      client,
-      user: user.data.user,
-    },
-    {
-      filter,
-    }
-  );
-  res.status(200).json(metrics);
+  const properties = await getProperties(user.data.user.id);
+  res.status(properties.error === null ? 200 : 500).json(properties);
 }

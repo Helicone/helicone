@@ -13,6 +13,13 @@ const monthNames = [
   "Dec",
 ];
 
+const getUSDateShort = (value: string) => {
+  const date = new Date(value);
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+  return `${month} ${day}`;
+};
+
 const getUSDate = (value: string) => {
   const date = new Date(value);
   const month = monthNames[date.getMonth()];
@@ -22,4 +29,4 @@ const getUSDate = (value: string) => {
     .slice(-2)}`;
 };
 
-export { getUSDate };
+export { getUSDate, getUSDateShort };

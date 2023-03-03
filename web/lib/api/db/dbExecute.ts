@@ -11,7 +11,6 @@ export async function dbExecute<T>(
   });
   try {
     // Let's print out the time it takes to execute the query
-    const start = Date.now();
     await client.connect();
 
     const result = await client.query(query);

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { FilterNode } from "../../../lib/api/metrics/filters";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export function Filters({
   keys,
@@ -42,9 +42,7 @@ export function Filters({
               return {
                 user_api_keys: {
                   api_key_hash: {
-                    equals: {
-                      api_key_hash: [e.target.value],
-                    },
+                    equals: e.target.value,
                   },
                 },
               };
@@ -56,9 +54,7 @@ export function Filters({
               ...f,
               user_api_keys: {
                 api_key_hash: {
-                  equals: {
-                    api_key_hash: [e.target.value],
-                  },
+                  equals: e.target.value,
                 },
               },
             };
