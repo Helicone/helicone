@@ -351,6 +351,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
+
   return (
     <>
       <AuthHeader title={"Requests"} />
