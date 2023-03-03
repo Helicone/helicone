@@ -15,7 +15,10 @@ import {
   initialGraphDataState,
 } from "../../../lib/dashboardGraphs";
 import { Result } from "../../../lib/result";
-import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
+import {
+  getTimeMap,
+  timeGraphConfig,
+} from "../../../lib/timeCalculations/constants";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -55,6 +58,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     useState<Loading<Result<Metrics, string>>>("loading");
   const [interval, setInterval] = useState<TimeInterval>("1m");
   const [filter, setFilter] = useState<FilterNode>("all");
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
   const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
@@ -67,10 +71,18 @@ const DashboardPage = (props: DashboardPageProps) => {
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
   useEffect(() => {
-    console.log("getting dashboard data", timeFilter, filter);
-    getDashboardData(timeFilter, filter, setMetrics, setTimeData);
+    getDashboardData(
+      timeFilter,
+      {
+        left: filter,
+        operator: "and",
+        right: apiKeyFilter,
+      },
+      setMetrics,
+      setTimeData
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeFilter, filter]);
+  }, [timeFilter, filter, apiKeyFilter]);
 
   const propertyFilterMap = {
     properties: {
@@ -82,7 +94,13 @@ const DashboardPage = (props: DashboardPageProps) => {
     <AuthLayout user={user}>
       <AuthHeader
         title={"Dashboard"}
-        actions={<Filters keys={keys} filter={filter} setFilter={setFilter} />}
+        actions={
+          <Filters
+            keys={keys}
+            filter={apiKeyFilter}
+            setFilter={setApiKeyFilter}
+          />
+        }
       />
       {keys.length === 0 ? (
         <div className="space-y-16">
@@ -188,8 +206,10 @@ const DashboardPage = (props: DashboardPageProps) => {
           <MetricsPanel filters={filter} metrics={metrics} />
           <TimeGraphWHeader
             data={timeData}
-            interval={interval}
-            setInterval={setInterval}
+            timeMap={getTimeMap(
+              new Date(timeFilter.request!.created_at!.gte!),
+              new Date(timeFilter.request!.created_at!.lte!)
+            )}
           />
         </div>
       )}

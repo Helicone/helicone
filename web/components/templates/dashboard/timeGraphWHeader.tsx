@@ -2,7 +2,10 @@ import { Dispatch, SetStateAction } from "react";
 
 import { GraphDataState } from "../../../lib/dashboardGraphs";
 import { Result } from "../../../lib/result";
-import { timeGraphConfig } from "../../../lib/timeCalculations/constants";
+import {
+  getTimeMap,
+  timeGraphConfig,
+} from "../../../lib/timeCalculations/constants";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { clsx } from "../../shared/clsx";
@@ -14,8 +17,8 @@ import { RenderLineChart } from "./timeGraph";
 
 interface TimeGraphWHeaderProps {
   data: GraphDataState;
-  interval: TimeInterval;
-  setInterval: Dispatch<SetStateAction<TimeInterval>>;
+
+  timeMap: (date: Date) => string;
 }
 
 function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
@@ -31,8 +34,7 @@ function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
   const {
     data: { requestsOverTime, costOverTime, errorOverTime },
-    interval,
-    setInterval,
+    timeMap,
   } = props;
 
   return (
@@ -53,7 +55,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               ...r,
               value: r.count,
             }))}
-            timeMap={timeGraphConfig[interval].timeMap}
+            timeMap={timeMap}
             valueFormatter={(v) => [v.toString(), "requests"]}
           />
         </div>
@@ -68,7 +70,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               ...r,
               value: r.cost,
             }))}
-            timeMap={timeGraphConfig[interval].timeMap}
+            timeMap={timeMap}
             valueFormatter={(v) => [`$${v.toString()}`, "cost"]}
           />
         </div>
@@ -83,7 +85,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               ...r,
               value: r.count,
             }))}
-            timeMap={timeGraphConfig[interval].timeMap}
+            timeMap={timeMap}
             valueFormatter={(v) => [v.toString(), "errors"]}
           />
         </div>

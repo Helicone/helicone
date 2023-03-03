@@ -84,3 +84,26 @@ export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
     end: getXMinutesAgoFloored(-1),
   },
 };
+
+export function getTimeMap(start: Date, end: Date) {
+  const totalTime = end.getTime() - start.getTime();
+  if (totalTime <= 1000 * 60 * 60 * 2) {
+    // less than 1 hour
+    return timeGraphConfig["1h"].timeMap;
+  } else if (totalTime <= 1000 * 60 * 60 * 24 * 2) {
+    // less than 1 day
+    return timeGraphConfig["24h"].timeMap;
+  } else if (totalTime <= 1000 * 60 * 60 * 24 * 7 * 2) {
+    // less than 1 week
+    return timeGraphConfig["7d"].timeMap;
+  } else if (totalTime <= 1000 * 60 * 60 * 24 * 30 * 2) {
+    // less than 1 month
+    return timeGraphConfig["1m"].timeMap;
+  } else if (totalTime <= 1000 * 60 * 60 * 24 * 30 * 3 * 2) {
+    // less than 3 months
+    return timeGraphConfig["3m"].timeMap;
+  } else {
+    // more than 3 months
+    return timeGraphConfig["all"].timeMap;
+  }
+}

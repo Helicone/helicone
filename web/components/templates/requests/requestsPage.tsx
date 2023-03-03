@@ -63,7 +63,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
-        gte: new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString(),
+        gte: new Date(0).toISOString(),
       },
     },
   });

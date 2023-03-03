@@ -36,13 +36,13 @@ export const getIncrement = (totalTime: number) => {
     // Increment by 5 minutes
     return 1000 * 60 * 5;
   }
-  if (totalTime < 1000 * 60 * 60 * 24 * 2) {
-    // less than 1 day
+  if (totalTime < 1000 * 60 * 60 * 24 * 7) {
+    // less than 7 day
     // Increment by 3 hour
     return 1000 * 60 * 60 * 3;
   }
-  if (totalTime < 1000 * 60 * 60 * 24 * 7 * 2) {
-    // less than 7 days
+  if (totalTime <= 1000 * 60 * 60 * 24 * 7 * 2) {
+    // less than 14 days
     // Increment by 1 day
     return 1000 * 60 * 60 * 24;
   }
