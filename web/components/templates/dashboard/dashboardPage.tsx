@@ -88,6 +88,12 @@ const DashboardPage = (props: DashboardPageProps) => {
       ),
     },
   };
+  const filterMap =
+    properties.length > 0
+      ? { ...propertyFilterMap, ...RequestsTableFilter }
+      : RequestsTableFilter;
+
+  console.log("filterMap", filterMap);
   return (
     <AuthLayout user={user}>
       <AuthHeader
@@ -152,10 +158,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               { key: "3m", value: "3mo" },
             ]}
             defaultTimeFilter={interval}
-            filterMap={{
-              ...propertyFilterMap,
-              ...RequestsTableFilter,
-            }}
+            filterMap={filterMap}
             onAdvancedFilter={(_filters: Filter[]) => {
               const filters = _filters.filter((f) => f) as FilterNode[];
               if (filters.length === 0) {

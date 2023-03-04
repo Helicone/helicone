@@ -382,6 +382,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       columns: getPropertyFilters(properties),
     },
   };
+  const filterMap =
+    properties.length > 0
+      ? { ...propertyFilterMap, ...RequestsTableFilter }
+      : RequestsTableFilter;
+
   return (
     <>
       <AuthHeader title={"Requests"} />
@@ -400,10 +405,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               ]}
               customTimeFilter
               fileName="requests.csv"
-              filterMap={{
-                ...propertyFilterMap,
-                ...RequestsTableFilter,
-              }}
+              filterMap={RequestsTableFilter}
               onAdvancedFilter={(_filters) => {
                 router.query.page = "1";
                 router.push(router);
