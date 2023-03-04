@@ -235,7 +235,10 @@ const RequestsPage = (props: RequestsPageProps) => {
         : `error: ${JSON.stringify(d.response_body?.error)}`;
 
       chatProperties = {
-        request: request_messages,
+        request:
+          typeof request_messages === "string"
+            ? JSON.parse(request_messages)
+            : request_messages,
         response: response_blob?.message,
       };
     } else {
