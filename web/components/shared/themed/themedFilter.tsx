@@ -41,6 +41,7 @@ import {
   ColumnType,
   TableFilterMap,
 } from "../../../services/lib/filters/frontendFilterDefs";
+import ThemedTextDropDown from "./themedTextDropDown";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -278,10 +279,12 @@ function AdvancedFilterInput({
   type,
   value,
   onChange,
+  inputParams,
 }: {
   type: ColumnType;
   value: string;
   onChange: (value: string) => void;
+  inputParams?: string[];
 }) {
   switch (type) {
     case "text":
@@ -314,8 +317,16 @@ function AdvancedFilterInput({
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
-    default:
-      return <></>;
+    case "text-with-suggestions":
+      return (
+        <>
+          <ThemedTextDropDown
+            options={inputParams ?? []}
+            onChange={(e) => onChange(e)}
+            value={value}
+          />
+        </>
+      );
   }
 }
 
@@ -376,6 +387,10 @@ function AdvancedFilterRow({
         return "greater than or equal to";
       case "lte":
         return "less than or equal to";
+      case "like":
+        return "like";
+      case "ilike":
+        return "ilike";
       default:
         return "";
     }
@@ -434,6 +449,7 @@ function AdvancedFilterRow({
           <AdvancedFilterInput
             type={selectedOperator.type}
             value={value}
+            inputParams={selectedOperator.inputParams}
             onChange={(value) => {
               let filter: any = {};
               filter[table] = {};
