@@ -1,3 +1,6 @@
+import { UserCircleIcon, UserIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
+import { clsx } from "../../shared/clsx";
 import { ChatProperties, CsvData } from "./requestsPage";
 
 interface ChatProps {
@@ -11,52 +14,46 @@ export const Chat = (props: ChatProps) => {
     messages = messages.concat([response]);
   }
 
+  console.log(messages);
+
   return (
-    <div className="gap-4 text-sm w-full p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap overflow-auto leading-6">
-      {messages.map((message, index) => {
-        const isAssistant = message.role === "assistant";
-        const isSystem = message.role === "system";
-        const isUser = message.role === "user";
-        const messageStyle = isAssistant
-          ? "text-left p-4 bg-white"
-          : isSystem
-          ? "text-left font-bold p-4 bg-white"
-          : "text-left p-4";
-        const containerStyle = isAssistant
-          ? { justifyContent: "flex-start" }
-          : { justifyContent: "flex-end" };
-        return (
-          <div key={index} className="message-container" style={containerStyle}>
-            <div
-              className={`message ${
-                isAssistant ? "assistant" : "user"
-              } ${messageStyle}`}
-              style={{ display: "flex" }}
-            >
-              {(isAssistant || isSystem) && (
-                <img
-                  src={"/assets/ChatGPT_logo.svg"}
-                  className="h-6 w-6"
-                  style={{ marginRight: "1rem" }}
-                />
-              )}
-              {isUser && (
-                <img
-                  src={"/assets/user.svg"}
-                  className="h-6 w-6"
-                  style={{ marginRight: "1rem" }}
-                />
-              )}
-              <div>{message.content}</div>
-            </div>
-            {
+    <div className="w-full flex flex-col text-left space-y-1 text-xs">
+      <p className="text-gray-500 font-medium">Messages</p>
+      <div className="text-xs w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full max-h-[500px]">
+        {messages.map((message, index) => {
+          const isAssistant = message.role === "assistant";
+          const isSystem = message.role === "system";
+          const isUser = message.role === "user";
+
+          return (
+            <div key={index} className="">
               <div
-                style={{ borderTop: "1px solid #ccc", margin: "0.0rem 0" }}
-              ></div>
-            }
-          </div>
-        );
-      })}
+                className={clsx(
+                  isAssistant || isSystem ? "bg-gray-100" : "bg-white",
+                  "items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                )}
+              >
+                <div className="col-span-1">
+                  {isAssistant || isSystem ? (
+                    <Image
+                      src={"/assets/chatGPT.png"}
+                      className="h-5 w-5 rounded-md"
+                      height={24}
+                      width={24}
+                      alt="ChatGPT Logo"
+                    />
+                  ) : (
+                    <UserCircleIcon className="h-5 w-5 bg-white rounded-full" />
+                  )}
+                </div>
+                <div className="whitespace-pre-wrap col-span-9">
+                  {message.content}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
