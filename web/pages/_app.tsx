@@ -12,7 +12,7 @@ import posthog from "posthog-js";
 
 if (typeof window !== "undefined") {
   posthog.init("phc_jeluwNoJNpc7zEzkQrPbjyMOqdnJQjFAVr849LaEaPG", {
-    api_host: "https://app.posthog.com",
+    api_host: "https://e.helicone.ai",
   });
 }
 
