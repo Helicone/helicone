@@ -1,12 +1,16 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
-import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
+import {
+  FilterLeaf,
+  FilterNode,
+} from "../../../services/lib/filters/filterDefs";
 import { Result } from "../../result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { timeBackfill } from "../../timeCalculations/time";
 
 export interface DataOverTimeRequest {
-  filter: FilterLeaf;
+  timeFilter: FilterLeaf;
+  userFilter: FilterNode;
   userId: string;
   dbIncrement: TimeIncrement;
   timeZoneDifference: number;
@@ -28,12 +32,12 @@ export async function getSomeDataOverTime<T, K>(
   if (error !== null) {
     return { data: null, error: error };
   }
-
+  // console.log("DATA", data);
   return {
     data: timeBackfill(
       data,
-      new Date(requestParams.filter!.request!.created_at!.gte!),
-      new Date(requestParams.filter!.request!.created_at!.lte!),
+      new Date(requestParams.timeFilter!.request!.created_at!.gte!),
+      new Date(requestParams.timeFilter!.request!.created_at!.lte!),
       backFillParams.reducer,
       backFillParams.initial
     ),
@@ -52,19 +56,22 @@ export async function getTimeDataHandler<T>(
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const { filter, dbIncrement, timeZoneDifference } = req.body as {
-    filter: FilterLeaf;
-    dbIncrement: TimeIncrement;
-    timeZoneDifference: number;
-  };
+  const { timeFilter, userFilter, dbIncrement, timeZoneDifference } =
+    req.body as {
+      timeFilter: FilterLeaf;
+      userFilter: FilterNode;
+      dbIncrement: TimeIncrement;
+      timeZoneDifference: number;
+    };
 
-  if (!filter || !dbIncrement) {
+  if (!timeFilter || !userFilter || !dbIncrement) {
     res.status(400).json({ error: "Bad request", data: null });
     return;
   }
 
   const metrics = await dataExtractor({
-    filter,
+    timeFilter,
+    userFilter,
     userId: user.data.user.id,
     dbIncrement,
     timeZoneDifference,

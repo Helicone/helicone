@@ -8,6 +8,7 @@ import {
 import { dbExecute } from "../db/dbExecute";
 import { buildFilter } from "../../../services/lib/filters/filters";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export interface AuthClient {
   client: SupabaseClient;
@@ -21,11 +22,18 @@ export interface ModelUsageOverTime {
 }
 
 export async function getModelUsageOverTime({
-  filter,
+  timeFilter,
+  userFilter,
   userId,
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<ModelUsageOverTime[], string>> {
+  const filter: FilterNode = {
+    left: timeFilter,
+    operator: "and",
+    right: userFilter,
+  };
+
   if (!isValidTimeIncrement(dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }

@@ -1,3 +1,19 @@
+export function getPropertyFilters(properties: string[]) {
+  const filters: any = {};
+  properties.forEach((p) => {
+    filters[p] = {
+      label: p,
+      type: "text",
+      operations: {
+        equals: {
+          type: "text",
+        },
+      },
+    };
+  });
+  return filters;
+}
+
 export interface FilterLeafUserMetrics {
   user_id?: {
     equals?: string;
@@ -38,6 +54,11 @@ export interface FilterLeaf {
   user_api_keys?: FilterLeafUserApiKeys;
   response?: FilterLeafResponse;
   request?: FilterLeafRequest;
+  properties?: {
+    [key: string]: {
+      equals?: string;
+    };
+  };
 }
 export interface FilterBranch {
   left: FilterNode;

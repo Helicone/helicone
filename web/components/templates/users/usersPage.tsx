@@ -53,7 +53,6 @@ const UsersPage = (props: UsersPageProps) => {
     pageSize,
     advancedFilters
   );
-
   const router = useRouter();
 
   const { setNotification } = useNotification();

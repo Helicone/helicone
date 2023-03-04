@@ -118,3 +118,8 @@ export const UserMetricsTableFilter: TableFilterMap = {
   request: filterRequestFilter,
   response: filterResponseFilter,
 };
+
+export const RequestsTableFilter: TableFilterMap = {
+  request: filterRequestFilter,
+  response: filterResponseFilter,
+};
