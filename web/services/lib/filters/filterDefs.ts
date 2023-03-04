@@ -1,12 +1,18 @@
-export function getPropertyFilters(properties: string[]) {
-  const filters: any = {};
+import { ColumnComparators, Comparator } from "./frontendFilterDefs";
+
+export function getPropertyFilters(
+  properties: string[],
+  inputParams?: string[]
+) {
+  const filters: ColumnComparators<any> = {};
   properties.forEach((p) => {
     filters[p] = {
       label: p,
-      type: "text",
+      type: "text-with-suggestions",
       operations: {
         equals: {
-          type: "text",
+          inputParams,
+          type: "text-with-suggestions",
         },
       },
     };
@@ -28,6 +34,11 @@ export interface FilterLeafUserMetrics {
   };
 }
 export interface FilterLeafRequest {
+  prompt?: {
+    equals?: string;
+    like: string;
+    ilike?: string;
+  };
   created_at?: {
     gte?: string;
     lte?: string;

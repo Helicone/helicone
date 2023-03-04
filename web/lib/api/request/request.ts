@@ -72,7 +72,6 @@ export async function getRequests(
 `;
 
   const { data, error } = await dbExecute<HeliconeRequest>(query);
-  console.log("OUTPUT: getRequests -> data", data);
   if (error !== null) {
     return { data: null, error: error };
   }
