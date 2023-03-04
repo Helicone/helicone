@@ -19,6 +19,7 @@ import {
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useGetProperties } from "../../../services/hooks/properties";
+import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import {
   FilterLeaf,
   FilterNode,
@@ -62,6 +63,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   });
 
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const { propertyParams } = useGetPropertyParams();
 
   useEffect(() => {
     getDashboardData(
@@ -80,7 +82,10 @@ const DashboardPage = (props: DashboardPageProps) => {
   const propertyFilterMap = {
     properties: {
       label: "Properties",
-      columns: getPropertyFilters(properties),
+      columns: getPropertyFilters(
+        properties,
+        propertyParams.map((p) => p.property_param)
+      ),
     },
   };
   return (
@@ -148,8 +153,8 @@ const DashboardPage = (props: DashboardPageProps) => {
             ]}
             defaultTimeFilter={interval}
             filterMap={{
-              ...RequestsTableFilter,
               ...propertyFilterMap,
+              ...RequestsTableFilter,
             }}
             onAdvancedFilter={(_filters: Filter[]) => {
               const filters = _filters.filter((f) => f) as FilterNode[];
