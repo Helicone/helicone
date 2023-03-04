@@ -2,8 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import { Loading } from "../components/templates/dashboard/dashboardPage";
 import { CostOverTime } from "../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../pages/api/metrics/errorOverTime";
-import { FilterNode } from "../services/lib/filters/filterDefs";
-
+import { FilterLeaf, FilterNode } from "../services/lib/filters/filterDefs";
 import { ErrorCountOverTime } from "./api/metrics/getErrorOverTime";
 import { Metrics } from "./api/metrics/metrics";
 import { Result } from "./result";
@@ -26,7 +25,8 @@ export interface GraphDataState {
   errorOverTime: Loading<Result<ErrorOverTime[], string>>;
 }
 async function fetchDataOverTime<T>(
-  filter: FilterNode,
+  timeFilter: FilterLeaf,
+  userFilter: FilterNode,
   dbIncrement: TimeIncrement,
   path: string
 ) {
@@ -36,7 +36,8 @@ async function fetchDataOverTime<T>(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      filter,
+      timeFilter,
+      userFilter,
       dbIncrement,
       timeZoneDifference: new Date().getTimezoneOffset(),
     }),
@@ -44,16 +45,18 @@ async function fetchDataOverTime<T>(
 }
 
 export async function getDashboardData(
-  filter: FilterNode,
+  timeFilter: FilterLeaf,
+  userFilter: FilterNode,
   setMetrics: (m: Loading<Result<Metrics, string>>) => void,
   setGraphData: Dispatch<SetStateAction<GraphDataState>>
 ) {
-  if (validTimeWindow(filter)) {
+  if (validTimeWindow(timeFilter)) {
     setMetrics("loading");
     setGraphData(initialGraphDataState);
-    const timeInterval = getTimeInterval(filter);
+    const timeInterval = getTimeInterval(timeFilter);
     fetchDataOverTime<RequestsOverTime>(
-      filter,
+      timeFilter,
+      userFilter,
       timeInterval,
       "requestOverTime"
     ).then(({ data, error }) => {
@@ -77,31 +80,35 @@ export async function getDashboardData(
       }
     });
 
-    fetchDataOverTime<CostOverTime>(filter, timeInterval, "costOverTime").then(
-      ({ data, error }) => {
-        if (error !== null) {
-          console.error(error);
-          setGraphData((prev) => ({
-            ...prev,
-            costOverTime: { error, data: null },
-          }));
-        } else {
-          setGraphData((prev) => ({
-            ...prev,
-            costOverTime: {
-              data: data.map((d) => ({
-                cost: +d.cost,
-                time: new Date(d.time),
-              })),
-              error,
-            },
-          }));
-        }
+    fetchDataOverTime<CostOverTime>(
+      timeFilter,
+      userFilter,
+      timeInterval,
+      "costOverTime"
+    ).then(({ data, error }) => {
+      if (error !== null) {
+        console.error(error);
+        setGraphData((prev) => ({
+          ...prev,
+          costOverTime: { error, data: null },
+        }));
+      } else {
+        setGraphData((prev) => ({
+          ...prev,
+          costOverTime: {
+            data: data.map((d) => ({
+              cost: +d.cost,
+              time: new Date(d.time),
+            })),
+            error,
+          },
+        }));
       }
-    );
+    });
 
     fetchDataOverTime<ErrorOverTime>(
-      filter,
+      timeFilter,
+      userFilter,
       timeInterval,
       "errorOverTime"
     ).then(({ data, error }) => {
@@ -124,6 +131,12 @@ export async function getDashboardData(
         }));
       }
     });
+
+    const filter: FilterNode = {
+      right: timeFilter,
+      operator: "and",
+      left: userFilter,
+    };
 
     fetch("/api/metrics", {
       method: "POST",
