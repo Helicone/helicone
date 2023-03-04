@@ -1,21 +1,13 @@
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { Column } from "../../ThemedTableV2";
 
 const useRequestsPage = (
-  currentTimeFilter: string,
   currentPage: number,
   currentPageSize: number,
-  sortBy: string | null,
-  advancedFilters?: {
-    idx: number;
-    type?: "number" | "text" | "datetime-local" | undefined;
-    supabaseKey?: string | undefined;
-    value?: string | undefined;
-    column?: Column | undefined;
-    operator?: "eq" | "gt" | "lt";
-  }[]
+  advancedFilter?: FilterNode
 ) => {
   const {
     requests,
@@ -25,13 +17,7 @@ const useRequestsPage = (
     isLoading: isRequestsLoading,
     refetch,
     isRefetching,
-  } = useGetRequests(
-    currentTimeFilter,
-    currentPage,
-    currentPageSize,
-    sortBy,
-    advancedFilters
-  );
+  } = useGetRequests(currentPage, currentPageSize, advancedFilter);
 
   const {
     properties,
