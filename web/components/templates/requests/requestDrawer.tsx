@@ -37,8 +37,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const { open, setOpen, request, probabilities, index, properties, values } =
     props;
 
-  const { setNotification } = useNotification();
-
   const makePropertyRow = (name: string, val: string) => {
     return (
       <div className="flex justify-between py-2 text-xs font-medium">
