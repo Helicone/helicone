@@ -55,8 +55,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
-        gte: timeGraphConfig["1m"].start.toISOString(),
-        lte: timeGraphConfig["1m"].end.toISOString(),
+        gte: getTimeIntervalAgo("1m").toISOString(),
+        lte: new Date().toISOString(),
       },
     },
   });

@@ -4,7 +4,6 @@ import { Result } from "../../result";
 export async function dbExecute<T>(
   query: string
 ): Promise<Result<T[], string>> {
-  console.log("dbExecute", query);
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
     // Need to add ssl
