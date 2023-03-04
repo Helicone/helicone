@@ -10,6 +10,7 @@ interface ChatProps {
 export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
   let messages = request ? request : [];
+
   if (response) {
     messages = messages.concat([response]);
   }
