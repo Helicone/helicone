@@ -11,11 +11,6 @@ export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
   let messages = request ? request : [];
 
-  // This is a bandaid, need to fix the real issue...
-  if (typeof messages === "string") {
-    messages = JSON.parse(messages);
-  }
-
   if (response) {
     messages = messages.concat([response]);
   }
