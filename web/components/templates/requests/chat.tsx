@@ -10,6 +10,12 @@ interface ChatProps {
 export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
   let messages = request ? request : [];
+
+  if (typeof messages === "string") {
+    console.log("parsing messages", messages, response);
+    messages = JSON.parse(messages);
+  }
+
   if (response) {
     messages = messages.concat([response]);
   }
