@@ -28,6 +28,7 @@ import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
+import RequestDrawer from "./requestDrawer";
 import useRequestsPage from "./useRequestsPage";
 
 type Message = {
@@ -444,129 +445,15 @@ const RequestsPage = (props: RequestsPageProps) => {
         </div>
       </div>
       {open && selectedData !== undefined && index !== undefined && (
-        <ThemedModal open={open} setOpen={setOpen}>
-          <div className="sm:w-[750px] sm:max-w-[750px]">
-            <div className="mt-1 text-center sm:mt-3">
-              <ul className="mt-4 space-y-2">
-                <div className="flex flex-wrap">
-                  <div className="w-full md:w-1/3 px-4">
-                    <div className="border-b border-gray-300">
-                      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                        <p>Time:</p>
-                        <p>
-                          {new Date(selectedData.time || "").toLocaleString()}
-                        </p>
-                      </li>
-                    </div>
-                    <div className="border-gray-500">
-                      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                        <p>Duration:</p>
-                        <p>{selectedData["duration (s)"]}s</p>
-                      </li>
-                    </div>
-                  </div>
-                  <div className="w-full md:w-1/3 px-4">
-                    <div className="border-b border-gray-300">
-                      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                        <p>Tokens:</p>
-                        <p>{selectedData.total_tokens}</p>
-                      </li>
-                    </div>
-                    <div className="border-gray-500">
-                      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                        <p>Model:</p>
-                        <p>{selectedData.model}</p>
-                      </li>
-                    </div>
-                  </div>
-                  <div className="w-full md:w-1/3 px-4">
-                    <div className="border-b border-gray-300">
-                      <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                        <p>User Id:</p>
-                        <p>{selectedData.request_user_id}</p>
-                      </li>
-                    </div>
-                    {probabilities[index] && (
-                      <div className="md:border-b-0">
-                        <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                          <p>Log Probability:</p>
-                          <p>{probabilities ? probabilities[index] : 0}</p>
-                        </li>
-                      </div>
-                    )}
-                  </div>
-                  {selectedData.error &&
-                    selectedData.error != "unknown error" && (
-                      <div className="px-4 border-gray-500 overflow-auto text-red-500">
-                        <li className="w-full flex flex-row justify-between gap-4 text-sm py-4">
-                          <p>Error:</p>
-                          <p className="max-w-xl whitespace-pre-wrap text-left">
-                            {selectedData.error
-                              ? JSON.stringify(selectedData.error)
-                              : "{{ no error }}"}
-                          </p>
-                        </li>
-                      </div>
-                    )}
-                </div>
-                {properties
-                  .filter((v) => selectedData[v] != null)
-                  .map((p) =>
-                    makeCardProperty(
-                      p,
-                      selectedData[p] !== null ? selectedData[p] : "{NULL}"
-                    )
-                  )}
-                {selectedData.isChat ? (
-                  <Chat chatProperties={selectedData.chatProperties} />
-                ) : !selectedData.prompt_regex ? (
-                  <Completion
-                    request={selectedData.request}
-                    response={selectedData.response}
-                  />
-                ) : (
-                  <CompletionRegex
-                    prompt_regex={selectedData.prompt_regex}
-                    prompt_name={selectedData.prompt_name}
-                    // keys is the values for all the keys in `values`
-                    keys={values.reduce((acc, key) => {
-                      if (selectedData.hasOwnProperty(key)) {
-                        return {
-                          ...acc,
-                          [key]: selectedData[key],
-                        };
-                      }
-                      return acc;
-                    }, {})}
-                    response={selectedData.response}
-                    values={values}
-                  />
-                )}
-              </ul>
-            </div>
-          </div>
-          <div className="mt-5 sm:mt-6 w-full gap-4 flex flex-row justify-center">
-            <button
-              type="button"
-              tabIndex={-1}
-              className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm w-32"
-              onClick={() => setOpen(false)}
-            >
-              Done
-            </button>
-            <button
-              type="button"
-              tabIndex={-1}
-              className="inline-flex justify-center text-xs font-medium text-gray-500 sm:text-sm items-center"
-              onClick={() => {
-                setNotification("Copied to clipboard", "success");
-                navigator.clipboard.writeText(JSON.stringify(selectedData));
-              }}
-            >
-              <ClipboardDocumentIcon className="h-5 w-5" />
-            </button>
-          </div>
-        </ThemedModal>
+        <RequestDrawer
+          open={open}
+          index={index}
+          probabilities={probabilities}
+          properties={properties}
+          request={selectedData}
+          setOpen={setOpen}
+          values={values}
+        />
       )}
     </>
   );
