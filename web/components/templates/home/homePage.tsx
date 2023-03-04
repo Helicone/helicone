@@ -38,7 +38,7 @@ export default function HomePage() {
               <div className="absolute inset-0">
                 <img
                   className="h-full w-full object-cover"
-                  src="/assets/landscape.png"
+                  src="/assets/landscape.webp"
                   alt="People working on laptops"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-indigo-400 mix-blend-multiply" />

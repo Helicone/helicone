@@ -46,6 +46,22 @@ export function buildFilterHaving(filter: FilterLeaf): string[] {
 export function buildFilterLeaf(filter: FilterLeaf): string[] {
   let filters: string[] = [];
 
+  if (filter.properties) {
+    for (const [key, value] of Object.entries(filter.properties)) {
+      if (value.equals) {
+        if (key.includes("'") || value.equals.includes('"')) {
+          throw new Error("Invalid property key or value");
+        }
+        // check that key is only alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(key)) {
+          throw new Error("Invalid property key");
+        }
+        filters = filters.concat(
+          `quote_literal(properties ->>'${key}') = quote_literal('${value.equals}')`
+        );
+      }
+    }
+  }
   if (filter.user_metrics) {
     if (filter.user_metrics.user_id?.equals) {
       if (filter.user_metrics.user_id.equals.includes("'")) {
@@ -109,6 +125,36 @@ export function buildFilterLeaf(filter: FilterLeaf): string[] {
     }
   }
   if (filter.request) {
+    if (filter.request.prompt) {
+      if (filter.request.prompt.equals) {
+        // check that prompt is only alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(filter.request.prompt.equals)) {
+          throw new Error("Invalid prompt");
+        }
+        filters = filters.concat(
+          `quote_literal(request.body->>'prompt') = quote_literal('${filter.request.prompt.equals}')`
+        );
+      }
+      if (filter.request.prompt.like) {
+        // check that prompt is only alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(filter.request.prompt.like)) {
+          throw new Error("Invalid prompt");
+        }
+        filters = filters.concat(
+          `quote_literal(request.body->>'prompt') LIKE quote_literal('%${filter.request.prompt.like}%')`
+        );
+      }
+      if (filter.request.prompt.ilike) {
+        // check that prompt is only alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(filter.request.prompt.ilike)) {
+          throw new Error("Invalid prompt");
+        }
+        filters = filters.concat(
+          `quote_literal(request.body->>'prompt') ILIKE quote_literal('%${filter.request.prompt.ilike}%')`
+        );
+      }
+    }
+
     if (filter.request.created_at) {
       if (filter.request.created_at.gte) {
         if (isNaN(Date.parse(filter.request.created_at.gte))) {

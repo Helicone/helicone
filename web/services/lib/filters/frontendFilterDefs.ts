@@ -5,25 +5,35 @@ import {
   FilterLeafUserMetrics,
 } from "./filterDefs";
 
-export type ColumnType = "text" | "timestamp" | "number";
+export type ColumnType =
+  | "text"
+  | "timestamp"
+  | "number"
+  | "text-with-suggestions";
 interface Operator {
   type: ColumnType;
+  inputParams?: string[];
 }
 
-interface Comparator {
+export interface Comparator {
   type: ColumnType;
   label: string;
   operations: {
     equals?: Operator;
     gte?: Operator;
     lte?: Operator;
+    like?: Operator;
+    ilike?: Operator;
   };
 }
+
+export type ColumnComparators<T> = {
+  [key in keyof T]: Comparator;
+};
+
 export type TableFilter<T> = {
   label: string;
-  columns: {
-    [key in keyof T]: Comparator;
-  };
+  columns: ColumnComparators<T>;
 };
 export const filterUserMetric: TableFilter<FilterLeafUserMetrics> = {
   label: "User Metrics",
@@ -67,6 +77,21 @@ export const filterUserMetric: TableFilter<FilterLeafUserMetrics> = {
 export const filterRequestFilter: TableFilter<FilterLeafRequest> = {
   label: "Request",
   columns: {
+    prompt: {
+      label: "Prompt",
+      type: "text",
+      operations: {
+        equals: {
+          type: "text",
+        },
+        like: {
+          type: "text",
+        },
+        ilike: {
+          type: "text",
+        },
+      },
+    },
     created_at: {
       label: "Created At",
       type: "timestamp",
@@ -115,6 +140,11 @@ export type TableFilterMap = {
 
 export const UserMetricsTableFilter: TableFilterMap = {
   user_metrics: filterUserMetric,
+  request: filterRequestFilter,
+  response: filterResponseFilter,
+};
+
+export const RequestsTableFilter: TableFilterMap = {
   request: filterRequestFilter,
   response: filterResponseFilter,
 };

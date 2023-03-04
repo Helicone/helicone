@@ -1,3 +1,25 @@
+import { ColumnComparators, Comparator } from "./frontendFilterDefs";
+
+export function getPropertyFilters(
+  properties: string[],
+  inputParams?: string[]
+) {
+  const filters: ColumnComparators<any> = {};
+  properties.forEach((p) => {
+    filters[p] = {
+      label: p,
+      type: "text-with-suggestions",
+      operations: {
+        equals: {
+          inputParams,
+          type: "text-with-suggestions",
+        },
+      },
+    };
+  });
+  return filters;
+}
+
 export interface FilterLeafUserMetrics {
   user_id?: {
     equals?: string;
@@ -12,6 +34,11 @@ export interface FilterLeafUserMetrics {
   };
 }
 export interface FilterLeafRequest {
+  prompt?: {
+    equals?: string;
+    like: string;
+    ilike?: string;
+  };
   created_at?: {
     gte?: string;
     lte?: string;
@@ -38,6 +65,11 @@ export interface FilterLeaf {
   user_api_keys?: FilterLeafUserApiKeys;
   response?: FilterLeafResponse;
   request?: FilterLeafRequest;
+  properties?: {
+    [key: string]: {
+      equals?: string;
+    };
+  };
 }
 export interface FilterBranch {
   left: FilterNode;
