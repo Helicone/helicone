@@ -1,46 +1,68 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Column } from "../../components/ThemedTableV2";
+import { HeliconeRequest } from "../../lib/api/request/request";
+import { Result } from "../../lib/result";
+import { FilterNode } from "../lib/filters/filterDefs";
 import { getRequests } from "../lib/requests";
 
 const useGetRequests = (
-  currentTimeFilter: string | null,
   currentPage: number,
   currentPageSize: number,
-  sortBy: string | null,
-  advancedFilters?: {
-    idx: number;
-    type?: "number" | "text" | "datetime-local" | undefined;
-    supabaseKey?: string | undefined;
-    value?: string | undefined;
-    column?: Column | undefined;
-    operator?: "eq" | "gt" | "lt";
-  }[]
+  advancedFilter?: FilterNode
 ) => {
   const supabase = useSupabaseClient();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests"],
-    queryFn: async () => {
-      return getRequests(
-        supabase,
-        currentPage,
-        currentPageSize,
-        sortBy,
-        currentTimeFilter,
-        advancedFilters
-      ).then((res) => res);
+    queryKey: ["requests", currentPage, currentPageSize, advancedFilter],
+    queryFn: async (query) => {
+      const currentPage = query.queryKey[1] as number;
+      const currentPageSize = query.queryKey[2] as number;
+      const advancedFilter = query.queryKey[3];
+      return await Promise.all([
+        fetch("/api/request", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: advancedFilter,
+            offset: (currentPage - 1) * currentPageSize,
+            limit: currentPageSize,
+          }),
+        }).then(
+          (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
+        ),
+        fetch("/api/request/count", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: advancedFilter,
+          }),
+        }).then((res) => res.json() as Promise<Result<number, string>>),
+      ]);
     },
     refetchOnWindowFocus: false,
   });
+  const [response, count] = data || [null, null];
 
-  const requests = data?.data ?? [];
-  const count = data?.count ?? 0;
-  const from = data?.from ?? 0;
-  const to = data?.to ?? 0;
-  const error = data?.error?.message ?? "";
+  const requests = response?.data || [];
+  const from = (currentPage - 1) * currentPageSize;
+  const to = currentPage * currentPageSize;
+  const error = response?.error;
 
-  return { requests, count, from, to, error, isLoading, refetch, isRefetching };
+  return {
+    requests,
+    count: count?.data ?? 0,
+    from,
+    to,
+    error,
+    isLoading,
+    refetch,
+    isRefetching,
+  };
 };
 
 export { useGetRequests };

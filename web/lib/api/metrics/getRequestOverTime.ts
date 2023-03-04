@@ -28,11 +28,17 @@ export interface DateCountDBModel {
 }
 
 export async function getTotalRequestsOverTime({
-  filter,
+  timeFilter,
+  userFilter,
   userId,
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<DateCountDBModel[], string>> {
+  const filter: FilterNode = {
+    left: timeFilter,
+    operator: "and",
+    right: userFilter,
+  };
   if (!isValidTimeIncrement(dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }

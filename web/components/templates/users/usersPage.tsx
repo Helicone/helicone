@@ -53,7 +53,6 @@ const UsersPage = (props: UsersPageProps) => {
     pageSize,
     advancedFilters
   );
-
   const router = useRouter();
 
   const { setNotification } = useNotification();
@@ -84,7 +83,8 @@ const UsersPage = (props: UsersPageProps) => {
       type: "text",
       filter: true,
       minWidth: 170,
-      format: (value: string) => truncString(value, 10),
+      format: (value: string) =>
+        value ? truncString(value, 10) : "No user ID",
     },
     {
       key: "active_for",

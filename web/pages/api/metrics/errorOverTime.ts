@@ -3,7 +3,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
 import { getErrorOverTime } from "../../../lib/api/metrics/getErrorOverTime";
 
-import { getModelUsageOverTime } from "../../../lib/api/metrics/getModelUsageOverTime";
 import {
   getSomeDataOverTime,
   getTimeDataHandler,
