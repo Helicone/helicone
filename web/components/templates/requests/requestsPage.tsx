@@ -400,8 +400,8 @@ const RequestsPage = (props: RequestsPageProps) => {
               customTimeFilter
               fileName="requests.csv"
               filterMap={{
-                ...RequestsTableFilter,
                 ...propertyFilterMap,
+                ...RequestsTableFilter,
               }}
               onAdvancedFilter={(_filters) => {
                 router.query.page = "1";
