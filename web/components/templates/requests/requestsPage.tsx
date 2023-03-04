@@ -68,9 +68,7 @@ interface RequestsPageProps {
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, sortBy } = props;
-
-  const { setNotification } = useNotification();
+  const { page, pageSize } = props;
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
@@ -83,6 +81,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
     },
   });
+
   const { count, values, from, isLoading, properties, refetch, requests, to } =
     useRequestsPage(currentPage, currentPageSize, {
       left: timeFilter,
@@ -184,7 +183,6 @@ const RequestsPage = (props: RequestsPageProps) => {
   };
 
   const csvData: CsvData[] = requests?.map((d, i) => {
-    console.log("d.request_properties", d.request_properties);
     const latency =
       (new Date(d.response_created_at!).getTime() -
         new Date(d.request_created_at!).getTime()) /
@@ -272,15 +270,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       ...updated_request_properties,
     };
   });
-
-  const makeCardProperty = (name: string, val: string) => {
-    return (
-      <li className="w-full flex flex-row justify-between gap-4 text-sm">
-        <p>{name}:</p>
-        <p>{val || "{NULL}"}</p>
-      </li>
-    );
-  };
 
   const propertiesColumns = properties.map((p) => {
     return {
@@ -374,6 +363,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
+
   const router = useRouter();
 
   const propertyFilterMap = {

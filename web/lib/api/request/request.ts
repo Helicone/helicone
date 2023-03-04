@@ -14,19 +14,19 @@ export interface HeliconeRequest {
   request_created_at: string;
   request_body: any;
   request_path: string;
-  request_user_id: string;
+  request_user_id: string | null;
   request_properties: {
     [key: string]: Json;
-  };
-  request_formatted_prompt_id: string;
+  } | null;
+  request_formatted_prompt_id: string | null;
   request_prompt_values: {
     [key: string]: Json;
-  };
+  } | null;
   user_api_key_preview: string;
   user_api_key_user_id: string;
   user_api_key_hash: string;
-  prompt_name: string;
-  prompt_regex: string;
+  prompt_name: string | null;
+  prompt_regex: string | null;
   is_cached: boolean;
 }
 

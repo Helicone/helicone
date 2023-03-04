@@ -10,11 +10,10 @@ interface ChatProps {
 export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
   let messages = request ? request : [];
+
   if (response) {
     messages = messages.concat([response]);
   }
-
-  console.log(messages);
 
   return (
     <div className="w-full flex flex-col text-left space-y-1 text-xs">
