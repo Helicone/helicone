@@ -127,6 +127,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: p,
       label: p,
       format: (value: string) => (value ? truncString(value, 15) : value),
+      minWidth: 170,
     };
   });
 
@@ -163,14 +164,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       label: "Request",
       minWidth: 170,
       type: "text",
-      format: (value: string | { content: string; role: string }[]) =>
+      format: (value: string | { content: string; role: string }) =>
         typeof value === "string"
           ? truncString(value, 15)
-          : value.map((v) => `${v.role}: ${v.content}`).join("\n"),
+          : truncString(value.content, 15),
     },
     ...valuesColumns,
     {
-      key: "response",
+      key: "responseText",
       label: "Response",
       minWidth: 170,
       type: "text",
@@ -184,13 +185,13 @@ const RequestsPage = (props: RequestsPageProps) => {
       filter: true,
     },
     {
-      key: "total_tokens",
+      key: "totalTokens",
       label: "Total Tokens",
       type: "number",
       filter: true,
     },
     {
-      key: "logprobs",
+      key: "logProbs",
       label: "Log Prob",
       type: "number",
       filter: true,
@@ -204,7 +205,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
     ...propertiesColumns,
     {
-      key: "model",
+      key: "requestModel",
       label: "Model",
       filter: true,
       type: "text",
@@ -214,7 +215,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "isCached",
       label: "Cache",
       minWidth: 170,
-      format: (value: boolean) => (value ? "hit" : ""),
+      format: (value: boolean) => (value ? "yes" : "no"),
     },
   ].filter((column) => column !== null) as Column[];
 
@@ -230,8 +231,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
-
-  console.log(requests);
 
   return (
     <>

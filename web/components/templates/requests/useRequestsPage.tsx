@@ -29,8 +29,11 @@ export interface RequestWrapper {
   latency: number;
   totalTokens: number;
   requestModel: string;
-  requestText: string | { content: string; role: string }[]; // either prompt or messages
+  requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
+  responseText: string; // either the GPT3 response or the last message from the ChatGPT API
   logProbs: number[] | null;
+  [key: string]: Json | number | string | null | boolean | undefined;
+  error?: string; // if there was an error, this will be the error message
 
   gpt3?: {
     requestBody: {
@@ -118,6 +121,41 @@ const useRequestsPage = (
   const isLoading =
     isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
 
+  // if (is_chat) {
+  //   const request_messages = d.request_body?.messages;
+  //   const last_request_message =
+  //     request_messages?.[request_messages.length - 1].content;
+  //   const response_blob = d.response_body?.choices?.[0];
+  //   const response_content = response_blob?.message?.content;
+
+  //   request = last_request_message
+  //     ? last_request_message
+  //     : "Cannot find prompt";
+  //   response = response_content
+  //     ? response_content
+  //     : `error: ${JSON.stringify(d.response_body?.error)}`;
+
+  //   chatProperties = {
+  //     request:
+  //       typeof request_messages === "string"
+  //         ? JSON.parse(request_messages)
+  //         : request_messages,
+  //     response: response_blob?.message,
+  //   };
+  // } else {
+  //   chatProperties = null;
+  //   request = d.request_body?.prompt
+  //     ? typeof d.request_body?.prompt === "string"
+  //       ? d.request_body?.prompt
+  //       : JSON.stringify(d.request_body?.prompt)
+  //     : "Cannot find prompt";
+  //   response = d.response_body?.choices?.[0]?.text
+  //     ? d.response_body?.choices?.length === 1
+  //       ? d.response_body?.choices?.[0]?.text
+  //       : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
+  //     : `error: ${JSON.stringify(d.response_body?.error)}`;
+  // }
+
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
       (new Date(request.response_created_at!).getTime() -
@@ -140,15 +178,34 @@ const useRequestsPage = (
       userApiKeyHash: request.user_api_key_hash,
       userApiKeyPreview: request.user_api_key_preview,
       userApiKeyUserId: request.user_api_key_user_id,
+
       // More information about the request
       latency,
       totalTokens: request.response_body.usage_total_tokens || 0,
       requestModel: request.request_body.model || "n/a",
       requestText:
-        request.request_body.messages || request.request_body.prompt || "n/a",
+        request.request_body.messages?.at(-1) ||
+        request.request_body.prompt ||
+        "n/a",
+      responseText:
+        request.response_body.choices?.[0]?.text ||
+        request.response_body.choices?.[0]?.message.content ||
+        "n/a",
       logProbs:
-        request.response_body.choices?.[0]?.logProbs?.tokenLogProbs || null,
+        request.response_body.choices?.[0]?.logProbs?.tokenLogProbs || "n/a",
     };
+
+    // add the custom properties to the object
+    if (request.request_properties) {
+      for (const property in request.request_properties) {
+        if (request.request_properties.hasOwnProperty(property)) {
+          const value = request.request_properties[property];
+          obj[property] = value;
+        }
+      }
+    }
+
+    // TODO: handle the values
 
     // check to see what type of request this is and populate the corresponding fields
     if (
