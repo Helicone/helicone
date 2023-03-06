@@ -4,7 +4,7 @@ import { useGetRequests } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { Json } from "../../../supabase/database.types";
 
-export type RequestWrapper = {
+export interface RequestWrapper {
   isCached: boolean;
   promptName: string;
   promptRegex: string;
@@ -25,66 +25,69 @@ export type RequestWrapper = {
   userApiKeyPreview: string;
   userApiKeyUserId: string;
   latency: number;
-  gpt3:
-    | {
-        requestBody: {
-          maxTokens: number;
-          model: string;
-          prompt: string;
-          temperature: number;
-        };
-        responseBody: {
-          choices: {
-            finishReason: string;
-            index: number;
-            logProbs: null; // ???
-            text: string;
+  gpt3?: {
+    requestBody: {
+      maxTokens: number;
+      model: string;
+      prompt: string;
+      temperature: number;
+    };
+    responseBody: {
+      choices: {
+        finishReason: string;
+        index: number;
+        logProbs: {
+          tokens: string[];
+          tokenLogProbs: number[];
+          topLogProbs: {
+            [key: string]: number;
           }[];
-          created: number;
-          id: string;
-          model: string;
-          object: string;
-          usage: {
-            completionTokens: number;
-            promptTokens: number;
-            totalTokens: number;
-          };
+        } | null;
+        text: string;
+      }[];
+      created: number;
+      id: string;
+      model: string;
+      object: string;
+      usage: {
+        completionTokens: number;
+        promptTokens: number;
+        totalTokens: number;
+      };
+    };
+  };
+
+  chat?: {
+    requestBody: {
+      maxTokens: number;
+      model: string;
+      messages: {
+        content: string;
+        role: string;
+      }[];
+      temperature: number;
+    };
+    responseBody: {
+      choices: {
+        finishReason: string;
+        index: number;
+        message: {
+          content: string;
+          role: string;
         };
-      }
-    | undefined;
-  chat:
-    | {
-        requestBody: {
-          maxTokens: number;
-          model: string;
-          messages: {
-            content: string;
-            role: string;
-          }[];
-          temperature: number;
-        };
-        responseBody: {
-          choices: {
-            finishReason: string;
-            index: number;
-            message: {
-              content: string;
-              role: string;
-            };
-          }[];
-          created: number;
-          id: string;
-          model: string;
-          object: string;
-          usage: {
-            completionTokens: number;
-            promptTokens: number;
-            totalTokens: number;
-          };
-        };
-      }
-    | undefined;
-};
+      }[];
+      created: number;
+      id: string;
+      model: string;
+      object: string;
+      usage: {
+        completionTokens: number;
+        promptTokens: number;
+        totalTokens: number;
+      };
+    };
+  };
+}
 
 const useRequestsPage = (
   currentPage: number,
@@ -133,50 +136,50 @@ const useRequestsPage = (
 
       // More information about the request
       latency,
-      chat: undefined,
-      gpt3: undefined,
     };
 
     // check to see what type of request this is and populate the corresponding fields
     if (request.request_path?.includes("/chat/")) {
       obj.chat = {
         requestBody: {
-          maxTokens: request.request_body.max_tokens,
-          model: request.request_body.model,
-          messages: request.request_body.messages,
-          temperature: request.request_body.temperature,
+          maxTokens: request.request_body.max_tokens || 0,
+          model: request.request_body.model || "n/a",
+          messages: request.request_body.messages || [],
+          temperature: request.request_body.temperature || 0,
         },
         responseBody: {
-          choices: request.response_body.choices,
-          created: request.response_body.created,
-          id: request.response_body.id,
-          model: request.response_body.model,
-          object: request.response_body.object,
+          choices: request.response_body.choices || [],
+          created: request.response_body.created || 0,
+          id: request.response_body.id || "n/a",
+          model: request.response_body.model || "n/a",
+          object: request.response_body.object || "n/a",
           usage: {
-            completionTokens: request.response_body.usage_completion_tokens,
-            promptTokens: request.response_body.usage_prompt_tokens,
-            totalTokens: request.response_body.usage_total_tokens,
+            completionTokens:
+              request.response_body.usage_completion_tokens || 0,
+            promptTokens: request.response_body.usage_prompt_tokens || 0,
+            totalTokens: request.response_body.usage_total_tokens || 0,
           },
         },
       };
     } else {
       obj.gpt3 = {
         requestBody: {
-          maxTokens: request.request_body.max_tokens,
-          model: request.request_body.model,
-          prompt: request.request_body.prompt,
-          temperature: request.request_body.temperature,
+          maxTokens: request.request_body.max_tokens || 0,
+          model: request.request_body.model || "n/a",
+          prompt: request.request_body.prompt || "n/a",
+          temperature: request.request_body.temperature || 0,
         },
         responseBody: {
-          choices: request.response_body.choices,
-          created: request.response_body.created,
-          id: request.response_body.id,
-          model: request.response_body.model,
-          object: request.response_body.object,
+          choices: request.response_body.choices || [],
+          created: request.response_body.created || 0,
+          id: request.response_body.id || "n/a",
+          model: request.response_body.model || "n/a",
+          object: request.response_body.object || "n/a",
           usage: {
-            completionTokens: request.response_body.usage_completion_tokens,
-            promptTokens: request.response_body.usage_prompt_tokens,
-            totalTokens: request.response_body.usage_total_tokens,
+            completionTokens:
+              request.response_body.usage_completion_tokens || 0,
+            promptTokens: request.response_body.usage_prompt_tokens || 0,
+            totalTokens: request.response_body.usage_total_tokens || 0,
           },
         },
       };
@@ -188,7 +191,7 @@ const useRequestsPage = (
   console.log(wrappedRequests);
 
   return {
-    requests,
+    requests: wrappedRequests,
     count,
     from,
     to,
