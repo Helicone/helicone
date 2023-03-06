@@ -25,7 +25,12 @@ export interface RequestWrapper {
   userApiKeyPreview: string;
   userApiKeyUserId: string;
 
-  // these next 5 columns need to be double-defined because of the way the table is built
+  // these next columns need to be double-defined because of the way the table is built
+  error:
+    | {
+        [key: string]: Json;
+      }
+    | undefined;
   latency: number;
   totalTokens: number;
   requestModel: string;
@@ -33,7 +38,6 @@ export interface RequestWrapper {
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
   logProbs: number[] | null;
   [key: string]: Json | number | string | null | boolean | undefined;
-  error?: string; // if there was an error, this will be the error message
 
   gpt3?: {
     requestBody: {
@@ -156,6 +160,8 @@ const useRequestsPage = (
   //     : `error: ${JSON.stringify(d.response_body?.error)}`;
   // }
 
+  console.log("requests", requests);
+
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
       (new Date(request.response_created_at!).getTime() -
@@ -180,6 +186,8 @@ const useRequestsPage = (
       userApiKeyUserId: request.user_api_key_user_id,
 
       // More information about the request
+      // errorMessage: request.response_body.error?.message || undefined,
+      error: request.response_body.error || undefined,
       latency,
       totalTokens: request.response_body.usage_total_tokens || 0,
       requestModel: request.request_body.model || "n/a",
@@ -188,6 +196,8 @@ const useRequestsPage = (
         request.request_body.prompt ||
         "n/a",
       responseText:
+        (request.response_body.error?.message &&
+          `error: ${request.response_body.error?.message}`) ||
         request.response_body.choices?.[0]?.text ||
         request.response_body.choices?.[0]?.message.content ||
         "n/a",

@@ -87,18 +87,18 @@ const RequestDrawer = (props: RequestDrawerProps) => {
           <dd className="text-gray-900">{getLogProbs()}</dd>
         </div>
       </dl>
-      {/* {wrappedRequest. && request.error != "unknown error" && (
+      {wrappedRequest.error && (
         <div className="flex flex-col justify-between py-3 text-xs font-medium space-y-1">
           <dt className="text-gray-500">Error</dt>
           <dd className="text-gray-900 p-2 border border-gray-300 bg-gray-100 rounded-md">
             <pre className="whitespace-pre-wrap" style={{ fontSize: "0.7rem" }}>
-              {request.error
-                ? JSON.stringify(request.error, null, 2)
+              {wrappedRequest.error
+                ? JSON.stringify(wrappedRequest.error, null, 2)
                 : "{{ no error }}"}
             </pre>
           </dd>
         </div>
-      )} */}
+      )}
       <div className="mt-4">
         {wrappedRequest.chat ? (
           <Chat
