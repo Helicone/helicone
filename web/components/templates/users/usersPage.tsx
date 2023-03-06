@@ -122,9 +122,9 @@ const UsersPage = (props: UsersPageProps) => {
       format: (value: string) => Number(value).toFixed(2),
     },
     {
-      key: "total_cost",
-      label: "Total Cost",
-      format: (value: any) => `$TBD`,
+      key: "cost",
+      label: "Total Cost (USD)",
+      format: (value: any) => Number(value).toFixed(2),
     },
   ];
 
