@@ -24,7 +24,14 @@ export interface RequestWrapper {
   userApiKeyHash: string;
   userApiKeyPreview: string;
   userApiKeyUserId: string;
+
+  // these next 5 columns need to be double-defined because of the way the table is built
   latency: number;
+  totalTokens: number;
+  requestModel: string;
+  requestText: string | { content: string; role: string }[]; // either prompt or messages
+  logProbs: number[] | null;
+
   gpt3?: {
     requestBody: {
       maxTokens: number;
@@ -133,13 +140,21 @@ const useRequestsPage = (
       userApiKeyHash: request.user_api_key_hash,
       userApiKeyPreview: request.user_api_key_preview,
       userApiKeyUserId: request.user_api_key_user_id,
-
       // More information about the request
       latency,
+      totalTokens: request.response_body.usage_total_tokens || 0,
+      requestModel: request.request_body.model || "n/a",
+      requestText:
+        request.request_body.messages || request.request_body.prompt || "n/a",
+      logProbs:
+        request.response_body.choices?.[0]?.logProbs?.tokenLogProbs || null,
     };
 
     // check to see what type of request this is and populate the corresponding fields
-    if (request.request_path?.includes("/chat/")) {
+    if (
+      request.request_body.model === "gpt-3.5-turbo" ||
+      request.request_path?.includes("/chat/")
+    ) {
       obj.chat = {
         requestBody: {
           maxTokens: request.request_body.max_tokens || 0,

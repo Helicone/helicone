@@ -113,21 +113,6 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const [index, setIndex] = useState<number>();
 
-  // const [selectedData, setSelectedData] = useState<{
-  //   request_id: string | null;
-  //   response_id: string | null;
-  //   error?: any;
-  //   time: string | null;
-  //   request: string | undefined;
-  //   response: string | undefined;
-  //   "duration (s)": string;
-  //   total_tokens: number | undefined;
-  //   logprobs: any;
-  //   request_user_id: string | null;
-  //   model: string | undefined;
-  //   temperature: number | undefined;
-  //   [keys: string]: any;
-  // }>();
   const [selectedData, setSelectedData] = useState<RequestWrapper>();
   const [open, setOpen] = useState(true);
 
@@ -157,7 +142,7 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const columns: Column[] = [
     {
-      key: "time",
+      key: "requestCreatedAt",
       label: "Time",
       minWidth: 170,
       sortBy: "request_created_at",
@@ -174,11 +159,14 @@ const RequestsPage = (props: RequestsPageProps) => {
         }
       : null,
     {
-      key: "request",
+      key: "requestText",
       label: "Request",
       minWidth: 170,
       type: "text",
-      format: (value: string) => truncString(value, 15),
+      format: (value: string | { content: string; role: string }[]) =>
+        typeof value === "string"
+          ? truncString(value, 15)
+          : value.map((v) => `${v.role}: ${v.content}`).join("\n"),
     },
     ...valuesColumns,
     {
@@ -189,7 +177,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
     {
-      key: "duration (s)",
+      key: "latency",
       label: "Duration",
       format: (value: string) => `${value} s`,
       type: "number",
@@ -208,7 +196,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       filter: true,
     },
     {
-      key: "request_user_id",
+      key: "userId",
       label: "User",
       format: (value: string) => (value ? truncString(value, 15) : value),
       type: "text",
@@ -242,6 +230,8 @@ const RequestsPage = (props: RequestsPageProps) => {
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
+
+  console.log(requests);
 
   return (
     <>

@@ -104,13 +104,16 @@ const RequestDrawer = (props: RequestDrawerProps) => {
           <Chat
             chatProperties={{
               request: wrappedRequest.chat.requestBody.messages,
-              response: wrappedRequest.chat.responseBody.choices[0].message,
+              response:
+                wrappedRequest.chat.responseBody.choices[0]?.message || "error",
             }}
           />
-        ) : !wrappedRequest.promptRegex ? (
+        ) : wrappedRequest.promptRegex === "n/a" ? (
           <Completion
             request={wrappedRequest.gpt3?.requestBody.prompt}
-            response={wrappedRequest.gpt3?.responseBody.choices[0].text}
+            response={
+              wrappedRequest.gpt3?.responseBody.choices[0]?.text || "error"
+            }
           />
         ) : (
           <h1>hello Regex</h1>
