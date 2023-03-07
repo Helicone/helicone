@@ -17,7 +17,7 @@ import {
   RequestsTableFilter,
   UserMetricsTableFilter,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { Json } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
@@ -25,6 +25,7 @@ import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
 import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
+import { Filters } from "../dashboard/filters";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
@@ -57,6 +58,8 @@ export type CsvData = {
   isCached: boolean;
   isChat: boolean;
   chatProperties: ChatProperties | null;
+  isModeration: boolean;
+  moderationFullResponse: string | null;
 } & {
   [keys: string]: string | number | null | boolean | ChatProperties;
 };
@@ -65,14 +68,18 @@ interface RequestsPageProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
+  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize } = props;
+  const { page, pageSize, sortBy, keys } = props;
+
+  const { setNotification } = useNotification();
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
@@ -86,7 +93,11 @@ const RequestsPage = (props: RequestsPageProps) => {
     useRequestsPage(currentPage, currentPageSize, {
       left: timeFilter,
       operator: "and",
-      right: advancedFilter,
+      right: {
+        left: apiKeyFilter,
+        operator: "and",
+        right: advancedFilter,
+      },
     });
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
@@ -219,6 +230,13 @@ const RequestsPage = (props: RequestsPageProps) => {
       minWidth: 170,
       format: (value: boolean) => (value ? "hit" : ""),
     },
+    {
+      key: "key_name",
+      label: "Key Name",
+      minWidth: 170,
+      type: "text",
+      format: (value: string) => value,
+    },
   ].filter((column) => column !== null) as Column[];
 
   const router = useRouter();
@@ -236,7 +254,16 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   return (
     <>
-      <AuthHeader title={"Requests"} />
+      <AuthHeader
+        title={"Requests"}
+        actions={
+          <Filters
+            keys={keys}
+            filter={apiKeyFilter}
+            setFilter={setApiKeyFilter}
+          />
+        }
+      />
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
