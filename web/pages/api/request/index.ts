@@ -5,6 +5,7 @@ import { getRequests, HeliconeRequest } from "../../../lib/api/request/request";
 
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,11 +17,19 @@ export default async function handler(
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const { filter, offset, limit } = req.body as {
+  const { filter, offset, limit, sort } = req.body as {
     filter: FilterNode;
     offset: number;
     limit: number;
+    sort: SortLeafRequest;
   };
-  const metrics = await getRequests(user.data.user.id, filter, offset, limit);
+  console.log("sort", sort);
+  const metrics = await getRequests(
+    user.data.user.id,
+    filter,
+    offset,
+    limit,
+    sort
+  );
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }

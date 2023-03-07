@@ -5,6 +5,7 @@ import { Result } from "../../result";
 import { Database, Json } from "../../../supabase/database.types";
 import { buildFilter } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildSort, SortLeafRequest } from "../../../services/lib/sorts/sorts";
 
 export interface HeliconeRequest {
   response_id: string;
@@ -34,11 +35,13 @@ export async function getRequests(
   user_id: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+  const sortSQL = buildSort(sort);
   const query = `
   SELECT response.id AS response_id,
     coalesce(ch.created_at, response.created_at) as response_created_at,
@@ -66,10 +69,11 @@ export async function getRequests(
     user_api_keys.user_id = '${user_id}'
     AND (${buildFilter(filter)})
   )
-  ORDER BY response_created_at DESC
+  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+  console.log("query", query);
 
   const { data, error } = await dbExecute<HeliconeRequest>(query);
   if (error !== null) {
