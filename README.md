@@ -2,15 +2,12 @@
 
 # Helicone.ai
 
-Helicone is an open-source observability platform for GPT-3 users. Companies save on their OpenAI bills and identify application issues by monitoring their usage, latency, and costs on Helicone.
-
 [![](https://img.shields.io/badge/Visit%20Us-Helicone.ai-brightgreen)](https://helicone.ai)
-
 [![](https://img.shields.io/badge/View%20Documentation-Docs-yellow)](https://docs.helicone.ai/)
-
 [![](https://img.shields.io/badge/Join%20our%20community-Discord-blue)](https://discord.gg/zsSTcH2qhG)
-
 [![Twitter](https://img.shields.io/twitter/follow/Helicone_ai?style=social)](https://twitter.com/helicone_ai)
+
+Helicone is an open-source observability platform for GPT-3 users. Companies save on their OpenAI bills and identify application issues by monitoring their usage, latency, and costs on Helicone.
 
 You know that LLMs are being used in more and more software companies today but what you may not realize is that compared to their traditional software, companies don’t have any way to monitor how they are working…
 
