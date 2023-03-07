@@ -13,13 +13,13 @@ export const Completion = (props: CompletionProps) => {
       <div className="w-full flex flex-col text-left space-y-1">
         <p className="text-gray-500 font-medium">Request</p>
         <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full max-h-[300px] overflow-auto">
-          {request}
+          {request || "n/a"}
         </p>
       </div>
       <div className="w-full flex flex-col text-left space-y-1">
         <p className="text-gray-500 font-medium">Response</p>
         <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full max-h-[300px] overflow-auto">
-          {response}
+          {response || "n/a"}
         </p>
       </div>
     </div>

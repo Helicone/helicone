@@ -298,6 +298,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           wrappedRequest={selectedData}
           setOpen={setOpen}
           values={values}
+          properties={properties}
         />
       )}
     </>

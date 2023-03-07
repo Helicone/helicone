@@ -17,12 +17,14 @@ interface RequestDrawerProps {
   setOpen: (open: boolean) => void;
   wrappedRequest: RequestWrapper;
   values: string[];
+  properties?: string[];
 }
 
 const RequestDrawer = (props: RequestDrawerProps) => {
-  const { open, setOpen, wrappedRequest, values } = props;
+  const { open, setOpen, wrappedRequest, values, properties } = props;
 
-  const makePropertyRow = (name: string, val: string) => {
+  const makePropertyRow = (name: string, val: string | undefined) => {
+    if (val === undefined) return null;
     return (
       <div className="flex justify-between py-2 text-xs font-medium">
         <dt className="text-gray-500">{name}</dt>
@@ -75,6 +77,13 @@ const RequestDrawer = (props: RequestDrawerProps) => {
           <dt className="text-gray-500">Log Probability</dt>
           <dd className="text-gray-900">{getLogProbs()}</dd>
         </div>
+        {properties !== undefined &&
+          properties.map((property) => {
+            return makePropertyRow(
+              property,
+              (wrappedRequest[property] as string) || undefined
+            );
+          })}
       </dl>
       {wrappedRequest.error && (
         <div className="flex flex-col justify-between py-3 text-xs font-medium space-y-1">
