@@ -161,11 +161,12 @@ const useRequestsPage = (
     }
 
     // TODO: handle the values
-    console.log("requests");
-    console.log(requests);
-    console.log(wrappedRequests);
     return obj;
   });
+
+  console.log("requests");
+  console.log(requests);
+  console.log(wrappedRequests);
 
   return {
     requests: wrappedRequests,
