@@ -47,7 +47,7 @@ export interface RequestWrapper {
   requestModel: string;
   requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
-  logProbs: number[] | null;
+  logProbs: number | null;
   [key: string]:
     | Json
     | undefined
@@ -92,6 +92,11 @@ const useRequestsPage = (
 
   const isLoading =
     isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
+
+  const getLogProbs = (logProbs: number[]) => {
+    const sum = logProbs.reduce((total: any, num: any) => total + num);
+    return sum;
+  };
 
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
@@ -146,8 +151,11 @@ const useRequestsPage = (
         request.response_body.choices?.[0]?.text ||
         request.response_body.choices?.[0]?.message.content ||
         "n/a",
-      logProbs:
-        request.response_body.choices?.[0]?.logProbs?.tokenLogProbs || null,
+      logProbs: request.response_body.choices?.[0]?.logProbs?.token_logprobs
+        ? getLogProbs(
+            request.response_body.choices?.[0]?.logProbs?.token_logprobs
+          )
+        : null,
     };
 
     // add the custom properties to the object

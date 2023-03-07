@@ -33,16 +33,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
     );
   };
 
-  const getLogProbs = () => {
-    if (wrappedRequest.api.gpt3 && wrappedRequest.logProbs) {
-      const sum = wrappedRequest.logProbs.reduce(
-        (total: any, num: any) => total + num
-      );
-      return sum.toFixed(2);
-    }
-    return "n/a";
-  };
-
   return (
     <ThemedDrawer
       open={open}
@@ -75,7 +65,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Log Probability</dt>
-          <dd className="text-gray-900">{getLogProbs()}</dd>
+          <dd className="text-gray-900">
+            {wrappedRequest.logProbs
+              ? wrappedRequest.logProbs.toFixed(2)
+              : "n/a"}
+          </dd>
         </div>
         {properties !== undefined &&
           properties.map((property) => {
