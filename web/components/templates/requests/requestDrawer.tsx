@@ -53,7 +53,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Duration</dt>
-          <dd className="text-gray-900">{wrappedRequest.latency}</dd>
+          <dd className="text-gray-900">{wrappedRequest.latency}s</dd>
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Model</dt>

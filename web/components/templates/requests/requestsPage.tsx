@@ -203,6 +203,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => (value ? truncString(value, 15) : value),
       type: "text",
       filter: true,
+      minWidth: 170,
     },
     ...propertiesColumns,
     {
@@ -216,7 +217,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "isCached",
       label: "Cache",
       minWidth: 170,
-      format: (value: boolean) => (value ? "yes" : "no"),
+      format: (value: boolean) => (value ? "hit" : ""),
     },
   ].filter((column) => column !== null) as Column[];
 

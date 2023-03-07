@@ -134,6 +134,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
             </TableHead>
             <TableBody>
               {rows.map((row, idx) => {
+                const hasError = row.error;
                 return (
                   <TableRow
                     hover
@@ -141,7 +142,10 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                     tabIndex={-1}
                     key={`row-${idx}`}
                     onClick={() => onSelectHandler && onSelectHandler(row, idx)}
-                    className="hover:cursor-pointer"
+                    className={clsx(
+                      hasError ? "bg-red-100" : "",
+                      "hover:cursor-pointer"
+                    )}
                   >
                     {columns.map((column, idx) => {
                       const value = row[column.key];
@@ -154,7 +158,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                             className={clsx(
                               condensed ? "py-1" : "",
                               idx === 0
-                                ? " text-black font-medium"
+                                ? "text-black font-medium"
                                 : "text-gray-500 font-normal",
                               "font-sans text-sm"
                             )}
