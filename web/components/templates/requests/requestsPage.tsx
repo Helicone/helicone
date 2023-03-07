@@ -206,7 +206,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
     ...propertiesColumns,
     {
-      key: "requestModel",
+      key: "model",
       label: "Model",
       filter: true,
       type: "text",
