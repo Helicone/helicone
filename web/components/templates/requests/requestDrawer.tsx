@@ -108,7 +108,12 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         {request.isChat ? (
           <Chat chatProperties={request.chatProperties} />
         ) : !request.prompt_regex ? (
-          <Completion request={request.request} response={request.response} />
+          <Completion
+            request={request.request}
+            response={request.response}
+            isModeration={request.isModeration}
+            moderationFullResponse={request.moderationFullResponse}
+          />
         ) : (
           <CompletionRegex
             prompt_regex={request.prompt_regex}
