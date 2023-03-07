@@ -73,7 +73,6 @@ export async function getRequests(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-  console.log("query", query);
 
   const { data, error } = await dbExecute<HeliconeRequest>(query);
   if (error !== null) {
