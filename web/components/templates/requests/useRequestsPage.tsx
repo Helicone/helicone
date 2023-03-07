@@ -151,9 +151,9 @@ const useRequestsPage = (
         request.response_body.choices?.[0]?.text ||
         request.response_body.choices?.[0]?.message.content ||
         "n/a",
-      logProbs: request.response_body.choices?.[0]?.logProbs?.token_logprobs
+      logProbs: request.response_body.choices?.[0]?.logprobs?.token_logprobs
         ? getLogProbs(
-            request.response_body.choices?.[0]?.logProbs?.token_logprobs
+            request.response_body.choices?.[0]?.logprobs?.token_logprobs
           )
         : null,
     };
