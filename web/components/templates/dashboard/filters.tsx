@@ -16,6 +16,7 @@ export function Filters({
   filter: FilterNode;
   setFilter: Dispatch<SetStateAction<FilterNode>>;
 }) {
+  console.log("KEYS KEYS", keys);
   return (
     <div className="flex flex-row items-center gap-2">
       <label
