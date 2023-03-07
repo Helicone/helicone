@@ -262,8 +262,6 @@ const RequestsPage = (props: RequestsPageProps) => {
         : `error: ${JSON.stringify(d.response_body?.error)}`;
     }
 
-    console.log("KEY NAME", d);
-
     return {
       request_id: d.request_id ?? "Cannot find request id",
       response_id: d.response_id ?? "Cannot find response id",
