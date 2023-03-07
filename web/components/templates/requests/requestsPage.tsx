@@ -58,6 +58,8 @@ export type CsvData = {
   isCached: boolean;
   isChat: boolean;
   chatProperties: ChatProperties | null;
+  isModeration: boolean;
+  moderationFullResponse: string | null;
 } & {
   [keys: string]: string | number | null | boolean | ChatProperties;
 };
@@ -177,6 +179,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       prompt_regex: string | undefined;
       isChat: boolean;
       chatProperties: ChatProperties | null;
+      isModeration: boolean;
+      moderationFullResponse: string | null;
       [keys: string]: any;
     },
     idx: number
@@ -222,10 +226,12 @@ const RequestsPage = (props: RequestsPageProps) => {
       });
     }
     const is_chat = d.request_path?.includes("/chat/") ?? false;
+    const is_moderation = d.request_path?.includes("/moderations") ?? false;
 
     let request;
     let response;
     let chatProperties: ChatProperties | null = null;
+    let moderationFullResponse: string | null = null;
 
     if (is_chat) {
       const request_messages = d.request_body?.messages;
@@ -248,6 +254,11 @@ const RequestsPage = (props: RequestsPageProps) => {
             : request_messages,
         response: response_blob?.message,
       };
+    } else if (is_moderation) {
+      chatProperties = null;
+      request = d.request_body?.input;
+      response = JSON.stringify(d.response_body?.results[0]);
+      moderationFullResponse = JSON.stringify(d.response_body?.results[0]);
     } else {
       chatProperties = null;
       request = d.request_body?.prompt
@@ -278,6 +289,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       prompt_name: d.prompt_name ?? "",
       isCached: d.is_cached ?? false,
       isChat: is_chat,
+      isModeration: is_moderation,
+      moderationFullResponse: moderationFullResponse,
       chatProperties: chatProperties,
       key_name: d.key_name ?? "",
       ...updated_request_properties,
