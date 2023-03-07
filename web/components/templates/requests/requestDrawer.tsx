@@ -26,7 +26,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
     return (
-      <div className="flex justify-between py-2 text-xs font-medium">
+      <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
         <dt className="text-gray-500">{name}</dt>
         <dd className="text-gray-900">{val || "{NULL}"}</dd>
       </div>
@@ -40,30 +40,30 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       title="Request Information"
       copyData={JSON.stringify(wrappedRequest, null, 2)}
     >
-      <dl className="mt-2 divide-y divide-gray-200 border-b border-gray-200">
-        <div className="flex justify-between py-2 text-xs font-medium">
+      <dl className="mt-2 grid grid-cols-2">
+        <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
           <dt className="text-gray-500">Time</dt>
           <dd className="text-gray-900">
             {new Date(wrappedRequest.requestCreatedAt).toLocaleString()}
           </dd>
         </div>
-        <div className="flex justify-between py-2 text-xs font-medium">
+        <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
           <dt className="text-gray-500">User ID</dt>
           <dd className="text-gray-900">{wrappedRequest.userId || "n/a"}</dd>
         </div>
-        <div className="flex justify-between py-2 text-xs font-medium">
+        <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
           <dt className="text-gray-500">Duration</dt>
           <dd className="text-gray-900">{wrappedRequest.latency}s</dd>
         </div>
-        <div className="flex justify-between py-2 text-xs font-medium">
+        <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
           <dt className="text-gray-500">Model</dt>
           <dd className="text-gray-900">{wrappedRequest.model}</dd>
         </div>
-        <div className="flex justify-between py-2 text-xs font-medium">
+        <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
           <dt className="text-gray-500">Tokens</dt>
           <dd className="text-gray-900">{wrappedRequest.totalTokens}</dd>
         </div>
-        <div className="flex justify-between py-2 text-xs font-medium">
+        <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
           <dt className="text-gray-500">Log Probability</dt>
           <dd className="text-gray-900">
             {wrappedRequest.logProbs

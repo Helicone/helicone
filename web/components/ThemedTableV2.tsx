@@ -137,13 +137,14 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                 const hasError = row.error;
                 return (
                   <TableRow
-                    hover
                     role="checkbox"
                     tabIndex={-1}
                     key={`row-${idx}`}
                     onClick={() => onSelectHandler && onSelectHandler(row, idx)}
                     className={clsx(
-                      hasError ? "bg-red-100" : "",
+                      hasError
+                        ? "bg-red-100 hover:bg-red-200"
+                        : "hover:bg-gray-100",
                       "hover:cursor-pointer"
                     )}
                   >
