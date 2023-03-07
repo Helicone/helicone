@@ -32,14 +32,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   };
 
   const getLogProbs = () => {
-    if (wrappedRequest.gpt3 && wrappedRequest.gpt3.responseBody.choices) {
-      const choice = wrappedRequest.gpt3.responseBody.choices[0];
-      if (choice && choice.logProbs) {
-        const sum = choice.logProbs.tokenLogProbs.reduce(
-          (total: any, num: any) => total + num
-        );
-        return sum.toFixed(2);
-      }
+    if (wrappedRequest.api.gpt3 && wrappedRequest.logProbs) {
+      const sum = wrappedRequest.logProbs.reduce(
+        (total: any, num: any) => total + num
+      );
+      return sum.toFixed(2);
     }
     return "n/a";
   };
@@ -68,19 +65,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Model</dt>
-          <dd className="text-gray-900">
-            {wrappedRequest.gpt3
-              ? wrappedRequest.gpt3.requestBody.model
-              : wrappedRequest.chat?.requestBody.model}
-          </dd>
+          <dd className="text-gray-900">{wrappedRequest.requestModel}</dd>
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Tokens</dt>
-          <dd className="text-gray-900">
-            {wrappedRequest.gpt3
-              ? wrappedRequest.gpt3.responseBody.usage.totalTokens
-              : wrappedRequest.chat?.responseBody.usage.totalTokens}
-          </dd>
+          <dd className="text-gray-900">{wrappedRequest.totalTokens}</dd>
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Log Probability</dt>
@@ -100,39 +89,35 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         </div>
       )}
       <div className="mt-4">
-        {wrappedRequest.chat ? (
+        {wrappedRequest.api.chat ? (
           <Chat
             chatProperties={{
-              request: wrappedRequest.chat.requestBody.messages,
-              response:
-                wrappedRequest.chat.responseBody.choices[0]?.message || "error",
+              request: wrappedRequest.api.chat.request,
+              response: wrappedRequest.api.chat.response,
             }}
           />
         ) : wrappedRequest.promptRegex === "n/a" ? (
           <Completion
-            request={wrappedRequest.gpt3?.requestBody.prompt}
-            response={
-              wrappedRequest.gpt3?.responseBody.choices[0]?.text || "error"
-            }
+            request={wrappedRequest.api.gpt3?.request}
+            response={wrappedRequest.api.gpt3?.response}
           />
         ) : (
-          <h1>hello Regex</h1>
-          // <CompletionRegex
-          //   prompt_regex={wrappedRequest.promptRegex}
-          //   prompt_name={wrappedRequest.promptName}
-          //   // keys is the values for all the keys in `values`
-          //   keys={values.reduce((acc, key) => {
-          //     if (request.hasOwnProperty(key)) {
-          //       return {
-          //         ...acc,
-          //         [key]: wrappedRequest[key],
-          //       };
-          //     }
-          //     return acc;
-          //   }, {})}
-          //   response={request.response}
-          //   values={values}
-          // />
+          <CompletionRegex
+            prompt_regex={wrappedRequest.promptRegex}
+            prompt_name={wrappedRequest.promptName}
+            // keys is the values for all the keys in `values`
+            keys={values.reduce((acc, key) => {
+              if (request.hasOwnProperty(key)) {
+                return {
+                  ...acc,
+                  [key]: wrappedRequest[key],
+                };
+              }
+              return acc;
+            }, {})}
+            response={wrappedRequest.responseText}
+            values={values}
+          />
         )}
       </div>
     </ThemedDrawer>

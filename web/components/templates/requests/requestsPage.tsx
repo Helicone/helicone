@@ -31,7 +31,7 @@ import { CompletionRegex } from "./completionRegex";
 import RequestDrawer from "./requestDrawer";
 import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
 
-type Message = {
+export type Message = {
   role: string;
   content: string;
 };

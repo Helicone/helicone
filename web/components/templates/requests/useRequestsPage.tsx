@@ -3,6 +3,7 @@ import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { Json } from "../../../supabase/database.types";
+import { Message } from "./requestsPage";
 
 export interface RequestWrapper {
   isCached: boolean;
@@ -31,76 +32,105 @@ export interface RequestWrapper {
         [key: string]: Json;
       }
     | undefined;
+  api: {
+    chat?: {
+      request: Message[] | null;
+      response: Message | null;
+    };
+    gpt3?: {
+      request: string | undefined;
+      response: string | undefined;
+    };
+  };
   latency: number;
   totalTokens: number;
   requestModel: string;
   requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
   logProbs: number[] | null;
-  [key: string]: Json | number | string | null | boolean | undefined;
-
-  gpt3?: {
-    requestBody: {
-      maxTokens: number;
-      model: string;
-      prompt: string;
-      temperature: number;
-    };
-    responseBody: {
-      choices: {
-        finishReason: string;
-        index: number;
-        logProbs: {
-          tokens: string[];
-          tokenLogProbs: number[];
-          topLogProbs: {
-            [key: string]: number;
-          }[];
-        } | null;
-        text: string;
-      }[];
-      created: number;
-      id: string;
-      model: string;
-      object: string;
-      usage: {
-        completionTokens: number;
-        promptTokens: number;
-        totalTokens: number;
+  [key: string]:
+    | Json
+    | undefined
+    | number
+    | null
+    | boolean
+    | {
+        chat?:
+          | {
+              request: Message[] | null;
+              response: Message | null;
+            }
+          | undefined;
+        gpt3?:
+          | {
+              request: string | undefined;
+              response: string | undefined;
+            }
+          | undefined;
       };
-    };
-  };
 
-  chat?: {
-    requestBody: {
-      maxTokens: number;
-      model: string;
-      messages: {
-        content: string;
-        role: string;
-      }[];
-      temperature: number;
-    };
-    responseBody: {
-      choices: {
-        finishReason: string;
-        index: number;
-        message: {
-          content: string;
-          role: string;
-        };
-      }[];
-      created: number;
-      id: string;
-      model: string;
-      object: string;
-      usage: {
-        completionTokens: number;
-        promptTokens: number;
-        totalTokens: number;
-      };
-    };
-  };
+  // gpt3?: {
+  //   requestBody: {
+  //     maxTokens: number;
+  //     model: string;
+  //     prompt: string;
+  //     temperature: number;
+  //   };
+  //   responseBody: {
+  //     choices: {
+  //       finishReason: string;
+  //       index: number;
+  //       logProbs: {
+  //         tokens: string[];
+  //         tokenLogProbs: number[];
+  //         topLogProbs: {
+  //           [key: string]: number;
+  //         }[];
+  //       } | null;
+  //       text: string;
+  //     }[];
+  //     created: number;
+  //     id: string;
+  //     model: string;
+  //     object: string;
+  //     usage: {
+  //       completionTokens: number;
+  //       promptTokens: number;
+  //       totalTokens: number;
+  //     };
+  //   };
+  // };
+
+  // chat?: {
+  //   requestBody: {
+  //     maxTokens: number;
+  //     model: string;
+  //     messages: {
+  //       content: string;
+  //       role: string;
+  //     }[];
+  //     temperature: number;
+  //   };
+  //   responseBody: {
+  //     choices: {
+  //       finishReason: string;
+  //       index: number;
+  //       message: {
+  //         content: string;
+  //         role: string;
+  //       };
+  //     }[];
+  //     created: number;
+  //     id: string;
+  //     model: string;
+  //     object: string;
+  //     usage: {
+  //       completionTokens: number;
+  //       promptTokens: number;
+  //       totalTokens: number;
+  //     };
+  //   };
+  // };
 }
 
 const useRequestsPage = (
@@ -124,43 +154,6 @@ const useRequestsPage = (
 
   const isLoading =
     isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
-
-  // if (is_chat) {
-  //   const request_messages = d.request_body?.messages;
-  //   const last_request_message =
-  //     request_messages?.[request_messages.length - 1].content;
-  //   const response_blob = d.response_body?.choices?.[0];
-  //   const response_content = response_blob?.message?.content;
-
-  //   request = last_request_message
-  //     ? last_request_message
-  //     : "Cannot find prompt";
-  //   response = response_content
-  //     ? response_content
-  //     : `error: ${JSON.stringify(d.response_body?.error)}`;
-
-  //   chatProperties = {
-  //     request:
-  //       typeof request_messages === "string"
-  //         ? JSON.parse(request_messages)
-  //         : request_messages,
-  //     response: response_blob?.message,
-  //   };
-  // } else {
-  //   chatProperties = null;
-  //   request = d.request_body?.prompt
-  //     ? typeof d.request_body?.prompt === "string"
-  //       ? d.request_body?.prompt
-  //       : JSON.stringify(d.request_body?.prompt)
-  //     : "Cannot find prompt";
-  //   response = d.response_body?.choices?.[0]?.text
-  //     ? d.response_body?.choices?.length === 1
-  //       ? d.response_body?.choices?.[0]?.text
-  //       : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
-  //     : `error: ${JSON.stringify(d.response_body?.error)}`;
-  // }
-
-  console.log("requests", requests);
 
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
@@ -186,7 +179,21 @@ const useRequestsPage = (
       userApiKeyUserId: request.user_api_key_user_id,
 
       // More information about the request
-      // errorMessage: request.response_body.error?.message || undefined,
+      api:
+        request.request_body.model === "gpt-3.5-turbo" ||
+        request.request_path?.includes("/chat/")
+          ? {
+              chat: {
+                request: request.request_body.messages,
+                response: request.response_body.choices?.[0]?.message,
+              },
+            }
+          : {
+              gpt3: {
+                request: request.request_body.prompt,
+                response: request.response_body.choices?.[0]?.text,
+              },
+            },
       error: request.response_body.error || undefined,
       latency,
       totalTokens: request.response_body.usage_total_tokens || 0,
