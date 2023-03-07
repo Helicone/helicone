@@ -14,6 +14,7 @@ export interface UserMetric {
   total_requests: number;
   average_requests_per_day_active: number;
   average_tokens_per_request: number;
+  cost?: number;
 }
 
 export async function userMetrics(

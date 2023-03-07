@@ -43,6 +43,9 @@ export interface FilterLeafRequest {
     gte?: string;
     lte?: string;
   };
+  user_id?: {
+    equals?: string;
+  };
 }
 
 export interface FilterLeafUserApiKeys {
