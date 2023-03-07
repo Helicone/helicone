@@ -155,6 +155,8 @@ const useRequestsPage = (
   const isLoading =
     isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
 
+  console.log(requests);
+
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
       (new Date(request.response_created_at!).getTime() -
@@ -209,7 +211,7 @@ const useRequestsPage = (
         request.response_body.choices?.[0]?.message.content ||
         "n/a",
       logProbs:
-        request.response_body.choices?.[0]?.logProbs?.tokenLogProbs || "n/a",
+        request.response_body.choices?.[0]?.logProbs?.tokenLogProbs || null,
     };
 
     // add the custom properties to the object

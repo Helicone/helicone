@@ -195,6 +195,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       label: "Log Prob",
       type: "number",
       filter: true,
+      format: (value: number) => (value ? value.toFixed(2) : "n/a"),
     },
     {
       key: "userId",
