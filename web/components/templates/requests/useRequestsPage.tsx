@@ -139,7 +139,7 @@ const useRequestsPage = (
             },
       error: request.response_body.error || undefined,
       latency,
-      totalTokens: request.response_body.usage_total_tokens || 0,
+      totalTokens: request.response_body.usage.total_tokens || 0,
       model: request.response_body.model || "n/a",
       requestText:
         request.request_body.messages?.at(-1) ||

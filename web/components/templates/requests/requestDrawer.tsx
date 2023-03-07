@@ -57,7 +57,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Model</dt>
-          <dd className="text-gray-900">{wrappedRequest.requestModel}</dd>
+          <dd className="text-gray-900">{wrappedRequest.model}</dd>
         </div>
         <div className="flex justify-between py-2 text-xs font-medium">
           <dt className="text-gray-500">Tokens</dt>
