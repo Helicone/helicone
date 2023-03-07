@@ -161,7 +161,9 @@ const useRequestsPage = (
     }
 
     // TODO: handle the values
-
+    console.log("requests");
+    console.log(requests);
+    console.log(wrappedRequests);
     return obj;
   });
 
