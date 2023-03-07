@@ -30,9 +30,9 @@ import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
 import RequestDrawer from "./requestDrawer";
-import useRequestsPage from "./useRequestsPage";
+import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
 
-type Message = {
+export type Message = {
   role: string;
   content: string;
 };
@@ -88,6 +88,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
     },
   });
+
   const { count, values, from, isLoading, properties, refetch, requests, to } =
     useRequestsPage(currentPage, currentPageSize, {
       left: timeFilter,
@@ -122,188 +123,14 @@ const RequestsPage = (props: RequestsPageProps) => {
   };
 
   const [index, setIndex] = useState<number>();
-  const [selectedData, setSelectedData] = useState<{
-    request_id: string | null;
-    response_id: string | null;
-    error?: any;
-    time: string | null;
-    request: string | undefined;
-    response: string | undefined;
-    "duration (s)": string;
-    total_tokens: number | undefined;
-    logprobs: any;
-    request_user_id: string | null;
-    model: string | undefined;
-    temperature: number | undefined;
-    [keys: string]: any;
-  }>();
+
+  const [selectedData, setSelectedData] = useState<RequestWrapper>();
   const [open, setOpen] = useState(true);
 
-  const probabilities = requests?.map((req) => {
-    const choice = (req.response_body as any)?.choices
-      ? (req.response_body as any)?.choices[0]
-      : null;
-
-    if (!choice) {
-      return null;
-    }
-
-    let prob;
-    if (choice.logprobs !== undefined && choice.logprobs !== null) {
-      const tokenLogprobs = choice.logprobs.token_logprobs;
-      const sum = tokenLogprobs.reduce(
-        (total: any, num: any) => total + num,
-        0
-      );
-      prob = sum.toFixed(2);
-    } else {
-      prob = "";
-    }
-
-    return prob;
-  });
-
-  const selectRowHandler = (
-    row: {
-      request_id: string | null;
-      response_id: string | null;
-      time: string | null;
-      request: string | undefined;
-      response: string | undefined;
-      "duration (s)": string;
-      total_tokens: number | undefined;
-      logprobs: any;
-      request_user_id: string | null;
-      model: string | undefined;
-      temperature: number | undefined;
-      prompt_regex: string | undefined;
-      isChat: boolean;
-      chatProperties: ChatProperties | null;
-      isModeration: boolean;
-      moderationFullResponse: string | null;
-      [keys: string]: any;
-    },
-    idx: number
-  ) => {
+  const selectRowHandler = (row: RequestWrapper, idx: number) => {
     setIndex(idx);
     setSelectedData(row);
     setOpen(true);
-  };
-
-  type JsonDict = {
-    [key: string]: Json;
-  };
-
-  const csvData: CsvData[] = requests?.map((d, i) => {
-    console.log("d.request_properties", d.request_properties);
-    const latency =
-      (new Date(d.response_created_at!).getTime() -
-        new Date(d.request_created_at!).getTime()) /
-      1000;
-
-    let updated_request_properties: {
-      [keys: string]: string;
-    } = Object.assign(
-      {},
-      ...properties.map((p) => ({
-        [p]: d.request_properties != null ? d.request_properties[p] : null,
-      }))
-    );
-
-    if (values !== null) {
-      updated_request_properties = Object.assign(
-        updated_request_properties,
-        ...values.map((p) => ({
-          [p]:
-            d.request_prompt_values != null ? d.request_prompt_values[p] : null,
-        }))
-      );
-    }
-
-    if (d.prompt_regex) {
-      updated_request_properties = Object.assign(updated_request_properties, {
-        prompt_regex: d.prompt_regex,
-      });
-    }
-    const is_chat = d.request_path?.includes("/chat/") ?? false;
-    const is_moderation = d.request_path?.includes("/moderations") ?? false;
-
-    let request;
-    let response;
-    let chatProperties: ChatProperties | null = null;
-    let moderationFullResponse: string | null = null;
-
-    if (is_chat) {
-      const request_messages = d.request_body?.messages;
-      const last_request_message =
-        request_messages?.[request_messages.length - 1].content;
-      const response_blob = d.response_body?.choices?.[0];
-      const response_content = response_blob?.message?.content;
-
-      request = last_request_message
-        ? last_request_message
-        : "Cannot find prompt";
-      response = response_content
-        ? response_content
-        : `error: ${JSON.stringify(d.response_body?.error)}`;
-
-      chatProperties = {
-        request:
-          typeof request_messages === "string"
-            ? JSON.parse(request_messages)
-            : request_messages,
-        response: response_blob?.message,
-      };
-    } else if (is_moderation) {
-      chatProperties = null;
-      request = d.request_body?.input;
-      response = JSON.stringify(d.response_body?.results[0]);
-      moderationFullResponse = JSON.stringify(d.response_body?.results[0]);
-    } else {
-      chatProperties = null;
-      request = d.request_body?.prompt
-        ? typeof d.request_body?.prompt === "string"
-          ? d.request_body?.prompt
-          : JSON.stringify(d.request_body?.prompt)
-        : "Cannot find prompt";
-      response = d.response_body?.choices?.[0]?.text
-        ? d.response_body?.choices?.length === 1
-          ? d.response_body?.choices?.[0]?.text
-          : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
-        : `error: ${JSON.stringify(d.response_body?.error)}`;
-    }
-
-    return {
-      request_id: d.request_id ?? "Cannot find request id",
-      response_id: d.response_id ?? "Cannot find response id",
-      error: d.response_body?.error ?? "unknown error",
-      time: d.request_created_at ?? "Cannot find time",
-      request: request,
-      response: response,
-      "duration (s)": latency.toString(),
-      total_tokens: d.response_body?.usage?.total_tokens ?? 0,
-      logprobs: probabilities ? probabilities[i] : null,
-      request_user_id: d.request_user_id ?? "",
-      model: d.response_body?.model ?? "",
-      temperature: d.request_body?.temperature ?? null,
-      prompt_name: d.prompt_name ?? "",
-      isCached: d.is_cached ?? false,
-      isChat: is_chat,
-      isModeration: is_moderation,
-      moderationFullResponse: moderationFullResponse,
-      chatProperties: chatProperties,
-      key_name: d.key_name ?? "",
-      ...updated_request_properties,
-    };
-  });
-
-  const makeCardProperty = (name: string, val: string) => {
-    return (
-      <li className="w-full flex flex-row justify-between gap-4 text-sm">
-        <p>{name}:</p>
-        <p>{val || "{NULL}"}</p>
-      </li>
-    );
   };
 
   const propertiesColumns = properties.map((p) => {
@@ -311,6 +138,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: p,
       label: p,
       format: (value: string) => (value ? truncString(value, 15) : value),
+      minWidth: 170,
     };
   });
 
@@ -326,7 +154,7 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const columns: Column[] = [
     {
-      key: "time",
+      key: "requestCreatedAt",
       label: "Time",
       minWidth: 170,
       sortBy: "request_created_at",
@@ -343,45 +171,50 @@ const RequestsPage = (props: RequestsPageProps) => {
         }
       : null,
     {
-      key: "request",
+      key: "requestText",
       label: "Request",
       minWidth: 170,
       type: "text",
-      format: (value: string) => truncString(value, 15),
+      format: (value: string | { content: string; role: string }) =>
+        typeof value === "string"
+          ? truncString(value, 15)
+          : truncString(value.content, 15),
     },
     ...valuesColumns,
     {
-      key: "response",
+      key: "responseText",
       label: "Response",
       minWidth: 170,
       type: "text",
       format: (value: string) => (value ? truncString(value, 15) : value),
     },
     {
-      key: "duration (s)",
+      key: "latency",
       label: "Duration",
       format: (value: string) => `${value} s`,
       type: "number",
       filter: true,
     },
     {
-      key: "total_tokens",
+      key: "totalTokens",
       label: "Total Tokens",
       type: "number",
       filter: true,
     },
     {
-      key: "logprobs",
+      key: "logProbs",
       label: "Log Prob",
       type: "number",
       filter: true,
+      format: (value: number) => (value ? value.toFixed(2) : "n/a"),
     },
     {
-      key: "request_user_id",
+      key: "userId",
       label: "User",
       format: (value: string) => (value ? truncString(value, 15) : value),
       type: "text",
       filter: true,
+      minWidth: 170,
     },
     ...propertiesColumns,
     {
@@ -405,6 +238,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => value,
     },
   ].filter((column) => column !== null) as Column[];
+
   const router = useRouter();
 
   const propertyFilterMap = {
@@ -434,7 +268,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
             <ThemedFilter
-              data={csvData || []}
+              data={null}
               isFetching={isLoading}
               onTimeSelectHandler={onTimeSelectHandler}
               timeFilterOptions={[
@@ -473,7 +307,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               <ThemedTableV2
                 condensed
                 columns={columns}
-                rows={csvData || []}
+                rows={requests}
                 count={count || 0}
                 page={page}
                 from={from}
@@ -489,12 +323,10 @@ const RequestsPage = (props: RequestsPageProps) => {
       {open && selectedData !== undefined && index !== undefined && (
         <RequestDrawer
           open={open}
-          index={index}
-          probabilities={probabilities}
-          properties={properties}
-          request={selectedData}
+          wrappedRequest={selectedData}
           setOpen={setOpen}
           values={values}
+          properties={properties}
         />
       )}
     </>

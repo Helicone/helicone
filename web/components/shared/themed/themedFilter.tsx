@@ -42,6 +42,7 @@ import {
   TableFilterMap,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import ThemedTextDropDown from "./themedTextDropDown";
+import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -52,7 +53,7 @@ export function escapeCSVString(s: string | undefined): string | undefined {
 export type Filter = (FilterLeaf & { id?: string }) | { id?: string };
 
 interface ThemedFilterProps {
-  data: CsvData[] | null | UserMetric[]; // if data is null, then we don't show the export button
+  data: null | UserMetric[]; // if data is null, then we don't show the export button
   isFetching: boolean; // if fetching, we disable other time select buttons
   onTimeSelectHandler?: (key: TimeInterval, value: string) => void;
   timeFilterOptions?: { key: string; value: string }[]; // if undefined, then we don't show the timeFilter dropdown
@@ -145,15 +146,15 @@ export default function ThemedFilter(props: ThemedFilterProps) {
                   <Menu as="div" className="relative inline-block">
                     <CSVLink
                       data={data.map((d) => {
-                        if ("request" in d) {
-                          return {
-                            ...d,
-                            request: escapeCSVString(d.request),
-                            response: escapeCSVString(d.response),
-                          };
-                        } else {
-                          return d;
-                        }
+                        // if ("request" in d) {
+                        //   return {
+                        //     ...d,
+                        //     request: escapeCSVString(d.request),
+                        //     response: escapeCSVString(d.response),
+                        //   };
+                        // } else {
+                        return d;
+                        // }
                       })}
                       filename={fileName}
                       className="flex"
