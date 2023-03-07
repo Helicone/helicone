@@ -44,7 +44,7 @@ export interface RequestWrapper {
   };
   latency: number;
   totalTokens: number;
-  requestModel: string;
+  model: string;
   requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
   logProbs: number | null;
@@ -140,7 +140,7 @@ const useRequestsPage = (
       error: request.response_body.error || undefined,
       latency,
       totalTokens: request.response_body.usage_total_tokens || 0,
-      requestModel: request.request_body.model || "n/a",
+      model: request.response_body.model || "n/a",
       requestText:
         request.request_body.messages?.at(-1) ||
         request.request_body.prompt ||
