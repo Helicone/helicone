@@ -159,7 +159,7 @@ const UsersPage = (props: UsersPageProps) => {
           }}
         />
         {isLoading || from === undefined || to === undefined ? (
-          <LoadingAnimation title="Getting your requests" />
+          <LoadingAnimation title="Getting users" />
         ) : (
           <>
             <ThemedTableV2
