@@ -3,6 +3,7 @@ import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
 import { Json } from "../../../supabase/database.types";
 import { Message } from "./requestsPage";
 
@@ -83,7 +84,8 @@ export interface RequestWrapper {
 const useRequestsPage = (
   currentPage: number,
   currentPageSize: number,
-  advancedFilter?: FilterNode
+  advancedFilter: FilterNode,
+  sortLeaf: SortLeafRequest
 ) => {
   const {
     requests,
@@ -93,7 +95,7 @@ const useRequestsPage = (
     isLoading: isRequestsLoading,
     refetch,
     isRefetching,
-  } = useGetRequests(currentPage, currentPageSize, advancedFilter);
+  } = useGetRequests(currentPage, currentPageSize, advancedFilter, sortLeaf);
 
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
@@ -175,7 +177,7 @@ const useRequestsPage = (
         (request.response_body.error?.message &&
           `error: ${request.response_body.error?.message}`) ||
         request.response_body.choices?.[0]?.text ||
-        request.response_body.choices?.[0]?.message.content ||
+        request.response_body.choices?.[0]?.message?.content ||
         "n/a",
       logProbs: request.response_body.choices?.[0]?.logprobs?.token_logprobs
         ? getLogProbs(

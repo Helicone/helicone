@@ -1,6 +1,3 @@
-import { Dialog } from "@headlessui/react";
-import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";
 
 import { useState } from "react";
@@ -13,22 +10,15 @@ import {
   FilterNode,
   getPropertyFilters,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  RequestsTableFilter,
-  UserMetricsTableFilter,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import { Database, Json } from "../../../supabase/database.types";
+import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
-import ThemedModal from "../../shared/themed/themedModal";
+import ThemedFilter from "../../shared/themed/themedFilter";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
-import { Chat } from "./chat";
-import { Completion } from "./completion";
-import { CompletionRegex } from "./completionRegex";
 import RequestDrawer from "./requestDrawer";
 import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
 
@@ -74,11 +64,13 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy, keys } = props;
 
-  const { setNotification } = useNotification();
-
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
+  const [orderBy, setOrderBy] = useState<string>("");
+  const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
+    created_at: "desc",
+  });
   const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
@@ -90,15 +82,20 @@ const RequestsPage = (props: RequestsPageProps) => {
   });
 
   const { count, values, from, isLoading, properties, refetch, requests, to } =
-    useRequestsPage(currentPage, currentPageSize, {
-      left: timeFilter,
-      operator: "and",
-      right: {
-        left: apiKeyFilter,
+    useRequestsPage(
+      currentPage,
+      currentPageSize,
+      {
+        left: timeFilter,
         operator: "and",
-        right: advancedFilter,
+        right: {
+          left: apiKeyFilter,
+          operator: "and",
+          right: advancedFilter,
+        },
       },
-    });
+      sortLeaf
+    );
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setTimeFilter({
@@ -133,19 +130,33 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  const propertiesColumns = properties.map((p) => {
+  const propertiesColumns: Column[] = properties.map((p) => {
     return {
       key: p,
       label: p,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        properties: {
+          [p]: direction,
+        },
+      }),
+      columnOrigin: "property",
       format: (value: string) => (value ? truncString(value, 15) : value),
       minWidth: 170,
     };
   });
 
-  const valuesColumns = values.map((p) => {
+  const valuesColumns: Column[] = values.map((p) => {
     return {
       key: p,
       label: p,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        values: {
+          [p]: direction,
+        },
+      }),
+      columnOrigin: "value",
       format: (value: string) => (value ? truncString(value, 15) : value),
     };
   });
@@ -157,19 +168,13 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "requestCreatedAt",
       label: "Time",
       minWidth: 170,
-      sortBy: "request_created_at",
-      type: "date",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        created_at: direction,
+      }),
+      type: "timestamp",
       format: (value: string) => getUSDate(value),
     },
-    includePrompt
-      ? {
-          key: "prompt_name",
-          label: "Prompt Name",
-          format: (value: string) => value,
-          type: "text",
-          filter: true,
-        }
-      : null,
     {
       key: "requestText",
       label: "Request",
@@ -180,7 +185,6 @@ const RequestsPage = (props: RequestsPageProps) => {
           ? truncString(value, 15)
           : truncString(value.content, 15),
     },
-    ...valuesColumns,
     {
       key: "responseText",
       label: "Response",
@@ -192,12 +196,20 @@ const RequestsPage = (props: RequestsPageProps) => {
       key: "latency",
       label: "Duration",
       format: (value: string) => `${value} s`,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        latency: direction,
+      }),
       type: "number",
       filter: true,
     },
     {
       key: "totalTokens",
       label: "Total Tokens",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        total_tokens: direction,
+      }),
       type: "number",
       filter: true,
     },
@@ -211,21 +223,32 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "userId",
       label: "User",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        user_id: direction,
+      }),
       format: (value: string) => (value ? truncString(value, 15) : value),
       type: "text",
       filter: true,
       minWidth: 170,
     },
-    ...propertiesColumns,
     {
       key: "model",
       label: "Model",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        body_model: direction,
+      }),
       filter: true,
       type: "text",
       minWidth: 170,
     },
     {
       key: "isCached",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        is_cached: direction,
+      }),
       label: "Cache",
       minWidth: 170,
       format: (value: boolean) => (value ? "hit" : ""),
@@ -237,7 +260,23 @@ const RequestsPage = (props: RequestsPageProps) => {
       type: "text",
       format: (value: string) => value,
     },
-  ].filter((column) => column !== null) as Column[];
+    ...valuesColumns,
+    ...propertiesColumns,
+  ];
+  if (includePrompt) {
+    columns.push({
+      key: "prompt_name",
+      label: "Prompt Name",
+      format: (value: string) => value,
+      type: "text",
+      filter: true,
+    });
+  }
+
+  const columnOrderIndex = columns.findIndex((c) => c.key === orderBy);
+  if (columnOrderIndex > -1) {
+    columns[columnOrderIndex].sortBy = "asc";
+  }
 
   const router = useRouter();
 
@@ -279,7 +318,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               ]}
               customTimeFilter
               fileName="requests.csv"
-              filterMap={RequestsTableFilter}
+              filterMap={filterMap}
               onAdvancedFilter={(_filters) => {
                 router.query.page = "1";
                 router.push(router);
@@ -315,6 +354,15 @@ const RequestsPage = (props: RequestsPageProps) => {
                 onSelectHandler={selectRowHandler}
                 onPageChangeHandler={onPageChangeHandler}
                 onPageSizeChangeHandler={onPageSizeChangeHandler}
+                onSortHandler={(key) => {
+                  if (key.key === orderBy) {
+                    setOrderBy("");
+                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("desc"));
+                  } else {
+                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+                    setOrderBy(key.key);
+                  }
+                }}
               />
             )}
           </div>
