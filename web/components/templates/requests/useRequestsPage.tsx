@@ -98,9 +98,6 @@ const useRequestsPage = (
     isRefetching,
   } = useGetRequests(currentPage, currentPageSize, advancedFilter, sortLeaf);
 
-  console.log(1);
-  console.log(requests);
-
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
   const { values, isLoading: isValuesLoading } = useGetPromptValues();

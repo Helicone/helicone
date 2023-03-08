@@ -34,6 +34,8 @@ const RequestDrawer = (props: RequestDrawerProps) => {
     );
   };
 
+  console.log(wrappedRequest);
+
   return (
     <ThemedDrawer
       open={open}
@@ -105,7 +107,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             request={wrappedRequest.api.moderation.request}
             response={wrappedRequest.api.moderation.results}
           />
-        ) : wrappedRequest.promptRegex === "n/a" ? (
+        ) : wrappedRequest.promptRegex === "" ? (
           <Completion
             request={wrappedRequest.api.gpt3?.request}
             response={wrappedRequest.api.gpt3?.response}
