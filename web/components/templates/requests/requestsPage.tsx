@@ -312,6 +312,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       ),
     },
   };
+  console.log("propertyFilterMpa", propertyFilterMap);
   const filterMap =
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
