@@ -62,10 +62,6 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Total requests",
     },
     {
-      value: data?.total_requests ?? "n/a",
-      label: "UnCached requests",
-    },
-    {
       value: data?.total_cached_requests ?? "n/a",
       label: "Cached Requests",
     },
