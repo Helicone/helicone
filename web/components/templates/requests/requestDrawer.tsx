@@ -10,6 +10,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
+import Moderation from "./moderation";
 import { RequestWrapper } from "./useRequestsPage";
 
 interface RequestDrawerProps {
@@ -98,6 +99,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
               request: wrappedRequest.api.chat.request,
               response: wrappedRequest.api.chat.response,
             }}
+          />
+        ) : wrappedRequest.api.moderation ? (
+          <Moderation
+            request={wrappedRequest.api.moderation.request}
+            response={wrappedRequest.api.moderation.results}
           />
         ) : wrappedRequest.promptRegex === "n/a" ? (
           <Completion
