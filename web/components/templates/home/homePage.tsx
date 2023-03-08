@@ -16,7 +16,7 @@
 import { StarIcon } from "@heroicons/react/20/solid";
 import AdvancedAnalytics from "./AdvancedAnalytics";
 import { useRouter } from "next/router";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import Details from "./detailsV2";
 import BasePageV2 from "../../shared/layout/basePageV2";
@@ -26,7 +26,11 @@ import { useState } from "react";
 export default function HomePage() {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
+  const user = useUser();
   const [demoLoading, setDemoLoading] = useState(false);
+  if (!demoLoading && user?.email === DEMO_EMAIL) {
+    supabaseClient.auth.signOut();
+  }
 
   return (
     <>
@@ -72,7 +76,7 @@ export default function HomePage() {
                               password: "valyrdemo",
                             })
                             .then((res) => {
-                              router.push("/dashboard").then(() => {
+                              router.push("/demo").then(() => {
                                 setDemoLoading(false);
                               });
                             });
