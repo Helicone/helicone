@@ -178,6 +178,10 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "requestText",
       label: "Request",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        request_prompt: direction,
+      }),
       minWidth: 170,
       type: "text",
       format: (value: string | { content: string; role: string }) =>
@@ -188,6 +192,10 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "responseText",
       label: "Response",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        response_text: direction,
+      }),
       minWidth: 170,
       type: "text",
       format: (value: string) => (value ? truncString(value, 15) : value),
