@@ -99,6 +99,8 @@ const RequestDrawer = (props: RequestDrawerProps) => {
               response: wrappedRequest.api.chat.response,
             }}
           />
+        ) : wrappedRequest.api.moderation ? (
+          <h1>hello world</h1>
         ) : wrappedRequest.promptRegex === "n/a" ? (
           <Completion
             request={wrappedRequest.api.gpt3?.request}

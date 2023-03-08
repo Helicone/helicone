@@ -1,3 +1,4 @@
+import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
@@ -41,6 +42,12 @@ export interface RequestWrapper {
       request: string | undefined;
       response: string | undefined;
     };
+    moderation?: {
+      request: string | undefined;
+      results: {
+        [key: string]: Json;
+      }[];
+    };
   };
   latency: number;
   totalTokens: number;
@@ -56,18 +63,20 @@ export interface RequestWrapper {
     | string
     | boolean
     | {
-        chat?:
-          | {
-              request: Message[] | null;
-              response: Message | null;
-            }
-          | undefined;
-        gpt3?:
-          | {
-              request: string | undefined;
-              response: string | undefined;
-            }
-          | undefined;
+        chat?: {
+          request: Message[] | null;
+          response: Message | null;
+        };
+        gpt3?: {
+          request: string | undefined;
+          response: string | undefined;
+        };
+        moderation?: {
+          request: string | undefined;
+          results: {
+            [key: string]: Json;
+          }[];
+        };
       };
 }
 
@@ -98,6 +107,34 @@ const useRequestsPage = (
     return sum;
   };
 
+  const getRequestAndResponse = (request: HeliconeRequest) => {
+    if (
+      request.request_path?.includes("/chat/") ||
+      request.request_body.model === "gpt-3.5-turbo"
+    ) {
+      return {
+        chat: {
+          request: request.request_body.messages,
+          response: request.response_body.choices?.[0]?.message,
+        },
+      };
+    } else if (request.request_path?.includes("/moderation/")) {
+      return {
+        moderation: {
+          request: request.request_body.input,
+          results: request.response_body.results,
+        },
+      };
+    } else {
+      return {
+        gpt3: {
+          request: request.request_body.prompt,
+          response: request.response_body.choices?.[0]?.text,
+        },
+      };
+    }
+  };
+
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
       (new Date(request.response_created_at!).getTime() -
@@ -122,21 +159,7 @@ const useRequestsPage = (
       userApiKeyUserId: request.user_api_key_user_id,
 
       // More information about the request
-      api:
-        request.request_body.model === "gpt-3.5-turbo" ||
-        request.request_path?.includes("/chat/")
-          ? {
-              chat: {
-                request: request.request_body.messages,
-                response: request.response_body.choices?.[0]?.message,
-              },
-            }
-          : {
-              gpt3: {
-                request: request.request_body.prompt,
-                response: request.response_body.choices?.[0]?.text,
-              },
-            },
+      api: getRequestAndResponse(request),
       error: request.response_body.error || undefined,
       latency,
       totalTokens: request.response_body.usage?.total_tokens || 0,
@@ -145,6 +168,7 @@ const useRequestsPage = (
         : request.response_body.model || "n/a",
       requestText:
         request.request_body.messages?.at(-1) ||
+        request.request_body.input ||
         request.request_body.prompt ||
         "n/a",
       responseText:
@@ -173,10 +197,6 @@ const useRequestsPage = (
     // TODO: handle the values
     return obj;
   });
-
-  console.log("requests");
-  console.log(requests);
-  console.log(wrappedRequests);
 
   return {
     requests: wrappedRequests,
