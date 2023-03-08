@@ -31,11 +31,11 @@ function assertValidSortDirection(direction: SortDirection) {
 export function buildSort(sort: SortLeafRequest) {
   if (sort.created_at) {
     assertValidSortDirection(sort.created_at);
-    return `coalesce(ch.created_at, request.created_at) ${sort.created_at}`;
+    return `coalesce(request.cache_created_at, request.created_at) ${sort.created_at}`;
   }
   if (sort.latency) {
     assertValidSortDirection(sort.latency);
-    return `ch.created_at - request.created_at ${sort.latency}`;
+    return `request.cache_created_at - request.created_at ${sort.latency}`;
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);
@@ -51,7 +51,7 @@ export function buildSort(sort: SortLeafRequest) {
   }
   if (sort.is_cached) {
     assertValidSortDirection(sort.is_cached);
-    return `ch.created_at ${sort.is_cached}`;
+    return `request.cache_created_at ${sort.is_cached}`;
   }
   if (sort.request_prompt) {
     assertValidSortDirection(sort.request_prompt);
