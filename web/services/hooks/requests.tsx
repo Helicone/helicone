@@ -26,7 +26,7 @@ const useGetRequests = (
       const currentPageSize = query.queryKey[2] as number;
       const advancedFilter = query.queryKey[3];
       const sortLeaf = query.queryKey[4];
-      console.log("softLeaf", sortLeaf);
+
       return await Promise.all([
         fetch("/api/request", {
           method: "POST",

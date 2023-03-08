@@ -241,7 +241,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       }),
       filter: true,
       type: "text",
-      minWidth: 170,
+      minWidth: 200,
     },
     {
       key: "isCached",
@@ -254,7 +254,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: boolean) => (value ? "hit" : ""),
     },
     {
-      key: "key_name",
+      key: "keyName",
       label: "Key Name",
       minWidth: 170,
       type: "text",
