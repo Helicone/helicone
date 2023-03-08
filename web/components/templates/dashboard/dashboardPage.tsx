@@ -93,7 +93,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
 
-  console.log("filterMap", filterMap);
   return (
     <AuthLayout user={user}>
       <AuthHeader
