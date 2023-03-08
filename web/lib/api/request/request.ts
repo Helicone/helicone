@@ -44,11 +44,19 @@ export async function getRequests(
   }
   const sortSQL = buildSort(sort);
   const query = `
+  with all_requests as ( 
+      select *, NULL as cache_created_at 
+      from request 
+    union
+      select request.*, cache_hits.created_at as cache_created_at
+      from cache_hits
+      left join request on request.id = cache_hits.request_id
+    ) 
   SELECT response.id AS response_id,
-    coalesce(ch.created_at, response.created_at) as response_created_at,
+    coalesce(request.cache_created_at, response.created_at) as response_created_at,
     response.body AS response_body,
     request.id AS request_id,
-    coalesce(ch.created_at, request.created_at) as request_created_at,
+    coalesce(request.cache_created_at, request.created_at) as request_created_at,
     request.body AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
@@ -61,10 +69,9 @@ export async function getRequests(
     user_api_keys.key_name as key_name,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
-    ch.created_at IS NOT NULL AS is_cached
+    request.cache_created_at IS NOT NULL AS is_cached
   FROM response
-    left join request on request.id = response.request
-    left join cache_hits ch on ch.request_id = request.id
+    left join all_requests request on request.id = response.request
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
@@ -75,8 +82,10 @@ export async function getRequests(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+  console.log(query);
 
   const { data, error } = await dbExecute<HeliconeRequest>(query);
+  // console.log("LEN"mdata?.length, error);
   if (error !== null) {
     return { data: null, error: error };
   }
@@ -88,10 +97,17 @@ export async function getRequestCount(
   filter: FilterNode
 ): Promise<Result<number, string>> {
   const query = `
+  with all_requests as ( 
+    select *, NULL as cache_created_at 
+    from request 
+  union
+    select request.*, cache_hits.created_at as cache_created_at
+    from cache_hits
+    left join request on request.id = cache_hits.request_id
+  ) 
   SELECT count(*) as count
   FROM response
-    left join request on request.id = response.request
-    left join cache_hits ch on ch.request_id = request.id
+    left join all_requests request on request.id = response.request
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
