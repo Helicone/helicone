@@ -149,15 +149,15 @@ const useRequestsPage = (
 
     const obj: RequestWrapper = {
       isCached: request.is_cached,
-      promptName: request.prompt_name || "n/a",
-      promptRegex: request.prompt_regex || "n/a",
+      promptName: request.prompt_name || "",
+      promptRegex: request.prompt_regex || "",
       requestCreatedAt: request.request_created_at,
-      formattedPromptId: request.request_formatted_prompt_id || "n/a",
+      formattedPromptId: request.request_formatted_prompt_id || "",
       id: request.request_id,
       path: request.request_path,
       promptValues: request.request_prompt_values,
       customProperties: request.request_properties,
-      userId: request.request_user_id || "n/a",
+      userId: request.request_user_id || "",
       responseCreatedAt: request.response_created_at,
       responseId: request.response_id,
       keyName: request.key_name,
@@ -171,19 +171,19 @@ const useRequestsPage = (
       latency,
       totalTokens: request.response_body.usage?.total_tokens || 0,
       model: request.response_body.error
-        ? request.request_body.model || "n/a"
-        : request.response_body.model || "n/a",
+        ? request.request_body.model || ""
+        : request.response_body.model || "",
       requestText:
         request.request_body.messages?.at(-1) ||
         request.request_body.input ||
         request.request_body.prompt ||
-        "n/a",
+        "",
       responseText:
         (request.response_body.error?.message &&
           `error: ${request.response_body.error?.message}`) ||
         request.response_body.choices?.[0]?.text ||
         request.response_body.choices?.[0]?.message?.content ||
-        "n/a",
+        "",
       logProbs: request.response_body.choices?.[0]?.logprobs?.token_logprobs
         ? getLogProbs(
             request.response_body.choices?.[0]?.logprobs?.token_logprobs

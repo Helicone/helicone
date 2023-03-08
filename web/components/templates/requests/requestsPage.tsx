@@ -125,7 +125,7 @@ const defaultColumns: Column[] = [
     label: "Log Prob",
     type: "number",
     filter: true,
-    format: (value: number) => (value ? value.toFixed(2) : "n/a"),
+    format: (value: number) => (value ? value.toFixed(2) : ""),
   },
   {
     key: "userId",

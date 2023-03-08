@@ -58,16 +58,20 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Total cost (USD)",
     },
     {
-      value: data?.total_requests ?? "n/a",
+      value: +(data?.total_requests ?? 0) + +(data?.total_cached_requests ?? 0),
       label: "Total requests",
     },
     {
-      value: data?.total_cached_savings?.toFixed(2) ?? "n/a",
-      label: "Cache Savings (USD)",
+      value: data?.total_requests ?? "n/a",
+      label: "UnCached requests",
     },
     {
       value: data?.total_cached_requests ?? "n/a",
       label: "Cached Requests",
+    },
+    {
+      value: data?.total_cached_savings?.toFixed(2) ?? "n/a",
+      label: "Cache Savings (USD)",
     },
   ];
 
