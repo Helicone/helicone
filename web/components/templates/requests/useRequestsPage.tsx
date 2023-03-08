@@ -198,6 +198,8 @@ const useRequestsPage = (
     return obj;
   });
 
+  console.log(wrappedRequests);
+
   return {
     requests: wrappedRequests,
     count,
