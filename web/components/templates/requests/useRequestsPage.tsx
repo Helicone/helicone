@@ -120,7 +120,7 @@ const useRequestsPage = (
           response: request.response_body.choices?.[0]?.message,
         },
       };
-    } else if (request.request_path?.includes("/moderation/")) {
+    } else if (request.request_path?.includes("/moderations")) {
       return {
         moderation: {
           request: request.request_body.input,
