@@ -2,7 +2,7 @@ import { ColumnComparators, Comparator } from "./frontendFilterDefs";
 
 export function getPropertyFilters(
   properties: string[],
-  inputParams?: string[]
+  inputParams: string[]
 ) {
   const filters: ColumnComparators<any> = {};
   properties.forEach((p) => {

@@ -6,6 +6,7 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import {
   FilterNode,
   getPropertyFilters,
@@ -60,6 +61,113 @@ interface RequestsPageProps {
   sortBy: string | null;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
+
+const defaultColumns: Column[] = [
+  {
+    key: "requestCreatedAt",
+    label: "Time",
+    minWidth: 170,
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      created_at: direction,
+    }),
+    type: "timestamp",
+    format: (value: string) => getUSDate(value),
+  },
+  {
+    key: "requestText",
+    label: "Request",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      request_prompt: direction,
+    }),
+    minWidth: 170,
+    type: "text",
+    format: (value: string | { content: string; role: string }) =>
+      typeof value === "string"
+        ? truncString(value, 15)
+        : truncString(value.content, 15),
+  },
+  {
+    key: "responseText",
+    label: "Response",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      response_text: direction,
+    }),
+    minWidth: 170,
+    type: "text",
+    format: (value: string) => (value ? truncString(value, 15) : value),
+  },
+  {
+    key: "latency",
+    label: "Duration",
+    format: (value: string) => `${value} s`,
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      latency: direction,
+    }),
+    type: "number",
+    filter: true,
+  },
+  {
+    key: "totalTokens",
+    label: "Total Tokens",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      total_tokens: direction,
+    }),
+    type: "number",
+    filter: true,
+  },
+  {
+    key: "logProbs",
+    label: "Log Prob",
+    type: "number",
+    filter: true,
+    format: (value: number) => (value ? value.toFixed(2) : "n/a"),
+  },
+  {
+    key: "userId",
+    label: "User",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      user_id: direction,
+    }),
+    format: (value: string) => (value ? truncString(value, 15) : value),
+    type: "text",
+    filter: true,
+    minWidth: 170,
+  },
+  {
+    key: "model",
+    label: "Model",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      body_model: direction,
+    }),
+    filter: true,
+    type: "text",
+    minWidth: 200,
+  },
+  {
+    key: "isCached",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      is_cached: direction,
+    }),
+    label: "Cache",
+    minWidth: 170,
+    format: (value: boolean) => (value ? "hit" : ""),
+  },
+  {
+    key: "keyName",
+    label: "Key Name",
+    minWidth: 170,
+    type: "text",
+    format: (value: string) => value,
+  },
+];
 
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy, keys } = props;
@@ -164,110 +272,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const includePrompt = valuesColumns.length > 0;
 
   const columns: Column[] = [
-    {
-      key: "requestCreatedAt",
-      label: "Time",
-      minWidth: 170,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        created_at: direction,
-      }),
-      type: "timestamp",
-      format: (value: string) => getUSDate(value),
-    },
-    {
-      key: "requestText",
-      label: "Request",
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        request_prompt: direction,
-      }),
-      minWidth: 170,
-      type: "text",
-      format: (value: string | { content: string; role: string }) =>
-        typeof value === "string"
-          ? truncString(value, 15)
-          : truncString(value.content, 15),
-    },
-    {
-      key: "responseText",
-      label: "Response",
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        response_text: direction,
-      }),
-      minWidth: 170,
-      type: "text",
-      format: (value: string) => (value ? truncString(value, 15) : value),
-    },
-    {
-      key: "latency",
-      label: "Duration",
-      format: (value: string) => `${value} s`,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        latency: direction,
-      }),
-      type: "number",
-      filter: true,
-    },
-    {
-      key: "totalTokens",
-      label: "Total Tokens",
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        total_tokens: direction,
-      }),
-      type: "number",
-      filter: true,
-    },
-    {
-      key: "logProbs",
-      label: "Log Prob",
-      type: "number",
-      filter: true,
-      format: (value: number) => (value ? value.toFixed(2) : "n/a"),
-    },
-    {
-      key: "userId",
-      label: "User",
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        user_id: direction,
-      }),
-      format: (value: string) => (value ? truncString(value, 15) : value),
-      type: "text",
-      filter: true,
-      minWidth: 170,
-    },
-    {
-      key: "model",
-      label: "Model",
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        body_model: direction,
-      }),
-      filter: true,
-      type: "text",
-      minWidth: 200,
-    },
-    {
-      key: "isCached",
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        is_cached: direction,
-      }),
-      label: "Cache",
-      minWidth: 170,
-      format: (value: boolean) => (value ? "hit" : ""),
-    },
-    {
-      key: "keyName",
-      label: "Key Name",
-      minWidth: 170,
-      type: "text",
-      format: (value: string) => value,
-    },
+    ...defaultColumns,
     ...valuesColumns,
     ...propertiesColumns,
   ];
@@ -287,13 +292,18 @@ const RequestsPage = (props: RequestsPageProps) => {
   }
 
   const router = useRouter();
+  const { propertyParams } = useGetPropertyParams();
 
   const propertyFilterMap = {
     properties: {
       label: "Properties",
-      columns: getPropertyFilters(properties),
+      columns: getPropertyFilters(
+        properties,
+        propertyParams.map((p) => p.property_param)
+      ),
     },
   };
+  console.log("propertyFilterMpa", propertyFilterMap);
   const filterMap =
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
