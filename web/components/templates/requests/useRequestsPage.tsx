@@ -25,6 +25,7 @@ export interface RequestWrapper {
   responseCreatedAt: string;
   responseId: string;
   userApiKeyHash: string;
+  keyName: string;
   userApiKeyPreview: string;
   userApiKeyUserId: string;
 
@@ -97,6 +98,9 @@ const useRequestsPage = (
     isRefetching,
   } = useGetRequests(currentPage, currentPageSize, advancedFilter, sortLeaf);
 
+  console.log(1);
+  console.log(requests);
+
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
   const { values, isLoading: isValuesLoading } = useGetPromptValues();
@@ -156,6 +160,7 @@ const useRequestsPage = (
       userId: request.request_user_id || "n/a",
       responseCreatedAt: request.response_created_at,
       responseId: request.response_id,
+      keyName: request.key_name,
       userApiKeyHash: request.user_api_key_hash,
       userApiKeyPreview: request.user_api_key_preview,
       userApiKeyUserId: request.user_api_key_user_id,
@@ -199,8 +204,6 @@ const useRequestsPage = (
     // TODO: handle the values
     return obj;
   });
-
-  console.log(wrappedRequests);
 
   return {
     requests: wrappedRequests,
