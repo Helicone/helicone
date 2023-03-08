@@ -15,21 +15,15 @@ interface RequestsProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const Requests = (props: RequestsProps) => {
-  const { user, page, pageSize, sortBy, keys } = props;
+  const { user, page, pageSize, sortBy } = props;
 
   return (
     <MetaData title="Requests">
       <AuthLayout user={user}>
-        <RequestsPage
-          page={page}
-          pageSize={pageSize}
-          sortBy={sortBy}
-          keys={keys}
-        />
+        <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} />
       </AuthLayout>
     </MetaData>
   );
@@ -45,8 +39,6 @@ export const getServerSideProps = async (
   const {
     data: { session },
   } = await supabase.auth.getSession();
-
-  const [{ data: keyData }] = await Promise.all([getKeys(supabase)]);
 
   if (!session)
     return {
@@ -69,7 +61,6 @@ export const getServerSideProps = async (
       page: currentPage,
       pageSize: pageSize,
       sortBy: sortBy,
-      keys: keyData,
     },
   };
 };

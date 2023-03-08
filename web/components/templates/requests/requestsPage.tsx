@@ -6,6 +6,7 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useGetKeys } from "../../../services/hooks/keys";
 import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import {
   FilterNode,
@@ -62,7 +63,6 @@ interface RequestsPageProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const defaultColumns: Column[] = [
@@ -173,7 +173,7 @@ const defaultColumns: Column[] = [
 ];
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, sortBy, keys } = props;
+  const { page, pageSize, sortBy } = props;
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
@@ -213,6 +213,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
       sortLeaf
     );
+
+  const { keys, isLoading: isKeysLoading } = useGetKeys();
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setTimeFilter({
@@ -312,7 +314,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       ),
     },
   };
-  console.log("propertyFilterMpa", propertyFilterMap);
+
   const filterMap =
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
@@ -323,13 +325,18 @@ const RequestsPage = (props: RequestsPageProps) => {
       <AuthHeader
         title={"Requests"}
         actions={
-          <Filters
-            keys={keys}
-            filter={apiKeyFilter}
-            setFilter={setApiKeyFilter}
-          />
+          !isKeysLoading ? (
+            <Filters
+              keys={keys}
+              filter={apiKeyFilter}
+              setFilter={setApiKeyFilter}
+            />
+          ) : (
+            <></>
+          )
         }
       />
+
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
