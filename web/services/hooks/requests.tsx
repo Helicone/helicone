@@ -5,20 +5,28 @@ import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { getRequests } from "../lib/requests";
+import { SortLeafRequest } from "../lib/sorts/sorts";
 
 const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
-  advancedFilter?: FilterNode
+  advancedFilter: FilterNode,
+  sortLeaf: SortLeafRequest
 ) => {
-  const supabase = useSupabaseClient();
-
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests", currentPage, currentPageSize, advancedFilter],
+    queryKey: [
+      "requests",
+      currentPage,
+      currentPageSize,
+      advancedFilter,
+      sortLeaf,
+    ],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
       const currentPageSize = query.queryKey[2] as number;
       const advancedFilter = query.queryKey[3];
+      const sortLeaf = query.queryKey[4];
+      console.log("softLeaf", sortLeaf);
       return await Promise.all([
         fetch("/api/request", {
           method: "POST",
@@ -29,6 +37,7 @@ const useGetRequests = (
             filter: advancedFilter,
             offset: (currentPage - 1) * currentPageSize,
             limit: currentPageSize,
+            sort: sortLeaf,
           }),
         }).then(
           (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
