@@ -28,6 +28,7 @@ export interface HeliconeRequest {
   user_api_key_hash: string;
   prompt_name: string | null;
   prompt_regex: string | null;
+  key_name: string;
   is_cached: boolean;
 }
 
@@ -57,6 +58,7 @@ export async function getRequests(
     user_api_keys.api_key_preview as user_api_key_preview,
     user_api_keys.user_id as user_api_key_user_id,
     user_api_keys.api_key_hash as user_api_key_hash,
+    user_api_keys.key_name as key_name,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
     ch.created_at IS NOT NULL AS is_cached

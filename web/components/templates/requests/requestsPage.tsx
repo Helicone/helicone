@@ -12,11 +12,13 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedFilter from "../../shared/themed/themedFilter";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
+import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
 import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
 
@@ -46,6 +48,8 @@ export type CsvData = {
   isCached: boolean;
   isChat: boolean;
   chatProperties: ChatProperties | null;
+  isModeration: boolean;
+  moderationFullResponse: string | null;
 } & {
   [keys: string]: string | number | null | boolean | ChatProperties;
 };
@@ -54,10 +58,11 @@ interface RequestsPageProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
+  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize } = props;
+  const { page, pageSize, sortBy, keys } = props;
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
@@ -66,6 +71,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
     created_at: "desc",
   });
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
@@ -82,7 +88,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       {
         left: timeFilter,
         operator: "and",
-        right: advancedFilter,
+        right: {
+          left: apiKeyFilter,
+          operator: "and",
+          right: advancedFilter,
+        },
       },
       sortLeaf
     );
@@ -243,6 +253,13 @@ const RequestsPage = (props: RequestsPageProps) => {
       minWidth: 170,
       format: (value: boolean) => (value ? "hit" : ""),
     },
+    {
+      key: "key_name",
+      label: "Key Name",
+      minWidth: 170,
+      type: "text",
+      format: (value: string) => value,
+    },
     ...valuesColumns,
     ...propertiesColumns,
   ];
@@ -276,7 +293,16 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   return (
     <>
-      <AuthHeader title={"Requests"} />
+      <AuthHeader
+        title={"Requests"}
+        actions={
+          <Filters
+            keys={keys}
+            filter={apiKeyFilter}
+            setFilter={setApiKeyFilter}
+          />
+        }
+      />
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-2">

@@ -142,7 +142,9 @@ const useRequestsPage = (
       error: request.response_body.error || undefined,
       latency,
       totalTokens: request.response_body.usage?.total_tokens || 0,
-      model: request.response_body.model || "n/a",
+      model: request.response_body.error
+        ? request.request_body.model || "n/a"
+        : request.response_body.model || "n/a",
       requestText:
         request.request_body.messages?.at(-1) ||
         request.request_body.prompt ||
