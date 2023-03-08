@@ -59,7 +59,7 @@ export function buildSort(sort: SortLeafRequest) {
   }
   if (sort.response_text) {
     assertValidSortDirection(sort.response_text);
-    return `coalesce(response.body -> 'choices'->0->'text', response.body -> 'choices'->'message'->'content') ${sort.response_text}`;
+    return `coalesce(response.body -> 'choices'->0->'text', response.body -> 'choices'->0->'message'->'content') ${sort.response_text}`;
   }
 
   if (sort.properties) {

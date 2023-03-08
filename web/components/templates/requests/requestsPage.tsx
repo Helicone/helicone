@@ -12,7 +12,10 @@ import {
   getPropertyFilters,
 } from "../../../services/lib/filters/filterDefs";
 import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/sorts";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -175,7 +178,13 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
-  const [orderBy, setOrderBy] = useState<string>("");
+  const [orderBy, setOrderBy] = useState<{
+    column: string;
+    direction: SortDirection;
+  }>({
+    column: "",
+    direction: "desc",
+  });
   const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
     created_at: "desc",
   });
@@ -286,9 +295,9 @@ const RequestsPage = (props: RequestsPageProps) => {
     });
   }
 
-  const columnOrderIndex = columns.findIndex((c) => c.key === orderBy);
+  const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
-    columns[columnOrderIndex].sortBy = "asc";
+    columns[columnOrderIndex].sortBy = orderBy.direction;
   }
 
   const router = useRouter();
@@ -372,12 +381,23 @@ const RequestsPage = (props: RequestsPageProps) => {
                 onPageChangeHandler={onPageChangeHandler}
                 onPageSizeChangeHandler={onPageSizeChangeHandler}
                 onSortHandler={(key) => {
-                  if (key.key === orderBy) {
-                    setOrderBy("");
-                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("desc"));
+                  if (key.key === orderBy.column) {
+                    setOrderBy({
+                      column: key.key,
+                      direction: orderBy.direction === "asc" ? "desc" : "asc",
+                    });
+                    key.toSortLeaf &&
+                      setSortLeaf(
+                        key.toSortLeaf(
+                          orderBy.direction === "asc" ? "desc" : "asc"
+                        )
+                      );
                   } else {
                     key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-                    setOrderBy(key.key);
+                    setOrderBy({
+                      column: key.key,
+                      direction: "asc",
+                    });
                   }
                 }}
               />
