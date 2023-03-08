@@ -95,7 +95,7 @@ const UsersPage = (props: UsersPageProps) => {
     {
       key: "last_active",
       label: "Last Active",
-      type: "datetime-local",
+      type: "timestamp",
       filter: true,
       minWidth: 170,
       format: (value: string) => getUSDate(value),

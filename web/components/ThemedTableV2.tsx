@@ -11,14 +11,19 @@ import { clsx } from "./shared/clsx";
 import { useRouter } from "next/router";
 import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 
+import { SortDirection, SortLeafRequest } from "../services/lib/sorts/sorts";
+import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
+
 export interface Column {
   key: string;
   label: string;
-  type?: "text" | "number" | "datetime-local";
+  type?: ColumnType;
   filter?: boolean;
-  sortBy?: string;
+  sortBy?: SortDirection;
+  columnOrigin?: "property" | "value";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
+  toSortLeaf?: (direction: SortDirection) => SortLeafRequest;
   format?: (value: any) => string;
 }
 
@@ -32,6 +37,7 @@ interface ThemedTableV2Props {
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
+  onSortHandler?: (key: Column) => void;
   condensed?: boolean;
 }
 
@@ -46,6 +52,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
     condensed = false,
     onSelectHandler,
     onPageChangeHandler,
+    onSortHandler,
     onPageSizeChangeHandler,
   } = props;
   const router = useRouter();
@@ -84,35 +91,16 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                     align={column.align}
                     style={{ minWidth: column.minWidth }}
                   >
-                    {column.sortBy ? (
+                    {column.sortBy !== undefined ? (
                       <button
-                        onClick={() => {
-                          if (
-                            !router.query.sort ||
-                            router.query.sort.includes("desc")
-                          ) {
-                            router.replace({
-                              query: {
-                                ...router.query,
-                                sort: `${column.key}_asc`,
-                              },
-                            });
-                            return;
-                          }
-                          router.replace({
-                            query: {
-                              ...router.query,
-                              sort: `${column.key}_desc`,
-                            },
-                          });
-                        }}
+                        onClick={() => onSortHandler && onSortHandler(column)}
                         className={clsx(
                           condensed ? "py-2" : "",
                           "whitespace-nowrap font-semibold text-gray-700 font-sans text-sm flex flex-row items-center hover:text-black hover:scale-105 transition ease-in-out delay-150 duration-300"
                         )}
                       >
                         {column.label}
-                        {router.query.sort?.includes("asc") ? (
+                        {column.sortBy === "asc" ? (
                           <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300" />
                         ) : (
                           <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300" />
