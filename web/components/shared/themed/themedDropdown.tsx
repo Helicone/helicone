@@ -4,13 +4,14 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
 import { Column } from "../../ThemedTableV2";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { ColumnType } from "../../../services/lib/filters/frontendFilterDefs";
 
 interface ThemedDropdownProps {
   idx: number;
   options: Column[];
   onChange: (
     idx: number,
-    type: "text" | "number" | "datetime-local",
+    type: ColumnType,
     key: string,
     value: string,
     column: Column,
@@ -75,10 +76,7 @@ export default function ThemedDropdown(props: ThemedDropdownProps) {
     setOperator(operator);
   };
 
-  const renderType = (
-    selected: Column,
-    type: "text" | "number" | "datetime-local"
-  ) => {
+  const renderType = (selected: Column, type: ColumnType) => {
     switch (type) {
       case "text":
         return (
@@ -122,7 +120,7 @@ export default function ThemedDropdown(props: ThemedDropdownProps) {
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
           />
         );
-      case "datetime-local":
+      case "timestamp":
         return (
           <input
             type="datetime-local"
@@ -303,7 +301,7 @@ export default function ThemedDropdown(props: ThemedDropdownProps) {
       )}
       {selected && (
         <div className="flex flex-row col-span-4 w-full">
-          {renderType(selected, selected.type || "text")}
+          {renderType(selected, selected.type ?? "timestamp")}
         </div>
       )}
       <div className="">
