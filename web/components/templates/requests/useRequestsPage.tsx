@@ -2,13 +2,14 @@ import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
+import { useGetRequestsMetaData } from "../../../services/hooks/requestsMetaData";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
 import { Json } from "../../../supabase/database.types";
 import { Message } from "./requestsPage";
 
 export interface RequestWrapper {
-  isCached: boolean;
+  cacheCount: number;
   promptName: string;
   promptRegex: string;
   requestCreatedAt: string;
@@ -145,7 +146,7 @@ const useRequestsPage = (
       1000;
 
     const obj: RequestWrapper = {
-      isCached: request.is_cached,
+      cacheCount: +request.cache_count,
       promptName: request.prompt_name || "",
       promptRegex: request.prompt_regex || "",
       requestCreatedAt: request.request_created_at,

@@ -154,14 +154,14 @@ const defaultColumns: Column[] = [
     minWidth: 200,
   },
   {
-    key: "isCached",
+    key: "cacheCount",
     sortBy: "desc",
     toSortLeaf: (direction) => ({
       is_cached: direction,
     }),
-    label: "Cache",
+    label: "Cache hits",
     minWidth: 170,
-    format: (value: boolean) => (value ? "hit" : ""),
+    format: (value: number) => value.toFixed(0),
   },
   {
     key: "keyName",
