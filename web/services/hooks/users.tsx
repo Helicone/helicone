@@ -12,8 +12,6 @@ const useUsers = (
   currentPageSize: number,
   advancedFilter?: FilterNode
 ) => {
-  const supabase = useSupabaseClient();
-
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["users", currentPage, currentPageSize, advancedFilter],
     queryFn: async (query) => {

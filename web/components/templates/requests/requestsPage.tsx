@@ -20,7 +20,7 @@ import {
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import ThemedFilter from "../../shared/themed/themedFilter";
+import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
@@ -65,9 +65,10 @@ interface RequestsPageProps {
   sortBy: string | null;
 }
 
-const defaultColumns: Column[] = [
+const initialColumns: Column[] = [
   {
     key: "requestCreatedAt",
+    active: true,
     label: "Time",
     minWidth: 170,
     sortBy: "desc",
@@ -79,6 +80,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "requestText",
+    active: true,
     label: "Request",
     sortBy: "desc",
     toSortLeaf: (direction) => ({
@@ -93,6 +95,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "responseText",
+    active: true,
     label: "Response",
     sortBy: "desc",
     toSortLeaf: (direction) => ({
@@ -104,6 +107,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "latency",
+    active: true,
     label: "Duration",
     format: (value: string) => `${value} s`,
     sortBy: "desc",
@@ -115,6 +119,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "totalTokens",
+    active: true,
     label: "Total Tokens",
     sortBy: "desc",
     toSortLeaf: (direction) => ({
@@ -125,6 +130,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "logProbs",
+    active: true,
     label: "Log Prob",
     type: "number",
     filter: true,
@@ -132,6 +138,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "userId",
+    active: true,
     label: "User",
     sortBy: "desc",
     toSortLeaf: (direction) => ({
@@ -144,6 +151,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "model",
+    active: true,
     label: "Model",
     sortBy: "desc",
     toSortLeaf: (direction) => ({
@@ -155,6 +163,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "cacheCount",
+    active: true,
     sortBy: "desc",
     toSortLeaf: (direction) => ({
       is_cached: direction,
@@ -165,6 +174,7 @@ const defaultColumns: Column[] = [
   },
   {
     key: "keyName",
+    active: true,
     label: "Key Name",
     minWidth: 170,
     type: "text",
@@ -175,6 +185,8 @@ const defaultColumns: Column[] = [
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
+  const [defaultColumns, setDefaultColumns] =
+    useState<Column[]>(initialColumns);
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
@@ -238,13 +250,10 @@ const RequestsPage = (props: RequestsPageProps) => {
     refetch();
   };
 
-  const [index, setIndex] = useState<number>();
-
   const [selectedData, setSelectedData] = useState<RequestWrapper>();
   const [open, setOpen] = useState(true);
 
   const selectRowHandler = (row: RequestWrapper, idx: number) => {
-    setIndex(idx);
     setSelectedData(row);
     setOpen(true);
   };
@@ -253,6 +262,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     return {
       key: p,
       label: p,
+      active: true,
       sortBy: "desc",
       toSortLeaf: (direction) => ({
         properties: {
@@ -269,6 +279,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     return {
       key: p,
       label: p,
+      active: true,
       sortBy: "desc",
       toSortLeaf: (direction) => ({
         values: {
@@ -283,14 +294,16 @@ const RequestsPage = (props: RequestsPageProps) => {
   const includePrompt = valuesColumns.length > 0;
 
   const columns: Column[] = [
-    ...defaultColumns,
+    ...initialColumns,
     ...valuesColumns,
     ...propertiesColumns,
   ];
+
   if (includePrompt) {
     columns.push({
       key: "prompt_name",
       label: "Prompt Name",
+      active: true,
       format: (value: string) => value,
       type: "text",
       filter: true,
@@ -332,7 +345,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               setFilter={setApiKeyFilter}
             />
           ) : (
-            <></>
+            <div className="h-10"></div>
           )
         }
       />
@@ -340,37 +353,48 @@ const RequestsPage = (props: RequestsPageProps) => {
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
-            <ThemedFilter
-              data={null}
+            <ThemedTableHeader
+              editColumns={{
+                columns: defaultColumns,
+                onColumnCallback: (columns) => setDefaultColumns(columns),
+              }}
+              timeFilter={{
+                customTimeFilter: true,
+                defaultTimeFilter: "all",
+                onTimeSelectHandler: onTimeSelectHandler,
+                timeFilterOptions: [
+                  { key: "24h", value: "day" },
+                  { key: "7d", value: "wk" },
+                  { key: "1m", value: "mo" },
+                  { key: "all", value: "all" },
+                ],
+              }}
+              csvExport={{
+                data: requests,
+                fileName: "requests.csv",
+              }}
               isFetching={isLoading}
-              onTimeSelectHandler={onTimeSelectHandler}
-              timeFilterOptions={[
-                { key: "24h", value: "day" },
-                { key: "7d", value: "wk" },
-                { key: "1m", value: "mo" },
-                { key: "all", value: "all" },
-              ]}
-              customTimeFilter
-              fileName="requests.csv"
-              filterMap={filterMap}
-              onAdvancedFilter={(_filters) => {
-                router.query.page = "1";
-                router.push(router);
-                const filters = _filters.filter((f) => f) as FilterNode[];
-                if (filters.length === 0) {
-                  setAdvancedFilter("all");
-                } else {
-                  const firstFilter = filters[0];
-                  setAdvancedFilter(
-                    filters.slice(1).reduce((acc, curr) => {
-                      return {
-                        left: acc,
-                        operator: "and",
-                        right: curr,
-                      };
-                    }, firstFilter)
-                  );
-                }
+              advancedFilter={{
+                filterMap,
+                onAdvancedFilter: (_filters) => {
+                  router.query.page = "1";
+                  router.push(router);
+                  const filters = _filters.filter((f) => f) as FilterNode[];
+                  if (filters.length === 0) {
+                    setAdvancedFilter("all");
+                  } else {
+                    const firstFilter = filters[0];
+                    setAdvancedFilter(
+                      filters.slice(1).reduce((acc, curr) => {
+                        return {
+                          left: acc,
+                          operator: "and",
+                          right: curr,
+                        };
+                      }, firstFilter)
+                    );
+                  }
+                },
               }}
             />
 
@@ -379,7 +403,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV2
                 condensed
-                columns={columns}
+                columns={columns.filter((c) => c.active)}
                 rows={requests}
                 count={count || 0}
                 page={page}
@@ -413,7 +437,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           </div>
         </div>
       </div>
-      {open && selectedData !== undefined && index !== undefined && (
+      {open && selectedData !== undefined && (
         <RequestDrawer
           open={open}
           wrappedRequest={selectedData}
