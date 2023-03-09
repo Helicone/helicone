@@ -16,7 +16,7 @@ export const Chat = (props: ChatProps) => {
   }
 
   return (
-    <div className="w-full flex flex-col text-left space-y-1 text-xs">
+    <div className="w-full flex flex-col text-left space-y-2 text-xs">
       <p className="text-gray-500 font-medium">Messages</p>
       <div className="text-xs w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full max-h-[500px]">
         {messages.length > 0 ? (

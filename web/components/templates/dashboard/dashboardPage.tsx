@@ -29,7 +29,8 @@ import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilte
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import AuthLayout from "../../shared/layout/authLayout";
-import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
+import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import { Filter } from "../../shared/themed/themedTableHeader";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
@@ -145,62 +146,62 @@ const DashboardPage = (props: DashboardPageProps) => {
         </div>
       ) : (
         <div className="space-y-8">
-          <ThemedFilter
-            data={null}
+          <ThemedTableHeader
             isFetching={metrics === "loading"}
-            customTimeFilter
-            timeFilterOptions={[
-              { key: "1h", value: "hour" },
-              { key: "24h", value: "day" },
-              { key: "7d", value: "wk" },
-              { key: "1m", value: "mo" },
-              { key: "3m", value: "3mo" },
-            ]}
-            defaultTimeFilter={interval}
-            filterMap={filterMap}
-            onAdvancedFilter={(_filters: Filter[]) => {
-              const filters = _filters.filter((f) => f) as FilterNode[];
-              if (filters.length === 0) {
-                setFilter("all");
-              } else {
-                const firstFilter = filters[0];
-                setFilter(
-                  filters.slice(1).reduce((acc, curr) => {
-                    return {
-                      left: acc,
-                      operator: "and",
-                      right: curr,
-                    };
-                  }, firstFilter)
-                );
-              }
+            timeFilter={{
+              customTimeFilter: true,
+              timeFilterOptions: [
+                { key: "1h", value: "hour" },
+                { key: "24h", value: "day" },
+                { key: "7d", value: "wk" },
+                { key: "1m", value: "mo" },
+                { key: "3m", value: "3mo" },
+              ],
+              defaultTimeFilter: interval,
+              onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                if ((key as string) === "custom") {
+                  value = value.replace("custom:", "");
+                  const start = new Date(value.split("_")[0]);
+                  const end = new Date(value.split("_")[1]);
+                  setTimeFilter({
+                    request: {
+                      created_at: {
+                        gte: start.toISOString(),
+                        lte: end.toISOString(),
+                      },
+                    },
+                  });
+                } else {
+                  setTimeFilter({
+                    request: {
+                      created_at: {
+                        gte: getTimeIntervalAgo(key).toISOString(),
+                        lte: new Date().toISOString(),
+                      },
+                    },
+                  });
+                }
+              },
             }}
-            onTimeSelectHandler={(key: TimeInterval, value: string) => {
-              if ((key as string) === "custom") {
-                console.log("CUSTOM", value);
-                value = value.replace("custom:", "");
-                const start = new Date(value.split("_")[0]);
-                const end = new Date(value.split("_")[1]);
-                console.log("CUSTOM", start, end);
-                setTimeFilter({
-                  request: {
-                    created_at: {
-                      gte: start.toISOString(),
-                      lte: end.toISOString(),
-                    },
-                  },
-                });
-              } else {
-                console.log("KEY", key, value);
-                setTimeFilter({
-                  request: {
-                    created_at: {
-                      gte: getTimeIntervalAgo(key).toISOString(),
-                      lte: new Date().toISOString(),
-                    },
-                  },
-                });
-              }
+            advancedFilter={{
+              filterMap,
+              onAdvancedFilter: (_filters: Filter[]) => {
+                const filters = _filters.filter((f) => f) as FilterNode[];
+                if (filters.length === 0) {
+                  setFilter("all");
+                } else {
+                  const firstFilter = filters[0];
+                  setFilter(
+                    filters.slice(1).reduce((acc, curr) => {
+                      return {
+                        left: acc,
+                        operator: "and",
+                        right: curr,
+                      };
+                    }, firstFilter)
+                  );
+                }
+              },
             }}
           />
           <MetricsPanel filters={filter} metrics={metrics} />
