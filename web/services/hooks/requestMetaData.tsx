@@ -4,10 +4,8 @@ import { Result } from "../../lib/result";
 
 const useGetRequestMetaData = (requestId: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests", requestId],
-    queryFn: async (query) => {
-      const requestId = query.queryKey[1] as string;
-
+    queryKey: ["requestsMetaData"],
+    queryFn: async () => {
       return fetch(`/api/request/${requestId}/metaData`).then(
         (res) => res.json() as Promise<Result<RequestMetaData[], string>>
       );
