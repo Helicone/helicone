@@ -294,7 +294,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const includePrompt = valuesColumns.length > 0;
 
   const columns: Column[] = [
-    ...initialColumns,
+    ...defaultColumns,
     ...valuesColumns,
     ...propertiesColumns,
   ];

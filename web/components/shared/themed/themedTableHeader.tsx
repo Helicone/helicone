@@ -18,6 +18,7 @@ import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
   FunnelIcon,
+  MinusCircleIcon,
   PlusIcon,
   TrashIcon,
   ViewColumnsIcon,
@@ -37,6 +38,7 @@ import {
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
+import useNotification from "../notification/useNotification";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -77,6 +79,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   const [selectedColumns, setSelectedColumns] = useState<Column[]>(
     editColumns?.columns || []
   );
+
+  const { setNotification } = useNotification();
 
   return (
     <div className="">
@@ -128,12 +132,50 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       leaveFrom="opacity-100 translate-y-0"
                       leaveTo="opacity-0 translate-y-1"
                     >
-                      <Popover.Panel className="absolute left-0 z-10 mt-2 flex">
+                      <Popover.Panel className="absolute left-0 z-10 mt-2.5 flex">
                         {({ close }) => (
                           <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-                            <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto rounded-t-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                            <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
+                              <button
+                                onClick={() => {
+                                  const newColumns = [...selectedColumns];
+
+                                  newColumns.forEach((col) => {
+                                    col.active = false;
+                                  });
+
+                                  setSelectedColumns(newColumns);
+                                }}
+                                className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg border-b border-gray-900/5"
+                              >
+                                <MinusCircleIcon
+                                  className="h-4 w-4 flex-none text-gray-400"
+                                  aria-hidden="true"
+                                />
+                                Deselect All
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const newColumns = [...selectedColumns];
+
+                                  newColumns.forEach((col) => {
+                                    col.active = true;
+                                  });
+
+                                  setSelectedColumns(newColumns);
+                                }}
+                                className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
+                              >
+                                <MinusCircleIcon
+                                  className="h-4 w-4 flex-none text-gray-400"
+                                  aria-hidden="true"
+                                />
+                                Select All
+                              </button>
+                            </div>
+                            <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
                               <div className="divide-y divide-gray-200 border-gray-200">
-                                {editColumns.columns.map((col, idx) => (
+                                {selectedColumns.map((col, idx) => (
                                   <div
                                     key={col.label}
                                     className="relative flex items-start p-4"
@@ -151,7 +193,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                         id={`person-${col.label}`}
                                         name={`person-${col.label}`}
                                         type="checkbox"
-                                        defaultChecked={col.active}
+                                        checked={col.active}
                                         onChange={(e) => {
                                           const newColumns = [
                                             ...selectedColumns,
@@ -170,6 +212,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                             <div className="grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 rounded-b-lg">
                               <button
                                 onClick={() => {
+                                  if (
+                                    selectedColumns.filter((col) => col.active)
+                                      .length < 1
+                                  ) {
+                                    setNotification(
+                                      "No columns selected",
+                                      "error"
+                                    );
+                                    return;
+                                  }
                                   editColumns.onColumnCallback(selectedColumns);
                                   close();
                                 }}
