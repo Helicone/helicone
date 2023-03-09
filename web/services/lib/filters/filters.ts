@@ -125,6 +125,23 @@ export function buildFilterLeaf(filter: FilterLeaf): string[] {
     }
   }
   if (filter.request) {
+    if (filter.request.user_id) {
+      if (filter.request.user_id.equals) {
+        if (filter.request.user_id.equals.includes("'")) {
+          throw new Error(
+            "Invalid filter: filter.request.user_id.equals cannot contain single quotes"
+          );
+        }
+        // Make sure the user_id does not contain newlines
+        if (filter.request.user_id.equals.includes("\n")) {
+          throw new Error("Invalid user_id");
+        }
+
+        filters = filters.concat(
+          `quote_literal(request.user_id) = quote_literal('${filter.request.user_id.equals}')`
+        );
+      }
+    }
     if (filter.request.prompt) {
       if (filter.request.prompt.equals) {
         // check that prompt is only alphanumeric
