@@ -13,9 +13,10 @@ import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 
 import { SortDirection, SortLeafRequest } from "../services/lib/sorts/sorts";
 import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
+import { RequestWrapper } from "./templates/requests/useRequestsPage";
 
 export interface Column {
-  key: string;
+  key: keyof RequestWrapper;
   label: string;
   type?: ColumnType;
   filter?: boolean;

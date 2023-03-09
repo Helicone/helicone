@@ -4,9 +4,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { request } from "https";
 import { wrap } from "module";
+import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
+import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
 import { CompletionRegex } from "./completionRegex";
@@ -23,6 +25,9 @@ interface RequestDrawerProps {
 
 const RequestDrawer = (props: RequestDrawerProps) => {
   const { open, setOpen, wrappedRequest, values, properties } = props;
+  const { metaData: requestMetaData } = useGetRequestMetaData(
+    wrappedRequest.id
+  );
 
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
@@ -33,8 +38,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       </div>
     );
   };
-
-  console.log(wrappedRequest);
 
   return (
     <ThemedDrawer
@@ -82,6 +85,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             );
           })}
       </dl>
+      <CacheHits metadata={requestMetaData} />
       {wrappedRequest.error && (
         <div className="flex flex-col justify-between py-3 text-xs font-medium space-y-1">
           <dt className="text-gray-500">Error</dt>
