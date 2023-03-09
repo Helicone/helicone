@@ -2,7 +2,6 @@ import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetRequests } from "../../../services/hooks/requests";
-import { useGetRequestsMetaData } from "../../../services/hooks/requestsMetaData";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
 import { Json } from "../../../supabase/database.types";

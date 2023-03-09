@@ -5,6 +5,7 @@ import { clsx } from "../clsx";
 import { Column } from "../../ThemedTableV2";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { ColumnType } from "../../../services/lib/filters/frontendFilterDefs";
+import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 
 interface ThemedDropdownProps {
   idx: number;
@@ -12,7 +13,7 @@ interface ThemedDropdownProps {
   onChange: (
     idx: number,
     type: ColumnType,
-    key: string,
+    key: keyof RequestWrapper,
     value: string,
     column: Column,
     operator: "eq" | "gt" | "lt"
