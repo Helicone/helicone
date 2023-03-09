@@ -90,7 +90,6 @@ export async function getRequestCount(
   SELECT count(*) as count
   FROM response
     left join request on request.id = response.request
-    left join cache_hits ch on ch.request_id = request.id
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (

@@ -179,7 +179,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
   const [orderBy, setOrderBy] = useState<{
-    column: string;
+    column: keyof RequestWrapper;
     direction: SortDirection;
   }>({
     column: "",
