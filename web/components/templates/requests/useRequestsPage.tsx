@@ -8,7 +8,7 @@ import { Json } from "../../../supabase/database.types";
 import { Message } from "./requestsPage";
 
 export interface RequestWrapper {
-  isCached: boolean;
+  cacheCount: number;
   promptName: string;
   promptRegex: string;
   requestCreatedAt: string;
@@ -145,7 +145,7 @@ const useRequestsPage = (
       1000;
 
     const obj: RequestWrapper = {
-      isCached: request.is_cached,
+      cacheCount: +request.cache_count,
       promptName: request.prompt_name || "",
       promptRegex: request.prompt_regex || "",
       requestCreatedAt: request.request_created_at,
