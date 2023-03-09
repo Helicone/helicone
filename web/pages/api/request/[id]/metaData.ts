@@ -23,6 +23,6 @@ export default async function handler(
     user.data.user.id,
     requestId as string
   );
-  console.log("METRICS", metrics);
+
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
