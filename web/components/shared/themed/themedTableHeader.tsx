@@ -19,6 +19,7 @@ import {
   ChevronDownIcon,
   FunnelIcon,
   MinusCircleIcon,
+  PlusCircleIcon,
   PlusIcon,
   TrashIcon,
   ViewColumnsIcon,
@@ -166,7 +167,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 }}
                                 className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
                               >
-                                <MinusCircleIcon
+                                <PlusCircleIcon
                                   className="h-4 w-4 flex-none text-gray-400"
                                   aria-hidden="true"
                                 />
@@ -209,7 +210,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 ))}
                               </div>
                             </fieldset>
-                            <div className="grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 rounded-b-lg">
+                            <div className="grid grid-cols-1 bg-black rounded-b-lg">
                               <button
                                 onClick={() => {
                                   if (
@@ -225,10 +226,10 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                   editColumns.onColumnCallback(selectedColumns);
                                   close();
                                 }}
-                                className="flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 rounded-b-lg border-t border-gray-900/5"
+                                className="flex items-center justify-center gap-x-2.5 p-3 font-semibold text-white hover:bg-gray-800 rounded-b-lg border-t border-gray-900/5"
                               >
                                 <ViewColumnsIcon
-                                  className="h-5 w-5 flex-none text-gray-400"
+                                  className="h-5 w-5 flex-none text-gray-200"
                                   aria-hidden="true"
                                 />
                                 Select Columns (
