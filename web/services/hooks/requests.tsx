@@ -14,8 +14,18 @@ const useGetRequests = (
   sortLeaf: SortLeafRequest
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["requests"],
-    queryFn: async () => {
+    queryKey: [
+      "requests",
+      currentPage,
+      currentPageSize,
+      advancedFilter,
+      sortLeaf,
+    ],
+    queryFn: async (query) => {
+      const currentPage = query.queryKey[1] as number;
+      const currentPageSize = query.queryKey[2] as number;
+      const advancedFilter = query.queryKey[3];
+      const sortLeaf = query.queryKey[4];
       return await Promise.all([
         fetch("/api/request", {
           method: "POST",
