@@ -299,7 +299,7 @@ const WelcomePage = (props: DashboardPageProps) => {
           Welcome to Helicone 🚀
         </h1>
         <p className="text-gray-500">
-          Helicone is a tool to help you understand your API traffic. It's
+          Helicone is a tool to help you understand your API traffic. It{"'"}s
           currently in beta, so please let us know if you have any feedback or
           questions.
         </p>
