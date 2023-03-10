@@ -1,6 +1,8 @@
 import { Result } from "./index";
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
+const MAX_BUCKET_SIZE = 20;
+
 export interface CacheSettings {
   shouldSaveToCache: boolean;
   shouldReadFromCache: boolean;
@@ -67,6 +69,12 @@ export function getCacheSettings(
       cacheHeaders.cacheEnabled || cacheHeaders.cacheRead;
 
     const cacheControl = buildCacheControl(headers.get("Cache-Control") ?? "");
+    if (cacheHeaders.cacheBucketMaxSize > MAX_BUCKET_SIZE) {
+      return {
+        error: `Cache bucket size cannot be greater than ${MAX_BUCKET_SIZE}`,
+        data: null,
+      };
+    }
 
     return {
       error: null,
