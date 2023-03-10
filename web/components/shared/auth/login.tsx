@@ -2,6 +2,7 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { BsGoogle } from "react-icons/bs";
 
 interface LoginProps {}
 
@@ -180,6 +181,29 @@ const Login = (props: LoginProps) => {
                           Sign In
                         </div>
                       )}
+                    </button>
+                    {/* Sign in with Google */}
+                    <button
+                      onClick={async () => {
+                        setLoading(true);
+                        const { data, error } =
+                          await supabaseClient.auth.signInWithOAuth({
+                            provider: "google",
+                          });
+                        if (error) {
+                          setAuthError(error.message);
+                        } else {
+                          router.push("/dashboard");
+                        }
+                        setLoading(false);
+                      }}
+                      type="button"
+                      className="flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-md font-medium text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      <div className="flex flex-row items-center">
+                        <BsGoogle className="w-5 h-5 mr-2" />
+                        Sign in with Google
+                      </div>
                     </button>
                   </div>
                 </div>
