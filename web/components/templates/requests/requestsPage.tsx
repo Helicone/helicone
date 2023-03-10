@@ -1,6 +1,3 @@
-import { Dialog } from "@headlessui/react";
-import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";
 
 import { useState } from "react";
@@ -9,30 +6,28 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useGetKeys } from "../../../services/hooks/keys";
+import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import {
   FilterNode,
   getPropertyFilters,
 } from "../../../services/lib/filters/filterDefs";
+import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import {
-  RequestsTableFilter,
-  UserMetricsTableFilter,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import { Database, Json } from "../../../supabase/database.types";
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/sorts";
+import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedFilter, { Filter } from "../../shared/themed/themedFilter";
-import ThemedModal from "../../shared/themed/themedModal";
+import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
-import { Chat } from "./chat";
-import { Completion } from "./completion";
-import { CompletionRegex } from "./completionRegex";
 import RequestDrawer from "./requestDrawer";
-import useRequestsPage from "./useRequestsPage";
+import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
 
-type Message = {
+export type Message = {
   role: string;
   content: string;
 };
@@ -58,6 +53,8 @@ export type CsvData = {
   isCached: boolean;
   isChat: boolean;
   chatProperties: ChatProperties | null;
+  isModeration: boolean;
+  moderationFullResponse: string | null;
 } & {
   [keys: string]: string | number | null | boolean | ChatProperties;
 };
@@ -66,17 +63,143 @@ interface RequestsPageProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
+const initialColumns: Column[] = [
+  {
+    key: "requestCreatedAt",
+    active: true,
+    label: "Time",
+    minWidth: 170,
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      created_at: direction,
+    }),
+    type: "timestamp",
+    format: (value: string) => getUSDate(value),
+  },
+  {
+    key: "requestText",
+    active: true,
+    label: "Request",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      request_prompt: direction,
+    }),
+    minWidth: 170,
+    type: "text",
+    format: (value: string | { content: string; role: string }) =>
+      typeof value === "string"
+        ? truncString(value, 15)
+        : truncString(value.content, 15),
+  },
+  {
+    key: "responseText",
+    active: true,
+    label: "Response",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      response_text: direction,
+    }),
+    minWidth: 170,
+    type: "text",
+    format: (value: string) => (value ? truncString(value, 15) : value),
+  },
+  {
+    key: "latency",
+    active: true,
+    label: "Duration",
+    format: (value: string) => `${value} s`,
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      latency: direction,
+    }),
+    type: "number",
+    filter: true,
+  },
+  {
+    key: "totalTokens",
+    active: true,
+    label: "Total Tokens",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      total_tokens: direction,
+    }),
+    type: "number",
+    filter: true,
+  },
+  {
+    key: "logProbs",
+    active: true,
+    label: "Log Prob",
+    type: "number",
+    filter: true,
+    format: (value: number) => (value ? value.toFixed(2) : ""),
+  },
+  {
+    key: "userId",
+    active: true,
+    label: "User",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      user_id: direction,
+    }),
+    format: (value: string) => (value ? truncString(value, 15) : value),
+    type: "text",
+    filter: true,
+    minWidth: 170,
+  },
+  {
+    key: "model",
+    active: true,
+    label: "Model",
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      body_model: direction,
+    }),
+    filter: true,
+    type: "text",
+    minWidth: 200,
+  },
+  {
+    key: "cacheCount",
+    active: true,
+    sortBy: "desc",
+    toSortLeaf: (direction) => ({
+      is_cached: direction,
+    }),
+    label: "Cache hits",
+    minWidth: 170,
+    format: (value: number) => value.toFixed(0),
+  },
+  {
+    key: "keyName",
+    active: true,
+    label: "Key Name",
+    minWidth: 170,
+    type: "text",
+    format: (value: string) => value,
+  },
+];
+
 const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, sortBy, keys } = props;
+  const { page, pageSize, sortBy } = props;
 
-  const { setNotification } = useNotification();
-
+  const [defaultColumns, setDefaultColumns] =
+    useState<Column[]>(initialColumns);
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
+  const [orderBy, setOrderBy] = useState<{
+    column: keyof RequestWrapper;
+    direction: SortDirection;
+  }>({
+    column: "",
+    direction: "desc",
+  });
+  const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
+    created_at: "desc",
+  });
   const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
@@ -86,16 +209,24 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
     },
   });
+
   const { count, values, from, isLoading, properties, refetch, requests, to } =
-    useRequestsPage(currentPage, currentPageSize, {
-      left: timeFilter,
-      operator: "and",
-      right: {
-        left: apiKeyFilter,
+    useRequestsPage(
+      currentPage,
+      currentPageSize,
+      {
+        left: timeFilter,
         operator: "and",
-        right: advancedFilter,
+        right: {
+          left: apiKeyFilter,
+          operator: "and",
+          right: advancedFilter,
+        },
       },
-    });
+      sortLeaf
+    );
+
+  const { keys, isLoading: isKeysLoading } = useGetKeys();
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setTimeFilter({
@@ -119,192 +250,43 @@ const RequestsPage = (props: RequestsPageProps) => {
     refetch();
   };
 
-  const [index, setIndex] = useState<number>();
-  const [selectedData, setSelectedData] = useState<{
-    request_id: string | null;
-    response_id: string | null;
-    error?: any;
-    time: string | null;
-    request: string | undefined;
-    response: string | undefined;
-    "duration (s)": string;
-    total_tokens: number | undefined;
-    logprobs: any;
-    request_user_id: string | null;
-    model: string | undefined;
-    temperature: number | undefined;
-    [keys: string]: any;
-  }>();
+  const [selectedData, setSelectedData] = useState<RequestWrapper>();
   const [open, setOpen] = useState(true);
 
-  const probabilities = requests?.map((req) => {
-    const choice = (req.response_body as any)?.choices
-      ? (req.response_body as any)?.choices[0]
-      : null;
-
-    if (!choice) {
-      return null;
-    }
-
-    let prob;
-    if (choice.logprobs !== undefined && choice.logprobs !== null) {
-      const tokenLogprobs = choice.logprobs.token_logprobs;
-      const sum = tokenLogprobs.reduce(
-        (total: any, num: any) => total + num,
-        0
-      );
-      prob = sum.toFixed(2);
-    } else {
-      prob = "";
-    }
-
-    return prob;
-  });
-
-  const selectRowHandler = (
-    row: {
-      request_id: string | null;
-      response_id: string | null;
-      time: string | null;
-      request: string | undefined;
-      response: string | undefined;
-      "duration (s)": string;
-      total_tokens: number | undefined;
-      logprobs: any;
-      request_user_id: string | null;
-      model: string | undefined;
-      temperature: number | undefined;
-      prompt_regex: string | undefined;
-      isChat: boolean;
-      chatProperties: ChatProperties | null;
-      [keys: string]: any;
-    },
-    idx: number
-  ) => {
-    setIndex(idx);
+  const selectRowHandler = (row: RequestWrapper, idx: number) => {
     setSelectedData(row);
     setOpen(true);
   };
 
-  type JsonDict = {
-    [key: string]: Json;
-  };
-
-  const csvData: CsvData[] = requests?.map((d, i) => {
-    console.log("d.request_properties", d.request_properties);
-    const latency =
-      (new Date(d.response_created_at!).getTime() -
-        new Date(d.request_created_at!).getTime()) /
-      1000;
-
-    let updated_request_properties: {
-      [keys: string]: string;
-    } = Object.assign(
-      {},
-      ...properties.map((p) => ({
-        [p]: d.request_properties != null ? d.request_properties[p] : null,
-      }))
-    );
-
-    if (values !== null) {
-      updated_request_properties = Object.assign(
-        updated_request_properties,
-        ...values.map((p) => ({
-          [p]:
-            d.request_prompt_values != null ? d.request_prompt_values[p] : null,
-        }))
-      );
-    }
-
-    if (d.prompt_regex) {
-      updated_request_properties = Object.assign(updated_request_properties, {
-        prompt_regex: d.prompt_regex,
-      });
-    }
-    const is_chat = d.request_path?.includes("/chat/") ?? false;
-
-    let request;
-    let response;
-    let chatProperties: ChatProperties | null = null;
-
-    if (is_chat) {
-      const request_messages = d.request_body?.messages;
-      const last_request_message =
-        request_messages?.[request_messages.length - 1].content;
-      const response_blob = d.response_body?.choices?.[0];
-      const response_content = response_blob?.message?.content;
-
-      request = last_request_message
-        ? last_request_message
-        : "Cannot find prompt";
-      response = response_content
-        ? response_content
-        : `error: ${JSON.stringify(d.response_body?.error)}`;
-
-      chatProperties = {
-        request:
-          typeof request_messages === "string"
-            ? JSON.parse(request_messages)
-            : request_messages,
-        response: response_blob?.message,
-      };
-    } else {
-      chatProperties = null;
-      request = d.request_body?.prompt
-        ? typeof d.request_body?.prompt === "string"
-          ? d.request_body?.prompt
-          : JSON.stringify(d.request_body?.prompt)
-        : "Cannot find prompt";
-      response = d.response_body?.choices?.[0]?.text
-        ? d.response_body?.choices?.length === 1
-          ? d.response_body?.choices?.[0]?.text
-          : JSON.stringify(d.response_body?.choices?.map((c: any) => c.text))
-        : `error: ${JSON.stringify(d.response_body?.error)}`;
-    }
-
-    return {
-      request_id: d.request_id ?? "Cannot find request id",
-      response_id: d.response_id ?? "Cannot find response id",
-      error: d.response_body?.error ?? "unknown error",
-      time: d.request_created_at ?? "Cannot find time",
-      request: request,
-      response: response,
-      "duration (s)": latency.toString(),
-      total_tokens: d.response_body?.usage?.total_tokens ?? 0,
-      logprobs: probabilities ? probabilities[i] : null,
-      request_user_id: d.request_user_id ?? "",
-      model: d.response_body?.model ?? "",
-      temperature: d.request_body?.temperature ?? null,
-      prompt_name: d.prompt_name ?? "",
-      isCached: d.is_cached ?? false,
-      isChat: is_chat,
-      chatProperties: chatProperties,
-      key_name: d.key_name ?? "",
-      ...updated_request_properties,
-    };
-  });
-
-  const makeCardProperty = (name: string, val: string) => {
-    return (
-      <li className="w-full flex flex-row justify-between gap-4 text-sm">
-        <p>{name}:</p>
-        <p>{val || "{NULL}"}</p>
-      </li>
-    );
-  };
-
-  const propertiesColumns = properties.map((p) => {
+  const propertiesColumns: Column[] = properties.map((p) => {
     return {
       key: p,
       label: p,
+      active: true,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        properties: {
+          [p]: direction,
+        },
+      }),
+      columnOrigin: "property",
       format: (value: string) => (value ? truncString(value, 15) : value),
+      minWidth: 170,
     };
   });
 
-  const valuesColumns = values.map((p) => {
+  const valuesColumns: Column[] = values.map((p) => {
     return {
       key: p,
       label: p,
+      active: true,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        values: {
+          [p]: direction,
+        },
+      }),
+      columnOrigin: "value",
       format: (value: string) => (value ? truncString(value, 15) : value),
     };
   });
@@ -312,94 +294,40 @@ const RequestsPage = (props: RequestsPageProps) => {
   const includePrompt = valuesColumns.length > 0;
 
   const columns: Column[] = [
-    {
-      key: "time",
-      label: "Time",
-      minWidth: 170,
-      sortBy: "request_created_at",
-      type: "date",
-      format: (value: string) => getUSDate(value),
-    },
-    includePrompt
-      ? {
-          key: "prompt_name",
-          label: "Prompt Name",
-          format: (value: string) => value,
-          type: "text",
-          filter: true,
-        }
-      : null,
-    {
-      key: "request",
-      label: "Request",
-      minWidth: 170,
-      type: "text",
-      format: (value: string) => truncString(value, 15),
-    },
+    ...defaultColumns,
     ...valuesColumns,
-    {
-      key: "response",
-      label: "Response",
-      minWidth: 170,
-      type: "text",
-      format: (value: string) => (value ? truncString(value, 15) : value),
-    },
-    {
-      key: "duration (s)",
-      label: "Duration",
-      format: (value: string) => `${value} s`,
-      type: "number",
-      filter: true,
-    },
-    {
-      key: "total_tokens",
-      label: "Total Tokens",
-      type: "number",
-      filter: true,
-    },
-    {
-      key: "logprobs",
-      label: "Log Prob",
-      type: "number",
-      filter: true,
-    },
-    {
-      key: "request_user_id",
-      label: "User",
-      format: (value: string) => (value ? truncString(value, 15) : value),
-      type: "text",
-      filter: true,
-    },
     ...propertiesColumns,
-    {
-      key: "model",
-      label: "Model",
-      filter: true,
-      type: "text",
-      minWidth: 170,
-    },
-    {
-      key: "isCached",
-      label: "Cache",
-      minWidth: 170,
-      format: (value: boolean) => (value ? "hit" : ""),
-    },
-    {
-      key: "key_name",
-      label: "Key Name",
-      minWidth: 170,
-      type: "text",
+  ];
+
+  if (includePrompt) {
+    columns.push({
+      key: "prompt_name",
+      label: "Prompt Name",
+      active: true,
       format: (value: string) => value,
-    },
-  ].filter((column) => column !== null) as Column[];
+      type: "text",
+      filter: true,
+    });
+  }
+
+  const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
+  if (columnOrderIndex > -1) {
+    columns[columnOrderIndex].sortBy = orderBy.direction;
+  }
+
   const router = useRouter();
+  const { propertyParams } = useGetPropertyParams();
 
   const propertyFilterMap = {
     properties: {
       label: "Properties",
-      columns: getPropertyFilters(properties),
+      columns: getPropertyFilters(
+        properties,
+        propertyParams.map((p) => p.property_param)
+      ),
     },
   };
+
   const filterMap =
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
@@ -410,47 +338,63 @@ const RequestsPage = (props: RequestsPageProps) => {
       <AuthHeader
         title={"Requests"}
         actions={
-          <Filters
-            keys={keys}
-            filter={apiKeyFilter}
-            setFilter={setApiKeyFilter}
-          />
+          !isKeysLoading ? (
+            <Filters
+              keys={keys}
+              filter={apiKeyFilter}
+              setFilter={setApiKeyFilter}
+            />
+          ) : (
+            <div className="h-10"></div>
+          )
         }
       />
+
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
-            <ThemedFilter
-              data={csvData || []}
+            <ThemedTableHeader
+              editColumns={{
+                columns: defaultColumns,
+                onColumnCallback: (columns) => setDefaultColumns(columns),
+              }}
+              timeFilter={{
+                customTimeFilter: true,
+                defaultTimeFilter: "all",
+                onTimeSelectHandler: onTimeSelectHandler,
+                timeFilterOptions: [
+                  { key: "24h", value: "day" },
+                  { key: "7d", value: "wk" },
+                  { key: "1m", value: "mo" },
+                  { key: "all", value: "all" },
+                ],
+              }}
+              csvExport={{
+                data: requests,
+                fileName: "requests.csv",
+              }}
               isFetching={isLoading}
-              onTimeSelectHandler={onTimeSelectHandler}
-              timeFilterOptions={[
-                { key: "24h", value: "day" },
-                { key: "7d", value: "wk" },
-                { key: "1m", value: "mo" },
-                { key: "all", value: "all" },
-              ]}
-              customTimeFilter
-              fileName="requests.csv"
-              filterMap={RequestsTableFilter}
-              onAdvancedFilter={(_filters) => {
-                router.query.page = "1";
-                router.push(router);
-                const filters = _filters.filter((f) => f) as FilterNode[];
-                if (filters.length === 0) {
-                  setAdvancedFilter("all");
-                } else {
-                  const firstFilter = filters[0];
-                  setAdvancedFilter(
-                    filters.slice(1).reduce((acc, curr) => {
-                      return {
-                        left: acc,
-                        operator: "and",
-                        right: curr,
-                      };
-                    }, firstFilter)
-                  );
-                }
+              advancedFilter={{
+                filterMap,
+                onAdvancedFilter: (_filters) => {
+                  router.query.page = "1";
+                  router.push(router);
+                  const filters = _filters.filter((f) => f) as FilterNode[];
+                  if (filters.length === 0) {
+                    setAdvancedFilter("all");
+                  } else {
+                    const firstFilter = filters[0];
+                    setAdvancedFilter(
+                      filters.slice(1).reduce((acc, curr) => {
+                        return {
+                          left: acc,
+                          operator: "and",
+                          right: curr,
+                        };
+                      }, firstFilter)
+                    );
+                  }
+                },
               }}
             />
 
@@ -459,8 +403,8 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV2
                 condensed
-                columns={columns}
-                rows={csvData || []}
+                columns={columns.filter((c) => c.active)}
+                rows={requests}
                 count={count || 0}
                 page={page}
                 from={from}
@@ -468,20 +412,38 @@ const RequestsPage = (props: RequestsPageProps) => {
                 onSelectHandler={selectRowHandler}
                 onPageChangeHandler={onPageChangeHandler}
                 onPageSizeChangeHandler={onPageSizeChangeHandler}
+                onSortHandler={(key) => {
+                  if (key.key === orderBy.column) {
+                    setOrderBy({
+                      column: key.key,
+                      direction: orderBy.direction === "asc" ? "desc" : "asc",
+                    });
+                    key.toSortLeaf &&
+                      setSortLeaf(
+                        key.toSortLeaf(
+                          orderBy.direction === "asc" ? "desc" : "asc"
+                        )
+                      );
+                  } else {
+                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+                    setOrderBy({
+                      column: key.key,
+                      direction: "asc",
+                    });
+                  }
+                }}
               />
             )}
           </div>
         </div>
       </div>
-      {open && selectedData !== undefined && index !== undefined && (
+      {open && selectedData !== undefined && (
         <RequestDrawer
           open={open}
-          index={index}
-          probabilities={probabilities}
-          properties={properties}
-          request={selectedData}
+          wrappedRequest={selectedData}
           setOpen={setOpen}
           values={values}
+          properties={properties}
         />
       )}
     </>

@@ -1,10 +1,15 @@
 import { Result } from "./index";
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
+const MAX_BUCKET_SIZE = 20;
+
 export interface CacheSettings {
   shouldSaveToCache: boolean;
   shouldReadFromCache: boolean;
   cacheControl: string;
+  bucketSettings: {
+    maxSize: number;
+  };
 }
 
 function buildCacheControl(cacheControl: string): string {
@@ -35,6 +40,7 @@ interface CacheHeaders {
   cacheEnabled: boolean;
   cacheSave: boolean;
   cacheRead: boolean;
+  cacheBucketMaxSize: number;
 }
 
 function getCacheState(headers: Headers): CacheHeaders {
@@ -45,26 +51,46 @@ function getCacheState(headers: Headers): CacheHeaders {
       (headers.get("Helicone-Cache-Save") ?? "").toLowerCase() === "true",
     cacheRead:
       (headers.get("Helicone-Cache-Read") ?? "").toLowerCase() === "true",
+    cacheBucketMaxSize: parseInt(
+      headers.get("Helicone-Cache-Bucket-Max-Size") ?? "1"
+    ),
   };
 }
 
 export function getCacheSettings(
   headers: Headers
 ): Result<CacheSettings, string> {
-  const cacheHeaders = getCacheState(headers);
+  try {
+    const cacheHeaders = getCacheState(headers);
 
-  const shouldSaveToCache = cacheHeaders.cacheEnabled || cacheHeaders.cacheSave;
-  const shouldReadFromCache =
-    cacheHeaders.cacheEnabled || cacheHeaders.cacheRead;
+    const shouldSaveToCache =
+      cacheHeaders.cacheEnabled || cacheHeaders.cacheSave;
+    const shouldReadFromCache =
+      cacheHeaders.cacheEnabled || cacheHeaders.cacheRead;
 
-  const cacheControl = buildCacheControl(headers.get("Cache-Control") ?? "");
+    const cacheControl = buildCacheControl(headers.get("Cache-Control") ?? "");
+    if (cacheHeaders.cacheBucketMaxSize > MAX_BUCKET_SIZE) {
+      return {
+        error: `Cache bucket size cannot be greater than ${MAX_BUCKET_SIZE}`,
+        data: null,
+      };
+    }
 
-  return {
-    error: null,
-    data: {
-      shouldReadFromCache,
-      shouldSaveToCache,
-      cacheControl,
-    },
-  };
+    return {
+      error: null,
+      data: {
+        shouldReadFromCache,
+        shouldSaveToCache,
+        cacheControl,
+        bucketSettings: {
+          maxSize: cacheHeaders.cacheBucketMaxSize,
+        },
+      },
+    };
+  } catch (e) {
+    return {
+      error: JSON.stringify(e),
+      data: null,
+    };
+  }
 }

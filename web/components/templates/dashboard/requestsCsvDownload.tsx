@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { GetTableData } from "./requestTable";
-import { escapeCSVString } from "../../shared/themed/themedFilter";
+import { escapeCSVString } from "../../shared/themed/themedTableHeader";
 
 export function RequestsCSVDownloadButton({
   client,

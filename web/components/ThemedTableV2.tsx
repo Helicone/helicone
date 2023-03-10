@@ -11,14 +11,21 @@ import { clsx } from "./shared/clsx";
 import { useRouter } from "next/router";
 import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 
+import { SortDirection, SortLeafRequest } from "../services/lib/sorts/sorts";
+import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
+import { RequestWrapper } from "./templates/requests/useRequestsPage";
+
 export interface Column {
-  key: string;
+  key: keyof RequestWrapper;
   label: string;
-  type?: "text" | "number" | "datetime-local";
+  active: boolean;
+  type?: ColumnType;
   filter?: boolean;
-  sortBy?: string;
+  sortBy?: SortDirection;
+  columnOrigin?: "property" | "value";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
+  toSortLeaf?: (direction: SortDirection) => SortLeafRequest;
   format?: (value: any) => string;
 }
 
@@ -32,6 +39,7 @@ interface ThemedTableV2Props {
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
+  onSortHandler?: (key: Column) => void;
   condensed?: boolean;
 }
 
@@ -46,6 +54,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
     condensed = false,
     onSelectHandler,
     onPageChangeHandler,
+    onSortHandler,
     onPageSizeChangeHandler,
   } = props;
   const router = useRouter();
@@ -70,7 +79,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
             "0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 0.5px 1px 0 rgba(0, 0, 0, 0.1)",
         }}
       >
-        <TableContainer sx={{ maxHeight: "65vh", paddingX: 1 }}>
+        <TableContainer sx={{ maxHeight: "60vh", paddingX: 1 }}>
           <Table
             stickyHeader
             aria-label="sticky table"
@@ -84,35 +93,16 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                     align={column.align}
                     style={{ minWidth: column.minWidth }}
                   >
-                    {column.sortBy ? (
+                    {column.sortBy !== undefined ? (
                       <button
-                        onClick={() => {
-                          if (
-                            !router.query.sort ||
-                            router.query.sort.includes("desc")
-                          ) {
-                            router.replace({
-                              query: {
-                                ...router.query,
-                                sort: `${column.key}_asc`,
-                              },
-                            });
-                            return;
-                          }
-                          router.replace({
-                            query: {
-                              ...router.query,
-                              sort: `${column.key}_desc`,
-                            },
-                          });
-                        }}
+                        onClick={() => onSortHandler && onSortHandler(column)}
                         className={clsx(
                           condensed ? "py-2" : "",
                           "whitespace-nowrap font-semibold text-gray-700 font-sans text-sm flex flex-row items-center hover:text-black hover:scale-105 transition ease-in-out delay-150 duration-300"
                         )}
                       >
                         {column.label}
-                        {router.query.sort?.includes("asc") ? (
+                        {column.sortBy === "asc" ? (
                           <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300" />
                         ) : (
                           <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300" />
@@ -134,14 +124,19 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
             </TableHead>
             <TableBody>
               {rows.map((row, idx) => {
+                const hasError = row.error;
                 return (
                   <TableRow
-                    hover
                     role="checkbox"
                     tabIndex={-1}
                     key={`row-${idx}`}
                     onClick={() => onSelectHandler && onSelectHandler(row, idx)}
-                    className="hover:cursor-pointer"
+                    className={clsx(
+                      hasError
+                        ? "bg-red-100 hover:bg-red-200"
+                        : "hover:bg-gray-100",
+                      "hover:cursor-pointer"
+                    )}
                   >
                     {columns.map((column, idx) => {
                       const value = row[column.key];
@@ -154,7 +149,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                             className={clsx(
                               condensed ? "py-1" : "",
                               idx === 0
-                                ? " text-black font-medium"
+                                ? "text-black font-medium"
                                 : "text-gray-500 font-normal",
                               "font-sans text-sm"
                             )}

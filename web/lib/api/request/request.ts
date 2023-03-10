@@ -5,6 +5,7 @@ import { Result } from "../../result";
 import { Database, Json } from "../../../supabase/database.types";
 import { buildFilter } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildSort, SortLeafRequest } from "../../../services/lib/sorts/sorts";
 
 export interface HeliconeRequest {
   response_id: string;
@@ -14,38 +15,40 @@ export interface HeliconeRequest {
   request_created_at: string;
   request_body: any;
   request_path: string;
-  request_user_id: string;
+  request_user_id: string | null;
   request_properties: {
     [key: string]: Json;
-  };
-  request_formatted_prompt_id: string;
+  } | null;
+  request_formatted_prompt_id: string | null;
   request_prompt_values: {
     [key: string]: Json;
-  };
+  } | null;
   user_api_key_preview: string;
   user_api_key_user_id: string;
   user_api_key_hash: string;
+  prompt_name: string | null;
+  prompt_regex: string | null;
   key_name: string;
-  prompt_name: string;
-  prompt_regex: string;
-  is_cached: boolean;
+  cache_count: number;
 }
 
 export async function getRequests(
   user_id: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+  const sortSQL = buildSort(sort);
   const query = `
   SELECT response.id AS response_id,
-    coalesce(ch.created_at, response.created_at) as response_created_at,
+    response.created_at as response_created_at,
     response.body AS response_body,
     request.id AS request_id,
-    coalesce(ch.created_at, request.created_at) as request_created_at,
+    request.created_at as request_created_at,
     request.body AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
@@ -58,17 +61,16 @@ export async function getRequests(
     user_api_keys.key_name as key_name,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
-    ch.created_at IS NOT NULL AS is_cached
+    (select count(*) from cache_hits ch where ch.request_id = request.id) as cache_count
   FROM response
     left join request on request.id = response.request
-    left join cache_hits ch on ch.request_id = request.id
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     user_api_keys.user_id = '${user_id}'
     AND (${buildFilter(filter)})
   )
-  ORDER BY response_created_at DESC
+  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
 `;
@@ -88,7 +90,6 @@ export async function getRequestCount(
   SELECT count(*) as count
   FROM response
     left join request on request.id = response.request
-    left join cache_hits ch on ch.request_id = request.id
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (

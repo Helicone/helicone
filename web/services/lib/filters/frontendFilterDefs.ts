@@ -104,6 +104,15 @@ export const filterRequestFilter: TableFilter<FilterLeafRequest> = {
         },
       },
     },
+    user_id: {
+      label: "User ID",
+      type: "text",
+      operations: {
+        equals: {
+          type: "text",
+        },
+      },
+    },
   },
 };
 

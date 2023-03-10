@@ -36,6 +36,7 @@
     "react-csv": "2.2.2",
     "react-dom": "18.2.0",
     "react-icons": "^4.7.1",
+    "react-json-pretty": "^2.2.0",
     "recharts": "^2.1.16",
     "stripe": "^11.8.0",
     "typescript": "4.9.3"
