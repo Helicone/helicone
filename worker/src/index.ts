@@ -312,7 +312,10 @@ async function uncachedRequest(
   }
 }
 
-async function buildCachedRequest(request: Request): Promise<Request> {
+async function buildCachedRequest(
+  request: Request,
+  idx: number
+): Promise<Request> {
   const headers = new Headers();
   for (const [key, value] of request.headers.entries()) {
     if (key.toLowerCase().startsWith("helicone-")) {
@@ -326,7 +329,8 @@ async function buildCachedRequest(request: Request): Promise<Request> {
   const cacheKey = await hash(
     request.url +
       (await request.text()) +
-      JSON.stringify([...headers.entries()])
+      JSON.stringify([...headers.entries()]) +
+      (idx >= 1 ? idx.toString() : "")
   );
   const cacheUrl = new URL(request.url);
 
@@ -342,7 +346,8 @@ async function buildCachedRequest(request: Request): Promise<Request> {
 async function saveToCache(
   request: Request,
   response: Response,
-  cacheControl: string
+  cacheControl: string,
+  settings: { maxSize: number }
 ): Promise<void> {
   console.log("Saving to cache");
   const cache = caches.default;
@@ -354,22 +359,56 @@ async function saveToCache(
     headers: responseHeaders,
   });
   console.log("cache response", response.headers);
-  cache.put(await buildCachedRequest(request), cacheResponse);
+  const { freeIndexes } = await getMaxCachedResponses(
+    request.clone(),
+    settings
+  );
+  if (freeIndexes.length > 0) {
+    cache.put(await buildCachedRequest(request, freeIndexes[0]), cacheResponse);
+  } else {
+    throw new Error("No free indexes");
+  }
 }
 
-async function getCachedResponse(request: Request): Promise<Response | null> {
+async function getMaxCachedResponses(
+  request: Request,
+  { maxSize }: { maxSize: number }
+): Promise<{ requests: Response[]; freeIndexes: number[] }> {
   const cache = caches.default;
-  const requestCache = await buildCachedRequest(request.clone());
-  const cachedResponse = await cache.match(requestCache);
-  if (cachedResponse) {
-    const cachedResponseHeaders = new Headers(cachedResponse.headers);
+  const requests = await Promise.all(
+    Array.from(Array(maxSize).keys()).map(async (idx) => {
+      const requestCache = await buildCachedRequest(request.clone(), idx);
+      return cache.match(requestCache);
+    })
+  );
+  return {
+    requests: requests.filter((r) => r !== undefined) as Response[],
+    freeIndexes: requests
+      .map((r, idx) => idx)
+      .filter((idx) => requests[idx] === undefined),
+  };
+}
+
+async function getCachedResponse(
+  request: Request,
+  settings: { maxSize: number }
+): Promise<Response | null> {
+  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
+    request.clone(),
+    settings
+  );
+  if (freeIndexes.length > 0) {
+    console.log("Max cache size reached, not caching");
+    return null;
+  } else {
+    const randomCache =
+      requestCaches[Math.floor(Math.random() * requestCaches.length)];
+    const cachedResponseHeaders = new Headers(randomCache.headers);
     cachedResponseHeaders.append("Helicone-Cache", "HIT");
-    return new Response(cachedResponse.body, {
-      ...cachedResponse,
+    return new Response(randomCache.body, {
+      ...randomCache,
       headers: cachedResponseHeaders,
     });
-  } else {
-    return null;
   }
 }
 
@@ -403,8 +442,12 @@ export default {
     if (cacheError !== null) {
       return new Response(cacheError, { status: 400 });
     }
+
     if (cacheSettings.shouldReadFromCache) {
-      const cachedResponse = await getCachedResponse(request.clone());
+      const cachedResponse = await getCachedResponse(
+        request.clone(),
+        cacheSettings.bucketSettings
+      );
       if (cachedResponse) {
         ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
         return cachedResponse;
@@ -417,7 +460,12 @@ export default {
 
     if (cacheSettings.shouldSaveToCache && requestClone) {
       ctx.waitUntil(
-        saveToCache(requestClone, response, cacheSettings.cacheControl)
+        saveToCache(
+          requestClone,
+          response,
+          cacheSettings.cacheControl,
+          cacheSettings.bucketSettings
+        )
       );
     }
     const responseHeaders = new Headers(response.headers);
