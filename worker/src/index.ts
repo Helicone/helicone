@@ -401,10 +401,14 @@ async function getCachedResponse(
     console.log("Max cache size reached, not caching");
     return null;
   } else {
-    const randomCache =
-      requestCaches[Math.floor(Math.random() * requestCaches.length)];
+    const cacheIdx = Math.floor(Math.random() * requestCaches.length);
+    const randomCache = requestCaches[cacheIdx];
     const cachedResponseHeaders = new Headers(randomCache.headers);
     cachedResponseHeaders.append("Helicone-Cache", "HIT");
+    cachedResponseHeaders.append(
+      "Helicone-Cache-Bucket-Idx",
+      cacheIdx.toString()
+    );
     return new Response(randomCache.body, {
       ...randomCache,
       headers: cachedResponseHeaders,
