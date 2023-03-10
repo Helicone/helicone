@@ -25,7 +25,7 @@ const LoginButton = (props: LoginButtonProps) => {
       </button>
 
       <ThemedModal open={openLogin} setOpen={setOpenLogin}>
-        <Login />
+        <Login formState="login" />
       </ThemedModal>
     </>
   );

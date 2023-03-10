@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { useGetKeys } from "../../../services/hooks/keys";
+import { VscRocket } from "react-icons/vsc";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -43,6 +44,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navigation = [
+    {
+      name: "Welcome",
+      href: "/welcome",
+      icon: VscRocket,
+      current: pathname === "/welcome",
+    },
     {
       name: "Dashboard",
       href: "/dashboard",
