@@ -29,4 +29,20 @@ const getUSDate = (value: string) => {
     .slice(-2)}`;
 };
 
-export { getUSDate, getUSDateShort };
+const capitalizeWords = (str: string) => {
+  // replace underscores with spaces
+  const strWithSpaces = str.replace(/_/g, " ");
+
+  // split the string into an array of words
+  const words = strWithSpaces.split(" ");
+
+  // map over each word and capitalize the first letter
+  const capitalizedWords = words.map(
+    (word) => word.charAt(0).toUpperCase() + word.slice(1)
+  );
+
+  // join the capitalized words back into a single string
+  return capitalizedWords.join(" ");
+};
+
+export { getUSDate, getUSDateShort, capitalizeWords };

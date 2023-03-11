@@ -16,9 +16,9 @@ export const Chat = (props: ChatProps) => {
   }
 
   return (
-    <div className="w-full flex flex-col text-left space-y-2 text-xs">
+    <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <p className="text-gray-500 font-medium">Messages</p>
-      <div className="text-xs w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full max-h-[500px]">
+      <div className="text-sm w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full">
         {messages.length > 0 ? (
           messages.map((message, index) => {
             const isAssistant = message.role === "assistant";
@@ -29,23 +29,24 @@ export const Chat = (props: ChatProps) => {
                 <div
                   className={clsx(
                     isAssistant || isSystem ? "bg-gray-100" : "bg-white",
-                    "items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                    "items-start px-4 py-4 text-left grid grid-cols-12",
+                    isSystem ? "font-semibold" : ""
                   )}
                 >
                   <div className="col-span-1">
                     {isAssistant || isSystem ? (
                       <Image
                         src={"/assets/chatGPT.png"}
-                        className="h-5 w-5 rounded-md"
-                        height={24}
-                        width={24}
+                        className="h-7 w-7 rounded-md"
+                        height={30}
+                        width={30}
                         alt="ChatGPT Logo"
                       />
                     ) : (
-                      <UserCircleIcon className="h-5 w-5 bg-white rounded-full" />
+                      <UserCircleIcon className="h-7 w-7 bg-white rounded-full" />
                     )}
                   </div>
-                  <div className="whitespace-pre-wrap col-span-9">
+                  <div className="whitespace-pre-wrap col-span-11 leading-6">
                     {message.content}
                   </div>
                 </div>

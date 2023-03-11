@@ -21,7 +21,7 @@ import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import { getUSDate } from "../../shared/utils/utils";
+import { capitalizeWords, getUSDate } from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
@@ -65,20 +65,14 @@ interface RequestsPageProps {
   sortBy: string | null;
 }
 
-const initialColumns: Column[] = [
-  {
-    key: "requestCreatedAt",
-    active: true,
-    label: "Time",
-    minWidth: 170,
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      created_at: direction,
-    }),
-    type: "timestamp",
-    format: (value: string) => getUSDate(value),
-  },
-  {
+const RequestsPage = (props: RequestsPageProps) => {
+  const { page, pageSize, sortBy } = props;
+
+  const [viewMode, setViewMode] = useState<"left" | "right">("left");
+  const isPreview = viewMode === "right";
+  const truncLength = isPreview ? 8000 : 19;
+
+  const requestColumn: Column = {
     key: "requestText",
     active: true,
     label: "Request",
@@ -90,10 +84,11 @@ const initialColumns: Column[] = [
     type: "text",
     format: (value: string | { content: string; role: string }) =>
       typeof value === "string"
-        ? truncString(value, 15)
-        : truncString(value.content, 15),
-  },
-  {
+        ? truncString(value, truncLength)
+        : truncString(value.content, truncLength),
+  };
+
+  const responseColumn: Column = {
     key: "responseText",
     active: true,
     label: "Response",
@@ -103,87 +98,102 @@ const initialColumns: Column[] = [
     }),
     minWidth: 170,
     type: "text",
-    format: (value: string) => (value ? truncString(value, 15) : value),
-  },
-  {
-    key: "latency",
-    active: true,
-    label: "Duration",
-    format: (value: string) => `${value} s`,
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      latency: direction,
-    }),
-    type: "number",
-    filter: true,
-  },
-  {
-    key: "totalTokens",
-    active: true,
-    label: "Total Tokens",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      total_tokens: direction,
-    }),
-    type: "number",
-    filter: true,
-  },
-  {
-    key: "logProbs",
-    active: true,
-    label: "Log Prob",
-    type: "number",
-    filter: true,
-    format: (value: number) => (value ? value.toFixed(2) : ""),
-  },
-  {
-    key: "userId",
-    active: true,
-    label: "User",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      user_id: direction,
-    }),
-    format: (value: string) => (value ? truncString(value, 15) : value),
-    type: "text",
-    filter: true,
-    minWidth: 170,
-  },
-  {
-    key: "model",
-    active: true,
-    label: "Model",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      body_model: direction,
-    }),
-    filter: true,
-    type: "text",
-    minWidth: 200,
-  },
-  {
-    key: "cacheCount",
-    active: true,
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      is_cached: direction,
-    }),
-    label: "Cache hits",
-    minWidth: 170,
-    format: (value: number) => value.toFixed(0),
-  },
-  {
-    key: "keyName",
-    active: true,
-    label: "Key Name",
-    minWidth: 170,
-    type: "text",
-    format: (value: string) => value,
-  },
-];
+    format: (value: string) =>
+      value ? truncString(value, truncLength) : value,
+  };
 
-const RequestsPage = (props: RequestsPageProps) => {
-  const { page, pageSize, sortBy } = props;
+  const initialColumns: Column[] = [
+    {
+      key: "requestCreatedAt",
+      active: true,
+      label: "Time",
+      minWidth: 170,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        created_at: direction,
+      }),
+      type: "timestamp",
+      format: (value: string) => getUSDate(value),
+    },
+    requestColumn,
+    responseColumn,
+    {
+      key: "latency",
+      active: true,
+      label: "Duration",
+      format: (value: string) => `${value} s`,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        latency: direction,
+      }),
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "totalTokens",
+      active: true,
+      label: "Total Tokens",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        total_tokens: direction,
+      }),
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "userId",
+      active: true,
+      label: "User",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        user_id: direction,
+      }),
+      format: (value: string) =>
+        value ? truncString(value, truncLength) : value,
+      type: "text",
+      filter: true,
+      minWidth: 170,
+    },
+    {
+      key: "model",
+      active: true,
+      label: "Model",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        body_model: direction,
+      }),
+      filter: true,
+      type: "text",
+      minWidth: 200,
+    },
+    {
+      key: "keyName",
+      active: false,
+      label: "Key Name",
+      minWidth: 170,
+      type: "text",
+      format: (value: string) => value,
+    },
+    {
+      key: "cacheCount",
+      active: false,
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        is_cached: direction,
+      }),
+      label: "Cache hits",
+      minWidth: 170,
+      format: (value: number) => value.toFixed(0),
+    },
+    {
+      key: "logProbs",
+      active: false,
+      label: "Log Prob",
+      type: "number",
+      filter: true,
+      format: (value: number) => (value ? value.toFixed(2) : ""),
+    },
+  ];
 
   const [defaultColumns, setDefaultColumns] =
     useState<Column[]>(initialColumns);
@@ -258,56 +268,60 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  const propertiesColumns: Column[] = properties.map((p) => {
-    return {
-      key: p,
-      label: p,
-      active: true,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        properties: {
-          [p]: direction,
-        },
-      }),
-      columnOrigin: "property",
-      format: (value: string) => (value ? truncString(value, 15) : value),
-      minWidth: 170,
-    };
-  });
+  let columns: Column[] = [];
 
-  const valuesColumns: Column[] = values.map((p) => {
-    return {
-      key: p,
-      label: p,
-      active: true,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        values: {
-          [p]: direction,
-        },
-      }),
-      columnOrigin: "value",
-      format: (value: string) => (value ? truncString(value, 15) : value),
-    };
-  });
-
-  const includePrompt = valuesColumns.length > 0;
-
-  const columns: Column[] = [
-    ...defaultColumns,
-    ...valuesColumns,
-    ...propertiesColumns,
-  ];
-
-  if (includePrompt) {
-    columns.push({
-      key: "prompt_name",
-      label: "Prompt Name",
-      active: true,
-      format: (value: string) => value,
-      type: "text",
-      filter: true,
+  if (isPreview) {
+    columns = [requestColumn, responseColumn];
+  } else {
+    const propertiesColumns: Column[] = properties.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "property",
+        format: (value: string) =>
+          value ? truncString(value, truncLength) : value,
+        minWidth: 170,
+      };
     });
+
+    const valuesColumns: Column[] = values.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          values: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "value",
+        format: (value: string) =>
+          value ? truncString(value, truncLength) : value,
+      };
+    });
+
+    const includePrompt = valuesColumns.length > 0;
+
+    columns = [...defaultColumns, ...valuesColumns, ...propertiesColumns];
+
+    if (includePrompt) {
+      columns.push({
+        key: "prompt_name",
+        label: "Prompt Name",
+        active: true,
+        format: (value: string) => value,
+        type: "text",
+        filter: true,
+      });
+    }
   }
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
@@ -363,10 +377,12 @@ const RequestsPage = (props: RequestsPageProps) => {
                 defaultTimeFilter: "all",
                 onTimeSelectHandler: onTimeSelectHandler,
                 timeFilterOptions: [
-                  { key: "24h", value: "day" },
-                  { key: "7d", value: "wk" },
-                  { key: "1m", value: "mo" },
-                  { key: "all", value: "all" },
+                  { key: "1h", value: "Last Hour" },
+                  { key: "24h", value: "Today" },
+                  { key: "7d", value: "7D" },
+                  { key: "1m", value: "1M" },
+                  { key: "3m", value: "3M" },
+                  { key: "all", value: "All" },
                 ],
               }}
               csvExport={{
@@ -396,6 +412,8 @@ const RequestsPage = (props: RequestsPageProps) => {
                   }
                 },
               }}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
             />
 
             {isLoading || from === undefined || to === undefined ? (
@@ -432,6 +450,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                     });
                   }
                 }}
+                isPreview={isPreview}
               />
             )}
           </div>
