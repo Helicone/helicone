@@ -70,3 +70,22 @@ cd worker
 wrangler dev
 # wait for it to load (like 10 seconds), press `L` to start in local mode
 ```
+
+### Example .env file
+
+Make sure your .env file is in `web/.env`
+
+```bash
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
+STRIPE_SECRET_KEY=""
+NEXT_PUBLIC_HELICONE_BILLING_PORTAL_LINK=""
+NEXT_PUBLIC_HELICONE_CONTACT_LINK="https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
+STRIPE_PRICE_ID=""
+STRIPE_STARTER_PRICE_ID=""
+STRIPE_ENTERPRISE_PRODUCT_ID=""
+STRIPE_STARTER_PRODUCT_ID=""
+DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+NEXT_PUBLIC_SUPABASE_URL="http://localhost:54321"
+SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+```
