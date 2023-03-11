@@ -276,7 +276,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
-        label: p,
+        label: capitalizeWords(p),
         active: true,
         sortBy: "desc",
         toSortLeaf: (direction) => ({

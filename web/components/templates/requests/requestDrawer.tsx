@@ -8,6 +8,7 @@ import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
+import { capitalizeWords } from "../../shared/utils/utils";
 import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
@@ -33,7 +34,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
     if (val === undefined) return null;
     return (
       <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
-        <dt className="text-gray-500">{name}</dt>
+        <dt className="text-gray-500">{capitalizeWords(name)}</dt>
         <dd className="text-gray-900">{val || "{NULL}"}</dd>
       </div>
     );
