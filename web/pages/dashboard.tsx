@@ -44,6 +44,14 @@ export const getServerSideProps = async (
     getKeys(supabase),
     requestOverLimit(supabase),
   ]);
+  if (keyData?.length === 0) {
+    return {
+      redirect: {
+        destination: "/welcome",
+        permanent: false,
+      },
+    };
+  }
 
   if (isRequestLimitOver) {
     return {

@@ -1,46 +1,22 @@
-import {
-  ArrowTopRightOnSquareIcon,
-  ClipboardDocumentListIcon,
-} from "@heroicons/react/24/outline";
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
-import { Metrics } from "../../../lib/api/metrics/metrics";
-import {
-  getDashboardData,
-  GraphDataState,
-  initialGraphDataState,
-} from "../../../lib/dashboardGraphs";
-import { Result } from "../../../lib/result";
-import {
-  getTimeMap,
-  timeGraphConfig,
-} from "../../../lib/timeCalculations/constants";
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../lib/timeCalculations/time";
-import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
-import {
-  FilterLeaf,
-  FilterNode,
-  getPropertyFilters,
-} from "../../../services/lib/filters/filterDefs";
-import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import * as DashboardAnimation from "../../../public/lottie/DashboardAnimation.json";
+import * as PartyParrot from "../../../public/lottie/PartyParrot.json";
 import { Database } from "../../../supabase/database.types";
-import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import AuthLayout from "../../shared/layout/authLayout";
+import LoadingAnimation from "../../shared/loadingAnimation";
+import * as loading from "../../../public/lottie/Loading.json";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import { Filter } from "../../shared/themed/themedTableHeader";
-import { Filters } from "../dashboard/filters";
 
-import { MetricsPanel } from "../dashboard/metricsPanel";
-import TimeGraphWHeader from "../dashboard/timeGraphWHeader";
+import ProgressBar from "../home/progressBar";
 import KeyPage from "../keys/keyPage";
+import Lottie from "react-lottie";
+import { useQuery } from "@tanstack/react-query";
+import { Result } from "../../../lib/result";
+import { useRouter } from "next/router";
 
 interface DashboardPageProps {
   user: User;
@@ -238,147 +214,252 @@ const BaseUrlInstructions = () => {
   );
 };
 
+const RenderStepActions = ({
+  currentStep,
+  setCurrentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  setCurrentStep: Dispatch<SetStateAction<Steps>>;
+  totalSteps: number;
+}) => {
+  if (currentStep === totalSteps) {
+    return (
+      <div className="bottom-0 relative flex flex-row justify-start flex-1 pt-8">
+        <button
+          onClick={() => setCurrentStep(currentStep - 1)}
+          className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Back
+        </button>
+      </div>
+    );
+  } else if (currentStep === 1) {
+    return (
+      <div className="bottom-0 relative flex flex-row justify-end flex-1 pt-8">
+        <button
+          onClick={() => setCurrentStep(currentStep + 1)}
+          className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Next
+        </button>
+      </div>
+    );
+  } else {
+    return (
+      <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
+        <button
+          onClick={() => setCurrentStep(currentStep - 1)}
+          className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Back
+        </button>
+        <button
+          onClick={() => setCurrentStep(currentStep + 1)}
+          className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Next
+        </button>
+      </div>
+    );
+  }
+};
+
+const Step1 = () => {
+  return (
+    <div className="flex flex-col gap-4">
+      {" "}
+      <p className="text-gray-500">
+        Helicone is a tool to help you understand your API traffic. It{"'"}s
+        currently in beta, so please let us know if you have any feedback or
+        questions.
+      </p>
+      <LoadingAnimation title="" animation={DashboardAnimation} />
+    </div>
+  );
+};
+
+const Step2 = () => {
+  return (
+    <div className="flex flex-col gap-4">
+      {" "}
+      <p className="text-gray-500">
+        Within your codebase, replace your OpenAI call with the following code
+        snippet.
+      </p>
+      <BaseUrlInstructions />
+    </div>
+  );
+};
+
+const Step3 = () => {
+  return (
+    <div>
+      {" "}
+      <p className="text-gray-500"></p>
+      <KeyPage></KeyPage>
+    </div>
+  );
+};
+
+const Step4 = () => {
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const router = useRouter();
+
+  const { data } = useQuery({
+    queryKey: ["requestsCount"],
+    queryFn: async () => {
+      if (data?.data === 0 || (data?.data ?? null) == null) {
+        setTimeElapsed((prev) => prev + 3);
+        return await fetch("/api/request/count", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: "all",
+          }),
+        }).then((res) => res.json() as Promise<Result<number, string>>);
+      }
+    },
+    refetchOnWindowFocus: false,
+    refetchInterval: 3000,
+  });
+  console.log(data);
+  if (data?.data === 0 || (data?.data ?? null) === null) {
+    return (
+      <div>
+        <div className="flex flex-col gap-2 items-center">
+          <div className="text-2xl text-gray-600">Listening for events</div>
+          <Lottie
+            options={{
+              loop: true,
+              autoplay: true,
+              animationData: loading,
+              rendererSettings: {
+                preserveAspectRatio: "xMidYMid slice",
+              },
+            }}
+            height={100}
+            width={100}
+            isStopped={false}
+            isPaused={false}
+            style={{
+              pointerEvents: "none",
+              background: "transparent",
+            }}
+          />
+          <div>
+            Onces we receive your first event you can visit your dashboard
+          </div>
+          {timeElapsed > 30 && (
+            <div className="text-sm mt-10">
+              Note: This should be instant, but if you{"'"}re still waiting
+              after 30 seconds, please join our discord and we{"'"}ll help you
+              out. Or you can email us at help@helicone.ai.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <div className="flex flex-col gap-2 items-center">
+          <Lottie
+            options={{
+              loop: true,
+              autoplay: true,
+              animationData: PartyParrot,
+              rendererSettings: {
+                preserveAspectRatio: "xMidYMid slice",
+              },
+            }}
+            height={100}
+            width={100}
+            isStopped={false}
+            isPaused={false}
+            style={{
+              pointerEvents: "none",
+              background: "transparent",
+            }}
+          />
+          <div>We have received {data?.data} events. You are all set 🚀</div>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+};
+
+const Step5 = () => {
+  return (
+    <div>
+      {" "}
+      <p className="text-gray-500">
+        You{"'"}re all set! You can now view your API traffic in the dashboard.
+      </p>
+    </div>
+  );
+};
+type Steps = 1 | 2 | 3 | 4 | 5;
+
+const stepComponents: {
+  [key in Steps]: () => JSX.Element;
+} = {
+  1: Step2,
+  2: Step3,
+  3: Step4,
+};
+const StepComponent = ({ step }: { step: Steps }) => {
+  const Step = stepComponents[step];
+  return <Step />;
+};
+
 const WelcomePage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const [timeData, setTimeData] = useState<GraphDataState>(
-    initialGraphDataState
-  );
-
-  const [metrics, setMetrics] =
-    useState<Loading<Result<Metrics, string>>>("loading");
-  const [interval, setInterval] = useState<TimeInterval>("1m");
-  const [filter, setFilter] = useState<FilterNode>("all");
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
-  const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo("1m").toISOString(),
-        lte: new Date().toISOString(),
-      },
-    },
-  });
-
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
-  const { propertyParams } = useGetPropertyParams();
-
-  useEffect(() => {
-    getDashboardData(
-      timeFilter,
-      {
-        left: filter,
-        operator: "and",
-        right: apiKeyFilter,
-      },
-      setMetrics,
-      setTimeData
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeFilter, filter, apiKeyFilter]);
-
-  const propertyFilterMap = {
-    properties: {
-      label: "Properties",
-      columns: getPropertyFilters(
-        properties,
-        propertyParams.map((p) => p.property_param)
-      ),
-    },
+  const [step, setStep] = useState<Steps>(1);
+  const totalSteps = Object.keys(stepComponents).length;
+  const stepMessage: {
+    [key in Steps]: string;
+  } = {
+    1: "Replace you OpenAI base url",
+    2: "Add your OpenAI API Key to Helicone",
+    3: "Wait for your first event",
   };
-  const filterMap =
-    properties.length > 0
-      ? { ...propertyFilterMap, ...RequestsTableFilter }
-      : RequestsTableFilter;
 
   return (
-    <AuthLayout user={user}>
-      <div
-        className="flex flex-col flex-1 gap-5 w-full max-w-3xl  px-4 sm:px-6 lg:px-8 pb-10"
-        style={{ minHeight: "calc(100vh - 4rem)" }}
-      >
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome to Helicone 🚀
-        </h1>
-        <p className="text-gray-500">
-          Helicone is a tool to help you understand your API traffic. It{"'"}s
-          currently in beta, so please let us know if you have any feedback or
-          questions.
-        </p>
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-5">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Getting Started
-            </h2>
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-5">
-                <h3 className="text-xl font-bold text-gray-900">
-                  1. Change your OpenAI base url
-                </h3>
-                <BaseUrlInstructions />
-                <h3 className="text-xl font-bold text-gray-900">
-                  2. Add your hashed OpenAI API key
-                </h3>
-                <KeyPage></KeyPage>
-
-                <h3 className="text-xl font-bold text-gray-900">
-                  3. You{"'"}re all set!
-                </h3>
-                <p className="text-gray-500">
-                  Now you can start sending requests to your API and Helicone
-                  will start collecting data.
-                </p>
-                <div className="text-start">
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center rounded-md bg-gradient-to-r from-sky-600 to-indigo-500 bg-origin-border px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    <ArrowTopRightOnSquareIcon
-                      className="-ml-1 mr-2 h-5 w-5"
-                      aria-hidden="true"
-                    />
-                    Dashboard
-                  </Link>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  4. (Optional) Advanced features
-                </h3>
-                <ul
-                  className="list-none list-inside text-gray-500"
-                  style={{ paddingLeft: "1.5rem" }}
-                >
-                  <li className="text-gray-500">
-                    <Link
-                      href="https://docs.helicone.ai/advanced-usage/caching"
-                      className="text-indigo-500 hover:text-indigo-600"
-                    >
-                      Caching
-                    </Link>
-                    : Helicone offers advanced caching features to reduce the
-                    number of requests you send to your API.
-                  </li>
-                  <li className="text-gray-500">
-                    <Link
-                      href="https://docs.helicone.ai/advanced-usage/custom-properties"
-                      className="text-indigo-500 hover:text-indigo-600"
-                    >
-                      Custom Properties
-                    </Link>
-                    : Helicone allows you to add custom properties to your
-                    requests.
-                  </li>
-
-                  <li className="text-gray-500">
-                    <Link
-                      href="https://docs.helicone.ai/advanced-usage/user-metrics"
-                      className="text-indigo-500 hover:text-indigo-600"
-                    >
-                      User Metrics
-                    </Link>
-                    : User tracking is a powerful tool to understand your users
-                    and their behavior.
-                  </li>
-                </ul>
+    <AuthLayout user={user} hideSidebar={true}>
+      <div className="flex flex-col flex-1 gap-5 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div
+          className="
+        sm:max-w-2xl flex flex-col space-y-2 w-full min-w-[300px] sm:min-w-[450px]"
+        >
+          <h1 className="text-3xl font-bold text-gray-900 w-full text-center mb-10">
+            Welcome to Helicone 🚀
+          </h1>
+          <div className="w-full border-b border-gray-300 pb-4 justify-between flex flex-col items-center text-center space-y-4">
+            <p className="text-lg font-medium w-full">{`Step ${step}: ${stepMessage[step]}`}</p>
+            <div className="w-full justify-center items-center mx-auto flex">
+              <ProgressBar currentStep={step} totalSteps={totalSteps} />
+            </div>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <div className="h-full flex flex-col w-full pt-2">
+              <div className="pt-2 w-full flex-auto">
+                <StepComponent step={step} />
               </div>
             </div>
+            <RenderStepActions
+              currentStep={step}
+              setCurrentStep={setStep}
+              totalSteps={totalSteps}
+            />
           </div>
         </div>
       </div>

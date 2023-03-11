@@ -2,19 +2,29 @@ import Lottie from "react-lottie";
 import * as chicky from "../../public/lottie/Polite Chicky.json";
 import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
+import * as dashboard from "../../public/lottie/DashboardAnimation.json";
+import * as loading from "../../public/lottie/Loading.json";
 import { useEffect, useState } from "react";
+
+type Animation =
+  | typeof chicky
+  | typeof hamster
+  | typeof plane
+  | typeof dashboard
+  | typeof loading;
 
 interface LoadingAnimationProps {
   title: string;
   height?: number;
   width?: number;
+  animation?: Animation;
 }
 
 const LoadingAnimation = (props: LoadingAnimationProps) => {
-  const { title, height = 300, width = 300 } = props;
-  const [animation, setAnimation] = useState<
-    typeof chicky | typeof hamster | typeof plane
-  >();
+  const { title, animation: defaultAnimation } = props;
+  const [animation, setAnimation] = useState<Animation | undefined>(
+    defaultAnimation
+  );
 
   function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -22,21 +32,9 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
 
   useEffect(() => {
     if (animation !== undefined) return;
-    const randomInt = randomIntFromInterval(1, 3);
-    const getLottieId = () => {
-      switch (randomInt) {
-        case 1:
-          setAnimation(chicky);
-          return;
-        case 2:
-          setAnimation(hamster);
-          return;
-        case 3:
-          setAnimation(plane);
-          return;
-      }
-    };
-    getLottieId();
+    const animationItems = [chicky, hamster, plane];
+    const randomIndex = randomIntFromInterval(0, animationItems.length - 1);
+    setAnimation(animationItems[randomIndex]);
   }, [animation]);
 
   return (
