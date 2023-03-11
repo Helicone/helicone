@@ -41,7 +41,7 @@ interface ThemedTableV2Props {
   onSelectHandler?: (row: any, idx: number) => void;
   onSortHandler?: (key: Column) => void;
   condensed?: boolean;
-  isPreview: boolean;
+  isPreview?: boolean;
 }
 
 export default function ThemedTableV2(props: ThemedTableV2Props) {
@@ -86,7 +86,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
             stickyHeader
             aria-label="sticky table"
             size={condensed ? "small" : "medium"}
-            style={isPreview ? {} : { tableLayout: "fixed" }}
+            style={isPreview === false ? {} : { tableLayout: "fixed" }}
           >
             <TableHead>
               <TableRow>

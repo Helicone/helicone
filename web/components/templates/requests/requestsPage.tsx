@@ -449,6 +449,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                     });
                   }
                 }}
+                isPreview={isPreview}
               />
             )}
           </div>
