@@ -32,7 +32,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
     return (
-      <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+      <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
         <dt className="text-gray-500">{name}</dt>
         <dd className="text-gray-900">{val || "{NULL}"}</dd>
       </div>
@@ -48,29 +48,29 @@ const RequestDrawer = (props: RequestDrawerProps) => {
     >
       <div className="flex flex-col space-y-2">
         <dl className="mt-2 grid grid-cols-2">
-          <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">Time</dt>
             <dd className="text-gray-900">
               {new Date(wrappedRequest.requestCreatedAt).toLocaleString()}
             </dd>
           </div>
-          <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">User ID</dt>
             <dd className="text-gray-900">{wrappedRequest.userId || "n/a"}</dd>
           </div>
-          <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">Duration</dt>
             <dd className="text-gray-900">{wrappedRequest.latency}s</dd>
           </div>
-          <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">Model</dt>
             <dd className="text-gray-900">{wrappedRequest.model}</dd>
           </div>
-          <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">Tokens</dt>
             <dd className="text-gray-900">{wrappedRequest.totalTokens}</dd>
           </div>
-          <div className="flex flex-col justify-between py-2 text-xs font-medium col-span-1 border-b border-gray-200">
+          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">Log Probability</dt>
             <dd className="text-gray-900">
               {wrappedRequest.logProbs
@@ -91,7 +91,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         )}
 
         {wrappedRequest.error && (
-          <div className="flex flex-col justify-between text-xs font-medium space-y-1">
+          <div className="flex flex-col justify-between text-sm font-medium space-y-1">
             <dt className="text-gray-500">Error</dt>
             <dd className="text-gray-900 p-2 border border-gray-300 bg-gray-100 rounded-md">
               <pre

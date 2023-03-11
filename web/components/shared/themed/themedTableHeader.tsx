@@ -40,6 +40,7 @@ import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
 import useNotification from "../notification/useNotification";
+import { ViewMode } from "../../templates/dashboard/viewMode";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -69,12 +70,22 @@ interface ThemedHeaderProps {
     filterMap: TableFilterMap;
     onAdvancedFilter: (advancedFilters: Filter[]) => void;
   };
+  viewMode?: string;
+  setViewMode?: Dispatch<SetStateAction<"left" | "right">>;
 }
 
 export default function ThemedHeader(props: ThemedHeaderProps) {
-  const { isFetching, editColumns, timeFilter, advancedFilter, csvExport } =
-    props;
+  const {
+    isFetching,
+    editColumns,
+    timeFilter,
+    advancedFilter,
+    csvExport,
+    viewMode,
+    setViewMode,
+  } = props;
 
+  console.log("VIEW MODE", viewMode, setViewMode);
   const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<Column[]>(
@@ -104,8 +115,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-row space-x-1 items-center pr-2">
-            {editColumns && (
+          <div className="flex flex-row space-x-1 items-center">
+            {editColumns && viewMode == "left" && (
               <Popover className="relative text-sm">
                 {({ open }) => (
                   <>
@@ -303,6 +314,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     </button>
                   </CSVLink>
                 </Menu>
+              </div>
+            )}
+            {viewMode && setViewMode && (
+              <div className="ml-auto space-x-2">
+                <ViewMode
+                  leftLabel="Condensed"
+                  rightLabel="Expanded"
+                  selected={viewMode}
+                  setSelected={setViewMode}
+                />
               </div>
             )}
           </div>

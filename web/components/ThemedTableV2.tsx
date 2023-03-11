@@ -41,6 +41,7 @@ interface ThemedTableV2Props {
   onSelectHandler?: (row: any, idx: number) => void;
   onSortHandler?: (key: Column) => void;
   condensed?: boolean;
+  isPreview: boolean;
 }
 
 export default function ThemedTableV2(props: ThemedTableV2Props) {
@@ -56,6 +57,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
     onPageChangeHandler,
     onSortHandler,
     onPageSizeChangeHandler,
+    isPreview,
   } = props;
   const router = useRouter();
 
@@ -84,6 +86,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
             stickyHeader
             aria-label="sticky table"
             size={condensed ? "small" : "medium"}
+            style={isPreview ? {} : { tableLayout: "fixed" }}
           >
             <TableHead>
               <TableRow>
@@ -144,12 +147,13 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                         <TableCell
                           key={`cell-${column.key}`}
                           align={column.align || "left"}
+                          sx={{ verticalAlign: "top", whiteSpace: "pre-wrap" }}
                         >
                           <p
                             className={clsx(
                               condensed ? "py-1" : "",
                               idx === 0
-                                ? "text-black font-medium"
+                                ? "text-black"
                                 : "text-gray-500 font-normal",
                               "font-sans text-sm"
                             )}
