@@ -70,19 +70,23 @@ const getRequests = async (
     query = query.gte("request_created_at", startTime);
     query = query.lte("request_created_at", endTime);
   }
-  if (timeFilter === "day") {
+  if (timeFilter === "Last Hour") {
+    date = new Date(date.getTime() - 60 * 60 * 1000);
+    query = query.gte("request_created_at", date.toISOString());
+  }
+  if (timeFilter === "Today") {
     date = new Date(date.getTime() - 24 * 60 * 60 * 1000);
     query = query.gte("request_created_at", date.toISOString());
   }
-  if (timeFilter === "wk") {
+  if (timeFilter === "7D") {
     date = new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000);
     query = query.gte("request_created_at", date.toISOString());
   }
-  if (timeFilter === "mo") {
+  if (timeFilter === "1M") {
     date = new Date(date.getTime() - 30 * 24 * 60 * 60 * 1000);
     query = query.gte("request_created_at", date.toISOString());
   }
-  if (timeFilter === "3mo") {
+  if (timeFilter === "3M") {
     date = new Date(date.getTime() - 90 * 24 * 60 * 60 * 1000);
     query = query.gte("request_created_at", date.toISOString());
   }
