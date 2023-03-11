@@ -221,7 +221,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
+        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-40 md:flex-col">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
             <div className="flex flex-shrink-0 items-center px-4">
@@ -367,7 +367,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-1 flex-col md:pl-64">
+        <div className="flex flex-1 flex-col md:pl-40">
           <div className="sticky top-0 z-20 flex h-16 flex-shrink-0 bg-white border-b border-gray-300">
             <button
               type="button"
@@ -508,7 +508,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           <main className="flex-1 bg">
             <div className="mx-auto px-4 sm:px-8 bg-gray-100 min-h-[92.5vh]">
               {/* Replace with your content */}
-              <div className="py-4 sm:py-8 max-w-7xl">{children}</div>
+              <div className="py-4 sm:py-8">{children}</div>
               {/* /End replace */}
             </div>
           </main>
