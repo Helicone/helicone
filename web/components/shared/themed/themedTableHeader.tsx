@@ -85,7 +85,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     setViewMode,
   } = props;
 
-  console.log("VIEW MODE", viewMode, setViewMode);
   const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<Column[]>(
