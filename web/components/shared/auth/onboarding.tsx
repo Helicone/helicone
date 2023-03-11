@@ -11,6 +11,7 @@ import { useState } from "react";
 import { clsx } from "../clsx";
 import ProgressBar from "../../templates/home/progressBar";
 import useNotification from "../notification/useNotification";
+import { BsGoogle } from "react-icons/bs";
 
 interface OnboardingProps {
   currentStep: number;
@@ -299,6 +300,26 @@ const Onboarding = (props: OnboardingProps) => {
                     />
                   </div>
                 </div>
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    const { data, error } =
+                      await supabaseClient.auth.signInWithOAuth({
+                        provider: "google",
+                      });
+                    if (error) {
+                      setAuthError(error.message);
+                    }
+                    setLoading(false);
+                  }}
+                  type="button"
+                  className="flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-md font-medium text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <div className="flex flex-row items-center">
+                    <BsGoogle className="w-5 h-5 mr-2" />
+                    Sign in with Google
+                  </div>
+                </button>
                 {authError && (
                   <div className="mt-4 text-sm text-red-600 w-full">
                     <p>{authError}</p>
