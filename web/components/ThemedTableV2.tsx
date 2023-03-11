@@ -154,7 +154,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                               condensed ? "py-1" : "",
                               idx === 0
                                 ? "text-black"
-                                : "text-gray-500 font-normal",
+                                : "text-black font-normal",
                               "font-sans text-sm"
                             )}
                           >
