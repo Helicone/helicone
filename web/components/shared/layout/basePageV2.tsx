@@ -3,7 +3,6 @@ import { SVGProps, useState } from "react";
 import ThemedModal from "../themed/themedModal";
 import Login from "../auth/login";
 import NavBarV2 from "./navBarV2";
-import Onboarding from "../auth/onboarding";
 
 const footerNavigation = {
   social: [

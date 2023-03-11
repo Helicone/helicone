@@ -227,7 +227,7 @@ const RenderStepActions = ({
     return (
       <div className="bottom-0 relative flex flex-row justify-start flex-1 pt-8">
         <button
-          onClick={() => setCurrentStep(currentStep - 1)}
+          onClick={() => setCurrentStep((currentStep - 1) as Steps)}
           className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Back
@@ -238,7 +238,7 @@ const RenderStepActions = ({
     return (
       <div className="bottom-0 relative flex flex-row justify-end flex-1 pt-8">
         <button
-          onClick={() => setCurrentStep(currentStep + 1)}
+          onClick={() => setCurrentStep((currentStep + 1) as Steps)}
           className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Next
@@ -249,13 +249,13 @@ const RenderStepActions = ({
     return (
       <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
         <button
-          onClick={() => setCurrentStep(currentStep - 1)}
+          onClick={() => setCurrentStep((currentStep - 1) as Steps)}
           className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Back
         </button>
         <button
-          onClick={() => setCurrentStep(currentStep + 1)}
+          onClick={() => setCurrentStep((currentStep + 1) as Steps)}
           className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Next
@@ -263,20 +263,6 @@ const RenderStepActions = ({
       </div>
     );
   }
-};
-
-const Step1 = () => {
-  return (
-    <div className="flex flex-col gap-4">
-      {" "}
-      <p className="text-gray-500">
-        Helicone is a tool to help you understand your API traffic. It{"'"}s
-        currently in beta, so please let us know if you have any feedback or
-        questions.
-      </p>
-      <LoadingAnimation title="" animation={DashboardAnimation} />
-    </div>
-  );
 };
 
 const Step2 = () => {
@@ -325,7 +311,7 @@ const Step4 = () => {
     refetchOnWindowFocus: false,
     refetchInterval: 3000,
   });
-  console.log(data);
+
   if (data?.data === 0 || (data?.data ?? null) === null) {
     return (
       <div>
@@ -397,17 +383,7 @@ const Step4 = () => {
   }
 };
 
-const Step5 = () => {
-  return (
-    <div>
-      {" "}
-      <p className="text-gray-500">
-        You{"'"}re all set! You can now view your API traffic in the dashboard.
-      </p>
-    </div>
-  );
-};
-type Steps = 1 | 2 | 3 | 4 | 5;
+type Steps = 1 | 2 | 3;
 
 const stepComponents: {
   [key in Steps]: () => JSX.Element;
