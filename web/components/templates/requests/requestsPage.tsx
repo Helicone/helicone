@@ -382,6 +382,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                   { key: "7d", value: "7D" },
                   { key: "1m", value: "1M" },
                   { key: "3m", value: "3M" },
+                  { key: "all", value: "All" },
                 ],
               }}
               csvExport={{
