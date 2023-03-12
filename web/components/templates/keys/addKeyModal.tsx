@@ -70,21 +70,21 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                 />
               </div>
             </div>
-            <i className="w-full text-xs text-gray-500">
-              <p>One-way hash that is stored on our servers: </p>
-              <div
-                className="flex flex-row hover:cursor-pointer"
-                onClick={() => {
-                  navigator.clipboard.writeText(hashedKey);
-                  setNotification("Copied to clipboard", "success");
-                }}
-              >
-                <div>{middleTruncString(hashedKey, 30)}</div>
-                <div>
-                  <ClipboardDocumentListIcon className="h-4 w-4 ml-2" />
+            {hashedKey !== "" && (
+              <i className="w-full text-xs text-gray-500">
+                <p>Only the irreversible hash is stored on our servers.</p>
+                <p>Hash:</p>
+                <div
+                  className="flex flex-row hover:cursor-pointer"
+                  onClick={() => {
+                    navigator.clipboard.writeText(hashedKey);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                >
+                  <div>{middleTruncString(hashedKey, 50)}</div>
                 </div>
-              </div>
-            </i>
+              </i>
+            )}
 
             <div className="w-full flex flex-row justify-end">
               <button

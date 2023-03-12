@@ -370,7 +370,7 @@ const Step4 = () => {
               background: "transparent",
             }}
           />
-          <div>We have received {data?.data} events. You are all set 🚀</div>
+          <div>We received an event! You are all set 🚀</div>
           <button
             onClick={() => router.push("/dashboard")}
             className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
