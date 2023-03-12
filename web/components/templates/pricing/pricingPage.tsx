@@ -1,23 +1,15 @@
-import { Fragment, SVGProps, useState } from "react";
-import { Popover, RadioGroup, Transition } from "@headlessui/react";
 import {
   BanknotesIcon,
-  Bars3Icon,
   ChatBubbleLeftRightIcon,
   CheckIcon,
   CodeBracketIcon,
   QuestionMarkCircleIcon,
-  XMarkIcon,
 } from "@heroicons/react/20/solid";
-import { clsx } from "../../shared/clsx";
-import { useRouter } from "next/router";
-import Image from "next/image";
 import Link from "next/link";
-import ThemedModal from "../../shared/themed/themedModal";
-import Onboarding from "../../shared/auth/onboarding";
-import Login from "../../shared/auth/login";
-import BasePageV2 from "../../shared/layout/basePageV2";
+import { SVGProps } from "react";
 import OnboardingButton from "../../shared/auth/onboardingButton";
+import { clsx } from "../../shared/clsx";
+import BasePageV2 from "../../shared/layout/basePageV2";
 
 const frequencies = [
   { value: "monthly", label: "Monthly", priceSuffix: "/month" },

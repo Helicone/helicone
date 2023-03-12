@@ -20,8 +20,9 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import Details from "./detailsV2";
 import BasePageV2 from "../../shared/layout/basePageV2";
-import OnboardingButton from "../../shared/auth/onboardingButton";
+
 import { useState } from "react";
+import OnboardingButton from "../../shared/auth/onboardingButton";
 
 export default function HomePage() {
   const router = useRouter();
