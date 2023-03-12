@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { clsx } from "../clsx";
 import ThemedModal from "../themed/themedModal";
-import Onboarding from "./onboarding";
+import Login from "./login";
 
 interface OnboardingButtonProps {
   title: string;
@@ -14,7 +14,6 @@ const OnboardingButton = (props: OnboardingButtonProps) => {
   const { variant = "primary", onClick, full = false, title } = props;
 
   const [openOnboarding, setOpenOnboarding] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
 
   const handleClick = () => {
     setOpenOnboarding(true);
@@ -46,7 +45,7 @@ const OnboardingButton = (props: OnboardingButtonProps) => {
       )}
 
       <ThemedModal open={openOnboarding} setOpen={setOpenOnboarding}>
-        <Onboarding currentStep={currentStep} setCurrentStep={setCurrentStep} />
+        <Login formState="signup" />
       </ThemedModal>
     </>
   );

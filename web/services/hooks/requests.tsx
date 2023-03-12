@@ -1,5 +1,5 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
 import { Column } from "../../components/ThemedTableV2";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
@@ -11,7 +11,8 @@ const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
   advancedFilter: FilterNode,
-  sortLeaf: SortLeafRequest
+  sortLeaf: SortLeafRequest,
+  options?: QueryObserverOptions
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
