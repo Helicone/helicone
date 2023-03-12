@@ -257,8 +257,6 @@ const Login = (props: LoginProps) => {
                           });
                         if (error) {
                           setAuthError(error.message);
-                        } else {
-                          router.push("/dashboard");
                         }
                         setLoading(false);
                       }}
