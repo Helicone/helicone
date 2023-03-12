@@ -41,13 +41,11 @@ export const getServerSideProps = async (
       },
     };
 
-  const [{ data: keyData }, isRequestLimitOver, { data: count }] =
-    await Promise.all([
-      getKeys(supabase),
-      requestOverLimit(supabase),
-      getRequestCount(user.id, "all"),
-    ]);
-  if (keyData?.length === 0 || (count ?? 0) === 0) {
+  const [{ data: keyData }, isRequestLimitOver] = await Promise.all([
+    getKeys(supabase),
+    requestOverLimit(supabase),
+  ]);
+  if (keyData?.length === 0) {
     return {
       redirect: {
         destination: "/welcome",
