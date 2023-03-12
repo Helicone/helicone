@@ -47,7 +47,6 @@ export const getServerSideProps = async (
       requestOverLimit(supabase),
       getRequestCount(user.id, "all"),
     ]);
-  console.log(count);
   if (keyData?.length === 0 || (count ?? 0) === 0) {
     return {
       redirect: {
