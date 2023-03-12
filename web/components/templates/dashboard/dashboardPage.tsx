@@ -128,18 +128,18 @@ const DashboardPage = (props: DashboardPageProps) => {
               No OpenAI API Keys found
             </h3>
             <p className="mt-1 text-lg text-gray-500">
-              Go to the keys page to add a key and get started.
+              Go to the welcome page to get started
             </p>
             <div className="mt-6">
               <Link
-                href="/keys"
+                href="/welcome"
                 className="inline-flex items-center rounded-md bg-gradient-to-r from-sky-600 to-indigo-500 bg-origin-border px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <ArrowTopRightOnSquareIcon
                   className="-ml-1 mr-2 h-5 w-5"
                   aria-hidden="true"
                 />
-                Key Page
+                Welcome Page
               </Link>
             </div>
           </div>
@@ -151,11 +151,11 @@ const DashboardPage = (props: DashboardPageProps) => {
             timeFilter={{
               customTimeFilter: true,
               timeFilterOptions: [
-                { key: "1h", value: "hour" },
-                { key: "24h", value: "day" },
-                { key: "7d", value: "wk" },
-                { key: "1m", value: "mo" },
-                { key: "3m", value: "3mo" },
+                { key: "1h", value: "Last Hour" },
+                { key: "24h", value: "Today" },
+                { key: "7d", value: "7D" },
+                { key: "1m", value: "1M" },
+                { key: "3m", value: "3M" },
               ],
               defaultTimeFilter: interval,
               onTimeSelectHandler: (key: TimeInterval, value: string) => {
