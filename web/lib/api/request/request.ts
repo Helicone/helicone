@@ -102,5 +102,5 @@ export async function getRequestCount(
   if (error !== null) {
     return { data: null, error: error };
   }
-  return { data: data[0].count, error: null };
+  return { data: +data[0].count, error: null };
 }

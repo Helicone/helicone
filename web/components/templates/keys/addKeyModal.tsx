@@ -1,6 +1,8 @@
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
+import Link from "next/link";
 import { useState } from "react";
-import { middleTruncString } from "../../../lib/stringHelpers";
+import { middleTruncString, truncString } from "../../../lib/stringHelpers";
 import { hashAuth } from "../../../lib/supabaseClient";
 import { useAddKey } from "../../../services/hooks/keys";
 import useNotification from "../../shared/notification/useNotification";
@@ -35,6 +37,15 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               OpenAI. We do <span className="font-bold">not</span> store your
               API key on our servers.
             </p>
+            <Link
+              href="https://docs.helicone.ai/getting-started/how-encryption-works"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline inline-flex text-sm flex-row w-fit"
+            >
+              Learn More
+            </Link>
+
             <div className="w-full">
               <label
                 htmlFor="openAIKey"
@@ -48,12 +59,33 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                   name="openAIKey"
                   id="openAIKey"
                   value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  onChange={(e) => {
+                    setApiKey(e.target.value);
+                    hashAuth(apiKey).then((res) => {
+                      setHashedKey(res);
+                    });
+                  }}
                   placeholder="Enter in your OpenAI API key here"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
                 />
               </div>
             </div>
+            {hashedKey !== "" && (
+              <i className="w-full text-xs text-gray-500">
+                <p>Only the irreversible hash is stored on our servers.</p>
+                <p>Hash:</p>
+                <div
+                  className="flex flex-row hover:cursor-pointer"
+                  onClick={() => {
+                    navigator.clipboard.writeText(hashedKey);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                >
+                  <div>{middleTruncString(hashedKey, 50)}</div>
+                </div>
+              </i>
+            )}
+
             <div className="w-full flex flex-row justify-end">
               <button
                 onClick={(e) => {

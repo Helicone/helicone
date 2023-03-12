@@ -96,7 +96,7 @@ const OnboardingPage = (props: OnboardingPageProps) => {
   return (
     <BasePageV2>
       <div className="h-full justify-center align-middle items-center flex flex-col space-y-6 sm:space-y-12">
-        <ProgressBar currentStep={step} />
+        <ProgressBar currentStep={step} totalSteps={3} />
         {renderStep()}
       </div>
     </BasePageV2>

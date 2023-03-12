@@ -3,40 +3,23 @@ import { clsx } from "../../shared/clsx";
 
 interface ProgressBarProps {
   currentStep: number;
+  totalSteps: number;
 }
 
 const ProgressBar = (props: ProgressBarProps) => {
-  const { currentStep } = props;
+  const { currentStep, totalSteps } = props;
 
-  const steps = [
-    {
-      name: "Step 1",
+  const steps = Array.from({ length: totalSteps }, (_, i) => i + 1).map(
+    (step) => ({
+      name: `Step ${step}`,
       status:
-        currentStep === 1
+        currentStep === step
           ? "current"
-          : currentStep > 1
+          : currentStep > step
           ? "complete"
           : "incomplete",
-    },
-    {
-      name: "Step 2",
-      status:
-        currentStep === 2
-          ? "current"
-          : currentStep > 2
-          ? "complete"
-          : "incomplete",
-    },
-    {
-      name: "Step 3",
-      status:
-        currentStep === 3
-          ? "current"
-          : currentStep > 3
-          ? "complete"
-          : "incomplete",
-    },
-  ];
+    })
+  );
 
   return (
     <nav aria-label="Progress">

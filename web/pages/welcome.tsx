@@ -3,7 +3,7 @@ import { User, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
-import { getRequestCount } from "../lib/api/request/request";
+import WelcomePage from "../components/templates/welcome/welcomePage";
 import { requestOverLimit } from "../lib/checkRequestLimit";
 import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
@@ -17,8 +17,8 @@ const Dashboard = (props: DashboardProps) => {
   const { user, keys } = props;
 
   return (
-    <MetaData title="Dashboard">
-      <DashboardPage user={user} keys={keys} />
+    <MetaData title="Welcome to Helicone">
+      <WelcomePage user={user} keys={keys} />
     </MetaData>
   );
 };
@@ -45,14 +45,6 @@ export const getServerSideProps = async (
     getKeys(supabase),
     requestOverLimit(supabase),
   ]);
-  if (keyData?.length === 0) {
-    return {
-      redirect: {
-        destination: "/welcome",
-        permanent: false,
-      },
-    };
-  }
 
   if (isRequestLimitOver) {
     return {

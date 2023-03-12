@@ -3,7 +3,6 @@ import { SVGProps, useState } from "react";
 import ThemedModal from "../themed/themedModal";
 import Login from "../auth/login";
 import NavBarV2 from "./navBarV2";
-import Onboarding from "../auth/onboarding";
 
 const footerNavigation = {
   social: [
@@ -91,10 +90,10 @@ const BasePageV2 = (props: BasePageV2Props) => {
         </footer>
       </div>
       <ThemedModal open={openOnboarding} setOpen={setOpenOnboarding}>
-        <Onboarding currentStep={currentStep} setCurrentStep={setCurrentStep} />
+        <Login formState="signup" />
       </ThemedModal>
       <ThemedModal open={openLogin} setOpen={setOpenLogin}>
-        <Login />
+        <Login formState="login" />
       </ThemedModal>
     </>
   );
