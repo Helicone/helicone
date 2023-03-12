@@ -265,7 +265,7 @@ const RenderStepActions = ({
   }
 };
 
-const Step2 = () => {
+const Step1 = () => {
   return (
     <div className="flex flex-col gap-4">
       {" "}
@@ -278,7 +278,7 @@ const Step2 = () => {
   );
 };
 
-const Step3 = () => {
+const Step2 = () => {
   return (
     <div>
       {" "}
@@ -288,7 +288,7 @@ const Step3 = () => {
   );
 };
 
-const Step4 = () => {
+const Step3 = () => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const router = useRouter();
 
@@ -388,9 +388,9 @@ type Steps = 1 | 2 | 3;
 const stepComponents: {
   [key in Steps]: () => JSX.Element;
 } = {
-  1: Step2,
-  2: Step3,
-  3: Step4,
+  1: Step1,
+  2: Step2,
+  3: Step3,
 };
 const StepComponent = ({ step }: { step: Steps }) => {
   const Step = stepComponents[step];

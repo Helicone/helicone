@@ -3,6 +3,7 @@ import { User, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
+import { getRequestCount } from "../lib/api/request/request";
 import { requestOverLimit } from "../lib/checkRequestLimit";
 import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
@@ -40,11 +41,14 @@ export const getServerSideProps = async (
       },
     };
 
-  const [{ data: keyData }, isRequestLimitOver] = await Promise.all([
-    getKeys(supabase),
-    requestOverLimit(supabase),
-  ]);
-  if (keyData?.length === 0) {
+  const [{ data: keyData }, isRequestLimitOver, { data: count }] =
+    await Promise.all([
+      getKeys(supabase),
+      requestOverLimit(supabase),
+      getRequestCount(user.id, "all"),
+    ]);
+  console.log(count);
+  if (keyData?.length === 0 || (count ?? 0) === 0) {
     return {
       redirect: {
         destination: "/welcome",
