@@ -3,7 +3,7 @@ import { HomeIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 
 type ViewModeProps = {
-  size: "sm" | "md";
+  size?: "sm" | "md";
   leftLabel: string;
   rightLabel: string;
   onSelectionChange?: (selection: "left" | "right") => void;
