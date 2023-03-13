@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { HomeIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { clsx } from "../../shared/clsx";
 
 type ViewModeProps = {
+  size?: "sm" | "md";
   leftLabel: string;
   rightLabel: string;
   onSelectionChange?: (selection: "left" | "right") => void;
@@ -10,6 +12,7 @@ type ViewModeProps = {
 };
 
 export function ViewMode({
+  size = "sm",
   leftLabel,
   rightLabel,
   onSelectionChange,
@@ -26,11 +29,13 @@ export function ViewMode({
   return (
     <div className="flex items-center">
       <button
-        className={`relative inline-flex items-center w-24 h-8 transition-colors text-sm ${
+        className={clsx(
           selected === "left"
             ? "bg-blue-600 text-white"
-            : "bg-gray-200 text-gray-500"
-        } rounded-l-md cursor-pointer`}
+            : "bg-gray-200 text-gray-500",
+          `relative inline-flex items-center  transition-colors rounded-l-md cursor-pointer`,
+          size === "sm" ? "text-xs w-20 h-6" : "text-sm w-24 h-8"
+        )}
         onClick={() => handleSelection("left")}
       >
         <span className="absolute inset-0 flex items-center justify-center">
@@ -39,11 +44,13 @@ export function ViewMode({
         </span>
       </button>
       <button
-        className={`relative inline-flex items-center w-24 h-8 transition-colors text-sm ${
+        className={clsx(
           selected === "right"
             ? "bg-blue-600 text-white"
-            : "bg-gray-200 text-gray-500"
-        } rounded-r-md cursor-pointer`}
+            : "bg-gray-200 text-gray-500",
+          `relative inline-flex items-center  transition-colors rounded-r-md cursor-pointer`,
+          size === "sm" ? "text-xs w-20 h-6" : "text-sm w-24 h-8"
+        )}
         onClick={() => handleSelection("right")}
       >
         <span className="absolute inset-0 flex items-center justify-center">
