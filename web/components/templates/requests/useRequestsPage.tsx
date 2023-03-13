@@ -57,6 +57,8 @@ export interface RequestWrapper {
   requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
   logProbs: number | null;
+  requestBody: Json;
+  responseBody: Json;
   [key: string]:
     | Json
     | undefined
@@ -145,6 +147,8 @@ const useRequestsPage = (
       1000;
 
     const obj: RequestWrapper = {
+      requestBody: request.request_body,
+      responseBody: request.response_body,
       cacheCount: +request.cache_count,
       promptName: request.prompt_name || "",
       promptRegex: request.prompt_regex || "",
