@@ -4,11 +4,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { request } from "https";
 import { wrap } from "module";
+import { useState } from "react";
 import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
 import { capitalizeWords } from "../../shared/utils/utils";
+import { ViewMode } from "../dashboard/viewMode";
 import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
@@ -29,6 +31,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );
+  const [viewMode, setViewMode] = useState<"left" | "right">("left");
 
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
@@ -106,40 +109,58 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             </dd>
           </div>
         )}
-        <div>
-          {wrappedRequest.api.chat ? (
-            <Chat
-              chatProperties={{
-                request: wrappedRequest.api.chat.request,
-                response: wrappedRequest.api.chat.response,
-              }}
+        <div className="flex-col">
+          <div className="flex flex-row justify-end w-full">
+            <ViewMode
+              size="sm"
+              leftLabel="Pretty"
+              rightLabel="JSON"
+              selected={viewMode}
+              setSelected={setViewMode}
             />
-          ) : wrappedRequest.api.moderation ? (
-            <Moderation
-              request={wrappedRequest.api.moderation.request}
-              response={wrappedRequest.api.moderation.results}
-            />
-          ) : wrappedRequest.promptRegex === "" ? (
-            <Completion
-              request={wrappedRequest.api.gpt3?.request}
-              response={wrappedRequest.api.gpt3?.response}
-            />
+          </div>
+          {viewMode === "left" ? (
+            <>
+              {wrappedRequest.api.chat ? (
+                <Chat
+                  chatProperties={{
+                    request: wrappedRequest.api.chat.request,
+                    response: wrappedRequest.api.chat.response,
+                  }}
+                />
+              ) : wrappedRequest.api.moderation ? (
+                <Moderation
+                  request={wrappedRequest.api.moderation.request}
+                  response={wrappedRequest.api.moderation.results}
+                />
+              ) : wrappedRequest.promptRegex === "" ? (
+                <Completion
+                  request={wrappedRequest.api.gpt3?.request}
+                  response={wrappedRequest.api.gpt3?.response}
+                />
+              ) : (
+                <CompletionRegex
+                  prompt_regex={wrappedRequest.promptRegex}
+                  prompt_name={wrappedRequest.promptName}
+                  // keys is the values for all the keys in `values`
+                  keys={values.reduce((acc, key) => {
+                    if (request.hasOwnProperty(key)) {
+                      return {
+                        ...acc,
+                        [key]: wrappedRequest[key],
+                      };
+                    }
+                    return acc;
+                  }, {})}
+                  response={wrappedRequest.responseText}
+                  values={values}
+                />
+              )}
+            </>
           ) : (
-            <CompletionRegex
-              prompt_regex={wrappedRequest.promptRegex}
-              prompt_name={wrappedRequest.promptName}
-              // keys is the values for all the keys in `values`
-              keys={values.reduce((acc, key) => {
-                if (request.hasOwnProperty(key)) {
-                  return {
-                    ...acc,
-                    [key]: wrappedRequest[key],
-                  };
-                }
-                return acc;
-              }, {})}
-              response={wrappedRequest.responseText}
-              values={values}
+            <Completion
+              request={JSON.stringify(wrappedRequest.requestBody, null, 4)}
+              response={JSON.stringify(wrappedRequest.responseBody, null, 4)}
             />
           )}
         </div>
