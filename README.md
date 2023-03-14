@@ -69,6 +69,25 @@ yarn dev
 cd worker
 wrangler dev
 # wait for it to load (like 10 seconds), press `L` to start in local mode
+
+# Make your request to local host
+curl --request POST \
+  --url http://127.0.0.1:8787/v1/chat/completions \
+  --header 'Authorization: Bearer <KEY>' \
+  --data '{
+	"model": "gpt-3.5-turbo",
+	"messages": [
+		{
+			"role": "system",
+			"content": "Can you give me a random number?"
+		}
+	],
+	"temperature": 1,
+	"max_tokens": 7
+}'
+
+# Now you can go to localhost:3000 and create an account and see your request.
+# When creating an account on localhost, you will automatically be signed in.
 ```
 
 ### Example .env file
