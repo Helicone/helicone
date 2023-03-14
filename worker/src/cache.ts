@@ -58,8 +58,24 @@ function getCacheState(headers: Headers): CacheHeaders {
 }
 
 export function getCacheSettings(
-  headers: Headers
+  headers: Headers,
+  isStream: boolean
 ): Result<CacheSettings, string> {
+  // streams cannot be cached
+  if (isStream) {
+    return {
+      data: {
+        shouldReadFromCache: false,
+        shouldSaveToCache: false,
+        cacheControl: "no-cache",
+        bucketSettings: {
+          maxSize: 1,
+        },
+      },
+      error: null,
+    };
+  }
+
   try {
     const cacheHeaders = getCacheState(headers);
 
