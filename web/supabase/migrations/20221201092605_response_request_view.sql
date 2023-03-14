@@ -3,38 +3,17 @@
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
 
--- Check PostgreSQL version
-DO $$BEGIN
-  IF (SELECT setting FROM pg_settings WHERE name = 'server_version_num')::integer < 150000 THEN
-    -- Changes for PostgreSQL version 14 and below
-    CREATE OR REPLACE VIEW public.response_and_request
-     AS 
-     SELECT response.body AS response_body,
-        response.id AS response_id,
-        response.created_at AS response_created_at,
-        request.id AS request_id,
-        request.body AS request_body,
-        request.path AS request_path,
-        request.created_at AS request_created_at
-       FROM response
-         LEFT JOIN request ON request.id = response.request;
-    ALTER VIEW response_and_request OWNER TO authenticated;
-  ELSE
-    -- Changes for PostgreSQL version 15 and above
-    CREATE OR REPLACE VIEW public.response_and_request
-     WITH (security_invoker) AS 
-     SELECT response.body AS response_body,
-        response.id AS response_id,
-        response.created_at AS response_created_at,
-        request.id AS request_id,
-        request.body AS request_body,
-        request.path AS request_path,
-        request.created_at AS request_created_at
-       FROM response
-         LEFT JOIN request ON request.id = response.request;
-
-  END IF;
-END$$;
+CREATE OR REPLACE VIEW public.response_and_request
+  WITH (security_invoker) AS 
+  SELECT response.body AS response_body,
+    response.id AS response_id,
+    response.created_at AS response_created_at,
+    request.id AS request_id,
+    request.body AS request_body,
+    request.path AS request_path,
+    request.created_at AS request_created_at
+    FROM response
+      LEFT JOIN request ON request.id = response.request;
 
 -- Set owner and permissions
 ALTER TABLE public.response_and_request

@@ -3,46 +3,21 @@
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
 
--- Check PostgreSQL version
-DO $$BEGIN
-  IF (SELECT setting FROM pg_settings WHERE name = 'server_version_num')::integer < 150000 THEN
-    -- Changes for PostgreSQL version 14 and below
-    CREATE OR REPLACE VIEW public.metrics
-     AS
-     SELECT ( SELECT count(*) AS count
-               FROM request) AS total_requests,
-        (( SELECT count(*) AS count
-               FROM request))::double precision / (( SELECT count(DISTINCT date_trunc('day'::text, request.created_at)) AS count
-               FROM request))::double precision AS average_requests_per_day,
-        ( SELECT avg(EXTRACT(epoch FROM response.created_at - request.created_at)) AS avg
-               FROM request
-                 LEFT JOIN response ON response.request = request.id) AS average_response_time,
-        ( SELECT avg((request.body ->> 'max_tokens'::text)::integer) AS avg
-               FROM request) AS average_tokens_per_request,
-        ( SELECT avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer) AS avg
-               FROM response) AS average_tokens_per_response;
-    -- Set owner and permissions
-    ALTER TABLE public.metrics OWNER TO authenticated;
+CREATE OR REPLACE VIEW public.metrics
+WITH (security_invoker) AS
+SELECT ( SELECT count(*) AS count
+              FROM request) AS total_requests,
+       (( SELECT count(*) AS count
+              FROM request))::double precision / (( SELECT count(DISTINCT date_trunc('day'::text, request.created_at)) AS count
+              FROM request))::double precision AS average_requests_per_day,
+       ( SELECT avg(EXTRACT(epoch FROM response.created_at - request.created_at)) AS avg
+              FROM request
+              LEFT JOIN response ON response.request = request.id) AS average_response_time,
+       ( SELECT avg((request.body ->> 'max_tokens'::text)::integer) AS avg
+              FROM request) AS average_tokens_per_request,
+       ( SELECT avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer) AS avg
+              FROM response) AS average_tokens_per_response;
 
-  ELSE
-    -- Changes for PostgreSQL version 15 and above
-    CREATE OR REPLACE VIEW public.metrics
-     WITH (security_invoker) AS
-     SELECT ( SELECT count(*) AS count
-               FROM request) AS total_requests,
-        (( SELECT count(*) AS count
-               FROM request))::double precision / (( SELECT count(DISTINCT date_trunc('day'::text, request.created_at)) AS count
-               FROM request))::double precision AS average_requests_per_day,
-        ( SELECT avg(EXTRACT(epoch FROM response.created_at - request.created_at)) AS avg
-               FROM request
-                 LEFT JOIN response ON response.request = request.id) AS average_response_time,
-        ( SELECT avg((request.body ->> 'max_tokens'::text)::integer) AS avg
-               FROM request) AS average_tokens_per_request,
-        ( SELECT avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer) AS avg
-               FROM response) AS average_tokens_per_response;
-
-  END IF;
-END$$;
 
 GRANT ALL ON TABLE public.metrics TO service_role;
 GRANT ALL ON TABLE public.metrics TO authenticated;
