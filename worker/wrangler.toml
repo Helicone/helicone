@@ -22,4 +22,4 @@ routes = [
 ]
 
 [env.devdev.vars]
-SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+SUPABASE_URL = "https://wldkumawyhruufmucrrc.supabase.co"
