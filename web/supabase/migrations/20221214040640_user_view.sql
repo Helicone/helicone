@@ -2,43 +2,18 @@
 -- For the circular dependencies, the order in which Schema Diff writes the objects is not very sophisticated
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
+CREATE OR REPLACE VIEW public.user_metrics
+  WITH (security_invoker) AS
+  SELECT request.user_id,
+    min(request.created_at) AS first_active,
+    max(request.created_at) AS last_active,
+    count(request.id) AS total_requests,
+    count(request.id)::double precision / count(DISTINCT date_trunc('day'::text, request.created_at))::double precision AS average_requests_per_day_active,
+    avg(((response.body ->> 'usage'::text)::json->> 'total_tokens'::text)::integer) AS average_tokens_per_request
+    FROM request
+      LEFT JOIN response ON response.request = request.id
+  GROUP BY request.user_id;
 
-DO $$BEGIN
-  IF (SELECT setting FROM pg_settings WHERE name = 'server_version_num')::integer < 150000 THEN
-    -- Changes for PostgreSQL version 14 and below
-    CREATE OR REPLACE VIEW public.user_metrics
-     AS
-     SELECT request.user_id,
-        min(request.created_at) AS first_active,
-        max(request.created_at) AS last_active,
-        count(request.id) AS total_requests,
-        count(request.id)::double precision / count(DISTINCT date_trunc('day'::text, request.created_at))::double precision AS average_requests_per_day_active,
-        avg(((response.body ->> 'usage'::text)::json->> 'total_tokens'::text)::integer) AS average_tokens_per_request
-       FROM request
-         LEFT JOIN response ON response.request = request.id
-      GROUP BY request.user_id;
-
-    ALTER TABLE public.user_metrics OWNER TO authenticated;
-
-    GRANT ALL ON TABLE public.user_metrics TO service_role;
-    GRANT ALL ON TABLE public.user_metrics TO authenticated;
-    GRANT ALL ON TABLE public.user_metrics TO anon;
-  ELSE
-    -- Changes for PostgreSQL version 15 and above
-    CREATE OR REPLACE VIEW public.user_metrics
-     WITH (security_invoker) AS
-     SELECT request.user_id,
-        min(request.created_at) AS first_active,
-        max(request.created_at) AS last_active,
-        count(request.id) AS total_requests,
-        count(request.id)::double precision / count(DISTINCT date_trunc('day'::text, request.created_at))::double precision AS average_requests_per_day_active,
-        avg(((response.body ->> 'usage'::text)::json->> 'total_tokens'::text)::integer) AS average_tokens_per_request
-       FROM request
-         LEFT JOIN response ON response.request = request.id
-      GROUP BY request.user_id;
-
-    GRANT ALL ON TABLE public.user_metrics TO service_role;
-    GRANT ALL ON TABLE public.user_metrics TO authenticated;
-    GRANT ALL ON TABLE public.user_metrics TO anon;
-  END IF;
-END$$;
+GRANT ALL ON TABLE public.user_metrics TO service_role;
+GRANT ALL ON TABLE public.user_metrics TO authenticated;
+GRANT ALL ON TABLE public.user_metrics TO anon;
