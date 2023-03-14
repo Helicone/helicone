@@ -16,9 +16,9 @@ export const Chat = (props: ChatProps) => {
   }
 
   return (
-    <div className="w-full flex flex-col text-left space-y-2 text-sm">
+    <div className="w-full flex flex-col text-left space-y-2">
       <p className="text-gray-500 font-medium">Messages</p>
-      <div className="text-sm w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full">
+      <div className="w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full">
         {messages.length > 0 ? (
           messages.map((message, index) => {
             const isAssistant = message.role === "assistant";

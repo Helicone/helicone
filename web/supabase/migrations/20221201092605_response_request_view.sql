@@ -4,17 +4,18 @@
 -- Please report an issue for any failure with the reproduction steps.
 
 CREATE OR REPLACE VIEW public.response_and_request
- AS
- SELECT response.body AS response_body,
+  WITH (security_invoker) AS 
+  SELECT response.body AS response_body,
     response.id AS response_id,
     response.created_at AS response_created_at,
     request.id AS request_id,
     request.body AS request_body,
     request.path AS request_path,
     request.created_at AS request_created_at
-   FROM response
-     LEFT JOIN request ON request.id = response.request;
+    FROM response
+      LEFT JOIN request ON request.id = response.request;
 
+-- Set owner and permissions
 ALTER TABLE public.response_and_request
     OWNER TO postgres;
 
@@ -23,5 +24,5 @@ GRANT ALL ON TABLE public.response_and_request TO postgres;
 GRANT ALL ON TABLE public.response_and_request TO anon;
 GRANT ALL ON TABLE public.response_and_request TO service_role;
 
--- THANK YOU REDDIT https://www.reddit.com/r/Supabase/comments/txq9o9/rls_views_and_functions/
-ALTER VIEW response_and_request OWNER TO authenticated;
+-- -- THANK YOU REDDIT https://www.reddit.com/r/Supabase/comments/txq9o9/rls_views_and_functions/
+-- ALTER VIEW response_and_request OWNER TO authenticated;
