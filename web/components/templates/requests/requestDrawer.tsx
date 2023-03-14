@@ -9,8 +9,8 @@ import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedModal from "../../shared/themed/themedModal";
+import ThemedSelect from "../../shared/themed/themedSelect";
 import { capitalizeWords } from "../../shared/utils/utils";
-import { ViewMode } from "../dashboard/viewMode";
 import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
 import { Completion } from "./completion";
@@ -31,7 +31,9 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );
-  const [viewMode, setViewMode] = useState<"left" | "right">("left");
+  const [viewMode, setViewMode] = useState<"condensed" | "expanded">(
+    "condensed"
+  );
 
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
@@ -111,15 +113,21 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         )}
         <div className="flex-col">
           <div className="flex flex-row justify-end w-full">
-            <ViewMode
+            <ThemedSelect
+              options={["condensed", "expanded"]}
+              onOptionSelect={(option) =>
+                setViewMode(option as "condensed" | "expanded")
+              }
+            />
+            {/* <ViewMode
               size="sm"
               leftLabel="Pretty"
               rightLabel="JSON"
               selected={viewMode}
               setSelected={setViewMode}
-            />
+            /> */}
           </div>
-          {viewMode === "left" ? (
+          {viewMode === "condensed" ? (
             <>
               {wrappedRequest.api.chat ? (
                 <Chat

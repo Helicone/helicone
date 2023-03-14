@@ -16,7 +16,6 @@
 import { Menu, Popover, Transition } from "@headlessui/react";
 import {
   ArrowDownTrayIcon,
-  ChevronDownIcon,
   FunnelIcon,
   MinusCircleIcon,
   PlusCircleIcon,
@@ -39,8 +38,6 @@ import {
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
-import useNotification from "../notification/useNotification";
-import { ViewMode } from "../../templates/dashboard/viewMode";
 import ThemedSelect from "./themedSelect";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
@@ -220,33 +217,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 ))}
                               </div>
                             </fieldset>
-                            {/* <div className="grid grid-cols-1 bg-black rounded-b-lg">
-                              <button
-                                onClick={() => {
-                                  if (
-                                    selectedColumns.filter((col) => col.active)
-                                      .length < 1
-                                  ) {
-                                    setNotification(
-                                      "No columns selected",
-                                      "error"
-                                    );
-                                    return;
-                                  }
-                                  editColumns.onColumnCallback(selectedColumns);
-                                  close();
-                                }}
-                                className="flex items-center justify-center gap-x-2.5 p-3 font-semibold text-white hover:bg-gray-800 rounded-b-lg border-t border-gray-900/5"
-                              >
-                                <ViewColumnsIcon
-                                  className="h-5 w-5 flex-none text-gray-200"
-                                  aria-hidden="true"
-                                />
-                                Select Columns (
-                                {selectedColumns.filter((c) => c.active).length}
-                                )
-                              </button>
-                            </div> */}
                           </div>
                         )}
                       </Popover.Panel>
