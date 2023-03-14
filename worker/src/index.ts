@@ -180,23 +180,6 @@ async function logRequest({
   }
 }
 
-async function logResponse(
-  dbClient: SupabaseClient,
-  requestId: string,
-  body: any
-): Promise<void> {
-  console.log(requestId);
-  const { data, error } = await dbClient
-    .from("response")
-    .insert([{ request: requestId, body: body }])
-    .select("id");
-  if (error !== null) {
-    console.error(error, "saf");
-  } else {
-    console.log(data);
-  }
-}
-
 function heliconeHeaders(
   requestResult: Result<string, string>
 ): Record<string, string> {
@@ -281,7 +264,6 @@ async function readResponse(
   }
   try {
     if (!requestSettings.stream) {
-      console.log("NO STREAM", JSON.parse(result));
       return {
         data: JSON.parse(result),
         error: null,
@@ -312,8 +294,15 @@ async function readAndLogResponse(
   dbClient: SupabaseClient
 ): Promise<void> {
   const responseResult = await readResponse(requestSettings, readable);
-  console.log("responseREsult,", responseResult);
-  return logResponse(dbClient, requestId, responseResult);
+  const { data, error } = await dbClient
+    .from("response")
+    .insert([{ request: requestId, body: responseResult }])
+    .select("id");
+  if (error !== null) {
+    console.error(error);
+  } else {
+    console.log(data);
+  }
 }
 
 async function forwardAndLog(
