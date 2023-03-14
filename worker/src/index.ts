@@ -338,16 +338,16 @@ async function forwardAndLog(
     undefined,
     undefined,
   ];
-  console.log("result", requestResult);
 
   ctx.waitUntil(
-    readableLog &&
-      readAndLogResponse(
-        requestSettings,
-        readableLog,
-        requestResult.data,
-        dbClient
-      )
+    readableLog && requestResult.data !== null
+      ? readAndLogResponse(
+          requestSettings,
+          readableLog,
+          requestResult.data,
+          dbClient
+        )
+      : Promise.resolve()
   );
 
   return new Response(readable, {
