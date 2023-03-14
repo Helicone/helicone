@@ -14,3 +14,12 @@ routes = [
 
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+
+[env.devdev]
+name = "helicone-worker-devdev"
+routes = [
+	{ pattern = "devdev-oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" }
+]
+
+[env.devdev.vars]
+SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
