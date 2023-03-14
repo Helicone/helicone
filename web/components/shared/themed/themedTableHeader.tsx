@@ -41,6 +41,7 @@ import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
 import useNotification from "../notification/useNotification";
 import { ViewMode } from "../../templates/dashboard/viewMode";
+import ThemedSelect from "./themedSelect";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -70,8 +71,10 @@ interface ThemedHeaderProps {
     filterMap: TableFilterMap;
     onAdvancedFilter: (advancedFilters: Filter[]) => void;
   };
-  viewMode?: string;
-  setViewMode?: Dispatch<SetStateAction<"left" | "right">>;
+  view?: {
+    viewMode: string;
+    setViewMode: Dispatch<SetStateAction<"condensed" | "expanded">>;
+  };
 }
 
 export default function ThemedHeader(props: ThemedHeaderProps) {
@@ -81,17 +84,11 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     timeFilter,
     advancedFilter,
     csvExport,
-    viewMode,
-    setViewMode,
+    view,
   } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState<Column[]>(
-    editColumns?.columns || []
-  );
-
-  const { setNotification } = useNotification();
 
   return (
     <div className="">
@@ -115,7 +112,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             )}
           </div>
           <div className="flex flex-row space-x-1 items-center">
-            {editColumns && viewMode == "left" && (
+            {editColumns && view?.viewMode == "condensed" && (
               <Popover className="relative text-sm">
                 {({ open }) => (
                   <>
@@ -149,13 +146,13 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                             <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
                               <button
                                 onClick={() => {
-                                  const newColumns = [...selectedColumns];
+                                  const newColumns = [...editColumns.columns];
 
                                   newColumns.forEach((col) => {
                                     col.active = false;
                                   });
 
-                                  setSelectedColumns(newColumns);
+                                  editColumns.onColumnCallback(newColumns);
                                 }}
                                 className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg border-b border-gray-900/5"
                               >
@@ -167,13 +164,13 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                               </button>
                               <button
                                 onClick={() => {
-                                  const newColumns = [...selectedColumns];
+                                  const newColumns = [...editColumns.columns];
 
                                   newColumns.forEach((col) => {
                                     col.active = true;
                                   });
 
-                                  setSelectedColumns(newColumns);
+                                  editColumns.onColumnCallback(newColumns);
                                 }}
                                 className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
                               >
@@ -184,9 +181,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 Select All
                               </button>
                             </div>
-                            <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                            <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
                               <div className="divide-y divide-gray-200 border-gray-200">
-                                {selectedColumns.map((col, idx) => (
+                                {editColumns.columns.map((col, idx) => (
                                   <div
                                     key={col.label}
                                     className="relative flex items-start p-4"
@@ -207,20 +204,23 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                         checked={col.active}
                                         onChange={(e) => {
                                           const newColumns = [
-                                            ...selectedColumns,
+                                            ...editColumns.columns,
                                           ];
                                           const col = newColumns[idx];
                                           col.active = e.target.checked;
-                                          setSelectedColumns(newColumns);
+
+                                          editColumns.onColumnCallback(
+                                            newColumns
+                                          );
                                         }}
-                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
                                       />
                                     </div>
                                   </div>
                                 ))}
                               </div>
                             </fieldset>
-                            <div className="grid grid-cols-1 bg-black rounded-b-lg">
+                            {/* <div className="grid grid-cols-1 bg-black rounded-b-lg">
                               <button
                                 onClick={() => {
                                   if (
@@ -246,7 +246,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 {selectedColumns.filter((c) => c.active).length}
                                 )
                               </button>
-                            </div>
+                            </div> */}
                           </div>
                         )}
                       </Popover.Panel>
@@ -315,13 +315,13 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 </Menu>
               </div>
             )}
-            {viewMode && setViewMode && (
-              <div className="ml-auto space-x-2">
-                <ViewMode
-                  leftLabel="Condensed"
-                  rightLabel="Expanded"
-                  selected={viewMode}
-                  setSelected={setViewMode}
+            {view && (
+              <div className="mx-auto flex text-sm">
+                <ThemedSelect
+                  options={["condensed", "expanded"]}
+                  onOptionSelect={(option) =>
+                    view.setViewMode(option as "condensed" | "expanded")
+                  }
                 />
               </div>
             )}
