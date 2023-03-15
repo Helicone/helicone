@@ -3,19 +3,6 @@ import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
 
-const publishingOptions = [
-  {
-    title: "Published",
-    description: "This job posting can be viewed by anyone who has the link.",
-    current: true,
-  },
-  {
-    title: "Draft",
-    description: "This job posting will no longer be publicly accessible.",
-    current: false,
-  },
-];
-
 interface ThemedSelectProps {
   options: string[];
   onOptionSelect: (option: string) => void;
