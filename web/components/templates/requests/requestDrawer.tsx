@@ -8,8 +8,7 @@ import { useState } from "react";
 import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import ThemedModal from "../../shared/themed/themedModal";
-import ThemedSelect from "../../shared/themed/themedSelect";
+import ThemedToggle from "../../shared/themed/themedToggle";
 import { capitalizeWords } from "../../shared/utils/utils";
 import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
@@ -113,7 +112,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         )}
         <div className="flex-col">
           <div className="flex flex-row justify-end w-full">
-            <ThemedSelect
+            <ThemedToggle
               options={["condensed", "expanded"]}
               onOptionSelect={(option) =>
                 setViewMode(option as "condensed" | "expanded")

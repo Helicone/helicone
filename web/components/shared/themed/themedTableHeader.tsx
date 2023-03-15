@@ -38,7 +38,7 @@ import {
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
-import ThemedSelect from "./themedSelect";
+import ThemedToggle from "./themedToggle";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -287,7 +287,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             )}
             {view && (
               <div className="mx-auto flex text-sm">
-                <ThemedSelect
+                <ThemedToggle
                   options={["condensed", "expanded"]}
                   onOptionSelect={(option) =>
                     view.setViewMode(option as "condensed" | "expanded")
