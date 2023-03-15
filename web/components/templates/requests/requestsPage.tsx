@@ -401,15 +401,17 @@ const RequestsPage = (props: RequestsPageProps) => {
                     setAdvancedFilter("all");
                   } else {
                     const firstFilter = filters[0];
-                    setAdvancedFilter(
-                      filters.slice(1).reduce((acc, curr) => {
+                    const reducedFilter = filters
+                      .slice(1)
+                      .reduce((acc, curr) => {
                         return {
                           left: acc,
                           operator: "and",
                           right: curr,
                         };
-                      }, firstFilter)
-                    );
+                      }, firstFilter);
+
+                    setAdvancedFilter(reducedFilter);
                   }
                 },
               }}

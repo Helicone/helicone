@@ -108,7 +108,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-row space-x-1 items-center">
+          <div className="flex flex-wrap space-x-1 items-center">
             {editColumns && view?.viewMode == "condensed" && (
               <Popover className="relative text-sm">
                 {({ open }) => (
@@ -343,7 +343,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 Clear
               </button>
               <button
-                onClick={() => advancedFilter.onAdvancedFilter(advancedFilters)}
+                onClick={() => {
+                  advancedFilter.onAdvancedFilter(advancedFilters);
+                }}
                 className={clsx(
                   "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
                 )}
@@ -368,7 +370,7 @@ function AdvancedFilters({
   setAdvancedFilters: Dispatch<SetStateAction<Filter[]>>;
 }) {
   return (
-    <div className="">
+    <div className="space-y-4">
       {filters.map((_filter, index) => {
         return (
           <div key={_filter.id}>
@@ -521,7 +523,7 @@ function AdvancedFilterRow({
   };
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center ">
+    <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center">
       <ThemedDropdownV2
         options={tables.map((table) => {
           return {
