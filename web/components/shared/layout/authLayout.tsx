@@ -228,7 +228,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </Transition.Root>
 
             {/* Static sidebar for desktop */}
-            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-40 md:flex-col">
+            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
                 <div className="flex flex-shrink-0 items-center px-4">
@@ -254,11 +254,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     />
                   </button>
                 </div>
-                <div className="mt-5 flex flex-grow flex-col bg-y-el">
+                <div className="mt-5 flex flex-grow flex-col">
                   <nav className="flex-1 space-y-1 px-2 pb-4 pt-2">
-                    {/* <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wide pt-4">
-                  METRICS
-                </p> */}
                     {navigation.map((item) => {
                       if (item.name === "Keys" && !isLoading && count < 1) {
                         return (
@@ -377,7 +374,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </>
         )}
         <div
-          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-40")}
+          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-56")}
         >
           <div className="sticky top-0 z-20 flex h-16 flex-shrink-0 bg-white border-b border-gray-300">
             <button

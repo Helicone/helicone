@@ -68,8 +68,10 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
-  const [viewMode, setViewMode] = useState<"left" | "right">("left");
-  const isPreview = viewMode === "right";
+  const [viewMode, setViewMode] = useState<"expanded" | "condensed">(
+    "condensed"
+  );
+  const isPreview = viewMode === "expanded";
   const truncLength = isPreview ? 8000 : 19;
 
   const requestColumn: Column = {
@@ -377,7 +379,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                 defaultTimeFilter: "all",
                 onTimeSelectHandler: onTimeSelectHandler,
                 timeFilterOptions: [
-                  { key: "1h", value: "Last Hour" },
                   { key: "24h", value: "Today" },
                   { key: "7d", value: "7D" },
                   { key: "1m", value: "1M" },
@@ -400,20 +401,24 @@ const RequestsPage = (props: RequestsPageProps) => {
                     setAdvancedFilter("all");
                   } else {
                     const firstFilter = filters[0];
-                    setAdvancedFilter(
-                      filters.slice(1).reduce((acc, curr) => {
+                    const reducedFilter = filters
+                      .slice(1)
+                      .reduce((acc, curr) => {
                         return {
                           left: acc,
                           operator: "and",
                           right: curr,
                         };
-                      }, firstFilter)
-                    );
+                      }, firstFilter);
+
+                    setAdvancedFilter(reducedFilter);
                   }
                 },
               }}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
+              view={{
+                viewMode,
+                setViewMode,
+              }}
             />
 
             {isLoading || from === undefined || to === undefined ? (
