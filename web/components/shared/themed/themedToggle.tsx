@@ -10,7 +10,7 @@ export default function ThemedToggle(props: ThemedToggleProps) {
   const { options, onOptionSelect } = props;
 
   return (
-    <div className="block px-2 py-16 sm:px-0">
+    <div className="inline-flex px-2 sm:px-0">
       <Tab.Group>
         <Tab.List className="flex space-x-1 rounded-lg bg-gray-300 p-0.5">
           {options.map((option, idx) => (
