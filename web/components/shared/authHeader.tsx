@@ -9,7 +9,7 @@ const AuthHeader = (props: AuthHeaderProps) => {
   const { title, actions } = props;
 
   return (
-    <div className="sm:flex sm:items-center border-b border-gray-200 pb-4 mb-4">
+    <div className="sm:flex sm:items-center border-b border-gray-200 pb-2 mb-2">
       <div className="sm:flex-auto">
         <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
       </div>
