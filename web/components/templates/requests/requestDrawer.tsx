@@ -119,13 +119,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                 setViewMode(option as "condensed" | "expanded")
               }
             />
-            {/* <ViewMode
-              size="sm"
-              leftLabel="Pretty"
-              rightLabel="JSON"
-              selected={viewMode}
-              setSelected={setViewMode}
-            /> */}
           </div>
           {viewMode === "condensed" ? (
             <>
