@@ -16,10 +16,12 @@
 import { Menu, Popover, Transition } from "@headlessui/react";
 import {
   ArrowDownTrayIcon,
+  ArrowsPointingOutIcon,
   FunnelIcon,
   MinusCircleIcon,
   PlusCircleIcon,
   PlusIcon,
+  Square3Stack3DIcon,
   TrashIcon,
   ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
@@ -94,8 +96,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col xl:flex-row items-start gap-4 justify-between xl:items-center pb-3">
-          <div className="flex flex-col xl:flex-row items-start gap-4 sm:gap-2 sm:items-center">
+        <div className="flex flex-col lg:flex-row items-start gap-4 justify-between lg:items-center pb-3">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
             {timeFilter && (
               <ThemedTimeFilter
                 timeFilterOptions={timeFilter.timeFilterOptions}
@@ -109,7 +111,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             )}
           </div>
           <div className="flex flex-wrap space-x-1 items-center">
-            {editColumns && view?.viewMode == "condensed" && (
+            {editColumns && (
               <Popover className="relative text-sm">
                 {({ open }) => (
                   <>
@@ -288,7 +290,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             {view && (
               <div className="mx-auto flex text-sm">
                 <ThemedToggle
-                  options={["condensed", "expanded"]}
+                  options={[
+                    {
+                      label: "condensed",
+                      icon: Square3Stack3DIcon,
+                    },
+                    {
+                      label: "expanded",
+                      icon: ArrowsPointingOutIcon,
+                    },
+                  ]}
                   onOptionSelect={(option) =>
                     view.setViewMode(option as "condensed" | "expanded")
                   }
