@@ -76,10 +76,16 @@ export async function getRequests(
 `;
 
   const { data, error } = await dbExecute<HeliconeRequest>(query);
+
   if (error !== null) {
     return { data: null, error: error };
   }
-  return { data: data, error: null };
+  // This is a patch for a regression within the worker
+  const fixedData = data.map((d) => ({
+    ...d,
+    response_body: d.response_body.data ?? d.response_body,
+  }));
+  return { data: fixedData, error: null };
 }
 
 export async function getRequestCount(
