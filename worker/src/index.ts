@@ -350,12 +350,13 @@ async function forwardAndLog(
       : Promise.resolve()
   );
 
+  const responseHeaders = new Headers(response.headers);
+  for (const [key, value] of Object.entries(heliconeHeaders(requestResult))) {
+    responseHeaders.set(key, value);
+  }
   return new Response(readable, {
     ...response,
-    headers: {
-      ...heliconeHeaders(requestResult),
-      ...response.headers,
-    },
+    headers: responseHeaders,
   });
 }
 
