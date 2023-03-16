@@ -294,14 +294,18 @@ async function readAndLogResponse(
   dbClient: SupabaseClient
 ): Promise<void> {
   const responseResult = await readResponse(requestSettings, readable);
-  const { data, error } = await dbClient
-    .from("response")
-    .insert([{ request: requestId, body: responseResult }])
-    .select("id");
-  if (error !== null) {
-    console.error(error);
+  if (responseResult.data !== null) {
+    const { data, error } = await dbClient
+      .from("response")
+      .insert([{ request: requestId, body: responseResult.data }])
+      .select("id");
+    if (error !== null) {
+      console.error(error);
+    } else {
+      console.log(data);
+    }
   } else {
-    console.log(data);
+    console.error(responseResult.error);
   }
 }
 
