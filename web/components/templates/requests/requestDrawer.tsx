@@ -1,6 +1,8 @@
 import {
+  ArrowsPointingOutIcon,
   ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
+  Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import { request } from "https";
 import { wrap } from "module";
@@ -113,7 +115,16 @@ const RequestDrawer = (props: RequestDrawerProps) => {
         <div className="flex-col">
           <div className="flex flex-row justify-end w-full">
             <ThemedToggle
-              options={["condensed", "expanded"]}
+              options={[
+                {
+                  label: "condensed",
+                  icon: Square3Stack3DIcon,
+                },
+                {
+                  label: "expanded",
+                  icon: ArrowsPointingOutIcon,
+                },
+              ]}
               onOptionSelect={(option) =>
                 setViewMode(option as "condensed" | "expanded")
               }
