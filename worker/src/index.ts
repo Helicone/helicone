@@ -1,7 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
+import { PassThrough } from "stream";
 // import bcrypt from "bcrypt";
+
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
@@ -178,20 +180,6 @@ async function logRequest({
   }
 }
 
-async function logResponse(
-  dbClient: SupabaseClient,
-  requestId: string,
-  body: string
-): Promise<void> {
-  const { data, error } = await dbClient
-    .from("response")
-    .insert([{ request: requestId, body: JSON.parse(body) }])
-    .select("id");
-  if (error !== null) {
-    console.error(error);
-  }
-}
-
 function heliconeHeaders(
   requestResult: Result<string, string>
 ): Record<string, string> {
@@ -254,7 +242,71 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
+async function readResponse(
+  requestSettings: RequestSettings,
+  readable: ReadableStream<any>
+): Promise<Result<any, string>> {
+  const reader = await readable?.getReader();
+  let result = "";
+  const MAX_LOOPS = 10_000;
+  let i = 0;
+  while (true) {
+    if (reader === undefined) break;
+    const res = await reader?.read();
+    if (res?.done) break;
+    if (typeof res?.value === "string") {
+      result += res?.value;
+    } else if (res?.value instanceof Uint8Array) {
+      result += new TextDecoder().decode(res?.value);
+    }
+    i++;
+    if (i > MAX_LOOPS) break;
+  }
+  try {
+    if (!requestSettings.stream) {
+      return {
+        data: JSON.parse(result),
+        error: null,
+      };
+    }
+    const lines = result.split("\n").filter((line) => line !== "");
+    const data = lines.map((line, i) => {
+      if (i === lines.length - 1) return {};
+
+      return JSON.parse(line.replace("data:", ""));
+    });
+    return {
+      data: data,
+      error: null,
+    };
+  } catch (e) {
+    return {
+      data: null,
+      error: "error parsing response, " + e + ", " + result,
+    };
+  }
+}
+
+async function readAndLogResponse(
+  requestSettings: RequestSettings,
+  readable: ReadableStream<any>,
+  requestId: string,
+  dbClient: SupabaseClient
+): Promise<void> {
+  const responseResult = await readResponse(requestSettings, readable);
+  const { data, error } = await dbClient
+    .from("response")
+    .insert([{ request: requestId, body: responseResult }])
+    .select("id");
+  if (error !== null) {
+    console.error(error);
+  } else {
+    console.log(data);
+  }
+}
+
 async function forwardAndLog(
+  requestSettings: RequestSettings,
   body: string,
   request: Request,
   env: Env,
@@ -282,31 +334,49 @@ async function forwardAndLog(
       ...getHeliconeHeaders(request.headers),
     }),
   ]);
-  const responseBody = await response.text();
-  if (requestResult.data !== null) {
-    ctx.waitUntil(logResponse(dbClient, requestResult.data, responseBody));
-  } else {
-    console.error(requestResult.error);
-  }
+  const [readable, readableLog] = response.body?.tee() ?? [
+    undefined,
+    undefined,
+  ];
 
-  return new Response(responseBody, {
+  ctx.waitUntil(
+    readableLog && requestResult.data !== null
+      ? readAndLogResponse(
+          requestSettings,
+          readableLog,
+          requestResult.data,
+          dbClient
+        )
+      : Promise.resolve()
+  );
+
+  const responseHeaders = new Headers(response.headers);
+  for (const [key, value] of Object.entries(heliconeHeaders(requestResult))) {
+    responseHeaders.set(key, value);
+  }
+  return new Response(readable, {
     ...response,
-    headers: {
-      ...heliconeHeaders(requestResult),
-      ...response.headers,
-    },
+    headers: responseHeaders,
   });
 }
 
 async function uncachedRequest(
   request: Request,
   env: Env,
-  ctx: ExecutionContext
+  ctx: ExecutionContext,
+  requestSettings: RequestSettings
 ): Promise<Response> {
   const result = await extractPrompt(request);
   if (result.data !== null) {
     const { request: formattedRequest, body: body, prompt } = result.data;
-    return await forwardAndLog(body, formattedRequest, env, ctx, prompt);
+    return await forwardAndLog(
+      requestSettings,
+      body,
+      formattedRequest,
+      env,
+      ctx,
+      prompt
+    );
   } else {
     return new Response(result.error, { status: 400 });
   }
@@ -434,15 +504,26 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
+interface RequestSettings {
+  stream: boolean;
+}
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    const requestBody = await request.clone().json<{ stream?: boolean }>();
+    const requestSettings = {
+      stream: requestBody.stream ?? false,
+    };
+
     const { data: cacheSettings, error: cacheError } = getCacheSettings(
-      request.headers
+      request.headers,
+      requestBody.stream ?? false
     );
+
     if (cacheError !== null) {
       return new Response(cacheError, { status: 400 });
     }
@@ -460,7 +541,7 @@ export default {
 
     let requestClone = cacheSettings.shouldSaveToCache ? request.clone() : null;
 
-    const response = await uncachedRequest(request, env, ctx);
+    const response = await uncachedRequest(request, env, ctx, requestSettings);
 
     if (cacheSettings.shouldSaveToCache && requestClone) {
       ctx.waitUntil(
