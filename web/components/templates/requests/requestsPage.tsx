@@ -71,6 +71,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [viewMode, setViewMode] = useState<"expanded" | "condensed">(
     "condensed"
   );
+
   const isPreview = viewMode === "expanded";
   const truncLength = isPreview ? 8000 : 19;
 
@@ -196,6 +197,22 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: number) => (value ? value.toFixed(2) : ""),
     },
   ];
+
+  const localStorageColumns =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsColumns")
+      : null;
+
+  const parsed = JSON.parse(localStorageColumns || "[]") as Column[];
+
+  if (parsed) {
+    initialColumns.forEach((column) => {
+      const match = parsed.find((c) => c.key === column.key);
+      if (match) {
+        column.active = match.active;
+      }
+    });
+  }
 
   const [defaultColumns, setDefaultColumns] =
     useState<Column[]>(initialColumns);
@@ -372,7 +389,19 @@ const RequestsPage = (props: RequestsPageProps) => {
             <ThemedTableHeader
               editColumns={{
                 columns: defaultColumns,
-                onColumnCallback: (columns) => setDefaultColumns(columns),
+                onColumnCallback: (columns) => {
+                  const active = columns.map((c) => {
+                    return {
+                      key: c.key,
+                      active: c.active,
+                    };
+                  });
+                  localStorage.setItem(
+                    "requestsColumns",
+                    JSON.stringify(active)
+                  );
+                  setDefaultColumns(columns);
+                },
               }}
               timeFilter={{
                 customTimeFilter: true,
