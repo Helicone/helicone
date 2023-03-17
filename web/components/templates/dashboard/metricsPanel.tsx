@@ -73,21 +73,22 @@ export function MetricsPanel(props: MetricsPanelProps) {
 
   return (
     <div>
-      <dl className="grid grid-cols-1 max-w-7xl gap-0.5 overflow-hidden rounded-lg text-center sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="mx-auto w-full grid grid-cols-2 sm:grid-cols-4 text-gray-900 gap-y-4">
         {metrics.map((row) => (
           <div
-            key={row.label as string}
-            className="flex flex-col bg-white p-2 border border-gray-300 shadow-sm rounded-lg"
+            key={row.label}
+            className="flex flex-col pl-4 border-l border-gray-200"
           >
-            <dt className="text-sm font-semibold text-gray-600">{row.label}</dt>
-            <dd
-              className={clsx(
-                loading ? "animate-pulse text-gray-400" : "",
-                "order-first text-lg font-semibold tracking-tight text-gray-900"
+            <dd className="order-first text-sm sm:text-md font-bold tracking-tight">
+              {loading ? (
+                <div className="animate-pulse h-6 w-24 bg-gray-300 rounded-md" />
+              ) : (
+                row.value
               )}
-            >
-              {loading ? "Loading" : row.value}
             </dd>
+            <dt className="text-xs sm:text-sm leading-6 text-gray-700">
+              {row.label}
+            </dt>
           </div>
         ))}
       </dl>

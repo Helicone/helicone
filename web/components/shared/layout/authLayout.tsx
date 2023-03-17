@@ -228,7 +228,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </Transition.Root>
 
             {/* Static sidebar for desktop */}
-            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col">
+            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
                 <div className="flex flex-shrink-0 items-center px-4">
@@ -374,7 +374,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </>
         )}
         <div
-          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-56")}
+          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
         >
           <div className="sticky top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
             <button
