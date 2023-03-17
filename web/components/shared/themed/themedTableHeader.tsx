@@ -40,7 +40,7 @@ import {
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
-import ThemedToggle from "./themedToggle";
+import ThemedToggle from "./themedTabs";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {

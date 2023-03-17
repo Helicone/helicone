@@ -2,10 +2,10 @@ import { ForwardRefExoticComponent, SVGProps, useState } from "react";
 import { Tab } from "@headlessui/react";
 import { clsx } from "../clsx";
 
-interface ThemedToggleProps {
+interface ThemedTabsProps {
   options: {
     label: string;
-    icon?: ForwardRefExoticComponent<
+    icon: ForwardRefExoticComponent<
       SVGProps<SVGSVGElement> & {
         title?: string | undefined;
         titleId?: string | undefined;
@@ -14,7 +14,7 @@ interface ThemedToggleProps {
   }[];
   onOptionSelect: (option: string) => void;
 }
-export default function ThemedToggle(props: ThemedToggleProps) {
+export default function ThemedTabs(props: ThemedTabsProps) {
   const { options, onOptionSelect } = props;
 
   return (
@@ -26,7 +26,7 @@ export default function ThemedToggle(props: ThemedToggleProps) {
               key={idx}
               className={({ selected }) =>
                 clsx(
-                  "w-full flex flex-row rounded-md px-3 py-1.5 text-sm font-medium leading-5",
+                  "w-full flex flex-row rounded-md px-2.5 py-1.5 text-sm font-medium leading-5",
                   selected
                     ? "bg-white shadow text-gray-900"
                     : " hover:cursor-pointer text-gray-500"
@@ -35,16 +35,16 @@ export default function ThemedToggle(props: ThemedToggleProps) {
               onClick={() => onOptionSelect(option.label)}
             >
               {({ selected }) => (
-                <div className="flex flex-row space-x-1.5">
-                  {option.icon && (
-                    <option.icon
-                      className={clsx(
-                        selected ? "text-sky-500" : "text-gray-500",
-                        "w-5 h-5 inline-block"
-                      )}
-                    />
-                  )}
-                  <span className="sr-only xl:not-sr-only">{option.label}</span>
+                <div className="flex flex-row space-x-2 items-center">
+                  <option.icon
+                    className={clsx(
+                      selected ? "text-sky-500" : "text-gray-500",
+                      "w-5 h-5 inline-block"
+                    )}
+                  />
+                  <span className="sr-only xl:not-sr-only ">
+                    {option.label}
+                  </span>
                 </div>
               )}
             </Tab>
