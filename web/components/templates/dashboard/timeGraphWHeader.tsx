@@ -46,9 +46,9 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         )}
       >
         {/* Requests over time */}
-        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1 bg-white">
-          <h3 className="text-lg font-medium text-gray-900 text-center">
-            OpenAI Requests over time
+        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1 bg-white">
+          <h3 className="text-md font-semibold text-gray-900 text-center">
+            OpenAI Requests
           </h3>
           <RenderLineChart
             data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
@@ -61,9 +61,9 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         </div>
 
         {/* Costs over time */}
-        <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
-          <h3 className="text-lg font-medium text-gray-900 text-center">
-            Costs over time (USD)
+        <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1">
+          <h3 className="text-md font-semibold text-gray-900 text-center">
+            Costs (USD)
           </h3>
           <RenderLineChart
             data={unwrapDefaultEmpty(costOverTime).map((r) => ({
@@ -76,9 +76,9 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         </div>
 
         {/* Errors */}
-        <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-lg pl-0 pr-8 pt-4 pb-8 space-y-1">
-          <h3 className="text-lg font-medium text-gray-900 text-center">
-            Errors over time
+        <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1">
+          <h3 className="text-md font-semibold text-gray-900 text-center">
+            Errors
           </h3>
           <RenderLineChart
             data={unwrapDefaultEmpty(errorOverTime).map((r) => ({

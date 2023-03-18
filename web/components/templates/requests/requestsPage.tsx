@@ -202,8 +202,23 @@ const RequestsPage = (props: RequestsPageProps) => {
     typeof window !== "undefined"
       ? localStorage.getItem("requestsColumns")
       : null;
+  const sessionStorageKey =
+    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
   const parsed = JSON.parse(localStorageColumns || "[]") as Column[];
+
+  const parseKey = (keyString: string | null) => {
+    if (!keyString) {
+      return "all";
+    }
+    return {
+      user_api_keys: {
+        api_key_hash: {
+          equals: keyString,
+        },
+      },
+    };
+  };
 
   if (parsed) {
     initialColumns.forEach((column) => {
@@ -229,7 +244,9 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
     created_at: "desc",
   });
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
+    parseKey(sessionStorageKey)
+  );
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
