@@ -40,7 +40,7 @@ import {
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
-import ThemedToggle from "./themedToggle";
+import ThemedToggle from "./themedTabs";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -183,39 +183,31 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                             <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
                               <div className="divide-y divide-gray-200 border-gray-200">
                                 {editColumns.columns.map((col, idx) => (
-                                  <div
-                                    key={col.label}
-                                    className="relative flex items-start p-4"
+                                  <label
+                                    key={idx}
+                                    htmlFor={`person-${col.label}`}
+                                    className="relative p-4 select-none font-medium text-gray-900 w-full justify-between items-center flex hover:bg-gray-50 hover:cursor-pointer"
                                   >
-                                    <div className="min-w-0 flex-1 text-sm leading-6">
-                                      <label
-                                        htmlFor={`person-${col.label}`}
-                                        className="select-none font-medium text-gray-900"
-                                      >
-                                        {col.label}
-                                      </label>
-                                    </div>
-                                    <div className="ml-3 flex h-6 items-center">
-                                      <input
-                                        id={`person-${col.label}`}
-                                        name={`person-${col.label}`}
-                                        type="checkbox"
-                                        checked={col.active}
-                                        onChange={(e) => {
-                                          const newColumns = [
-                                            ...editColumns.columns,
-                                          ];
-                                          const col = newColumns[idx];
-                                          col.active = e.target.checked;
+                                    <span>{col.label}</span>
+                                    <input
+                                      id={`person-${col.label}`}
+                                      name={`person-${col.label}`}
+                                      type="checkbox"
+                                      checked={col.active}
+                                      onChange={(e) => {
+                                        const newColumns = [
+                                          ...editColumns.columns,
+                                        ];
+                                        const col = newColumns[idx];
+                                        col.active = e.target.checked;
 
-                                          editColumns.onColumnCallback(
-                                            newColumns
-                                          );
-                                        }}
-                                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
-                                      />
-                                    </div>
-                                  </div>
+                                        editColumns.onColumnCallback(
+                                          newColumns
+                                        );
+                                      }}
+                                      className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
+                                    />
+                                  </label>
                                 ))}
                               </div>
                             </fieldset>

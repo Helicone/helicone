@@ -45,6 +45,22 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
+  const sessionStorageKey =
+    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
+
+  const parseKey = (keyString: string | null) => {
+    if (!keyString) {
+      return "all";
+    }
+    return {
+      user_api_keys: {
+        api_key_hash: {
+          equals: keyString,
+        },
+      },
+    };
+  };
+
   const [timeData, setTimeData] = useState<GraphDataState>(
     initialGraphDataState
   );
@@ -53,7 +69,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     useState<Loading<Result<Metrics, string>>>("loading");
   const [interval, setInterval] = useState<TimeInterval>("1m");
   const [filter, setFilter] = useState<FilterNode>("all");
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
+    parseKey(sessionStorageKey)
+  );
   const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
@@ -63,7 +81,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   });
 
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const { properties } = useGetProperties();
   const { propertyParams } = useGetPropertyParams();
 
   useEffect(() => {
