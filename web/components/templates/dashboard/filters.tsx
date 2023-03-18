@@ -16,6 +16,8 @@ export function Filters({
   filter: FilterNode;
   setFilter: Dispatch<SetStateAction<FilterNode>>;
 }) {
+  const defaultKey =
+    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
   return (
     <div className="flex flex-row items-center gap-2">
       <label
@@ -27,9 +29,12 @@ export function Filters({
       <select
         id="location"
         name="location"
-        className="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        defaultValue={"all"}
+        className="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md"
+        defaultValue={defaultKey || "all"}
         onChange={(e) => {
+          e.target.value !== "all"
+            ? sessionStorage.setItem("currentKey", e.target.value)
+            : sessionStorage.removeItem("currentKey");
           setFilter((f) => {
             if (e.target.value === "all" && f !== "all") {
               return {
@@ -50,6 +55,7 @@ export function Filters({
             if ("left" in f) {
               throw new Error("Not implemented");
             }
+
             return {
               ...f,
               user_api_keys: {
