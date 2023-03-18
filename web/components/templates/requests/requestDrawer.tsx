@@ -2,6 +2,8 @@ import {
   ArrowsPointingOutIcon,
   ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
+  CodeBracketIcon,
+  EyeIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import { request } from "https";
@@ -10,7 +12,7 @@ import { useState } from "react";
 import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import ThemedToggle from "../../shared/themed/themedToggle";
+import ThemedToggle from "../../shared/themed/themedTabs";
 import { capitalizeWords } from "../../shared/utils/utils";
 import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
@@ -32,9 +34,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );
-  const [viewMode, setViewMode] = useState<"condensed" | "expanded">(
-    "condensed"
-  );
+  const [viewMode, setViewMode] = useState<"pretty" | "json">("pretty");
 
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
@@ -117,20 +117,20 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             <ThemedToggle
               options={[
                 {
-                  label: "condensed",
-                  icon: Square3Stack3DIcon,
+                  label: "pretty",
+                  icon: EyeIcon,
                 },
                 {
-                  label: "expanded",
-                  icon: ArrowsPointingOutIcon,
+                  label: "json",
+                  icon: CodeBracketIcon,
                 },
               ]}
               onOptionSelect={(option) =>
-                setViewMode(option as "condensed" | "expanded")
+                setViewMode(option as "pretty" | "json")
               }
             />
           </div>
-          {viewMode === "condensed" ? (
+          {viewMode === "pretty" ? (
             <>
               {wrappedRequest.api.chat ? (
                 <Chat
