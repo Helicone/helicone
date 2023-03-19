@@ -18,6 +18,8 @@ export interface AuthClient {
 export interface ModelUsageOverTime {
   created_at_trunc: Date;
   sum_tokens: number;
+  prompt_tokens: number;
+  completion_tokens: number;
   model: string;
 }
 
