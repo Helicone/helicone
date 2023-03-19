@@ -15,8 +15,8 @@ export async function getModelMetrics(
 ) {
   const query = `
 SELECT response.body ->> 'model'::text as model,
-  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens
-  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS prompt_tokens
+  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
+  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS prompt_tokens,
   sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS completion_tokens
 FROM response 
   left join request on response.request = request.id
