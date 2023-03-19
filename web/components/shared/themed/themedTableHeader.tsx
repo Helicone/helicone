@@ -72,7 +72,7 @@ interface ThemedHeaderProps {
   };
   view?: {
     viewMode: string;
-    setViewMode: Dispatch<SetStateAction<"condensed" | "expanded">>;
+    setViewMode: Dispatch<SetStateAction<"Condensed" | "Expanded">>;
   };
 }
 
@@ -292,16 +292,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 <ThemedToggle
                   options={[
                     {
-                      label: "condensed",
+                      label: "Condensed",
                       icon: Square3Stack3DIcon,
                     },
                     {
-                      label: "expanded",
+                      label: "Expanded",
                       icon: ArrowsPointingOutIcon,
                     },
                   ]}
                   onOptionSelect={(option) =>
-                    view.setViewMode(option as "condensed" | "expanded")
+                    view.setViewMode(option as "Condensed" | "Expanded")
                   }
                 />
               </div>
