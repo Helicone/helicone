@@ -47,7 +47,9 @@ export async function getModelUsageOverTime({
 SELECT
   response.body ->> 'model'::text as model,
   ${dateTrunc} as created_at_trunc,
-  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens
+  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
+  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS prompt_tokens,
+  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS completion_tokens
 FROM response
   left join request on response.request = request.id
   left join user_api_keys on request.auth_hash = user_api_keys.api_key_hash
@@ -69,6 +71,8 @@ GROUP BY response.body ->> 'model'::text, ${dateTrunc}
         d.created_at_trunc.getTime() - timeZoneDifference * 60 * 1000
       ),
       sum_tokens: Number(d.sum_tokens),
+      prompt_tokens: Number(d.prompt_tokens),
+      completion_tokens: Number(d.completion_tokens),
     })),
     error: null,
   };
