@@ -53,11 +53,15 @@ export default async function handler(
           acc[userCost.user_id] += modelCost({
             model: userCost.model,
             sum_tokens: userCost.sum_tokens,
+            prompt_tokens: userCost.prompt_tokens,
+            completion_tokens: userCost.completion_tokens,
           });
         } else {
           acc[userCost.user_id] = modelCost({
             model: userCost.model,
             sum_tokens: userCost.sum_tokens,
+            prompt_tokens: userCost.prompt_tokens,
+            completion_tokens: userCost.completion_tokens,
           });
         }
         return acc;

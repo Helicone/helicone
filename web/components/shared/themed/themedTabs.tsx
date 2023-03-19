@@ -1,6 +1,7 @@
 import { ForwardRefExoticComponent, SVGProps, useState } from "react";
 import { Tab } from "@headlessui/react";
 import { clsx } from "../clsx";
+import { capitalizeWords } from "../utils/utils";
 
 interface ThemedTabsProps {
   options: {
