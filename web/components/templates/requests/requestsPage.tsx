@@ -70,11 +70,11 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
-  const [viewMode, setViewMode] = useState<"expanded" | "condensed">(
-    "condensed"
+  const [viewMode, setViewMode] = useState<"Expanded" | "Condensed">(
+    "Condensed"
   );
 
-  const isPreview = viewMode === "expanded";
+  const isPreview = viewMode === "Expanded";
   const truncLength = isPreview ? 8000 : 19;
 
   const requestColumn: Column = {

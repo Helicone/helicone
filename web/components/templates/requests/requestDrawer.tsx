@@ -34,7 +34,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );
-  const [viewMode, setViewMode] = useState<"pretty" | "json">("pretty");
+  const [viewMode, setViewMode] = useState<"Pretty" | "JSON">("Pretty");
 
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
@@ -117,20 +117,20 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             <ThemedToggle
               options={[
                 {
-                  label: "pretty",
+                  label: "Pretty",
                   icon: EyeIcon,
                 },
                 {
-                  label: "json",
+                  label: "JSON",
                   icon: CodeBracketIcon,
                 },
               ]}
               onOptionSelect={(option) =>
-                setViewMode(option as "pretty" | "json")
+                setViewMode(option as "Pretty" | "JSON")
               }
             />
           </div>
-          {viewMode === "pretty" ? (
+          {viewMode === "Pretty" ? (
             <>
               {wrappedRequest.api.chat ? (
                 <Chat
