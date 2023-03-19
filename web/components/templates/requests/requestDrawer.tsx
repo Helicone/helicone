@@ -2,6 +2,8 @@ import {
   ArrowsPointingOutIcon,
   ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
+  CodeBracketIcon,
+  EyeIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import { request } from "https";
@@ -10,7 +12,7 @@ import { useState } from "react";
 import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import ThemedToggle from "../../shared/themed/themedToggle";
+import ThemedToggle from "../../shared/themed/themedTabs";
 import { capitalizeWords } from "../../shared/utils/utils";
 import { CacheHits } from "./cacheHits";
 import { Chat } from "./chat";
@@ -116,11 +118,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
               options={[
                 {
                   label: "Pretty",
-                  icon: undefined,
+                  icon: EyeIcon,
                 },
                 {
                   label: "JSON",
-                  icon: undefined,
+                  icon: CodeBracketIcon,
                 },
               ]}
               onOptionSelect={(option) =>

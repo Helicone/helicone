@@ -1,4 +1,7 @@
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -28,6 +31,7 @@ import {
 import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
 import AuthLayout from "../../shared/layout/authLayout";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { Filter } from "../../shared/themed/themedTableHeader";
@@ -45,6 +49,22 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
+  const sessionStorageKey =
+    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
+
+  const parseKey = (keyString: string | null) => {
+    if (!keyString) {
+      return "all";
+    }
+    return {
+      user_api_keys: {
+        api_key_hash: {
+          equals: keyString,
+        },
+      },
+    };
+  };
+
   const [timeData, setTimeData] = useState<GraphDataState>(
     initialGraphDataState
   );
@@ -53,7 +73,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     useState<Loading<Result<Metrics, string>>>("loading");
   const [interval, setInterval] = useState<TimeInterval>("1m");
   const [filter, setFilter] = useState<FilterNode>("all");
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
+    parseKey(sessionStorageKey)
+  );
   const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
@@ -63,10 +85,10 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   });
 
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const { properties } = useGetProperties();
   const { propertyParams } = useGetPropertyParams();
 
-  useEffect(() => {
+  const getData = () => {
     getDashboardData(
       timeFilter,
       {
@@ -77,6 +99,10 @@ const DashboardPage = (props: DashboardPageProps) => {
       setMetrics,
       setTimeData
     );
+  };
+
+  useEffect(() => {
+    getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeFilter, filter, apiKeyFilter]);
 
@@ -98,13 +124,20 @@ const DashboardPage = (props: DashboardPageProps) => {
     <AuthLayout user={user}>
       <AuthHeader
         title={"Dashboard"}
-        actions={
-          <Filters
-            keys={keys}
-            filter={apiKeyFilter}
-            setFilter={setApiKeyFilter}
-          />
+        headerActions={
+          <button
+            onClick={() => getData()}
+            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+          >
+            <ArrowPathIcon
+              className={clsx(
+                metrics === "loading" ? "animate-spin" : "",
+                "h-5 w-5 inline"
+              )}
+            />
+          </button>
         }
+        actions={<Filters keys={keys} setFilter={setApiKeyFilter} />}
       />
       {keys.length === 0 ? (
         <div className="space-y-16">
