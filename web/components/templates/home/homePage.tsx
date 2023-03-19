@@ -23,6 +23,7 @@ import BasePageV2 from "../../shared/layout/basePageV2";
 
 import { useState } from "react";
 import OnboardingButton from "../../shared/auth/onboardingButton";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export default function HomePage() {
   const router = useRouter();
@@ -86,28 +87,9 @@ export default function HomePage() {
                       className="flex w-full items-center justify-center rounded-md border border-transparent bg-sky-500 bg-opacity-80 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-opacity-70 sm:px-8"
                     >
                       {demoLoading ? (
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                          />
-                        </svg>
+                        <ArrowPathIcon className="h-5 w-5 inline animate-spin" />
                       ) : (
-                        "View Demo"
+                        <p>View Demo</p>
                       )}
                     </button>
                   </div>
