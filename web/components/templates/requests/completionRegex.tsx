@@ -10,13 +10,6 @@ interface CompletionRegexProps {
 
 export const CompletionRegex = (props: CompletionRegexProps) => {
   const { prompt_name, prompt_regex, response, values, keys } = props;
-  console.log(
-    "WRAPPED REQUEST COMPLETION REGEX",
-    "VALUES",
-    values,
-    "KEYS",
-    keys
-  );
 
   return (
     <>

@@ -279,7 +279,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
       sortLeaf
     );
-  console.log("VALUES", requests);
 
   const { keys, isLoading: isKeysLoading } = useGetKeys();
 
@@ -391,7 +390,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
-  console.log("WRAPPED REQUESTS", selectedData);
 
   return (
     <>

@@ -52,12 +52,12 @@ function formatPrompt(prompt: Prompt): Result {
         match = regex.exec(formattedString);
     }
 
-    // if (missingPlaceholders.length > 0) {
-    //     return {
-    //         data: null,
-    //         error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
-    //     };
-    // }
+    if (missingPlaceholders.length > 0) {
+        return {
+            data: null,
+            error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
+        };
+    }
 
     return {
         data: formattedString,

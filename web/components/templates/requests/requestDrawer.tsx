@@ -30,7 +30,6 @@ interface RequestDrawerProps {
 
 const RequestDrawer = (props: RequestDrawerProps) => {
   const { open, setOpen, wrappedRequest, values, properties } = props;
-  console.log("WRAPPED REQUEST", wrappedRequest, values, properties);
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );

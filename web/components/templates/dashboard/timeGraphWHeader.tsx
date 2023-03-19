@@ -48,7 +48,7 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
         {/* Requests over time */}
         <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1 bg-white">
           <h3 className="text-md font-semibold text-gray-900 text-center">
-            OpenAI Requests
+            Requests
           </h3>
           <RenderLineChart
             data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
