@@ -1,3 +1,4 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 
 import { useState } from "react";
@@ -19,6 +20,7 @@ import {
 } from "../../../services/lib/sorts/sorts";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { capitalizeWords, getUSDate } from "../../shared/utils/utils";
@@ -387,16 +389,27 @@ const RequestsPage = (props: RequestsPageProps) => {
     <>
       <AuthHeader
         title={"Requests"}
-        actions={
-          !isKeysLoading ? (
-            <Filters
-              keys={keys}
-              filter={apiKeyFilter}
-              setFilter={setApiKeyFilter}
+        headerActions={
+          <button
+            onClick={() => refetch()}
+            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+          >
+            <ArrowPathIcon
+              className={clsx(
+                isLoading ? "animate-spin" : "",
+                "h-5 w-5 inline"
+              )}
             />
-          ) : (
-            <div className="h-10"></div>
-          )
+          </button>
+        }
+        actions={
+          <div className="flex flex-row space-x-8 items-center">
+            {!isKeysLoading ? (
+              <Filters keys={keys} setFilter={setApiKeyFilter} />
+            ) : (
+              <div className="h-10"></div>
+            )}
+          </div>
         }
       />
 
