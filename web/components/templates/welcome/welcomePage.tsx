@@ -336,7 +336,7 @@ const Step3 = () => {
             }}
           />
           <div>
-            Onces we receive your first event you can visit your dashboard
+            Once we receive your first event you can visit your dashboard
           </div>
           {timeElapsed > 30 && (
             <div className="text-sm mt-10">

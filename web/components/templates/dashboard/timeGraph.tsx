@@ -41,8 +41,17 @@ export const RenderLineChart = ({
           strokeWidth={1.5}
           animationDuration={0}
         />
-        <XAxis dataKey="time" />
-        <YAxis />
+        <XAxis
+          dataKey="time"
+          style={{
+            fontSize: "0.85rem",
+          }}
+        />
+        <YAxis
+          style={{
+            fontSize: "0.85rem",
+          }}
+        />
         <Tooltip
           formatter={(value) =>
             valueFormatter ? valueFormatter(value) : value

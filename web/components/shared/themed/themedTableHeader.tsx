@@ -31,7 +31,6 @@ import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
 import { UserMetric } from "../../../lib/api/users/users";
-import ThemedDropdownV2 from "./themedDropdownV2";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import {
   ColumnType,
@@ -40,7 +39,8 @@ import {
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
-import ThemedToggle from "./themedToggle";
+import ThemedToggle from "./themedTabs";
+import ThemedDropdown from "./themedDropdown";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -72,7 +72,7 @@ interface ThemedHeaderProps {
   };
   view?: {
     viewMode: string;
-    setViewMode: Dispatch<SetStateAction<"condensed" | "expanded">>;
+    setViewMode: Dispatch<SetStateAction<"Condensed" | "Expanded">>;
   };
 }
 
@@ -183,39 +183,31 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                             <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
                               <div className="divide-y divide-gray-200 border-gray-200">
                                 {editColumns.columns.map((col, idx) => (
-                                  <div
-                                    key={col.label}
-                                    className="relative flex items-start p-4"
+                                  <label
+                                    key={idx}
+                                    htmlFor={`person-${col.label}`}
+                                    className="relative p-4 select-none font-medium text-gray-900 w-full justify-between items-center flex hover:bg-gray-50 hover:cursor-pointer"
                                   >
-                                    <div className="min-w-0 flex-1 text-sm leading-6">
-                                      <label
-                                        htmlFor={`person-${col.label}`}
-                                        className="select-none font-medium text-gray-900"
-                                      >
-                                        {col.label}
-                                      </label>
-                                    </div>
-                                    <div className="ml-3 flex h-6 items-center">
-                                      <input
-                                        id={`person-${col.label}`}
-                                        name={`person-${col.label}`}
-                                        type="checkbox"
-                                        checked={col.active}
-                                        onChange={(e) => {
-                                          const newColumns = [
-                                            ...editColumns.columns,
-                                          ];
-                                          const col = newColumns[idx];
-                                          col.active = e.target.checked;
+                                    <span>{col.label}</span>
+                                    <input
+                                      id={`person-${col.label}`}
+                                      name={`person-${col.label}`}
+                                      type="checkbox"
+                                      checked={col.active}
+                                      onChange={(e) => {
+                                        const newColumns = [
+                                          ...editColumns.columns,
+                                        ];
+                                        const col = newColumns[idx];
+                                        col.active = e.target.checked;
 
-                                          editColumns.onColumnCallback(
-                                            newColumns
-                                          );
-                                        }}
-                                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
-                                      />
-                                    </div>
-                                  </div>
+                                        editColumns.onColumnCallback(
+                                          newColumns
+                                        );
+                                      }}
+                                      className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
+                                    />
+                                  </label>
                                 ))}
                               </div>
                             </fieldset>
@@ -292,16 +284,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 <ThemedToggle
                   options={[
                     {
-                      label: "condensed",
+                      label: "Condensed",
                       icon: Square3Stack3DIcon,
                     },
                     {
-                      label: "expanded",
+                      label: "Expanded",
                       icon: ArrowsPointingOutIcon,
                     },
                   ]}
                   onOptionSelect={(option) =>
-                    view.setViewMode(option as "condensed" | "expanded")
+                    view.setViewMode(option as "Condensed" | "Expanded")
                   }
                 />
               </div>
@@ -535,7 +527,7 @@ function AdvancedFilterRow({
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center">
-      <ThemedDropdownV2
+      <ThemedDropdown
         options={tables.map((table) => {
           return {
             value: table[0],
@@ -550,7 +542,7 @@ function AdvancedFilterRow({
         label="Table"
       />
       {columnsEntries && (
-        <ThemedDropdownV2
+        <ThemedDropdown
           options={columnsEntries.map((column) => {
             return {
               value: column[0],
@@ -567,7 +559,7 @@ function AdvancedFilterRow({
       )}
 
       {column && (
-        <ThemedDropdownV2
+        <ThemedDropdown
           options={operatorsEntries.map((operator) => {
             return {
               value: operator[0],

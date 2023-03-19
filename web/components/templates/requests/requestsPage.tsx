@@ -1,3 +1,4 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 
 import { useState } from "react";
@@ -19,6 +20,7 @@ import {
 } from "../../../services/lib/sorts/sorts";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { capitalizeWords, getUSDate } from "../../shared/utils/utils";
@@ -68,11 +70,11 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
-  const [viewMode, setViewMode] = useState<"expanded" | "condensed">(
-    "condensed"
+  const [viewMode, setViewMode] = useState<"Expanded" | "Condensed">(
+    "Condensed"
   );
 
-  const isPreview = viewMode === "expanded";
+  const isPreview = viewMode === "Expanded";
   const truncLength = isPreview ? 8000 : 19;
 
   const requestColumn: Column = {
@@ -202,8 +204,23 @@ const RequestsPage = (props: RequestsPageProps) => {
     typeof window !== "undefined"
       ? localStorage.getItem("requestsColumns")
       : null;
+  const sessionStorageKey =
+    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
   const parsed = JSON.parse(localStorageColumns || "[]") as Column[];
+
+  const parseKey = (keyString: string | null) => {
+    if (!keyString) {
+      return "all";
+    }
+    return {
+      user_api_keys: {
+        api_key_hash: {
+          equals: keyString,
+        },
+      },
+    };
+  };
 
   if (parsed) {
     initialColumns.forEach((column) => {
@@ -229,7 +246,9 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
     created_at: "desc",
   });
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>("all");
+  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
+    parseKey(sessionStorageKey)
+  );
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
@@ -370,16 +389,27 @@ const RequestsPage = (props: RequestsPageProps) => {
     <>
       <AuthHeader
         title={"Requests"}
-        actions={
-          !isKeysLoading ? (
-            <Filters
-              keys={keys}
-              filter={apiKeyFilter}
-              setFilter={setApiKeyFilter}
+        headerActions={
+          <button
+            onClick={() => refetch()}
+            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+          >
+            <ArrowPathIcon
+              className={clsx(
+                isLoading ? "animate-spin" : "",
+                "h-5 w-5 inline"
+              )}
             />
-          ) : (
-            <div className="h-10"></div>
-          )
+          </button>
+        }
+        actions={
+          <div className="flex flex-row space-x-8 items-center">
+            {!isKeysLoading ? (
+              <Filters keys={keys} setFilter={setApiKeyFilter} />
+            ) : (
+              <div className="h-10"></div>
+            )}
+          </div>
         }
       />
 
