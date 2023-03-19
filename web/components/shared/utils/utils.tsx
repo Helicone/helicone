@@ -45,4 +45,8 @@ const capitalizeWords = (str: string) => {
   return capitalizedWords.join(" ");
 };
 
-export { getUSDate, getUSDateShort, capitalizeWords };
+function removeLeadingWhitespace(str: string): string {
+  return str.replace(/^\s+/, ""); // Replace one or more whitespace characters at the beginning of the string with an empty string
+}
+
+export { getUSDate, getUSDateShort, capitalizeWords, removeLeadingWhitespace };

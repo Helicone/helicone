@@ -46,7 +46,7 @@ export const Chat = (props: ChatProps) => {
                       <UserCircleIcon className="h-7 w-7 bg-white rounded-full" />
                     )}
                   </div>
-                  <div className="whitespace-pre-wrap col-span-11 leading-6">
+                  <div className="whitespace-pre-wrap col-span-11 leading-8">
                     {message.content}
                   </div>
                 </div>

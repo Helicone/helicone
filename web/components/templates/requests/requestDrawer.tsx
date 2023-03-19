@@ -6,7 +6,6 @@ import {
   EyeIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
-import { request } from "https";
 import { wrap } from "module";
 import { useState } from "react";
 import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
@@ -31,6 +30,7 @@ interface RequestDrawerProps {
 
 const RequestDrawer = (props: RequestDrawerProps) => {
   const { open, setOpen, wrappedRequest, values, properties } = props;
+  console.log("WRAPPED REQUEST", wrappedRequest, values, properties);
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );
@@ -155,10 +155,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                   prompt_name={wrappedRequest.promptName}
                   // keys is the values for all the keys in `values`
                   keys={values.reduce((acc, key) => {
-                    if (request.hasOwnProperty(key)) {
+                    const promptValues = wrappedRequest.promptValues;
+                    if (promptValues && promptValues.hasOwnProperty(key)) {
                       return {
                         ...acc,
-                        [key]: wrappedRequest[key],
+                        [key]: promptValues[key],
                       };
                     }
                     return acc;

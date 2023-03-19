@@ -23,7 +23,11 @@ import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import { capitalizeWords, getUSDate } from "../../shared/utils/utils";
+import {
+  capitalizeWords,
+  getUSDate,
+  removeLeadingWhitespace,
+} from "../../shared/utils/utils";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
@@ -104,7 +108,9 @@ const RequestsPage = (props: RequestsPageProps) => {
     minWidth: 170,
     type: "text",
     format: (value: string) =>
-      value ? truncString(value, truncLength) : value,
+      value
+        ? removeLeadingWhitespace(truncString(value, truncLength))
+        : removeLeadingWhitespace(value),
   };
 
   const initialColumns: Column[] = [
@@ -273,6 +279,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
       sortLeaf
     );
+  console.log("VALUES", requests);
 
   const { keys, isLoading: isKeysLoading } = useGetKeys();
 
@@ -384,6 +391,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
+  console.log("WRAPPED REQUESTS", selectedData);
 
   return (
     <>
