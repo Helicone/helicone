@@ -369,6 +369,50 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
+                <ul className="p-4 font-medium text-sm text-gray-500 space-y-4">
+                  <li>
+                    <Link
+                      href="https://docs.helicone.ai/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-gray-900"
+                    >
+                      Docs
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="https://discord.gg/zsSTcH2qhG"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-gray-900"
+                    >
+                      Discord
+                    </Link>
+                  </li>
+                </ul>
+                <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
+                  <div className="group block w-full flex-shrink-0">
+                    <div className="flex items-center">
+                      <div>
+                        <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                          <span className="sr-only">Open user menu</span>
+                          {user?.email?.charAt(0).toUpperCase() || (
+                            <UserCircleIcon className="h-8 w-8 text-black" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="ml-3 flex flex-col items-start">
+                        <p className="text-sm font-medium text-gray-700">
+                          {user?.email}
+                        </p>
+                        <button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </>
@@ -376,7 +420,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <div
           className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
         >
-          <div className="sticky top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
+          {/* <div className="sticky top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
             <button
               type="button"
               className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
@@ -447,7 +491,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </Link>
                 </div>
 
-                {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
@@ -511,10 +554,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </Menu>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <main className="flex-1 bg">
-            <div className="mx-auto px-4 sm:px-8 bg-gray-100 min-h-[92.5vh]">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
               {/* Replace with your content */}
               <div className="py-4 sm:py-8">{children}</div>
               {/* /End replace */}
