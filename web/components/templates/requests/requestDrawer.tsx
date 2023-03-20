@@ -132,15 +132,15 @@ const RequestDrawer = (props: RequestDrawerProps) => {
           {viewMode === "Pretty" ? (
             <>
               {wrappedRequest.api.chat ? (
-                <Chat 
+                <Chat
                   chatProperties={{
                     request: wrappedRequest.api.chat.request,
                     response: wrappedRequest.api.chat.response,
-                  }} 
-                  prompt_regex={wrappedRequest.promptRegex} 
+                  }}
+                  prompt_regex={wrappedRequest.promptRegex}
                   keys={values.reduce((acc, key) => {
-                    console.log("REQUEST", wrappedRequest.promptRegex)
-                    console.log("REQUEST", wrappedRequest["adjective"])
+                    console.log("REQUEST", wrappedRequest.promptRegex);
+                    console.log("REQUEST", wrappedRequest["adjective"]);
                     if (wrappedRequest.hasOwnProperty(key)) {
                       return {
                         ...acc,
@@ -148,7 +148,8 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                       };
                     }
                     return acc;
-                }, {})} />
+                  }, {})}
+                />
               ) : wrappedRequest.api.moderation ? (
                 <Moderation
                   request={wrappedRequest.api.moderation.request}

@@ -24,7 +24,7 @@ export interface Result {
 export function formatPrompt(prompt: Prompt): Result {
   const missingValues = [];
   let formattedString = prompt.prompt;
-  const elements = formattedString.split(/({{[^}]+}})/g).map((part) => {
+  const elements = formattedString.split(/({{[^}]+}})/g).map((part, index) => {
     const match = part.match(/{{([^}]+)}}/);
     if (match) {
       const key = match[1];
@@ -33,22 +33,20 @@ export function formatPrompt(prompt: Prompt): Result {
         missingValues.push(key);
         return part;
       }
-      return <Hover value={value} name={key} />;
+      return <Hover key={`${key}-${index}`} value={value} name={key} />;
     }
     return part;
   });
 
   const output = (
     <div>
-      <p>
-        {elements}
-      </p>
+      <p>{elements}</p>
     </div>
   );
 
   return {
-      data: <div>{output}</div>,
-      error: null,
+    data: <div>{output}</div>,
+    error: null,
   };
 }
 
@@ -56,7 +54,11 @@ export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
   const { prompt_regex, keys } = props;
 
-  let messages: Message[] = prompt_regex ? JSON.parse(prompt_regex) : (request ? request : []);
+  let messages: Message[] = prompt_regex
+    ? JSON.parse(prompt_regex)
+    : request
+    ? request
+    : [];
 
   if (response) {
     messages = messages.concat([response]);
@@ -74,11 +76,13 @@ export const Chat = (props: ChatProps) => {
             let formattedMessageContent;
             if (prompt_regex) {
               formattedMessageContent = formatPrompt({
-                  prompt: removeLeadingWhitespace(message.content),
-                  values: keys,
+                prompt: removeLeadingWhitespace(message.content),
+                values: keys,
               }).data;
             } else {
-              formattedMessageContent = removeLeadingWhitespace(message.content);
+              formattedMessageContent = removeLeadingWhitespace(
+                message.content
+              );
             }
 
             return (
