@@ -39,7 +39,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   if (!session)
     return {
       redirect: {
-        destination: "/login",
+        destination: "/",
         permanent: false,
       },
     };
