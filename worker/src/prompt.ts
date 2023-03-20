@@ -4,11 +4,21 @@ export interface Prompt {
     prompt: string;
     values: { [key: string]: string };
 }
- 
+
+interface Message {
+    role: string;
+    content: string;
+}
+
+export interface ChatPrompt {
+    prompt: Message[];
+    values: { [key: string]: string };
+}
+
 interface PromptResult {
     request: Request,
     body: string,
-    prompt?: Prompt,
+    prompt?: Prompt | ChatPrompt,
 }
 
 function formatPrompt(prompt: Prompt): Result {
@@ -24,13 +34,6 @@ function formatPrompt(prompt: Prompt): Result {
         }
     }
 
-    if (missingValues.length > 0) {
-        return {
-            data: null,
-            error: `Missing values in the prompt: ${missingValues.join(', ')}`,
-        };
-    }
-
     const regex = /{{([^{}]+)}}/g;
     let match = regex.exec(formattedString);
     const missingPlaceholders = [];
@@ -40,13 +43,6 @@ function formatPrompt(prompt: Prompt): Result {
             missingPlaceholders.push(match[1]);
         }
         match = regex.exec(formattedString);
-    }
-
-    if (missingPlaceholders.length > 0) {
-        return {
-            data: null,
-            error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
-        };
     }
 
     return {
@@ -77,6 +73,10 @@ export async function extractPrompt(
             const cloneRequest = request.clone();
             const cloneBody = await cloneRequest.text();
             const json = cloneBody ? JSON.parse(cloneBody) : {};
+            if ("messages" in json) {
+                return extractPromptMessages(cloneRequest, json);
+            }
+
             const prompt = JSON.parse(json["prompt"]);
             const stringPromptResult = formatPrompt(prompt);
             if (stringPromptResult.error !== null) {
@@ -114,4 +114,71 @@ export async function extractPrompt(
             error: null,
         }
     }
+}
+
+async function extractPromptMessages(
+    cloneRequest: Request,
+    json: any,
+): Promise<GenericResult<PromptResult>> {
+    const regexPrompt = json["messages"];
+    const regexMessages = regexPrompt;
+    const regexValues = json["values"];
+    
+    // If regexValues is not defined, return an error
+    if (regexValues === undefined) {
+        return {
+            data: null,
+            error: "Missing values in the template-formatted prompt",
+        };
+    }
+
+    let formattedMessages = [];
+    for (let i = 0; i < regexMessages.length; i++) {
+        let message = regexMessages[i];
+        const content = message["content"];
+
+        const formattedContent = formatPrompt(
+            {
+                prompt: content,
+                values: regexValues,
+            }
+        )
+
+        if (formattedContent.error !== null) {
+            return {
+                data: null,
+                error: formattedContent.error,
+            };
+        }
+
+        const formattedMessage = {
+            ...message,
+            content: formattedContent.data,
+        }
+
+        formattedMessages.push(formattedMessage);
+    }
+    json["messages"] = formattedMessages;
+    delete json["values"];
+
+    const body = JSON.stringify(json);
+    const formattedRequest = updateContentLength(cloneRequest, body);
+
+    const data = {
+        request: formattedRequest,
+        prompt: regexPrompt,
+        body,
+    }
+
+    return {
+        data: {
+            request: formattedRequest,
+            prompt: {
+                prompt: regexPrompt,
+                values: regexValues,
+            },
+            body,
+        },
+        error: null,
+    };
 }
