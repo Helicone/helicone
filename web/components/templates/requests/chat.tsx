@@ -1,6 +1,7 @@
 import { UserCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
+import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import Hover from "./hover";
 import { ChatProperties, CsvData, Message } from "./requestsPage";
 
@@ -30,7 +31,7 @@ export function formatPrompt(prompt: Prompt): Result {
       const value = prompt.values[key];
       if (value === undefined) {
         missingValues.push(key);
-        return null;
+        return part;
       }
       return <Hover value={value} name={key} />;
     }
@@ -73,11 +74,11 @@ export const Chat = (props: ChatProps) => {
             let formattedMessageContent;
             if (prompt_regex) {
               formattedMessageContent = formatPrompt({
-                  prompt: message.content,
+                  prompt: removeLeadingWhitespace(message.content),
                   values: keys,
               }).data;
             } else {
-              formattedMessageContent = message.content;
+              formattedMessageContent = removeLeadingWhitespace(message.content);
             }
 
             return (
