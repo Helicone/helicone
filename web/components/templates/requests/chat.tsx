@@ -16,7 +16,7 @@ export const Chat = (props: ChatProps) => {
   }
 
   return (
-    <div className="w-full flex flex-col text-left space-y-2">
+    <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <p className="text-gray-500 font-medium">Messages</p>
       <div className="w-full border border-gray-300 rounded-md overflow-auto divide-y divide-gray-200 h-full">
         {messages.length > 0 ? (
@@ -46,7 +46,7 @@ export const Chat = (props: ChatProps) => {
                       <UserCircleIcon className="h-7 w-7 bg-white rounded-full" />
                     )}
                   </div>
-                  <div className="whitespace-pre-wrap col-span-11 leading-8">
+                  <div className="whitespace-pre-wrap col-span-11 leading-6">
                     {message.content}
                   </div>
                 </div>

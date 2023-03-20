@@ -62,6 +62,7 @@ export function getCacheSettings(
   isStream: boolean
 ): Result<CacheSettings, string> {
   // streams cannot be cached
+  console.log("IS STREAM", isStream)
   if (isStream) {
     return {
       data: {
@@ -78,6 +79,8 @@ export function getCacheSettings(
 
   try {
     const cacheHeaders = getCacheState(headers);
+    console.log("HEADERS", headers)
+    console.log("CACHE HEADERS", cacheHeaders)
 
     const shouldSaveToCache =
       cacheHeaders.cacheEnabled || cacheHeaders.cacheSave;

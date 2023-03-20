@@ -58,6 +58,7 @@ async function getPromptId(
 ): Promise<Result<string, string>> {
   // First, get the prompt id if there's a match in the prompt table
   const auth_hash = await hash(auth);
+  console.log("prompt prompt", prompt.prompt)
   const { data, error } = await dbClient
     .from("prompt")
     .select("id")
@@ -67,6 +68,7 @@ async function getPromptId(
   if (error !== null) {
     return { data: null, error: error.message };
   }
+  console.log("DATA ERROR FIRST", data, error)
   if (data !== null && data.length > 0) {
     return { data: data[0].id, error: null };
   } else {
@@ -138,10 +140,12 @@ async function logRequest({
     const json = body ? JSON.parse(body) : {};
     const jsonUserId = json.user;
 
+    console.log("PRE GET PROMPT ID", prompt, promptName)
     const formattedPromptResult =
       prompt !== undefined
         ? await getPromptId(dbClient, prompt, promptName, auth)
         : null;
+    console.log("POST GET PROMPT ID", formattedPromptResult)
     if (
       formattedPromptResult !== null &&
       formattedPromptResult.error !== null
@@ -152,6 +156,7 @@ async function logRequest({
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
+    console.log("LOOK FOR DATA")
     const { data, error } = await dbClient
       .from("request")
       .insert([
@@ -169,6 +174,7 @@ async function logRequest({
       ])
       .select("id")
       .single();
+    console.log("DONE WITH LOOK", data, error)
 
     if (error !== null) {
       return { data: null, error: error.message };
@@ -326,6 +332,7 @@ async function forwardAndLog(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
+  console.log("FINAL FINAL", request, body)
 
   const [response, requestResult] = await Promise.all([
     forwardRequestToOpenAi(request, body),
@@ -373,6 +380,7 @@ async function uncachedRequest(
   const result = await extractPrompt(request);
   if (result.data !== null) {
     const { request: formattedRequest, body: body, prompt } = result.data;
+    console.log("THE SENT REQUEST", prompt)
     return await forwardAndLog(
       requestSettings,
       body,

@@ -52,12 +52,12 @@ function formatPrompt(prompt: Prompt): Result {
         match = regex.exec(formattedString);
     }
 
-    if (missingPlaceholders.length > 0) {
-        return {
-            data: null,
-            error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
-        };
-    }
+    // if (missingPlaceholders.length > 0) {
+    //     return {
+    //         data: null,
+    //         error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
+    //     };
+    // }
 
     return {
         data: formattedString,
@@ -136,8 +136,8 @@ async function extractPromptMessages(
 ): Promise<GenericResult<PromptResult>> {
     console.log("Original body", cloneRequest.body)
     const regexPrompt = json["messages"];
-    const regexMessages = regexPrompt["prompt"];
-    const regexValues = regexPrompt["values"];
+    const regexMessages = regexPrompt;
+    const regexValues = json["values"];
 
     let formattedMessages = [];
     for (let i = 0; i < regexMessages.length; i++) {
@@ -167,7 +167,9 @@ async function extractPromptMessages(
         formattedMessages.push(formattedMessage);
     }
     json["messages"] = formattedMessages;
-    console.log("FORMATTED", formattedMessages)
+    // Delete 'values' from the body
+    delete json["values"];
+
     const body = JSON.stringify(json);
     const formattedRequest = updateContentLength(cloneRequest, body);
 
@@ -181,7 +183,10 @@ async function extractPromptMessages(
     return {
         data: {
             request: formattedRequest,
-            prompt: regexPrompt,
+            prompt: {
+                prompt: regexPrompt,
+                values: regexValues,
+            },
             body,
         },
         error: null,
