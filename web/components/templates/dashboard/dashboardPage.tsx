@@ -79,7 +79,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
-        gte: getTimeIntervalAgo("1m").toISOString(),
+        gte: getTimeIntervalAgo(interval).toISOString(),
         lte: new Date().toISOString(),
       },
     },
@@ -130,7 +130,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               getData({
                 request: {
                   created_at: {
-                    gte: getTimeIntervalAgo("1m").toISOString(),
+                    gte: getTimeIntervalAgo(interval).toISOString(),
                     lte: new Date().toISOString(),
                   },
                 },
@@ -205,6 +205,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   value = value.replace("custom:", "");
                   const start = new Date(value.split("_")[0]);
                   const end = new Date(value.split("_")[1]);
+                  setInterval(key);
                   setTimeFilter({
                     request: {
                       created_at: {
@@ -214,6 +215,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     },
                   });
                 } else {
+                  setInterval(key);
                   setTimeFilter({
                     request: {
                       created_at: {
