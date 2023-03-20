@@ -139,8 +139,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                   }}
                   prompt_regex={wrappedRequest.promptRegex}
                   keys={values.reduce((acc, key) => {
-                    console.log("REQUEST", wrappedRequest.promptRegex);
-                    console.log("REQUEST", wrappedRequest["adjective"]);
                     if (wrappedRequest.hasOwnProperty(key)) {
                       return {
                         ...acc,

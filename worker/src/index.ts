@@ -326,7 +326,6 @@ async function forwardAndLog(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
-  console.log("FINAL FINAL", request, body)
 
   const [response, requestResult] = await Promise.all([
     forwardRequestToOpenAi(request, body),
