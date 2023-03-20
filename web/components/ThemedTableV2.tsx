@@ -68,8 +68,8 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
     <div className="space-y-2">
       <p className="text-sm text-gray-700">
         Showing <span className="font-medium">{from + 1}</span> to{" "}
-        <span className="font-medium">{Math.min(to + 1, count as number)}</span>{" "}
-        of <span className="font-medium">{count}</span> results
+        <span className="font-medium">{Math.min(to, count as number)}</span> of{" "}
+        <span className="font-medium">{count}</span> results
       </p>
       <Paper
         sx={{
@@ -81,7 +81,7 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
             "0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 0.5px 1px 0 rgba(0, 0, 0, 0.1)",
         }}
       >
-        <TableContainer sx={{ maxHeight: "60vh", paddingX: 1 }}>
+        <TableContainer sx={{ paddingX: 1 }}>
           <Table
             stickyHeader
             aria-label="sticky table"

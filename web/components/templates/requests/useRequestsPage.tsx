@@ -202,7 +202,16 @@ const useRequestsPage = (
       }
     }
 
-    // TODO: handle the values
+    // add the values to the object
+    if (obj.promptValues) {
+      for (const key of values) {
+        if (obj.promptValues.hasOwnProperty(key)) {
+          const value = obj.promptValues[key];
+          obj[key] = value;
+        }
+      }
+    }
+
     return obj;
   });
 

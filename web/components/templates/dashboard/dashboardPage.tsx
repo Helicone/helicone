@@ -79,7 +79,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
     request: {
       created_at: {
-        gte: getTimeIntervalAgo("1m").toISOString(),
+        gte: getTimeIntervalAgo(interval).toISOString(),
         lte: new Date().toISOString(),
       },
     },
@@ -88,7 +88,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const { properties } = useGetProperties();
   const { propertyParams } = useGetPropertyParams();
 
-  const getData = () => {
+  const getData = (timeFilter: FilterLeaf) => {
     getDashboardData(
       timeFilter,
       {
@@ -102,7 +102,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   useEffect(() => {
-    getData();
+    getData(timeFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeFilter, filter, apiKeyFilter]);
 
@@ -126,7 +126,16 @@ const DashboardPage = (props: DashboardPageProps) => {
         title={"Dashboard"}
         headerActions={
           <button
-            onClick={() => getData()}
+            onClick={() => {
+              getData({
+                request: {
+                  created_at: {
+                    gte: getTimeIntervalAgo(interval).toISOString(),
+                    lte: new Date().toISOString(),
+                  },
+                },
+              });
+            }}
             className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
           >
             <ArrowPathIcon
@@ -196,6 +205,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   value = value.replace("custom:", "");
                   const start = new Date(value.split("_")[0]);
                   const end = new Date(value.split("_")[1]);
+                  setInterval(key);
                   setTimeFilter({
                     request: {
                       created_at: {
@@ -205,6 +215,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     },
                   });
                 } else {
+                  setInterval(key);
                   setTimeFilter({
                     request: {
                       created_at: {

@@ -37,7 +37,7 @@ const Login = () => {
                   "Password successfully reset, redirecting to dashboard in 3 seconds..."
                 );
                 setTimeout(() => {
-                  router.push("/login");
+                  router.push("/");
                 }, 3000);
               }
             });
