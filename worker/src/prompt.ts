@@ -132,7 +132,6 @@ async function extractPromptMessages(
         };
     }
 
-
     let formattedMessages = [];
     for (let i = 0; i < regexMessages.length; i++) {
         let message = regexMessages[i];
@@ -160,7 +159,6 @@ async function extractPromptMessages(
         formattedMessages.push(formattedMessage);
     }
     json["messages"] = formattedMessages;
-    // Delete 'values' from the body
     delete json["values"];
 
     const body = JSON.stringify(json);
