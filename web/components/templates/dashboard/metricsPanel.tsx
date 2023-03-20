@@ -18,10 +18,6 @@ interface MetricsPanelProps {
 
 export function MetricsPanel(props: MetricsPanelProps) {
   const { filters, metrics: metricsData } = props;
-  const { setNotification } = useNotification();
-  if (metricsData !== "loading" && metricsData.error !== null) {
-    // setNotification(metricsData.error, "error"); Do nothing, we need to support an empty set
-  }
 
   const loading = metricsData === "loading";
   const data =
@@ -81,7 +77,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
           >
             <dd className="order-first text-m sm:text-md font-bold tracking-tight">
               {loading ? (
-                <div className="animate-pulse h-6 w-24 bg-gray-300 rounded-md" />
+                <div className="animate-pulse h-5 w-24 bg-gray-300 rounded-md" />
               ) : (
                 row.label
               )}

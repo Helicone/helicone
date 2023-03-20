@@ -13,6 +13,7 @@ const Home = (props: HomeProps) => {
   const router = useRouter();
 
   const user = useUser();
+
   if (user && user.email !== DEMO_EMAIL) {
     router.push("/dashboard");
     return <LoadingAnimation title="Redirecting you to your dashboard..." />;
@@ -26,9 +27,3 @@ const Home = (props: HomeProps) => {
 };
 
 export default Home;
-
-export const getServerSideProps = redirectIfLoggedIn("/dashboard", async () => {
-  return {
-    props: {},
-  };
-});

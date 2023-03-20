@@ -68,8 +68,8 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
     <div className="space-y-2">
       <p className="text-sm text-gray-700">
         Showing <span className="font-medium">{from + 1}</span> to{" "}
-        <span className="font-medium">{Math.min(to + 1, count as number)}</span>{" "}
-        of <span className="font-medium">{count}</span> results
+        <span className="font-medium">{Math.min(to, count as number)}</span> of{" "}
+        <span className="font-medium">{count}</span> results
       </p>
       <Paper
         sx={{
