@@ -34,13 +34,6 @@ function formatPrompt(prompt: Prompt): Result {
         }
     }
 
-    // if (missingValues.length > 0) {
-    //     return {
-    //         data: null,
-    //         error: `Missing values in the prompt: ${missingValues.join(', ')}`,
-    //     };
-    // }
-
     const regex = /{{([^{}]+)}}/g;
     let match = regex.exec(formattedString);
     const missingPlaceholders = [];
@@ -51,13 +44,6 @@ function formatPrompt(prompt: Prompt): Result {
         }
         match = regex.exec(formattedString);
     }
-
-    // if (missingPlaceholders.length > 0) {
-    //     return {
-    //         data: null,
-    //         error: `Missing placeholders in the prompt regex: ${missingPlaceholders.join(', ')}`,
-    //     };
-    // }
 
     return {
         data: formattedString,
@@ -134,10 +120,18 @@ async function extractPromptMessages(
     cloneRequest: Request,
     json: any,
 ): Promise<GenericResult<PromptResult>> {
-    console.log("Original body", cloneRequest.body)
     const regexPrompt = json["messages"];
     const regexMessages = regexPrompt;
     const regexValues = json["values"];
+    
+    // If regexValues is not defined, return an error
+    if (regexValues === undefined) {
+        return {
+            data: null,
+            error: "Missing values in the template-formatted prompt",
+        };
+    }
+
 
     let formattedMessages = [];
     for (let i = 0; i < regexMessages.length; i++) {
@@ -152,7 +146,6 @@ async function extractPromptMessages(
         )
 
         if (formattedContent.error !== null) {
-            console.log("ERROR", formattedContent.error)
             return {
                 data: null,
                 error: formattedContent.error,
@@ -178,7 +171,6 @@ async function extractPromptMessages(
         prompt: regexPrompt,
         body,
     }
-    console.log("Final data", data)
 
     return {
         data: {
