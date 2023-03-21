@@ -78,14 +78,14 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           <p className="italic text-gray-500">No columns selected</p>
         </div>
       ) : (
-        <div className="overflow-x-auto font-sans">
+        <div className="overflow-x-auto font-sans min-w-full">
           <table
             {...{
               style: {
                 width: table.getCenterTotalSize(),
               },
             }}
-            className="inline-block w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2"
+            className="inline-block w-full min-w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2"
           >
             <thead className="text-left text-sm font-semibold text-gray-900">
               {table.getHeaderGroups().map((headerGroup) => (
