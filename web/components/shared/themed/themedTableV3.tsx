@@ -11,10 +11,13 @@ import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { getUSDate } from "../utils/utils";
 import { truncString } from "../../../lib/stringHelpers";
 import { useRouter } from "next/router";
+import { Column } from "../../ThemedTableV2";
+import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
-  columns: any[];
+  sortColumns: Column[];
+  columns: any[]; // abstract this to a <T>
   page: number;
   from: number;
   to: number;
@@ -22,12 +25,14 @@ interface ThemedTableV3Props {
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
+  onSortHandler?: (key: any) => void; // use the same type as the column type above
 }
 
 const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const {
     data,
     columns,
+    sortColumns,
     from,
     to,
     count,
@@ -35,6 +40,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onPageChangeHandler,
     onPageSizeChangeHandler,
     onSelectHandler,
+    onSortHandler,
   } = props;
 
   const router = useRouter();
@@ -68,35 +74,52 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           <thead className="text-left text-sm font-semibold text-gray-900">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900"
-                    key={header.id}
-                    {...{
-                      colSpan: header.colSpan,
-                      style: {
-                        width: header.getSize(),
-                      },
-                    }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    <div
-                      className={clsx(
-                        header.column.getIsResizing() ? "isResizing" : "",
-                        "resizer"
-                      )}
+                {headerGroup.headers.map((header, idx) => {
+                  const col = sortColumns[idx];
+                  return (
+                    <th
+                      className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900"
+                      key={header.id}
                       {...{
-                        onMouseDown: header.getResizeHandler(),
-                        onTouchStart: header.getResizeHandler(),
+                        colSpan: header.colSpan,
+                        style: {
+                          width: header.getSize(),
+                        },
                       }}
-                    />
-                  </th>
-                ))}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      <div
+                        className={clsx(
+                          header.column.getIsResizing() ? "isResizing" : "",
+                          "resizer"
+                        )}
+                        {...{
+                          onMouseDown: header.getResizeHandler(),
+                          onTouchStart: header.getResizeHandler(),
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (onSortHandler) {
+                            onSortHandler(col);
+                          }
+                        }}
+                        className="text-gray-700 hover:text-gray-900 hover:scale-105"
+                      >
+                        {col.sortBy === "asc" ? (
+                          <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
+                        ) : (
+                          <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
+                        )}
+                      </button>
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>

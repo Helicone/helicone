@@ -495,6 +495,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV3
                 data={requests}
+                sortColumns={columns.filter((c) => c.active)}
                 columns={columns
                   .filter((c) => c.active)
                   .map((c) =>
@@ -512,10 +513,30 @@ const RequestsPage = (props: RequestsPageProps) => {
                 onSelectHandler={selectRowHandler}
                 onPageChangeHandler={onPageChangeHandler}
                 onPageSizeChangeHandler={onPageSizeChangeHandler}
+                onSortHandler={(key) => {
+                  if (key.key === orderBy.column) {
+                    setOrderBy({
+                      column: key.key,
+                      direction: orderBy.direction === "asc" ? "desc" : "asc",
+                    });
+                    key.toSortLeaf &&
+                      setSortLeaf(
+                        key.toSortLeaf(
+                          orderBy.direction === "asc" ? "desc" : "asc"
+                        )
+                      );
+                  } else {
+                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+                    setOrderBy({
+                      column: key.key,
+                      direction: "asc",
+                    });
+                  }
+                }}
               />
               // <ThemedTableV2
               //   condensed
-              //   columns={columns.filter((c) => c.active)}
+              // columns={columns.filter((c) => c.active)}
               //   rows={requests}
               // count={count || 0}
               // page={page}
@@ -524,26 +545,26 @@ const RequestsPage = (props: RequestsPageProps) => {
               // onSelectHandler={selectRowHandler}
               // onPageChangeHandler={onPageChangeHandler}
               // onPageSizeChangeHandler={onPageSizeChangeHandler}
-              //   onSortHandler={(key) => {
-              //     if (key.key === orderBy.column) {
-              //       setOrderBy({
-              //         column: key.key,
-              //         direction: orderBy.direction === "asc" ? "desc" : "asc",
-              //       });
-              //       key.toSortLeaf &&
-              //         setSortLeaf(
-              //           key.toSortLeaf(
-              //             orderBy.direction === "asc" ? "desc" : "asc"
-              //           )
-              //         );
-              //     } else {
-              //       key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-              //       setOrderBy({
-              //         column: key.key,
-              //         direction: "asc",
-              //       });
-              //     }
-              //   }}
+              // onSortHandler={(key) => {
+              //   if (key.key === orderBy.column) {
+              //     setOrderBy({
+              //       column: key.key,
+              //       direction: orderBy.direction === "asc" ? "desc" : "asc",
+              //     });
+              //     key.toSortLeaf &&
+              //       setSortLeaf(
+              //         key.toSortLeaf(
+              //           orderBy.direction === "asc" ? "desc" : "asc"
+              //         )
+              //       );
+              //   } else {
+              //     key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+              //     setOrderBy({
+              //       column: key.key,
+              //       direction: "asc",
+              //     });
+              //   }
+              // }}
               //   isPreview={isPreview}
               // />
             )}
