@@ -81,7 +81,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   );
 
   const isPreview = viewMode === "Expanded";
-  const truncLength = isPreview ? 8000 : 19;
+  const truncLength = isPreview ? 8000 : 50;
 
   const requestColumn: Column = {
     key: "requestText",
@@ -91,7 +91,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     toSortLeaf: (direction) => ({
       request_prompt: direction,
     }),
-    minWidth: 170,
+    minWidth: 240,
     type: "text",
     format: (value: string | { content: string; role: string }) =>
       typeof value === "string"
@@ -107,7 +107,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     toSortLeaf: (direction) => ({
       response_text: direction,
     }),
-    minWidth: 170,
+    minWidth: 240,
     type: "text",
     format: (value: string) =>
       value
@@ -505,6 +505,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                             ? c.format(info.getValue())
                             : info.getValue(),
                         header: () => <span>{c.label}</span>,
+                        size: c.minWidth,
                       })
                     // if (c.active) {
                     //   return columnHelper.accessor(c.key as string, {

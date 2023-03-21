@@ -472,29 +472,33 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row, idx) => (
-            <tr
-              key={row.id}
-              className={clsx(
-                idx === 0
-                  ? "border-t border-gray-300"
-                  : "border-t border-gray-200",
-                "hover:cursor-pointer hover:bg-gray-100"
-              )}
-            >
-              {row.getVisibleCells().map((cell, idx) => (
-                <td
-                  key={cell.id}
-                  className={clsx(
-                    idx === 0 ? "font-medium text-gray-900" : "font-normal",
-                    "px-4 py-2 text-sm text-gray-700 "
-                  )}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row, idx) => {
+            const hasError = row.original.error;
+            return (
+              <tr
+                key={row.id}
+                className={clsx(
+                  hasError
+                    ? "bg-red-100 hover:bg-red-200"
+                    : "hover:bg-gray-100",
+                  "border-t border-gray-300",
+                  "hover:cursor-pointer"
+                )}
+              >
+                {row.getVisibleCells().map((cell, idx) => (
+                  <td
+                    key={cell.id}
+                    className={clsx(
+                      idx === 0 ? "font-medium text-gray-900" : "font-normal",
+                      "px-4 py-2 text-sm text-gray-700 "
+                    )}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
