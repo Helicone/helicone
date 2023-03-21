@@ -509,6 +509,9 @@ const RequestsPage = (props: RequestsPageProps) => {
                 page={page}
                 from={from}
                 to={to}
+                onSelectHandler={selectRowHandler}
+                onPageChangeHandler={onPageChangeHandler}
+                onPageSizeChangeHandler={onPageSizeChangeHandler}
               />
               // <ThemedTableV2
               //   condensed
@@ -518,9 +521,9 @@ const RequestsPage = (props: RequestsPageProps) => {
               // page={page}
               // from={from}
               // to={to}
-              //   onSelectHandler={selectRowHandler}
-              //   onPageChangeHandler={onPageChangeHandler}
-              //   onPageSizeChangeHandler={onPageSizeChangeHandler}
+              // onSelectHandler={selectRowHandler}
+              // onPageChangeHandler={onPageChangeHandler}
+              // onPageSizeChangeHandler={onPageSizeChangeHandler}
               //   onSortHandler={(key) => {
               //     if (key.key === orderBy.column) {
               //       setOrderBy({
