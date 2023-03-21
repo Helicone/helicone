@@ -2,7 +2,7 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import {
   getTimeIntervalAgo,
@@ -76,44 +76,7 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
-  const [viewMode, setViewMode] = useState<"Expanded" | "Condensed">(
-    "Condensed"
-  );
-
-  const isPreview = viewMode === "Expanded";
-  const truncLength = isPreview ? 8000 : 50;
-
-  const requestColumn: Column = {
-    key: "requestText",
-    active: true,
-    label: "Request",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      request_prompt: direction,
-    }),
-    minWidth: 240,
-    type: "text",
-    format: (value: string | { content: string; role: string }) =>
-      typeof value === "string"
-        ? truncString(value, truncLength)
-        : truncString(value.content, truncLength),
-  };
-
-  const responseColumn: Column = {
-    key: "responseText",
-    active: true,
-    label: "Response",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      response_text: direction,
-    }),
-    minWidth: 240,
-    type: "text",
-    format: (value: string) =>
-      value
-        ? removeLeadingWhitespace(truncString(value, truncLength))
-        : removeLeadingWhitespace(value),
-  };
+  const truncLength = 50;
 
   const initialColumns: Column[] = [
     {
@@ -128,8 +91,36 @@ const RequestsPage = (props: RequestsPageProps) => {
       type: "timestamp",
       format: (value: string) => getUSDate(value),
     },
-    requestColumn,
-    responseColumn,
+    {
+      key: "requestText",
+      active: true,
+      label: "Request",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        request_prompt: direction,
+      }),
+      minWidth: 240,
+      type: "text",
+      format: (value: string | { content: string; role: string }) =>
+        typeof value === "string"
+          ? truncString(value, truncLength)
+          : truncString(value.content, truncLength),
+    },
+    {
+      key: "responseText",
+      active: true,
+      label: "Response",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        response_text: direction,
+      }),
+      minWidth: 240,
+      type: "text",
+      format: (value: string) =>
+        value
+          ? removeLeadingWhitespace(truncString(value, truncLength))
+          : removeLeadingWhitespace(value),
+    },
     {
       key: "totalTokens",
       active: true,
@@ -218,15 +209,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     };
   };
 
-  if (parsed) {
-    initialColumns.forEach((column) => {
-      const match = parsed.find((c) => c.key === column.key);
-      if (match) {
-        column.active = match.active;
-      }
-    });
-  }
-
   const [defaultColumns, setDefaultColumns] =
     useState<Column[]>(initialColumns);
   const [currentPage, setCurrentPage] = useState<number>(page);
@@ -302,11 +284,14 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  let columns: Column[] = [];
+  // columns
 
-  if (isPreview) {
-    columns = [requestColumn, responseColumn];
-  } else {
+  const [columns, setColumns] = useState<Column[]>([]);
+
+  useEffect(() => {
+    if (columns.length > initialColumns.length) {
+      return;
+    }
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
@@ -342,21 +327,75 @@ const RequestsPage = (props: RequestsPageProps) => {
       };
     });
 
-    const includePrompt = valuesColumns.length > 0;
+    const newColumns = [
+      ...defaultColumns,
+      ...valuesColumns,
+      ...propertiesColumns,
+    ];
 
-    columns = [...defaultColumns, ...valuesColumns, ...propertiesColumns];
-
-    if (includePrompt) {
-      columns.push({
-        key: "prompt_name",
-        label: "Prompt Name",
-        active: true,
-        format: (value: string) => value,
-        type: "text",
-        filter: true,
+    if (parsed) {
+      newColumns.forEach((column) => {
+        const match = parsed.find((c) => c.key === column.key);
+        if (match) {
+          column.active = match.active;
+        }
       });
     }
-  }
+
+    setColumns([...defaultColumns, ...valuesColumns, ...propertiesColumns]);
+  }, [defaultColumns, values, properties]);
+
+  console.log(1);
+
+  // const propertiesColumns: Column[] = properties.map((p) => {
+  //   return {
+  //     key: p,
+  //     label: capitalizeWords(p),
+  //     active: true,
+  //     sortBy: "desc",
+  //     toSortLeaf: (direction) => ({
+  //       properties: {
+  //         [p]: direction,
+  //       },
+  //     }),
+  //     columnOrigin: "property",
+  //     format: (value: string) =>
+  //       value ? truncString(value, truncLength) : value,
+  //     minWidth: 170,
+  //   };
+  // });
+
+  // const valuesColumns: Column[] = values.map((p) => {
+  //   return {
+  //     key: p,
+  //     label: capitalizeWords(p),
+  //     active: true,
+  //     sortBy: "desc",
+  //     toSortLeaf: (direction) => ({
+  //       values: {
+  //         [p]: direction,
+  //       },
+  //     }),
+  //     columnOrigin: "value",
+  //     format: (value: string) =>
+  //       value ? truncString(value, truncLength) : value,
+  //   };
+  // });
+
+  // const includePrompt = valuesColumns.length > 0;
+
+  // columns = [...defaultColumns, ...valuesColumns, ...propertiesColumns];
+
+  // if (includePrompt) {
+  //   columns.push({
+  //     key: "prompt_name",
+  //     label: "Prompt Name",
+  //     active: true,
+  //     format: (value: string) => value,
+  //     type: "text",
+  //     filter: true,
+  //   });
+  // }
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
@@ -416,7 +455,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           <div className="space-y-2">
             <ThemedTableHeader
               editColumns={{
-                columns: defaultColumns,
+                columns: columns,
                 onColumnCallback: (columns) => {
                   const active = columns.map((c) => {
                     return {
@@ -471,10 +510,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                     setAdvancedFilter(reducedFilter);
                   }
                 },
-              }}
-              view={{
-                viewMode,
-                setViewMode,
               }}
             />
 

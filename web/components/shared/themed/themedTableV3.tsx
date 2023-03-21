@@ -60,7 +60,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     },
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
 
   let columnBeingDragged: number;
