@@ -75,7 +75,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
             key={row.label}
             className="flex flex-col pl-4 border-l border-gray-300"
           >
-            <dd className="text-md font-semibold tracking-tight">
+            <dd className="text-sm font-semibold">
               {loading ? (
                 <div className="animate-pulse h-5 w-24 bg-gray-300 rounded-md" />
               ) : (

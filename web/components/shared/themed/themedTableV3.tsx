@@ -161,7 +161,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
         </table>
       </div>
       <div
-        className="flex items-center justify-betweenpy-2 px-4"
+        className="flex items-center justify-between px-1"
         aria-label="Pagination"
       >
         <div className="flex flex-row items-center gap-2">
