@@ -1,4 +1,5 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { createColumnHelper } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 
 import { useState } from "react";
@@ -23,6 +24,7 @@ import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTableV3 from "../../shared/themed/themedTableV3";
 import {
   capitalizeWords,
   getUSDate,
@@ -391,6 +393,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
 
+  const columnHelper = createColumnHelper<RequestWrapper>();
+
   return (
     <>
       <AuthHeader
@@ -489,39 +493,61 @@ const RequestsPage = (props: RequestsPageProps) => {
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
-              <ThemedTableV2
-                condensed
-                columns={columns.filter((c) => c.active)}
-                rows={requests}
-                count={count || 0}
-                page={page}
-                from={from}
-                to={to}
-                onSelectHandler={selectRowHandler}
-                onPageChangeHandler={onPageChangeHandler}
-                onPageSizeChangeHandler={onPageSizeChangeHandler}
-                onSortHandler={(key) => {
-                  if (key.key === orderBy.column) {
-                    setOrderBy({
-                      column: key.key,
-                      direction: orderBy.direction === "asc" ? "desc" : "asc",
-                    });
-                    key.toSortLeaf &&
-                      setSortLeaf(
-                        key.toSortLeaf(
-                          orderBy.direction === "asc" ? "desc" : "asc"
-                        )
-                      );
-                  } else {
-                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-                    setOrderBy({
-                      column: key.key,
-                      direction: "asc",
-                    });
-                  }
-                }}
-                isPreview={isPreview}
+              <ThemedTableV3
+                data={requests}
+                columns={columns
+                  .filter((c) => c.active)
+                  .map(
+                    (c) =>
+                      columnHelper.accessor(c.key as string, {
+                        cell: (info) =>
+                          c.format
+                            ? c.format(info.getValue())
+                            : info.getValue(),
+                        header: () => <span>{c.label}</span>,
+                      })
+                    // if (c.active) {
+                    //   return columnHelper.accessor(c.key as string, {
+                    //     cell: (info) =>
+                    //       c.format ? c.format(info.getValue()) : info.getValue(),
+                    //     header: () => <span>{c.label}</span>,
+                    //   });
+                    // }
+                  )}
               />
+              // <ThemedTableV2
+              //   condensed
+              //   columns={columns.filter((c) => c.active)}
+              //   rows={requests}
+              //   count={count || 0}
+              //   page={page}
+              //   from={from}
+              //   to={to}
+              //   onSelectHandler={selectRowHandler}
+              //   onPageChangeHandler={onPageChangeHandler}
+              //   onPageSizeChangeHandler={onPageSizeChangeHandler}
+              //   onSortHandler={(key) => {
+              //     if (key.key === orderBy.column) {
+              //       setOrderBy({
+              //         column: key.key,
+              //         direction: orderBy.direction === "asc" ? "desc" : "asc",
+              //       });
+              //       key.toSortLeaf &&
+              //         setSortLeaf(
+              //           key.toSortLeaf(
+              //             orderBy.direction === "asc" ? "desc" : "asc"
+              //           )
+              //         );
+              //     } else {
+              //       key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+              //       setOrderBy({
+              //         column: key.key,
+              //         direction: "asc",
+              //       });
+              //     }
+              //   }}
+              //   isPreview={isPreview}
+              // />
             )}
           </div>
         </div>
