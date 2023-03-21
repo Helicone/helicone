@@ -108,11 +108,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string | { content: string; role: string }, mode) =>
         typeof value === "string"
           ? mode === "Condensed"
-            ? truncString(value, truncLength)
-            : truncString(value, 5000)
+            ? removeLeadingWhitespace(truncString(value, truncLength))
+            : removeLeadingWhitespace(truncString(value, 5000))
           : mode === "Condensed"
-          ? truncString(value.content, truncLength)
-          : truncString(value.content, 5000),
+          ? removeLeadingWhitespace(truncString(value.content, truncLength))
+          : removeLeadingWhitespace(truncString(value.content, 5000)),
     },
     {
       key: "responseText",
