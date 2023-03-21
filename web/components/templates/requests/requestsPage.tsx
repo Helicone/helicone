@@ -294,7 +294,7 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   // columns
 
-  const [columns, setColumns] = useState<Column[]>([]);
+  const [columns, setColumns] = useState<Column[]>(defaultColumns);
 
   useEffect(() => {
     if (
@@ -303,49 +303,49 @@ const RequestsPage = (props: RequestsPageProps) => {
     ) {
       return;
     }
-    // const propertiesColumns: Column[] = properties.map((p) => {
-    //   return {
-    //     key: p,
-    //     label: capitalizeWords(p),
-    //     active: true,
-    //     sortBy: "desc",
-    //     toSortLeaf: (direction) => ({
-    //       properties: {
-    //         [p]: direction,
-    //       },
-    //     }),
-    //     columnOrigin: "property",
-    //     format: (value: string, mode) =>
-    //       value && mode === "Condensed"
-    //         ? truncString(value, truncLength)
-    //         : value,
-    //     minWidth: 170,
-    //   };
-    // });
+    const propertiesColumns: Column[] = properties.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "property",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
 
-    // const valuesColumns: Column[] = values.map((p) => {
-    //   return {
-    //     key: p,
-    //     label: capitalizeWords(p),
-    //     active: true,
-    //     sortBy: "desc",
-    //     toSortLeaf: (direction) => ({
-    //       values: {
-    //         [p]: direction,
-    //       },
-    //     }),
-    //     columnOrigin: "value",
-    //     format: (value: string, mode) =>
-    //       value && mode === "Condensed"
-    //         ? truncString(value, truncLength)
-    //         : value,
-    //   };
-    // });
+    const valuesColumns: Column[] = values.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          values: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "value",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+      };
+    });
 
     const newColumns = [
       ...defaultColumns,
-      // ...valuesColumns,
-      // ...propertiesColumns,
+      ...valuesColumns,
+      ...propertiesColumns,
     ];
 
     if (parsed) {
