@@ -55,6 +55,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     columnResizeMode: "onChange",
   });
 
+  let columnBeingDragged: number;
+
   return (
     <div className="space-y-2">
       <p className="text-sm text-gray-700">
@@ -85,6 +87,34 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                         style: {
                           width: header.getSize(),
                         },
+                      }}
+                      data-column-index={header.index}
+                      draggable={
+                        !table.getState().columnSizingInfo.isResizingColumn
+                      }
+                      onDragStart={(e) => {
+                        columnBeingDragged = Number(
+                          e.currentTarget.dataset.columnIndex
+                        );
+                      }}
+                      onDragOver={(e): void => {
+                        e.preventDefault();
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const newPosition = Number(
+                          e.currentTarget.dataset.columnIndex
+                        );
+                        const currentCols = table
+                          .getVisibleLeafColumns()
+                          .map((c) => c.id);
+                        const colToBeMoved = currentCols.splice(
+                          columnBeingDragged,
+                          1
+                        );
+
+                        currentCols.splice(newPosition, 0, colToBeMoved[0]);
+                        table.setColumnOrder(currentCols);
                       }}
                     >
                       {header.isPlaceholder
@@ -161,7 +191,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
         </table>
       </div>
       <div
-        className="flex items-center justify-between px-1"
+        className="flex items-center justify-betweenpy-2"
         aria-label="Pagination"
       >
         <div className="flex flex-row items-center gap-2">

@@ -131,18 +131,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     requestColumn,
     responseColumn,
     {
-      key: "latency",
-      active: true,
-      label: "Duration",
-      format: (value: string) => `${value} s`,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        latency: direction,
-      }),
-      type: "number",
-      filter: true,
-    },
-    {
       key: "totalTokens",
       active: true,
       label: "Total Tokens",
