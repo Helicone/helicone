@@ -497,33 +497,27 @@ const RequestsPage = (props: RequestsPageProps) => {
                 data={requests}
                 columns={columns
                   .filter((c) => c.active)
-                  .map(
-                    (c) =>
-                      columnHelper.accessor(c.key as string, {
-                        cell: (info) =>
-                          c.format
-                            ? c.format(info.getValue())
-                            : info.getValue(),
-                        header: () => <span>{c.label}</span>,
-                        size: c.minWidth,
-                      })
-                    // if (c.active) {
-                    //   return columnHelper.accessor(c.key as string, {
-                    //     cell: (info) =>
-                    //       c.format ? c.format(info.getValue()) : info.getValue(),
-                    //     header: () => <span>{c.label}</span>,
-                    //   });
-                    // }
+                  .map((c) =>
+                    columnHelper.accessor(c.key as string, {
+                      cell: (info) =>
+                        c.format ? c.format(info.getValue()) : info.getValue(),
+                      header: () => <span>{c.label}</span>,
+                      size: c.minWidth,
+                    })
                   )}
+                count={count || 0}
+                page={page}
+                from={from}
+                to={to}
               />
               // <ThemedTableV2
               //   condensed
               //   columns={columns.filter((c) => c.active)}
               //   rows={requests}
-              //   count={count || 0}
-              //   page={page}
-              //   from={from}
-              //   to={to}
+              // count={count || 0}
+              // page={page}
+              // from={from}
+              // to={to}
               //   onSelectHandler={selectRowHandler}
               //   onPageChangeHandler={onPageChangeHandler}
               //   onPageSizeChangeHandler={onPageSizeChangeHandler}
