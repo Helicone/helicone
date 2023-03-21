@@ -1,4 +1,6 @@
-import { CsvData } from "./requestsPage";
+import { removeLeadingWhitespace } from "../../shared/utils/utils";
+import Hover from "./hover";
+import { ChatProperties, CsvData } from "./requestsPage";
 
 interface CompletionRegexProps {
   prompt_name?: string;
@@ -11,34 +13,49 @@ interface CompletionRegexProps {
 export const CompletionRegex = (props: CompletionRegexProps) => {
   const { prompt_name, prompt_regex, response, values, keys } = props;
 
+  const formatPrompt = (prompt: string): JSX.Element => {
+    const missingValues: string[] = [];
+    let formattedString = prompt;
+    const elements = formattedString
+      .split(/({{[^}]+}})/g)
+      .map((part, index) => {
+        const match = part.match(/{{([^}]+)}}/);
+        if (match) {
+          const key = match[1];
+          const value = keys[key];
+          if (value === undefined) {
+            missingValues.push(key);
+            return part;
+          }
+          return <Hover key={`${key}-${index}`} value={value} name={key} />;
+        }
+        return part;
+      });
+
+    return (
+      <div className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap overflow-auto">
+        {elements}
+      </div>
+    );
+  };
+
   return (
-    <>
-      <div>
-        <div className="w-full flex flex-col text-left space-y-1 ">
-          <p>{prompt_name}:</p>
-          <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
-            {prompt_regex}
-          </p>
+    <div className="flex flex-col text-left space-y-2 text-sm">
+      {prompt_regex && (
+        <div className="flex flex-col text-left space-y-1 leading-6 mb-4">
+          <p className="text-gray-500 font-medium">Request</p>
+          {formatPrompt(removeLeadingWhitespace(prompt_regex))}
         </div>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-4  w-full">
-        {values
-          .filter((v) => keys[v] != null)
-          .map((v) => (
-            <div className="w-full flex flex-col text-left space-y-1 " key={v}>
-              <p>{v}:</p>
-              <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[100px] overflow-auto">
-                {keys[v]}
-              </p>
-            </div>
-          ))}
-      </div>
-      <div className="w-full flex flex-col text-left space-y-1 ">
-        <p>Response:</p>
-        <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-[150px] max-h-[150px] overflow-auto">
-          {response}
-        </p>
-      </div>
-    </>
+      )}
+
+      {response && (
+        <div className="flex flex-col text-left space-y-1 ">
+          <p className="text-gray-500 font-medium">Response</p>
+          <div className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap overflow-auto leading-6">
+            {removeLeadingWhitespace(response)}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
