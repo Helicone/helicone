@@ -6,7 +6,7 @@ interface CompletionRegexProps {
   prompt_name?: string;
   prompt_regex?: string;
   response?: string;
-  values: { [key: string]: string };
+  values: string[];
   [keys: string]: any;
 }
 
@@ -14,7 +14,6 @@ export const CompletionRegex = (props: CompletionRegexProps) => {
   const { prompt_name, prompt_regex, response, values, keys } = props;
 
   const formatPrompt = (prompt: string): JSX.Element => {
-    console.log("LOOK HERE", prompt);
     const missingValues: string[] = [];
     let formattedString = prompt;
     const elements = formattedString
