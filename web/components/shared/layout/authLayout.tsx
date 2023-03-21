@@ -314,7 +314,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               <p className="text-md font-medium text-gray-700">
                                 {user?.email}
                               </p>
-                              <button className="text-sm font-medium text-gray-500 group-hover:text-gray-700">
+                              <button
+                                onClick={() =>
+                                  supabaseClient.auth.signOut().then(() => {
+                                    router.push("/");
+                                  })
+                                }
+                                className="text-sm font-medium text-gray-500 group-hover:text-gray-700"
+                              >
                                 Sign Out
                               </button>
                             </div>
@@ -509,7 +516,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         <p className="text-sm font-medium text-gray-700">
                           {user?.email}
                         </p>
-                        <button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                        <button
+                          onClick={() =>
+                            supabaseClient.auth.signOut().then(() => {
+                              router.push("/");
+                            })
+                          }
+                          className="text-xs font-medium text-gray-500 group-hover:text-gray-700"
+                        >
                           Sign Out
                         </button>
                       </div>
