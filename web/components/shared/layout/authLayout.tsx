@@ -532,47 +532,50 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
-            {/* {user?.email === DEMO_EMAIL && (
-              <div className="flex h-full items-center px-2">
-                <div className="py-2 bg-red-600 px-4 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
-                  <div className="flex flex-row gap-1 sm:gap-2">
-                    <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
-                    <p className="hidden lg:inline">
-                      Currently viewing demo. Data from:
-                    </p>
-                    <p className="inline lg:hidden">Viewing</p>
-                    <div className="flex flex-row gap-1 items-center">
+          </div>
+
+          <main className="flex-1 bg">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
+              {/* Replace with your content */}
+              {user?.email === DEMO_EMAIL && (
+                <div className="pointer-events-none flex sm:justify-center mt-4">
+                  <div className="w-full pointer-events-auto flex items-center justify-between gap-x-6 bg-red-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
+                    <div className="text-sm leading-6 text-white items-center">
+                      <strong className="font-semibold">
+                        Currently viewing DEMO
+                      </strong>
+                      <svg
+                        viewBox="0 0 2 2"
+                        className="mx-2 inline h-0.5 w-0.5 fill-current"
+                        aria-hidden="true"
+                      >
+                        <circle cx={1} cy={1} r={1} />
+                      </svg>
+                      Data from{" "}
                       <Link
                         href="https://demoapp.valyrai.com"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline"
                       >
-                        <p className="hidden lg:inline">AI App Ideas</p>
-                        <p className="inline lg:hidden">Demo</p>
+                        <p className="inline font-semibold">AI App Ideas</p>
+                        <ArrowTopRightOnSquareIcon className="h-4 w-4 mb-1 ml-1 inline" />
                       </Link>
-                      <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                     </div>
+                    <button
+                      onClick={() =>
+                        supabaseClient.auth.signOut().then(() => {
+                          router.push("/");
+                        })
+                      }
+                      type="button"
+                      className="-m-1.5 flex-none px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-900 rounded-lg"
+                    >
+                      Exit Demo
+                    </button>
                   </div>
                 </div>
-                <button
-                  className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base"
-                  onClick={() =>
-                    supabaseClient.auth.signOut().then(() => {
-                      router.push("/");
-                    })
-                  }
-                >
-                  <span className="inline lg:hidden">Exit</span>
-                  <span className="hidden lg:inline">Exit Demo</span>
-                </button>
-              </div>
-            )} */}
-          </div>
-
-          <main className="flex-1 bg">
-            <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
-              {/* Replace with your content */}
+              )}
               <div className="py-4 sm:py-8">{children}</div>
               {/* /End replace */}
             </div>
