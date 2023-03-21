@@ -4,6 +4,8 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { clsx } from "../clsx";
@@ -40,9 +42,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onPageChangeHandler,
     onPageSizeChangeHandler,
     onSelectHandler,
-    onSortHandler,
+    // onSortHandler,
   } = props;
-
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const router = useRouter();
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
@@ -53,6 +55,12 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    debugTable: true,
   });
 
   let columnBeingDragged: number;
@@ -77,7 +85,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header, idx) => {
-                  const col = sortColumns[idx];
                   return (
                     <th
                       className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900"
@@ -123,8 +130,12 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                      <div
+                      <button
+                        onClick={() => header.column.getToggleSortingHandler()}
                         className={clsx(
+                          header.column.getCanSort()
+                            ? "cursor-pointer select-none"
+                            : "",
                           header.column.getIsResizing() ? "isResizing" : "",
                           "resizer"
                         )}
@@ -135,17 +146,17 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                       />
                       <button
                         onClick={() => {
-                          if (onSortHandler) {
-                            onSortHandler(col);
-                          }
+                          // if (onSortHandler) {
+                          //   onSortHandler(col);
+                          // }
                         }}
                         className="text-gray-700 hover:text-gray-900 hover:scale-105"
                       >
-                        {col.sortBy === "asc" ? (
+                        {/* {col?.sortBy === "asc" ? (
                           <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
                         ) : (
                           <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
-                        )}
+                        )} */}
                       </button>
                     </th>
                   );
