@@ -113,6 +113,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                     "border-t border-gray-300",
                     "hover:cursor-pointer"
                   )}
+                  onClick={() =>
+                    onSelectHandler && onSelectHandler(row.original, idx)
+                  }
                 >
                   {row.getVisibleCells().map((cell, idx) => (
                     <td
