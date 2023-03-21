@@ -303,49 +303,49 @@ const RequestsPage = (props: RequestsPageProps) => {
     ) {
       return;
     }
-    const propertiesColumns: Column[] = properties.map((p) => {
-      return {
-        key: p,
-        label: capitalizeWords(p),
-        active: true,
-        sortBy: "desc",
-        toSortLeaf: (direction) => ({
-          properties: {
-            [p]: direction,
-          },
-        }),
-        columnOrigin: "property",
-        format: (value: string, mode) =>
-          value && mode === "Condensed"
-            ? truncString(value, truncLength)
-            : value,
-        minWidth: 170,
-      };
-    });
+    // const propertiesColumns: Column[] = properties.map((p) => {
+    //   return {
+    //     key: p,
+    //     label: capitalizeWords(p),
+    //     active: true,
+    //     sortBy: "desc",
+    //     toSortLeaf: (direction) => ({
+    //       properties: {
+    //         [p]: direction,
+    //       },
+    //     }),
+    //     columnOrigin: "property",
+    //     format: (value: string, mode) =>
+    //       value && mode === "Condensed"
+    //         ? truncString(value, truncLength)
+    //         : value,
+    //     minWidth: 170,
+    //   };
+    // });
 
-    const valuesColumns: Column[] = values.map((p) => {
-      return {
-        key: p,
-        label: capitalizeWords(p),
-        active: true,
-        sortBy: "desc",
-        toSortLeaf: (direction) => ({
-          values: {
-            [p]: direction,
-          },
-        }),
-        columnOrigin: "value",
-        format: (value: string, mode) =>
-          value && mode === "Condensed"
-            ? truncString(value, truncLength)
-            : value,
-      };
-    });
+    // const valuesColumns: Column[] = values.map((p) => {
+    //   return {
+    //     key: p,
+    //     label: capitalizeWords(p),
+    //     active: true,
+    //     sortBy: "desc",
+    //     toSortLeaf: (direction) => ({
+    //       values: {
+    //         [p]: direction,
+    //       },
+    //     }),
+    //     columnOrigin: "value",
+    //     format: (value: string, mode) =>
+    //       value && mode === "Condensed"
+    //         ? truncString(value, truncLength)
+    //         : value,
+    //   };
+    // });
 
     const newColumns = [
       ...defaultColumns,
-      ...valuesColumns,
-      ...propertiesColumns,
+      // ...valuesColumns,
+      // ...propertiesColumns,
     ];
 
     if (parsed) {
@@ -357,7 +357,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       });
     }
 
-    setColumns([...defaultColumns, ...valuesColumns, ...propertiesColumns]);
+    setColumns(newColumns);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultColumns, values, properties]);
 
