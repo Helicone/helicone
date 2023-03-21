@@ -76,7 +76,11 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
-  const truncLength = 50;
+  const truncLength = 30;
+
+  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
+    "Condensed"
+  );
 
   const initialColumns: Column[] = [
     {
@@ -101,10 +105,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       }),
       minWidth: 240,
       type: "text",
-      format: (value: string | { content: string; role: string }) =>
+      format: (value: string | { content: string; role: string }, mode) =>
         typeof value === "string"
-          ? truncString(value, truncLength)
-          : truncString(value.content, truncLength),
+          ? mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value
+          : mode === "Condensed"
+          ? truncString(value.content, truncLength)
+          : value.content,
     },
     {
       key: "responseText",
@@ -116,8 +124,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       }),
       minWidth: 240,
       type: "text",
-      format: (value: string) =>
-        value
+      format: (value: string, mode) =>
+        value && mode === "Condensed"
           ? removeLeadingWhitespace(truncString(value, truncLength))
           : removeLeadingWhitespace(value),
     },
@@ -307,8 +315,10 @@ const RequestsPage = (props: RequestsPageProps) => {
           },
         }),
         columnOrigin: "property",
-        format: (value: string) =>
-          value ? truncString(value, truncLength) : value,
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
         minWidth: 170,
       };
     });
@@ -325,8 +335,10 @@ const RequestsPage = (props: RequestsPageProps) => {
           },
         }),
         columnOrigin: "value",
-        format: (value: string) =>
-          value ? truncString(value, truncLength) : value,
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
       };
     });
 
@@ -346,59 +358,8 @@ const RequestsPage = (props: RequestsPageProps) => {
     }
 
     setColumns([...defaultColumns, ...valuesColumns, ...propertiesColumns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultColumns, values, properties]);
-
-  console.log(1);
-
-  // const propertiesColumns: Column[] = properties.map((p) => {
-  //   return {
-  //     key: p,
-  //     label: capitalizeWords(p),
-  //     active: true,
-  //     sortBy: "desc",
-  //     toSortLeaf: (direction) => ({
-  //       properties: {
-  //         [p]: direction,
-  //       },
-  //     }),
-  //     columnOrigin: "property",
-  //     format: (value: string) =>
-  //       value ? truncString(value, truncLength) : value,
-  //     minWidth: 170,
-  //   };
-  // });
-
-  // const valuesColumns: Column[] = values.map((p) => {
-  //   return {
-  //     key: p,
-  //     label: capitalizeWords(p),
-  //     active: true,
-  //     sortBy: "desc",
-  //     toSortLeaf: (direction) => ({
-  //       values: {
-  //         [p]: direction,
-  //       },
-  //     }),
-  //     columnOrigin: "value",
-  //     format: (value: string) =>
-  //       value ? truncString(value, truncLength) : value,
-  //   };
-  // });
-
-  // const includePrompt = valuesColumns.length > 0;
-
-  // columns = [...defaultColumns, ...valuesColumns, ...propertiesColumns];
-
-  // if (includePrompt) {
-  //   columns.push({
-  //     key: "prompt_name",
-  //     label: "Prompt Name",
-  //     active: true,
-  //     format: (value: string) => value,
-  //     type: "text",
-  //     filter: true,
-  //   });
-  // }
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
@@ -457,6 +418,10 @@ const RequestsPage = (props: RequestsPageProps) => {
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
             <ThemedTableHeader
+              view={{
+                viewMode,
+                setViewMode,
+              }}
               editColumns={{
                 columns: columns,
                 onColumnCallback: (columns) => {
@@ -521,13 +486,14 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV3
                 data={requests}
-                sortColumns={columns.filter((c) => c.active)}
                 columns={columns
                   .filter((c) => c.active)
                   .map((c) =>
                     columnHelper.accessor(c.key as string, {
                       cell: (info) =>
-                        c.format ? c.format(info.getValue()) : info.getValue(),
+                        c.format
+                          ? c.format(info.getValue(), viewMode)
+                          : info.getValue(),
                       header: () => <span>{c.label}</span>,
                       size: c.minWidth,
                     })
@@ -560,39 +526,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                   }
                 }}
               />
-              // <ThemedTableV2
-              //   condensed
-              // columns={columns.filter((c) => c.active)}
-              //   rows={requests}
-              // count={count || 0}
-              // page={page}
-              // from={from}
-              // to={to}
-              // onSelectHandler={selectRowHandler}
-              // onPageChangeHandler={onPageChangeHandler}
-              // onPageSizeChangeHandler={onPageSizeChangeHandler}
-              // onSortHandler={(key) => {
-              //   if (key.key === orderBy.column) {
-              //     setOrderBy({
-              //       column: key.key,
-              //       direction: orderBy.direction === "asc" ? "desc" : "asc",
-              //     });
-              //     key.toSortLeaf &&
-              //       setSortLeaf(
-              //         key.toSortLeaf(
-              //           orderBy.direction === "asc" ? "desc" : "asc"
-              //         )
-              //       );
-              //   } else {
-              //     key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-              //     setOrderBy({
-              //       column: key.key,
-              //       direction: "asc",
-              //     });
-              //   }
-              // }}
-              //   isPreview={isPreview}
-              // />
             )}
           </div>
         </div>

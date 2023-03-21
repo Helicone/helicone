@@ -70,11 +70,21 @@ interface ThemedHeaderProps {
     filterMap: TableFilterMap;
     onAdvancedFilter: (advancedFilters: Filter[]) => void;
   };
+  view?: {
+    viewMode: string;
+    setViewMode: Dispatch<SetStateAction<"Condensed" | "Expanded">>;
+  };
 }
 
 export default function ThemedHeader(props: ThemedHeaderProps) {
-  const { isFetching, editColumns, timeFilter, advancedFilter, csvExport } =
-    props;
+  const {
+    isFetching,
+    editColumns,
+    timeFilter,
+    advancedFilter,
+    csvExport,
+    view,
+  } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -267,6 +277,25 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     </button>
                   </CSVLink>
                 </Menu>
+              </div>
+            )}
+            {view && (
+              <div className="mx-auto flex text-sm">
+                <ThemedToggle
+                  options={[
+                    {
+                      label: "Condensed",
+                      icon: Square3Stack3DIcon,
+                    },
+                    {
+                      label: "Expanded",
+                      icon: ArrowsPointingOutIcon,
+                    },
+                  ]}
+                  onOptionSelect={(option) =>
+                    view.setViewMode(option as "Condensed" | "Expanded")
+                  }
+                />
               </div>
             )}
           </div>

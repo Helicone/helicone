@@ -26,7 +26,7 @@ export interface Column {
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
   toSortLeaf?: (direction: SortDirection) => SortLeafRequest;
-  format?: (value: any) => string;
+  format?: (value: any, mode: "Condensed" | "Expanded") => string;
 }
 
 interface ThemedTableV2Props {
@@ -158,7 +158,9 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                               "font-sans text-sm"
                             )}
                           >
-                            {column.format ? column.format(value) : value}
+                            {column.format
+                              ? column.format(value, "Condensed")
+                              : value}
                           </p>
                         </TableCell>
                       );

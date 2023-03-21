@@ -14,11 +14,10 @@ import { getUSDate } from "../utils/utils";
 import { truncString } from "../../../lib/stringHelpers";
 import { useRouter } from "next/router";
 import { Column } from "../../ThemedTableV2";
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
+import { ArrowUpIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
-  sortColumns: Column[];
   columns: any[]; // abstract this to a <T>
   page: number;
   from: number;
@@ -34,7 +33,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const {
     data,
     columns,
-    sortColumns,
     from,
     to,
     count,
@@ -66,140 +64,155 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-gray-700">
-        Showing <span className="font-medium">{from + 1}</span> to{" "}
-        <span className="font-medium">{Math.min(to, count as number)}</span> of{" "}
-        <span className="font-medium">{count}</span> results
-      </p>
-      <div className="overflow-x-auto font-sans">
-        <table
-          {...{
-            style: {
-              width: table.getCenterTotalSize(),
-            },
-          }}
-          className="inline-block w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2"
-        >
-          <thead className="text-left text-sm font-semibold text-gray-900">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header, idx) => {
-                  return (
-                    <th
-                      className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900"
-                      key={header.id}
-                      {...{
-                        colSpan: header.colSpan,
-                        style: {
-                          width: header.getSize(),
-                        },
-                      }}
-                      data-column-index={header.index}
-                      draggable={
-                        !table.getState().columnSizingInfo.isResizingColumn
-                      }
-                      onDragStart={(e) => {
-                        columnBeingDragged = Number(
-                          e.currentTarget.dataset.columnIndex
-                        );
-                      }}
-                      onDragOver={(e): void => {
-                        e.preventDefault();
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        const newPosition = Number(
-                          e.currentTarget.dataset.columnIndex
-                        );
-                        const currentCols = table
-                          .getVisibleLeafColumns()
-                          .map((c) => c.id);
-                        const colToBeMoved = currentCols.splice(
-                          columnBeingDragged,
-                          1
-                        );
-
-                        currentCols.splice(newPosition, 0, colToBeMoved[0]);
-                        table.setColumnOrder(currentCols);
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      <button
-                        onClick={() => header.column.getToggleSortingHandler()}
-                        className={clsx(
-                          header.column.getCanSort()
-                            ? "cursor-pointer select-none"
-                            : "",
-                          header.column.getIsResizing() ? "isResizing" : "",
-                          "resizer"
-                        )}
-                        {...{
-                          onMouseDown: header.getResizeHandler(),
-                          onTouchStart: header.getResizeHandler(),
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          // if (onSortHandler) {
-                          //   onSortHandler(col);
-                          // }
-                        }}
-                        className="text-gray-700 hover:text-gray-900 hover:scale-105"
-                      >
-                        {/* {col?.sortBy === "asc" ? (
-                          <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
-                        ) : (
-                          <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
-                        )} */}
-                      </button>
-                    </th>
-                  );
-                })}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row, idx) => {
-              const hasError = row.original.error;
-              return (
-                <tr
-                  key={row.id}
-                  className={clsx(
-                    hasError
-                      ? "bg-red-100 hover:bg-red-200"
-                      : "hover:bg-gray-100",
-                    "border-t border-gray-300",
-                    "hover:cursor-pointer"
-                  )}
-                  onClick={() =>
-                    onSelectHandler && onSelectHandler(row.original, idx)
-                  }
-                >
-                  {row.getVisibleCells().map((cell, idx) => (
-                    <td
-                      key={cell.id}
-                      className={clsx(
-                        idx === 0 ? "font-medium text-gray-900" : "font-normal",
-                        "px-4 py-2.5 text-sm text-gray-700 "
-                      )}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div>
+        <p className="text-sm text-gray-700">
+          Showing <span className="font-medium">{from + 1}</span> to{" "}
+          <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
+          of <span className="font-medium">{count}</span> results
+        </p>
       </div>
+
+      {columns.length < 1 ? (
+        <div className="w-full h-48 items-center justify-center align-middle flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm p-2">
+          <TableCellsIcon className="h-12 w-12 text-gray-500" />
+          <p className="italic text-gray-500">No columns selected</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto font-sans">
+          <table
+            {...{
+              style: {
+                width: table.getCenterTotalSize(),
+              },
+            }}
+            className="inline-block w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2"
+          >
+            <thead className="text-left text-sm font-semibold text-gray-900">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <th
+                        className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900"
+                        key={header.id}
+                        {...{
+                          colSpan: header.colSpan,
+                          style: {
+                            width: header.getSize(),
+                          },
+                        }}
+                        data-column-index={header.index}
+                        draggable={
+                          !table.getState().columnSizingInfo.isResizingColumn
+                        }
+                        onDragStart={(e) => {
+                          columnBeingDragged = Number(
+                            e.currentTarget.dataset.columnIndex
+                          );
+                        }}
+                        onDragOver={(e): void => {
+                          e.preventDefault();
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const newPosition = Number(
+                            e.currentTarget.dataset.columnIndex
+                          );
+                          const currentCols = table
+                            .getVisibleLeafColumns()
+                            .map((c) => c.id);
+                          const colToBeMoved = currentCols.splice(
+                            columnBeingDragged,
+                            1
+                          );
+
+                          currentCols.splice(newPosition, 0, colToBeMoved[0]);
+                          table.setColumnOrder(currentCols);
+                        }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                        <button
+                          onClick={() =>
+                            header.column.getToggleSortingHandler()
+                          }
+                          className={clsx(
+                            header.column.getCanSort()
+                              ? "cursor-pointer select-none"
+                              : "",
+                            header.column.getIsResizing() ? "isResizing" : "",
+                            "resizer"
+                          )}
+                          {...{
+                            onMouseDown: header.getResizeHandler(),
+                            onTouchStart: header.getResizeHandler(),
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            // if (onSortHandler) {
+                            //   onSortHandler(col);
+                            // }
+                          }}
+                          className="text-gray-700 hover:text-gray-900 hover:scale-105"
+                        >
+                          {/* {col?.sortBy === "asc" ? (
+                            <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
+                          ) : (
+                            <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
+                          )} */}
+                        </button>
+                      </th>
+                    );
+                  })}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row, idx) => {
+                const hasError = row.original.error;
+                return (
+                  <tr
+                    key={row.id}
+                    className={clsx(
+                      hasError
+                        ? "bg-red-100 hover:bg-red-200"
+                        : "hover:bg-gray-100",
+                      "border-t border-gray-300",
+                      "hover:cursor-pointer"
+                    )}
+                    onClick={() =>
+                      onSelectHandler && onSelectHandler(row.original, idx)
+                    }
+                  >
+                    {row.getVisibleCells().map((cell, idx) => (
+                      <td
+                        key={cell.id}
+                        className={clsx(
+                          idx === 0
+                            ? "font-medium text-gray-900"
+                            : "font-normal",
+                          "px-4 py-2.5 text-sm text-gray-700 "
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <div
         className="flex items-center justify-betweenpy-2"
         aria-label="Pagination"
