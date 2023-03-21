@@ -301,6 +301,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       columns.length > initialColumns.length ||
       (values.length === 0 && properties.length === 0)
     ) {
+      if (parsed) {
+        columns.forEach((column) => {
+          const match = parsed.find((c) => c.key === column.key);
+          if (match) {
+            column.active = match.active;
+          }
+        });
+      }
       return;
     }
     const propertiesColumns: Column[] = properties.map((p) => {
