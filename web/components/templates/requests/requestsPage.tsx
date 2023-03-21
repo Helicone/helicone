@@ -289,7 +289,10 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [columns, setColumns] = useState<Column[]>([]);
 
   useEffect(() => {
-    if (columns.length > initialColumns.length) {
+    if (
+      columns.length > initialColumns.length ||
+      (values.length === 0 && properties.length === 0)
+    ) {
       return;
     }
     const propertiesColumns: Column[] = properties.map((p) => {
