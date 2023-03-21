@@ -109,10 +109,10 @@ const RequestsPage = (props: RequestsPageProps) => {
         typeof value === "string"
           ? mode === "Condensed"
             ? truncString(value, truncLength)
-            : truncString(value, 8000)
+            : truncString(value, 5000)
           : mode === "Condensed"
           ? truncString(value.content, truncLength)
-          : truncString(value.content, 8000),
+          : truncString(value.content, 5000),
     },
     {
       key: "responseText",

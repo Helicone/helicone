@@ -514,7 +514,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </div>
                       <div className="ml-3 flex flex-col items-start">
                         <p className="text-sm font-medium text-gray-700">
-                          {user?.email} {user?.email} {user?.email}
+                          {user?.email}
                         </p>
                         <button
                           onClick={() =>
