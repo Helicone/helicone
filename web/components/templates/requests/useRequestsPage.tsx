@@ -7,7 +7,7 @@ import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
 import { Json } from "../../../supabase/database.types";
 import { Message } from "./requestsPage";
 
-export interface RequestWrapper {
+export type RequestWrapper = {
   cacheCount: number;
   promptName: string;
   promptRegex: string;
@@ -82,7 +82,7 @@ export interface RequestWrapper {
           }[];
         };
       };
-}
+};
 
 const useRequestsPage = (
   currentPage: number,

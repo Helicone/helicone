@@ -1,0 +1,77 @@
+/* table,
+.divTable {
+  border: 1px solid lightgray;
+  width: fit-content;
+} */
+/* 
+.tr {
+  display: flex;
+} */
+
+/* tr,
+.tr {
+  width: fit-content;
+  height: 30px;
+}
+
+th,
+.th,
+td,
+.td {
+  box-shadow: inset 0 0 0 1px lightgray;
+  padding: 0.25rem;
+} */
+
+th,
+.th {
+  padding: 1px 2px;
+  position: relative;
+  font-weight: bold;
+  text-align: center;
+  height: 30px;
+}
+
+/* td,
+.td {
+  height: 30px;
+} */
+
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+.resizer.isResizing {
+  background: blue;
+  opacity: 1;
+}
+
+.hide {
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  .hide {
+    opacity: 0;
+  }
+
+  *:hover > .hide {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) {
+  .resizer {
+    opacity: 0;
+  }
+
+  *:hover > .resizer {
+    opacity: 1;
+  }
+}
