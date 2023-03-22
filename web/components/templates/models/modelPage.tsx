@@ -36,6 +36,8 @@ const ModelPage = (props: ModelPageProps) => {
       });
   }, [client]);
 
+  console.log(modelMetrics);
+
   return (
     <>
       <AuthHeader title={"Models"} />

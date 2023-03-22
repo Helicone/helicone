@@ -1,7 +1,8 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { createColumnHelper } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import {
   getTimeIntervalAgo,
@@ -23,6 +24,7 @@ import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTableV3 from "../../shared/themed/themedTableV3";
 import {
   capitalizeWords,
   getUSDate,
@@ -74,44 +76,11 @@ interface RequestsPageProps {
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
 
-  const [viewMode, setViewMode] = useState<"Expanded" | "Condensed">(
+  const truncLength = 30;
+
+  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
     "Condensed"
   );
-
-  const isPreview = viewMode === "Expanded";
-  const truncLength = isPreview ? 8000 : 19;
-
-  const requestColumn: Column = {
-    key: "requestText",
-    active: true,
-    label: "Request",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      request_prompt: direction,
-    }),
-    minWidth: 170,
-    type: "text",
-    format: (value: string | { content: string; role: string }) =>
-      typeof value === "string"
-        ? truncString(value, truncLength)
-        : truncString(value.content, truncLength),
-  };
-
-  const responseColumn: Column = {
-    key: "responseText",
-    active: true,
-    label: "Response",
-    sortBy: "desc",
-    toSortLeaf: (direction) => ({
-      response_text: direction,
-    }),
-    minWidth: 170,
-    type: "text",
-    format: (value: string) =>
-      value
-        ? removeLeadingWhitespace(truncString(value, truncLength))
-        : removeLeadingWhitespace(value),
-  };
 
   const initialColumns: Column[] = [
     {
@@ -126,19 +95,39 @@ const RequestsPage = (props: RequestsPageProps) => {
       type: "timestamp",
       format: (value: string) => getUSDate(value),
     },
-    requestColumn,
-    responseColumn,
     {
-      key: "latency",
+      key: "requestText",
       active: true,
-      label: "Duration",
-      format: (value: string) => `${value} s`,
+      label: "Request",
       sortBy: "desc",
       toSortLeaf: (direction) => ({
-        latency: direction,
+        request_prompt: direction,
       }),
-      type: "number",
-      filter: true,
+      minWidth: 240,
+      type: "text",
+      format: (value: string | { content: string; role: string }, mode) =>
+        typeof value === "string"
+          ? mode === "Condensed"
+            ? removeLeadingWhitespace(truncString(value, truncLength))
+            : removeLeadingWhitespace(truncString(value, 5000))
+          : mode === "Condensed"
+          ? removeLeadingWhitespace(truncString(value.content, truncLength))
+          : removeLeadingWhitespace(truncString(value.content, 5000)),
+    },
+    {
+      key: "responseText",
+      active: true,
+      label: "Response",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        response_text: direction,
+      }),
+      minWidth: 240,
+      type: "text",
+      format: (value: string, mode) =>
+        value && mode === "Condensed"
+          ? removeLeadingWhitespace(truncString(value, truncLength))
+          : removeLeadingWhitespace(value),
     },
     {
       key: "totalTokens",
@@ -228,15 +217,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     };
   };
 
-  if (parsed) {
-    initialColumns.forEach((column) => {
-      const match = parsed.find((c) => c.key === column.key);
-      if (match) {
-        column.active = match.active;
-      }
-    });
-  }
-
   const [defaultColumns, setDefaultColumns] =
     useState<Column[]>(initialColumns);
   const [currentPage, setCurrentPage] = useState<number>(page);
@@ -312,11 +292,25 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  let columns: Column[] = [];
+  // columns
 
-  if (isPreview) {
-    columns = [requestColumn, responseColumn];
-  } else {
+  const [columns, setColumns] = useState<Column[]>(defaultColumns);
+
+  useEffect(() => {
+    if (
+      columns.length > initialColumns.length ||
+      (values.length === 0 && properties.length === 0)
+    ) {
+      if (parsed) {
+        columns.forEach((column) => {
+          const match = parsed.find((c) => c.key === column.key);
+          if (match) {
+            column.active = match.active;
+          }
+        });
+      }
+      return;
+    }
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
@@ -329,8 +323,10 @@ const RequestsPage = (props: RequestsPageProps) => {
           },
         }),
         columnOrigin: "property",
-        format: (value: string) =>
-          value ? truncString(value, truncLength) : value,
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
         minWidth: 170,
       };
     });
@@ -347,26 +343,31 @@ const RequestsPage = (props: RequestsPageProps) => {
           },
         }),
         columnOrigin: "value",
-        format: (value: string) =>
-          value ? truncString(value, truncLength) : value,
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
       };
     });
 
-    const includePrompt = valuesColumns.length > 0;
+    const newColumns = [
+      ...defaultColumns,
+      ...valuesColumns,
+      ...propertiesColumns,
+    ];
 
-    columns = [...defaultColumns, ...valuesColumns, ...propertiesColumns];
-
-    if (includePrompt) {
-      columns.push({
-        key: "prompt_name",
-        label: "Prompt Name",
-        active: true,
-        format: (value: string) => value,
-        type: "text",
-        filter: true,
+    if (parsed) {
+      newColumns.forEach((column) => {
+        const match = parsed.find((c) => c.key === column.key);
+        if (match) {
+          column.active = match.active;
+        }
       });
     }
-  }
+
+    setColumns(newColumns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultColumns, values, properties]);
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
@@ -390,6 +391,8 @@ const RequestsPage = (props: RequestsPageProps) => {
     properties.length > 0
       ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
+
+  const columnHelper = createColumnHelper<RequestWrapper>();
 
   return (
     <>
@@ -423,8 +426,12 @@ const RequestsPage = (props: RequestsPageProps) => {
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
             <ThemedTableHeader
+              view={{
+                viewMode,
+                setViewMode,
+              }}
               editColumns={{
-                columns: defaultColumns,
+                columns: columns,
                 onColumnCallback: (columns) => {
                   const active = columns.map((c) => {
                     return {
@@ -480,19 +487,30 @@ const RequestsPage = (props: RequestsPageProps) => {
                   }
                 },
               }}
-              view={{
-                viewMode,
-                setViewMode,
-              }}
             />
 
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
-              <ThemedTableV2
-                condensed
-                columns={columns.filter((c) => c.active)}
-                rows={requests}
+              <ThemedTableV3
+                data={requests}
+                sortColumns={columns}
+                columns={columns
+                  .filter((c) => c.active)
+                  .map((c) =>
+                    columnHelper.accessor(c.key as string, {
+                      cell: (info) =>
+                        c.format ? (
+                          <span className="whitespace-pre-wrap max-w-7xl break-all">
+                            {c.format(info.getValue(), viewMode)}
+                          </span>
+                        ) : (
+                          info.getValue()
+                        ),
+                      header: () => <span>{c.label}</span>,
+                      size: c.minWidth,
+                    })
+                  )}
                 count={count || 0}
                 page={page}
                 from={from}
@@ -520,7 +538,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                     });
                   }
                 }}
-                isPreview={isPreview}
               />
             )}
           </div>

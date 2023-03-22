@@ -3,6 +3,7 @@ import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { AppProps } from "next/app";
 import { useState } from "react";
 import "../styles/globals.css";
+import "../styles/index.css";
 import { Analytics } from "@vercel/analytics/react";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import Notification from "../components/shared/notification/Notification";

@@ -2,7 +2,7 @@
 import Image from "next/image";
 
 import { Fragment, useEffect, useState } from "react";
-import { Dialog, Menu, Transition } from "@headlessui/react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { useGetKeys } from "../../../services/hooks/keys";
+import ThemedModal from "../themed/themedModal";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -169,20 +170,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                   href={item.href}
                                   className={clsx(
                                     item.current
-                                      ? "bg-gray-100 text-gray-900"
-                                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                                    "group flex items-center px-2 py-2 text-base font-medium rounded-md w-full justify-between"
+                                      ? "bg-gray-200 text-black"
+                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full justify-between"
                                   )}
                                 >
                                   <div className="flex flex-row items-center">
                                     <item.icon
                                       className={clsx(
                                         item.current
-                                          ? "text-gray-500"
-                                          : "text-gray-400 group-hover:text-gray-500",
-                                        "mr-4 flex-shrink-0 h-5 w-5"
+                                          ? "text-black"
+                                          : "text-gray-600 group-hover:text-gray-900",
+                                        "mr-3 flex-shrink-0 h-5 w-5"
                                       )}
-                                      aria-hidden="true"
                                     />
                                     {item.name}
                                   </div>
@@ -198,17 +198,77 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                 href={item.href}
                                 className={clsx(
                                   item.current
-                                    ? "bg-gray-100 text-gray-900"
-                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                                  "group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                                    ? "bg-gray-200 text-black"
+                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md"
                                 )}
                               >
                                 <item.icon
                                   className={clsx(
                                     item.current
-                                      ? "text-gray-500"
-                                      : "text-gray-400 group-hover:text-gray-500",
-                                    "mr-4 flex-shrink-0 h-5 w-5"
+                                      ? "text-black"
+                                      : "text-gray-600 group-hover:text-gray-900",
+                                    "mr-3 flex-shrink-0 h-5 w-5"
+                                  )}
+                                />
+                                {item.name}
+                              </Link>
+                            );
+                          })}
+                          <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
+                            Account
+                          </p>
+                          {accountNav.map((item) => {
+                            if (
+                              item.name === "Keys" &&
+                              !isLoading &&
+                              count < 1
+                            ) {
+                              return (
+                                <Link
+                                  key={item.name}
+                                  href={item.href}
+                                  className={clsx(
+                                    item.current
+                                      ? "bg-gray-200 text-black"
+                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full justify-between"
+                                  )}
+                                >
+                                  <div className="flex flex-row items-center">
+                                    <item.icon
+                                      className={clsx(
+                                        item.current
+                                          ? "text-black"
+                                          : "text-gray-600 group-hover:text-gray-900",
+                                        "mr-3 flex-shrink-0 h-5 w-5"
+                                      )}
+                                    />
+                                    {item.name}
+                                  </div>
+                                  <div>
+                                    <ExclamationCircleIcon className="h-5 w-5 mr-1 text-red-500" />
+                                  </div>
+                                </Link>
+                              );
+                            }
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                className={clsx(
+                                  item.current
+                                    ? "bg-gray-200 text-black"
+                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md"
+                                )}
+                              >
+                                <item.icon
+                                  className={clsx(
+                                    item.current
+                                      ? "text-black"
+                                      : "text-gray-600 group-hover:text-gray-900",
+                                    "mr-3 flex-shrink-0 h-5 w-5"
                                   )}
                                   aria-hidden="true"
                                 />
@@ -217,6 +277,82 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             );
                           })}
                         </nav>
+                      </div>
+                      <ul className="p-4 font-medium text-md text-gray-500 space-y-4">
+                        <li>
+                          <Link
+                            href="https://docs.helicone.ai/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-gray-900"
+                          >
+                            Docs
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            href="https://discord.gg/zsSTcH2qhG"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-gray-900"
+                          >
+                            Discord
+                          </Link>
+                        </li>
+                      </ul>
+                      <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
+                        <div className="group block w-full flex-shrink-0">
+                          <Disclosure>
+                            <div className="flex items-center">
+                              <div>
+                                <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                  <span className="sr-only">
+                                    Open user menu
+                                  </span>
+                                  {user?.email?.charAt(0).toUpperCase() || (
+                                    <UserCircleIcon className="h-8 w-8 text-black" />
+                                  )}
+                                </div>
+                              </div>
+                              <div className="ml-3 flex flex-col items-start">
+                                <p className="text-sm font-medium text-gray-700">
+                                  {user?.email}
+                                </p>
+                                <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                                  Sign Out
+                                </Disclosure.Button>
+                              </div>
+                            </div>
+                            <Disclosure.Panel className="text-gray-500">
+                              {({ close }) => (
+                                <div className="w-full flex justify-between gap-4 mt-4">
+                                  <button
+                                    onClick={() => {
+                                      close();
+                                    }}
+                                    className={clsx(
+                                      "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                                    )}
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      supabaseClient.auth.signOut().then(() => {
+                                        router.push("/");
+                                      })
+                                    }
+                                    className={clsx(
+                                      "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                                    )}
+                                  >
+                                    Sign Out
+                                  </button>
+                                </div>
+                              )}
+                            </Disclosure.Panel>
+                          </Disclosure>
+                        </div>
                       </div>
                     </Dialog.Panel>
                   </Transition.Child>
@@ -369,6 +505,80 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
+                <ul className="p-4 font-medium text-sm text-gray-500 space-y-4">
+                  <li>
+                    <Link
+                      href="https://docs.helicone.ai/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-gray-900"
+                    >
+                      Docs
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="https://discord.gg/zsSTcH2qhG"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-gray-900"
+                    >
+                      Discord
+                    </Link>
+                  </li>
+                </ul>
+                <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
+                  <div className="group block w-full flex-shrink-0">
+                    <Disclosure>
+                      <div className="flex items-center">
+                        <div>
+                          <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                            <span className="sr-only">Open user menu</span>
+                            {user?.email?.charAt(0).toUpperCase() || (
+                              <UserCircleIcon className="h-8 w-8 text-black" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-3 flex flex-col items-start">
+                          <p className="text-sm font-medium text-gray-700">
+                            {user?.email}
+                          </p>
+                          <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                            Sign Out
+                          </Disclosure.Button>
+                        </div>
+                      </div>
+                      <Disclosure.Panel className="text-gray-500">
+                        {({ close }) => (
+                          <div className="w-full flex justify-between gap-4 mt-4">
+                            <button
+                              onClick={() => {
+                                close();
+                              }}
+                              className={clsx(
+                                "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                              )}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() =>
+                                supabaseClient.auth.signOut().then(() => {
+                                  router.push("/");
+                                })
+                              }
+                              className={clsx(
+                                "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                              )}
+                            >
+                              Sign Out
+                            </button>
+                          </div>
+                        )}
+                      </Disclosure.Panel>
+                    </Disclosure>
+                  </div>
+                </div>
               </div>
             </div>
           </>
@@ -376,7 +586,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <div
           className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
         >
-          <div className="sticky top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
+          <div className="sticky sm:hidden top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
             <button
               type="button"
               className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
@@ -385,137 +595,50 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
-            {user?.email === DEMO_EMAIL && (
-              <div className="flex h-full items-center px-2">
-                <div className="py-2 bg-red-600 px-4 rounded-lg text-white flex flex-row text-xs sm:text-base items-center ">
-                  <div className="flex flex-row gap-1 sm:gap-2">
-                    <ExclamationCircleIcon className="h-5 w-5 mt-0.5 hidden sm:inline" />
-                    <p className="hidden lg:inline">
-                      Currently viewing demo. Data from:
-                    </p>
-                    <p className="inline lg:hidden">Viewing</p>
-                    <div className="flex flex-row gap-1 items-center">
+          </div>
+
+          <main className="flex-1 bg">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
+              {/* Replace with your content */}
+              {user?.email === DEMO_EMAIL && (
+                <div className="pointer-events-none flex sm:justify-center mt-4">
+                  <div className="w-full pointer-events-auto flex items-center justify-between gap-x-6 bg-red-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
+                    <div className="text-sm leading-6 text-white items-center">
+                      <strong className="font-semibold">
+                        Currently viewing DEMO
+                      </strong>
+                      <svg
+                        viewBox="0 0 2 2"
+                        className="mx-2 inline h-0.5 w-0.5 fill-current"
+                        aria-hidden="true"
+                      >
+                        <circle cx={1} cy={1} r={1} />
+                      </svg>
+                      Data from{" "}
                       <Link
                         href="https://demoapp.valyrai.com"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline"
                       >
-                        <p className="hidden lg:inline">AI App Ideas</p>
-                        <p className="inline lg:hidden">Demo</p>
+                        <p className="inline font-semibold">AI App Ideas</p>
+                        <ArrowTopRightOnSquareIcon className="h-4 w-4 mb-1 ml-1 inline" />
                       </Link>
-                      <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                     </div>
+                    <button
+                      onClick={() =>
+                        supabaseClient.auth.signOut().then(() => {
+                          router.push("/");
+                        })
+                      }
+                      type="button"
+                      className="-m-1.5 flex-none px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-900 rounded-lg"
+                    >
+                      Exit Demo
+                    </button>
                   </div>
                 </div>
-                <button
-                  className="flex flex-row ml-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-xs sm:text-base"
-                  onClick={() =>
-                    supabaseClient.auth.signOut().then(() => {
-                      router.push("/");
-                    })
-                  }
-                >
-                  <span className="inline lg:hidden">Exit</span>
-                  <span className="hidden lg:inline">Exit Demo</span>
-                </button>
-              </div>
-            )}
-
-            <div className="flex flex-1 justify-end px-4">
-              <div className="ml-4 flex items-center md:ml-6">
-                <div className="hidden sm:flex text-gray-500">
-                  <Link
-                    href="https://docs.helicone.ai/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={clsx(
-                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
-                    )}
-                  >
-                    Docs
-                  </Link>
-                  <Link
-                    href="https://discord.gg/zsSTcH2qhG"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={clsx(
-                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-4"
-                    )}
-                  >
-                    Discord
-                  </Link>
-                </div>
-
-                {/* Profile dropdown */}
-                <Menu as="div" className="relative ml-3">
-                  <div>
-                    <Menu.Button className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                      <span className="sr-only">Open user menu</span>
-                      {user?.email?.charAt(0).toUpperCase() || (
-                        <UserCircleIcon className="h-8 w-8 text-black" />
-                      )}
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute right-0 z-50 mt-2 w-max min-w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <Menu.Item key="user-email">
-                        {({ active }) => (
-                          <p className="block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">
-                            {user?.email}
-                          </p>
-                        )}
-                      </Menu.Item>
-                      {accountNav.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <a
-                              href={item.href}
-                              className={clsx(
-                                active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm text-gray-600"
-                              )}
-                            >
-                              {item.mobile}
-                            </a>
-                          )}
-                        </Menu.Item>
-                      ))}
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            className={clsx(
-                              active ? "bg-gray-100" : "",
-                              "flex w-full px-4 py-2 text-sm text-gray-500 border-t border-gray-300"
-                            )}
-                            onClick={() => {
-                              supabaseClient.auth
-                                .signOut()
-                                .then(() => router.push("/"));
-                            }}
-                          >
-                            Sign out
-                          </button>
-                        )}
-                      </Menu.Item>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-              </div>
-            </div>
-          </div>
-
-          <main className="flex-1 bg">
-            <div className="mx-auto px-4 sm:px-8 bg-gray-100 min-h-[92.5vh]">
-              {/* Replace with your content */}
+              )}
               <div className="py-4 sm:py-8">{children}</div>
               {/* /End replace */}
             </div>

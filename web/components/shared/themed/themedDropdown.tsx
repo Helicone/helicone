@@ -14,13 +14,20 @@ interface ThemedDropdownProps<T> {
   options: DropdownOption<T>[];
   selectedValue: T;
   onSelect: (option: T) => void;
-
+  align?: "left" | "right";
   className?: string;
   label?: string;
 }
 
 export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
-  const { options, selectedValue, onSelect, className, label } = props;
+  const {
+    options,
+    selectedValue,
+    onSelect,
+    className,
+    label,
+    align = "left",
+  } = props;
   const selected = options.find((option) => option.value === selectedValue);
 
   return (
@@ -57,7 +64,12 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute right-0 z-30 mt-1.5 max-h-60 w-full min-w-[200px] overflow-auto rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options
+                  className={clsx(
+                    align === "left" ? "left-0" : "right-0",
+                    "absolute z-30 mt-1.5 max-h-60 w-full min-w-[200px] overflow-auto rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  )}
+                >
                   {options.map((option, i) => (
                     <Listbox.Option
                       key={i}

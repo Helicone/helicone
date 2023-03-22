@@ -73,16 +73,16 @@ export function MetricsPanel(props: MetricsPanelProps) {
         {metrics.map((row) => (
           <div
             key={row.label}
-            className="flex flex-col pl-4 border-l border-gray-400"
+            className="flex flex-col pl-4 border-l border-gray-300"
           >
-            <dd className="order-first text-m sm:text-md font-bold tracking-tight">
+            <dd className="text-sm font-semibold">
               {loading ? (
                 <div className="animate-pulse h-5 w-24 bg-gray-300 rounded-md" />
               ) : (
                 row.label
               )}
             </dd>
-            <dt className="sm:text-m leading-6 text-gray-700">{row.value}</dt>
+            <dt className="text-md leading-6 text-gray-700">{row.value}</dt>
           </div>
         ))}
       </dl>

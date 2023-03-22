@@ -45,6 +45,7 @@ export function Filters({
         API Key:
       </label>
       <ThemedDropdown
+        align="right"
         options={options}
         selectedValue={currentKey}
         onSelect={(option: string) => {
