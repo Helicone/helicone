@@ -153,14 +153,22 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                             header.column.getCanSort()
                               ? "cursor-pointer select-none"
                               : "",
-                            header.column.getIsResizing() ? "isResizing" : "",
-                            "resizer"
+                            "resizer pl-2 pr-3"
                           )}
                           {...{
                             onMouseDown: header.getResizeHandler(),
                             onTouchStart: header.getResizeHandler(),
                           }}
-                        />
+                        >
+                          <div
+                            className={clsx(
+                              header.column.getIsResizing()
+                                ? "bg-blue-700"
+                                : "bg-gray-500",
+                              "h-full w-1"
+                            )}
+                          />
+                        </button>
                         <button
                           onClick={() => {
                             if (onSortHandler) {
