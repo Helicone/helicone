@@ -102,7 +102,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                     );
                     return (
                       <th
-                        className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900 hover:cursor-pointer"
+                        className="py-2.5 pl-6 pr-4 text-left text-sm font-semibold text-gray-900 hover:cursor-pointer"
                         key={header.id}
                         {...{
                           colSpan: header.colSpan,
@@ -139,16 +139,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                           table.setColumnOrder(currentCols);
                         }}
                       >
-                        {/* <div className="h-4 w-4 border border-gray-500 rounded-md transform rotate-45"></div> */}
-
-                        <div className="mt-[1px] h-4 w-2.5 inline-grid grid-cols-2 justify-between hide absolute left-0 items-center">
-                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
-                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
-                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
-                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
-                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
-                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
-                        </div>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -185,6 +175,14 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                             <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
                           )}
                         </button>
+                        <div className="self-end mt-[1px] h-4 w-2.5 inline-grid grid-cols-2 justify-between hide absolute left-2 mr-2 items-center">
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                        </div>
                       </th>
                     );
                   })}
@@ -215,7 +213,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                           idx === 0
                             ? "font-medium text-gray-900"
                             : "font-normal",
-                          "px-4 py-2.5 text-sm text-gray-700 "
+                          "pl-6 pr-4 py-2.5 text-sm text-gray-700 align-top"
                         )}
                       >
                         {flexRender(

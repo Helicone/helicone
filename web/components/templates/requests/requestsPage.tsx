@@ -500,9 +500,13 @@ const RequestsPage = (props: RequestsPageProps) => {
                   .map((c) =>
                     columnHelper.accessor(c.key as string, {
                       cell: (info) =>
-                        c.format
-                          ? c.format(info.getValue(), viewMode)
-                          : info.getValue(),
+                        c.format ? (
+                          <span className="whitespace-pre-wrap">
+                            {c.format(info.getValue(), viewMode)}
+                          </span>
+                        ) : (
+                          info.getValue()
+                        ),
                       header: () => <span>{c.label}</span>,
                       size: c.minWidth,
                     })
