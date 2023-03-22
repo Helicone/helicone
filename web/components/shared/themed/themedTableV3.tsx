@@ -153,7 +153,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                             header.column.getCanSort()
                               ? "cursor-pointer select-none"
                               : "",
-                            "resizer pl-2 pr-3"
+                            "resizer pl-4 pr-2 mr-4 w-4"
                           )}
                           {...{
                             onMouseDown: header.getResizeHandler(),
