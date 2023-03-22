@@ -501,7 +501,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                     columnHelper.accessor(c.key as string, {
                       cell: (info) =>
                         c.format ? (
-                          <span className="whitespace-pre-wrap">
+                          <span className="whitespace-pre-wrap max-w-7xl break-all">
                             {c.format(info.getValue(), viewMode)}
                           </span>
                         ) : (
