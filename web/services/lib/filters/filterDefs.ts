@@ -62,6 +62,11 @@ export interface FilterLeafResponse {
   body_model?: {
     equals?: string;
   };
+  body_completion?: {
+    equals?: string;
+    ilike?: string;
+    like?: string;
+  };
 }
 
 export interface FilterLeaf {
@@ -72,11 +77,15 @@ export interface FilterLeaf {
   properties?: {
     [key: string]: {
       equals?: string;
+      ilike?: string;
+      like?: string;
     };
   };
   values?: {
     [key: string]: {
       equals?: string;
+      ilike?: string;
+      like?: string;
     };
   };
 }

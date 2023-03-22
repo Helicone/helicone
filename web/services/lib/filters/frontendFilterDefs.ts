@@ -10,6 +10,7 @@ export type ColumnType =
   | "timestamp"
   | "number"
   | "text-with-suggestions";
+
 interface Operator {
   type: ColumnType;
   inputParams?: string[];
@@ -139,6 +140,22 @@ export const filterResponseFilter: TableFilter<FilterLeafResponse> = {
         },
       },
     },
+    body_completion: {
+      label: "Completion",
+      table: "response",
+      type: "text",
+      operations: {
+        equals: {
+          type: "text",
+        },
+        ilike: {
+          type: "text",
+        },
+        like: {
+          type: "text",
+        },
+      },
+    },
     body_model: {
       label: "Model",
       table: "response",
@@ -178,6 +195,12 @@ export function getValueFilters(properties: string[], inputParams: string[]) {
         equals: {
           inputParams,
           type: "text-with-suggestions",
+        },
+        ilike: {
+          type: "text",
+        },
+        like: {
+          type: "text",
         },
       },
     };
