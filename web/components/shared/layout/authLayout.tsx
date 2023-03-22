@@ -2,7 +2,7 @@
 import Image from "next/image";
 
 import { Fragment, useEffect, useState } from "react";
-import { Dialog, Menu, Transition } from "@headlessui/react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { useGetKeys } from "../../../services/hooks/keys";
+import ThemedModal from "../themed/themedModal";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -301,31 +302,56 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </ul>
                       <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
                         <div className="group block w-full flex-shrink-0">
-                          <div className="flex items-center">
-                            <div>
-                              <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                                <span className="sr-only">Open user menu</span>
-                                {user?.email?.charAt(0).toUpperCase() || (
-                                  <UserCircleIcon className="h-8 w-8 text-black" />
-                                )}
+                          <Disclosure>
+                            <div className="flex items-center">
+                              <div>
+                                <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                  <span className="sr-only">
+                                    Open user menu
+                                  </span>
+                                  {user?.email?.charAt(0).toUpperCase() || (
+                                    <UserCircleIcon className="h-8 w-8 text-black" />
+                                  )}
+                                </div>
+                              </div>
+                              <div className="ml-3 flex flex-col items-start">
+                                <p className="text-sm font-medium text-gray-700">
+                                  {user?.email}
+                                </p>
+                                <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                                  Sign Out
+                                </Disclosure.Button>
                               </div>
                             </div>
-                            <div className="ml-3 flex flex-col items-start">
-                              <p className="text-md font-medium text-gray-700">
-                                {user?.email}
-                              </p>
-                              <button
-                                onClick={() =>
-                                  supabaseClient.auth.signOut().then(() => {
-                                    router.push("/");
-                                  })
-                                }
-                                className="text-sm font-medium text-gray-500 group-hover:text-gray-700"
-                              >
-                                Sign Out
-                              </button>
-                            </div>
-                          </div>
+                            <Disclosure.Panel className="text-gray-500">
+                              {({ close }) => (
+                                <div className="w-full flex justify-between gap-4 mt-4">
+                                  <button
+                                    onClick={() => {
+                                      close();
+                                    }}
+                                    className={clsx(
+                                      "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                                    )}
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      supabaseClient.auth.signOut().then(() => {
+                                        router.push("/");
+                                      })
+                                    }
+                                    className={clsx(
+                                      "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                                    )}
+                                  >
+                                    Sign Out
+                                  </button>
+                                </div>
+                              )}
+                            </Disclosure.Panel>
+                          </Disclosure>
                         </div>
                       </div>
                     </Dialog.Panel>
@@ -503,31 +529,54 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </ul>
                 <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
                   <div className="group block w-full flex-shrink-0">
-                    <div className="flex items-center">
-                      <div>
-                        <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                          <span className="sr-only">Open user menu</span>
-                          {user?.email?.charAt(0).toUpperCase() || (
-                            <UserCircleIcon className="h-8 w-8 text-black" />
-                          )}
+                    <Disclosure>
+                      <div className="flex items-center">
+                        <div>
+                          <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                            <span className="sr-only">Open user menu</span>
+                            {user?.email?.charAt(0).toUpperCase() || (
+                              <UserCircleIcon className="h-8 w-8 text-black" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-3 flex flex-col items-start">
+                          <p className="text-sm font-medium text-gray-700">
+                            {user?.email}
+                          </p>
+                          <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                            Sign Out
+                          </Disclosure.Button>
                         </div>
                       </div>
-                      <div className="ml-3 flex flex-col items-start">
-                        <p className="text-sm font-medium text-gray-700">
-                          {user?.email}
-                        </p>
-                        <button
-                          onClick={() =>
-                            supabaseClient.auth.signOut().then(() => {
-                              router.push("/");
-                            })
-                          }
-                          className="text-xs font-medium text-gray-500 group-hover:text-gray-700"
-                        >
-                          Sign Out
-                        </button>
-                      </div>
-                    </div>
+                      <Disclosure.Panel className="text-gray-500">
+                        {({ close }) => (
+                          <div className="w-full flex justify-between gap-4 mt-4">
+                            <button
+                              onClick={() => {
+                                close();
+                              }}
+                              className={clsx(
+                                "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                              )}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() =>
+                                supabaseClient.auth.signOut().then(() => {
+                                  router.push("/");
+                                })
+                              }
+                              className={clsx(
+                                "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                              )}
+                            >
+                              Sign Out
+                            </button>
+                          </div>
+                        )}
+                      </Disclosure.Panel>
+                    </Disclosure>
                   </div>
                 </div>
               </div>
