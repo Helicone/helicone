@@ -7,6 +7,7 @@ export function getPropertyFilters(
   const filters: ColumnComparators<any> = {};
   properties.forEach((p) => {
     filters[p] = {
+      table: "properties",
       label: p,
       type: "text-with-suggestions",
       operations: {
@@ -69,6 +70,11 @@ export interface FilterLeaf {
   response?: FilterLeafResponse;
   request?: FilterLeafRequest;
   properties?: {
+    [key: string]: {
+      equals?: string;
+    };
+  };
+  values?: {
     [key: string]: {
       equals?: string;
     };

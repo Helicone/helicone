@@ -44,6 +44,7 @@ export function buildFilterHaving(filter: FilterLeaf): string[] {
 }
 
 export function buildFilterLeaf(filter: FilterLeaf): string[] {
+  console.log("buildFilterLeaf", filter);
   let filters: string[] = [];
 
   if (filter.properties) {
@@ -62,6 +63,23 @@ export function buildFilterLeaf(filter: FilterLeaf): string[] {
       }
     }
   }
+  if (filter.values) {
+    for (const [key, value] of Object.entries(filter.values)) {
+      if (value.equals) {
+        if (key.includes("'") || value.equals.includes('"')) {
+          throw new Error("Invalid value key or value");
+        }
+        // check that key is only alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(key)) {
+          throw new Error("Invalid value key");
+        }
+        filters = filters.concat(
+          `quote_literal(prompt_values ->>'${key}') = quote_literal('${value.equals}')`
+        );
+      }
+    }
+  }
+
   if (filter.user_metrics) {
     if (filter.user_metrics.user_id?.equals) {
       if (filter.user_metrics.user_id.equals.includes("'")) {
