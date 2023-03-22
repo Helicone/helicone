@@ -52,6 +52,7 @@ export type CsvData = {
   response: string;
   total_tokens: number;
   logprobs: number | null;
+  probability: number | null;
   request_user_id: string;
   model: string;
   temperature: number | null;
@@ -204,6 +205,15 @@ const RequestsPage = (props: RequestsPageProps) => {
       filter: true,
       format: (value: number) => (value ? value.toFixed(2) : ""),
     },
+    {
+      key: "probability",
+      active: false,
+      label: "Probability",
+      type: "number",
+      filter: true,
+      format: (value: number) =>
+        value ? (value * 100).toFixed(0) + "%" : "",
+    }
   ];
 
   const localStorageColumns =

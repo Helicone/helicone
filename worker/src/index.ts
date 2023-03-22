@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
+import retry from 'async-retry';
 import { PassThrough } from "stream";
 // import bcrypt from "bcrypt";
 
@@ -20,7 +21,26 @@ interface ErrorResult<T> {
 
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
-function forwardRequestToOpenAi(
+async function forwardRequestToOpenAiWithRetry(request: Request, body?: string): Promise<Response> {
+  const retryOptions = {
+    retries: 5, // number of times to retry the request
+    factor: 2, // exponential backoff factor
+    minTimeout: 1000, // minimum amount of time to wait before retrying (in milliseconds)
+    maxTimeout: 10000, // maximum amount of time to wait before retrying (in milliseconds)
+    onRetry: (error, attempt) => {
+      console.log(`Retry attempt ${attempt}. Error: ${error}`);
+    }, // optional function to run on each retry attempt
+  };
+
+  // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
+  const response = await retry(async () => {
+    return forwardRequestToOpenAi(request, body);
+  }, retryOptions);
+
+  return response;
+}
+
+async function forwardRequestToOpenAi(
   request: Request,
   body?: string
 ): Promise<Response> {
@@ -30,7 +50,14 @@ function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
-  return fetch(new_url.href, init);
+  const response = await fetch(new_url.href, init);
+
+  // Throw an error if the status code is 429
+  if (response.status === 429) {
+    throw new Error("429 Too Many Requests");
+  }
+
+  return response;
 }
 
 type HeliconeRequest = {
@@ -328,7 +355,7 @@ async function forwardAndLog(
   );
 
   const [response, requestResult] = await Promise.all([
-    forwardRequestToOpenAi(request, body),
+    forwardRequestToOpenAiWithRetry(request, body),
     logRequest({
       dbClient,
       request,
@@ -410,7 +437,6 @@ async function buildCachedRequest(
 
   const pathName = cacheUrl.pathname.replaceAll("/", "_");
   cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
-  console.log("PATHNAME", cacheUrl.pathname);
 
   return new Request(cacheUrl, {
     method: "GET",
@@ -508,6 +534,40 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
+async function updateRequestProperties(id: string, properties: Record<string, string>, env: Env): Promise<void> {
+  const dbClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+
+  // Fetch the existing properties
+  const { data: requestData, error: fetchError } = await dbClient
+    .from('request')
+    .select('properties')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) {
+    console.error('Error fetching properties:', fetchError.message);
+    return;
+  }
+
+  // Update the properties with the new values
+  const updatedProperties = {
+    ...requestData.properties,
+    ...properties,
+  };
+
+  // Save the updated properties to the database
+  const { error: updateError } = await dbClient
+    .from('request')
+    .update({ properties: updatedProperties })
+    .eq('id', id);
+
+  if (updateError) {
+    console.error('Error updating properties:', updateError.message);
+  } else {
+    console.log('Update successful');
+  }
+}
+
 interface RequestSettings {
   stream: boolean;
 }
@@ -518,6 +578,29 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    // Check async logging endpoint
+    const url = new URL(request.url);
+    const method = request.method;
+    const endpoint = url.pathname;
+    if (method === 'POST' && endpoint === '/v1/log') {
+      const body = await request.json();
+      const heliconeId = body['helicone-id'];
+
+      const propTag = "helicone-property-";
+      const heliconeHeaders = Object.fromEntries(
+        [...request.headers.entries()]
+          .filter(
+            ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
+          )
+          .map(([key, value]) => [key.substring(propTag.length), value])
+      );
+
+      await updateRequestProperties(heliconeId, heliconeHeaders, env);
+      const propertyNames = Object.keys(heliconeHeaders).join(', ');
+
+      return new Response(`Properties updated with properties: ${propertyNames}`, { status: 200 });
+    }
+
     const requestBody = await request.clone().json<{ stream?: boolean }>();
     const requestSettings = {
       stream: requestBody.stream ?? false,

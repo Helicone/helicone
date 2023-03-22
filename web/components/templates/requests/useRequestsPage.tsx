@@ -57,6 +57,7 @@ export interface RequestWrapper {
   requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
   logProbs: number | null;
+  probability: number | null;
   requestBody: Json;
   responseBody: Json;
   [key: string]:
@@ -146,6 +147,15 @@ const useRequestsPage = (
         new Date(request.request_created_at!).getTime()) /
       1000;
 
+    const logProbs = request.response_body.choices?.[0]?.logprobs?.token_logprobs
+      ? getLogProbs(
+          request.response_body.choices?.[0]?.logprobs?.token_logprobs
+        )
+      : null;
+
+    console.log("PROBABILITY", logProbs ? Math.exp(logProbs) : null)
+    console.log("FULL REQUEST", request)
+
     const obj: RequestWrapper = {
       requestBody: request.request_body,
       responseBody: request.response_body,
@@ -184,12 +194,10 @@ const useRequestsPage = (
           `error: ${request.response_body.error?.message}`) ||
         request.response_body.choices?.[0]?.text ||
         request.response_body.choices?.[0]?.message?.content ||
+        JSON.stringify(request.response_body.results?.[0], null, 2) ||
         "",
-      logProbs: request.response_body.choices?.[0]?.logprobs?.token_logprobs
-        ? getLogProbs(
-            request.response_body.choices?.[0]?.logprobs?.token_logprobs
-          )
-        : null,
+      logProbs: logProbs,
+      probability: logProbs ? Math.exp(logProbs) : null,
     };
 
     // add the custom properties to the object
