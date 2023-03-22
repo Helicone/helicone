@@ -53,6 +53,20 @@ th,
   opacity: 1;
 }
 
+.hide {
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  .hide {
+    opacity: 0;
+  }
+
+  *:hover > .hide {
+    opacity: 1;
+  }
+}
+
 @media (hover: hover) {
   .resizer {
     opacity: 0;

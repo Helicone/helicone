@@ -14,11 +14,16 @@ import { getUSDate } from "../utils/utils";
 import { truncString } from "../../../lib/stringHelpers";
 import { useRouter } from "next/router";
 import { Column } from "../../ThemedTableV2";
-import { ArrowUpIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowUpIcon,
+  Bars3Icon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
   columns: any[]; // abstract this to a <T>
+  sortColumns: Column[];
   page: number;
   from: number;
   to: number;
@@ -33,6 +38,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const {
     data,
     columns,
+    sortColumns,
     from,
     to,
     count,
@@ -40,7 +46,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onPageChangeHandler,
     onPageSizeChangeHandler,
     onSelectHandler,
-    // onSortHandler,
+    onSortHandler,
   } = props;
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const router = useRouter();
@@ -90,10 +96,13 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
             <thead className="text-left text-sm font-semibold text-gray-900">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
+                  {headerGroup.headers.map((header, idx) => {
+                    const currentCol = sortColumns.find(
+                      (col) => col.key === header.id
+                    );
                     return (
                       <th
-                        className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900"
+                        className="py-2.5 px-4 text-left text-sm font-semibold text-gray-900 hover:cursor-pointer"
                         key={header.id}
                         {...{
                           colSpan: header.colSpan,
@@ -130,6 +139,16 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                           table.setColumnOrder(currentCols);
                         }}
                       >
+                        {/* <div className="h-4 w-4 border border-gray-500 rounded-md transform rotate-45"></div> */}
+
+                        <div className="mt-[1px] h-4 w-2.5 inline-grid grid-cols-2 justify-between hide absolute left-0 items-center">
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                          <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
+                        </div>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -154,17 +173,17 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                         />
                         <button
                           onClick={() => {
-                            // if (onSortHandler) {
-                            //   onSortHandler(col);
-                            // }
+                            if (onSortHandler) {
+                              onSortHandler(currentCol);
+                            }
                           }}
-                          className="text-gray-700 hover:text-gray-900 hover:scale-105"
+                          className="text-gray-700 hover:text-gray-900 hover:scale-105 ml-0.5"
                         >
-                          {/* {col?.sortBy === "asc" ? (
+                          {currentCol?.sortBy === "asc" ? (
                             <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
                           ) : (
                             <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
-                          )} */}
+                          )}
                         </button>
                       </th>
                     );

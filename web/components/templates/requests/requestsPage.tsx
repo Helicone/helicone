@@ -494,6 +494,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV3
                 data={requests}
+                sortColumns={columns}
                 columns={columns
                   .filter((c) => c.active)
                   .map((c) =>
