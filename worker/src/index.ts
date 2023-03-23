@@ -338,10 +338,31 @@ async function forwardAndLog(
       ...getHeliconeHeaders(request.headers),
     }),
   ]);
-  const [readable, readableLog] = response.body?.tee() ?? [
-    undefined,
-    undefined,
-  ];
+
+  let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
+
+  if (requestSettings.ff_stream_force_format) {
+    let buffer: any = null;
+    const transformer = new TransformStream({
+      transform(chunk, controller) {
+        console.log("buffer", buffer, chunk);
+        if (chunk.length < 50) {
+          buffer = chunk;
+        } else {
+          if (buffer) {
+            const mergedArray = new Uint8Array(buffer.length + chunk.length);
+            mergedArray.set(buffer);
+            mergedArray.set(chunk, buffer.length);
+            controller.enqueue(mergedArray);
+          } else {
+            controller.enqueue(chunk);
+          }
+          buffer = null;
+        }
+      },
+    });
+    readable = readable?.pipeThrough(transformer);
+  }
 
   ctx.waitUntil(
     readableLog && requestResult.data !== null
@@ -510,6 +531,7 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
 
 interface RequestSettings {
   stream: boolean;
+  ff_stream_force_format?: boolean;
 }
 
 export default {
@@ -521,6 +543,8 @@ export default {
     const requestBody = await request.clone().json<{ stream?: boolean }>();
     const requestSettings = {
       stream: requestBody.stream ?? false,
+      ff_stream_force_format:
+        request.headers.get("helicone-ff-stream-force-format") === "true",
     };
 
     const { data: cacheSettings, error: cacheError } = getCacheSettings(
