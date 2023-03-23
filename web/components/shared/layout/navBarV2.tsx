@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Fragment, useState } from "react";
-import { useUser } from "@supabase/auth-helpers-react";
 
 const navigation = [
   {
@@ -61,8 +60,6 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const { setOpenLogin, setOpenOnboarding } = props;
 
   const router = useRouter();
-
-  const user = useUser();
 
   return (
     <header>
@@ -114,25 +111,17 @@ const NavBarV2 = (props: NavBarV2Props) => {
             ))}
           </Popover.Group>
           <div className="hidden items-center justify-end md:flex md:flex-1 lg:w-0">
-            {!user && (
-              <button
-                onClick={() => setOpenLogin(true)}
-                className="whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"
-              >
-                Sign in
-              </button>
-            )}
             <button
-              onClick={() => {
-                if (user) {
-                  router.push("/dashboard");
-                } else {
-                  setOpenOnboarding(true);
-                }
-              }}
+              onClick={() => setOpenLogin(true)}
+              className="whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => setOpenOnboarding(true)}
               className="ml-8 inline-flex items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-gradient-to-r from-sky-600 to-indigo-500 bg-origin-border px-4 py-2 text-base font-medium text-white shadow-sm hover:from-sky-700 hover:to-indigo-600"
             >
-              {user ? "Dashboard" : "Sign up"}
+              Sign up
             </button>
           </div>
         </div>
