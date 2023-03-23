@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Dialog, Popover, Transition } from "@headlessui/react";
 import {
   BanknotesIcon,
@@ -70,7 +71,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
-          <a href="/" className="-m-1.5 p-1.5">
+          <Link href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Helicone</span>
             <Image
               className="rounded-md"
@@ -79,7 +80,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               height={75}
               alt="Helicone-full-logo"
             />
-          </a>
+          </Link>
         </div>
         <div className="hidden lg:flex lg:gap-x-16">
           {navigation.map((item) => (
