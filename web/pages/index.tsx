@@ -10,14 +10,6 @@ interface HomeProps {}
 
 const Home = (props: HomeProps) => {
   const {} = props;
-  const router = useRouter();
-
-  const user = useUser();
-
-  if (user && user.email !== DEMO_EMAIL) {
-    router.push("/dashboard");
-    return <LoadingAnimation title="Redirecting you to your dashboard..." />;
-  }
 
   return (
     <MetaData title="Home">
