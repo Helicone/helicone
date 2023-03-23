@@ -35,10 +35,7 @@ const OnboardingButton = (props: OnboardingButtonProps) => {
       ) : (
         <button
           onClick={handleClick}
-          className={clsx(
-            full ? "w-full" : "w-auto",
-            "w-full flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-sky-700 shadow-sm hover:bg-indigo-50 sm:px-8"
-          )}
+          className="rounded-md bg-sky-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
         >
           {title}
         </button>

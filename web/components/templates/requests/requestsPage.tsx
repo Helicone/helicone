@@ -106,13 +106,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       minWidth: 240,
       type: "text",
       format: (value: string | { content: string; role: string }, mode) =>
-        typeof value === "string"
-          ? mode === "Condensed"
-            ? removeLeadingWhitespace(truncString(value, truncLength))
-            : removeLeadingWhitespace(truncString(value, 5000))
-          : mode === "Condensed"
-          ? removeLeadingWhitespace(truncString(value.content, truncLength))
-          : removeLeadingWhitespace(truncString(value.content, 5000)),
+        typeof value === "string" ? value : value.content,
+      // typeof value === "string"
+      //   ? mode === "Condensed"
+      //     ? removeLeadingWhitespace(truncString(value, truncLength))
+      //     : removeLeadingWhitespace(truncString(value, 5000))
+      //   : mode === "Condensed"
+      //   ? removeLeadingWhitespace(truncString(value.content, truncLength))
+      //   : removeLeadingWhitespace(truncString(value.content, 5000)),
     },
     {
       key: "responseText",
@@ -501,9 +502,9 @@ const RequestsPage = (props: RequestsPageProps) => {
                     columnHelper.accessor(c.key as string, {
                       cell: (info) =>
                         c.format ? (
-                          <span className="whitespace-pre-wrap max-w-7xl break-all">
+                          <p className="max-w-full text-ellipsis overflow-hidden">
                             {c.format(info.getValue(), viewMode)}
-                          </span>
+                          </p>
                         ) : (
                           info.getValue()
                         ),
