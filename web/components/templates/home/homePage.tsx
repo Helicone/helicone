@@ -54,7 +54,7 @@ export default function HomePage() {
                   <span className="block text-white">
                     Observability for your
                   </span>
-                  <span className="block text-sky-100">GPT-3 application</span>
+                  <span className="block text-sky-100">OpenAI application</span>
                 </h1>
                 <p className="mx-auto mt-6 max-w-lg text-center text-xl text-indigo-100 sm:max-w-3xl">
                   Track usage, costs, and latency metrics with one line of code.
