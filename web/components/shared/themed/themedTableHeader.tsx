@@ -254,17 +254,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 <Menu as="div" className="relative inline-block">
                   <CSVLink
                     data={csvExport.data}
-                    // data={csvExport.data.map((d) => {
-                    //   if ("request" in d) {
-                    //     return {
-                    //       ...d,
-                    //       request: escapeCSVString(d.requestText),
-                    //       response: escapeCSVString(d.responseText),
-                    //     };
-                    //   } else {
-                    //     return d;
-                    //   }
-                    // })}
                     filename={csvExport.fileName}
                     className="flex"
                     target="_blank"

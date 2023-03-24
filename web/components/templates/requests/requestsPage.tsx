@@ -400,30 +400,21 @@ const RequestsPage = (props: RequestsPageProps) => {
     .filter((col) => col.active)
     .map((col) => col.key as string);
 
-  // const copy = [...requests];
-
   const csv = requests.map((request) => {
     const keys = Object.keys(request);
-    const newRequest = { ...request };
+    const copyRequest = { ...request };
     for (const key of keys) {
       if (!activeCols.includes(key)) {
-        delete newRequest[key];
+        delete copyRequest[key];
       } else {
-        // newRequest[key] = JSON.stringify(request[key]);
         if (key === "requestText" || key === "responseText") {
-          newRequest[key] =
+          copyRequest[key] =
             escapeCSVString(JSON.stringify(request[key] || "")) || "";
         }
       }
     }
-    return newRequest;
+    return copyRequest;
   });
-
-  console.log(csv);
-  console.log(1);
-  console.log(requests);
-
-  // console.log(requests);
 
   return (
     <>
