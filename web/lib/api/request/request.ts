@@ -42,6 +42,7 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+  const builtFilter = buildFilter(filter, []);
   const sortSQL = buildSort(sort);
   const query = `
   SELECT response.id AS response_id,
@@ -68,14 +69,19 @@ export async function getRequests(
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     user_api_keys.user_id = '${user_id}'
-    AND (${buildFilter(filter)})
+    AND (${builtFilter.filter})
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+  console.log("QUERY", query);
+  console.log("ARGS", builtFilter.argsAcc);
 
-  const { data, error } = await dbExecute<HeliconeRequest>(query);
+  const { data, error } = await dbExecute<HeliconeRequest>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }
@@ -86,6 +92,7 @@ export async function getRequestCount(
   user_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
+  const builtFilter = buildFilter(filter, []);
   const query = `
   SELECT count(*) as count
   FROM response
@@ -94,11 +101,14 @@ export async function getRequestCount(
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     user_api_keys.user_id = '${user_id}'
-    AND (${buildFilter(filter)})
+    AND (${builtFilter.filter})
   )
   `;
 
-  const { data, error } = await dbExecute<{ count: number }>(query);
+  const { data, error } = await dbExecute<{ count: number }>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }

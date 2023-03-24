@@ -11,6 +11,7 @@ export async function getRequestCount(
   user_id: string,
   cached: boolean
 ): Promise<Result<number, string>> {
+  const { filter: filterString, argsAcc } = buildFilter(filter, []);
   const query = `
 SELECT 
   COUNT(*) AS count
@@ -20,10 +21,10 @@ SELECT
   ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
 WHERE (
   user_api_keys.user_id = '${user_id}'
-  AND (${buildFilter(filter)})
+  AND (${filterString})
 )
 `;
-  const { data, error } = await dbExecute<Count>(query);
+  const { data, error } = await dbExecute<Count>(query, argsAcc);
   if (error !== null) {
     return { data: null, error: error };
   }

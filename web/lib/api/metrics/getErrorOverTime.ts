@@ -38,7 +38,8 @@ export async function getErrorOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
+  const builtFilter = buildFilter(filter, [dbIncrement, timeZoneDifference]);
+  const dateTrunc = `DATE_TRUNC('$1', request.created_at + INTERVAL '$2 minutes')`;
   const query = `
 SELECT
   ${dateTrunc} as created_at_trunc,
@@ -49,11 +50,14 @@ FROM response
 WHERE (
   user_api_keys.user_id = '${userId}'
   AND response.body ->>'error' is not null
-  AND (${buildFilter(filter)})
+  AND (${builtFilter.filter})
 )
 GROUP BY ${dateTrunc}
 `;
-  const { data, error } = await dbExecute<ErrorCountOverTime>(query);
+  const { data, error } = await dbExecute<ErrorCountOverTime>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }

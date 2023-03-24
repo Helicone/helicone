@@ -42,7 +42,8 @@ export async function getModelUsageOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
+  const builtFilter = buildFilter(filter, [dbIncrement, timeZoneDifference]);
+  const dateTrunc = `DATE_TRUNC('$1', request.created_at + INTERVAL '$2 minutes')`;
   const query = `
 SELECT
   response.body ->> 'model'::text as model,
@@ -56,11 +57,14 @@ FROM response
 WHERE (
   user_api_keys.user_id = '${userId}'
   AND response.body ->> 'model'::text is not null
-  AND (${buildFilter(filter)})
+  AND (${builtFilter.argsAcc})
 )
 GROUP BY response.body ->> 'model'::text, ${dateTrunc}
 `;
-  const { data, error } = await dbExecute<ModelUsageOverTime>(query);
+  const { data, error } = await dbExecute<ModelUsageOverTime>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }
