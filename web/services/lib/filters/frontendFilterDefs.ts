@@ -10,6 +10,7 @@ export type ColumnType =
   | "timestamp"
   | "number"
   | "text-with-suggestions";
+
 interface Operator {
   type: ColumnType;
   inputParams?: string[];
@@ -25,6 +26,7 @@ export interface Comparator {
     like?: Operator;
     ilike?: Operator;
   };
+  table: keyof FilterLeaf;
 }
 
 export type ColumnComparators<T> = {
@@ -39,6 +41,7 @@ export const filterUserMetric: TableFilter<FilterLeafUserMetrics> = {
   label: "User Metrics",
   columns: {
     user_id: {
+      table: "user_metrics",
       label: "User ID",
       type: "text",
       operations: {
@@ -49,6 +52,7 @@ export const filterUserMetric: TableFilter<FilterLeafUserMetrics> = {
     },
     last_active: {
       label: "Last Active",
+      table: "user_metrics",
       type: "timestamp",
       operations: {
         gte: {
@@ -61,6 +65,7 @@ export const filterUserMetric: TableFilter<FilterLeafUserMetrics> = {
     },
     total_requests: {
       label: "Total Requests",
+      table: "user_metrics",
       type: "number",
       operations: {
         gte: {
@@ -79,6 +84,7 @@ export const filterRequestFilter: TableFilter<FilterLeafRequest> = {
   columns: {
     prompt: {
       label: "Prompt",
+      table: "request",
       type: "text",
       operations: {
         equals: {
@@ -95,6 +101,7 @@ export const filterRequestFilter: TableFilter<FilterLeafRequest> = {
     created_at: {
       label: "Created At",
       type: "timestamp",
+      table: "request",
       operations: {
         gte: {
           type: "timestamp",
@@ -106,6 +113,7 @@ export const filterRequestFilter: TableFilter<FilterLeafRequest> = {
     },
     user_id: {
       label: "User ID",
+      table: "request",
       type: "text",
       operations: {
         equals: {
@@ -121,6 +129,7 @@ export const filterResponseFilter: TableFilter<FilterLeafResponse> = {
   columns: {
     body_tokens: {
       label: "Tokens",
+      table: "response",
       type: "number",
       operations: {
         gte: {
@@ -131,8 +140,25 @@ export const filterResponseFilter: TableFilter<FilterLeafResponse> = {
         },
       },
     },
+    body_completion: {
+      label: "Completion",
+      table: "response",
+      type: "text",
+      operations: {
+        equals: {
+          type: "text",
+        },
+        ilike: {
+          type: "text",
+        },
+        like: {
+          type: "text",
+        },
+      },
+    },
     body_model: {
       label: "Model",
+      table: "response",
       type: "text",
       operations: {
         equals: {
@@ -144,7 +170,7 @@ export const filterResponseFilter: TableFilter<FilterLeafResponse> = {
 };
 
 export type TableFilterMap = {
-  [key in keyof FilterLeaf]: TableFilter<any>;
+  [key: string]: TableFilter<any>;
 };
 
 export const UserMetricsTableFilter: TableFilterMap = {
@@ -157,3 +183,27 @@ export const RequestsTableFilter: TableFilterMap = {
   request: filterRequestFilter,
   response: filterResponseFilter,
 };
+
+export function getValueFilters(properties: string[], inputParams: string[]) {
+  const filters: ColumnComparators<any> = {};
+  properties.forEach((p) => {
+    filters[p] = {
+      table: "values",
+      label: p,
+      type: "text-with-suggestions",
+      operations: {
+        equals: {
+          inputParams,
+          type: "text-with-suggestions",
+        },
+        ilike: {
+          type: "text",
+        },
+        like: {
+          type: "text",
+        },
+      },
+    };
+  });
+  return filters;
+}
