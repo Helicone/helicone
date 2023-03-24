@@ -61,7 +61,7 @@ WHERE (
 GROUP BY ${dateTrunc}
 ORDER BY created_at_trunc
 `;
-  console.log(query, builtFilter.argsAcc);
+
   const { data, error } = await dbExecute<DateCountDBModel>(
     query,
     builtFilter.argsAcc

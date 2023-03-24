@@ -56,7 +56,6 @@ export function buildFilterLeaf(
   filters: string[];
   argsAcc: any[];
 } {
-  console.log("buildFilterLeaf", filter);
   let filters: string[] = [];
 
   if (filter.properties) {
@@ -149,7 +148,7 @@ export function buildFilterLeaf(
         filters.push(`response.body ->> 'model' = $${valueIndex}`);
       }
     }
-    console.log("COMPLETING BODY", filter.response.body_completion);
+
     if (filter.response.body_completion) {
       if (filter.response.body_completion.equals) {
         argsAcc.push(filter.response.body_completion.equals);
