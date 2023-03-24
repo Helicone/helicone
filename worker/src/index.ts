@@ -540,7 +540,10 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const requestBody = await request.clone().json<{ stream?: boolean }>();
+    const requestBody =
+      request.method === "POST"
+        ? await request.clone().json<{ stream?: boolean }>()
+        : {};
     const requestSettings = {
       stream: requestBody.stream ?? false,
       ff_stream_force_format:
