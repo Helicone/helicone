@@ -18,7 +18,7 @@ JOIN user_api_keys u ON r.auth_hash = u.api_key_hash
 CROSS JOIN LATERAL jsonb_object_keys(properties) keys
 WHERE (u.user_id = '${user_id}');`;
 
-  const { data, error } = await dbExecute<PropertyParam>(query);
+  const { data, error } = await dbExecute<PropertyParam>(query, []);
   if (error !== null) {
     return { data: null, error: error };
   }
