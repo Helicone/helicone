@@ -2,7 +2,8 @@ import { Client, Pool } from "pg";
 import { Result } from "../../result";
 
 export async function dbExecute<T>(
-  query: string
+  query: string,
+  parameters: any[]
 ): Promise<Result<T[], string>> {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
@@ -13,7 +14,7 @@ export async function dbExecute<T>(
     // Let's print out the time it takes to execute the query
     await client.connect();
 
-    const result = await client.query(query);
+    const result = await client.query(query, parameters);
 
     await client.end();
 
