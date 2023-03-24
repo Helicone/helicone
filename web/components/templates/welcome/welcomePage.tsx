@@ -25,7 +25,7 @@ interface DashboardPageProps {
 
 export type Loading<T> = T | "loading";
 
-const BaseUrlInstructions = () => {
+export const BaseUrlInstructions = () => {
   const { setNotification } = useNotification();
   const [lang, setLang] = useState<"python" | "curl" | "node">("node");
 
