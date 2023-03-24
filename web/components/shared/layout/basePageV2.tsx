@@ -40,7 +40,6 @@ const BasePageV2 = (props: BasePageV2Props) => {
 
   const [openOnboarding, setOpenOnboarding] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
 
   return (
     <>
@@ -56,7 +55,7 @@ const BasePageV2 = (props: BasePageV2Props) => {
             Footer
           </h2>
           <div className="mx-auto max-w-7xl px-6 pb-8 lg:px-8">
-            <div className="pt-8 md:flex md:items-center md:justify-between lg:mt-16">
+            <div className="pt-8 md:flex md:items-center md:justify-between">
               <div className="flex space-x-6 md:order-2">
                 {footerNavigation.social.map((item) => (
                   <a
