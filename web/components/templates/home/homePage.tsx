@@ -246,16 +246,14 @@ export default function HomePage() {
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
                 Creating an internal tool for observability and monitoring is
-                difficult to build and even harder to maintain. And general
-                logging tools like Mixpanel or Datadog aren&apos;t tailored
-                enough for LLMs. Helicone is a platform built specifically for
-                developers using LLMs.
+                difficult to build and even harder to maintain. Helicone is a
+                platform built specifically for developers using LLMs.
               </p>
             </div>
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
               <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-8 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
                 <p className="flex-none text-3xl font-bold tracking-tight text-gray-900">
-                  100
+                  100+
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   <p className="text-lg font-semibold tracking-tight text-gray-900">
