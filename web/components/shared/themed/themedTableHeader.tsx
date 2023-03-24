@@ -57,7 +57,7 @@ interface ThemedHeaderProps {
     onColumnCallback: (columns: Column[]) => void;
   };
   csvExport?: {
-    data: RequestWrapper[] | UserMetric[];
+    data: any[];
     fileName: string;
   };
   timeFilter?: {
@@ -253,17 +253,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
                   <CSVLink
-                    data={csvExport.data.map((d) => {
-                      if ("request" in d) {
-                        return {
-                          ...d,
-                          request: escapeCSVString(d.requestText),
-                          response: escapeCSVString(d.responseText),
-                        };
-                      } else {
-                        return d;
-                      }
-                    })}
+                    data={csvExport.data}
                     filename={csvExport.fileName}
                     className="flex"
                     target="_blank"
