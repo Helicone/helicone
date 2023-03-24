@@ -32,6 +32,7 @@ import { BaseUrlInstructions } from "../welcome/welcomePage";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
+import { useQuery } from "@tanstack/react-query";
 
 const timeline = [
   {
@@ -131,6 +132,13 @@ export default function HomePage() {
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }
+  const { data: globalMetrics } = useQuery({
+    queryKey: ["global_metrics"],
+    queryFn: async () => {
+      const data = fetch("/api/global_metrics").then((res) => res.json());
+      return data;
+    },
+  });
 
   return (
     <>
@@ -260,12 +268,18 @@ export default function HomePage() {
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-44">
                 <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  5.7 Million
+                  {Math.floor(
+                    (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
+                  ) / 10}{" "}
+                  Million
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   <p className="text-lg font-semibold tracking-tight text-white">
-                    We&apos;re proud that our customers have made over 5 million
-                    requests.
+                    We&apos;re proud that our customers have made over{" "}
+                    {Math.floor(
+                      (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
+                    )}{" "}
+                    million requests.
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-400">
                     We currently support all OpenAI models and have plans to add
@@ -275,7 +289,7 @@ export default function HomePage() {
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
                 <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  &gt;350,000
+                  &gt;200,000
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   <p className="text-lg font-semibold tracking-tight text-white">
