@@ -18,10 +18,17 @@ interface ErrorResult<T> {
   error: T;
 }
 
+interface RequestSettings {
+  stream: boolean;
+  ff_stream_force_format?: boolean;
+  ff_increase_timeout?: boolean;
+}
+
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
 function forwardRequestToOpenAi(
   request: Request,
+  requestSettings: RequestSettings,
   body?: string
 ): Promise<Response> {
   let url = new URL(request.url);
@@ -30,7 +37,14 @@ function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
-  return fetch(new_url.href, init);
+  if (requestSettings.ff_increase_timeout) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    setTimeout(() => controller.abort(), 1000 * 60 * 30);
+    return fetch(new_url.href, { ...init, signal });
+  } else {
+    return fetch(new_url.href, init);
+  }
 }
 
 type HeliconeRequest = {
@@ -328,7 +342,7 @@ async function forwardAndLog(
   );
 
   const [response, requestResult] = await Promise.all([
-    forwardRequestToOpenAi(request, body),
+    forwardRequestToOpenAi(request, requestSettings, body),
     logRequest({
       dbClient,
       request,
@@ -529,11 +543,6 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
-interface RequestSettings {
-  stream: boolean;
-  ff_stream_force_format?: boolean;
-}
-
 export default {
   async fetch(
     request: Request,
@@ -544,10 +553,12 @@ export default {
       request.method === "POST"
         ? await request.clone().json<{ stream?: boolean }>()
         : {};
-    const requestSettings = {
+    const requestSettings: RequestSettings = {
       stream: requestBody.stream ?? false,
       ff_stream_force_format:
         request.headers.get("helicone-ff-stream-force-format") === "true",
+      ff_increase_timeout:
+        request.headers.get("helicone-ff-increase-timeout") === "true",
     };
 
     const { data: cacheSettings, error: cacheError } = getCacheSettings(
