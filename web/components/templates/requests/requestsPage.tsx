@@ -23,7 +23,9 @@ import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTableHeader, {
+  escapeCSVString,
+} from "../../shared/themed/themedTableHeader";
 import ThemedTableV3 from "../../shared/themed/themedTableV3";
 import {
   capitalizeWords,
@@ -394,6 +396,26 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const columnHelper = createColumnHelper<RequestWrapper>();
 
+  const activeCols: string[] = columns
+    .filter((col) => col.active)
+    .map((col) => col.key as string);
+
+  const csv = requests.map((request) => {
+    const keys = Object.keys(request);
+    const copyRequest = { ...request };
+    for (const key of keys) {
+      if (!activeCols.includes(key)) {
+        delete copyRequest[key];
+      } else {
+        if (key === "requestText" || key === "responseText") {
+          copyRequest[key] =
+            escapeCSVString(JSON.stringify(request[key] || "")) || "";
+        }
+      }
+    }
+    return copyRequest;
+  });
+
   return (
     <>
       <AuthHeader
@@ -459,7 +481,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 ],
               }}
               csvExport={{
-                data: requests,
+                data: csv,
                 fileName: "requests.csv",
               }}
               isFetching={isLoading}
