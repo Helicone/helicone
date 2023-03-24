@@ -38,8 +38,8 @@ export async function getErrorOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const builtFilter = buildFilter(filter, [dbIncrement, timeZoneDifference]);
-  const dateTrunc = `DATE_TRUNC('$1', request.created_at + INTERVAL '$2 minutes')`;
+  const builtFilter = buildFilter(filter, []);
+  const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT
   ${dateTrunc} as created_at_trunc,
