@@ -1,8 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
-import retry from 'async-retry';
 import { PassThrough } from "stream";
+import { handleLoggingEndpoint, isLoggingEndpoint, updateRequestProperties } from "./properties";
+import { forwardRequestToOpenAiWithRetry, getRetryOptions, RetryOptions } from "./retry";
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -19,7 +20,7 @@ interface ErrorResult<T> {
   error: T;
 }
 
-interface RequestSettings {
+export interface RequestSettings {
   stream: boolean;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
@@ -27,26 +28,8 @@ interface RequestSettings {
 
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
-async function forwardRequestToOpenAiWithRetry(request: Request, body?: string): Promise<Response> {
-  const retryOptions = {
-    retries: 5, // number of times to retry the request
-    factor: 2, // exponential backoff factor
-    minTimeout: 1000, // minimum amount of time to wait before retrying (in milliseconds)
-    maxTimeout: 10000, // maximum amount of time to wait before retrying (in milliseconds)
-    onRetry: (error, attempt) => {
-      console.log(`Retry attempt ${attempt}. Error: ${error}`);
-    }, // optional function to run on each retry attempt
-  };
 
-  // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
-  const response = await retry(async () => {
-    return forwardRequestToOpenAi(request, body);
-  }, retryOptions);
-
-  return response;
-}
-
-async function forwardRequestToOpenAi(
+export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
   body?: string
@@ -58,24 +41,22 @@ async function forwardRequestToOpenAi(
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
-
-  // const response = await fetch(new_url.href, init);
-
-  // // Throw an error if the status code is 429
-  // if (response.status === 429) {
-  //   throw new Error("429 Too Many Requests");
-  // }
-
-  // return response;
-
+  let response;
   if (requestSettings.ff_increase_timeout) {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    return fetch(new_url.href, { ...init, signal });
+    response = await fetch(new_url.href, { ...init, signal });
   } else {
-    return fetch(new_url.href, init);
+    response = await fetch(new_url.href, init);
   }
+
+  // Throw an error if the status code is 429
+  if (response.status === 429) {
+    throw new Error("429 Too Many Requests");
+  }
+
+  return response;
 }
 
 type HeliconeRequest = {
@@ -360,6 +341,7 @@ async function forwardAndLog(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
+  retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
@@ -373,11 +355,7 @@ async function forwardAndLog(
   );
 
   const [response, requestResult] = await Promise.all([
-<<<<<<< HEAD
-    forwardRequestToOpenAiWithRetry(request, body),
-=======
-    forwardRequestToOpenAi(request, requestSettings, body),
->>>>>>> 00821d10d615932859f905c87513471d70ece4f4
+    retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body),
     logRequest({
       dbClient,
       request,
@@ -438,7 +416,8 @@ async function uncachedRequest(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-  requestSettings: RequestSettings
+  requestSettings: RequestSettings,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   const result = await extractPrompt(request);
   if (result.data !== null) {
@@ -449,6 +428,7 @@ async function uncachedRequest(
       formattedRequest,
       env,
       ctx,
+      retryOptions,
       prompt
     );
   } else {
@@ -577,92 +557,29 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
-<<<<<<< HEAD
-async function updateRequestProperties(id: string, properties: Record<string, string>, env: Env): Promise<void> {
-  const dbClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-
-  // Fetch the existing properties
-  const { data: requestData, error: fetchError } = await dbClient
-    .from('request')
-    .select('properties')
-    .eq('id', id)
-    .single();
-
-  if (fetchError) {
-    console.error('Error fetching properties:', fetchError.message);
-    return;
-  }
-
-  // Update the properties with the new values
-  const updatedProperties = {
-    ...requestData.properties,
-    ...properties,
-  };
-
-  // Save the updated properties to the database
-  const { error: updateError } = await dbClient
-    .from('request')
-    .update({ properties: updatedProperties })
-    .eq('id', id);
-
-  if (updateError) {
-    console.error('Error updating properties:', updateError.message);
-  } else {
-    console.log('Update successful');
-  }
-}
-
-interface RequestSettings {
-  stream: boolean;
-}
-
-=======
->>>>>>> 00821d10d615932859f905c87513471d70ece4f4
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-<<<<<<< HEAD
-    // Check async logging endpoint
-    const url = new URL(request.url);
-    const method = request.method;
-    const endpoint = url.pathname;
-    if (method === 'POST' && endpoint === '/v1/log') {
-      const body = await request.json();
-      const heliconeId = body['helicone-id'];
-
-      const propTag = "helicone-property-";
-      const heliconeHeaders = Object.fromEntries(
-        [...request.headers.entries()]
-          .filter(
-            ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
-          )
-          .map(([key, value]) => [key.substring(propTag.length), value])
-      );
-
-      await updateRequestProperties(heliconeId, heliconeHeaders, env);
-      const propertyNames = Object.keys(heliconeHeaders).join(', ');
-
-      return new Response(`Properties updated with properties: ${propertyNames}`, { status: 200 });
+    if (isLoggingEndpoint(request)) {
+      const response = await handleLoggingEndpoint(request, env);
+      return response;
     }
 
-    const requestBody = await request.clone().json<{ stream?: boolean }>();
-    const requestSettings = {
-=======
     const requestBody =
       request.method === "POST"
         ? await request.clone().json<{ stream?: boolean }>()
         : {};
     const requestSettings: RequestSettings = {
->>>>>>> 00821d10d615932859f905c87513471d70ece4f4
       stream: requestBody.stream ?? false,
       ff_stream_force_format:
         request.headers.get("helicone-ff-stream-force-format") === "true",
       ff_increase_timeout:
         request.headers.get("helicone-ff-increase-timeout") === "true",
     };
+    const retryOptions = getRetryOptions(request)
 
     const { data: cacheSettings, error: cacheError } = getCacheSettings(
       request.headers,
@@ -686,7 +603,7 @@ export default {
 
     let requestClone = cacheSettings.shouldSaveToCache ? request.clone() : null;
 
-    const response = await uncachedRequest(request, env, ctx, requestSettings);
+    const response = await uncachedRequest(request, env, ctx, requestSettings, retryOptions);
 
     if (cacheSettings.shouldSaveToCache && requestClone) {
       ctx.waitUntil(
