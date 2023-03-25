@@ -202,9 +202,8 @@ const RequestsPage = (props: RequestsPageProps) => {
       label: "Probability",
       type: "number",
       filter: true,
-      format: (value: number) =>
-        value ? (value * 100).toFixed(0) + "%" : "",
-    }
+      format: (value: number) => (value ? (value * 100).toFixed(0) + "%" : ""),
+    },
   ];
 
   const localStorageColumns =

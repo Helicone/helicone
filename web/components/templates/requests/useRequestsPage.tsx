@@ -147,7 +147,8 @@ const useRequestsPage = (
         new Date(request.request_created_at!).getTime()) /
       1000;
 
-    const logProbs = request.response_body.choices?.[0]?.logprobs?.token_logprobs
+    const logProbs = request.response_body.choices?.[0]?.logprobs
+      ?.token_logprobs
       ? getLogProbs(
           request.response_body.choices?.[0]?.logprobs?.token_logprobs
         )
