@@ -29,7 +29,7 @@ export function RequestsCSVDownloadButton({
       total_tokens: d.response_body?.usage?.total_tokens,
       logprobs: tableData.probabilities[i],
       request_user_id: d.request_user_id,
-      model: d.response_body?.model,
+      model: d.request_body?.model,
       temperature: d.request_body?.temperature,
     };
   });
