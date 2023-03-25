@@ -40,9 +40,6 @@ const useUsers = (
           }),
         }).then((res) => res.json() as Promise<Result<number, string>>),
       ]);
-      console.log("RESPONSE PRE", response)
-      // response.data[0].cost = 1;
-      console.log("RESPONSE POST", response)
 
       return [response, count] as [
         Result<UserMetric[], string>,

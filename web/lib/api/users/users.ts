@@ -60,14 +60,9 @@ SELECT request.user_id,
   OFFSET ${offset}
 `;
   const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
-  console.log("DATA", data);
   if (error !== null) {
     return { data: null, error: error };
   }
-  console.log("RESPONSE TWO", data)
-  // data[0].cost = 0;
-  data[0].total_requests = '10000'
-  console.log("RESPONSE TWO POST", data)
   return { data: data, error: null };
 }
 

@@ -142,7 +142,6 @@ export default function ThemedTableV2(props: ThemedTableV2Props) {
                     )}
                   >
                     {columns.map((column, idx) => {
-                      console.log("ROW", row)
                       const value = row[column.key];
                       return (
                         <TableCell
