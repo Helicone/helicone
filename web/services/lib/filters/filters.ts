@@ -148,7 +148,7 @@ export function buildFilterLeaf(
         filters.push(`response.body ->> 'model' = $${valueIndex}`);
       }
     }
-    
+
     if (filter.response.body_completion) {
       if (filter.response.body_completion.equals) {
         argsAcc.push(filter.response.body_completion.equals);
