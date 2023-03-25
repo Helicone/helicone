@@ -57,7 +57,6 @@ interface ThemedHeaderProps {
   };
   csvExport?: {
     onClick: () => void;
-    fileName: string;
   };
   timeFilter?: {
     timeFilterOptions: { key: string; value: string }[];

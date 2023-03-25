@@ -173,7 +173,6 @@ const UsersPage = (props: UsersPageProps) => {
         <ThemedTableHeader
           csvExport={{
             onClick: downloadCSV,
-            fileName: "users.csv",
           }}
           isFetching={isLoading}
           advancedFilter={{

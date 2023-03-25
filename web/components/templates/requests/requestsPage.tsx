@@ -520,7 +520,6 @@ const RequestsPage = (props: RequestsPageProps) => {
               }}
               csvExport={{
                 onClick: downloadCSV,
-                fileName: "requests.csv",
               }}
               isFetching={isLoading}
               advancedFilter={{
