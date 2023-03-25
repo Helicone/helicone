@@ -10,21 +10,21 @@ import { clsx } from "../../shared/clsx";
 const features = [
   {
     name: "dashboard",
-    label: "Your Dashboard.",
+    label: "Dashboard Metrics",
     description:
-      "Get an insightful overview of your application and its performance. See how your users are interacting with your app, and how your app is performing.",
+      "Get an overview of your application with an in-built dashboard, tailor made for your generative AI application",
     icon: CloudArrowUpIcon,
   },
   {
     name: "requests",
     label: "View Requests.",
     description:
-      "See all of your requests in one place. Filter by date, endpoint, and more. See the request body, response body, response time, and much more.",
+      "View all of your requests in one place. Filter by date, users, and custom properties.",
     icon: LockClosedIcon,
   },
   {
     name: "model",
-    label: "Model Metrics.",
+    label: "User Metrics.",
     description:
       "Ever wonder how much you're spending on each model and its efficiency? See how much you're spending on each model so you can optimize your usage.",
     icon: ServerIcon,
@@ -37,20 +37,17 @@ const Details = () => {
   const [view, setView] = useState<DetailViews>("dashboard");
 
   return (
-    <div className="overflow-hidden bg-gray-50 py-24 sm:py-32">
+    <div className="overflow-hidden bg-gray-50 py-6 sm:py-6">
       <div className="mx-auto max-w-7xl md:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
           <div className="px-6 lg:px-0 lg:pt-4 lg:pr-4">
             <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Let us handle the analytics.
-              </p>
-              <p className="mt-6 text-lg leading-8 text-gray-600">
-                Monitoring your GPT-3 usage and costs shouldn&apos;t be a
-                hassle. With Helicone, you can focus on building your product,
-                not building and maintaining your own analytics solution for
-                GPT-3.
-              </p>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+  Stay on top of your costs, usage, and latency
+</p>
+<p className="mt-6 text-lg leading-8 text-gray-600 font-bold">
+  Integrate your API requests to models like GPT-4 with Helicone. Explore your results in a user-friendly interface.
+</p>
               <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name}>
