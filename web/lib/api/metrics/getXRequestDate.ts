@@ -11,6 +11,7 @@ export async function getXRequestDate(
   user_id: string,
   first: boolean
 ): Promise<Result<Date, string>> {
+  const { filter: filterString, argsAcc } = buildFilter(filter, []);
   const query = `
 SELECT 
   request.created_at
@@ -19,12 +20,12 @@ SELECT
    LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
 WHERE (
   user_api_keys.user_id = '${user_id}'
-  AND (${buildFilter(filter)})
+  AND (${filterString})
 )
 ORDER BY response.created_at ${first ? "ASC" : "DESC"}
 LIMIT 1
 `;
-  const { data, error } = await dbExecute<CreatedAt>(query);
+  const { data, error } = await dbExecute<CreatedAt>(query, argsAcc);
   if (error !== null) {
     return { data: null, error: error };
   }

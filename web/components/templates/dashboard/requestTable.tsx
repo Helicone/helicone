@@ -138,7 +138,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
                 <td>
                   {row.request_user_id && truncString(row.request_user_id, 5)}
                 </td>
-                <td>{row.response_body?.model}</td>
+                <td>{row.request_body?.model}</td>
                 <td>
                   <DocumentDuplicateIcon
                     className="h-5 w-5 text-black hover:cursor-pointer"

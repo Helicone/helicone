@@ -45,6 +45,7 @@ export async function getTotalRequestsOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
+  const builtFilter = buildFilter(filter, []);
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT
@@ -55,13 +56,16 @@ FROM request
    LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
 WHERE (
   user_api_keys.user_id = '${userId}'
-  AND (${buildFilter(filter)})
+  AND (${builtFilter.filter})
 )
 GROUP BY ${dateTrunc}
 ORDER BY created_at_trunc
 `;
 
-  const { data, error } = await dbExecute<DateCountDBModel>(query);
+  const { data, error } = await dbExecute<DateCountDBModel>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }

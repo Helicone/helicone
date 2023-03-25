@@ -26,6 +26,15 @@ export async function userMetrics(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
+  const { filter: whereFilterString, argsAcc: whereArgsAcc } = buildFilter(
+    filter,
+    []
+  );
+  const { filter: havingFilterString, argsAcc: havingArgsAcc } = buildFilter(
+    filter,
+    whereArgsAcc,
+    true
+  );
   const query = `
 SELECT request.user_id,
   count(DISTINCT date_trunc('day'::text, request.created_at)) AS active_for,
@@ -39,19 +48,18 @@ SELECT request.user_id,
   LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
   WHERE (
     user_api_keys.user_id = '${user_id}'
-    AND (${buildFilter(filter)})
+    AND (${whereFilterString})
   )
   GROUP BY request.user_id
   HAVING (
     true
-    AND (${buildFilter(filter, true)})
+    AND (${havingFilterString})
   )
   ORDER BY last_active DESC
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-
-  const { data, error } = await dbExecute<UserMetric>(query);
+  const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
   if (error !== null) {
     return { data: null, error: error };
   }
@@ -62,6 +70,15 @@ export async function userMetricsCount(
   user_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
+  const { filter: whereFilterString, argsAcc: whereArgsAcc } = buildFilter(
+    filter,
+    []
+  );
+  const { filter: havingFilterString, argsAcc: havingArgsAcc } = buildFilter(
+    filter,
+    whereArgsAcc,
+    true
+  );
   const query = `
 SELECT count(*) as count
   FROM (
@@ -77,18 +94,21 @@ SELECT count(*) as count
       LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
     WHERE (
       user_api_keys.user_id = '${user_id}'
-      AND (${buildFilter(filter)})
+      AND (${whereFilterString})
     )
     GROUP BY request.user_id
     HAVING (
       true
-      AND (${buildFilter(filter, true)})
+      AND (${havingFilterString})
     )
     ORDER BY last_active DESC
   ) as x
 `;
 
-  const { data, error } = await dbExecute<{ count: number }>(query);
+  const { data, error } = await dbExecute<{ count: number }>(
+    query,
+    havingArgsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }

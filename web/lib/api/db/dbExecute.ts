@@ -3,7 +3,7 @@ import { Result } from "../../result";
 
 export async function dbExecute<T>(
   query: string,
-  parameters: any[] = []
+  parameters: any[]
 ): Promise<Result<T[], string>> {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,

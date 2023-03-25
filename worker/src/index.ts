@@ -19,6 +19,12 @@ interface ErrorResult<T> {
   error: T;
 }
 
+interface RequestSettings {
+  stream: boolean;
+  ff_stream_force_format?: boolean;
+  ff_increase_timeout?: boolean;
+}
+
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
 async function forwardRequestToOpenAiWithRetry(request: Request, body?: string): Promise<Response> {
@@ -42,6 +48,7 @@ async function forwardRequestToOpenAiWithRetry(request: Request, body?: string):
 
 async function forwardRequestToOpenAi(
   request: Request,
+  requestSettings: RequestSettings,
   body?: string
 ): Promise<Response> {
   let url = new URL(request.url);
@@ -50,14 +57,25 @@ async function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
-  const response = await fetch(new_url.href, init);
 
-  // Throw an error if the status code is 429
-  if (response.status === 429) {
-    throw new Error("429 Too Many Requests");
+
+  // const response = await fetch(new_url.href, init);
+
+  // // Throw an error if the status code is 429
+  // if (response.status === 429) {
+  //   throw new Error("429 Too Many Requests");
+  // }
+
+  // return response;
+
+  if (requestSettings.ff_increase_timeout) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    setTimeout(() => controller.abort(), 1000 * 60 * 30);
+    return fetch(new_url.href, { ...init, signal });
+  } else {
+    return fetch(new_url.href, init);
   }
-
-  return response;
 }
 
 type HeliconeRequest = {
@@ -355,7 +373,11 @@ async function forwardAndLog(
   );
 
   const [response, requestResult] = await Promise.all([
+<<<<<<< HEAD
     forwardRequestToOpenAiWithRetry(request, body),
+=======
+    forwardRequestToOpenAi(request, requestSettings, body),
+>>>>>>> 00821d10d615932859f905c87513471d70ece4f4
     logRequest({
       dbClient,
       request,
@@ -365,10 +387,31 @@ async function forwardAndLog(
       ...getHeliconeHeaders(request.headers),
     }),
   ]);
-  const [readable, readableLog] = response.body?.tee() ?? [
-    undefined,
-    undefined,
-  ];
+
+  let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
+
+  if (requestSettings.ff_stream_force_format) {
+    let buffer: any = null;
+    const transformer = new TransformStream({
+      transform(chunk, controller) {
+        console.log("buffer", buffer, chunk);
+        if (chunk.length < 50) {
+          buffer = chunk;
+        } else {
+          if (buffer) {
+            const mergedArray = new Uint8Array(buffer.length + chunk.length);
+            mergedArray.set(buffer);
+            mergedArray.set(chunk, buffer.length);
+            controller.enqueue(mergedArray);
+          } else {
+            controller.enqueue(chunk);
+          }
+          buffer = null;
+        }
+      },
+    });
+    readable = readable?.pipeThrough(transformer);
+  }
 
   ctx.waitUntil(
     readableLog && requestResult.data !== null
@@ -534,6 +577,7 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
+<<<<<<< HEAD
 async function updateRequestProperties(id: string, properties: Record<string, string>, env: Env): Promise<void> {
   const dbClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -572,12 +616,15 @@ interface RequestSettings {
   stream: boolean;
 }
 
+=======
+>>>>>>> 00821d10d615932859f905c87513471d70ece4f4
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+<<<<<<< HEAD
     // Check async logging endpoint
     const url = new URL(request.url);
     const method = request.method;
@@ -603,7 +650,18 @@ export default {
 
     const requestBody = await request.clone().json<{ stream?: boolean }>();
     const requestSettings = {
+=======
+    const requestBody =
+      request.method === "POST"
+        ? await request.clone().json<{ stream?: boolean }>()
+        : {};
+    const requestSettings: RequestSettings = {
+>>>>>>> 00821d10d615932859f905c87513471d70ece4f4
       stream: requestBody.stream ?? false,
+      ff_stream_force_format:
+        request.headers.get("helicone-ff-stream-force-format") === "true",
+      ff_increase_timeout:
+        request.headers.get("helicone-ff-increase-timeout") === "true",
     };
 
     const { data: cacheSettings, error: cacheError } = getCacheSettings(

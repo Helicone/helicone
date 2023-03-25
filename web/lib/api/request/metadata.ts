@@ -31,7 +31,7 @@ export async function getRequestMetaData(
   )
 `;
 
-  const { data, error } = await dbExecute<RequestMetaData>(query);
+  const { data, error } = await dbExecute<RequestMetaData>(query, []);
   if (error !== null) {
     return { data: null, error: error };
   }
