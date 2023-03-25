@@ -59,7 +59,6 @@ SELECT request.user_id,
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-
   const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
   if (error !== null) {
     return { data: null, error: error };
