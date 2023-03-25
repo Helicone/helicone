@@ -57,7 +57,7 @@ const ModelPage = (props: ModelPageProps) => {
           .filter((m) => m.model !== null)
           .map((m) => ({
             ...m,
-            cost: modelCost(m as any).toFixed(5),
+            cost: modelCost(m as any).toFixed(2),
           }))}
       />
     </>
