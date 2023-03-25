@@ -36,8 +36,8 @@ const OPENAI_FINETUNE_COSTS_COMPLETIONS = {
 export function modelCost(modelRow: ModelMetrics): number {
   const model = modelRow.model;
   const tokens = modelRow.sum_tokens;
-  const promptTokens = modelRow.prompt_tokens;
-  const completionTokens = modelRow.completion_tokens;
+  const promptTokens = modelRow.sum_prompt_tokens;
+  const completionTokens = modelRow.sum_completion_tokens;
   if (tokens === null) {
     console.error("Tokens is null");
     return 0;

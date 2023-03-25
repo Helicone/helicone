@@ -4,8 +4,8 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export interface ModelMetrics {
   model: string;
-  prompt_tokens: number;
-  completion_tokens: number;
+  sum_prompt_tokens: number;
+  sum_completion_tokens: number;
   sum_tokens: number;
 }
 export async function getModelMetrics(
@@ -17,8 +17,8 @@ export async function getModelMetrics(
   const query = `
 SELECT response.body ->> 'model'::text as model,
   sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS prompt_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS completion_tokens
+  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS sum_prompt_tokens,
+  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens
 FROM response 
   left join request on response.request = request.id
   left join user_api_keys on request.auth_hash = user_api_keys.api_key_hash
@@ -35,8 +35,8 @@ GROUP BY response.body ->> 'model'::text;
 export interface ModelMetricsUsers {
   model: string;
   sum_tokens: number;
-  prompt_tokens: number;
-  completion_tokens: number;
+  sum_prompt_tokens: number;
+  sum_completion_tokens: number;
   user_id: string;
 }
 export async function getModelMetricsForUsers(
@@ -50,8 +50,8 @@ export async function getModelMetricsForUsers(
   const query = `
 SELECT response.body ->> 'model'::text as model,
   sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS prompt_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS completion_tokens,
+  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS sum_prompt_tokens,
+  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens,
   request.user_id
 FROM response 
   left join request on response.request = request.id
