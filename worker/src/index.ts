@@ -462,7 +462,7 @@ async function saveToCache(
   const cache = caches.default;
   const responseClone = response.clone();
   const responseHeaders = new Headers(responseClone.headers);
-  responseHeaders.append("Cache-Control", cacheControl);
+  responseHeaders.set("Cache-Control", cacheControl);
   const cacheResponse = new Response(responseClone.body, {
     ...responseClone,
     headers: responseHeaders,
