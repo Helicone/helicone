@@ -50,7 +50,7 @@ export default async function handler(
         if (
           typeof jsonObj[key] === "object" &&
           jsonObj[key] !== null &&
-          depth < 2
+          depth < 3
         ) {
           Object.assign(
             flattened,
