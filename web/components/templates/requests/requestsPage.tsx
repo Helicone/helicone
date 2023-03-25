@@ -453,28 +453,10 @@ const RequestsPage = (props: RequestsPageProps) => {
     } catch (error) {
       console.error(error);
     }
-    // fetch("/api/export/requests", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     filter: advancedFilter,
-    //     offset: (currentPage - 1) * currentPageSize,
-    //     limit: 100000,
-    //     sort: sortLeaf,
-    //   }),
-    // })
-    //   .then((res) => res.json() as Promise<Result<HeliconeRequest[], string>>)
-    //   .then((data) => {
-    //     const csv = Papa.unparse(data.data || []);
-    //     console.log(csv);
-    //   });
   }
 
   return (
     <>
-      <button onClick={downloadCSV}>Export to CSV</button>;
       <AuthHeader
         title={"Requests"}
         headerActions={
@@ -537,7 +519,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 ],
               }}
               csvExport={{
-                data: csv,
+                onClick: downloadCSV,
                 fileName: "requests.csv",
               }}
               isFetching={isLoading}

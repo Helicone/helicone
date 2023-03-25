@@ -5,6 +5,9 @@ import { getRequests } from "../../../../lib/api/request/request";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 import { SortLeafRequest } from "../../../../services/lib/sorts/sorts";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { userMetrics } from "../../../../lib/api/users/users";
+import { getModelMetricsForUsers } from "../../../../lib/api/metrics/modelMetrics";
+import { modelCost } from "../../../../lib/api/metrics/costCalc";
 
 interface FlatObject {
   [key: string]: string | number | boolean | null;
@@ -26,13 +29,55 @@ export default async function handler(
     limit: number;
     sort: SortLeafRequest;
   };
-  const metrics = await getRequests(
+
+  const { error: metricsError, data: metrics } = await userMetrics(
     user.data.user.id,
     filter,
     offset,
-    100000,
-    sort
+    limit
   );
+
+  if (metricsError !== null) {
+    res.status(500).json({ error: metricsError, data: null });
+    return;
+  }
+
+  const userIds = metrics?.map((metric) => metric.user_id) ?? [];
+
+  const { error: userCostError, data: userCosts } =
+    await getModelMetricsForUsers(filter, user.data.user.id, false, userIds);
+
+  const costByUser =
+    userCosts?.reduce(
+      (
+        acc: {
+          [key: string]: number;
+        },
+        userCost
+      ) => {
+        const userMetric = acc[userCost.user_id];
+        if (userMetric !== undefined) {
+          acc[userCost.user_id] += modelCost({
+            model: userCost.model,
+            sum_tokens: userCost.sum_tokens,
+            prompt_tokens: userCost.prompt_tokens,
+            completion_tokens: userCost.completion_tokens,
+          });
+        } else {
+          acc[userCost.user_id] = modelCost({
+            model: userCost.model,
+            sum_tokens: userCost.sum_tokens,
+            prompt_tokens: userCost.prompt_tokens,
+            completion_tokens: userCost.completion_tokens,
+          });
+        }
+        return acc;
+      },
+      {}
+    ) ?? {};
+  for (const metric of metrics ?? []) {
+    metric.cost = costByUser[metric.user_id];
+  }
 
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", "attachment; filename=export.csv");
@@ -65,9 +110,9 @@ export default async function handler(
     return flattened;
   }
 
-  const flattened = metrics.data?.map((item) => flattenJSON(item));
+  const flattened = metrics?.map((item) => flattenJSON(item));
 
   const csvData = Papa.unparse(flattened || []);
 
-  res.status(metrics.error === null ? 200 : 500).send(csvData);
+  res.status(metricsError === null ? 200 : 500).send(csvData);
 }

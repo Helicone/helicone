@@ -56,7 +56,7 @@ interface ThemedHeaderProps {
     onColumnCallback: (columns: Column[]) => void;
   };
   csvExport?: {
-    data: any[];
+    onClick: () => void;
     fileName: string;
   };
   timeFilter?: {
@@ -251,20 +251,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
-                  {/* <CSVLink
-                    data={csvExport.data}
-                    filename={csvExport.fileName}
-                    className="flex"
-                    target="_blank"
+                  <button
+                    onClick={csvExport.onClick}
+                    className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
                   >
-                    <button className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
-                      <ArrowDownTrayIcon
-                        className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                        aria-hidden="true"
-                      />
-                      Export
-                    </button>
-                  </CSVLink> */}
+                    <ArrowDownTrayIcon
+                      className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                      aria-hidden="true"
+                    />
+                    Export
+                  </button>
                 </Menu>
               </div>
             )}

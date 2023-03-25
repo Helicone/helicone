@@ -131,13 +131,48 @@ const UsersPage = (props: UsersPageProps) => {
     },
   ];
 
+  async function downloadCSV() {
+    try {
+      const response = await fetch("/api/export/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: advancedFilters,
+          offset: (page - 1) * pageSize,
+          limit: 100000,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("An error occurred while downloading the CSV file");
+      }
+
+      const csvData = await response.text();
+      const blob = new Blob([csvData], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "users.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Release the Blob URL
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <>
       <AuthHeader title={"Users"} />
       <div className="space-y-2">
         <ThemedTableHeader
           csvExport={{
-            data: users,
+            onClick: downloadCSV,
             fileName: "users.csv",
           }}
           isFetching={isLoading}
