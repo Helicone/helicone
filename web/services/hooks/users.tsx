@@ -55,7 +55,6 @@ const useUsers = (
   const from = (currentPage - 1) * currentPageSize;
   const to = currentPage * currentPageSize;
   const error = response?.error;
-  console.log("RESPONSE", users)
 
   return {
     users,
