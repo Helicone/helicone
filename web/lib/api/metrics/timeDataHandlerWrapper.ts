@@ -32,7 +32,7 @@ export async function getSomeDataOverTime<T, K>(
   if (error !== null) {
     return { data: null, error: error };
   }
-  // console.log("DATA", data);
+
   return {
     data: timeBackfill(
       data,
