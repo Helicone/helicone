@@ -153,9 +153,6 @@ const useRequestsPage = (
         )
       : null;
 
-    console.log("PROBABILITY", logProbs ? Math.exp(logProbs) : null)
-    console.log("FULL REQUEST", request)
-
     const obj: RequestWrapper = {
       requestBody: request.request_body,
       responseBody: request.response_body,

@@ -148,11 +148,6 @@ export function buildFilterLeaf(
         filters.push(`response.body ->> 'model' = $${valueIndex}`);
       }
     }
-<<<<<<< HEAD
-    console.log("COMPLETING BODY", filter.response.body_completion);
-=======
-
->>>>>>> 00821d10d615932859f905c87513471d70ece4f4
     if (filter.response.body_completion) {
       if (filter.response.body_completion.equals) {
         argsAcc.push(filter.response.body_completion.equals);

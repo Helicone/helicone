@@ -10,15 +10,11 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useGetKeys } from "../../../services/hooks/keys";
 import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
-import { useGetValueParams } from "../../../services/hooks/valueParams";
 import {
   FilterNode,
   getPropertyFilters,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  getValueFilters,
-  RequestsTableFilter,
-} from "../../../services/lib/filters/frontendFilterDefs";
+import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import {
   SortDirection,
   SortLeafRequest,
@@ -392,7 +388,6 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const router = useRouter();
   const { propertyParams } = useGetPropertyParams();
-  const { valueParams } = useGetValueParams();
 
   const propertyFilterMap = {
     properties: {
@@ -404,23 +399,9 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   };
 
-  const valueFilterMap = {
-    values: {
-      label: "Values",
-      columns: getValueFilters(
-        values,
-        valueParams.map((p) => p.value_param)
-      ),
-    },
-  };
-
   const filterMap =
     properties.length > 0
-      ? {
-          ...valueFilterMap,
-          ...propertyFilterMap,
-          ...RequestsTableFilter,
-        }
+      ? { ...propertyFilterMap, ...RequestsTableFilter }
       : RequestsTableFilter;
 
   const columnHelper = createColumnHelper<RequestWrapper>();
