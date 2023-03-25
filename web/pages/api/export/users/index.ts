@@ -85,34 +85,7 @@ export default async function handler(
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
 
-  function flattenJSON(jsonObj: any, prefix = "", depth = 0): FlatObject {
-    const flattened: FlatObject = {};
-
-    for (const key in jsonObj) {
-      if (jsonObj.hasOwnProperty(key)) {
-        const newPrefix = prefix ? prefix + "." + key : key;
-
-        if (
-          typeof jsonObj[key] === "object" &&
-          jsonObj[key] !== null &&
-          depth < 3
-        ) {
-          Object.assign(
-            flattened,
-            flattenJSON(jsonObj[key], newPrefix, depth + 1)
-          );
-        } else {
-          flattened[newPrefix] = jsonObj[key];
-        }
-      }
-    }
-
-    return flattened;
-  }
-
-  const flattened = metrics?.map((item) => flattenJSON(item));
-
-  const csvData = Papa.unparse(flattened || []);
+  const csvData = Papa.unparse(metrics || []);
 
   res.status(metricsError === null ? 200 : 500).send(csvData);
 }
