@@ -14,7 +14,7 @@ export interface UserMetric {
   total_requests: number;
   average_requests_per_day_active: number;
   average_tokens_per_request: number;
-  cost?: number;
+  cost: number;
 }
 
 export async function userMetrics(
@@ -59,11 +59,15 @@ SELECT request.user_id,
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-
   const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
+  console.log("DATA", data);
   if (error !== null) {
     return { data: null, error: error };
   }
+  console.log("RESPONSE TWO", data)
+  // data[0].cost = 0;
+  data[0].total_requests = '10000'
+  console.log("RESPONSE TWO POST", data)
   return { data: data, error: null };
 }
 

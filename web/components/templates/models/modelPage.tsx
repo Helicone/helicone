@@ -36,7 +36,7 @@ const ModelPage = (props: ModelPageProps) => {
       });
   }, [client]);
 
-  console.log(modelMetrics);
+  console.log("MODEL", modelMetrics);
 
   return (
     <>
