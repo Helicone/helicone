@@ -26,7 +26,6 @@ import {
   ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
-import { CSVLink } from "react-csv";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
@@ -252,7 +251,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
-                  <CSVLink
+                  {/* <CSVLink
                     data={csvExport.data}
                     filename={csvExport.fileName}
                     className="flex"
@@ -265,7 +264,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       />
                       Export
                     </button>
-                  </CSVLink>
+                  </CSVLink> */}
                 </Menu>
               </div>
             )}
