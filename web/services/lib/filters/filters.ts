@@ -82,6 +82,7 @@ export function buildFilterLeaf(
     }
   }
   if (filter.values) {
+    console.log("filter.values", filter.values);
     for (const [key, value] of Object.entries(filter.values)) {
       if (value.equals) {
         argsAcc.push(key);

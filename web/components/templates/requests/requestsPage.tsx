@@ -10,9 +10,11 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useGetKeys } from "../../../services/hooks/keys";
 import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
+import { useGetValueParams } from "../../../services/hooks/valueParams";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getPropertyFilters,
+  getValueFilters,
   requestTableFilters,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
@@ -378,13 +380,23 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const router = useRouter();
   const { propertyParams } = useGetPropertyParams();
+  const { valueParams } = useGetValueParams();
 
-  const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
-    getPropertyFilters(
-      properties,
-      propertyParams.map((p) => p.property_param)
+  const filterMap = (requestTableFilters as SingleFilterDef<any>[])
+    .concat(
+      getPropertyFilters(
+        properties,
+        propertyParams.map((p) => p.property_param)
+      )
     )
-  );
+    .concat(
+      getValueFilters(
+        values,
+        valueParams.map((v) => v.value_param)
+      )
+    );
+  console.log("filterMap", filterMap);
+  console.log("values", values);
 
   const columnHelper = createColumnHelper<RequestWrapper>();
 

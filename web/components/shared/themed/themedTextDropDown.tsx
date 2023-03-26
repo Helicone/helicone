@@ -9,13 +9,13 @@ import { clsx } from "../clsx";
 
 interface ThemedTextDropDownProps {
   options: string[];
-  onChange: (option: string) => void;
+  onChange: (option: string | null) => void;
   value: string;
 }
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
   const { options, onChange, value } = props;
-  const [selected, setSelected] = useState(options[0]);
+  const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
 
   const filteredPeople =
