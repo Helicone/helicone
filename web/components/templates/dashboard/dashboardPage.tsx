@@ -26,9 +26,14 @@ import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import {
   FilterLeaf,
   FilterNode,
-  getPropertyFilters,
 } from "../../../services/lib/filters/filterDefs";
-import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  getPropertyFilters,
+  getValueFilters,
+  requestTableFilters,
+  SingleFilterDef,
+} from "../../../services/lib/filters/frontendFilterDefs";
+
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
@@ -52,19 +57,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
-  const parseKey = (keyString: string | null) => {
-    if (!keyString) {
-      return "all";
-    }
-    return {
-      user_api_keys: {
-        api_key_hash: {
-          equals: keyString,
-        },
-      },
-    };
-  };
-
   const [timeData, setTimeData] = useState<GraphDataState>(
     initialGraphDataState
   );
@@ -72,30 +64,35 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [metrics, setMetrics] =
     useState<Loading<Result<Metrics, string>>>("loading");
   const [interval, setInterval] = useState<TimeInterval>("1m");
-  const [filter, setFilter] = useState<FilterNode>("all");
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
-    parseKey(sessionStorageKey)
+  const [filters, setFilters] = useState<FilterLeaf[]>([]);
+  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
+    sessionStorageKey
   );
-  const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo(interval).toISOString(),
-        lte: new Date().toISOString(),
-      },
-    },
+  const [timeFilter, setTimeFilter] = useState<{
+    start: Date;
+    end: Date;
+  }>({
+    start: getTimeIntervalAgo(interval),
+    end: new Date(),
   });
 
   const { properties } = useGetProperties();
   const { propertyParams } = useGetPropertyParams();
 
-  const getData = (timeFilter: FilterLeaf) => {
+  const getData = (timeFilter: { start: Date; end: Date }) => {
     getDashboardData(
       timeFilter,
-      {
-        left: filter,
-        operator: "and",
-        right: apiKeyFilter,
-      },
+      apiKeyFilter !== null
+        ? filters.concat([
+            {
+              user_api_keys: {
+                api_key_hash: {
+                  equals: apiKeyFilter,
+                },
+              },
+            },
+          ])
+        : filters,
       setMetrics,
       setTimeData
     );
@@ -104,21 +101,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   useEffect(() => {
     getData(timeFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeFilter, filter, apiKeyFilter]);
+  }, [timeFilter, filters, apiKeyFilter]);
 
-  const propertyFilterMap = {
-    properties: {
-      label: "Properties",
-      columns: getPropertyFilters(
-        properties,
-        propertyParams.map((p) => p.property_param)
-      ),
-    },
-  };
-  const filterMap =
-    properties.length > 0
-      ? { ...propertyFilterMap, ...RequestsTableFilter }
-      : RequestsTableFilter;
+  const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
+    getPropertyFilters(
+      properties,
+      propertyParams.map((p) => p.property_param)
+    )
+  );
 
   return (
     <AuthLayout user={user}>
@@ -128,12 +118,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           <button
             onClick={() => {
               getData({
-                request: {
-                  created_at: {
-                    gte: getTimeIntervalAgo(interval).toISOString(),
-                    lte: new Date().toISOString(),
-                  },
-                },
+                start: getTimeIntervalAgo(interval),
+                end: new Date(),
               });
             }}
             className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
@@ -207,22 +193,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   const end = new Date(value.split("_")[1]);
                   setInterval(key);
                   setTimeFilter({
-                    request: {
-                      created_at: {
-                        gte: start.toISOString(),
-                        lte: end.toISOString(),
-                      },
-                    },
+                    start,
+                    end,
                   });
                 } else {
                   setInterval(key);
                   setTimeFilter({
-                    request: {
-                      created_at: {
-                        gte: getTimeIntervalAgo(key).toISOString(),
-                        lte: new Date().toISOString(),
-                      },
-                    },
+                    start: getTimeIntervalAgo(key),
+                    end: new Date(),
                   });
                 }
               },
@@ -230,31 +208,19 @@ const DashboardPage = (props: DashboardPageProps) => {
             advancedFilter={{
               filterMap,
               onAdvancedFilter: (_filters: Filter[]) => {
-                const filters = _filters.filter((f) => f) as FilterNode[];
-                if (filters.length === 0) {
-                  setFilter("all");
+                const thisFilters = _filters.filter((f) => f) as FilterLeaf[];
+                if (thisFilters.length === 0) {
+                  setFilters([]);
                 } else {
-                  const firstFilter = filters[0];
-                  setFilter(
-                    filters.slice(1).reduce((acc, curr) => {
-                      return {
-                        left: acc,
-                        operator: "and",
-                        right: curr,
-                      };
-                    }, firstFilter)
-                  );
+                  setFilters(thisFilters);
                 }
               },
             }}
           />
-          <MetricsPanel filters={filter} metrics={metrics} />
+          <MetricsPanel metrics={metrics} />
           <TimeGraphWHeader
             data={timeData}
-            timeMap={getTimeMap(
-              new Date(timeFilter.request!.created_at!.gte!),
-              new Date(timeFilter.request!.created_at!.lte!)
-            )}
+            timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
           />
         </div>
       )}

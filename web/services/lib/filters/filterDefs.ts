@@ -1,94 +1,59 @@
-import { ColumnComparators, Comparator } from "./frontendFilterDefs";
+export type TextOperators = Record<"equals" | "like" | "ilike", string>;
 
-export function getPropertyFilters(
-  properties: string[],
-  inputParams: string[]
-) {
-  const filters: ColumnComparators<any> = {};
-  properties.forEach((p) => {
-    filters[p] = {
-      table: "properties",
-      label: p,
-      type: "text-with-suggestions",
-      operations: {
-        equals: {
-          inputParams,
-          type: "text-with-suggestions",
-        },
-      },
-    };
-  });
-  return filters;
-}
+export type NumberOperators = Record<"equals" | "gte" | "lte", number>;
 
-export interface FilterLeafUserMetrics {
-  user_id?: {
-    equals?: string;
-  };
-  last_active?: {
-    gte?: string;
-    lte?: string;
-  };
-  total_requests?: {
-    gte?: number;
-    lte?: number;
-  };
-}
-export interface FilterLeafRequest {
-  prompt?: {
-    equals?: string;
-    like: string;
-    ilike?: string;
-  };
-  created_at?: {
-    gte?: string;
-    lte?: string;
-  };
-  user_id?: {
-    equals?: string;
-  };
-}
+export type TimestampOperators = Record<"gte" | "lte", string>;
 
-export interface FilterLeafUserApiKeys {
-  api_key_hash?: {
-    equals?: string;
-  };
-}
-export interface FilterLeafResponse {
-  body_tokens?: {
-    gte?: number;
-    lte?: number;
-  };
-  body_model?: {
-    equals?: string;
-  };
-  body_completion?: {
-    equals?: string;
-    ilike?: string;
-    like?: string;
-  };
-}
+type SingleKey<T> = {
+  [K in keyof T]: Partial<{
+    [P in keyof T]: P extends K ? T[P] : never;
+  }>;
+}[keyof T];
 
-export interface FilterLeaf {
-  user_metrics?: FilterLeafUserMetrics;
-  user_api_keys?: FilterLeafUserApiKeys;
-  response?: FilterLeafResponse;
-  request?: FilterLeafRequest;
-  properties?: {
-    [key: string]: {
-      equals?: string;
-      ilike?: string;
-      like?: string;
-    };
+export type RequestTableToOperators = {
+  prompt: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperators>;
+  user_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
+
+type UserApiKeysTableToOperators = {
+  api_key_hash: SingleKey<TextOperators>;
+};
+
+export type FilterLeafUserApiKeys = SingleKey<UserApiKeysTableToOperators>;
+
+type ResponseTableToOperators = {
+  body_tokens: SingleKey<NumberOperators>;
+  body_model: SingleKey<TextOperators>;
+  body_completion: SingleKey<TextOperators>;
+};
+
+export type FilterLeafResponse = SingleKey<ResponseTableToOperators>;
+
+type UserMetricsToOperators = {
+  user_id: SingleKey<TextOperators>;
+  last_active: SingleKey<TimestampOperators>;
+  total_requests: SingleKey<NumberOperators>;
+};
+
+export type FilterLeafUserMetrics = SingleKey<UserMetricsToOperators>;
+export type TablesAndViews = {
+  user_metrics: FilterLeafUserMetrics;
+  user_api_keys: FilterLeafUserApiKeys;
+  response: FilterLeafResponse;
+  request: FilterLeafRequest;
+  properties: {
+    [key: string]: SingleKey<TextOperators>;
   };
-  values?: {
-    [key: string]: {
-      equals?: string;
-      ilike?: string;
-      like?: string;
-    };
+  values: {
+    [key: string]: SingleKey<TextOperators>;
   };
-}
+};
+
+export type FilterLeaf = SingleKey<TablesAndViews>;
+
 export interface FilterBranch {
   left: FilterNode;
   operator: "or" | "and"; // Can add more later
@@ -96,3 +61,20 @@ export interface FilterBranch {
 }
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
+
+export function filterListToTree(
+  list: FilterNode[],
+  operator: "or" | "and"
+): FilterNode {
+  if (list.length === 0) {
+    return "all";
+  } else if (list.length === 1) {
+    return list[0];
+  } else {
+    return {
+      left: list[0],
+      operator,
+      right: filterListToTree(list.slice(1), operator),
+    };
+  }
+}

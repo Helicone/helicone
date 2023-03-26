@@ -15,7 +15,7 @@ export function Filters({
     key_name: string | null;
   }[];
 
-  setFilter: Dispatch<SetStateAction<FilterNode>>;
+  setFilter: Dispatch<SetStateAction<string | null>>;
 }) {
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
@@ -56,36 +56,7 @@ export function Filters({
           }
 
           setCurrentKey(option);
-          setFilter((f) => {
-            if (option === "all" && f !== "all") {
-              return {
-                ...f,
-                user_api_keys: undefined,
-              };
-            }
-
-            if (f === "all") {
-              return {
-                user_api_keys: {
-                  api_key_hash: {
-                    equals: option,
-                  },
-                },
-              };
-            }
-            if ("left" in f) {
-              throw new Error("Not implemented");
-            }
-
-            return {
-              ...f,
-              user_api_keys: {
-                api_key_hash: {
-                  equals: option,
-                },
-              },
-            };
-          });
+          setFilter(option);
         }}
       />
       {/* <select

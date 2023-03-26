@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { useUsers } from "../../../services/hooks/users";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { UserMetricsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
 import { UserRow } from "../../../services/lib/users";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -18,6 +17,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 
 const monthNames = [
   "Jan",
@@ -142,7 +142,7 @@ const UsersPage = (props: UsersPageProps) => {
           }}
           isFetching={isLoading}
           advancedFilter={{
-            filterMap: UserMetricsTableFilter,
+            filterMap: userTableFilters,
             onAdvancedFilter: (_filters) => {
               router.query.page = "1";
               router.push(router);

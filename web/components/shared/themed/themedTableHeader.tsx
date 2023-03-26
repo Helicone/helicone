@@ -34,7 +34,8 @@ import { UserMetric } from "../../../lib/api/users/users";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import {
   ColumnType,
-  TableFilterMap,
+  requestTableFilters,
+  SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import ThemedTextDropDown from "./themedTextDropDown";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
@@ -48,7 +49,7 @@ export function escapeCSVString(s: string | undefined): string | undefined {
   }
   return s.replace(/"/g, '""');
 }
-export type Filter = (FilterLeaf & { id?: string }) | { id?: string };
+export type Filter = FilterLeaf;
 
 interface ThemedHeaderProps {
   isFetching: boolean; // if fetching, we disable other time select buttons
@@ -67,7 +68,7 @@ interface ThemedHeaderProps {
     defaultTimeFilter: TimeInterval;
   };
   advancedFilter?: {
-    filterMap: TableFilterMap;
+    filterMap: SingleFilterDef<any>[];
     onAdvancedFilter: (advancedFilters: Filter[]) => void;
   };
   view?: {
@@ -86,7 +87,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     view,
   } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   return (
@@ -312,7 +313,10 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             <button
               onClick={() => {
                 setAdvancedFilters((prev) => {
-                  return [...prev, { id: crypto.randomUUID() }];
+                  return [
+                    ...prev,
+                    { filterMapIdx: 0, value: "", operatorIdx: 0 },
+                  ];
                 });
               }}
               className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
@@ -327,7 +331,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               <button
                 onClick={() => {
                   setAdvancedFilters([]);
-                  advancedFilter.onAdvancedFilter(advancedFilters);
+                  advancedFilter.onAdvancedFilter([]);
                 }}
                 className={clsx(
                   "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
@@ -337,7 +341,23 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               </button>
               <button
                 onClick={() => {
-                  advancedFilter.onAdvancedFilter(advancedFilters);
+                  advancedFilter.onAdvancedFilter(
+                    advancedFilters.map((filter) => {
+                      const table =
+                        advancedFilter.filterMap[filter.filterMapIdx].table;
+                      const column =
+                        advancedFilter.filterMap[filter.filterMapIdx].column;
+                      const operator =
+                        advancedFilter.filterMap[filter.filterMapIdx].operators[
+                          filter.operatorIdx
+                        ];
+                      let filterLeaf: any = {};
+                      filterLeaf[table] = {};
+                      filterLeaf[table][column] = {};
+                      filterLeaf[table][column][operator.value] = filter.value;
+                      return filterLeaf;
+                    })
+                  );
                 }}
                 className={clsx(
                   "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
@@ -358,29 +378,31 @@ function AdvancedFilters({
   filters,
   setAdvancedFilters,
 }: {
-  filterMap: TableFilterMap;
-  filters: Filter[];
-  setAdvancedFilters: Dispatch<SetStateAction<Filter[]>>;
+  filterMap: SingleFilterDef<any>[];
+  filters: UIFilterRow[];
+  setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
 }) {
   return (
     <div className="space-y-4">
       {filters.map((_filter, index) => {
         return (
-          <div key={_filter.id}>
+          <div key={index}>
             <AdvancedFilterRow
               filterMap={filterMap}
-              handleFilterChange={(filter) => {
+              filter={_filter}
+              setFilter={(filter) => {
                 setAdvancedFilters((prev) => {
+                  if (typeof filter === "function") {
+                    filter = filter(prev[index]);
+                  }
                   const newFilters = [...prev];
                   newFilters[index] = filter;
-                  newFilters[index].id = _filter.id;
                   return newFilters;
                 });
               }}
               onDeleteHandler={() => {
                 setAdvancedFilters((prev) => {
                   const newFilters = [...prev];
-                  newFilters[index].id = _filter.id;
                   newFilters.splice(index, 1);
                   console.log("newFilters", newFilters);
                   return newFilters;
@@ -449,137 +471,81 @@ function AdvancedFilterInput({
   }
 }
 
+type UIFilterRow = {
+  filterMapIdx: number;
+  operatorIdx: number;
+  value: string;
+};
+
 function AdvancedFilterRow({
   filterMap,
-  handleFilterChange,
+  filter,
+  setFilter,
   onDeleteHandler,
 }: {
-  filterMap: TableFilterMap;
-  handleFilterChange: (filter: FilterLeaf) => void;
+  filterMap: SingleFilterDef<any>[];
+  filter: UIFilterRow;
+  setFilter: Dispatch<SetStateAction<UIFilterRow>>;
   onDeleteHandler: () => void;
 }) {
-  const tables = Object.entries(filterMap);
-
-  const [table, setTable] = useState(tables[0][0]);
-
-  const columns = tables.find((t) => t[0] === table)?.[1].columns;
-
-  const columnsEntries = columns ? Object.entries(columns) : null;
-
-  const [column, setColumn] = useState(
-    columnsEntries && columnsEntries[0] ? columnsEntries[0][0] : ""
-  );
-
-  const operators =
-    (columnsEntries && columnsEntries.find((c) => c[0] === column)?.[1]) ??
-    null;
-
-  const operatorsEntries = operators
-    ? Object.entries(operators.operations)
-    : [];
-
-  const [operator, setOperator] = useState(
-    operatorsEntries && operatorsEntries[0] ? operatorsEntries[0][0] : ""
-  );
-
-  const selectedOperator = operatorsEntries.find((o) => o[0] === operator)?.[1];
-
-  const [value, setValue] = useState("");
-
-  useEffect(() => {
-    setColumn(columnsEntries ? columnsEntries[0][0] : "");
-    setValue("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table]);
-
-  useEffect(() => {
-    setOperator(operatorsEntries ? operatorsEntries[0][0] : "");
-    setValue("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [column]);
-
-  const operatorMap = (operator: string) => {
-    switch (operator) {
-      case "equals":
-        return "equals";
-      case "gte":
-        return "greater than or equal to";
-      case "lte":
-        return "less than or equal to";
-      case "like":
-        return "like";
-      case "ilike":
-        return "ilike";
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center">
       <ThemedDropdown
-        options={tables.map((table) => {
+        options={filterMap.map((column, i) => {
           return {
-            value: table[0],
-            label: table[1].label,
+            value: i,
+            label: column.label,
+            category: column.category,
           };
         })}
-        selectedValue={table}
+        selectedValue={filter.filterMapIdx}
         onSelect={(selected) => {
-          setTable(selected);
+          setFilter({
+            filterMapIdx: selected,
+            operatorIdx: 0,
+            value: "",
+          });
         }}
         className="w-full lg:w-fit"
-        label="Table"
+        label="Column"
       />
-      {columnsEntries && (
-        <ThemedDropdown
-          options={columnsEntries.map((column) => {
-            return {
-              value: column[0],
-              label: column[1].label,
-            };
-          })}
-          selectedValue={column}
-          onSelect={(selected) => {
-            setColumn(selected);
-          }}
-          className="w-full lg:w-fit"
-          label="Column"
-        />
-      )}
 
-      {column && (
-        <ThemedDropdown
-          options={operatorsEntries.map((operator) => {
-            return {
-              value: operator[0],
-              label: operatorMap(operator[0]),
-            };
-          })}
-          selectedValue={operator}
-          onSelect={(selected) => {
-            setOperator(selected);
+      <ThemedDropdown
+        options={filterMap[filter.filterMapIdx].operators.map((operator, i) => {
+          return {
+            value: i,
+            label: operator.label,
+          };
+        })}
+        selectedValue={filter.operatorIdx}
+        onSelect={(selected) => {
+          setFilter((f) => ({
+            ...f,
+            operatorIdx: selected,
+            value: "",
+          }));
+        }}
+        className="w-full lg:w-fit"
+      />
+
+      <div className="w-full lg:w-fit">
+        <AdvancedFilterInput
+          type={
+            filterMap[filter.filterMapIdx].operators[filter.operatorIdx].type
+          }
+          value={filter.value}
+          inputParams={
+            filterMap[filter.filterMapIdx].operators[filter.operatorIdx]
+              .inputParams
+          }
+          onChange={(value) => {
+            setFilter((f) => ({
+              ...f,
+              value,
+            }));
           }}
-          className="w-full lg:w-fit"
         />
-      )}
-      {selectedOperator && (
-        <div className="w-full lg:w-fit">
-          <AdvancedFilterInput
-            type={selectedOperator.type}
-            value={value}
-            inputParams={selectedOperator.inputParams}
-            onChange={(value) => {
-              let filter: any = {};
-              filter[table] = {};
-              filter[table][column] = {};
-              filter[table][column][operator] = value;
-              handleFilterChange(filter);
-              setValue(value);
-            }}
-          />
-        </div>
-      )}
+      </div>
 
       <div className="w-full lg:w-fit border-b pb-4 lg:border-b-0 lg:pb-0 justify-end flex lg:justify-center">
         <button

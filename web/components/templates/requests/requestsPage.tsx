@@ -10,16 +10,16 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useGetKeys } from "../../../services/hooks/keys";
 import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
-  FilterNode,
   getPropertyFilters,
-} from "../../../services/lib/filters/filterDefs";
-import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+  requestTableFilters,
+  SingleFilterDef,
+} from "../../../services/lib/filters/frontendFilterDefs";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/sorts";
-import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -32,7 +32,7 @@ import {
   getUSDate,
   removeLeadingWhitespace,
 } from "../../shared/utils/utils";
-import ThemedTableV2, { Column } from "../../ThemedTableV2";
+import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
 import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
@@ -234,8 +234,8 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
     created_at: "desc",
   });
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
-    parseKey(sessionStorageKey)
+  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
+    sessionStorageKey
   );
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
@@ -254,7 +254,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         left: timeFilter,
         operator: "and",
         right: {
-          left: apiKeyFilter,
+          left: parseKey(apiKeyFilter),
           operator: "and",
           right: advancedFilter,
         },
@@ -379,20 +379,12 @@ const RequestsPage = (props: RequestsPageProps) => {
   const router = useRouter();
   const { propertyParams } = useGetPropertyParams();
 
-  const propertyFilterMap = {
-    properties: {
-      label: "Properties",
-      columns: getPropertyFilters(
-        properties,
-        propertyParams.map((p) => p.property_param)
-      ),
-    },
-  };
-
-  const filterMap =
-    properties.length > 0
-      ? { ...propertyFilterMap, ...RequestsTableFilter }
-      : RequestsTableFilter;
+  const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
+    getPropertyFilters(
+      properties,
+      propertyParams.map((p) => p.property_param)
+    )
+  );
 
   const columnHelper = createColumnHelper<RequestWrapper>();
 
