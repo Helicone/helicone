@@ -425,7 +425,7 @@ function AdvancedFilterInput({
 }: {
   type: ColumnType;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string | null) => void;
   inputParams?: string[];
 }) {
   switch (type) {
@@ -542,7 +542,7 @@ function AdvancedFilterRow({
           onChange={(value) => {
             setFilter((f) => ({
               ...f,
-              value,
+              value: value ?? "",
             }));
           }}
         />
