@@ -37,11 +37,12 @@ import {
   requestTableFilters,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import ThemedTextDropDown from "./themedTextDropDown";
+
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { Column } from "../../ThemedTableV2";
 import ThemedToggle from "./themedTabs";
 import ThemedDropdown from "./themedDropdown";
+import { ThemedTextDropDown } from "./themedTextDropDown";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
