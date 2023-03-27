@@ -34,11 +34,7 @@ export async function getTotalRequestsOverTime({
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<DateCountDBModel[], string>> {
-  const filter: FilterNode = {
-    left: timeFilter,
-    operator: "and",
-    right: userFilter,
-  };
+  const filter: FilterNode = userFilter;
   if (!isValidTimeIncrement(dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }
