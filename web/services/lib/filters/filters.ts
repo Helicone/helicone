@@ -91,11 +91,17 @@ export function buildFilterLeaf(
               ? "<="
               : operatorKey === "not-equals"
               ? "!="
+              : operatorKey === "contains"
+              ? "LIKE"
               : undefined;
 
           if (sqlOperator && columnName) {
             filters.push(`${columnName} ${sqlOperator} $${argsAcc.length + 1}`);
-            argsAcc.push(value);
+            if (operatorKey === "contains") {
+              argsAcc.push(`%${value}%`);
+            } else {
+              argsAcc.push(value);
+            }
           }
         }
       }
