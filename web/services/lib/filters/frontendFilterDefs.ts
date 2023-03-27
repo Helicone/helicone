@@ -16,11 +16,15 @@ export type ColumnType =
   | "number"
   | "text-with-suggestions";
 
+export type InputParam = {
+  key: string;
+  param: string;
+};
 interface Operator<T> {
   value: T;
   label: string;
   type: ColumnType;
-  inputParams?: string[];
+  inputParams?: InputParam[];
 }
 const textOperators: Operator<keyof TextOperators>[] = [
   {
@@ -29,13 +33,18 @@ const textOperators: Operator<keyof TextOperators>[] = [
     type: "text",
   },
   {
+    value: "not-equals",
+    label: "!=",
+    type: "text",
+  },
+  {
     value: "ilike",
-    label: "~~",
+    label: "ILIKE",
     type: "text",
   },
   {
     value: "like",
-    label: "~",
+    label: "LIKE",
     type: "text",
   },
 ];
@@ -45,6 +54,11 @@ const numberOperators: Operator<keyof NumberOperators>[] = [
     value: "equals",
     label: "=",
     type: "number",
+  },
+  {
+    value: "not-equals",
+    label: "!=",
+    type: "text",
   },
   {
     value: "gte",
@@ -82,28 +96,21 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
 
 export const requestTableFilters: [
   SingleFilterDef<"request">,
-  SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
-  SingleFilterDef<"response">
+  SingleFilterDef<"response">,
+  SingleFilterDef<"user_api_keys">
 ] = [
   {
-    label: "Created At",
-    operators: timestampOperators,
-    table: "request",
-    column: "created_at",
-    category: "request",
-  },
-  {
-    label: "Prompt",
+    label: "Request",
     operators: textOperators,
     table: "request",
     column: "prompt",
     category: "request",
   },
   {
-    label: "Completion",
+    label: "Response",
     operators: textOperators,
     table: "response",
     column: "body_completion",
@@ -117,7 +124,7 @@ export const requestTableFilters: [
     category: "request",
   },
   {
-    label: "User ID",
+    label: "User",
     operators: textOperators,
     table: "request",
     column: "user_id",
@@ -128,6 +135,13 @@ export const requestTableFilters: [
     operators: textOperators,
     table: "response",
     column: "body_model",
+    category: "request",
+  },
+  {
+    label: "Key Name",
+    operators: textOperators,
+    table: "user_api_keys",
+    column: "api_key_name",
     category: "request",
   },
 ];
@@ -184,7 +198,7 @@ export const userTableFilters: [
   },
 ];
 
-function textWithSuggestions(inputParams: string[]): Operator<string>[] {
+function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
   return textOperators.map((o) => ({
     ...o,
     type: "text-with-suggestions",
@@ -194,7 +208,7 @@ function textWithSuggestions(inputParams: string[]): Operator<string>[] {
 
 export function getPropertyFilters(
   properties: string[],
-  inputParams: string[]
+  inputParams: InputParam[]
 ): SingleFilterDef<"properties">[] {
   return properties.map((p) => ({
     label: p,
@@ -207,7 +221,7 @@ export function getPropertyFilters(
 
 export function getValueFilters(
   properties: string[],
-  inputParams: string[]
+  inputParams: InputParam[]
 ): SingleFilterDef<"values">[] {
   return properties.map((p) => ({
     label: p,

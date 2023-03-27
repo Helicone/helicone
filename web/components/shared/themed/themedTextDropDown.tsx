@@ -15,7 +15,7 @@ interface ThemedTextDropDownProps {
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
   const { options, onChange, value } = props;
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(value);
   const [query, setQuery] = useState("");
 
   const filteredPeople =

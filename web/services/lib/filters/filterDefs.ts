@@ -1,6 +1,21 @@
-export type TextOperators = Record<"equals" | "like" | "ilike", string>;
+import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
+import { SingleFilterDef } from "./frontendFilterDefs";
+export type AllOperators =
+  | "equals"
+  | "like"
+  | "ilike"
+  | "gte"
+  | "lte"
+  | "not-equals";
+export type TextOperators = Record<
+  "not-equals" | "equals" | "like" | "ilike",
+  string
+>;
 
-export type NumberOperators = Record<"equals" | "gte" | "lte", number>;
+export type NumberOperators = Record<
+  "not-equals" | "equals" | "gte" | "lte",
+  number
+>;
 
 export type TimestampOperators = Record<"gte" | "lte", string>;
 
@@ -20,6 +35,7 @@ export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
 
 type UserApiKeysTableToOperators = {
   api_key_hash: SingleKey<TextOperators>;
+  api_key_name: SingleKey<TextOperators>;
 };
 
 export type FilterLeafUserApiKeys = SingleKey<UserApiKeysTableToOperators>;
@@ -78,3 +94,32 @@ export function filterListToTree(
     };
   }
 }
+
+export function filterUIToFilterLeafs(
+  filterMap: SingleFilterDef<any>[],
+  filters: UIFilterRow[]
+): FilterLeaf[] {
+  return filters
+    .filter((filter) => filter.value !== "")
+    .map((filter) => {
+      const leaf: FilterLeaf = {
+        [filterMap[filter.filterMapIdx].table]: {
+          [filterMap[filter.filterMapIdx].column]: {
+            [filterMap[filter.filterMapIdx].operators[filter.operatorIdx]
+              .value]: filter.value,
+          },
+        },
+      };
+      return leaf;
+    });
+}
+
+export const parseKey = (keyString: string): FilterLeaf => {
+  return {
+    user_api_keys: {
+      api_key_hash: {
+        equals: keyString,
+      },
+    },
+  };
+};

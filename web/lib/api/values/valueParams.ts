@@ -6,13 +6,15 @@ import { Database } from "../../../supabase/database.types";
 
 export interface ValueParam {
   value_param: string;
+  value_key: string;
 }
 
 export async function getValueParams(
   user_id: string
 ): Promise<Result<ValueParam[], string>> {
   const query = `
-SELECT DISTINCT prompt_values->>keys AS value_param
+SELECT DISTINCT prompt_values->>keys AS value_param,
+keys AS value_key
 FROM request r
 JOIN user_api_keys u ON r.auth_hash = u.api_key_hash
 CROSS JOIN LATERAL jsonb_object_keys(prompt_values) keys

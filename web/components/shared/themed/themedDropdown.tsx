@@ -74,6 +74,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
     };
   }, []);
 
+  console.log("selected value", selectedValue);
   return (
     <div className={className}>
       <Listbox value={selected?.value} onChange={onSelect}>

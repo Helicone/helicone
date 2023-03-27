@@ -56,7 +56,7 @@ export function Filters({
           }
 
           setCurrentKey(option);
-          setFilter(option);
+          setFilter(option !== "all" ? option : null);
         }}
       />
       {/* <select

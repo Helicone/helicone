@@ -4,46 +4,28 @@ import {
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { Metrics } from "../../../lib/api/metrics/metrics";
-import {
-  getDashboardData,
-  GraphDataState,
-  initialGraphDataState,
-} from "../../../lib/dashboardGraphs";
-import { Result } from "../../../lib/result";
-import {
-  getTimeMap,
-  timeGraphConfig,
-} from "../../../lib/timeCalculations/constants";
+import { GraphDataState } from "../../../lib/dashboardGraphs";
+import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
-import {
-  FilterLeaf,
-  FilterNode,
-} from "../../../services/lib/filters/filterDefs";
-import {
-  getPropertyFilters,
-  getValueFilters,
-  requestTableFilters,
-  SingleFilterDef,
-} from "../../../services/lib/filters/frontendFilterDefs";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { useLocalStorageState } from "../../../services/hooks/localStorage";
 
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import AuthLayout from "../../shared/layout/authLayout";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import { Filter } from "../../shared/themed/themedTableHeader";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
 import TimeGraphWHeader from "./timeGraphWHeader";
+import { useDashboardPage } from "./useDashboardPage";
 
 interface DashboardPageProps {
   user: User;
@@ -54,20 +36,7 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const sessionStorageKey =
-    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
-
-  const [timeData, setTimeData] = useState<GraphDataState>(
-    initialGraphDataState
-  );
-
-  const [metrics, setMetrics] =
-    useState<Loading<Result<Metrics, string>>>("loading");
   const [interval, setInterval] = useState<TimeInterval>("1m");
-  const [filters, setFilters] = useState<FilterLeaf[]>([]);
-  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
-    sessionStorageKey
-  );
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
@@ -76,39 +45,28 @@ const DashboardPage = (props: DashboardPageProps) => {
     end: new Date(),
   });
 
-  const { properties } = useGetProperties();
-  const { propertyParams } = useGetPropertyParams();
-
-  const getData = (timeFilter: { start: Date; end: Date }) => {
-    getDashboardData(
-      timeFilter,
-      apiKeyFilter !== null
-        ? filters.concat([
-            {
-              user_api_keys: {
-                api_key_hash: {
-                  equals: apiKeyFilter,
-                },
-              },
-            },
-          ])
-        : filters,
-      setMetrics,
-      setTimeData
-    );
-  };
-
-  useEffect(() => {
-    getData(timeFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeFilter, filters, apiKeyFilter]);
-
-  const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
-    getPropertyFilters(
-      properties,
-      propertyParams.map((p) => p.property_param)
-    )
+  const sessionStorageKey =
+    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
+  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
+    sessionStorageKey
   );
+  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
+    UIFilterRow[]
+  >("advancedFilters", []);
+  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
+
+  const { metrics, filterMap, errorsOverTime, requestsOverTime, costOverTime } =
+    useDashboardPage({
+      timeFilter,
+      uiFilters: debouncedAdvancedFilters,
+      apiKeyFilter,
+    });
+  const timeData: GraphDataState = {
+    costOverTime: costOverTime.data ?? "loading",
+    errorOverTime: errorsOverTime.data ?? "loading",
+    requestsOverTime: requestsOverTime.data ?? "loading",
+  };
+  console.log("timeData", timeData);
 
   return (
     <AuthLayout user={user}>
@@ -117,7 +75,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
-              getData({
+              setTimeFilter({
                 start: getTimeIntervalAgo(interval),
                 end: new Date(),
               });
@@ -126,7 +84,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           >
             <ArrowPathIcon
               className={clsx(
-                metrics === "loading" ? "animate-spin" : "",
+                metrics.isLoading ? "animate-spin" : "",
                 "h-5 w-5 inline"
               )}
             />
@@ -175,7 +133,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-8">
           <ThemedTableHeader
-            isFetching={metrics === "loading"}
+            isFetching={metrics.isLoading}
             timeFilter={{
               customTimeFilter: true,
               timeFilterOptions: [
@@ -207,17 +165,11 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: (_filters: Filter[]) => {
-                const thisFilters = _filters.filter((f) => f) as FilterLeaf[];
-                if (thisFilters.length === 0) {
-                  setFilters([]);
-                } else {
-                  setFilters(thisFilters);
-                }
-              },
+              onAdvancedFilter: setAdvancedFilters,
+              filters: advancedFilters,
             }}
           />
-          <MetricsPanel metrics={metrics} />
+          <MetricsPanel metrics={metrics.data ?? "loading"} />
           <TimeGraphWHeader
             data={timeData}
             timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
