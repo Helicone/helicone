@@ -6,9 +6,10 @@ export type AllOperators =
   | "ilike"
   | "gte"
   | "lte"
-  | "not-equals";
+  | "not-equals"
+  | "contains";
 export type TextOperators = Record<
-  "not-equals" | "equals" | "like" | "ilike",
+  "not-equals" | "equals" | "like" | "ilike" | "contains",
   string
 >;
 
