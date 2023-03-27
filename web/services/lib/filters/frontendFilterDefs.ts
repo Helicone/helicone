@@ -38,6 +38,11 @@ const textOperators: Operator<keyof TextOperators>[] = [
     type: "text",
   },
   {
+    value: "contains",
+    label: "CONTAINS",
+    type: "text",
+  },
+  {
     value: "ilike",
     label: "ILIKE",
     type: "text",
