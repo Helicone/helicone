@@ -28,7 +28,6 @@ export function AdvancedFilters({
     <div className="flex flex-col gap-3 bg-white p-3">
       <div className="flex flex-wrap gap-3 bg-white">
         {filters.map((_filter, index) => {
-          console.log("filter34", _filter);
           return (
             <div key={index} className="rounded-md text-xs bg-white">
               <AdvancedFilterRow
@@ -36,7 +35,6 @@ export function AdvancedFilters({
                 filter={_filter}
                 setFilter={(filter) => {
                   setAdvancedFilters((prev) => {
-                    console.log("setting filterz", filter, "to index", index);
                     if (typeof filter === "function") {
                       filter = filter(prev[index]);
                     }
@@ -50,7 +48,7 @@ export function AdvancedFilters({
                   setAdvancedFilters((prev) => {
                     const newFilters = [...prev];
                     newFilters.splice(index, 1);
-                    console.log("newFilters", newFilters);
+
                     return newFilters;
                   });
                 }}
@@ -193,7 +191,6 @@ function AdvancedFilterRow({
                     })}
                     selectedValue={filter.filterMapIdx}
                     onSelect={(selected) => {
-                      console.log("selectedzzz", selected);
                       setFilter({
                         filterMapIdx: selected,
                         operatorIdx: 0,
