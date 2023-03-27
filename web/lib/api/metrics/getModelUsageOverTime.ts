@@ -30,12 +30,7 @@ export async function getModelUsageOverTime({
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<ModelUsageOverTime[], string>> {
-  const filter: FilterNode = {
-    left: timeFilter,
-    operator: "and",
-    right: userFilter,
-  };
-
+  const filter: FilterNode = userFilter;
   if (!isValidTimeIncrement(dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }

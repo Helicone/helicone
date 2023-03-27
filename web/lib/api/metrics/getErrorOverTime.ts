@@ -21,17 +21,12 @@ export interface ErrorCountOverTime {
 }
 
 export async function getErrorOverTime({
-  timeFilter,
   userFilter,
   userId,
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<ErrorCountOverTime[], string>> {
-  const filter: FilterNode = {
-    left: timeFilter,
-    operator: "and",
-    right: userFilter,
-  };
+  const filter: FilterNode = userFilter;
   if (!isValidTimeIncrement(dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }

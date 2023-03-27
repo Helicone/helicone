@@ -5,19 +5,21 @@ import React, { useEffect, useState } from "react";
 import { Metrics } from "../../../lib/api/metrics/metrics";
 import { Result } from "../../../lib/result";
 import { MetricsDB } from "../../../schema/metrics";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  FilterLeaf,
+  FilterNode,
+} from "../../../services/lib/filters/filterDefs";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import { Loading } from "./dashboardPage";
 
 interface MetricsPanelProps {
-  filters: FilterNode;
   metrics: Loading<Result<Metrics, string>>;
 }
 
 export function MetricsPanel(props: MetricsPanelProps) {
-  const { filters, metrics: metricsData } = props;
+  const { metrics: metricsData } = props;
 
   const loading = metricsData === "loading";
   const data =

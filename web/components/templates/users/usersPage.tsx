@@ -9,8 +9,11 @@ import { useEffect, useState } from "react";
 
 import { truncString } from "../../../lib/stringHelpers";
 import { useUsers } from "../../../services/hooks/users";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { UserMetricsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  filterListToTree,
+  FilterNode,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
 import { UserRow } from "../../../services/lib/users";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -18,6 +21,8 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 const monthNames = [
   "Jan",
@@ -42,12 +47,15 @@ interface UsersPageProps {
 const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<FilterNode>("all");
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const { users, count, from, isLoading, to } = useUsers(
     page,
     pageSize,
-    advancedFilters
+    filterListToTree(
+      filterUIToFilterLeafs(userTableFilters, advancedFilters),
+      "and"
+    )
   );
   const router = useRouter();
 
@@ -176,26 +184,9 @@ const UsersPage = (props: UsersPageProps) => {
           }}
           isFetching={isLoading}
           advancedFilter={{
-            filterMap: UserMetricsTableFilter,
-            onAdvancedFilter: (_filters) => {
-              router.query.page = "1";
-              router.push(router);
-              const filters = _filters.filter((f) => f) as FilterNode[];
-              if (filters.length === 0) {
-                setAdvancedFilters("all");
-              } else {
-                const firstFilter = filters[0];
-                setAdvancedFilters(
-                  filters.slice(1).reduce((acc, curr) => {
-                    return {
-                      left: acc,
-                      operator: "and",
-                      right: curr,
-                    };
-                  }, firstFilter)
-                );
-              }
-            },
+            filterMap: userTableFilters,
+            onAdvancedFilter: setAdvancedFilters,
+            filters: advancedFilters,
           }}
         />
         {isLoading || from === undefined || to === undefined ? (

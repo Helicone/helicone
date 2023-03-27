@@ -3,6 +3,11 @@ import {
   FilterLeafRequest,
   FilterLeafResponse,
   FilterLeafUserMetrics,
+  NumberOperators,
+  RequestTableToOperators,
+  TablesAndViews,
+  TextOperators,
+  TimestampOperators,
 } from "./filterDefs";
 
 export type ColumnType =
@@ -11,199 +16,243 @@ export type ColumnType =
   | "number"
   | "text-with-suggestions";
 
-interface Operator {
+export type InputParam = {
+  key: string;
+  param: string;
+};
+interface Operator<T> {
+  value: T;
+  label: string;
   type: ColumnType;
-  inputParams?: string[];
+  inputParams?: InputParam[];
+}
+const textOperators: Operator<keyof TextOperators>[] = [
+  {
+    value: "equals",
+    label: "=",
+    type: "text",
+  },
+  {
+    value: "not-equals",
+    label: "!=",
+    type: "text",
+  },
+  {
+    value: "ilike",
+    label: "ILIKE",
+    type: "text",
+  },
+  {
+    value: "like",
+    label: "LIKE",
+    type: "text",
+  },
+];
+
+const numberOperators: Operator<keyof NumberOperators>[] = [
+  {
+    value: "equals",
+    label: "=",
+    type: "number",
+  },
+  {
+    value: "not-equals",
+    label: "!=",
+    type: "text",
+  },
+  {
+    value: "gte",
+    label: ">=",
+    type: "number",
+  },
+  {
+    value: "lte",
+    label: "<=",
+    type: "number",
+  },
+];
+
+const timestampOperators: Operator<keyof TimestampOperators>[] = [
+  {
+    value: "gte",
+    label: ">=",
+    type: "timestamp",
+  },
+  {
+    value: "lte",
+    label: "<=",
+    type: "timestamp",
+  },
+];
+
+type KeyOfUnion<T> = T extends T ? keyof T : never;
+export type SingleFilterDef<T extends keyof TablesAndViews> = {
+  label: string;
+  operators: Operator<string>[];
+  table: T;
+  column: KeyOfUnion<TablesAndViews[T]>;
+  category: string;
+};
+
+export const requestTableFilters: [
+  SingleFilterDef<"request">,
+  SingleFilterDef<"response">,
+  SingleFilterDef<"response">,
+  SingleFilterDef<"request">,
+  SingleFilterDef<"response">,
+  SingleFilterDef<"user_api_keys">
+] = [
+  {
+    label: "Request",
+    operators: textOperators,
+    table: "request",
+    column: "prompt",
+    category: "request",
+  },
+  {
+    label: "Response",
+    operators: textOperators,
+    table: "response",
+    column: "body_completion",
+    category: "request",
+  },
+  {
+    label: "Total Tokens",
+    operators: numberOperators,
+    table: "response",
+    column: "body_tokens",
+    category: "request",
+  },
+  {
+    label: "User",
+    operators: textOperators,
+    table: "request",
+    column: "user_id",
+    category: "request",
+  },
+  {
+    label: "Model",
+    operators: textOperators,
+    table: "response",
+    column: "body_model",
+    category: "request",
+  },
+  {
+    label: "Key Name",
+    operators: textOperators,
+    table: "user_api_keys",
+    column: "api_key_name",
+    category: "request",
+  },
+];
+
+export const userTableFilters: [
+  SingleFilterDef<"user_metrics">,
+  SingleFilterDef<"user_metrics">,
+  SingleFilterDef<"user_metrics">,
+  SingleFilterDef<"request">,
+  SingleFilterDef<"request">,
+  SingleFilterDef<"response">,
+  SingleFilterDef<"response">,
+  SingleFilterDef<"request">,
+  SingleFilterDef<"response">
+] = [
+  {
+    label: "ID",
+    operators: textOperators,
+    table: "user_metrics",
+    column: "user_id",
+    category: "user",
+  },
+  {
+    label: "Last Active",
+    operators: textOperators,
+    table: "user_metrics",
+    column: "last_active",
+    category: "user",
+  },
+  {
+    label: "Requests",
+    operators: numberOperators,
+    table: "user_metrics",
+    column: "total_requests",
+    category: "user",
+  },
+
+  {
+    label: "Created At",
+    operators: timestampOperators,
+    table: "request",
+    column: "created_at",
+    category: "request",
+  },
+  {
+    label: "Prompt",
+    operators: textOperators,
+    table: "request",
+    column: "prompt",
+    category: "request",
+  },
+  {
+    label: "Completion",
+    operators: textOperators,
+    table: "response",
+    column: "body_completion",
+    category: "request",
+  },
+  {
+    label: "Total Tokens",
+    operators: numberOperators,
+    table: "response",
+    column: "body_tokens",
+    category: "request",
+  },
+  {
+    label: "User ID",
+    operators: textOperators,
+    table: "request",
+    column: "user_id",
+    category: "request",
+  },
+  {
+    label: "Model",
+    operators: textOperators,
+    table: "response",
+    column: "body_model",
+    category: "request",
+  },
+];
+
+function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
+  return textOperators.map((o) => ({
+    ...o,
+    type: "text-with-suggestions",
+    inputParams,
+  }));
 }
 
-export interface Comparator {
-  type: ColumnType;
-  label: string;
-  operations: {
-    equals?: Operator;
-    gte?: Operator;
-    lte?: Operator;
-    like?: Operator;
-    ilike?: Operator;
-  };
-  table: keyof FilterLeaf;
+export function getPropertyFilters(
+  properties: string[],
+  inputParams: InputParam[]
+): SingleFilterDef<"properties">[] {
+  return properties.map((p) => ({
+    label: p,
+    operators: textWithSuggestions(inputParams),
+    table: "properties",
+    column: p,
+    category: "properties",
+  }));
 }
 
-export type ColumnComparators<T> = {
-  [key in keyof T]: Comparator;
-};
-
-export type TableFilter<T> = {
-  label: string;
-  columns: ColumnComparators<T>;
-};
-export const filterUserMetric: TableFilter<FilterLeafUserMetrics> = {
-  label: "User Metrics",
-  columns: {
-    user_id: {
-      table: "user_metrics",
-      label: "User ID",
-      type: "text",
-      operations: {
-        equals: {
-          type: "text",
-        },
-      },
-    },
-    last_active: {
-      label: "Last Active",
-      table: "user_metrics",
-      type: "timestamp",
-      operations: {
-        gte: {
-          type: "timestamp",
-        },
-        lte: {
-          type: "timestamp",
-        },
-      },
-    },
-    total_requests: {
-      label: "Total Requests",
-      table: "user_metrics",
-      type: "number",
-      operations: {
-        gte: {
-          type: "number",
-        },
-        lte: {
-          type: "number",
-        },
-      },
-    },
-  },
-};
-
-export const filterRequestFilter: TableFilter<FilterLeafRequest> = {
-  label: "Request",
-  columns: {
-    prompt: {
-      label: "Prompt",
-      table: "request",
-      type: "text",
-      operations: {
-        equals: {
-          type: "text",
-        },
-        like: {
-          type: "text",
-        },
-        ilike: {
-          type: "text",
-        },
-      },
-    },
-    created_at: {
-      label: "Created At",
-      type: "timestamp",
-      table: "request",
-      operations: {
-        gte: {
-          type: "timestamp",
-        },
-        lte: {
-          type: "timestamp",
-        },
-      },
-    },
-    user_id: {
-      label: "User ID",
-      table: "request",
-      type: "text",
-      operations: {
-        equals: {
-          type: "text",
-        },
-      },
-    },
-  },
-};
-
-export const filterResponseFilter: TableFilter<FilterLeafResponse> = {
-  label: "Response",
-  columns: {
-    body_tokens: {
-      label: "Tokens",
-      table: "response",
-      type: "number",
-      operations: {
-        gte: {
-          type: "number",
-        },
-        lte: {
-          type: "number",
-        },
-      },
-    },
-    body_completion: {
-      label: "Completion",
-      table: "response",
-      type: "text",
-      operations: {
-        equals: {
-          type: "text",
-        },
-        ilike: {
-          type: "text",
-        },
-        like: {
-          type: "text",
-        },
-      },
-    },
-    body_model: {
-      label: "Model",
-      table: "response",
-      type: "text",
-      operations: {
-        equals: {
-          type: "text",
-        },
-      },
-    },
-  },
-};
-
-export type TableFilterMap = {
-  [key: string]: TableFilter<any>;
-};
-
-export const UserMetricsTableFilter: TableFilterMap = {
-  user_metrics: filterUserMetric,
-  request: filterRequestFilter,
-  response: filterResponseFilter,
-};
-
-export const RequestsTableFilter: TableFilterMap = {
-  request: filterRequestFilter,
-  response: filterResponseFilter,
-};
-
-export function getValueFilters(properties: string[], inputParams: string[]) {
-  const filters: ColumnComparators<any> = {};
-  properties.forEach((p) => {
-    filters[p] = {
-      table: "values",
-      label: p,
-      type: "text-with-suggestions",
-      operations: {
-        equals: {
-          inputParams,
-          type: "text-with-suggestions",
-        },
-        ilike: {
-          type: "text",
-        },
-        like: {
-          type: "text",
-        },
-      },
-    };
-  });
-  return filters;
+export function getValueFilters(
+  properties: string[],
+  inputParams: InputParam[]
+): SingleFilterDef<"values">[] {
+  return properties.map((p) => ({
+    label: p,
+    operators: textWithSuggestions(inputParams),
+    table: "values",
+    column: p,
+    category: "values",
+  }));
 }

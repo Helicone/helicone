@@ -221,7 +221,6 @@ const Login = (props: LoginProps) => {
                               password,
                             })
                             .then((res) => {
-                              console.log(res);
                               if (res.error) {
                                 setAuthError(res.error.message);
                               } else {
