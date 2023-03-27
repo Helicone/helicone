@@ -253,6 +253,6 @@ export function getValueFilters(
     operators: textWithSuggestions(inputParams),
     table: "values",
     column: p,
-    category: "values",
+    category: "prompt variables",
   }));
 }
