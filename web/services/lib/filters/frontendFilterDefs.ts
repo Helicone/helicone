@@ -38,6 +38,11 @@ const textOperators: Operator<keyof TextOperators>[] = [
     type: "text",
   },
   {
+    value: "contains",
+    label: "CONTAINS",
+    type: "text",
+  },
+  {
     value: "ilike",
     label: "ILIKE",
     type: "text",
@@ -253,6 +258,6 @@ export function getValueFilters(
     operators: textWithSuggestions(inputParams),
     table: "values",
     column: p,
-    category: "values",
+    category: "prompt variables",
   }));
 }
