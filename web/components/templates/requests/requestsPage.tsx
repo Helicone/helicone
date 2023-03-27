@@ -1,7 +1,11 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { createColumnHelper } from "@tanstack/react-table";
+import { useRouter } from "next/router";
+import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import { Result } from "../../../lib/result";
 import { truncString } from "../../../lib/stringHelpers";
 import {
   getTimeIntervalAgo,
@@ -390,7 +394,43 @@ const RequestsPage = (props: RequestsPageProps) => {
     }
     return copyRequest;
   });
-  console.log("ADVANCED FILTERS", advancedFilters);
+
+  async function downloadCSV() {
+    try {
+      const response = await fetch("/api/export/requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: advancedFilters,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: 100000,
+          sort: sortLeaf,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("An error occurred while downloading the CSV file");
+      }
+
+      const csvData = await response.text();
+      const blob = new Blob([csvData], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "requests.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Release the Blob URL
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <>
       <AuthHeader
@@ -418,7 +458,6 @@ const RequestsPage = (props: RequestsPageProps) => {
           </div>
         }
       />
-
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-2">
@@ -456,8 +495,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 ],
               }}
               csvExport={{
-                data: csv,
-                fileName: "requests.csv",
+                onClick: downloadCSV,
               }}
               isFetching={isLoading}
               advancedFilter={{

@@ -2,7 +2,6 @@ import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
-import { UsersCSVDownloadButton } from "./usersCsvDownload";
 
 interface UserMetricsDB {
   user_id: string;
