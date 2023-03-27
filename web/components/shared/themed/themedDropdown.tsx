@@ -33,11 +33,6 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
           acc[option.category] = [];
         }
         acc[option.category].push(option);
-      } else {
-        if (!acc[""]) {
-          acc[""] = [];
-        }
-        acc[""].push(option);
       }
       return acc;
     },
