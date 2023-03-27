@@ -35,10 +35,9 @@ export default async function handler(
   }
 
   const userIds = metrics?.map((metric) => metric.user_id) ?? [];
-  console.log("userIds", userIds);
+
   const { error: userCostError, data: userCosts } =
     await getModelMetricsForUsers(filter, user.data.user.id, false, userIds);
-  console.log("userCosts", userCosts);
 
   const costByUser =
     userCosts?.reduce(

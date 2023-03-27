@@ -147,6 +147,9 @@ export const requestTableFilters: [
 ];
 
 export const userTableFilters: [
+  SingleFilterDef<"user_metrics">,
+  SingleFilterDef<"user_metrics">,
+  SingleFilterDef<"user_metrics">,
   SingleFilterDef<"request">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
@@ -154,6 +157,28 @@ export const userTableFilters: [
   SingleFilterDef<"request">,
   SingleFilterDef<"response">
 ] = [
+  {
+    label: "ID",
+    operators: textOperators,
+    table: "user_metrics",
+    column: "user_id",
+    category: "user",
+  },
+  {
+    label: "Last Active",
+    operators: textOperators,
+    table: "user_metrics",
+    column: "last_active",
+    category: "user",
+  },
+  {
+    label: "Requests",
+    operators: numberOperators,
+    table: "user_metrics",
+    column: "total_requests",
+    category: "user",
+  },
+
   {
     label: "Created At",
     operators: timestampOperators,

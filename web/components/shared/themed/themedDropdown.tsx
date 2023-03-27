@@ -45,7 +45,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
       all: options,
     } as { [key: string]: DropdownOption<T>[] }
   );
-
+  console.log("categories", categories);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   options = options.filter((option) => {
@@ -115,7 +115,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                     "overflow-hidden absolute z-30 mt-1.5 max-h-80 w-full min-w-[300px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
-                  {Object.keys(categories).length > 2 && (
+                  {Object.keys(categories).length >= 2 && (
                     <div className="text-gray-500 px-3 py-2 text-xs border-b-2">
                       Categories
                       <div className="flex flex-wrap">

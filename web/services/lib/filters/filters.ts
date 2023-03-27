@@ -17,8 +17,6 @@ type KeyMappings = {
 const whereKeyMappings: KeyMappings = {
   user_metrics: {
     user_id: "request.user_id",
-    last_active: "max(request.created_at)",
-    total_requests: "count(request.id)",
   },
   user_api_keys: {
     api_key_hash: "user_api_keys.api_key_hash",
@@ -95,7 +93,7 @@ export function buildFilterLeaf(
               ? "!="
               : undefined;
 
-          if (sqlOperator) {
+          if (sqlOperator && columnName) {
             filters.push(`${columnName} ${sqlOperator} $${argsAcc.length + 1}`);
             argsAcc.push(value);
           }
@@ -154,6 +152,7 @@ export function buildFilter(
     argsAcc,
     having ? havingKeyMappings : whereKeyMappings
   );
+
   if (res.filters.length === 0) {
     return {
       filter: "true",
