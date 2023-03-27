@@ -5,6 +5,7 @@ export async function dbExecute<T>(
   query: string,
   parameters: any[]
 ): Promise<Result<T[], string>> {
+  // console.log("Executing query: ", query, parameters);
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
     // Need to add ssl
