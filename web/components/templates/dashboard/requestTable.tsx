@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { truncString } from "../../../lib/stringHelpers";
 import { ResponseAndRequest } from "../../../services/lib/requests";
 import { Database } from "../../../supabase/database.types";
-import { RequestsCSVDownloadButton } from "./requestsCsvDownload";
 
 export interface DataTable {
   data: ResponseAndRequest[];
@@ -85,7 +84,7 @@ export function RequestTable({ client }: { client: SupabaseClient<Database> }) {
             className="text-xs items-center text-center px-4 btn btn-primary bg-gray-300 rounded-full py-1 cursor-pointer text-right text-xs"
             style={{ float: "right" }}
           >
-            <RequestsCSVDownloadButton client={client} />
+            {/* <RequestsCSVDownloadButton client={client} /> */}
           </span>
         ) : null}
       </div>

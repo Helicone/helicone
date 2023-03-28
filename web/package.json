@@ -32,10 +32,10 @@
     "eslint-config-next": "13.0.5",
     "mui": "^0.0.1",
     "next": "13.0.5",
+    "papaparse": "^5.4.1",
     "pg": "^8.9.0",
     "posthog-js": "^1.50.0",
     "react": "18.2.0",
-    "react-csv": "2.2.2",
     "react-dom": "18.2.0",
     "react-icons": "^4.7.1",
     "react-json-pretty": "^2.2.0",
@@ -44,8 +44,8 @@
     "typescript": "4.9.3"
   },
   "devDependencies": {
+    "@types/papaparse": "^5.3.7",
     "@types/pg": "^8.6.6",
-    "@types/react-csv": "^1.1.3",
     "@types/react-lottie": "^1.2.6",
     "autoprefixer": "^10.4.13",
     "eslint-config-prettier": "^8.5.0",

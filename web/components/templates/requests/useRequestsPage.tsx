@@ -1,10 +1,24 @@
 import { HeliconeRequest } from "../../../lib/api/request/request";
+import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
+import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import { useGetRequests } from "../../../services/hooks/requests";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { useGetValueParams } from "../../../services/hooks/valueParams";
+import {
+  filterListToTree,
+  FilterNode,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
+import {
+  getPropertyFilters,
+  getValueFilters,
+  requestTableFilters,
+  SingleFilterDef,
+} from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
 import { Json } from "../../../supabase/database.types";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { Message } from "./requestsPage";
 
 export type RequestWrapper = {
@@ -88,9 +102,44 @@ export type RequestWrapper = {
 const useRequestsPage = (
   currentPage: number,
   currentPageSize: number,
+  iuFilterIdxs: UIFilterRow[],
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest
 ) => {
+  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const { values, isLoading: isValuesLoading } = useGetPromptValues();
+  const { propertyParams } = useGetPropertyParams();
+  const { valueParams } = useGetValueParams();
+
+  const filterMap = (requestTableFilters as SingleFilterDef<any>[])
+    .concat(
+      getPropertyFilters(
+        properties,
+        propertyParams.map((p) => ({
+          param: p.property_param,
+          key: p.property_key,
+        }))
+      )
+    )
+    .concat(
+      getValueFilters(
+        values,
+        valueParams.map((v) => ({
+          param: v.value_param,
+          key: v.value_key,
+        }))
+      )
+    );
+  const filter: FilterNode = {
+    left: filterListToTree(
+      filterUIToFilterLeafs(filterMap, iuFilterIdxs),
+      "and"
+    ),
+    right: advancedFilter,
+    operator: "and",
+  };
+  console.log("filter", filter);
+
   const {
     requests,
     count,
@@ -99,11 +148,7 @@ const useRequestsPage = (
     isLoading: isRequestsLoading,
     refetch,
     isRefetching,
-  } = useGetRequests(currentPage, currentPageSize, advancedFilter, sortLeaf);
-
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
-
-  const { values, isLoading: isValuesLoading } = useGetPromptValues();
+  } = useGetRequests(currentPage, currentPageSize, filter, sortLeaf);
 
   const isLoading =
     isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
@@ -227,6 +272,7 @@ const useRequestsPage = (
     from,
     to,
     isLoading,
+    filterMap,
     refetch,
     properties,
     values,

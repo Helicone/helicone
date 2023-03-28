@@ -1,16 +1,21 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { Pool } from "pg";
+import Papa, { unparse } from "papaparse";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getRequests } from "../../../../lib/api/request/request";
+import { FilterNode } from "../../../../services/lib/filters/filterDefs";
+import { SortLeafRequest } from "../../../../services/lib/sorts/sorts";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { modelCost } from "../../../lib/api/metrics/costCalc";
-import { getModelMetricsForUsers } from "../../../lib/api/metrics/modelMetrics";
+import { userMetrics } from "../../../../lib/api/users/users";
+import { getModelMetricsForUsers } from "../../../../lib/api/metrics/modelMetrics";
+import { modelCost } from "../../../../lib/api/metrics/costCalc";
 
-import { UserMetric, userMetrics } from "../../../lib/api/users/users";
-import { Result } from "../../../lib/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+interface FlatObject {
+  [key: string]: string | number | boolean | null;
+}
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Result<UserMetric[], string>>
+  res: NextApiResponse
 ) {
   const client = createServerSupabaseClient({ req, res });
   const user = await client.auth.getUser();
@@ -18,17 +23,20 @@ export default async function handler(
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const { filter, offset, limit } = req.body as {
+  const { filter, offset, limit, sort } = req.body as {
     filter: FilterNode;
     offset: number;
     limit: number;
+    sort: SortLeafRequest;
   };
+
   const { error: metricsError, data: metrics } = await userMetrics(
     user.data.user.id,
     filter,
     offset,
     limit
   );
+
   if (metricsError !== null) {
     res.status(500).json({ error: metricsError, data: null });
     return;
@@ -71,5 +79,13 @@ export default async function handler(
     metric.cost = costByUser[metric.user_id];
   }
 
-  res.status(200).json({ error: null, data: metrics });
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", "attachment; filename=export.csv");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
+  const csvData = Papa.unparse(metrics || []);
+
+  res.status(metricsError === null ? 200 : 500).send(csvData);
 }
