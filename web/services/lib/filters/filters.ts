@@ -24,13 +24,15 @@ const whereKeyMappings: KeyMappings = {
   },
   properties: (key) => `properties ->> '${key}'`,
   request: {
-    prompt: "request.body ->> 'prompt'",
+    // TODO: We need to be able to handle multiple messages
+    prompt:
+      "(coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text",
     created_at: "request.created_at",
     user_id: "request.user_id",
   },
   response: {
     body_completion:
-      "(coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text",
+      "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model: "request.body ->> 'model'",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
   },
@@ -92,7 +94,7 @@ export function buildFilterLeaf(
               : operatorKey === "not-equals"
               ? "!="
               : operatorKey === "contains"
-              ? "LIKE"
+              ? "ILIKE"
               : undefined;
 
           if (sqlOperator && columnName) {
