@@ -405,7 +405,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         body: JSON.stringify({
           filter: advancedFilters,
           offset: (currentPage - 1) * currentPageSize,
-          limit: 100000,
+          limit: 10000,
           sort: sortLeaf,
         }),
       });
