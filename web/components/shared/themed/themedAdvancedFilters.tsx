@@ -25,11 +25,12 @@ export function AdvancedFilters({
   setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
 }) {
   return (
-    <div className="flex flex-col gap-3 bg-white p-3">
-      <div className="flex flex-wrap gap-3 bg-white">
+    <div className="flex flex-col bg-white p-4 rounded-md border border-gray-300 border-dashed">
+      <p className="text-md text-gray-500">Filters</p>
+      <div className="flex flex-col gap-2 bg-white space-y-2 mt-4">
         {filters.map((_filter, index) => {
           return (
-            <div key={index} className="rounded-md text-xs bg-white">
+            <div key={index}>
               <AdvancedFilterRow
                 filterMap={filterMap}
                 filter={_filter}
@@ -62,7 +63,7 @@ export function AdvancedFilters({
               return [...prev, { filterMapIdx: 0, value: "", operatorIdx: 0 }];
             });
           }}
-          className="bg-white ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-5 py-1.5 rounded-lg"
+          className="bg-white ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
         >
           <PlusIcon
             className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
@@ -86,7 +87,6 @@ function AdvancedFilterInput({
   onChange: (value: string | null) => void;
   inputParams?: string[];
 }) {
-  console.log("value", value, "type", type, "inputParams", inputParams);
   switch (type) {
     case "text":
       return (
@@ -151,104 +151,72 @@ function AdvancedFilterRow({
   onDeleteHandler: () => void;
 }) {
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center">
-      <div className="flex justify-center items-center ">
-        <Popover className="relative">
-          {({ open }) => (
-            <>
-              <Popover.Button className="bg-blue-500 text-white pl-4 pr-1 py-2 rounded-md">
-                <div className="flex flex-row gap-2">
-                  <div>
-                    {filterMap[filter.filterMapIdx].label}{" "}
-                    {
-                      filterMap[filter.filterMapIdx].operators[
-                        filter.operatorIdx
-                      ].label
-                    }{" "}
-                    {filter.value}
-                  </div>
-                  <div>
-                    <XMarkIcon
-                      className="h-4"
-                      onClick={() => onDeleteHandler()}
-                    />
-                  </div>
-                </div>
-              </Popover.Button>
-              <Popover.Panel
-                className={`${
-                  open ? "block" : "hidden"
-                } absolute bg-white text-black p-4  rounded-md shadow-lg z-10 min-w-max`}
-              >
-                <div className="flex flex-row gap-2">
-                  <ThemedDropdown
-                    options={filterMap.map((column, i) => {
-                      return {
-                        value: i,
-                        label: column.label,
-                        category: column.category,
-                      };
-                    })}
-                    selectedValue={filter.filterMapIdx}
-                    onSelect={(selected) => {
-                      setFilter({
-                        filterMapIdx: selected,
-                        operatorIdx: 0,
-                        value: "",
-                      });
-                    }}
-                    className="w-full lg:w-fit"
-                  />
+    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center">
+      <ThemedDropdown
+        options={filterMap.map((column, i) => {
+          return {
+            value: i,
+            label: column.label,
+            category: column.category,
+          };
+        })}
+        selectedValue={filter.filterMapIdx}
+        onSelect={(selected) => {
+          setFilter({
+            filterMapIdx: selected,
+            operatorIdx: 0,
+            value: "",
+          });
+        }}
+        className="w-full lg:w-fit min-w-[150px]"
+      />
 
-                  <ThemedDropdown
-                    options={filterMap[filter.filterMapIdx].operators.map(
-                      (operator, i) => {
-                        return {
-                          value: i,
-                          label: operator.label,
-                        };
-                      }
-                    )}
-                    selectedValue={filter.operatorIdx}
-                    onSelect={(selected) => {
-                      setFilter((f) => ({
-                        ...f,
-                        operatorIdx: selected,
-                        value: "",
-                      }));
-                    }}
-                    className="w-full lg:w-fit"
-                  />
+      <ThemedDropdown
+        options={filterMap[filter.filterMapIdx].operators.map((operator, i) => {
+          return {
+            value: i,
+            label: operator.label,
+          };
+        })}
+        selectedValue={filter.operatorIdx}
+        onSelect={(selected) => {
+          setFilter((f) => ({
+            ...f,
+            operatorIdx: selected,
+            value: "",
+          }));
+        }}
+        className="w-full lg:w-fit min-w-[75px]"
+      />
 
-                  <div className="w-full lg:w-fit">
-                    <AdvancedFilterInput
-                      type={
-                        filterMap[filter.filterMapIdx].operators[
-                          filter.operatorIdx
-                        ].type
-                      }
-                      value={filter.value}
-                      inputParams={filterMap[filter.filterMapIdx].operators[
-                        filter.operatorIdx
-                      ].inputParams
-                        ?.filter(
-                          (param) =>
-                            param.key === filterMap[filter.filterMapIdx].column
-                        )
-                        .map((param) => param.param)}
-                      onChange={(value) => {
-                        setFilter((f) => ({
-                          ...f,
-                          value: value ?? "",
-                        }));
-                      }}
-                    />
-                  </div>
-                </div>
-              </Popover.Panel>
-            </>
-          )}
-        </Popover>
+      <div className="w-full lg:w-fit min-w-[150px]">
+        <AdvancedFilterInput
+          type={
+            filterMap[filter.filterMapIdx].operators[filter.operatorIdx].type
+          }
+          value={filter.value}
+          inputParams={filterMap[filter.filterMapIdx].operators[
+            filter.operatorIdx
+          ].inputParams
+            ?.filter(
+              (param) => param.key === filterMap[filter.filterMapIdx].column
+            )
+            .map((param) => param.param)}
+          onChange={(value) => {
+            setFilter((f) => ({
+              ...f,
+              value: value ?? "",
+            }));
+          }}
+        />
+      </div>
+      <div className="w-full lg:w-fit">
+        <button
+          onClick={onDeleteHandler}
+          className="bg-red-500 text-white rounded-md p-2 hover:bg-red-700"
+        >
+          <TrashIcon className="h-4" />
+        </button>
       </div>
     </div>
   );

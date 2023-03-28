@@ -460,7 +460,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       />
       <div className="">
         <div className="mt-4 space-y-2">
-          <div className="space-y-2">
+          <div className="space-y-4">
             <ThemedTableHeader
               view={{
                 viewMode,
