@@ -221,8 +221,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     aria-hidden="true"
                   />
                   <p>
-                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"} (
-                    {advancedFilter.filters.length})
+                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
+                    {advancedFilter.filters.length > 0 &&
+                      `(${advancedFilter.filters.length})`}
                   </p>
                 </button>
               </div>
