@@ -17,6 +17,7 @@ import { Menu, Popover, Transition } from "@headlessui/react";
 import {
   ArrowDownTrayIcon,
   ArrowsPointingOutIcon,
+  FunnelIcon,
   MinusCircleIcon,
   PlusCircleIcon,
   Square3Stack3DIcon,
@@ -76,6 +77,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     csvExport,
     view,
   } = props;
+
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   return (
     <div className="">
@@ -207,6 +210,23 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 )}
               </Popover>
             )}
+            {advancedFilter && (
+              <div className="mx-auto flex text-sm">
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
+                >
+                  <FunnelIcon
+                    className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                    aria-hidden="true"
+                  />
+                  <p>
+                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"} (
+                    {advancedFilter.filters.length})
+                  </p>
+                </button>
+              </div>
+            )}
 
             {csvExport && (
               <div className="mx-auto flex text-sm">
@@ -247,13 +267,60 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         </div>
 
         {advancedFilter && (
-          <div className="space-y-4 ml-0 sm:ml-4">
+          <div className="">
             {advancedFilter.filterMap && (
-              <AdvancedFilters
-                filterMap={advancedFilter.filterMap}
-                filters={advancedFilter.filters}
-                setAdvancedFilters={advancedFilter.onAdvancedFilter}
-              />
+              <>
+                {showAdvancedFilters && (
+                  <AdvancedFilters
+                    filterMap={advancedFilter.filterMap}
+                    filters={advancedFilter.filters}
+                    setAdvancedFilters={advancedFilter.onAdvancedFilter}
+                  />
+                )}
+
+                <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
+                  {advancedFilter.filters.map((_filter, index) => {
+                    return (
+                      <span
+                        key={index}
+                        className="inline-flex items-center rounded-2xl bg-sky-100 py-1.5 pl-4 pr-2 text-sm font-medium text-sky-700 border border-sky-300"
+                      >
+                        {advancedFilter.filterMap[_filter.filterMapIdx].label}{" "}
+                        {
+                          advancedFilter.filterMap[_filter.filterMapIdx]
+                            .operators[_filter.operatorIdx].label
+                        }{" "}
+                        {_filter.value}
+                        <button
+                          onClick={() => {
+                            advancedFilter.onAdvancedFilter((prev) => {
+                              const newFilters = [...prev];
+                              newFilters.splice(index, 1);
+                              return newFilters;
+                            });
+                          }}
+                          type="button"
+                          className="ml-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-sky-400 hover:bg-indigo-200 hover:text-sky-500 focus:bg-sky-500 focus:text-white focus:outline-none"
+                        >
+                          <span className="sr-only">Remove large option</span>
+                          <svg
+                            className="h-2.5 w-2.5"
+                            stroke="currentColor"
+                            fill="none"
+                            viewBox="0 0 8 8"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeWidth="1.5"
+                              d="M1 1l6 6m0-6L1 7"
+                            />
+                          </svg>
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         )}
