@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import {
+  ColumnOrderState,
   ColumnSizingState,
   createColumnHelper,
   flexRender,
@@ -56,14 +57,26 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
       ? localStorage.getItem("requestsColumnSizing")
       : null;
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const initialColumnOrder =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsColumnOrder")
+      : null;
+
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
     initialColumnSizing ? JSON.parse(initialColumnSizing) : {}
+  );
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
+    initialColumnOrder ? JSON.parse(initialColumnOrder) : []
   );
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
     localStorage.setItem("requestsColumnSizing", JSON.stringify(columnSizing));
+  };
+
+  const orderHandler: OnChangeFn<ColumnOrderState> = (newState) => {
+    setColumnOrder(newState);
+    localStorage.setItem("requestsColumnOrder", JSON.stringify(newState));
   };
 
   const router = useRouter();
@@ -76,12 +89,12 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
     onColumnSizingChange: resizeHandler,
+    onColumnOrderChange: orderHandler,
     columnResizeMode: "onChange",
     state: {
       columnSizing,
-      sorting,
+      columnOrder,
     },
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
   });
 
@@ -155,7 +168,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                           );
 
                           currentCols.splice(newPosition, 0, colToBeMoved[0]);
-                          table.setColumnOrder(currentCols);
+                          orderHandler(currentCols);
+                          // table.setColumnOrder(currentCols);
                         }}
                       >
                         {header.isPlaceholder

@@ -36,7 +36,7 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const [interval, setInterval] = useState<TimeInterval>("1m");
+  const [interval, setInterval] = useState<TimeInterval>("7d");
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
@@ -47,12 +47,15 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
+
   const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
     sessionStorageKey
   );
+
   const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
     UIFilterRow[]
   >("advancedFilters", []);
+
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
   const { metrics, filterMap, errorsOverTime, requestsOverTime, costOverTime } =
@@ -61,12 +64,12 @@ const DashboardPage = (props: DashboardPageProps) => {
       uiFilters: debouncedAdvancedFilters,
       apiKeyFilter,
     });
+
   const timeData: GraphDataState = {
     costOverTime: costOverTime.data ?? "loading",
     errorOverTime: errorsOverTime.data ?? "loading",
     requestsOverTime: requestsOverTime.data ?? "loading",
   };
-  console.log("timeData", timeData);
 
   return (
     <AuthLayout user={user}>
