@@ -1,10 +1,12 @@
 import * as React from "react";
 
 import {
+  ColumnSizingState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  OnChangeFn,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -19,6 +21,7 @@ import {
   Bars3Icon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
@@ -48,7 +51,21 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onSelectHandler,
     onSortHandler,
   } = props;
+  const initialColumnSizing =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsColumnSizing")
+      : null;
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
+    initialColumnSizing ? JSON.parse(initialColumnSizing) : {}
+  );
+
+  const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
+    setColumnSizing(newState);
+    localStorage.setItem("requestsColumnSizing", JSON.stringify(columnSizing));
+  };
+
   const router = useRouter();
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
@@ -58,8 +75,10 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
+    onColumnSizingChange: resizeHandler,
     columnResizeMode: "onChange",
     state: {
+      columnSizing,
       sorting,
     },
     onSortingChange: setSorting,
