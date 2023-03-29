@@ -29,7 +29,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
         );
 
   return (
-    <div className="z-20">
+    <div className="z-30">
       <Combobox
         value={selected}
         onChange={(v) => {

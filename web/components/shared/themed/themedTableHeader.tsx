@@ -307,10 +307,13 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                           key={index}
                           className="inline-flex items-center rounded-2xl bg-sky-100 py-1.5 pl-4 pr-2 text-sm font-medium text-sky-700 border border-sky-300"
                         >
-                          {advancedFilter.filterMap[_filter.filterMapIdx].label}{" "}
                           {
                             advancedFilter.filterMap[_filter.filterMapIdx]
-                              .operators[_filter.operatorIdx].label
+                              ?.label
+                          }{" "}
+                          {
+                            advancedFilter.filterMap[_filter.filterMapIdx]
+                              ?.operators[_filter.operatorIdx].label
                           }{" "}
                           {_filter.value}
                           <button
