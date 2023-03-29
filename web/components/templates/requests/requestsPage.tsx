@@ -80,9 +80,23 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const truncLength = 30;
 
+  const sessionStorageView =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsViewMode")
+      : null;
+
   const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
-    "Condensed"
+    sessionStorageView
+      ? (sessionStorageView as "Condensed" | "Expanded")
+      : "Expanded"
   );
+
+  const viewModeHandler = (mode: "Condensed" | "Expanded") => {
+    setViewMode(mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("requestsViewMode", mode);
+    }
+  };
 
   const initialColumns: Column[] = [
     {
@@ -442,100 +456,101 @@ const RequestsPage = (props: RequestsPageProps) => {
       <div className="">
         <div className="mt-4 space-y-2">
           <div className="space-y-4">
-            <ThemedTableHeader
-              view={{
-                viewMode,
-                setViewMode,
-              }}
-              editColumns={{
-                columns: columns,
-                onColumnCallback: (columns) => {
-                  const active = columns.map((c) => {
-                    return {
-                      key: c.key,
-                      active: c.active,
-                    };
-                  });
-                  localStorage.setItem(
-                    "requestsColumns",
-                    JSON.stringify(active)
-                  );
-                  setDefaultColumns(columns);
-                },
-              }}
-              timeFilter={{
-                customTimeFilter: true,
-                defaultTimeFilter: "7d",
-                onTimeSelectHandler: onTimeSelectHandler,
-                timeFilterOptions: [
-                  { key: "24h", value: "Today" },
-                  { key: "7d", value: "7D" },
-                  { key: "1m", value: "1M" },
-                  { key: "3m", value: "3M" },
-                  { key: "all", value: "All" },
-                ],
-              }}
-              csvExport={{
-                onClick: downloadCSV,
-              }}
-              isFetching={isLoading}
-              advancedFilter={{
-                filterMap,
-                onAdvancedFilter: setAdvancedFilters,
-                filters: advancedFilters,
-              }}
-            />
-
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
-              <ThemedTableV3
-                data={requests}
-                sortColumns={columns}
-                columns={columns
-                  .filter((c) => c.active)
-                  .map((c) =>
-                    columnHelper.accessor(c.key as string, {
-                      cell: (info) =>
-                        c.format ? (
-                          <span className="whitespace-pre-wrap max-w-7xl break-all">
-                            {c.format(info.getValue(), viewMode)}
-                          </span>
-                        ) : (
-                          info.getValue()
-                        ),
-                      header: () => <span>{c.label}</span>,
-                      size: c.minWidth,
-                    })
-                  )}
-                count={count || 0}
-                page={page}
-                from={from}
-                to={to}
-                onSelectHandler={selectRowHandler}
-                onPageChangeHandler={onPageChangeHandler}
-                onPageSizeChangeHandler={onPageSizeChangeHandler}
-                onSortHandler={(key) => {
-                  if (key.key === orderBy.column) {
-                    setOrderBy({
-                      column: key.key,
-                      direction: orderBy.direction === "asc" ? "desc" : "asc",
-                    });
-                    key.toSortLeaf &&
-                      setSortLeaf(
-                        key.toSortLeaf(
-                          orderBy.direction === "asc" ? "desc" : "asc"
-                        )
+              <>
+                <ThemedTableHeader
+                  view={{
+                    viewMode,
+                    setViewMode: viewModeHandler,
+                  }}
+                  editColumns={{
+                    columns: columns,
+                    onColumnCallback: (columns) => {
+                      const active = columns.map((c) => {
+                        return {
+                          key: c.key,
+                          active: c.active,
+                        };
+                      });
+                      localStorage.setItem(
+                        "requestsColumns",
+                        JSON.stringify(active)
                       );
-                  } else {
-                    key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-                    setOrderBy({
-                      column: key.key,
-                      direction: "asc",
-                    });
-                  }
-                }}
-              />
+                      setDefaultColumns(columns);
+                    },
+                  }}
+                  timeFilter={{
+                    customTimeFilter: true,
+                    defaultTimeFilter: "7d",
+                    onTimeSelectHandler: onTimeSelectHandler,
+                    timeFilterOptions: [
+                      { key: "24h", value: "Today" },
+                      { key: "7d", value: "7D" },
+                      { key: "1m", value: "1M" },
+                      { key: "3m", value: "3M" },
+                      { key: "all", value: "All" },
+                    ],
+                  }}
+                  csvExport={{
+                    onClick: downloadCSV,
+                  }}
+                  isFetching={isLoading}
+                  advancedFilter={{
+                    filterMap,
+                    onAdvancedFilter: setAdvancedFilters,
+                    filters: advancedFilters,
+                  }}
+                />
+                <ThemedTableV3
+                  data={requests}
+                  sortColumns={columns}
+                  columns={columns
+                    .filter((c) => c.active)
+                    .map((c) =>
+                      columnHelper.accessor(c.key as string, {
+                        cell: (info) =>
+                          c.format ? (
+                            <span className="whitespace-pre-wrap max-w-7xl break-all">
+                              {c.format(info.getValue(), viewMode)}
+                            </span>
+                          ) : (
+                            info.getValue()
+                          ),
+                        header: () => <span>{c.label}</span>,
+                        size: c.minWidth,
+                      })
+                    )}
+                  count={count || 0}
+                  page={page}
+                  from={from}
+                  to={to}
+                  onSelectHandler={selectRowHandler}
+                  onPageChangeHandler={onPageChangeHandler}
+                  onPageSizeChangeHandler={onPageSizeChangeHandler}
+                  onSortHandler={(key) => {
+                    if (key.key === orderBy.column) {
+                      setOrderBy({
+                        column: key.key,
+                        direction: orderBy.direction === "asc" ? "desc" : "asc",
+                      });
+                      key.toSortLeaf &&
+                        setSortLeaf(
+                          key.toSortLeaf(
+                            orderBy.direction === "asc" ? "desc" : "asc"
+                          )
+                        );
+                    } else {
+                      key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+                      setOrderBy({
+                        column: key.key,
+                        direction: "asc",
+                      });
+                    }
+                  }}
+                />
+              </>
             )}
           </div>
         </div>
