@@ -20,7 +20,7 @@ export type NumberOperators = Record<
 
 export type TimestampOperators = Record<"gte" | "lte", string>;
 
-type SingleKey<T> = {
+export type SingleKey<T> = {
   [K in keyof T]: Partial<{
     [P in keyof T]: P extends K ? T[P] : never;
   }>;

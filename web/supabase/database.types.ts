@@ -11,47 +11,67 @@ export interface Database {
     Tables: {
       cache_hits: {
         Row: {
-          created_at: string
           request_id: string
+          created_at: string
         }
         Insert: {
-          created_at?: string
           request_id: string
+          created_at?: string
         }
         Update: {
-          created_at?: string
           request_id?: string
+          created_at?: string
+        }
+      }
+      helicone_api_keys: {
+        Row: {
+          api_key_hash: string
+          api_key_name: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          api_key_hash: string
+          api_key_name: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          api_key_hash?: string
+          api_key_name?: string
+          user_id?: string
+          created_at?: string
         }
       }
       prompt: {
         Row: {
-          created_at: string | null
           prompt: string
           name: string
           id: string
           auth_hash: string
+          created_at: string | null
         }
         Insert: {
-          created_at?: string | null
           prompt: string
           name: string
           id: string
           auth_hash: string
+          created_at?: string | null
         }
         Update: {
-          created_at?: string | null
           prompt?: string
           name?: string
           id?: string
           auth_hash?: string
+          created_at?: string | null
         }
       }
       request: {
         Row: {
-          id: string
-          created_at: string
           body: Json
           path: string
+          id: string
+          created_at: string
           auth_hash: string
           user_id: string | null
           prompt_id: string | null
@@ -60,10 +80,10 @@ export interface Database {
           prompt_values: Json | null
         }
         Insert: {
-          id?: string
-          created_at?: string
           body: Json
           path: string
+          id?: string
+          created_at?: string
           auth_hash: string
           user_id?: string | null
           prompt_id?: string | null
@@ -72,10 +92,10 @@ export interface Database {
           prompt_values?: Json | null
         }
         Update: {
-          id?: string
-          created_at?: string
           body?: Json
           path?: string
+          id?: string
+          created_at?: string
           auth_hash?: string
           user_id?: string | null
           prompt_id?: string | null
@@ -86,44 +106,44 @@ export interface Database {
       }
       response: {
         Row: {
+          body: Json
+          request: string
           id: string
           created_at: string
-          body: Json
-          request: string
         }
         Insert: {
-          id?: string
-          created_at?: string
           body: Json
           request: string
-        }
-        Update: {
           id?: string
           created_at?: string
+        }
+        Update: {
           body?: Json
           request?: string
+          id?: string
+          created_at?: string
         }
       }
       user_api_keys: {
         Row: {
-          created_at: string
           api_key_hash: string
           api_key_preview: string
           user_id: string
+          created_at: string
           key_name: string | null
         }
         Insert: {
-          created_at?: string
           api_key_hash: string
           api_key_preview: string
           user_id: string
+          created_at?: string
           key_name?: string | null
         }
         Update: {
-          created_at?: string
           api_key_hash?: string
           api_key_preview?: string
           user_id?: string
+          created_at?: string
           key_name?: string | null
         }
       }
@@ -188,7 +208,6 @@ export interface Database {
           auth_hash: string | null
           user_id: string | null
           properties: Json | null
-          cached_created_at: string | null
         }
       }
       response_and_request_rbac: {
@@ -237,20 +256,20 @@ export interface Database {
       }
       check_response_access:
         | {
-            Args: { this_associated_request_id: string }
+            Args: { this_associated_request_id: string; this_user_id: string }
             Returns: boolean
           }
         | {
-            Args: { this_associated_request_id: string; this_user_id: string }
+            Args: { this_associated_request_id: string }
             Returns: boolean
           }
       date_count:
         | {
-            Args: { time_increment: string; prev_period: string }
+            Args: { time_increment: string }
             Returns: Record<string, unknown>[]
           }
         | {
-            Args: { time_increment: string }
+            Args: { time_increment: string; prev_period: string }
             Returns: Record<string, unknown>[]
           }
     }
