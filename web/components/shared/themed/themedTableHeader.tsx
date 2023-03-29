@@ -95,8 +95,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     (option) => option.label === view?.viewMode
   );
 
-  console.log(initialIndex);
-
   return (
     <div className="">
       {/* Filters */}
