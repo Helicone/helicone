@@ -66,7 +66,7 @@ export function AdvancedFilters({
           className="bg-white ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
         >
           <PlusIcon
-            className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+            className="mr-1 h-3.5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
             aria-hidden="true"
           />
           Add Filter

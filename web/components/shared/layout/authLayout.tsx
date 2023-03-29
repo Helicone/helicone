@@ -586,7 +586,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <div
           className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
         >
-          <div className="sticky sm:hidden top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
+          <div className="sticky md:hidden top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
             <button
               type="button"
               className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
