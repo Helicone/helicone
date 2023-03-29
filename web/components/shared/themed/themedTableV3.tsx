@@ -1,10 +1,13 @@
 import * as React from "react";
 
 import {
+  ColumnOrderState,
+  ColumnSizingState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  OnChangeFn,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -19,6 +22,7 @@ import {
   Bars3Icon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
@@ -48,7 +52,33 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onSelectHandler,
     onSortHandler,
   } = props;
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const initialColumnSizing =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsColumnSizing")
+      : null;
+
+  const initialColumnOrder =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsColumnOrder")
+      : null;
+
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
+    initialColumnSizing ? JSON.parse(initialColumnSizing) : {}
+  );
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
+    initialColumnOrder ? JSON.parse(initialColumnOrder) : []
+  );
+
+  const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
+    setColumnSizing(newState);
+    localStorage.setItem("requestsColumnSizing", JSON.stringify(columnSizing));
+  };
+
+  const orderHandler: OnChangeFn<ColumnOrderState> = (newState) => {
+    setColumnOrder(newState);
+    localStorage.setItem("requestsColumnOrder", JSON.stringify(newState));
+  };
+
   const router = useRouter();
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
@@ -58,11 +88,13 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
+    onColumnSizingChange: resizeHandler,
+    onColumnOrderChange: orderHandler,
     columnResizeMode: "onChange",
     state: {
-      sorting,
+      columnSizing,
+      columnOrder,
     },
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
   });
 
@@ -136,7 +168,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                           );
 
                           currentCols.splice(newPosition, 0, colToBeMoved[0]);
-                          table.setColumnOrder(currentCols);
+                          orderHandler(currentCols);
+                          // table.setColumnOrder(currentCols);
                         }}
                       >
                         {header.isPlaceholder

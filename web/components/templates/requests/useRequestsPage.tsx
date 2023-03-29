@@ -138,7 +138,6 @@ const useRequestsPage = (
     right: advancedFilter,
     operator: "and",
   };
-  console.log("filter", filter);
 
   const {
     requests,
