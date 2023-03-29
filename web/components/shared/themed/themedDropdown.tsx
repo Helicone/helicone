@@ -40,7 +40,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
       all: options,
     } as { [key: string]: DropdownOption<T>[] }
   );
-  console.log("categories", categories);
+
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   options = options.filter((option) => {
@@ -69,14 +69,13 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
     };
   }, []);
 
-  console.log("selected value", selectedValue);
   return (
     <div className={className}>
       <Listbox value={selected?.value} onChange={onSelect}>
         {({ open }) => (
           <>
             <div className="relative">
-              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
+              <Listbox.Button className="hover:cursor-pointer relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
                 {label && (
                   <label
                     htmlFor="name"
@@ -118,11 +117,12 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                           ([category, items], index) => (
                             <div
                               key={index}
-                              className={
+                              className={clsx(
                                 category === selectedCategory
                                   ? "bg-sky-600 text-white px-2 py-1 rounded-md mr-2 mt-2"
-                                  : "bg-gray-200 px-2 py-1 rounded-md mr-2 mt-2"
-                              }
+                                  : "bg-gray-200 px-2 py-1 rounded-md mr-2 mt-2 hover:bg-gray-300",
+                                "hover:cursor-pointer"
+                              )}
                               onClick={() => {
                                 setSelectedCategory(category);
                                 setCategorySelected(true);

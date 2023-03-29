@@ -30,7 +30,7 @@ export default async function handler(
     user.data.user.id,
     filter,
     offset,
-    100000,
+    limit,
     sort
   );
 

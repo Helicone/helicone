@@ -201,6 +201,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     typeof window !== "undefined"
       ? localStorage.getItem("requestsColumns")
       : null;
+
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
@@ -231,7 +232,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
-        gte: new Date(0).toISOString(),
+        gte: getTimeIntervalAgo("7d").toISOString(),
       },
     },
   });
@@ -375,26 +376,6 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const columnHelper = createColumnHelper<RequestWrapper>();
 
-  const activeCols: string[] = columns
-    .filter((col) => col.active)
-    .map((col) => col.key as string);
-
-  const csv = requests.map((request) => {
-    const keys = Object.keys(request);
-    const copyRequest = { ...request };
-    for (const key of keys) {
-      if (!activeCols.includes(key)) {
-        delete copyRequest[key];
-      } else {
-        if (key === "requestText" || key === "responseText") {
-          copyRequest[key] =
-            escapeCSVString(JSON.stringify(request[key] || "")) || "";
-        }
-      }
-    }
-    return copyRequest;
-  });
-
   async function downloadCSV() {
     try {
       const response = await fetch("/api/export/requests", {
@@ -405,7 +386,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         body: JSON.stringify({
           filter: advancedFilters,
           offset: (currentPage - 1) * currentPageSize,
-          limit: 100000,
+          limit: 5000,
           sort: sortLeaf,
         }),
       });
@@ -460,7 +441,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       />
       <div className="">
         <div className="mt-4 space-y-2">
-          <div className="space-y-2">
+          <div className="space-y-4">
             <ThemedTableHeader
               view={{
                 viewMode,
@@ -484,7 +465,7 @@ const RequestsPage = (props: RequestsPageProps) => {
               }}
               timeFilter={{
                 customTimeFilter: true,
-                defaultTimeFilter: "all",
+                defaultTimeFilter: "7d",
                 onTimeSelectHandler: onTimeSelectHandler,
                 timeFilterOptions: [
                   { key: "24h", value: "Today" },
@@ -504,7 +485,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                 filters: advancedFilters,
               }}
             />
-
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
