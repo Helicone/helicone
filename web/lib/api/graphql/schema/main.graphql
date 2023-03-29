@@ -6,21 +6,70 @@ type Query {
     limit: Int
     after: Int
     offset: Int
-    where: RequestWhereInput
+    filters: [HeliconeRequestFilter!]
   ): [HeliconeRequest]
-}
-
-input RequestWhereInput {
-  userId: String
 }
 
 type HeliconeRequest {
   id: ID!
+  createdAt: String!
   prompt: String
   response: String
+
+  user: User
+  cacheHits: Int
+  properties: [Property]
+  values: [Value]
   responseBody: JSON
+  requestBody: JSON
+}
+
+input HeliconeRequestFilter {
+  id: NumberOperators
+  prompt: TextOperators
+  response: TextOperators
+  user: TextOperators
+  property: PropertyFilter
+  value: ValueFilter
+  responseBody: TextOperators
+  requestBody: TextOperators
+}
+
+input PropertyFilter {
+  name: String!
+  value: TextOperators!
+}
+
+input ValueFilter {
+  name: String!
+  value: TextOperators!
+}
+
+type Property {
+  name: String
+  value: String
+}
+
+type Value {
+  name: String
+  value: String
 }
 
 type User {
-  id: ID!
+  id: String!
+}
+
+input TextOperators {
+  equals: String
+  like: String
+  ilike: String
+  contains: String
+  not_equals: String
+}
+
+input NumberOperators {
+  equals: Float
+  gte: Float
+  lte: Float
+  not_equals: Float
 }

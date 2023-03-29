@@ -3,6 +3,12 @@ import { hashAuth } from "../../../supabaseClient";
 import { supabaseServer } from "../../../supabaseServer";
 
 export async function getUserOrThrow(auth: string): Promise<string> {
+  if (!auth.includes("Bearer ")) {
+    throw new ApolloError(
+      "Authorization must include the Bearer keyword. More information at docs.helicone.ai/playground.",
+      "UNAUTHENTICATED"
+    );
+  }
   const removedBearer = auth.replace("Bearer ", "").trim();
   const hashedApiKey = await hashAuth(removedBearer);
   const { data, error } = await supabaseServer
@@ -13,7 +19,7 @@ export async function getUserOrThrow(auth: string): Promise<string> {
 
   if (error != null) {
     throw new ApolloError(
-      "Need to add the authentication header. More information at docs.bhunk.io/playground.",
+      "Need to add the authentication header. More information at docs.helicone.ai/playground.",
       "UNAUTHENTICATED"
     );
   }

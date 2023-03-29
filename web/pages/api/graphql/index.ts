@@ -30,6 +30,16 @@ const resolvers = {
   // },
 };
 
+export interface Context {
+  auth: string;
+}
+
+function contextFunction(ctx: any): Context {
+  return {
+    auth: ctx.req.headers.authorization ?? "",
+  };
+}
+
 const apolloServer = new ApolloServer({
   typeDefs: makeExecutableSchema({
     typeDefs: [mainTypeDefs],
@@ -39,9 +49,7 @@ const apolloServer = new ApolloServer({
   introspection: true,
   csrfPrevention: true,
   plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
-  context: ({ req }) => ({
-    auth: req.headers.authorization,
-  }),
+  context: contextFunction,
 });
 const startServer = apolloServer.start();
 
