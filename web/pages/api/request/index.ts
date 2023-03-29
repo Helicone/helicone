@@ -23,7 +23,7 @@ export default async function handler(
     limit: number;
     sort: SortLeafRequest;
   };
-  // console.log("filter", JSON.stringify(filter, null, 2));
+
   const metrics = await getRequests(
     user.data.user.id,
     filter,
