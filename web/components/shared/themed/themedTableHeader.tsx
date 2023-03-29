@@ -64,7 +64,7 @@ interface ThemedHeaderProps {
   };
   view?: {
     viewMode: string;
-    setViewMode: Dispatch<SetStateAction<"Condensed" | "Expanded">>;
+    setViewMode: (mode: "Condensed" | "Expanded") => void;
   };
 }
 
@@ -79,6 +79,21 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  const options = [
+    {
+      label: "Condensed",
+      icon: Square3Stack3DIcon,
+    },
+    {
+      label: "Expanded",
+      icon: ArrowsPointingOutIcon,
+    },
+  ];
+
+  const initialIndex = options.findIndex(
+    (option) => option.label === view?.viewMode
+  );
 
   return (
     <div className="">
@@ -261,6 +276,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   onOptionSelect={(option) =>
                     view.setViewMode(option as "Condensed" | "Expanded")
                   }
+                  initialIndex={initialIndex}
                 />
               </div>
             )}
@@ -278,7 +294,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     setAdvancedFilters={advancedFilter.onAdvancedFilter}
                   />
                 )}
-                {advancedFilter.filters.length > 0 && (
+                {advancedFilter.filters.length > 0 && !showAdvancedFilters && (
                   <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
                     {advancedFilter.filters.map((_filter, index) => {
                       return (
