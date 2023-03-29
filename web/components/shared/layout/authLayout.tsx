@@ -80,11 +80,18 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname === "/usage",
     },
     {
-      name: "Keys",
+      name: "OpenAI Keys",
       mobile: "Manage Keys",
       href: "/keys",
       icon: KeyIcon,
       current: pathname === "/keys",
+    },
+    {
+      name: "Helicone Keys",
+      mobile: "Manage Keys",
+      href: "/helicone-keys",
+      icon: KeyIcon,
+      current: pathname === "/helicone-keys",
     },
   ];
 
