@@ -1,5 +1,24 @@
+scalar JSON
+
 type Query {
   user: User
+  heliconeRequest(
+    limit: Int
+    after: Int
+    offset: Int
+    where: RequestWhereInput
+  ): [HeliconeRequest]
+}
+
+input RequestWhereInput {
+  userId: String
+}
+
+type HeliconeRequest {
+  id: ID!
+  prompt: String
+  response: String
+  responseBody: JSON
 }
 
 type User {

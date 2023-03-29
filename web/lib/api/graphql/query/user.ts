@@ -1,6 +1,5 @@
-interface User {
-  id: string;
-}
+import { getUserOrThrow } from "../helpers/auth";
+import { User } from "../schema/types/graphql";
 
 export async function queryUser(
   root: any,
@@ -8,6 +7,8 @@ export async function queryUser(
   context: any,
   info: any
 ): Promise<User> {
+  const userId = getUserOrThrow(context.auth);
+
   return {
     id: "Helllo",
   };

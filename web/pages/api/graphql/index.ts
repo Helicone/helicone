@@ -4,20 +4,25 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { ApolloServer } from "apollo-server-micro";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { NextApiRequest, NextApiResponse } from "next";
+import { GraphQLJSON } from "graphql-type-json";
 
 // import "ts-tiny-invariant";
 
 import NextCors from "nextjs-cors";
 import { queryUser } from "../../../lib/api/graphql/query/user";
+import { heliconeRequest } from "../../../lib/api/graphql/query/heliconeRequest";
 
 // TODO BHU-21 We need to fix our N+1 queries and also have look aheads for what is queried. For now it is fine.
 
 const resolvers = {
+  JSON: GraphQLJSON,
+
   Query: {
     // apiKeys: () => {},
     // apiKey,
+    heliconeRequest: heliconeRequest,
     user: queryUser,
-    // requestedPrompts,
+    // requests:,
     // requestedPrompt,
   },
   // Mutation: {

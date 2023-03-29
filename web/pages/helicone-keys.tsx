@@ -20,7 +20,7 @@ const Keys = (props: KeysProps) => {
   return (
     <MetaData title="Keys">
       <AuthLayout user={user}>
-        <AuthHeader title="Helcione API Keys" />
+        <AuthHeader title="Helicone API Keys" />
         <HeliconeKeyPage />
       </AuthLayout>
     </MetaData>
