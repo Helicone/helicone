@@ -8,17 +8,13 @@ CREATE TABLE IF NOT EXISTS public.helicone_api_keys
     api_key_hash text COLLATE pg_catalog."default" NOT NULL,
     api_key_name text COLLATE pg_catalog."default" NOT NULL,
     user_id uuid NOT NULL,
-    CONSTRAINT user_api_keys_pkey PRIMARY KEY (api_key_hash)
-)
+    CONSTRAINT helicone_api_keys_pkey PRIMARY KEY (api_key_hash),
+    CONSTRAINT helicone_api_keys_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES auth.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 
--- Add Foreign Keys
-ALTER TABLE IF EXISTS public.helicone_api_keys
-    ADD CONSTRAINT helicone_api_keys_user_id_fkey FOREIGN KEY (user_id)
-    REFERENCES auth.users (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-TABLESPACE pg_default;
+);
 
 ALTER TABLE IF EXISTS public.helicone_api_keys
     OWNER to postgres;
