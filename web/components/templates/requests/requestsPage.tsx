@@ -197,9 +197,18 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   ];
 
+  const localStorageColumns =
+    typeof window !== "undefined"
+      ? localStorage.getItem("requestsColumns")
+      : null;
+
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
+  const parsed = JSON.parse(localStorageColumns || "[]") as Column[];
+
+  const [defaultColumns, setDefaultColumns] =
+    useState<Column[]>(initialColumns);
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
@@ -234,8 +243,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     values,
     from,
     isLoading,
-    isPropertiesLoading,
-    isValuesLoading,
     properties,
     refetch,
     filterMap,
@@ -252,11 +259,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
     sortLeaf
   );
-
-  // console.log("values", values);
-  // console.log("requests", requests);
-  // console.log("filterMap", filterMap
-  // console.log("properties", properties);
 
   const { keys, isLoading: isKeysLoading } = useGetKeys();
 
@@ -290,13 +292,25 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  const [columns, setColumns] = useLocalStorageState<Column[]>(
-    "requestTableColumns",
-    []
-  );
+  // columns
+
+  const [columns, setColumns] = useState<Column[]>(defaultColumns);
 
   useEffect(() => {
-    if (isPropertiesLoading || isValuesLoading) return;
+    if (
+      columns.length > initialColumns.length ||
+      (values.length === 0 && properties.length === 0)
+    ) {
+      if (parsed) {
+        columns.forEach((column) => {
+          const match = parsed.find((c) => c.key === column.key);
+          if (match) {
+            column.active = match.active;
+          }
+        });
+      }
+      return;
+    }
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
@@ -337,25 +351,23 @@ const RequestsPage = (props: RequestsPageProps) => {
     });
 
     const newColumns = [
-      ...initialColumns,
+      ...defaultColumns,
       ...valuesColumns,
       ...propertiesColumns,
     ];
 
-    setColumns((prev) => {
-      return newColumns.map((c) => {
-        const prevColumn = prev.find((p) => p.key === c.key);
-        if (prevColumn) {
-          return {
-            ...prevColumn,
-            ...c,
-          };
+    if (parsed) {
+      newColumns.forEach((column) => {
+        const match = parsed.find((c) => c.key === column.key);
+        if (match) {
+          column.active = match.active;
         }
-        return c;
       });
-    });
+    }
+
+    setColumns(newColumns);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPropertiesLoading, isValuesLoading]);
+  }, [defaultColumns, values, properties]);
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
@@ -437,7 +449,19 @@ const RequestsPage = (props: RequestsPageProps) => {
               }}
               editColumns={{
                 columns: columns,
-                onColumnCallback: setColumns,
+                onColumnCallback: (columns) => {
+                  const active = columns.map((c) => {
+                    return {
+                      key: c.key,
+                      active: c.active,
+                    };
+                  });
+                  localStorage.setItem(
+                    "requestsColumns",
+                    JSON.stringify(active)
+                  );
+                  setDefaultColumns(columns);
+                },
               }}
               timeFilter={{
                 customTimeFilter: true,

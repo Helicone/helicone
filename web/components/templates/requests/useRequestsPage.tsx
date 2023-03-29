@@ -264,8 +264,6 @@ const useRequestsPage = (
     count,
     from,
     to,
-    isPropertiesLoading,
-    isValuesLoading,
     isLoading,
     filterMap,
     refetch,
