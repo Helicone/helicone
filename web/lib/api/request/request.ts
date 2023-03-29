@@ -30,6 +30,8 @@ export interface HeliconeRequest {
   prompt_regex: string | null;
   key_name: string;
   cache_count: number;
+  request_prompt: string | null;
+  response_prompt: string | null;
 }
 
 export async function getRequests(
@@ -62,7 +64,9 @@ export async function getRequests(
     user_api_keys.key_name as key_name,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
-    (select count(*) from cache_hits ch where ch.request_id = request.id) as cache_count
+    (select count(*) from cache_hits ch where ch.request_id = request.id) as cache_count,
+    (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
+    (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM response
     left join request on request.id = response.request
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
