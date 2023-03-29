@@ -102,7 +102,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col lg:flex-row items-start gap-4 justify-between lg:items-center pb-3">
+        <div className="flex flex-col md:flex-row items-start gap-4 justify-between md:items-center pb-3">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
             {timeFilter && (
               <ThemedTimeFilter
@@ -116,7 +116,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-wrap space-x-1 items-center">
+          <div className="flex flex-row space-x-1 items-center">
             {editColumns && (
               <Popover className="relative text-sm">
                 {({ open }) => (
@@ -133,7 +133,12 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                         className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                         aria-hidden="true"
                       />
-                      <span>View Columns</span>
+
+                      <span className="sm:inline md:hidden lg:inline">
+                        {`Columns (${
+                          editColumns.columns.filter((col) => col.active).length
+                        } / ${editColumns.columns.length})`}
+                      </span>
                     </Popover.Button>
 
                     <Transition
@@ -235,7 +240,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                     aria-hidden="true"
                   />
-                  <p>
+                  <p className="sm:inline md:hidden lg:inline">
                     {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
                     {advancedFilter.filters.length > 0 &&
                       `(${advancedFilter.filters.length})`}
@@ -255,7 +260,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                       aria-hidden="true"
                     />
-                    Export
+                    <p className="sm:inline md:hidden lg:inline">Export</p>
                   </button>
                 </Menu>
               </div>
