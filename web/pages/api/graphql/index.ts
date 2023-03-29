@@ -12,18 +12,12 @@ import NextCors from "nextjs-cors";
 import { queryUser } from "../../../lib/api/graphql/query/user";
 import { heliconeRequest } from "../../../lib/api/graphql/query/heliconeRequest";
 
-// TODO BHU-21 We need to fix our N+1 queries and also have look aheads for what is queried. For now it is fine.
-
 const resolvers = {
   JSON: GraphQLJSON,
 
   Query: {
-    // apiKeys: () => {},
-    // apiKey,
     heliconeRequest: heliconeRequest,
     user: queryUser,
-    // requests:,
-    // requestedPrompt,
   },
   // Mutation: {
   //   // requestNewPrompt,

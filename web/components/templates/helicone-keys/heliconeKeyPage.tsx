@@ -67,9 +67,9 @@ export const HeliconeKeyPage = (props: HeliconeKeyPageProps) => {
                   className="max-w-sm border-none outline-none"
                   onChange={(e) => {
                     supabaseClient
-                      .from("user_api_keys")
+                      .from("helicone_api_keys")
                       .update({
-                        key_name: e.target.value,
+                        api_key_name: e.target.value,
                       })
                       .eq("api_key_hash", key.api_key_hash)
                       .then((res) => {
