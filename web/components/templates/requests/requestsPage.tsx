@@ -262,11 +262,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     sortLeaf
   );
 
-  // console.log("values", values);
-  // console.log("requests", requests);
-  // console.log("filterMap", filterMap
-  // console.log("properties", properties);
-
   const { keys, isLoading: isKeysLoading } = useGetKeys();
 
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
@@ -356,8 +351,8 @@ const RequestsPage = (props: RequestsPageProps) => {
         const prevColumn = prev.find((p) => p.key === c.key);
         if (prevColumn) {
           return {
-            ...prevColumn,
             ...c,
+            ...prevColumn,
           };
         }
         return c;
