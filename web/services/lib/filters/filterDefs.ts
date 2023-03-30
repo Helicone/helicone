@@ -104,10 +104,10 @@ export function filterUIToFilterLeafs(
     .filter((filter) => filter.value !== "")
     .map((filter) => {
       const leaf: FilterLeaf = {
-        [filterMap[filter.filterMapIdx].table]: {
-          [filterMap[filter.filterMapIdx].column]: {
-            [filterMap[filter.filterMapIdx].operators[filter.operatorIdx]
-              .value]: filter.value,
+        [filterMap[filter.filterMapIdx]?.table]: {
+          [filterMap[filter.filterMapIdx]?.column]: {
+            [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
+              ?.value]: filter.value,
           },
         },
       };

@@ -172,12 +172,14 @@ function AdvancedFilterRow({
       />
 
       <ThemedDropdown
-        options={filterMap[filter.filterMapIdx].operators.map((operator, i) => {
-          return {
-            value: i,
-            label: operator.label,
-          };
-        })}
+        options={filterMap[filter.filterMapIdx]?.operators.map(
+          (operator, i) => {
+            return {
+              value: i,
+              label: operator.label,
+            };
+          }
+        )}
         selectedValue={filter.operatorIdx}
         onSelect={(selected) => {
           setFilter((f) => ({
@@ -192,14 +194,14 @@ function AdvancedFilterRow({
       <div className="w-full lg:w-fit min-w-[150px]">
         <AdvancedFilterInput
           type={
-            filterMap[filter.filterMapIdx].operators[filter.operatorIdx].type
+            filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
           }
           value={filter.value}
-          inputParams={filterMap[filter.filterMapIdx].operators[
+          inputParams={filterMap[filter.filterMapIdx]?.operators[
             filter.operatorIdx
           ].inputParams
             ?.filter(
-              (param) => param.key === filterMap[filter.filterMapIdx].column
+              (param) => param.key === filterMap[filter.filterMapIdx]?.column
             )
             .map((param) => param.param)}
           onChange={(value) => {
