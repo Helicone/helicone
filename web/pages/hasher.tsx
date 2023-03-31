@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { hashAuth } from "../lib/supabaseClient";
+import { hashAuth } from "../lib/hashClient";
 
 const Hasher = () => {
   const [hash, setHash] = useState<string | null>(null);

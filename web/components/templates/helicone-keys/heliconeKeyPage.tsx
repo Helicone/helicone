@@ -3,13 +3,14 @@ import generateApiKey from "generate-api-key";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
-import { hashAuth } from "../../../lib/supabaseClient";
+
 import { useHeliconeKeys } from "../../../services/hooks/helicone-keys";
 import { Database } from "../../../supabase/database.types";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTable from "../../shared/themed/themedTable";
 import AddKeyModal from "./addKeyModal";
 import Link from "next/link";
+import { hashAuth } from "../../../lib/hashClient";
 
 interface HeliconeKeyPageProps {}
 const randomNames = [
