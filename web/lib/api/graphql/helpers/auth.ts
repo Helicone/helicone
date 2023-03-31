@@ -1,5 +1,6 @@
 import { ApolloError } from "apollo-server-errors";
-import { hashAuth } from "../../../supabaseClient";
+import { hashAuth } from "../../../hashGraphQL";
+
 import { supabaseServer } from "../../../supabaseServer";
 
 export async function getUserOrThrow(auth: string): Promise<string> {

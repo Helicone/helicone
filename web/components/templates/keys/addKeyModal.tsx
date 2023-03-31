@@ -2,8 +2,9 @@ import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useState } from "react";
+import { hashAuth } from "../../../lib/hashClient";
 import { middleTruncString, truncString } from "../../../lib/stringHelpers";
-import { hashAuth } from "../../../lib/supabaseClient";
+
 import { useAddKey } from "../../../services/hooks/keys";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
