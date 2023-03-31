@@ -127,6 +127,6 @@ export async function heliconeRequest(
         }))
       : [],
     requestBody: r.request_body,
-    responseBody: r.request_properties,
+    responseBody: r.response_body,
   }));
 }
