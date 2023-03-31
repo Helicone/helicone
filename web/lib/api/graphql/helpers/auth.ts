@@ -4,8 +4,10 @@ import { supabaseServer } from "../../../supabaseServer";
 
 export async function getUserOrThrow(auth: string): Promise<string> {
   if (!auth.includes("Bearer ")) {
-    const msg = `Authorization must include the Bearer keyword. More information at docs.helicone.ai/playground. Received ${auth}`;
-    throw new ApolloError(msg, "UNAUTHENTICATED");
+    throw new ApolloError(
+      "Authorization must include the Bearer keyword. More information at docs.helicone.ai/playground.",
+      "UNAUTHENTICATED"
+    );
   }
   const removedBearer = auth.replace("Bearer ", "").trim();
   const hashedApiKey = await hashAuth(removedBearer);
