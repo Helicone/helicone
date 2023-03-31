@@ -1,17 +1,11 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { Router, useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { middleTruncString } from "../../../lib/stringHelpers";
-import { hashAuth } from "../../../lib/supabaseClient";
-import { supabaseServer } from "../../../lib/supabaseServer";
-import AddAPIKey from "./addAPIKey";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import BasePageV2 from "../../shared/layout/basePageV2";
+import ProgressBar from "../home/progressBar";
 import ConfirmEmail from "./ConfirmEmail";
 import CreateAccount from "./createAccount";
 import OneLineChange from "./oneLineChange";
-import ProgressBar from "../home/progressBar";
-import { NextRequest } from "next/server";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
-import BasePageV2 from "../../shared/layout/basePageV2";
 
 interface OnboardingPageProps {
   origin: string;
