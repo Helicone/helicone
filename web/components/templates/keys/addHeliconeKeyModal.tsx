@@ -2,15 +2,14 @@ import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 
-interface AddKeyModalProps {
+interface AddHeliconeKeyModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   apiKey: string;
 }
 
-const AddKeyModal = (props: AddKeyModalProps) => {
+const AddHeliconeKeyModal = (props: AddHeliconeKeyModalProps) => {
   const { open, setOpen, apiKey } = props;
-  // const [apiKey, setApiKey] = useState("");
   const { setNotification } = useNotification();
 
   return (
@@ -60,4 +59,4 @@ const AddKeyModal = (props: AddKeyModalProps) => {
   );
 };
 
-export default AddKeyModal;
+export default AddHeliconeKeyModal;

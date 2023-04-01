@@ -74,24 +74,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const accountNav = [
     {
       name: "Usage",
-      mobile: "View Usage",
       href: "/usage",
       icon: BeakerIcon,
       current: pathname === "/usage",
     },
     {
-      name: "OpenAI Keys",
-      mobile: "Manage Keys",
+      name: "Keys",
       href: "/keys",
       icon: KeyIcon,
       current: pathname === "/keys",
-    },
-    {
-      name: "Helicone Keys",
-      mobile: "Manage Keys",
-      href: "/helicone-keys",
-      icon: KeyIcon,
-      current: pathname === "/helicone-keys",
     },
   ];
 
