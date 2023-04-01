@@ -262,9 +262,9 @@ export default function HomePage() {
                 Get integrated with only one line of code
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600 sm:text-2xl">
-                Trusted by leading developers building with OpenAI
+                Trusted by leading companies building with OpenAI
               </p>
-              <p className="mt-5 text-base leading-5 text-gray-600 italic sm:text-m">
+              <p className="mt-2 text-base leading-5 text-gray-600 italic sm:text-m">
                 Anthropic, Cohere, Google AI coming soon...
               </p>
             </div>

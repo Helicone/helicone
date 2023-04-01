@@ -24,9 +24,9 @@ const features = [
   },
   {
     name: "model",
-    label: "User Metrics.",
+    label: "Optimize spend.",
     description:
-      "Ever wonder how much you're spending on each model and its efficiency? See how much you're spending on each model so you can optimize your usage.",
+      "Track spending on each model, user, or conversation. Use this data to optimize your API usage and reduce costs.",
     icon: ServerIcon,
   },
 ];
