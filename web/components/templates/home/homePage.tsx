@@ -238,9 +238,6 @@ export default function HomePage() {
           </div>
         </div>
         {/* FEATURE */}
-        {/* DetailsV2 */}
-        <Details />
-        {/* ONE LINE OF CODE */}
         <div className="relative isolate bg-white pt-24 pb-6 sm:pt-32">
           <div className="absolute inset-x-0 top-0 -z-10 flex transform-gpu overflow-hidden pt-32 opacity-25 blur-3xl sm:pt-40 xl:justify-end">
             <svg
@@ -314,41 +311,68 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="bg-white py-24 sm:py-0">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-4">
-            <div className="mx-auto flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end justify-center">
-              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
-                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
-                  {(Math.floor(
-                    (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
-                  ) /
-                    10) |
-                    0}
-                  m+
+
+        {/* DetailsV2 */}
+        <Details />
+        {/* ONE LINE OF CODE */}
+        <div className="bg-white py-24 sm:py-16">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl lg:mx-0">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Even wonder how much you spend on GPT-4? We do too.
+              </h2>
+              <p className="mt-6 text-base leading-7 text-gray-600">
+                Creating an internal tool for observability and monitoring is
+                difficult to build and even harder to maintain. Helicone is a
+                platform built specifically for developers using LLMs.
+              </p>
+            </div>
+            <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-8 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-3xl font-bold tracking-tight text-gray-900">
+                  100+ Projects
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Requests logged
+                    Active Projects
+                  </p>
+                  <p className="mt-2 text-base leading-7 text-gray-600">
+                    Over a hundred active projects using Helicone
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
-                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
-                  250+
+              <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-44">
+                <p className="flex-none text-3xl font-bold tracking-tight text-white">
+                  {Math.floor(
+                    (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
+                  )}
+                  m+ Requests
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Developers community
+                  <p className="text-lg font-semibold tracking-tight text-white">
+                    We&apos;re proud that our customers have made over{" "}
+                    {Math.floor(
+                      (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
+                    )}{" "}
+                    million requests.
+                  </p>
+                  <p className="mt-2 text-base leading-7 text-gray-400">
+                    We currently support all OpenAI models and have plans to add
+                    other providers
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
-                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
-                  100+
+              <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
+                <p className="flex-none text-3xl font-bold tracking-tight text-white">
+                  250+ Community
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Projects using Helicone
+                  <p className="text-lg font-semibold tracking-tight text-white">
+                    Discord Community
+                  </p>
+                  <p className="mt-2 text-base leading-7 text-indigo-200">
+                    Join our community on Discord to get help, ask questions,
+                    and share your projects.
                   </p>
                 </div>
               </div>
