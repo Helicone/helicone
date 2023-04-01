@@ -186,10 +186,8 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <h1 className="mt-8 text-4xl tracking-tight text-gray-900 sm:text-6xl">
-                <span className="font-extrabold">Unlock</span>
+              <h1 className="mt-8 text-5xl tracking-tight text-gray-900 sm:text-7xl">
                 <span className="font-semibold">
-                  {" "}
                   Observability for Generative AI Applications
                 </span>
               </h1>
