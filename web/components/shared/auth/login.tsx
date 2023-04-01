@@ -269,7 +269,7 @@ const Login = (props: LoginProps) => {
                     </button>
                     {formState === "signup" ? (
                       <div>
-                        already have an account?{" "}
+                        Already have an account?{" "}
                         <a
                           className="text-indigo-600 hover:text-indigo-500 hover:cursor-pointer"
                           onClick={() => setFormState("login")}
