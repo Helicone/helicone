@@ -108,3 +108,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJz
 NEXT_PUBLIC_SUPABASE_URL="http://localhost:54321"
 SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 ```
+
+
+## Supported integrations
+
+| Name | Docs |
+|-|-|
+| [nextjs-chat-app](https://github.com/enricoros/nextjs-chatgpt-app) | [Docs](https://github.com/enricoros/nextjs-chatgpt-app/issues/32) |
+| [langchain](https://github.com/hwchase17/langchain) | [Docs](https://python.langchain.com/en/latest/ecosystem/helicone.html?highlight=helicone) |
+| [langchainjs](https://github.com/hwchase17/langchainjs) | [Docs](https://js.langchain.com/docs/ecosystem/helicone) |
+
+
+
