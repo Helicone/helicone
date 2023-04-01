@@ -244,10 +244,19 @@ const KeyPage = (props: KeyPageProps) => {
         <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
           <div className="text-gray-900 space-y-4 text-sm">
             <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
-              <div className="sm:flex-auto items-center flex flex-row space-x-4">
+              <div className="sm:flex-auto items-center flex flex-row space-x-4 justify-between">
                 <h1 className="text-lg font-semibold text-gray-900">
                   Helicone API (beta)
                 </h1>
+                <Link
+                  href="/api/graphql"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <button className="text-xs w-full mx-auto bg-sky-600 hover:bg-sky-800 text-white font-semibold py-2 px-4 rounded-md">
+                    Visit GraphQL playground
+                  </button>
+                </Link>
               </div>
             </div>
             <p className="text-sm text-gray-900">
