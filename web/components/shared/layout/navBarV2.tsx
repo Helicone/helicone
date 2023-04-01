@@ -59,11 +59,12 @@ const NavBarV2 = (props: NavBarV2Props) => {
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Helicone</span>
+            {/* 1324 × 364 */}
             <Image
               className="hidden sm:block rounded-md"
               src="/assets/heli-full-logo.png"
               width={150}
-              height={150}
+              height={150 / (1324 / 364)}
               alt="Helicone-full-logo"
             />
             <Image
