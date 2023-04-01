@@ -12,14 +12,14 @@ const features = [
     name: "dashboard",
     label: "Dashboard Metrics",
     description:
-      "Get an overview of your application with an in-built dashboard, tailor made for your generative AI application",
+      "Get an overview of your application with an in-built dashboard, tailor made for generative AI applications.",
     icon: CloudArrowUpIcon,
   },
   {
     name: "requests",
     label: "View Requests.",
     description:
-      "View all of your requests in one place. Filter by date, users, and custom properties.",
+      "View all of your requests in one place. Filter by time, users, and custom properties.",
     icon: LockClosedIcon,
   },
   {
@@ -42,12 +42,13 @@ const Details = () => {
         <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
           <div className="px-6 lg:px-0 lg:pt-4 lg:pr-4">
             <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-  Stay on top of your costs, usage, and latency
-</p>
-<p className="mt-6 text-lg leading-8 text-gray-600 font-bold">
-  Integrate your API requests to models like GPT-4 with Helicone. Explore your results in a user-friendly interface.
-</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Stay on top of your costs, usage, and latency
+              </p>
+              <p className="mt-6 text-lg leading-8 text-gray-600 font-bold">
+                Integrate models like GPT-4 with Helicone to track API requests
+                and visualize results in a sleek, customizable dashboard
+              </p>
               <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name}>

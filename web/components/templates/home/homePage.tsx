@@ -178,7 +178,7 @@ export default function HomePage() {
                     href="https://github.com/Helicone/helicone"
                     className="sm:inline-flex hidden items-center space-x-2 text-m font-medium leading-6 text-gray-600"
                   >
-                    <span>We&apos;re Open-Source</span>
+                    <span>We&apos;re open-source</span>
                     <ChevronRightIcon
                       className="h-5 w-5 text-gray-400"
                       aria-hidden="true"
@@ -187,14 +187,20 @@ export default function HomePage() {
                 </div>
               </div>
               <h1 className="mt-8 text-4xl tracking-tight text-gray-900 sm:text-6xl">
-  <span className="font-extrabold">Unlock</span>
-  <span className="font-semibold"> Observability for Generative AI Applications</span>
-</h1>
+                <span className="font-extrabold">Unlock</span>
+                <span className="font-semibold">
+                  {" "}
+                  Observability for Generative AI Applications
+                </span>
+              </h1>
               <p className="mt-6 text-3xl leading-8 text-gray-600">
                 Log requests and track metrics with one line of code.
               </p>
               <div className="mt-10 flex items-center gap-x-4">
-                <OnboardingButton variant="secondary" title={"Get Started - Free"} />
+                <OnboardingButton
+                  variant="secondary"
+                  title={"Get Started - Free"}
+                />
                 <button
                   onClick={() => {
                     setDemoLoading(true);
@@ -256,7 +262,10 @@ export default function HomePage() {
                 Get integrated with only one line of code
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600 sm:text-2xl">
-                Trusted by leading developers building with large language models
+                Trusted by leading developers building with OpenAI
+              </p>
+              <p className="mt-5 text-base leading-5 text-gray-600 italic sm:text-m">
+                Anthropic, Cohere, Google AI coming soon...
               </p>
             </div>
             <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
@@ -313,52 +322,39 @@ export default function HomePage() {
         <div className="bg-white py-24 sm:py-0">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
-              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-8 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
-                <p className="flex-none text-3xl font-bold tracking-tight text-gray-900">
-                  100+
+              <div className="flex flex-col-reverse justify-between gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-4">
+                <p className="flex-none text-5xl font-bold tracking-tight text-white">
+                  {Math.floor(
+                    (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
+                  ) / 10}
+                  m+
+                </p>
+                <p className="text-lg tracking-tight text-white">
+                  {" "}
+                  Requests logged
+                </p>
+              </div>
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
+                  250+
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Stars on Github
+                    Developers community
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-600">
-                    We provide cloud and self-hosting solutions
+                    Cloud and self-hosted solutions available
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-44">
-                <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  {Math.floor(
-                    (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
-                  ) / 10}{" "}
-                  Million
+              <div className="flex flex-col-reverse justify-between gap-x-16 rounded-2xl bg-sky-600 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-4">
+                <p className="flex-none text-5xl font-bold tracking-tight text-white">
+                  100+
                 </p>
-                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    We&apos;re proud that our customers have made over{" "}
-                    {Math.floor(
-                      (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
-                    )}{" "}
-                    million requests.
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-gray-400">
-                    We currently support all OpenAI models and have plans to add
-                    other providers
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
-                <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  &gt; 200,000
+                <p className="text-lg tracking-tight text-white">
+                  {" "}
+                  Projects using Helicone{" "}
                 </p>
-                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    Requests logged per day
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-indigo-200">
-                    Every day our customers are getting value from Helicone.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -371,10 +367,10 @@ export default function HomePage() {
                 Join our fast-growing open source community
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
-                We&apos;ve been developer driven from the start, and we&apos;re
+                We&apos;ve been developerdriven from the start, and we&apos;re
                 committed to keeping it that way. We&apos;re always looking for
-                new contributors to help us build the best open source developer
-                tools.
+                new contributors to help us build the best open source
+                observability platform for generative AI.
               </p>
             </div>
             <div className="block space-x-4">
@@ -394,39 +390,6 @@ export default function HomePage() {
               >
                 View Github
               </a>
-            </div>
-          </div>
-          <div className="py-8 sm:py-16">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <div className="mx-auto grid max-w-2xl grid-cols-1 gap-8 overflow-hidden lg:mx-0 lg:max-w-none lg:grid-cols-4">
-                {timeline.map((item) => (
-                  <div key={item.name}>
-                    <time
-                      dateTime={item.dateTime}
-                      className="flex items-center text-sm font-semibold leading-6 text-sky-600"
-                    >
-                      <svg
-                        viewBox="0 0 4 4"
-                        className="mr-4 h-1 w-1 flex-none"
-                        aria-hidden="true"
-                      >
-                        <circle cx={2} cy={2} r={2} fill="currentColor" />
-                      </svg>
-                      {item.date}
-                      <div
-                        className="absolute -ml-2 h-px w-screen -translate-x-full bg-gray-900/10 sm:-ml-4 lg:static lg:ml-8 lg:-mr-6 lg:w-auto lg:flex-auto lg:translate-x-0"
-                        aria-hidden="true"
-                      />
-                    </time>
-                    <p className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">
-                      {item.name}
-                    </p>
-                    <p className="mt-1 text-base leading-7 text-gray-600">
-                      {item.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
