@@ -186,19 +186,16 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <h1 className="mt-8 text-5xl tracking-tight text-gray-900 sm:text-7xl">
-                <span className="font-semibold">
-                  Observability for Generative AI Applications
-                </span>
+              <h1 className="mt-8 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                Observability for Generative AI applications
               </h1>
-              <p className="mt-6 text-3xl leading-8 text-gray-600">
-                Log requests and track metrics with one line of code
+              <p className="mt-6 text-xl leading-8 text-gray-600">
+                Track usage, costs, and latency metrics with one line of code.
+                We&apos;re an open-source observability platform that helps you
+                better understand your GPT-3 application.
               </p>
               <div className="mt-10 flex items-center gap-x-4">
-                <OnboardingButton
-                  variant="secondary"
-                  title={"Get Started - Free"}
-                />
+                <OnboardingButton variant="secondary" title={"Get Started"} />
                 <button
                   onClick={() => {
                     setDemoLoading(true);
