@@ -13,6 +13,7 @@ import generateApiKey from "generate-api-key";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
+import { hashAuth } from "../../../lib/hashClient";
 import { middleTruncString } from "../../../lib/stringHelpers";
 
 import { useDeleteKey, useGetKeys } from "../../../services/hooks/keys";
