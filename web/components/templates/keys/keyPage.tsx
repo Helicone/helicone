@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { middleTruncString } from "../../../lib/stringHelpers";
-import { hashAuth } from "../../../lib/supabaseClient";
+
 import { useDeleteKey, useGetKeys } from "../../../services/hooks/keys";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
