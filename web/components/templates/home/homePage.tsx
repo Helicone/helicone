@@ -324,9 +324,11 @@ export default function HomePage() {
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
               <div className="flex flex-col-reverse justify-between gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-4">
                 <p className="flex-none text-5xl font-bold tracking-tight text-white">
-                  {Math.floor(
+                  {(Math.floor(
                     (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
-                  ) / 10}
+                  ) /
+                    10) |
+                    0}
                   m+
                 </p>
                 <p className="text-lg tracking-tight text-white">
