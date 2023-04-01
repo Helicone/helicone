@@ -22,4 +22,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/Tor101/helicone/helicone:latest
+          tags: ghcr.io/tor101/helicone/helicone:latest
