@@ -194,7 +194,7 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className="mt-6 text-3xl leading-8 text-gray-600">
-                Log requests and track metrics with one line of code.
+                Log requests and track metrics with one line of code
               </p>
               <div className="mt-10 flex items-center gap-x-4">
                 <OnboardingButton
