@@ -1,4 +1,9 @@
-import { ForwardRefExoticComponent, SVGProps, useState } from "react";
+import {
+  ForwardRefExoticComponent,
+  SVGProps,
+  useEffect,
+  useState,
+} from "react";
 import { Tab } from "@headlessui/react";
 import { clsx } from "../clsx";
 import { capitalizeWords } from "../utils/utils";
@@ -14,13 +19,14 @@ interface ThemedTabsProps {
     >;
   }[];
   onOptionSelect: (option: string) => void;
+  initialIndex?: number;
 }
 export default function ThemedTabs(props: ThemedTabsProps) {
-  const { options, onOptionSelect } = props;
+  const { options, onOptionSelect, initialIndex } = props;
 
   return (
     <div className="inline-flex px-2 sm:px-0">
-      <Tab.Group>
+      <Tab.Group defaultIndex={initialIndex}>
         <Tab.List className="flex space-x-1 rounded-lg bg-gray-200 shadow-sm p-0.5">
           {options.map((option, idx) => (
             <Tab
@@ -36,16 +42,14 @@ export default function ThemedTabs(props: ThemedTabsProps) {
               onClick={() => onOptionSelect(option.label)}
             >
               {({ selected }) => (
-                <div className="flex flex-row space-x-2 items-center">
+                <div className="flex flex-row space-x-2 items-center w-fit">
                   <option.icon
                     className={clsx(
                       selected ? "text-sky-500" : "text-gray-500",
                       "w-5 h-5 inline-block"
                     )}
                   />
-                  <span className="sr-only xl:not-sr-only ">
-                    {option.label}
-                  </span>
+                  <p className="w-max">{option.label}</p>
                 </div>
               )}
             </Tab>

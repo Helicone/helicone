@@ -71,7 +71,15 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
               value: r.cost,
             }))}
             timeMap={timeMap}
-            valueFormatter={(v) => [`$${v.toString()}`, "cost"]}
+            valueFormatter={(v) => {
+              return [
+                `$${(typeof v === "number"
+                  ? v.toFixed(v % 1 !== 0 ? 1 : 0)
+                  : v
+                ).toString()}`,
+                "cost",
+              ];
+            }}
           />
         </div>
 

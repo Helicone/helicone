@@ -4,41 +4,28 @@ import {
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { Metrics } from "../../../lib/api/metrics/metrics";
-import {
-  getDashboardData,
-  GraphDataState,
-  initialGraphDataState,
-} from "../../../lib/dashboardGraphs";
-import { Result } from "../../../lib/result";
-import {
-  getTimeMap,
-  timeGraphConfig,
-} from "../../../lib/timeCalculations/constants";
+import { GraphDataState } from "../../../lib/dashboardGraphs";
+import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
-import {
-  FilterLeaf,
-  FilterNode,
-  getPropertyFilters,
-} from "../../../services/lib/filters/filterDefs";
-import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { useLocalStorageState } from "../../../services/hooks/localStorage";
+
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import AuthLayout from "../../shared/layout/authLayout";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import { Filter } from "../../shared/themed/themedTableHeader";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
 import TimeGraphWHeader from "./timeGraphWHeader";
+import { useDashboardPage } from "./useDashboardPage";
 
 interface DashboardPageProps {
   user: User;
@@ -49,76 +36,40 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
+  const [interval, setInterval] = useState<TimeInterval>("7d");
+  const [timeFilter, setTimeFilter] = useState<{
+    start: Date;
+    end: Date;
+  }>({
+    start: getTimeIntervalAgo(interval),
+    end: new Date(),
+  });
+
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
-  const parseKey = (keyString: string | null) => {
-    if (!keyString) {
-      return "all";
-    }
-    return {
-      user_api_keys: {
-        api_key_hash: {
-          equals: keyString,
-        },
-      },
-    };
-  };
-
-  const [timeData, setTimeData] = useState<GraphDataState>(
-    initialGraphDataState
+  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
+    sessionStorageKey
   );
 
-  const [metrics, setMetrics] =
-    useState<Loading<Result<Metrics, string>>>("loading");
-  const [interval, setInterval] = useState<TimeInterval>("1m");
-  const [filter, setFilter] = useState<FilterNode>("all");
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
-    parseKey(sessionStorageKey)
-  );
-  const [timeFilter, setTimeFilter] = useState<FilterLeaf>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo(interval).toISOString(),
-        lte: new Date().toISOString(),
-      },
-    },
-  });
+  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
+    UIFilterRow[]
+  >("advancedFilters", []);
 
-  const { properties } = useGetProperties();
-  const { propertyParams } = useGetPropertyParams();
+  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
-  const getData = (timeFilter: FilterLeaf) => {
-    getDashboardData(
+  const { metrics, filterMap, errorsOverTime, requestsOverTime, costOverTime } =
+    useDashboardPage({
       timeFilter,
-      {
-        left: filter,
-        operator: "and",
-        right: apiKeyFilter,
-      },
-      setMetrics,
-      setTimeData
-    );
-  };
+      uiFilters: debouncedAdvancedFilters,
+      apiKeyFilter,
+    });
 
-  useEffect(() => {
-    getData(timeFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeFilter, filter, apiKeyFilter]);
-
-  const propertyFilterMap = {
-    properties: {
-      label: "Properties",
-      columns: getPropertyFilters(
-        properties,
-        propertyParams.map((p) => p.property_param)
-      ),
-    },
+  const timeData: GraphDataState = {
+    costOverTime: costOverTime.data ?? "loading",
+    errorOverTime: errorsOverTime.data ?? "loading",
+    requestsOverTime: requestsOverTime.data ?? "loading",
   };
-  const filterMap =
-    properties.length > 0
-      ? { ...propertyFilterMap, ...RequestsTableFilter }
-      : RequestsTableFilter;
 
   return (
     <AuthLayout user={user}>
@@ -127,20 +78,16 @@ const DashboardPage = (props: DashboardPageProps) => {
         headerActions={
           <button
             onClick={() => {
-              getData({
-                request: {
-                  created_at: {
-                    gte: getTimeIntervalAgo(interval).toISOString(),
-                    lte: new Date().toISOString(),
-                  },
-                },
+              setTimeFilter({
+                start: getTimeIntervalAgo(interval),
+                end: new Date(),
               });
             }}
             className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
           >
             <ArrowPathIcon
               className={clsx(
-                metrics === "loading" ? "animate-spin" : "",
+                metrics.isLoading ? "animate-spin" : "",
                 "h-5 w-5 inline"
               )}
             />
@@ -189,7 +136,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       ) : (
         <div className="space-y-8">
           <ThemedTableHeader
-            isFetching={metrics === "loading"}
+            isFetching={metrics.isLoading}
             timeFilter={{
               customTimeFilter: true,
               timeFilterOptions: [
@@ -207,54 +154,28 @@ const DashboardPage = (props: DashboardPageProps) => {
                   const end = new Date(value.split("_")[1]);
                   setInterval(key);
                   setTimeFilter({
-                    request: {
-                      created_at: {
-                        gte: start.toISOString(),
-                        lte: end.toISOString(),
-                      },
-                    },
+                    start,
+                    end,
                   });
                 } else {
                   setInterval(key);
                   setTimeFilter({
-                    request: {
-                      created_at: {
-                        gte: getTimeIntervalAgo(key).toISOString(),
-                        lte: new Date().toISOString(),
-                      },
-                    },
+                    start: getTimeIntervalAgo(key),
+                    end: new Date(),
                   });
                 }
               },
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: (_filters: Filter[]) => {
-                const filters = _filters.filter((f) => f) as FilterNode[];
-                if (filters.length === 0) {
-                  setFilter("all");
-                } else {
-                  const firstFilter = filters[0];
-                  setFilter(
-                    filters.slice(1).reduce((acc, curr) => {
-                      return {
-                        left: acc,
-                        operator: "and",
-                        right: curr,
-                      };
-                    }, firstFilter)
-                  );
-                }
-              },
+              onAdvancedFilter: setAdvancedFilters,
+              filters: advancedFilters,
             }}
           />
-          <MetricsPanel filters={filter} metrics={metrics} />
+          <MetricsPanel metrics={metrics.data ?? "loading"} />
           <TimeGraphWHeader
             data={timeData}
-            timeMap={getTimeMap(
-              new Date(timeFilter.request!.created_at!.gte!),
-              new Date(timeFilter.request!.created_at!.lte!)
-            )}
+            timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
           />
         </div>
       )}

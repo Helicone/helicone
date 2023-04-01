@@ -35,6 +35,8 @@ export async function userMetrics(
     whereArgsAcc,
     true
   );
+  console.log("WHERE", whereFilterString);
+  console.log("HAVING", havingFilterString);
   const query = `
 SELECT request.user_id,
   count(DISTINCT date_trunc('day'::text, request.created_at)) AS active_for,
@@ -59,7 +61,6 @@ SELECT request.user_id,
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-
   const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
   if (error !== null) {
     return { data: null, error: error };

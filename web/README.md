@@ -1,7 +1,7 @@
 ## Making DB changes
 
 ```
-bash push_prod.sh
+bash prod_push.sh
 ```
 
 ## Getting Started

@@ -20,27 +20,19 @@ import {
   FunnelIcon,
   MinusCircleIcon,
   PlusCircleIcon,
-  PlusIcon,
   Square3Stack3DIcon,
-  TrashIcon,
   ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
-import { CSVLink } from "react-csv";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
+import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
+import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
-import { UserMetric } from "../../../lib/api/users/users";
-import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
-import {
-  ColumnType,
-  TableFilterMap,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import ThemedTextDropDown from "./themedTextDropDown";
-import { RequestWrapper } from "../../templates/requests/useRequestsPage";
+
 import { Column } from "../../ThemedTableV2";
+import { AdvancedFilters, UIFilterRow } from "./themedAdvancedFilters";
 import ThemedToggle from "./themedTabs";
-import ThemedDropdown from "./themedDropdown";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -48,7 +40,7 @@ export function escapeCSVString(s: string | undefined): string | undefined {
   }
   return s.replace(/"/g, '""');
 }
-export type Filter = (FilterLeaf & { id?: string }) | { id?: string };
+export type Filter = FilterLeaf;
 
 interface ThemedHeaderProps {
   isFetching: boolean; // if fetching, we disable other time select buttons
@@ -57,8 +49,7 @@ interface ThemedHeaderProps {
     onColumnCallback: (columns: Column[]) => void;
   };
   csvExport?: {
-    data: any[];
-    fileName: string;
+    onClick: () => void;
   };
   timeFilter?: {
     timeFilterOptions: { key: string; value: string }[];
@@ -67,12 +58,13 @@ interface ThemedHeaderProps {
     defaultTimeFilter: TimeInterval;
   };
   advancedFilter?: {
-    filterMap: TableFilterMap;
-    onAdvancedFilter: (advancedFilters: Filter[]) => void;
+    filterMap: SingleFilterDef<any>[];
+    onAdvancedFilter: Dispatch<SetStateAction<UIFilterRow[]>>;
+    filters: UIFilterRow[];
   };
   view?: {
     viewMode: string;
-    setViewMode: Dispatch<SetStateAction<"Condensed" | "Expanded">>;
+    setViewMode: (mode: "Condensed" | "Expanded") => void;
   };
 }
 
@@ -86,8 +78,22 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     view,
   } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<Filter[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  const options = [
+    {
+      label: "Condensed",
+      icon: Square3Stack3DIcon,
+    },
+    {
+      label: "Expanded",
+      icon: ArrowsPointingOutIcon,
+    },
+  ];
+
+  const initialIndex = options.findIndex(
+    (option) => option.label === view?.viewMode
+  );
 
   return (
     <div className="">
@@ -96,7 +102,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col lg:flex-row items-start gap-4 justify-between lg:items-center pb-3">
+        <div className="flex flex-col md:flex-row items-start gap-4 justify-between md:items-center pb-3">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
             {timeFilter && (
               <ThemedTimeFilter
@@ -110,7 +116,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-wrap space-x-1 items-center">
+          <div className="flex flex-row space-x-1 items-center">
             {editColumns && (
               <Popover className="relative text-sm">
                 {({ open }) => (
@@ -127,7 +133,12 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                         className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                         aria-hidden="true"
                       />
-                      <span>View Columns</span>
+
+                      <span className="sm:inline md:hidden lg:inline">
+                        {`Columns (${
+                          editColumns.columns.filter((col) => col.active).length
+                        } / ${editColumns.columns.length})`}
+                      </span>
                     </Popover.Button>
 
                     <Transition
@@ -220,30 +231,19 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               </Popover>
             )}
             {advancedFilter && (
-              <div className="text-sm mx-auto flex">
+              <div className="mx-auto flex text-sm">
                 <button
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className={clsx(
-                    showAdvancedFilters
-                      ? "bg-sky-100 text-sky-900"
-                      : "hover:bg-sky-100 hover:text-sky-900",
-                    "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-                  )}
+                  className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
                 >
                   <FunnelIcon
-                    className={clsx(
-                      showAdvancedFilters
-                        ? "bg-sky-100 text-sky-900"
-                        : "hover:bg-sky-100 hover:text-sky-900",
-                      "mr-2 h-5 flex-none"
-                    )}
+                    className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                     aria-hidden="true"
                   />
-                  <p className="text-sm">
-                    {showAdvancedFilters ? `Hide Filters` : `Show Filters`}{" "}
-                    {advancedFilters.length > 0
-                      ? `(${advancedFilters.length})`
-                      : ""}
+                  <p className="sm:inline md:hidden lg:inline">
+                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
+                    {advancedFilter.filters.length > 0 &&
+                      `(${advancedFilter.filters.length})`}
                   </p>
                 </button>
               </div>
@@ -252,20 +252,16 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
-                  <CSVLink
-                    data={csvExport.data}
-                    filename={csvExport.fileName}
-                    className="flex"
-                    target="_blank"
+                  <button
+                    onClick={csvExport.onClick}
+                    className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
                   >
-                    <button className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg">
-                      <ArrowDownTrayIcon
-                        className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                        aria-hidden="true"
-                      />
-                      Export
-                    </button>
-                  </CSVLink>
+                    <ArrowDownTrayIcon
+                      className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                      aria-hidden="true"
+                    />
+                    <p className="sm:inline md:hidden lg:inline">Export</p>
+                  </button>
                 </Menu>
               </div>
             )}
@@ -285,6 +281,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   onOptionSelect={(option) =>
                     view.setViewMode(option as "Condensed" | "Expanded")
                   }
+                  initialIndex={initialIndex}
                 />
               </div>
             )}
@@ -292,303 +289,67 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         </div>
 
         {advancedFilter && (
-          <div
-            className={clsx(
-              showAdvancedFilters ? "block" : "hidden",
-              "border border-gray-300 border-dashed bg-white rounded-lg p-4 mt-2 mb-4 shadow-sm space-y-4"
+          <div>
+            {advancedFilter.filterMap && (
+              <>
+                {showAdvancedFilters && (
+                  <AdvancedFilters
+                    filterMap={advancedFilter.filterMap}
+                    filters={advancedFilter.filters}
+                    setAdvancedFilters={advancedFilter.onAdvancedFilter}
+                  />
+                )}
+                {advancedFilter.filters.length > 0 && !showAdvancedFilters && (
+                  <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
+                    {advancedFilter.filters.map((_filter, index) => {
+                      return (
+                        <span
+                          key={index}
+                          className="inline-flex items-center rounded-2xl bg-sky-100 py-1.5 pl-4 pr-2 text-sm font-medium text-sky-700 border border-sky-300"
+                        >
+                          {
+                            advancedFilter.filterMap[_filter.filterMapIdx]
+                              ?.label
+                          }{" "}
+                          {
+                            advancedFilter.filterMap[_filter.filterMapIdx]
+                              ?.operators[_filter.operatorIdx].label
+                          }{" "}
+                          {_filter.value}
+                          <button
+                            onClick={() => {
+                              advancedFilter.onAdvancedFilter((prev) => {
+                                const newFilters = [...prev];
+                                newFilters.splice(index, 1);
+                                return newFilters;
+                              });
+                            }}
+                            type="button"
+                            className="ml-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-sky-400 hover:bg-indigo-200 hover:text-sky-500 focus:bg-sky-500 focus:text-white focus:outline-none"
+                          >
+                            <span className="sr-only">Remove large option</span>
+                            <svg
+                              className="h-2.5 w-2.5"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 8 8"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeWidth="1.5"
+                                d="M1 1l6 6m0-6L1 7"
+                              />
+                            </svg>
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
-          >
-            <div className="text-sm text-gray-500">Filters</div>
-            <div className="space-y-4 ml-0 sm:ml-4">
-              {advancedFilter.filterMap && (
-                <AdvancedFilters
-                  filterMap={advancedFilter.filterMap}
-                  filters={advancedFilters}
-                  setAdvancedFilters={setAdvancedFilters}
-                />
-              )}
-            </div>
-
-            <button
-              onClick={() => {
-                setAdvancedFilters((prev) => {
-                  return [...prev, { id: crypto.randomUUID() }];
-                });
-              }}
-              className="ml-4 flex flex-row items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-3 py-1.5 rounded-lg"
-            >
-              <PlusIcon
-                className="mr-2 h-4 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                aria-hidden="true"
-              />
-              Add Filter
-            </button>
-            <div className="w-full flex justify-end gap-4">
-              <button
-                onClick={() => {
-                  setAdvancedFilters([]);
-                  advancedFilter.onAdvancedFilter(advancedFilters);
-                }}
-                className={clsx(
-                  "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                )}
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => {
-                  advancedFilter.onAdvancedFilter(advancedFilters);
-                }}
-                className={clsx(
-                  "relative inline-flex items-center rounded-md hover:bg-gray-700 bg-black px-4 py-2 text-sm font-medium text-white"
-                )}
-              >
-                Save
-              </button>
-            </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function AdvancedFilters({
-  filterMap,
-  filters,
-  setAdvancedFilters,
-}: {
-  filterMap: TableFilterMap;
-  filters: Filter[];
-  setAdvancedFilters: Dispatch<SetStateAction<Filter[]>>;
-}) {
-  return (
-    <div className="space-y-4">
-      {filters.map((_filter, index) => {
-        return (
-          <div key={_filter.id}>
-            <AdvancedFilterRow
-              filterMap={filterMap}
-              handleFilterChange={(filter) => {
-                setAdvancedFilters((prev) => {
-                  const newFilters = [...prev];
-                  newFilters[index] = filter;
-                  newFilters[index].id = _filter.id;
-                  return newFilters;
-                });
-              }}
-              onDeleteHandler={() => {
-                setAdvancedFilters((prev) => {
-                  const newFilters = [...prev];
-                  newFilters[index].id = _filter.id;
-                  newFilters.splice(index, 1);
-                  console.log("newFilters", newFilters);
-                  return newFilters;
-                });
-              }}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function AdvancedFilterInput({
-  type,
-  value,
-  onChange,
-  inputParams,
-}: {
-  type: ColumnType;
-  value: string;
-  onChange: (value: string) => void;
-  inputParams?: string[];
-}) {
-  switch (type) {
-    case "text":
-      return (
-        <input
-          type="text"
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"text..."}
-          value={value}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        />
-      );
-    case "number":
-      return (
-        <input
-          type="number"
-          name="search-field"
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"number..."}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        />
-      );
-    case "timestamp":
-      return (
-        <input
-          type="datetime-local"
-          name="search-field-start"
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={"date..."}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
-        />
-      );
-    case "text-with-suggestions":
-      return (
-        <>
-          <ThemedTextDropDown
-            options={inputParams ?? []}
-            onChange={(e) => onChange(e)}
-            value={value}
-          />
-        </>
-      );
-  }
-}
-
-function AdvancedFilterRow({
-  filterMap,
-  handleFilterChange,
-  onDeleteHandler,
-}: {
-  filterMap: TableFilterMap;
-  handleFilterChange: (filter: FilterLeaf) => void;
-  onDeleteHandler: () => void;
-}) {
-  const tables = Object.entries(filterMap);
-
-  const [table, setTable] = useState(tables[0][0]);
-
-  const columns = tables.find((t) => t[0] === table)?.[1].columns;
-
-  const columnsEntries = columns ? Object.entries(columns) : null;
-
-  const [column, setColumn] = useState(
-    columnsEntries && columnsEntries[0] ? columnsEntries[0][0] : ""
-  );
-
-  const operators =
-    (columnsEntries && columnsEntries.find((c) => c[0] === column)?.[1]) ??
-    null;
-
-  const operatorsEntries = operators
-    ? Object.entries(operators.operations)
-    : [];
-
-  const [operator, setOperator] = useState(
-    operatorsEntries && operatorsEntries[0] ? operatorsEntries[0][0] : ""
-  );
-
-  const selectedOperator = operatorsEntries.find((o) => o[0] === operator)?.[1];
-
-  const [value, setValue] = useState("");
-
-  useEffect(() => {
-    setColumn(columnsEntries ? columnsEntries[0][0] : "");
-    setValue("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table]);
-
-  useEffect(() => {
-    setOperator(operatorsEntries ? operatorsEntries[0][0] : "");
-    setValue("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [column]);
-
-  const operatorMap = (operator: string) => {
-    switch (operator) {
-      case "equals":
-        return "equals";
-      case "gte":
-        return "greater than or equal to";
-      case "lte":
-        return "less than or equal to";
-      case "like":
-        return "like";
-      case "ilike":
-        return "ilike";
-      default:
-        return "";
-    }
-  };
-
-  return (
-    <div className="w-full flex flex-col lg:flex-row gap-2 items-left lg:items-center">
-      <ThemedDropdown
-        options={tables.map((table) => {
-          return {
-            value: table[0],
-            label: table[1].label,
-          };
-        })}
-        selectedValue={table}
-        onSelect={(selected) => {
-          setTable(selected);
-        }}
-        className="w-full lg:w-fit"
-        label="Table"
-      />
-      {columnsEntries && (
-        <ThemedDropdown
-          options={columnsEntries.map((column) => {
-            return {
-              value: column[0],
-              label: column[1].label,
-            };
-          })}
-          selectedValue={column}
-          onSelect={(selected) => {
-            setColumn(selected);
-          }}
-          className="w-full lg:w-fit"
-          label="Column"
-        />
-      )}
-
-      {column && (
-        <ThemedDropdown
-          options={operatorsEntries.map((operator) => {
-            return {
-              value: operator[0],
-              label: operatorMap(operator[0]),
-            };
-          })}
-          selectedValue={operator}
-          onSelect={(selected) => {
-            setOperator(selected);
-          }}
-          className="w-full lg:w-fit"
-        />
-      )}
-      {selectedOperator && (
-        <div className="w-full lg:w-fit">
-          <AdvancedFilterInput
-            type={selectedOperator.type}
-            value={value}
-            inputParams={selectedOperator.inputParams}
-            onChange={(value) => {
-              let filter: any = {};
-              filter[table] = {};
-              filter[table][column] = {};
-              filter[table][column][operator] = value;
-              handleFilterChange(filter);
-              setValue(value);
-            }}
-          />
-        </div>
-      )}
-
-      <div className="w-full lg:w-fit border-b pb-4 lg:border-b-0 lg:pb-0 justify-end flex lg:justify-center">
-        <button
-          type="button"
-          className="inline-flex items-center rounded-md bg-red-600 p-1.5 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-          onClick={() => onDeleteHandler()}
-        >
-          <TrashIcon className="h-4 w-4" />
-        </button>
       </div>
     </div>
   );

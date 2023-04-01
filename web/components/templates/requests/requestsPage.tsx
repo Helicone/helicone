@@ -1,28 +1,28 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useRouter } from "next/router";
+import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import { Result } from "../../../lib/result";
 import { truncString } from "../../../lib/stringHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetKeys } from "../../../services/hooks/keys";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
-import {
-  FilterNode,
-  getPropertyFilters,
-} from "../../../services/lib/filters/filterDefs";
-import { RequestsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import { useLocalStorageState } from "../../../services/hooks/localStorage";
+import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/sorts";
-import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader, {
   escapeCSVString,
 } from "../../shared/themed/themedTableHeader";
@@ -32,7 +32,7 @@ import {
   getUSDate,
   removeLeadingWhitespace,
 } from "../../shared/utils/utils";
-import ThemedTableV2, { Column } from "../../ThemedTableV2";
+import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
 import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
@@ -197,33 +197,15 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   ];
 
-  const localStorageColumns =
-    typeof window !== "undefined"
-      ? localStorage.getItem("requestsColumns")
-      : null;
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
 
-  const parsed = JSON.parse(localStorageColumns || "[]") as Column[];
-
-  const parseKey = (keyString: string | null) => {
-    if (!keyString) {
-      return "all";
-    }
-    return {
-      user_api_keys: {
-        api_key_hash: {
-          equals: keyString,
-        },
-      },
-    };
-  };
-
-  const [defaultColumns, setDefaultColumns] =
-    useState<Column[]>(initialColumns);
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [advancedFilter, setAdvancedFilter] = useState<FilterNode>("all");
+  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
+    UIFilterRow[]
+  >("advancedFilters", []);
+
   const [orderBy, setOrderBy] = useState<{
     column: keyof RequestWrapper;
     direction: SortDirection;
@@ -234,33 +216,42 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
     created_at: "desc",
   });
-  const [apiKeyFilter, setApiKeyFilter] = useState<FilterNode>(
-    parseKey(sessionStorageKey)
+  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
+    sessionStorageKey
   );
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
-        gte: new Date(0).toISOString(),
+        gte: getTimeIntervalAgo("7d").toISOString(),
       },
     },
   });
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
-  const { count, values, from, isLoading, properties, refetch, requests, to } =
-    useRequestsPage(
-      currentPage,
-      currentPageSize,
-      {
-        left: timeFilter,
-        operator: "and",
-        right: {
-          left: apiKeyFilter,
-          operator: "and",
-          right: advancedFilter,
-        },
-      },
-      sortLeaf
-    );
+  const {
+    count,
+    values,
+    from,
+    isLoading,
+    isPropertiesLoading,
+    isValuesLoading,
+    properties,
+    refetch,
+    filterMap,
+    requests,
+    to,
+  } = useRequestsPage(
+    currentPage,
+    currentPageSize,
+    debouncedAdvancedFilter,
+    {
+      left: timeFilter,
+      operator: "and",
+      right: apiKeyFilter ? parseKey(apiKeyFilter) : "all",
+    },
+    sortLeaf
+  );
 
   const { keys, isLoading: isKeysLoading } = useGetKeys();
 
@@ -294,25 +285,13 @@ const RequestsPage = (props: RequestsPageProps) => {
     setOpen(true);
   };
 
-  // columns
-
-  const [columns, setColumns] = useState<Column[]>(defaultColumns);
+  const [columns, setColumns] = useLocalStorageState<Column[]>(
+    "requestTableColumns",
+    []
+  );
 
   useEffect(() => {
-    if (
-      columns.length > initialColumns.length ||
-      (values.length === 0 && properties.length === 0)
-    ) {
-      if (parsed) {
-        columns.forEach((column) => {
-          const match = parsed.find((c) => c.key === column.key);
-          if (match) {
-            column.active = match.active;
-          }
-        });
-      }
-      return;
-    }
+    if (isPropertiesLoading || isValuesLoading) return;
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
@@ -353,68 +332,68 @@ const RequestsPage = (props: RequestsPageProps) => {
     });
 
     const newColumns = [
-      ...defaultColumns,
+      ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
     ];
 
-    if (parsed) {
-      newColumns.forEach((column) => {
-        const match = parsed.find((c) => c.key === column.key);
-        if (match) {
-          column.active = match.active;
+    setColumns((prev) => {
+      return newColumns.map((c) => {
+        const prevColumn = prev.find((p) => p.key === c.key);
+        if (prevColumn) {
+          return {
+            ...c,
+            ...prevColumn,
+          };
         }
+        return c;
       });
-    }
-
-    setColumns(newColumns);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultColumns, values, properties]);
+  }, [isPropertiesLoading, isValuesLoading]);
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }
 
-  const router = useRouter();
-  const { propertyParams } = useGetPropertyParams();
-
-  const propertyFilterMap = {
-    properties: {
-      label: "Properties",
-      columns: getPropertyFilters(
-        properties,
-        propertyParams.map((p) => p.property_param)
-      ),
-    },
-  };
-
-  const filterMap =
-    properties.length > 0
-      ? { ...propertyFilterMap, ...RequestsTableFilter }
-      : RequestsTableFilter;
-
   const columnHelper = createColumnHelper<RequestWrapper>();
 
-  const activeCols: string[] = columns
-    .filter((col) => col.active)
-    .map((col) => col.key as string);
-
-  const csv = requests.map((request) => {
-    const keys = Object.keys(request);
-    const copyRequest = { ...request };
-    for (const key of keys) {
-      if (!activeCols.includes(key)) {
-        delete copyRequest[key];
-      } else {
-        if (key === "requestText" || key === "responseText") {
-          copyRequest[key] =
-            escapeCSVString(JSON.stringify(request[key] || "")) || "";
-        }
+  async function downloadCSV() {
+    try {
+      const response = await fetch("/api/export/requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: advancedFilters,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: 5000,
+          sort: sortLeaf,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("An error occurred while downloading the CSV file");
       }
+
+      const csvData = await response.text();
+      const blob = new Blob([csvData], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "requests.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Release the Blob URL
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
     }
-    return copyRequest;
-  });
+  }
 
   return (
     <>
@@ -443,10 +422,9 @@ const RequestsPage = (props: RequestsPageProps) => {
           </div>
         }
       />
-
       <div className="">
         <div className="mt-4 space-y-2">
-          <div className="space-y-2">
+          <div className="space-y-4">
             <ThemedTableHeader
               view={{
                 viewMode,
@@ -454,23 +432,11 @@ const RequestsPage = (props: RequestsPageProps) => {
               }}
               editColumns={{
                 columns: columns,
-                onColumnCallback: (columns) => {
-                  const active = columns.map((c) => {
-                    return {
-                      key: c.key,
-                      active: c.active,
-                    };
-                  });
-                  localStorage.setItem(
-                    "requestsColumns",
-                    JSON.stringify(active)
-                  );
-                  setDefaultColumns(columns);
-                },
+                onColumnCallback: setColumns,
               }}
               timeFilter={{
                 customTimeFilter: true,
-                defaultTimeFilter: "all",
+                defaultTimeFilter: "7d",
                 onTimeSelectHandler: onTimeSelectHandler,
                 timeFilterOptions: [
                   { key: "24h", value: "Today" },
@@ -481,36 +447,15 @@ const RequestsPage = (props: RequestsPageProps) => {
                 ],
               }}
               csvExport={{
-                data: csv,
-                fileName: "requests.csv",
+                onClick: downloadCSV,
               }}
               isFetching={isLoading}
               advancedFilter={{
                 filterMap,
-                onAdvancedFilter: (_filters) => {
-                  router.query.page = "1";
-                  router.push(router);
-                  const filters = _filters.filter((f) => f) as FilterNode[];
-                  if (filters.length === 0) {
-                    setAdvancedFilter("all");
-                  } else {
-                    const firstFilter = filters[0];
-                    const reducedFilter = filters
-                      .slice(1)
-                      .reduce((acc, curr) => {
-                        return {
-                          left: acc,
-                          operator: "and",
-                          right: curr,
-                        };
-                      }, firstFilter);
-
-                    setAdvancedFilter(reducedFilter);
-                  }
-                },
+                onAdvancedFilter: setAdvancedFilters,
+                filters: advancedFilters,
               }}
             />
-
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (

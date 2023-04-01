@@ -6,13 +6,16 @@ import { Database } from "../../../supabase/database.types";
 
 export interface PropertyParam {
   property_param: string;
+  property_key: string;
 }
 
 export async function getPropertyParams(
   user_id: string
 ): Promise<Result<PropertyParam[], string>> {
   const query = `
-SELECT DISTINCT properties->>keys AS property_param
+SELECT DISTINCT properties->>keys AS property_param,
+keys AS property_key
+
 FROM request r
 JOIN user_api_keys u ON r.auth_hash = u.api_key_hash
 CROSS JOIN LATERAL jsonb_object_keys(properties) keys

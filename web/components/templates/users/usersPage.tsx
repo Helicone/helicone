@@ -9,8 +9,11 @@ import { useEffect, useState } from "react";
 
 import { truncString } from "../../../lib/stringHelpers";
 import { useUsers } from "../../../services/hooks/users";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { UserMetricsTableFilter } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  filterListToTree,
+  FilterNode,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
 import { UserRow } from "../../../services/lib/users";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -18,6 +21,8 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 const monthNames = [
   "Jan",
@@ -42,12 +47,15 @@ interface UsersPageProps {
 const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
-  const [advancedFilters, setAdvancedFilters] = useState<FilterNode>("all");
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const { users, count, from, isLoading, to } = useUsers(
     page,
     pageSize,
-    advancedFilters
+    filterListToTree(
+      filterUIToFilterLeafs(userTableFilters, advancedFilters),
+      "and"
+    )
   );
   const router = useRouter();
 
@@ -131,37 +139,54 @@ const UsersPage = (props: UsersPageProps) => {
     },
   ];
 
+  async function downloadCSV() {
+    try {
+      const response = await fetch("/api/export/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: advancedFilters,
+          offset: (page - 1) * pageSize,
+          limit: 100000,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("An error occurred while downloading the CSV file");
+      }
+
+      const csvData = await response.text();
+      const blob = new Blob([csvData], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "users.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Release the Blob URL
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <>
       <AuthHeader title={"Users"} />
       <div className="space-y-2">
         <ThemedTableHeader
           csvExport={{
-            data: users,
-            fileName: "users.csv",
+            onClick: downloadCSV,
           }}
           isFetching={isLoading}
           advancedFilter={{
-            filterMap: UserMetricsTableFilter,
-            onAdvancedFilter: (_filters) => {
-              router.query.page = "1";
-              router.push(router);
-              const filters = _filters.filter((f) => f) as FilterNode[];
-              if (filters.length === 0) {
-                setAdvancedFilters("all");
-              } else {
-                const firstFilter = filters[0];
-                setAdvancedFilters(
-                  filters.slice(1).reduce((acc, curr) => {
-                    return {
-                      left: acc,
-                      operator: "and",
-                      right: curr,
-                    };
-                  }, firstFilter)
-                );
-              }
-            },
+            filterMap: userTableFilters,
+            onAdvancedFilter: setAdvancedFilters,
+            filters: advancedFilters,
           }}
         />
         {isLoading || from === undefined || to === undefined ? (
