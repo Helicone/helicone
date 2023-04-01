@@ -32,8 +32,6 @@ const Home = (props: HomeProps) => {
     },
   });
 
-  console.log(data);
-
   function getLabel(label: HeliconeIssuesResolvedType["data"][0]["labels"][0]) {
     if (typeof label === "string") {
       return label;
@@ -95,8 +93,25 @@ const Home = (props: HomeProps) => {
                 issues that you would like to see implemented in Helicone.
               </p>
               <p className="text-lg font-sans">
-                Have an idea for a feature? Create an issue on our github or
-                discuss it on our discord.
+                Have an idea for a feature? Create an issue on our{" "}
+                <Link
+                  href="https://github.com/Helicone/helicone/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Github
+                </Link>{" "}
+                or discuss it on our{" "}
+                <Link
+                  href="https://discord.gg/zsSTcH2qhG"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Discord
+                </Link>
+                .
               </p>
             </div>
 
