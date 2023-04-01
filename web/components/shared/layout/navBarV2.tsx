@@ -14,52 +14,38 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { Fragment, useState } from "react";
 import OnboardingButton from "../auth/onboardingButton";
+import { SocialMeta } from "./basePageV2";
 
 const navigation = [
+  {
+    name: "Docs",
+    description: "Learn how to use Helicone to its fullest potential.",
+    href: "https://docs.helicone.ai/",
+    target: "_target",
+  },
+  {
+    name: "Roadmap",
+    description: "See what we're working on and what's coming next.",
+    href: "/roadmap",
+    target: "_self",
+  },
   {
     name: "Pricing",
     description:
       "Let us help you get back to what you do best. We'll handle the analytics.",
     href: "/pricing",
-    icon: BanknotesIcon,
     target: "_self",
-  },
-  {
-    name: "Docs",
-    description: "Learn how to use Helicone to its fullest potential.",
-    href: "https://docs.helicone.ai/",
-    icon: BookOpenIcon,
-    target: "_target",
-  },
-  {
-    name: "Github",
-    description: "We're open source! Check out our code and contribute!",
-    href: "https://github.com/Helicone/helicone",
-    icon: CodeBracketIcon,
-    target: "_blank",
-  },
-  {
-    name: "Discord",
-    description: "Join our vibrant community and chat with us!",
-    href: "https://discord.gg/zsSTcH2qhG",
-    icon: ChatBubbleLeftRightIcon,
-    target: "_blank",
-  },
-  {
-    name: "Contact",
-    description: "Have a question? We're here to help!",
-    href: process.env.NEXT_PUBLIC_HELICONE_CONTACT_LINK || "#",
-    icon: QuestionMarkCircleIcon,
   },
 ];
 
 interface NavBarV2Props {
   setOpenLogin: (open: boolean) => void;
   setOpenOnboarding: (open: boolean) => void;
+  socials: SocialMeta[];
 }
 
 const NavBarV2 = (props: NavBarV2Props) => {
-  const { setOpenLogin, setOpenOnboarding } = props;
+  const { setOpenLogin, setOpenOnboarding, socials } = props;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -103,6 +89,20 @@ const NavBarV2 = (props: NavBarV2Props) => {
           ))}
         </div>
         <div className="flex flex-1 items-center justify-end gap-x-4">
+          <div className="hidden lg:flex space-x-6">
+            {socials.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <span className="sr-only">{item.name}</span>
+                <item.icon className="h-6 w-6" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
           <button
             onClick={() => setOpenLogin(true)}
             className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold border border-gray-300 hover:bg-sky-50 text-gray-900 shadow-sm hover:text-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
@@ -130,40 +130,58 @@ const NavBarV2 = (props: NavBarV2Props) => {
       >
         <div className="fixed inset-0 z-10" />
         <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-gray-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-          <div className="flex items-center gap-x-6 justify-between">
-            <a href="#" className="-m-1.5 p-1.5">
-              <span className="sr-only">Helicone</span>
-              <Image
-                className="rounded-md"
-                src="/assets/heli-full-logo.png"
-                width={150}
-                height={150}
-                alt="Helicone-full-logo"
-              />
-            </a>
+          <div className="flex flex-col gap-10 h-full">
+            <div>
+              <div className="flex items-center gap-x-6 justify-between">
+                <a href="#" className="-m-1.5 p-1.5">
+                  <span className="sr-only">Helicone</span>
+                  <Image
+                    className="rounded-md"
+                    src="/assets/heli-full-logo.png"
+                    width={150}
+                    height={150}
+                    alt="Helicone-full-logo"
+                  />
+                </a>
 
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 text-gray-700"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <span className="sr-only">Close menu</span>
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-500/10">
-              <div className="space-y-2 py-6">
-                {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                  >
-                    {item.name}
-                  </a>
-                ))}
+                <button
+                  type="button"
+                  className="-m-2.5 rounded-md p-2.5 text-gray-700"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="sr-only">Close menu</span>
+                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
               </div>
+              <div className="mt-6 flow-root">
+                <div className="-my-6 divide-y divide-gray-500/10">
+                  <div className="space-y-2 py-6">
+                    {navigation.map((item) => (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                      >
+                        {item.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-row gap-5">
+              {socials.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <span className="sr-only">{item.name}</span>
+                  <item.icon className="h-6 w-6" aria-hidden="true" />
+                </a>
+              ))}
             </div>
           </div>
         </Dialog.Panel>
