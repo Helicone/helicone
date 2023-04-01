@@ -96,7 +96,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
           ))}
         </div>
         <div className="flex flex-1 items-center justify-end gap-x-4">
-          <div className="hidden lg:flex space-x-6">
+          <div className="hidden lg:flex space-x-6 mr-6">
             {socials.map((item) => (
               <a
                 key={item.name}
