@@ -37,13 +37,6 @@ const meta = {
         <BsDiscord {...props} />
       ),
     },
-    {
-      name: "Calendly",
-      href: "https://calendly.com/helicone",
-      icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <AiOutlineCalendar {...props} />
-      ),
-    },
   ],
 };
 
