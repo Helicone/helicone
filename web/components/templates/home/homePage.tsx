@@ -333,11 +333,11 @@ export default function HomePage() {
                   100+ Projects
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-gray-900">
+                  {/* <p className="text-lg font-semibold tracking-tight text-gray-900">
                     Active Projects
-                  </p>
+                  </p> */}
                   <p className="mt-2 text-base leading-7 text-gray-600">
-                    Over a hundred active projects using Helicone
+                    Our users trust us for their production applications.
                   </p>
                 </div>
               </div>
@@ -349,27 +349,28 @@ export default function HomePage() {
                   m+ Requests
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
+                  {/* <p className="text-lg font-semibold tracking-tight text-white">
                     We&apos;re proud that our customers have made over{" "}
                     {Math.floor(
-                      (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
+                      (globalMetrics?.data[0].count ?? 15_000_000) / 1_000_000
                     )}{" "}
                     million requests.
-                  </p>
+                  </p> */}
                   <p className="mt-2 text-base leading-7 text-gray-400">
-                    We currently support all OpenAI models and have plans to add
-                    other providers
+                    Our systems can easily scale to handle millions of requests
+                    per day. You never have to worry about volume being an
+                    issue.
                   </p>
                 </div>
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
                 <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  250+ Community
+                  250+ Discord Community
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
+                  {/* <p className="text-lg font-semibold tracking-tight text-white">
                     Discord Community
-                  </p>
+                  </p> */}
                   <p className="mt-2 text-base leading-7 text-indigo-200">
                     Join our community on Discord to get help, ask questions,
                     and share your projects.
