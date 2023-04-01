@@ -168,7 +168,7 @@ export default function HomePage() {
             />
           </svg>
           <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:py-28 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-2xl lg:flex-shrink-0 lg:pt-8">
               <div className="mt-24 sm:mt-32 lg:mt-8">
                 <div className="inline-flex space-x-6">
                   <span className="rounded-full bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
@@ -263,7 +263,7 @@ export default function HomePage() {
                 Trusted by leading companies building with OpenAI
               </p>
               <p className="mt-2 text-base leading-5 text-gray-600 italic sm:text-m">
-                Anthropic, Cohere, Google AI coming soon...
+                Anthropic, Cohere, Google AI, and more coming soon...
               </p>
             </div>
             <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
@@ -318,10 +318,10 @@ export default function HomePage() {
           </div>
         </div>
         <div className="bg-white py-24 sm:py-0">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
-              <div className="flex flex-col-reverse justify-between gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-4">
-                <p className="flex-none text-5xl font-bold tracking-tight text-white">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-4">
+            <div className="mx-auto flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end justify-center">
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
                   {(Math.floor(
                     (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
                   ) /
@@ -329,12 +329,13 @@ export default function HomePage() {
                     0}
                   m+
                 </p>
-                <p className="text-lg tracking-tight text-white">
-                  {" "}
-                  Requests logged
-                </p>
+                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
+                  <p className="text-lg font-semibold tracking-tight text-gray-900">
+                    Requests logged
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
                 <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
                   250+
                 </p>
@@ -342,19 +343,17 @@ export default function HomePage() {
                   <p className="text-lg font-semibold tracking-tight text-gray-900">
                     Developers community
                   </p>
-                  <p className="mt-2 text-base leading-7 text-gray-600">
-                    Cloud and self-hosted solutions available
-                  </p>
                 </div>
               </div>
-              <div className="flex flex-col-reverse justify-between gap-x-16 rounded-2xl bg-sky-600 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-4">
-                <p className="flex-none text-5xl font-bold tracking-tight text-white">
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
                   100+
                 </p>
-                <p className="text-lg tracking-tight text-white">
-                  {" "}
-                  Projects using Helicone{" "}
-                </p>
+                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
+                  <p className="text-lg font-semibold tracking-tight text-gray-900">
+                    Projects using Helicone
+                  </p>
+                </div>
               </div>
             </div>
           </div>

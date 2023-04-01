@@ -10,7 +10,7 @@ import { clsx } from "../../shared/clsx";
 const features = [
   {
     name: "dashboard",
-    label: "Dashboard Metrics",
+    label: "Key Metrics.",
     description:
       "Get an overview of your application with an in-built dashboard, tailor made for generative AI applications.",
     icon: CloudArrowUpIcon,
@@ -24,7 +24,7 @@ const features = [
   },
   {
     name: "model",
-    label: "Optimize spend.",
+    label: "Optimize Spend.",
     description:
       "Track spending on each model, user, or conversation. Use this data to optimize your API usage and reduce costs.",
     icon: ServerIcon,
@@ -47,7 +47,7 @@ const Details = () => {
               </p>
               <p className="mt-6 text-lg leading-8 text-gray-600 font-bold">
                 Integrate models like GPT-4 with Helicone to track API requests
-                and visualize results in a sleek, customizable dashboard
+                and visualize results.
               </p>
               <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
                 {features.map((feature) => (
