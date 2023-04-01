@@ -89,7 +89,7 @@ const Home = (props: HomeProps) => {
             <div className="flex flex-col space-y-4">
               <p className="text-5xl font-sans">Roadmap</p>
               <p className="text-lg font-sans">
-                We are building a community driven roadmap. View and vote on
+                We are building a community-driven roadmap. View and vote on
                 issues that you would like to see implemented in Helicone.
               </p>
               <p className="text-lg font-sans">

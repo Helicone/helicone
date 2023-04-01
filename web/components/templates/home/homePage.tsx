@@ -43,7 +43,7 @@ const timeline = [
     dateTime: "2023-01",
   },
   {
-    name: "Backed by YCombinator",
+    name: "Backed by Y Combinator",
     description:
       "We were accepted into YCombinator's Winter 2023 batch and have been working closely with the YC partners.",
     date: "Jan 2023",
@@ -168,17 +168,17 @@ export default function HomePage() {
             />
           </svg>
           <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:py-28 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-2xl lg:flex-shrink-0 lg:pt-8">
               <div className="mt-24 sm:mt-32 lg:mt-8">
                 <div className="inline-flex space-x-6">
                   <span className="rounded-full bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
-                    Backed by YCombinator
+                    Backed by Y Combinator
                   </span>
                   <Link
                     href="https://github.com/Helicone/helicone"
-                    className="sm:inline-flex hidden items-center space-x-2 text-sm font-medium leading-6 text-gray-600"
+                    className="sm:inline-flex hidden items-center space-x-2 text-m font-medium leading-6 text-gray-600"
                   >
-                    <span>We&apos;re Open-Source</span>
+                    <span>We&apos;re open-source</span>
                     <ChevronRightIcon
                       className="h-5 w-5 text-gray-400"
                       aria-hidden="true"
@@ -186,16 +186,19 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <h1 className="mt-8 text-4xl font-bold tracking-tight text-gray-900 sm:text-7xl">
-                Observability for LLM applications
+              <h1 className="mt-8 text-5xl tracking-tight text-gray-900 sm:text-7xl">
+                <span className="font-semibold">
+                  Observability for Generative AI Applications
+                </span>
               </h1>
-              <p className="mt-6 text-xl leading-8 text-gray-600">
-                Track usage, costs, and latency metrics with one line of code.
-                We&apos;re an open-source observability platform that helps you
-                better understand your GPT-3 application.
+              <p className="mt-6 text-3xl leading-8 text-gray-600">
+                Log requests and track metrics with one line of code
               </p>
               <div className="mt-10 flex items-center gap-x-4">
-                <OnboardingButton variant="secondary" title={"Get Started"} />
+                <OnboardingButton
+                  variant="secondary"
+                  title={"Get Started - Free"}
+                />
                 <button
                   onClick={() => {
                     setDemoLoading(true);
@@ -238,73 +241,10 @@ export default function HomePage() {
           </div>
         </div>
         {/* FEATURE */}
-        <div className="bg-white py-24 sm:py-16">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:mx-0">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Even wonder how much you spend on GPT-3? We do too.
-              </h2>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                Creating an internal tool for observability and monitoring is
-                difficult to build and even harder to maintain. Helicone is a
-                platform built specifically for developers using LLMs.
-              </p>
-            </div>
-            <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
-              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-8 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
-                <p className="flex-none text-3xl font-bold tracking-tight text-gray-900">
-                  100+
-                </p>
-                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Stars on Github
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-gray-600">
-                    We provide cloud and self-hosting solutions
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-44">
-                <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  {Math.floor(
-                    (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
-                  ) / 10}{" "}
-                  Million
-                </p>
-                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    We&apos;re proud that our customers have made over{" "}
-                    {Math.floor(
-                      (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
-                    )}{" "}
-                    million requests.
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-gray-400">
-                    We currently support all OpenAI models and have plans to add
-                    other providers
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
-                <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  &gt;200,000
-                </p>
-                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    Requests per day
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-indigo-200">
-                    Every day our customers are getting value from Helicone.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         {/* DetailsV2 */}
         <Details />
         {/* ONE LINE OF CODE */}
-        <div className="relative isolate bg-white pt-24 pb-32 sm:pt-32">
+        <div className="relative isolate bg-white pt-24 pb-6 sm:pt-32">
           <div className="absolute inset-x-0 top-0 -z-10 flex transform-gpu overflow-hidden pt-32 opacity-25 blur-3xl sm:pt-40 xl:justify-end">
             <svg
               viewBox="0 0 1313 771"
@@ -317,11 +257,13 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-7xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Get integrated with only one line of code.
+                Get integrated with only one line of code
               </h2>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                Here are some testimonials from real users that have integrated
-                Helicone into their apps.
+              <p className="mt-6 text-base leading-7 text-gray-600 sm:text-2xl">
+                Trusted by leading companies building with OpenAI
+              </p>
+              <p className="mt-2 text-base leading-5 text-gray-600 italic sm:text-m">
+                Anthropic, Cohere, Google AI, and more coming soon...
               </p>
             </div>
             <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
@@ -375,6 +317,47 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+        <div className="bg-white py-24 sm:py-0">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-4">
+            <div className="mx-auto flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end justify-center">
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
+                  {(Math.floor(
+                    (globalMetrics?.data[0].count ?? 5_700_000) / 100_000
+                  ) /
+                    10) |
+                    0}
+                  m+
+                </p>
+                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
+                  <p className="text-lg font-semibold tracking-tight text-gray-900">
+                    Requests logged
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
+                  250+
+                </p>
+                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
+                  <p className="text-lg font-semibold tracking-tight text-gray-900">
+                    Developers community
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-2 rounded-2xl bg-gray-200 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
+                <p className="flex-none text-5xl font-bold tracking-tight text-gray-900">
+                  100+
+                </p>
+                <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
+                  <p className="text-lg font-semibold tracking-tight text-gray-900">
+                    Projects using Helicone
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         {/* Open Source */}
         <div className="bg-gray-50 py-24 sm:py-32">
           <div className="flex flex-col sm:flex-row w-full justify-between mx-auto max-w-7xl px-6 lg:px-8 items-start sm:items-center space-y-6 sm:space-y-0">
@@ -383,10 +366,10 @@ export default function HomePage() {
                 Join our fast-growing open source community
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
-                We&apos;ve been developer driven from the start, and we&apos;re
+                We&apos;ve been developerdriven from the start, and we&apos;re
                 committed to keeping it that way. We&apos;re always looking for
-                new contributors to help us build the best open source developer
-                tools.
+                new contributors to help us build the best open source
+                observability platform for generative AI.
               </p>
             </div>
             <div className="block space-x-4">
@@ -406,39 +389,6 @@ export default function HomePage() {
               >
                 View Github
               </a>
-            </div>
-          </div>
-          <div className="py-8 sm:py-16">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <div className="mx-auto grid max-w-2xl grid-cols-1 gap-8 overflow-hidden lg:mx-0 lg:max-w-none lg:grid-cols-4">
-                {timeline.map((item) => (
-                  <div key={item.name}>
-                    <time
-                      dateTime={item.dateTime}
-                      className="flex items-center text-sm font-semibold leading-6 text-sky-600"
-                    >
-                      <svg
-                        viewBox="0 0 4 4"
-                        className="mr-4 h-1 w-1 flex-none"
-                        aria-hidden="true"
-                      >
-                        <circle cx={2} cy={2} r={2} fill="currentColor" />
-                      </svg>
-                      {item.date}
-                      <div
-                        className="absolute -ml-2 h-px w-screen -translate-x-full bg-gray-900/10 sm:-ml-4 lg:static lg:ml-8 lg:-mr-6 lg:w-auto lg:flex-auto lg:translate-x-0"
-                        aria-hidden="true"
-                      />
-                    </time>
-                    <p className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">
-                      {item.name}
-                    </p>
-                    <p className="mt-1 text-base leading-7 text-gray-600">
-                      {item.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
