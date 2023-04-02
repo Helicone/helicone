@@ -178,7 +178,7 @@ export default function HomePage() {
                     href="https://github.com/Helicone/helicone"
                     className="sm:inline-flex hidden items-center space-x-2 text-m font-medium leading-6 text-gray-600"
                   >
-                    <span>We&apos;re open-source</span>
+                    <span>We&apos;re open source</span>
                     <ChevronRightIcon
                       className="h-5 w-5 text-gray-400"
                       aria-hidden="true"
@@ -186,13 +186,12 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <h1 className="mt-8 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                Observability for Generative AI applications
+              <h1 className="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                Observability for Generative AI
               </h1>
               <p className="mt-6 text-xl leading-8 text-gray-600">
-                Track usage, costs, and latency metrics with one line of code.
-                We&apos;re an open-source observability platform that helps you
-                better understand your GPT-3 application.
+                Track costs, usage, and latency for GPT applications with one
+                line of code.
               </p>
               <div className="mt-10 flex items-center gap-x-4">
                 <OnboardingButton variant="secondary" title={"Get Started"} />
@@ -319,13 +318,8 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:mx-0">
               <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Even wonder how much you spend on GPT-4? We do too.
+                Tools built for companies of the future
               </h2>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                Creating an internal tool for observability and monitoring is
-                difficult to build and even harder to maintain. Helicone is a
-                platform built specifically for developers using LLMs.
-              </p>
             </div>
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
               <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-8 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
@@ -336,8 +330,8 @@ export default function HomePage() {
                   {/* <p className="text-lg font-semibold tracking-tight text-gray-900">
                     Active Projects
                   </p> */}
-                  <p className="mt-2 text-base leading-7 text-gray-600">
-                    Our users trust us for their production applications.
+                  <p className="mt-2 text-base leading-7 font-semibold text-gray-600">
+                    Battle-tested in live production applications
                   </p>
                 </div>
               </div>
@@ -356,24 +350,22 @@ export default function HomePage() {
                     )}{" "}
                     million requests.
                   </p> */}
-                  <p className="mt-2 text-base leading-7 text-gray-400">
-                    Our systems can easily scale to handle millions of requests
-                    per day. You never have to worry about volume being an
-                    issue.
+                  <p className="mt-2 text-base leading-7 font-semibold text-gray-200">
+                    Logging millions of requests at scale
                   </p>
                 </div>
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
                 <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  250+ Discord Community
+                  250+ Developer Community
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   {/* <p className="text-lg font-semibold tracking-tight text-white">
                     Discord Community
                   </p> */}
-                  <p className="mt-2 text-base leading-7 text-indigo-200">
-                    Join our community on Discord to get help, ask questions,
-                    and share your projects.
+                  <p className="mt-2 text-base leading-7 font-semibold text-indigo-50">
+                    Trusted by hundreds of developers who share their projects
+                    in Helicone&apos;s vibrant community
                   </p>
                 </div>
               </div>
@@ -388,10 +380,10 @@ export default function HomePage() {
                 Join our fast-growing open source community
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
-                We&apos;ve been developerdriven from the start, and we&apos;re
-                committed to keeping it that way. We&apos;re always looking for
-                new contributors to help us build the best open source
-                observability platform for generative AI.
+                Helicone is developer-driven and committed to keeping it that
+                way. Contributors actively participate in shaping the platform
+                by voting on feature enhancements and collaboratively pushing
+                updates.
               </p>
             </div>
             <div className="block space-x-4">
