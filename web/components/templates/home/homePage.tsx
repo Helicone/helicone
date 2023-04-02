@@ -322,9 +322,7 @@ export default function HomePage() {
                 Ever wonder how much you spend on GPT-4? We do too.
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
-                Creating an internal tool for observability and monitoring is
-                difficult to build and even harder to maintain. Helicone is a
-                platform built specifically for developers using LLMs.
+              Helicone is purpose-built to cater to the unique needs of developers working with large language models
               </p>
             </div>
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
@@ -333,9 +331,6 @@ export default function HomePage() {
                   100+ Projects
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Active Projects
-                  </p>
                   <p className="mt-2 text-base leading-7 text-gray-600">
                     Over a hundred active projects using Helicone
                   </p>
@@ -350,27 +345,23 @@ export default function HomePage() {
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
                   <p className="text-lg font-semibold tracking-tight text-white">
-                    We&apos;re proud that our customers have made over{" "}
+                    Customers have made over{" "}
                     {Math.floor(
                       (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
                     )}{" "}
-                    million requests.
+                    million requests with Helicone.
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-400">
-                    We currently support all OpenAI models and have plans to add
-                    other providers
+                    We currently support all OpenAI models and will soon suppot other providers
                   </p>
                 </div>
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
                 <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  250+ Community
+                  250+ Developer Community
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    Discord Community
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-indigo-200">
+                  <p className="mt-2 text-base font-semibold leading-7 text-indigo-200">
                     Join our community on Discord to get help, ask questions,
                     and share your projects.
                   </p>
