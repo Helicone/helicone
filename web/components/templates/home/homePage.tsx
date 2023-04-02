@@ -322,7 +322,8 @@ export default function HomePage() {
                 Ever wonder how much you spend on GPT-4? We do too.
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
-              Helicone is purpose-built to cater to the unique needs of developers working with large language models
+                Helicone is purpose-built to cater to the unique needs of
+                developers working with large language models
               </p>
             </div>
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
@@ -352,7 +353,8 @@ export default function HomePage() {
                     million requests with Helicone.
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-400">
-                    We currently support all OpenAI models and will soon suppot other providers
+                    We currently support all OpenAI models and will soon suppot
+                    other providers
                   </p>
                 </div>
               </div>
