@@ -192,7 +192,7 @@ export default function HomePage() {
               <p className="mt-6 text-xl leading-8 text-gray-600">
                 Track usage, costs, and latency metrics with one line of code.
                 We&apos;re an open-source observability platform that helps you
-                better understand your GPT-3 application.
+                better understand your GPT application.
               </p>
               <div className="mt-10 flex items-center gap-x-4">
                 <OnboardingButton variant="secondary" title={"Get Started"} />
@@ -319,7 +319,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:mx-0">
               <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Even wonder how much you spend on GPT-4? We do too.
+                Ever wonder how much you spend on GPT-4? We do too.
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
                 Creating an internal tool for observability and monitoring is
