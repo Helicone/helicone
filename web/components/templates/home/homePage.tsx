@@ -186,12 +186,13 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <h1 className="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+              <h1 className="mt-8 text-6xl font-bold tracking-tight text-gray-900 sm:text-6xl">
                 Observability for Generative AI
               </h1>
               <p className="mt-6 text-xl leading-8 text-gray-600">
-                Track costs, usage, and latency for GPT applications with one
-                line of code.
+                Track costs, usage, and latency for GPT applications
+                <br />
+                with one line of code.
               </p>
               <div className="mt-10 flex items-center gap-x-4">
                 <OnboardingButton variant="secondary" title={"Get Started"} />
@@ -381,9 +382,16 @@ export default function HomePage() {
               </h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
                 Helicone is developer-driven and committed to keeping it that
-                way. Contributors actively participate in shaping the platform
-                by voting on feature enhancements and collaboratively pushing
-                updates.
+                way. Contributors actively participate in{" "}
+                <a
+                  href="https://www.helicone.ai/roadmap"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-500 hover:text-blue-700"
+                >
+                  shaping the platform
+                </a>{" "}
+                by voting on features and collaboratively pushing updates.
               </p>
             </div>
             <div className="block space-x-4">
