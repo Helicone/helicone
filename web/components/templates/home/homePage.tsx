@@ -387,7 +387,7 @@ export default function HomePage() {
                   href="https://www.helicone.ai/roadmap"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700"
                 >
                   shaping the platform
                 </a>{" "}
