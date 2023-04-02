@@ -322,7 +322,7 @@ export default function HomePage() {
                 Tools built for savvy developers
               </h2>
               <p className="mt-6 text-xl leading-7 text-gray-600">
-                Cache requests to save latency and money, proactively track
+                Cache requests to save on latency and money, proactively track
                 errors in your application, handle rate limits and reliability
                 concerns with Helicone.
               </p>
