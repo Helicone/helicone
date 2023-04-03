@@ -249,7 +249,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               </div>
             )}
 
-            {csvExport && (
+            {/* {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
                   <button
@@ -264,7 +264,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   </button>
                 </Menu>
               </div>
-            )}
+            )} */}
             {view && (
               <div className="mx-auto flex text-sm">
                 <ThemedToggle
