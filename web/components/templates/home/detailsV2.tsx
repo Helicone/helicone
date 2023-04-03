@@ -7,13 +7,14 @@ import {
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 
-const features = [
+const features: FeatureDetails[] = [
   {
     name: "dashboard",
     label: "Key Metrics.",
     description:
       "Get an overview of your application with an in-built dashboard, tailor made for generative AI applications.",
     icon: CloudArrowUpIcon,
+    src: "/assets/landing/dashboard-preview.webp",
   },
   {
     name: "requests",
@@ -21,6 +22,7 @@ const features = [
     description:
       "View all of your requests in one place. Filter by time, users, and custom properties.",
     icon: LockClosedIcon,
+    src: "assets/landing/requests-preview.webp",
   },
   {
     name: "model",
@@ -28,13 +30,20 @@ const features = [
     description:
       "Track spending on each model, user, or conversation. Use this data to optimize your API usage and reduce costs.",
     icon: ServerIcon,
+    src: "assets/landing/models-preview.webp",
   },
 ];
 
-type DetailViews = "dashboard" | "requests" | "model";
+type FeatureDetails = {
+  name: string;
+  label: string;
+  description: string;
+  icon: any;
+  src: string;
+};
 
 const Details = () => {
-  const [view, setView] = useState<DetailViews>("dashboard");
+  const [selected, setSelected] = useState<FeatureDetails>(features[0]);
 
   return (
     <div className="overflow-hidden bg-gray-50 py-24 sm:py-32">
@@ -54,9 +63,9 @@ const Details = () => {
                   <div key={feature.name}>
                     <button
                       key={`desktop-${feature.name}`}
-                      onClick={() => setView(feature.name as DetailViews)}
+                      onClick={() => setSelected(feature)}
                       className={clsx(
-                        view === feature.name
+                        selected.name === feature.name
                           ? "border border-gray-500 shadow-sm"
                           : "border border-dashed border-gray-300 shadow-sm",
                         "hidden sm:block text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
@@ -69,7 +78,7 @@ const Details = () => {
                     </button>
                     <button
                       key={`mobile-${feature.name}`}
-                      onClick={() => setView(feature.name as DetailViews)}
+                      onClick={() => setSelected(feature)}
                       className={clsx(
                         "block sm:hidden border border-gray-500 shadow-sm text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
                       )}
@@ -92,7 +101,7 @@ const Details = () => {
               />
               <div className="mx-auto max-w-2xl sm:mx-0 sm:max-w-none">
                 <img
-                  src={`/assets/${view}V1.png`}
+                  src={selected.src}
                   alt="Product screenshot"
                   width={2432}
                   height={1442}
