@@ -283,7 +283,7 @@ const Step2 = () => {
     <div>
       {" "}
       <p className="text-gray-500"></p>
-      <KeyPage></KeyPage>
+      <KeyPage hideTabs={true} />
     </div>
   );
 };

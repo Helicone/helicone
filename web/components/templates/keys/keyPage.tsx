@@ -29,7 +29,9 @@ import AddHeliconeKeyModal from "./addHeliconeKeyModal";
 import AddKeyModal from "./addKeyModal";
 import { useKeysPage } from "./useKeysPage";
 
-interface KeyPageProps {}
+interface KeyPageProps {
+  hideTabs?: boolean;
+}
 
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
@@ -178,7 +180,7 @@ const KeyPage = (props: KeyPageProps) => {
 
   return (
     <>
-      {router.pathname !== "/welcome" && (
+      {props.hideTabs !== true && (
         <ThemedTabs
           options={[
             {
