@@ -49,7 +49,7 @@ export default function ThemedTabs(props: ThemedTabsProps) {
                       "w-5 h-5 inline-block"
                     )}
                   />
-                  <p className="w-max">{option.label}</p>
+                  <p className="w-max hidden xl:inline">{option.label}</p>
                 </div>
               )}
             </Tab>
