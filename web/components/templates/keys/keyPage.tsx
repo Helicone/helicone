@@ -11,6 +11,7 @@ import {
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import generateApiKey from "generate-api-key";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { hashAuth } from "../../../lib/hashClient";
@@ -32,7 +33,7 @@ interface KeyPageProps {}
 
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
-
+  const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
   const [selectedKey, setSelectedKey] =
     useState<Database["public"]["Tables"]["user_api_keys"]["Row"]>();
@@ -177,21 +178,23 @@ const KeyPage = (props: KeyPageProps) => {
 
   return (
     <>
-      <ThemedTabs
-        options={[
-          {
-            icon: KeyIcon,
-            label: "OpenAI Keys",
-          },
-          {
-            icon: BuildingOfficeIcon,
-            label: "Helicone Keys",
-          },
-        ]}
-        onOptionSelect={(option) => {
-          setSelectedTab(option);
-        }}
-      />
+      {router.pathname !== "/welcome" && (
+        <ThemedTabs
+          options={[
+            {
+              icon: KeyIcon,
+              label: "OpenAI Keys",
+            },
+            {
+              icon: BuildingOfficeIcon,
+              label: "Helicone Keys",
+            },
+          ]}
+          onOptionSelect={(option) => {
+            setSelectedTab(option);
+          }}
+        />
+      )}
       {selectedTab === "OpenAI Keys" && (
         <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
           <div className="text-gray-900 space-y-4 text-sm">
