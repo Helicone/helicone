@@ -116,7 +116,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-row space-x-1 items-center">
+          <div className="flex flex-wrap space-x-1 items-center">
             {editColumns && (
               <Popover className="relative text-sm">
                 {({ open }) => (
