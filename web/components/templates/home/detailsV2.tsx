@@ -37,19 +37,19 @@ const Details = () => {
   const [view, setView] = useState<DetailViews>("dashboard");
 
   return (
-    <div className="overflow-hidden bg-gray-50 py-6 sm:py-6">
+    <div className="overflow-hidden bg-gray-50 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl md:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
           <div className="px-6 lg:px-0 lg:pt-4 lg:pr-4">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg space-y-4 sm:space-y-8">
+              <p className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                 Stay on top of your costs, usage, and latency
               </p>
-              <p className="mt-6 text-lg leading-8 text-gray-600 font-bold">
+              <p className="text-lg sm:text-xl leading-8 text-gray-600">
                 Integrate models like GPT-4 with Helicone to track API requests
                 and visualize results.
               </p>
-              <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
+              <dl className="max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name}>
                     <button
