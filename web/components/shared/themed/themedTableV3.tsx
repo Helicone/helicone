@@ -27,10 +27,10 @@ import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
-export interface ColumnFormatted {
+export type ColumnFormatted = {
   name: string;
   sizing: string;
-}
+};
 
 function formatColumns(
   columnSizing: ColumnSizingState,

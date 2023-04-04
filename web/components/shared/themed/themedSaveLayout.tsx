@@ -5,7 +5,7 @@ import { UIFilterRow } from "./themedAdvancedFilters";
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { Database } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 
 export interface Layout {
   id: number;
@@ -36,8 +36,8 @@ const SaveLayoutButton: React.FC<SaveLayoutButtonProps> = ({
       .from("layout")
       .insert({
         user_id: user?.id,
-        columns: JSON.stringify(columns),
-        filters: JSON.stringify({ advancedFilters, timeFilter }),
+        columns: columns,
+        filters: { advancedFilters, timeFilter } as unknown as Json,
         name: "test",
       })
       .then(console.log);
