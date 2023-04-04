@@ -45,9 +45,10 @@ const DeleteLayoutButton: React.FC<DeleteLayoutButtonProps> = ({
 
     if (error) {
       setNotification("Error deleting layout", "error");
+      setOpen(false);
       return;
     }
-
+    setOpen(false);
     setNotification("Layout deleted", "success");
     refetchLayouts();
   };
@@ -62,34 +63,36 @@ const DeleteLayoutButton: React.FC<DeleteLayoutButtonProps> = ({
         <TrashIcon className="w-4 h-4 inline mr-2" />
         Delete Layout
       </button>
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">
-          <div className="flex flex-col space-y-2">
-            <p className="text-sm sm:text-md font-semibold text-gray-900">
-              Delete Layout
-            </p>
-            <p className="text-sm sm:text-md text-gray-500">
-              Are you sure you want to delete layout: {layoutName}?
-            </p>
-          </div>
+      {open && (
+        <ThemedModal open={open} setOpen={setOpen}>
+          <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">
+            <div className="flex flex-col space-y-2">
+              <p className="text-sm sm:text-md font-semibold text-gray-900">
+                Delete Layout
+              </p>
+              <p className="text-sm sm:text-md text-gray-500">
+                Are you sure you want to delete layout: {layoutName}?
+              </p>
+            </div>
 
-          <div className="w-full flex justify-end text-sm space-x-2">
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
-              Cancel
-            </button>
-            <button
-              className="flex flex-row items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium border border-red-500 hover:bg-red-700 text-gray-50 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-              onClick={onDeleteHandler}
-            >
-              Delete Layout
-            </button>
+            <div className="w-full flex justify-end text-sm space-x-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                className="flex flex-row items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium border border-red-500 hover:bg-red-700 text-gray-50 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                onClick={onDeleteHandler}
+              >
+                Delete Layout
+              </button>
+            </div>
           </div>
-        </div>
-      </ThemedModal>
+        </ThemedModal>
+      )}
     </>
   );
 };
