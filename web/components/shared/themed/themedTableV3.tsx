@@ -23,6 +23,15 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import SaveLayoutButton from "./themedSaveLayout";
+import { UIFilterRow } from "./themedAdvancedFilters";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import ThemedDropdown from "./themedDropdown";
+
+export type ColumnFormatted = {
+  name: string;
+  sizing: string;
+};
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
@@ -32,6 +41,18 @@ interface ThemedTableV3Props {
   from: number;
   to: number;
   count: number | null;
+  columnSizing: {
+    columnSizing: ColumnSizingState;
+    setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
+  };
+  columnOrder: {
+    columnOrder: ColumnOrderState;
+    setColumnOrder: React.Dispatch<React.SetStateAction<ColumnOrderState>>;
+  };
+  saveLayout: (name: string) => void;
+  setLayout: (name: string) => void;
+  currentLayout: string;
+  layouts: string[];
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
@@ -47,27 +68,17 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     to,
     count,
     page,
+    columnSizing: { columnSizing, setColumnSizing },
+    columnOrder: { columnOrder, setColumnOrder },
     onPageChangeHandler,
     onPageSizeChangeHandler,
     onSelectHandler,
     onSortHandler,
+    saveLayout,
+    setLayout,
+    currentLayout,
+    layouts,
   } = props;
-  const initialColumnSizing =
-    typeof window !== "undefined"
-      ? localStorage.getItem("requestsColumnSizing")
-      : null;
-
-  const initialColumnOrder =
-    typeof window !== "undefined"
-      ? localStorage.getItem("requestsColumnOrder")
-      : null;
-
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
-    initialColumnSizing ? JSON.parse(initialColumnSizing) : {}
-  );
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-    initialColumnOrder ? JSON.parse(initialColumnOrder) : []
-  );
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
@@ -102,12 +113,32 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
 
   return (
     <div className="space-y-2">
-      <div>
+      <div className="w-full flex flex-row justify-between items-end">
         <p className="text-sm text-gray-700">
           Showing <span className="font-medium">{from + 1}</span> to{" "}
           <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
           of <span className="font-medium">{count}</span> results
         </p>
+
+        <div className="flex flex-row space-x-2 items">
+          <SaveLayoutButton saveLayout={saveLayout} />
+          {layouts.length > 0 && (
+            <ThemedDropdown
+              options={layouts.map((layout, i) => ({
+                label: layout,
+                value: i,
+              }))}
+              onSelect={(idx: number) => {
+                setLayout(layouts[idx]);
+              }}
+              selectedValue={
+                layouts.findIndex((layout) => layout === currentLayout) || 0
+              }
+              align="right"
+              placeholder="Layouts"
+            />
+          )}
+        </div>
       </div>
 
       {columns.length < 1 ? (

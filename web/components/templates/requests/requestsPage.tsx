@@ -1,5 +1,10 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { createColumnHelper } from "@tanstack/react-table";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import {
+  ColumnOrderState,
+  ColumnSizingState,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import Papa from "papaparse";
 
@@ -13,15 +18,17 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetKeys } from "../../../services/hooks/keys";
-import { useLocalStorageState } from "../../../services/hooks/localStorage";
+import { useLayouts } from "../../../services/hooks/useLayouts";
 import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/sorts";
+import { Database, Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import useNotification from "../../shared/notification/useNotification";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader, {
   escapeCSVString,
@@ -78,12 +85,82 @@ interface RequestsPageProps {
 
 const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
+  const supabaseClient = useSupabaseClient<Database>();
+  const user = useUser();
+  const { setNotification } = useNotification();
 
   const truncLength = 30;
 
   const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
     "Condensed"
   );
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [timeFilter, setTimeFilter] = useState<FilterNode>({
+    request: {
+      created_at: {
+        gte: getTimeIntervalAgo("7d").toISOString(),
+      },
+    },
+  });
+  const { data: layouts, refetch: refetchLayouts } = useLayouts();
+  function saveLayout(name: string) {
+    console.log("HELLo");
+    supabaseClient
+      .from("layout")
+      .insert({
+        user_id: user!.id,
+        columns: {
+          columnSizing,
+          columnOrder,
+          columns,
+        } as unknown as Json,
+        filters: { advancedFilters, timeFilter } as unknown as Json,
+        name,
+      })
+      .then(console.log)
+      .then(() => refetchLayouts())
+      .then(() => setNotification("Layout saved!", "success"));
+  }
+  const [currentLayout, setCurrentLayout] = useState<string | null>(null);
+  function setLayout(name: string) {
+    type Columns = {
+      columnSizing: typeof columnSizing;
+      columnOrder: typeof columnOrder;
+      columns: typeof columns;
+    };
+    type Filters = {
+      advancedFilters: typeof advancedFilters;
+      timeFilter: typeof timeFilter;
+    };
+    supabaseClient
+      .from("layout")
+      .select("*")
+      .eq("name", name)
+      .then((res) => {
+        const layout = res.data![0];
+        console.log("DATA FROM LOADING", res.data);
+        setColumnSizing((layout.columns! as unknown as Columns).columnSizing);
+        setColumnOrder((layout.columns! as unknown as Columns).columnOrder);
+        setColumns((prevColumns) => {
+          const newColumns = (layout.columns! as unknown as Columns).columns;
+          return prevColumns.map((c) => {
+            const newColumn = newColumns.find((nc) => nc.key === c.key);
+            return {
+              ...c,
+              active: newColumn?.active ?? false,
+            };
+          });
+        });
+        setAdvancedFilters(
+          (layout.filters! as unknown as Filters).advancedFilters
+        );
+        setTimeFilter((layout.filters! as unknown as Filters).timeFilter);
+        setCurrentLayout(name);
+      });
+  }
 
   const initialColumns: Column[] = [
     {
@@ -211,9 +288,6 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
-    UIFilterRow[]
-  >("advancedFilters", []);
 
   const [orderBy, setOrderBy] = useState<{
     column: keyof RequestWrapper;
@@ -229,13 +303,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     sessionStorageKey
   );
 
-  const [timeFilter, setTimeFilter] = useState<FilterNode>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo("7d").toISOString(),
-      },
-    },
-  });
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const {
@@ -293,11 +360,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     setSelectedData(row);
     setOpen(true);
   };
-
-  const [columns, setColumns] = useLocalStorageState<Column[]>(
-    "requestTableColumns",
-    []
-  );
 
   useEffect(() => {
     if (isPropertiesLoading || isValuesLoading) return;
@@ -469,6 +531,18 @@ const RequestsPage = (props: RequestsPageProps) => {
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <ThemedTableV3
+                saveLayout={saveLayout}
+                currentLayout={currentLayout ?? ""}
+                layouts={layouts?.data?.map((l) => l.name) ?? []}
+                setLayout={setLayout}
+                columnOrder={{
+                  columnOrder,
+                  setColumnOrder,
+                }}
+                columnSizing={{
+                  columnSizing,
+                  setColumnSizing,
+                }}
                 data={requests}
                 sortColumns={columns}
                 columns={columns

@@ -2,7 +2,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
-import { handleLoggingEndpoint, isLoggingEndpoint, updateRequestProperties } from "./properties";
+import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import { forwardRequestToOpenAiWithRetry, getRetryOptions, RetryOptions } from "./retry";
 // import bcrypt from "bcrypt";
 

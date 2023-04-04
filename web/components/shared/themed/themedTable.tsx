@@ -58,7 +58,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         key={colIdx}
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-transparent",
-                          "relative py-4 pl-4 sm:pl-6 pr-3 text-sm"
+                          "relative py-2.5 pl-4 sm:pl-6 pr-3 text-sm"
                         )}
                       >
                         <div className="font-medium text-gray-900 overflow-ellipsis max-w-[120px] overflow-hidden">
@@ -76,7 +76,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-gray-200",
                           col.hidden ? "hidden" : "",
-                          "px-3 py-3.5 text-sm text-gray-500 lg:table-cell overflow-ellipsis max-w-[120px] overflow-hidden"
+                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell overflow-ellipsis max-w-[120px] overflow-hidden"
                         )}
                       >
                         {row[col.key]}
@@ -88,7 +88,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   <td
                     className={clsx(
                       rowIdx === 0 ? "" : "border-t border-transparent",
-                      "relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
+                      "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
                     )}
                   >
                     <button

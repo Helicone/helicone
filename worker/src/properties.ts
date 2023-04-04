@@ -16,7 +16,6 @@ export function isLoggingEndpoint(request: Request): boolean {
 export async function handleLoggingEndpoint(request: Request, env: Env): Promise<Response> {
     const body = await request.json() as LoggingRequestBody;
     const heliconeId = body['helicone-id'];
-    
     const propTag = "helicone-property-";
     const heliconeHeaders = Object.fromEntries(
       [...request.headers.entries()]
@@ -25,10 +24,10 @@ export async function handleLoggingEndpoint(request: Request, env: Env): Promise
         )
         .map(([key, value]) => [key.substring(propTag.length), value])
     );
-  
+
     await updateRequestProperties(heliconeId, heliconeHeaders, env);
     const propertyNames = Object.keys(heliconeHeaders).join(", ");
-  
+
     return new Response(
       `Properties updated with properties: ${propertyNames}`,
       { status: 200 }

@@ -7,58 +7,65 @@ import {
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 
-const features = [
+const features: FeatureDetails[] = [
   {
     name: "dashboard",
-    label: "Your Dashboard.",
+    label: "Key Metrics.",
     description:
-      "Get an insightful overview of your application and its performance. See how your users are interacting with your app, and how your app is performing.",
+      "Get an overview of your application with an in-built dashboard, tailor made for generative AI applications.",
     icon: CloudArrowUpIcon,
+    src: "/assets/landing/dashboard-preview.webp",
   },
   {
     name: "requests",
     label: "View Requests.",
     description:
-      "See all of your requests in one place. Filter by date, endpoint, and more. See the request body, response body, response time, and much more.",
+      "View all of your requests in one place. Filter by time, users, and custom properties.",
     icon: LockClosedIcon,
+    src: "assets/landing/requests-preview.webp",
   },
   {
     name: "model",
-    label: "Model Metrics.",
+    label: "Optimize Spend.",
     description:
-      "Ever wonder how much you're spending on each model and its efficiency? See how much you're spending on each model so you can optimize your usage.",
+      "Track spending on each model, user, or conversation. Use this data to optimize your API usage and reduce costs.",
     icon: ServerIcon,
+    src: "assets/landing/models-preview.webp",
   },
 ];
 
-type DetailViews = "dashboard" | "requests" | "model";
+type FeatureDetails = {
+  name: string;
+  label: string;
+  description: string;
+  icon: any;
+  src: string;
+};
 
 const Details = () => {
-  const [view, setView] = useState<DetailViews>("dashboard");
+  const [selected, setSelected] = useState<FeatureDetails>(features[0]);
 
   return (
     <div className="overflow-hidden bg-gray-50 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl md:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
           <div className="px-6 lg:px-0 lg:pt-4 lg:pr-4">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Let us handle the analytics.
+            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg space-y-4 sm:space-y-8">
+              <p className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Stay on top of your costs, usage, and latency
               </p>
-              <p className="mt-6 text-lg leading-8 text-gray-600">
-                Monitoring your GPT-3 usage and costs shouldn&apos;t be a
-                hassle. With Helicone, you can focus on building your product,
-                not building and maintaining your own analytics solution for
-                GPT-3.
+              <p className="text-lg sm:text-xl leading-8 text-gray-600">
+                Integrate models like GPT-4 with Helicone to track API requests
+                and visualize results.
               </p>
-              <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
+              <dl className="max-w-xl space-y-8 text-base leading-7 text-gray-600 lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name}>
                     <button
                       key={`desktop-${feature.name}`}
-                      onClick={() => setView(feature.name as DetailViews)}
+                      onClick={() => setSelected(feature)}
                       className={clsx(
-                        view === feature.name
+                        selected.name === feature.name
                           ? "border border-gray-500 shadow-sm"
                           : "border border-dashed border-gray-300 shadow-sm",
                         "hidden sm:block text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
@@ -71,7 +78,7 @@ const Details = () => {
                     </button>
                     <button
                       key={`mobile-${feature.name}`}
-                      onClick={() => setView(feature.name as DetailViews)}
+                      onClick={() => setSelected(feature)}
                       className={clsx(
                         "block sm:hidden border border-gray-500 shadow-sm text-left align-left relative rounded-md p-4 hover:scale-105 transition ease-in-out delay-150 duration-300 hover:cursor-pointer"
                       )}
@@ -94,7 +101,7 @@ const Details = () => {
               />
               <div className="mx-auto max-w-2xl sm:mx-0 sm:max-w-none">
                 <img
-                  src={`/assets/${view}V1.png`}
+                  src={selected.src}
                   alt="Product screenshot"
                   width={2432}
                   height={1442}

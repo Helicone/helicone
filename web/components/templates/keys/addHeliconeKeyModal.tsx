@@ -1,25 +1,15 @@
-import {
-  ClipboardDocumentListIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
-import Link from "next/link";
-import { useState } from "react";
-import { middleTruncString, truncString } from "../../../lib/stringHelpers";
-import { hashAuth } from "../../../lib/supabaseClient";
-import { useAddKey } from "../../../services/hooks/keys";
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 
-interface AddKeyModalProps {
+interface AddHeliconeKeyModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   apiKey: string;
 }
 
-const AddKeyModal = (props: AddKeyModalProps) => {
+const AddHeliconeKeyModal = (props: AddHeliconeKeyModalProps) => {
   const { open, setOpen, apiKey } = props;
-  // const [apiKey, setApiKey] = useState("");
   const { setNotification } = useNotification();
 
   return (
@@ -69,4 +59,4 @@ const AddKeyModal = (props: AddKeyModalProps) => {
   );
 };
 
-export default AddKeyModal;
+export default AddHeliconeKeyModal;

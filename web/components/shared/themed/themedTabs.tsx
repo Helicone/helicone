@@ -42,16 +42,14 @@ export default function ThemedTabs(props: ThemedTabsProps) {
               onClick={() => onOptionSelect(option.label)}
             >
               {({ selected }) => (
-                <div className="flex flex-row space-x-2 items-center">
+                <div className="flex flex-row space-x-2 items-center w-fit">
                   <option.icon
                     className={clsx(
                       selected ? "text-sky-500" : "text-gray-500",
                       "w-5 h-5 inline-block"
                     )}
                   />
-                  <span className="sr-only xl:not-sr-only ">
-                    {option.label}
-                  </span>
+                  <p className="w-max hidden xl:inline">{option.label}</p>
                 </div>
               )}
             </Tab>

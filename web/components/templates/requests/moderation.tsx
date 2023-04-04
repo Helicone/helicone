@@ -26,5 +26,4 @@ const Moderation = (props: ModerationProps) => {
     </div>
   );
 };
-
 export default Moderation;

@@ -3,8 +3,10 @@ import { SVGProps, useState } from "react";
 import ThemedModal from "../themed/themedModal";
 import Login from "../auth/login";
 import NavBarV2 from "./navBarV2";
+import { BsDiscord } from "react-icons/bs";
+import { AiOutlineCalendar } from "react-icons/ai";
 
-const footerNavigation = {
+const meta = {
   social: [
     {
       name: "Twitter",
@@ -28,8 +30,17 @@ const footerNavigation = {
         </svg>
       ),
     },
+    {
+      name: "Discord",
+      href: "https://discord.gg/2TkeWdXNPQ",
+      icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
+        <BsDiscord {...props} />
+      ),
+    },
   ],
 };
+
+export type SocialMeta = (typeof meta.social)[number];
 
 interface BasePageV2Props {
   children: React.ReactNode;
@@ -47,6 +58,7 @@ const BasePageV2 = (props: BasePageV2Props) => {
         <NavBarV2
           setOpenLogin={setOpenLogin}
           setOpenOnboarding={setOpenOnboarding}
+          socials={meta.social}
         />
 
         <main>{children}</main>
@@ -57,7 +69,7 @@ const BasePageV2 = (props: BasePageV2Props) => {
           <div className="mx-auto max-w-7xl px-6 pb-8 lg:px-8">
             <div className="pt-8 md:flex md:items-center md:justify-between">
               <div className="flex space-x-6 md:order-2">
-                {footerNavigation.social.map((item) => (
+                {meta.social.map((item) => (
                   <a
                     key={item.name}
                     href={item.href}
