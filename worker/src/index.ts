@@ -206,19 +206,6 @@ async function logRequest({
   }
 }
 
-function heliconeHeaders(
-  requestResult: Result<string, string>
-): Record<string, string> {
-  if (requestResult.error !== null) {
-    console.error(requestResult.error);
-    return {
-      "Helicone-Error": requestResult.error,
-      "Helicone-Status": "error",
-    };
-  } else {
-    return { "Helicone-Status": "success", "Helicone-Id": requestResult.data };
-  }
-}
 async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
@@ -354,17 +341,7 @@ async function forwardAndLog(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const [response, requestResult] = await Promise.all([
-    retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body),
-    logRequest({
-      dbClient,
-      request,
-      auth,
-      body: body === "" ? undefined : body,
-      prompt: prompt,
-      ...getHeliconeHeaders(request.headers),
-    }),
-  ]);
+  const response = await (retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body));
 
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 
@@ -392,20 +369,32 @@ async function forwardAndLog(
   }
 
   ctx.waitUntil(
-    readableLog && requestResult.data !== null
-      ? readAndLogResponse(
-          requestSettings,
-          readableLog,
-          requestResult.data,
-          dbClient
-        )
-      : Promise.resolve()
+    (async () => {
+      if (!readableLog) {
+        return;
+      }
+      const requestResult = await logRequest({
+        dbClient,
+        request,
+        auth,
+        body: body === "" ? undefined : body,
+        prompt: prompt,
+        ...getHeliconeHeaders(request.headers),
+      });
+      requestResult.data !== null
+        ? readAndLogResponse(
+            requestSettings,
+            readableLog,
+            requestResult.data,
+            dbClient
+          )
+        : Promise.resolve();
+    })()
   );
 
   const responseHeaders = new Headers(response.headers);
-  for (const [key, value] of Object.entries(heliconeHeaders(requestResult))) {
-    responseHeaders.set(key, value);
-  }
+  responseHeaders.set("Helicone-Status", "success");
+
   return new Response(readable, {
     ...response,
     headers: responseHeaders,
@@ -563,66 +552,95 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    if (isLoggingEndpoint(request)) {
-      const response = await handleLoggingEndpoint(request, env);
-      return response;
-    }
-
-    const requestBody =
-      request.method === "POST"
-        ? await request.clone().json<{ stream?: boolean }>()
-        : {};
-    const requestSettings: RequestSettings = {
-      stream: requestBody.stream ?? false,
-      ff_stream_force_format:
-        request.headers.get("helicone-ff-stream-force-format") === "true",
-      ff_increase_timeout:
-        request.headers.get("helicone-ff-increase-timeout") === "true",
-    };
-    const retryOptions = getRetryOptions(request)
-
-    const { data: cacheSettings, error: cacheError } = getCacheSettings(
-      request.headers,
-      requestBody.stream ?? false
-    );
-
-    if (cacheError !== null) {
-      return new Response(cacheError, { status: 400 });
-    }
-
-    if (cacheSettings.shouldReadFromCache) {
-      const cachedResponse = await getCachedResponse(
-        request.clone(),
-        cacheSettings.bucketSettings
-      );
-      if (cachedResponse) {
-        ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
-        return cachedResponse;
+    try {
+      if (isLoggingEndpoint(request)) {
+        const response = await handleLoggingEndpoint(request, env);
+        return response;
       }
-    }
 
-    let requestClone = cacheSettings.shouldSaveToCache ? request.clone() : null;
+      const requestBody =
+        request.method === "POST"
+          ? await request.clone().json<{ stream?: boolean }>()
+          : {};
+      const requestSettings: RequestSettings = {
+        stream: requestBody.stream ?? false,
+        ff_stream_force_format:
+          request.headers.get("helicone-ff-stream-force-format") === "true",
+        ff_increase_timeout:
+          request.headers.get("helicone-ff-increase-timeout") === "true",
+      };
 
-    const response = await uncachedRequest(request, env, ctx, requestSettings, retryOptions);
+      const retryOptions = getRetryOptions(request)
 
-    if (cacheSettings.shouldSaveToCache && requestClone) {
-      ctx.waitUntil(
-        saveToCache(
-          requestClone,
-          response,
-          cacheSettings.cacheControl,
+      const { data: cacheSettings, error: cacheError } = getCacheSettings(
+        request.headers,
+        requestBody.stream ?? false
+      );
+
+      if (cacheError !== null) {
+        return new Response(cacheError, { status: 400 });
+      }
+
+      if (cacheSettings.shouldReadFromCache) {
+        const cachedResponse = await getCachedResponse(
+          request.clone(),
           cacheSettings.bucketSettings
-        )
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
+          return cachedResponse;
+        }
+      }
+
+      let requestClone = cacheSettings.shouldSaveToCache
+        ? request.clone()
+        : null;
+
+      const response = await uncachedRequest(
+        request,
+        env,
+        ctx,
+        requestSettings,
+        retryOptions, 
+      );
+
+      if (cacheSettings.shouldSaveToCache && requestClone) {
+        ctx.waitUntil(
+          saveToCache(
+            requestClone,
+            response,
+            cacheSettings.cacheControl,
+            cacheSettings.bucketSettings
+          )
+        );
+      }
+      const responseHeaders = new Headers(response.headers);
+      if (cacheSettings.shouldReadFromCache) {
+        responseHeaders.append("Helicone-Cache", "MISS");
+      }
+
+      return new Response(response.body, {
+        ...response,
+        headers: responseHeaders,
+      });
+    } catch (e) {
+      console.error(e);
+      return new Response(
+        JSON.stringify({
+          "helicone-message":
+            "oh no :( this is embarrassing, Helicone ran into an error proxying your request. Please try again later",
+          support:
+            "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+          "helicone-error": JSON.stringify(e),
+        }),
+        {
+          status: 500,
+          headers: {
+            "content-type": "application/json;charset=UTF-8",
+            "helicone-error": "true",
+          },
+        }
       );
     }
-    const responseHeaders = new Headers(response.headers);
-    if (cacheSettings.shouldReadFromCache) {
-      responseHeaders.append("Helicone-Cache", "MISS");
-    }
-
-    return new Response(response.body, {
-      ...response,
-      headers: responseHeaders,
-    });
   },
 };

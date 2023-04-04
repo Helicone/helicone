@@ -27,6 +27,8 @@ import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import ThemedDropdown from "./themedDropdown";
+import DeleteLayoutButton from "./themedDeleteLayout";
+import { Json } from "../../../supabase/database.types";
 
 export type ColumnFormatted = {
   name: string;
@@ -51,7 +53,14 @@ interface ThemedTableV3Props {
   };
   saveLayout: (name: string) => void;
   setLayout: (name: string) => void;
-  currentLayout: string;
+  currentLayout: {
+    columns: Json;
+    created_at: string | null;
+    filters: Json;
+    id: number;
+    name: string;
+    user_id: string;
+  } | null;
   layouts: string[];
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
@@ -122,6 +131,12 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
 
         <div className="flex flex-row space-x-2 items">
           <SaveLayoutButton saveLayout={saveLayout} />
+          {currentLayout !== null && layouts.length > 0 && (
+            <DeleteLayoutButton
+              layoutId={currentLayout.id}
+              layoutName={currentLayout.name}
+            />
+          )}
           {layouts.length > 0 && (
             <ThemedDropdown
               options={layouts.map((layout, i) => ({
@@ -132,7 +147,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                 setLayout(layouts[idx]);
               }}
               selectedValue={
-                layouts.findIndex((layout) => layout === currentLayout) || 0
+                layouts.findIndex((layout) => layout === currentLayout?.name) ||
+                0
               }
               align="right"
               placeholder="Layouts"
