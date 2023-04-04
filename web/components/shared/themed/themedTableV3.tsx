@@ -23,6 +23,49 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import SaveLayoutButton from "./themedSaveLayout";
+import { UIFilterRow } from "./themedAdvancedFilters";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+
+
+export interface ColumnFormatted {
+  name: string;
+  sizing: string;
+}
+
+function formatColumns(
+  columnSizing: ColumnSizingState,
+  columnOrder: ColumnOrderState,
+  sortColumns: Column[]
+): ColumnFormatted[] {
+  // Filter active columns
+  const activeColumns = sortColumns.filter((column) => column.active);
+
+  // Create a map with keys as column names and values as Column objects
+  const columnMap = new Map<string, Column>(
+    activeColumns.map((column) => [column.key, column])
+  );
+
+  // Sort the active columns based on the columnOrder
+  const sortedActiveColumns = columnOrder
+    .filter((columnName) => columnMap.has(columnName))
+    .map((columnName) => columnMap.get(columnName)!);
+
+  // Add the columns not present in columnOrder to the end of the list
+  const remainingColumns = activeColumns.filter((column) => !columnOrder.includes(column.key));
+  sortedActiveColumns.push(...remainingColumns);
+
+  // Create the ColumnFormatted array
+  const formattedColumns: ColumnFormatted[] = sortedActiveColumns.map((column) => ({
+    name: column.label,
+    sizing: columnSizing[column.key]?.toString() || null,
+  }));
+
+  console.log("LAYOUT FINAL", formattedColumns)
+
+  return formattedColumns;
+}
+
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
@@ -32,6 +75,8 @@ interface ThemedTableV3Props {
   from: number;
   to: number;
   count: number | null;
+  advancedFilters: UIFilterRow[];
+  timeFilter: FilterNode;
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
@@ -47,11 +92,14 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     to,
     count,
     page,
+    advancedFilters,
+    timeFilter,
     onPageChangeHandler,
     onPageSizeChangeHandler,
     onSelectHandler,
     onSortHandler,
   } = props;
+
   const initialColumnSizing =
     typeof window !== "undefined"
       ? localStorage.getItem("requestsColumnSizing")
@@ -68,6 +116,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     initialColumnOrder ? JSON.parse(initialColumnOrder) : []
   );
+  console.log("LAYOUT COLUMN SIZING", columnSizing, columnOrder, columns, sortColumns, advancedFilters, timeFilter);
+
+  const formattedColumns = formatColumns(columnSizing, columnOrder, sortColumns);
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
@@ -108,6 +159,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
           of <span className="font-medium">{count}</span> results
         </p>
+      </div>
+      <div>
+        <SaveLayoutButton columns={ formattedColumns } advancedFilters={advancedFilters} timeFilter={timeFilter} />
       </div>
 
       {columns.length < 1 ? (

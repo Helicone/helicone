@@ -167,6 +167,29 @@ export interface Database {
           tier?: string
         }
       }
+      layout: {
+        Row: {
+          id: string
+          created_at: string | null
+          filters: Json | null
+          columns: Json | null
+          user: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string | null
+          filters?: Json | null
+          columns?: Json | null
+          user: string
+        }
+        Update: {
+          id?: string
+          created_at?: string | null
+          filters?: Json | null
+          columns?: Json | null
+          user?: string
+        }
+      }
     }
     Views: {
       metrics_rbac: {

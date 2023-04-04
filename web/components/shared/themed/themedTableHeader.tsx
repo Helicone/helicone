@@ -77,6 +77,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     csvExport,
     view,
   } = props;
+  console.log("LAYOUTS ALL", editColumns, timeFilter, advancedFilter?.filters)
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
@@ -209,6 +210,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                         const newColumns = [
                                           ...editColumns.columns,
                                         ];
+                                        console.log("LAYOUTS ON CHANGE", "NEW COLUMNS", newColumns, "OLD COLUMNS", editColumns.columns, "IDX", idx)
                                         const col = newColumns[idx];
                                         col.active = e.target.checked;
 
