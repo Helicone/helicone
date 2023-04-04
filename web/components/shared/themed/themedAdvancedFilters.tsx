@@ -169,6 +169,7 @@ function AdvancedFilterRow({
           });
         }}
         className="w-full lg:w-fit min-w-[150px]"
+        minWidth={300}
       />
 
       <ThemedDropdown

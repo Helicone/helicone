@@ -22,10 +22,18 @@ interface ThemedDropdownProps<T> {
   align?: "left" | "right";
   className?: string;
   label?: string;
+  minWidth?: number;
 }
 
 export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
-  const { selectedValue, onSelect, className, label, align = "left" } = props;
+  const {
+    selectedValue,
+    onSelect,
+    className,
+    label,
+    align = "left",
+    minWidth = 200,
+  } = props;
   let { options } = props;
   const selected = options.find((option) => option.value === selectedValue);
   const categories: {
@@ -110,7 +118,8 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   ref={transitionRef}
                   className={clsx(
                     align === "left" ? "left-0" : "right-0",
-                    "overflow-hidden absolute z-30 mt-1.5 max-h-80 w-full min-w-[200px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    `min-w-[${minWidth}px]`,
+                    "overflow-hidden absolute z-30 mt-1.5 max-h-80 w-full rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
                   {Object.keys(categories).length >= 2 && (
@@ -119,13 +128,13 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                       <div className="flex flex-wrap">
                         {Object.entries(categories).map(
                           ([category, items], index) => (
-                            <div
+                            <button
                               key={index}
                               className={clsx(
                                 category === selectedCategory
                                   ? "bg-sky-600 text-white px-2 py-1 rounded-md mr-2 mt-2"
                                   : "bg-gray-200 px-2 py-1 rounded-md mr-2 mt-2 hover:bg-gray-300",
-                                "hover:cursor-pointer"
+                                "hover:cursor-pointer w-max flex"
                               )}
                               onClick={() => {
                                 setSelectedCategory(category);
@@ -133,7 +142,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                               }}
                             >
                               {category} ({items.length})
-                            </div>
+                            </button>
                           )
                         )}
                       </div>
