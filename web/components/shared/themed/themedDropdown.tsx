@@ -22,10 +22,18 @@ interface ThemedDropdownProps<T> {
   align?: "left" | "right";
   className?: string;
   label?: string;
+  placeholder?: string;
 }
 
 export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
-  const { selectedValue, onSelect, className, label, align = "left" } = props;
+  const {
+    selectedValue,
+    onSelect,
+    className,
+    label,
+    align = "left",
+    placeholder = "Select an option",
+  } = props;
   let { options } = props;
   const selected = options.find((option) => option.value === selectedValue);
   const categories: {
@@ -90,7 +98,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                 )}
 
                 <span className="block truncate">
-                  {selected?.label || "Select a column"}
+                  {selected?.label || placeholder}
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronDownIcon
