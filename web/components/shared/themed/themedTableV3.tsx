@@ -27,7 +27,6 @@ import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
-
 export interface ColumnFormatted {
   name: string;
   sizing: string;
@@ -52,20 +51,23 @@ function formatColumns(
     .map((columnName) => columnMap.get(columnName)!);
 
   // Add the columns not present in columnOrder to the end of the list
-  const remainingColumns = activeColumns.filter((column) => !columnOrder.includes(column.key));
+  const remainingColumns = activeColumns.filter(
+    (column) => !columnOrder.includes(column.key)
+  );
   sortedActiveColumns.push(...remainingColumns);
 
   // Create the ColumnFormatted array
-  const formattedColumns: ColumnFormatted[] = sortedActiveColumns.map((column) => ({
-    name: column.label,
-    sizing: columnSizing[column.key]?.toString() || null,
-  }));
+  const formattedColumns: ColumnFormatted[] = sortedActiveColumns.map(
+    (column) => ({
+      name: column.label,
+      sizing: columnSizing[column.key]?.toString() || null,
+    })
+  );
 
-  console.log("LAYOUT FINAL", formattedColumns)
+  console.log("LAYOUT FINAL", formattedColumns);
 
   return formattedColumns;
 }
-
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
@@ -116,9 +118,21 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     initialColumnOrder ? JSON.parse(initialColumnOrder) : []
   );
-  console.log("LAYOUT COLUMN SIZING", columnSizing, columnOrder, columns, sortColumns, advancedFilters, timeFilter);
+  console.log(
+    "LAYOUT COLUMN SIZING",
+    columnSizing,
+    columnOrder,
+    columns,
+    sortColumns,
+    advancedFilters,
+    timeFilter
+  );
 
-  const formattedColumns = formatColumns(columnSizing, columnOrder, sortColumns);
+  const formattedColumns = formatColumns(
+    columnSizing,
+    columnOrder,
+    sortColumns
+  );
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
@@ -161,7 +175,11 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
         </p>
       </div>
       <div>
-        <SaveLayoutButton columns={ formattedColumns } advancedFilters={advancedFilters} timeFilter={timeFilter} />
+        <SaveLayoutButton
+          columns={formattedColumns}
+          advancedFilters={advancedFilters}
+          timeFilter={timeFilter}
+        />
       </div>
 
       {columns.length < 1 ? (
