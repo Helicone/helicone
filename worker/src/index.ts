@@ -194,19 +194,6 @@ async function logRequest({
   }
 }
 
-function heliconeHeaders(
-  requestResult: Result<string, string>
-): Record<string, string> {
-  if (requestResult.error !== null) {
-    console.error(requestResult.error);
-    return {
-      "Helicone-Error": requestResult.error,
-      "Helicone-Status": "error",
-    };
-  } else {
-    return { "Helicone-Status": "success", "Helicone-Id": requestResult.data };
-  }
-}
 async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
@@ -341,18 +328,7 @@ async function forwardAndLog(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const [response, requestResult] = await Promise.all([
-    forwardRequestToOpenAi(request, requestSettings, body),
-    logRequest({
-      dbClient,
-      request,
-      auth,
-      body: body === "" ? undefined : body,
-      prompt: prompt,
-      ...getHeliconeHeaders(request.headers),
-    }),
-  ]);
-
+  const response = await forwardRequestToOpenAi(request, requestSettings, body);
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 
   if (requestSettings.ff_stream_force_format) {
@@ -379,20 +355,32 @@ async function forwardAndLog(
   }
 
   ctx.waitUntil(
-    readableLog && requestResult.data !== null
-      ? readAndLogResponse(
-          requestSettings,
-          readableLog,
-          requestResult.data,
-          dbClient
-        )
-      : Promise.resolve()
+    (async () => {
+      if (!readableLog) {
+        return;
+      }
+      const requestResult = await logRequest({
+        dbClient,
+        request,
+        auth,
+        body: body === "" ? undefined : body,
+        prompt: prompt,
+        ...getHeliconeHeaders(request.headers),
+      });
+      requestResult.data !== null
+        ? readAndLogResponse(
+            requestSettings,
+            readableLog,
+            requestResult.data,
+            dbClient
+          )
+        : Promise.resolve();
+    })()
   );
 
   const responseHeaders = new Headers(response.headers);
-  for (const [key, value] of Object.entries(heliconeHeaders(requestResult))) {
-    responseHeaders.set(key, value);
-  }
+  responseHeaders.set("Helicone-Status", "success");
+
   return new Response(readable, {
     ...response,
     headers: responseHeaders,
