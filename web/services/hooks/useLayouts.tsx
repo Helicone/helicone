@@ -16,21 +16,7 @@ export const useLayouts = () => {
   return useQuery({
     queryKey: ["helicone-saved-layouts"],
     queryFn: async () => {
-      return {
-        layouts: await client.from("layout").select("*"),
-        setLayouts: async ({
-          columns,
-          advancedFilters,
-          timeFilter,
-        }: SaveLayoutInputs) => {
-          client.from("layout").insert({
-            user_id: user!.id,
-            columns: columns,
-            filters: { advancedFilters, timeFilter } as unknown as Json,
-            name: "test",
-          });
-        },
-      };
+      return await client.from("layout").select("*");
     },
     refetchOnWindowFocus: false,
   });

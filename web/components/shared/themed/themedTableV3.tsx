@@ -27,48 +27,49 @@ import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { useLocalStorageState } from "../../../services/hooks/localStorage";
+import ThemedDropdown from "./themedDropdown";
 
 export type ColumnFormatted = {
   name: string;
   sizing: string;
 };
 
-function formatColumns(
-  columnSizing: ColumnSizingState,
-  columnOrder: ColumnOrderState,
-  sortColumns: Column[]
-): ColumnFormatted[] {
-  // Filter active columns
-  const activeColumns = sortColumns.filter((column) => column.active);
+// function formatColumns(
+//   columnSizing: ColumnSizingState,
+//   columnOrder: ColumnOrderState,
+//   sortColumns: Column[]
+// ): ColumnFormatted[] {
+//   // Filter active columns
+//   const activeColumns = sortColumns.filter((column) => column.active);
 
-  // Create a map with keys as column names and values as Column objects
-  const columnMap = new Map<string, Column>(
-    activeColumns.map((column) => [column.key, column])
-  );
+//   // Create a map with keys as column names and values as Column objects
+//   const columnMap = new Map<string, Column>(
+//     activeColumns.map((column) => [column.key, column])
+//   );
 
-  // Sort the active columns based on the columnOrder
-  const sortedActiveColumns = columnOrder
-    .filter((columnName) => columnMap.has(columnName))
-    .map((columnName) => columnMap.get(columnName)!);
+//   // Sort the active columns based on the columnOrder
+//   const sortedActiveColumns = columnOrder
+//     .filter((columnName) => columnMap.has(columnName))
+//     .map((columnName) => columnMap.get(columnName)!);
 
-  // Add the columns not present in columnOrder to the end of the list
-  const remainingColumns = activeColumns.filter(
-    (column) => !columnOrder.includes(column.key)
-  );
-  sortedActiveColumns.push(...remainingColumns);
+//   // Add the columns not present in columnOrder to the end of the list
+//   const remainingColumns = activeColumns.filter(
+//     (column) => !columnOrder.includes(column.key)
+//   );
+//   sortedActiveColumns.push(...remainingColumns);
 
-  // Create the ColumnFormatted array
-  const formattedColumns: ColumnFormatted[] = sortedActiveColumns.map(
-    (column) => ({
-      name: column.label,
-      sizing: columnSizing[column.key]?.toString() || null,
-    })
-  );
+//   // Create the ColumnFormatted array
+//   const formattedColumns: ColumnFormatted[] = sortedActiveColumns.map(
+//     (column) => ({
+//       name: column.label,
+//       sizing: columnSizing[column.key]?.toString() || null,
+//     })
+//   );
 
-  console.log("LAYOUT FINAL", formattedColumns);
+//   console.log("LAYOUT FINAL", formattedColumns);
 
-  return formattedColumns;
-}
+//   return formattedColumns;
+// }
 
 interface ThemedTableV3Props {
   data: RequestWrapper[];
@@ -88,6 +89,9 @@ interface ThemedTableV3Props {
     columnOrder: ColumnOrderState;
     setColumnOrder: React.Dispatch<React.SetStateAction<ColumnOrderState>>;
   };
+  saveLayout: (name: string) => void;
+  setLayout: (name: string) => void;
+  layouts: string[];
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
@@ -111,6 +115,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onPageSizeChangeHandler,
     onSelectHandler,
     onSortHandler,
+    saveLayout,
+    setLayout,
+    layouts,
   } = props;
 
   console.log(
@@ -121,12 +128,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     sortColumns,
     advancedFilters,
     timeFilter
-  );
-
-  const formattedColumns = formatColumns(
-    columnSizing,
-    columnOrder,
-    sortColumns
   );
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
@@ -168,11 +169,19 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
           of <span className="font-medium">{count}</span> results
         </p>
-        <SaveLayoutButton
-          columns={formattedColumns}
-          advancedFilters={advancedFilters}
-          timeFilter={timeFilter}
-        />
+
+        <div className="flex flex-row space-x-2 items">
+          <SaveLayoutButton saveLayout={saveLayout} />
+          <ThemedDropdown
+            options={layouts.map((layout, i) => ({
+              label: layout,
+              value: i,
+            }))}
+            onSelect={(idx: number) => setLayout(layouts[idx])}
+            selectedValue={1}
+            align="right"
+          />
+        </div>
       </div>
 
       {columns.length < 1 ? (
