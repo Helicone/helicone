@@ -2,6 +2,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
+import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -549,6 +550,11 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    if (isLoggingEndpoint(request)) {
+      const response = await handleLoggingEndpoint(request, env);
+      return response;
+    }
+
     const requestBody =
       request.method === "POST"
         ? await request.clone().json<{ stream?: boolean }>()
