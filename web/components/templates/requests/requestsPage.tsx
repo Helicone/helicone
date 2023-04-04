@@ -18,6 +18,7 @@ import {
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetKeys } from "../../../services/hooks/keys";
 import { useLocalStorageState } from "../../../services/hooks/localStorage";
+import { useLayouts } from "../../../services/hooks/useLayouts";
 import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
   SortDirection,
@@ -94,6 +95,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     "requestsColumnOrderv2",
     []
   );
+  const {} = useLayouts();
 
   const initialColumns: Column[] = [
     {

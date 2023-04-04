@@ -86,13 +86,13 @@ CREATE POLICY "Enable delete access for auth users"
     AS PERMISSIVE
     FOR DELETE
     TO public
-    USING (((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'heliconedemo@gmail.com'::text)));
+    USING (((auth.uid() = user_id)));
 CREATE POLICY "Enable inserts for users based on user_id"
     ON public.user_api_keys
     AS PERMISSIVE
     FOR INSERT
     TO public
-    WITH CHECK (((auth.uid() = user_id) AND ((auth.jwt() ->> 'email'::text) <> 'heliconedemo@gmail.com'::text)));
+    WITH CHECK (((auth.uid() = user_id)));
 CREATE POLICY "Enable read access for users"
     ON public.user_api_keys
     AS PERMISSIVE
