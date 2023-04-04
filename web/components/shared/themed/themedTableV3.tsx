@@ -26,7 +26,6 @@ import { useEffect, useState } from "react";
 import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { useLocalStorageState } from "../../../services/hooks/localStorage";
 import ThemedDropdown from "./themedDropdown";
 
 export type ColumnFormatted = {
