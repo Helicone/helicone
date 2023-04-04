@@ -131,7 +131,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
 
         <div className="flex flex-row space-x-2 items">
           <SaveLayoutButton saveLayout={saveLayout} />
-          {currentLayout !== null && (
+          {currentLayout !== null && layouts.length > 0 && (
             <DeleteLayoutButton
               layoutId={currentLayout.id}
               layoutName={currentLayout.name}
