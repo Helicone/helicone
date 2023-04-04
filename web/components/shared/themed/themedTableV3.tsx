@@ -26,8 +26,9 @@ import { useEffect, useState } from "react";
 import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { useLocalStorageState } from "../../../services/hooks/localStorage";
 import ThemedDropdown from "./themedDropdown";
+import { useUser } from "@supabase/auth-helpers-react";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 export type ColumnFormatted = {
   name: string;
@@ -81,6 +82,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     layouts,
   } = props;
 
+  const user = useUser();
+
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
     localStorage.setItem("requestsColumnSizing", JSON.stringify(columnSizing));
@@ -122,7 +125,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
         </p>
 
         <div className="flex flex-row space-x-2 items">
-          <SaveLayoutButton saveLayout={saveLayout} />
+          {user?.email === DEMO_EMAIL && (
+            <SaveLayoutButton saveLayout={saveLayout} />
+          )}
           {layouts.length > 0 && (
             <ThemedDropdown
               options={layouts.map((layout, i) => ({
