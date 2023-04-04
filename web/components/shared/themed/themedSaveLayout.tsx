@@ -29,10 +29,10 @@ const SaveLayoutButton: React.FC<SaveLayoutButtonProps> = ({ saveLayout }) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex flex-row items-center rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold border border-gray-300 hover:bg-sky-50 text-gray-900 shadow-sm hover:text-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-sky-50 text-gray-900 shadow-sm hover:text-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
       >
         <HomeModernIcon className="w-4 h-4 inline mr-2" />
-        Save Layout
+        Create Layout
       </button>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">

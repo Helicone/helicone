@@ -18,7 +18,6 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetKeys } from "../../../services/hooks/keys";
-import { useLocalStorageState } from "../../../services/hooks/localStorage";
 import { useLayouts } from "../../../services/hooks/useLayouts";
 import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
@@ -64,6 +63,7 @@ export type CsvData = {
   response: string;
   total_tokens: number;
   logprobs: number | null;
+  probability: number | null;
   request_user_id: string;
   model: string;
   temperature: number | null;
@@ -94,19 +94,10 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
     "Condensed"
   );
-  const [columnSizing, setColumnSizing] =
-    useLocalStorageState<ColumnSizingState>("requestsColumnSizingv2", {});
-  const [columnOrder, setColumnOrder] = useLocalStorageState<ColumnOrderState>(
-    "requestsColumnOrderv2",
-    []
-  );
-  const [columns, setColumns] = useLocalStorageState<Column[]>(
-    "requestTableColumns",
-    []
-  );
-  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
-    UIFilterRow[]
-  >("advancedFilters", []);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
@@ -115,6 +106,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     },
   });
   const { data: layouts, refetch: refetchLayouts } = useLayouts();
+
   function saveLayout(name: string) {
     console.log("HELLo");
     supabaseClient
@@ -133,7 +125,15 @@ const RequestsPage = (props: RequestsPageProps) => {
       .then(() => refetchLayouts())
       .then(() => setNotification("Layout saved!", "success"));
   }
-  const [currentLayout, setCurrentLayout] = useState<string | null>(null);
+
+  const [currentLayout, setCurrentLayout] = useState<{
+    columns: Json;
+    created_at: string | null;
+    filters: Json;
+    id: number;
+    name: string;
+    user_id: string;
+  } | null>(null);
   function setLayout(name: string) {
     type Columns = {
       columnSizing: typeof columnSizing;
@@ -167,7 +167,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           (layout.filters! as unknown as Filters).advancedFilters
         );
         setTimeFilter((layout.filters! as unknown as Filters).timeFilter);
-        setCurrentLayout(name);
+        setCurrentLayout(layout);
       });
   }
 
@@ -281,6 +281,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       type: "number",
       filter: true,
       format: (value: number) => (value ? value.toFixed(2) : ""),
+    },
+    {
+      key: "probability",
+      active: false,
+      label: "Probability",
+      type: "number",
+      filter: true,
+      format: (value: number) => (value ? (value * 100).toFixed(0) + "%" : ""),
     },
   ];
 
@@ -533,7 +541,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV3
                 saveLayout={saveLayout}
-                currentLayout={currentLayout ?? ""}
+                currentLayout={currentLayout}
                 layouts={layouts?.data?.map((l) => l.name) ?? []}
                 setLayout={setLayout}
                 columnOrder={{
