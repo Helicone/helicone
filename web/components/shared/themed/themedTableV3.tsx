@@ -123,19 +123,22 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
 
         <div className="flex flex-row space-x-2 items">
           <SaveLayoutButton saveLayout={saveLayout} />
-          <ThemedDropdown
-            options={layouts.map((layout, i) => ({
-              label: layout,
-              value: i,
-            }))}
-            onSelect={(idx: number) => {
-              setLayout(layouts[idx]);
-            }}
-            selectedValue={
-              layouts.findIndex((layout) => layout === currentLayout) || 0
-            }
-            align="right"
-          />
+          {layouts.length > 0 && (
+            <ThemedDropdown
+              options={layouts.map((layout, i) => ({
+                label: layout,
+                value: i,
+              }))}
+              onSelect={(idx: number) => {
+                setLayout(layouts[idx]);
+              }}
+              selectedValue={
+                layouts.findIndex((layout) => layout === currentLayout) || 0
+              }
+              align="right"
+              placeholder="Layouts"
+            />
+          )}
         </div>
       </div>
 
