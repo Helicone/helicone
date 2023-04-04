@@ -162,14 +162,12 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
 
   return (
     <div className="space-y-2">
-      <div>
+      <div className="w-full flex flex-row justify-between items-end">
         <p className="text-sm text-gray-700">
           Showing <span className="font-medium">{from + 1}</span> to{" "}
           <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
           of <span className="font-medium">{count}</span> results
         </p>
-      </div>
-      <div>
         <SaveLayoutButton
           columns={formattedColumns}
           advancedFilters={advancedFilters}
