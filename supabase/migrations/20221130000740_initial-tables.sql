@@ -5,7 +5,7 @@
 
 CREATE TABLE IF NOT EXISTS public.request
 (
-    id uuid NOT NULL,
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     body jsonb NOT NULL,
     path text COLLATE pg_catalog."default" NOT NULL,
@@ -27,7 +27,7 @@ GRANT ALL ON TABLE public.request TO service_role;
 
 CREATE TABLE IF NOT EXISTS public.response
 (
-    id uuid NOT NULL,
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     body jsonb NOT NULL,
     request uuid NOT NULL,
