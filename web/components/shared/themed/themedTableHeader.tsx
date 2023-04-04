@@ -77,6 +77,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     csvExport,
     view,
   } = props;
+  console.log("LAYOUTS ALL", editColumns, timeFilter, advancedFilter?.filters);
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
