@@ -18,7 +18,6 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetKeys } from "../../../services/hooks/keys";
-import { useLocalStorageState } from "../../../services/hooks/localStorage";
 import { useLayouts } from "../../../services/hooks/useLayouts";
 import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
@@ -95,19 +94,10 @@ const RequestsPage = (props: RequestsPageProps) => {
   const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
     "Condensed"
   );
-  const [columnSizing, setColumnSizing] =
-    useLocalStorageState<ColumnSizingState>("requestsColumnSizingv2", {});
-  const [columnOrder, setColumnOrder] = useLocalStorageState<ColumnOrderState>(
-    "requestsColumnOrderv2",
-    []
-  );
-  const [columns, setColumns] = useLocalStorageState<Column[]>(
-    "requestTableColumns",
-    []
-  );
-  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
-    UIFilterRow[]
-  >("advancedFilters", []);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
