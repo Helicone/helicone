@@ -566,8 +566,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                 page={page}
                 from={from}
                 to={to}
-                advancedFilters={advancedFilters}
-                timeFilter={timeFilter}
                 onSelectHandler={selectRowHandler}
                 onPageChangeHandler={onPageChangeHandler}
                 onPageSizeChangeHandler={onPageSizeChangeHandler}

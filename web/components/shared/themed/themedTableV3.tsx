@@ -42,8 +42,6 @@ interface ThemedTableV3Props {
   from: number;
   to: number;
   count: number | null;
-  advancedFilters: UIFilterRow[];
-  timeFilter: FilterNode;
   columnSizing: {
     columnSizing: ColumnSizingState;
     setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
@@ -71,8 +69,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     to,
     count,
     page,
-    advancedFilters,
-    timeFilter,
     columnSizing: { columnSizing, setColumnSizing },
     columnOrder: { columnOrder, setColumnOrder },
     onPageChangeHandler,
