@@ -34,43 +34,6 @@ export type ColumnFormatted = {
   sizing: string;
 };
 
-// function formatColumns(
-//   columnSizing: ColumnSizingState,
-//   columnOrder: ColumnOrderState,
-//   sortColumns: Column[]
-// ): ColumnFormatted[] {
-//   // Filter active columns
-//   const activeColumns = sortColumns.filter((column) => column.active);
-
-//   // Create a map with keys as column names and values as Column objects
-//   const columnMap = new Map<string, Column>(
-//     activeColumns.map((column) => [column.key, column])
-//   );
-
-//   // Sort the active columns based on the columnOrder
-//   const sortedActiveColumns = columnOrder
-//     .filter((columnName) => columnMap.has(columnName))
-//     .map((columnName) => columnMap.get(columnName)!);
-
-//   // Add the columns not present in columnOrder to the end of the list
-//   const remainingColumns = activeColumns.filter(
-//     (column) => !columnOrder.includes(column.key)
-//   );
-//   sortedActiveColumns.push(...remainingColumns);
-
-//   // Create the ColumnFormatted array
-//   const formattedColumns: ColumnFormatted[] = sortedActiveColumns.map(
-//     (column) => ({
-//       name: column.label,
-//       sizing: columnSizing[column.key]?.toString() || null,
-//     })
-//   );
-
-//   console.log("LAYOUT FINAL", formattedColumns);
-
-//   return formattedColumns;
-// }
-
 interface ThemedTableV3Props {
   data: RequestWrapper[];
   columns: any[]; // abstract this to a <T>
@@ -91,6 +54,7 @@ interface ThemedTableV3Props {
   };
   saveLayout: (name: string) => void;
   setLayout: (name: string) => void;
+  currentLayout: string;
   layouts: string[];
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
@@ -117,18 +81,9 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onSortHandler,
     saveLayout,
     setLayout,
+    currentLayout,
     layouts,
   } = props;
-
-  console.log(
-    "LAYOUT COLUMN SIZING",
-    columnSizing,
-    columnOrder,
-    columns,
-    sortColumns,
-    advancedFilters,
-    timeFilter
-  );
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
@@ -177,8 +132,12 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
               label: layout,
               value: i,
             }))}
-            onSelect={(idx: number) => setLayout(layouts[idx])}
-            selectedValue={1}
+            onSelect={(idx: number) => {
+              setLayout(layouts[idx]);
+            }}
+            selectedValue={
+              layouts.findIndex((layout) => layout === currentLayout) || 0
+            }
             align="right"
           />
         </div>

@@ -29,6 +29,7 @@ import { Database, Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import useNotification from "../../shared/notification/useNotification";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader, {
   escapeCSVString,
@@ -86,6 +87,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   const { page, pageSize, sortBy } = props;
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
+  const { setNotification } = useNotification();
 
   const truncLength = 30;
 
@@ -112,7 +114,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
     },
   });
-  const { data: layouts } = useLayouts();
+  const { data: layouts, refetch: refetchLayouts } = useLayouts();
   function saveLayout(name: string) {
     console.log("HELLo");
     supabaseClient
@@ -127,9 +129,11 @@ const RequestsPage = (props: RequestsPageProps) => {
         filters: { advancedFilters, timeFilter } as unknown as Json,
         name,
       })
-      .then(console.log);
+      .then(console.log)
+      .then(() => refetchLayouts())
+      .then(() => setNotification("Layout saved!", "success"));
   }
-
+  const [currentLayout, setCurrentLayout] = useState<string | null>(null);
   function setLayout(name: string) {
     type Columns = {
       columnSizing: typeof columnSizing;
@@ -149,11 +153,21 @@ const RequestsPage = (props: RequestsPageProps) => {
         console.log("DATA FROM LOADING", res.data);
         setColumnSizing((layout.columns! as unknown as Columns).columnSizing);
         setColumnOrder((layout.columns! as unknown as Columns).columnOrder);
-        setColumns((layout.columns! as unknown as Columns).columns);
+        setColumns((prevColumns) => {
+          const newColumns = (layout.columns! as unknown as Columns).columns;
+          return prevColumns.map((c) => {
+            const newColumn = newColumns.find((nc) => nc.key === c.key);
+            return {
+              ...c,
+              active: newColumn?.active ?? false,
+            };
+          });
+        });
         setAdvancedFilters(
           (layout.filters! as unknown as Filters).advancedFilters
         );
-        // setTimeFilter((layout.filters! as unknown as Filters).timeFilter);
+        setTimeFilter((layout.filters! as unknown as Filters).timeFilter);
+        setCurrentLayout(name);
       });
   }
 
@@ -519,6 +533,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             ) : (
               <ThemedTableV3
                 saveLayout={saveLayout}
+                currentLayout={currentLayout ?? ""}
                 layouts={layouts?.data?.map((l) => l.name) ?? []}
                 setLayout={setLayout}
                 columnOrder={{
