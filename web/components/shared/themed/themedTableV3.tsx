@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import SaveLayoutButton from "./themedSaveLayout";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { useLocalStorageState } from "../../../services/hooks/localStorage";
 
 export type ColumnFormatted = {
   name: string;
@@ -79,6 +80,14 @@ interface ThemedTableV3Props {
   count: number | null;
   advancedFilters: UIFilterRow[];
   timeFilter: FilterNode;
+  columnSizing: {
+    columnSizing: ColumnSizingState;
+    setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
+  };
+  columnOrder: {
+    columnOrder: ColumnOrderState;
+    setColumnOrder: React.Dispatch<React.SetStateAction<ColumnOrderState>>;
+  };
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
@@ -96,28 +105,14 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     page,
     advancedFilters,
     timeFilter,
+    columnSizing: { columnSizing, setColumnSizing },
+    columnOrder: { columnOrder, setColumnOrder },
     onPageChangeHandler,
     onPageSizeChangeHandler,
     onSelectHandler,
     onSortHandler,
   } = props;
 
-  const initialColumnSizing =
-    typeof window !== "undefined"
-      ? localStorage.getItem("requestsColumnSizing")
-      : null;
-
-  const initialColumnOrder =
-    typeof window !== "undefined"
-      ? localStorage.getItem("requestsColumnOrder")
-      : null;
-
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
-    initialColumnSizing ? JSON.parse(initialColumnSizing) : {}
-  );
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-    initialColumnOrder ? JSON.parse(initialColumnOrder) : []
-  );
   console.log(
     "LAYOUT COLUMN SIZING",
     columnSizing,

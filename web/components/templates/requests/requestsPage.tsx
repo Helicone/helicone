@@ -1,5 +1,9 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { createColumnHelper } from "@tanstack/react-table";
+import {
+  ColumnOrderState,
+  ColumnSizingState,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import Papa from "papaparse";
 
@@ -82,6 +86,13 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
     "Condensed"
+  );
+
+  const [columnSizing, setColumnSizing] =
+    useLocalStorageState<ColumnSizingState>("requestsColumnSizingv2", {});
+  const [columnOrder, setColumnOrder] = useLocalStorageState<ColumnOrderState>(
+    "requestsColumnOrderv2",
+    []
   );
 
   const initialColumns: Column[] = [
@@ -460,6 +471,14 @@ const RequestsPage = (props: RequestsPageProps) => {
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <ThemedTableV3
+                columnOrder={{
+                  columnOrder,
+                  setColumnOrder,
+                }}
+                columnSizing={{
+                  columnSizing,
+                  setColumnSizing,
+                }}
                 data={requests}
                 sortColumns={columns}
                 columns={columns
