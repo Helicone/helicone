@@ -125,7 +125,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
         </p>
 
         <div className="flex flex-row space-x-2 items">
-          {user?.email === DEMO_EMAIL && (
+          {user?.email !== DEMO_EMAIL && (
             <SaveLayoutButton saveLayout={saveLayout} />
           )}
           {layouts.length > 0 && (
