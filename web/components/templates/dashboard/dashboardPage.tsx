@@ -13,7 +13,6 @@ import {
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
-import { useLocalStorageState } from "../../../services/hooks/localStorage";
 
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
@@ -52,9 +51,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     sessionStorageKey
   );
 
-  const [advancedFilters, setAdvancedFilters] = useLocalStorageState<
-    UIFilterRow[]
-  >("advancedFilters", []);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
