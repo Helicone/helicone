@@ -135,6 +135,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     name: string;
     user_id: string;
   } | null>(null);
+
   function setLayout(name: string) {
     type Columns = {
       columnSizing: typeof columnSizing;
@@ -433,6 +434,78 @@ const RequestsPage = (props: RequestsPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPropertiesLoading, isValuesLoading]);
 
+  const clearLayout = () => {
+    const propertiesColumns: Column[] = properties.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "property",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
+
+    const valuesColumns: Column[] = values.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          values: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "value",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+      };
+    });
+
+    const newColumns = [
+      ...initialColumns,
+      ...valuesColumns,
+      ...propertiesColumns,
+    ];
+
+    setColumns((prev) => {
+      return newColumns.map((c) => {
+        const prevColumn = prev.find((p) => p.key === c.key);
+        if (prevColumn) {
+          return {
+            ...c,
+            ...prevColumn,
+          };
+        }
+        return c;
+      });
+    });
+    setColumnSizing({});
+    setColumnOrder([]);
+    setColumns(newColumns);
+    setAdvancedFilters([]);
+    setTimeFilter({
+      request: {
+        created_at: {
+          gte: getTimeIntervalAgo("7d").toISOString(),
+        },
+      },
+    });
+    setCurrentLayout(null);
+  };
+
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
     columns[columnOrderIndex].sortBy = orderBy.direction;
@@ -535,6 +608,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 currentLayout,
                 layouts: layouts?.data || [],
                 setLayout,
+                clearLayout,
               }}
             />
             {isLoading || from === undefined || to === undefined ? (

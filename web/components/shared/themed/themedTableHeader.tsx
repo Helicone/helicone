@@ -93,6 +93,7 @@ interface ThemedHeaderProps {
         }[]
       | null
       | undefined;
+    clearLayout: () => void;
   };
 }
 
@@ -137,6 +138,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     setOpen(false);
     setNotification("Layout deleted", "success");
     refetchLayouts();
+    layout?.clearLayout();
   };
 
   return (
