@@ -20,9 +20,10 @@ interface ThemedTabsProps {
   }[];
   onOptionSelect: (option: string) => void;
   initialIndex?: number;
+  breakpoint?: "sm" | "md" | "lg" | "xl" | "2xl";
 }
 export default function ThemedTabs(props: ThemedTabsProps) {
-  const { options, onOptionSelect, initialIndex } = props;
+  const { options, onOptionSelect, initialIndex, breakpoint = "sm" } = props;
 
   return (
     <div className="inline-flex px-2 sm:px-0">
@@ -49,7 +50,9 @@ export default function ThemedTabs(props: ThemedTabsProps) {
                       "w-5 h-5 inline-block"
                     )}
                   />
-                  <p className="w-max hidden xl:inline">{option.label}</p>
+                  <p className={`w-max hidden ${breakpoint}:inline`}>
+                    {option.label}
+                  </p>
                 </div>
               )}
             </Tab>
