@@ -20,7 +20,10 @@ import {
   FunnelIcon,
   MinusCircleIcon,
   PlusCircleIcon,
+  PlusIcon,
   Square3Stack3DIcon,
+  Squares2X2Icon,
+  TrashIcon,
   ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
@@ -33,6 +36,12 @@ import ThemedTimeFilter from "./themedTimeFilter";
 import { Column } from "../../ThemedTableV2";
 import { AdvancedFilters, UIFilterRow } from "./themedAdvancedFilters";
 import ThemedToggle from "./themedTabs";
+import { Json } from "../../../supabase/database.types";
+import SaveLayoutButton from "./themedSaveLayout";
+import ThemedModal from "./themedModal";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import useNotification from "../notification/useNotification";
+import { useLayouts } from "../../../services/hooks/useLayouts";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -62,9 +71,29 @@ interface ThemedHeaderProps {
     onAdvancedFilter: Dispatch<SetStateAction<UIFilterRow[]>>;
     filters: UIFilterRow[];
   };
-  view?: {
-    viewMode: string;
-    setViewMode: (mode: "Condensed" | "Expanded") => void;
+  layout?: {
+    currentLayout: {
+      columns: Json;
+      created_at: string | null;
+      filters: Json;
+      id: number;
+      name: string;
+      user_id: string;
+    } | null;
+    setLayout: (name: string) => void;
+    onCreateLayout: (layoutName: string) => void;
+    layouts:
+      | {
+          columns: Json;
+          created_at: string | null;
+          filters: Json;
+          id: number;
+          name: string;
+          user_id: string;
+        }[]
+      | null
+      | undefined;
+    clearLayout: () => void;
   };
 }
 
@@ -74,29 +103,46 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     editColumns,
     timeFilter,
     advancedFilter,
+    layout,
     csvExport,
-    view,
   } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [openDelete, setOpenDelete] = useState(false);
+  const [deleteLayout, setDeleteLayout] = useState<{
+    columns: Json;
+    created_at: string | null;
+    filters: Json;
+    id: number;
+    name: string;
+    user_id: string;
+  }>();
 
-  const options = [
-    {
-      label: "Condensed",
-      icon: Square3Stack3DIcon,
-    },
-    {
-      label: "Expanded",
-      icon: ArrowsPointingOutIcon,
-    },
-  ];
+  const supabaseClient = useSupabaseClient();
+  const { setNotification } = useNotification();
+  const { refetch: refetchLayouts } = useLayouts();
 
-  const initialIndex = options.findIndex(
-    (option) => option.label === view?.viewMode
-  );
+  const onDeleteHandler = async (layoutId: number) => {
+    const { error } = await supabaseClient
+      .from("layout")
+      .delete()
+      .eq("id", layoutId);
+
+    if (error) {
+      setNotification("Error deleting layout", "error");
+      setOpen(false);
+      return;
+    }
+    setOpen(false);
+    setNotification("Layout deleted", "success");
+    refetchLayouts();
+    layout?.clearLayout();
+  };
 
   return (
-    <div className="">
+    <>
       {/* Filters */}
       <div aria-labelledby="filter-heading" className="grid items-center">
         <h2 id="filter-heading" className="sr-only">
@@ -116,7 +162,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-row space-x-1 items-center">
+          <div className="flex flex-wrap space-x-1 items-center">
             {editColumns && (
               <Popover className="relative text-sm">
                 {({ open }) => (
@@ -248,6 +294,109 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 </button>
               </div>
             )}
+            {layout && (
+              <Popover className="relative text-sm">
+                {({ open }) => (
+                  <>
+                    <Popover.Button
+                      className={clsx(
+                        open || layout.currentLayout !== null
+                          ? "bg-sky-100 text-sky-900"
+                          : "hover:bg-sky-100 hover:text-sky-900",
+                        "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
+                      )}
+                    >
+                      <Squares2X2Icon
+                        className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                        aria-hidden="true"
+                      />
+                      <span className="sm:inline hidden lg:inline overflow-ellipsis truncate max-w-[100px]">
+                        {layout.currentLayout !== null
+                          ? layout.currentLayout.name
+                          : "Layouts"}
+                      </span>
+                    </Popover.Button>
+
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-200"
+                      enterFrom="opacity-0 translate-y-1"
+                      enterTo="opacity-100 translate-y-0"
+                      leave="transition ease-in duration-150"
+                      leaveFrom="opacity-100 translate-y-0"
+                      leaveTo="opacity-0 translate-y-1"
+                    >
+                      <Popover.Panel className="absolute left-0 right-auto lg:left-auto lg:right-0 z-10 mt-2.5 flex">
+                        {({ close }) => (
+                          <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                            <div className="grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
+                              <button
+                                type="button"
+                                onClick={() => setOpen(true)}
+                                className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
+                              >
+                                <PlusCircleIcon
+                                  className="h-4 w-4 flex-none text-gray-400"
+                                  aria-hidden="true"
+                                />
+                                Create Layout
+                              </button>
+                            </div>
+                            <fieldset className="min-w-[250px] max-h-[400px] w-full overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
+                              {layout.layouts!.length < 1 ? (
+                                <div className="p-4 items-center h-[200px] flex flex-col justify-center text-center text-gray-500 space-y-4">
+                                  <Squares2X2Icon className="h-8 w-8" />
+                                  <p>
+                                    Create layouts to easily switch between
+                                    different filters, column selections, and
+                                    sort orders.
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="divide-y divide-gray-200 border-gray-200">
+                                  {layout.layouts!.map((l, idx) => (
+                                    <div
+                                      className="flex flex-row justify-between items-center relative"
+                                      key={idx}
+                                    >
+                                      <button
+                                        className={clsx(
+                                          l.id === layout.currentLayout?.id
+                                            ? "bg-sky-100 text-sky-900"
+                                            : "text-gray-900 hover:bg-gray-50",
+                                          "relative p-4 select-none font-medium w-full justify-between items-center flex hover:cursor-pointer"
+                                        )}
+                                        onClick={() => {
+                                          layout.setLayout(l.name);
+                                        }}
+                                      >
+                                        <span className="overflow-ellipsis truncate max-w-[175px]">
+                                          {l.name}
+                                        </span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="absolute right-3 inline-flex items-center rounded-md bg-red-500 p-1 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                                        onClick={() => {
+                                          setDeleteLayout(l);
+                                          setOpenDelete(true);
+                                        }}
+                                      >
+                                        <TrashIcon className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </fieldset>
+                          </div>
+                        )}
+                      </Popover.Panel>
+                    </Transition>
+                  </>
+                )}
+              </Popover>
+            )}
 
             {/* {csvExport && (
               <div className="mx-auto flex text-sm">
@@ -265,29 +414,8 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 </Menu>
               </div>
             )} */}
-            {view && (
-              <div className="mx-auto flex text-sm">
-                <ThemedToggle
-                  options={[
-                    {
-                      label: "Condensed",
-                      icon: Square3Stack3DIcon,
-                    },
-                    {
-                      label: "Expanded",
-                      icon: ArrowsPointingOutIcon,
-                    },
-                  ]}
-                  onOptionSelect={(option) =>
-                    view.setViewMode(option as "Condensed" | "Expanded")
-                  }
-                  initialIndex={initialIndex}
-                />
-              </div>
-            )}
           </div>
         </div>
-
         {advancedFilter && (
           <div>
             {advancedFilter.filterMap && (
@@ -351,6 +479,74 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
         )}
       </div>
-    </div>
+      {layout && open && (
+        <ThemedModal open={open} setOpen={setOpen}>
+          <div className="flex flex-col space-y-4 sm:space-y-8 max-w-sm">
+            <div className="flex flex-col space-y-2">
+              <p className="text-sm sm:text-md font-semibold text-gray-900">
+                Create Layout
+              </p>
+              <p className="text-sm sm:text-md text-gray-500">
+                Create layouts to easily switch between different filters,
+                column selections, and sort orders.
+              </p>
+            </div>
+
+            <input
+              type="text"
+              onChange={(e) => setName(e.target.value)}
+              placeholder={"Layout Name..."}
+              value={name}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            />
+            <div className="w-full flex justify-end text-sm">
+              <button
+                className="items-center rounded-md bg-black px-3 py-1.5 text-md flex font-normal text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                onClick={() => {
+                  layout.onCreateLayout(name);
+                  setOpen(false);
+                }}
+              >
+                <PlusIcon className="h-4 w-4 inline" />
+                Add Layout
+              </button>
+            </div>
+          </div>
+        </ThemedModal>
+      )}
+      {layout && openDelete && (
+        <ThemedModal open={openDelete} setOpen={setOpenDelete}>
+          <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">
+            <div className="flex flex-col space-y-2">
+              <p className="text-sm sm:text-md font-semibold text-gray-900">
+                Delete Layout
+              </p>
+              <p className="text-sm sm:text-md text-gray-500">
+                {`Are you sure you want to delete layout: ${deleteLayout?.name}?`}
+              </p>
+            </div>
+
+            <div className="w-full flex justify-end text-sm space-x-2">
+              <button
+                type="button"
+                onClick={() => setOpenDelete(false)}
+                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                className="flex flex-row items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium border border-red-500 hover:bg-red-700 text-gray-50 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                onClick={() => {
+                  deleteLayout?.id && onDeleteHandler(deleteLayout.id);
+                  setOpenDelete(false);
+                }}
+              >
+                Delete Layout
+              </button>
+            </div>
+          </div>
+        </ThemedModal>
+      )}
+    </>
   );
 }
