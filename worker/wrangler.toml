@@ -17,6 +17,16 @@ routes = [
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 
+
+[env.production_staging]
+name = "helicone-worker-prod-staging"
+routes = [
+	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" }
+]
+
+[env.production_staging.vars]
+SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+
 [env.preview]
 name = "helicone-worker-preview"
 routes = [
