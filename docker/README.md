@@ -5,6 +5,7 @@ You need to have installed Supabase (https://supabase.com/docs/guides/cli)
 
 You need to create the .env file that docker-compose will use.
 It must have the following environment variables:
+    
     - DATABASE_URL
     - SUPABASE_URL
     - SUPABASE_ANON_KEY
@@ -27,13 +28,20 @@ supabase start
 ```
 
 This will initialize the database for your local environment. After completion, the terminal will provide the necessary environment variables above:
+
 ![Supabase Output Example](https://github.com/Helicone/helicone/blob/main/web/public/assets/supabase-example.png)
 
 If you would like to hook into your own databasem, please checkout the [Supabase documentation](https://supabase.com/docs/guides/self-hosting/docker#using-an-external-database)
 
 
-Finally, fill in the .env file in this directory.
+Finally, fill in an .env file in this directory:
 
+```bash
+DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
+SUPABASE_URL="http://localhost:54321"
+SUPABASE_ANON_KEY="ThisIsAnExampleSupabaseAnonKey.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+SUPABASE_SERVICE_ROLE_KEY="ThisIsAnExampleSupabaseServiceRoleKey.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+```
 
 ## Running
 ```bash
