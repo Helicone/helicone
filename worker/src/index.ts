@@ -391,14 +391,14 @@ async function forwardAndLog(
         ...getHeliconeHeaders(request.headers),
         requestId,
       });
-      requestResult.data !== null
-        ? readAndLogResponse(
-            requestSettings,
-            readableLog,
-            requestResult.data,
-            dbClient
-          )
-        : Promise.resolve();
+      if (requestResult.data !== null) {
+        await readAndLogResponse(
+          requestSettings,
+          readableLog,
+          requestResult.data,
+          dbClient
+        );
+      }
     })()
   );
 
