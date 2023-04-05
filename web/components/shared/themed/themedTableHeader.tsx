@@ -310,7 +310,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                         className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                         aria-hidden="true"
                       />
-                      <span className="sm:inline hidden lg:inline">
+                      <span className="sm:inline hidden lg:inline overflow-ellipsis truncate max-w-[100px]">
                         {layout.currentLayout !== null
                           ? layout.currentLayout.name
                           : "Layouts"}
@@ -356,7 +356,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 <div className="divide-y divide-gray-200 border-gray-200">
                                   {layout.layouts!.map((l, idx) => (
                                     <div
-                                      className="flex flex-row justify-between items-center"
+                                      className="flex flex-row justify-between items-center relative"
                                       key={idx}
                                     >
                                       <button
@@ -370,7 +370,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                           layout.setLayout(l.name);
                                         }}
                                       >
-                                        <span>{l.name}</span>
+                                        <span className="overflow-ellipsis truncate max-w-[175px]">
+                                          {l.name}
+                                        </span>
                                       </button>
                                       <button
                                         type="button"
