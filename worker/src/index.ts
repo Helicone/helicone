@@ -525,7 +525,6 @@ async function forwardAndLog(
     return new Response("No authorization header found!", { status: 401 });
   }
 
-
   const response = await (retryOptions
     ? forwardRequestToOpenAiWithRetry(
         request,
@@ -582,15 +581,15 @@ async function forwardAndLog(
         ...getHeliconeHeaders(request.headers),
         requestId,
       });
-      requestResult.data !== null
-        ? readAndLogResponse(
-            requestSettings,
-            readableLog,
-            requestResult.data,
-            dbClient,
-            requestBody
-          )
-        : Promise.resolve();
+      if (requestResult.data !== null) {
+        await readAndLogResponse(
+          requestSettings,
+          readableLog,
+          requestResult.data,
+          dbClient,
+          requestBody
+        );
+      }
     })()
   );
 
@@ -832,7 +831,7 @@ export default {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "oh no :( this is embarrassing, Helicone ran into an error proxying your request. Please try again later",
+            "oh no :( this is embarrassing, Helicone ran into an error proxy-ing your request. Please try again later",
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
           "helicone-error": JSON.stringify(e),
