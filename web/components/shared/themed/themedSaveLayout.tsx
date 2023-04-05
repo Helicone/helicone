@@ -7,7 +7,11 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { Database, Json } from "../../../supabase/database.types";
 import { clsx } from "../clsx";
-import { HomeModernIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  HomeModernIcon,
+  PlusCircleIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import ThemedModal from "./themedModal";
 
 export interface Layout {
@@ -29,9 +33,12 @@ const SaveLayoutButton: React.FC<SaveLayoutButtonProps> = ({ saveLayout }) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-sky-50 text-gray-900 shadow-sm hover:text-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
       >
-        <HomeModernIcon className="w-4 h-4 inline mr-2" />
+        <PlusCircleIcon
+          className="h-4 w-4 flex-none text-gray-400"
+          aria-hidden="true"
+        />
         Create Layout
       </button>
       <ThemedModal open={open} setOpen={setOpen}>

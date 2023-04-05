@@ -91,9 +91,6 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const truncLength = 30;
 
-  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
-    "Condensed"
-  );
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
   const [columns, setColumns] = useState<Column[]>([]);
@@ -437,8 +434,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }
 
-  const columnHelper = createColumnHelper<RequestWrapper>();
-
   async function downloadCSV() {
     try {
       const response = await fetch("/api/export/requests", {
@@ -506,10 +501,6 @@ const RequestsPage = (props: RequestsPageProps) => {
         <div className="mt-4 space-y-2">
           <div className="space-y-4">
             <ThemedTableHeader
-              view={{
-                viewMode,
-                setViewMode,
-              }}
               editColumns={{
                 columns: columns,
                 onColumnCallback: setColumns,
@@ -535,15 +526,17 @@ const RequestsPage = (props: RequestsPageProps) => {
                 onAdvancedFilter: setAdvancedFilters,
                 filters: advancedFilters,
               }}
+              layout={{
+                onCreateLayout: saveLayout,
+                currentLayout,
+                layouts: layouts?.data || [],
+                setLayout,
+              }}
             />
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <ThemedTableV3
-                saveLayout={saveLayout}
-                currentLayout={currentLayout}
-                layouts={layouts?.data?.map((l) => l.name) ?? []}
-                setLayout={setLayout}
                 columnOrder={{
                   columnOrder,
                   setColumnOrder,
@@ -554,22 +547,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 }}
                 data={requests}
                 sortColumns={columns}
-                columns={columns
-                  .filter((c) => c.active)
-                  .map((c) =>
-                    columnHelper.accessor(c.key as string, {
-                      cell: (info) =>
-                        c.format ? (
-                          <span className="whitespace-pre-wrap max-w-7xl break-all">
-                            {c.format(info.getValue(), viewMode)}
-                          </span>
-                        ) : (
-                          info.getValue()
-                        ),
-                      header: () => <span>{c.label}</span>,
-                      size: c.minWidth,
-                    })
-                  )}
+                columns={columns}
                 count={count || 0}
                 page={page}
                 from={from}
