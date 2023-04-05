@@ -477,13 +477,14 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
       </div>
       {layout && open && (
         <ThemedModal open={open} setOpen={setOpen}>
-          <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">
+          <div className="flex flex-col space-y-4 sm:space-y-8 max-w-sm">
             <div className="flex flex-col space-y-2">
               <p className="text-sm sm:text-md font-semibold text-gray-900">
-                Save Layout
+                Create Layout
               </p>
               <p className="text-sm sm:text-md text-gray-500">
-                Save your current layout to be used later.
+                Create layouts to easily switch between different filters,
+                column selections, and sort orders.
               </p>
             </div>
 

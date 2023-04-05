@@ -104,9 +104,8 @@ const RequestsPage = (props: RequestsPageProps) => {
   });
   const { data: layouts, refetch: refetchLayouts } = useLayouts();
 
-  function saveLayout(name: string) {
-    console.log("HELLo");
-    supabaseClient
+  const onCreateLayout = async (name: string) => {
+    const { data, error } = await supabaseClient
       .from("layout")
       .insert({
         user_id: user!.id,
@@ -118,10 +117,15 @@ const RequestsPage = (props: RequestsPageProps) => {
         filters: { advancedFilters, timeFilter } as unknown as Json,
         name,
       })
-      .then(console.log)
-      .then(() => refetchLayouts())
-      .then(() => setNotification("Layout saved!", "success"));
-  }
+      .select();
+    if (error) {
+      setNotification("Error creating layout", "error");
+      return;
+    }
+    setNotification("Layout created!", "success");
+    refetchLayouts();
+    setLayout(data[0].name);
+  };
 
   const [currentLayout, setCurrentLayout] = useState<{
     columns: Json;
@@ -527,7 +531,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 filters: advancedFilters,
               }}
               layout={{
-                onCreateLayout: saveLayout,
+                onCreateLayout,
                 currentLayout,
                 layouts: layouts?.data || [],
                 setLayout,
