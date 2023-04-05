@@ -264,7 +264,7 @@ const UsersPage = (props: UsersPageProps) => {
                 </li>
                 <li className="w-full flex flex-row justify-between gap-4 text-sm">
                   <p>Total Cost:</p>
-                  <p className="italic">(coming soon)</p>
+                  <p className="italic">{selectedUser.cost}</p>
                 </li>
               </ul>
             </div>
