@@ -9,6 +9,7 @@ export interface UserRow {
   total_requests: string;
   average_requests_per_day_active: string;
   average_tokens_per_request: string;
+  cost: number;
 }
 
 const getUsers = async (
