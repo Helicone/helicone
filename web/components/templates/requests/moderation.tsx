@@ -9,8 +9,6 @@ interface ModerationProps {
 const Moderation = (props: ModerationProps) => {
   const { request, response } = props;
 
-  //   const jsonResponse = JSON.parse(response[0] || "{}");
-
   return (
     <div className="flex flex-col gap-2 w-full space-y-2 text-sm">
       <div className="w-full flex flex-col text-left space-y-1 mb-4">
