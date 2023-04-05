@@ -302,7 +302,7 @@ async function getRequestCount(
 function getResponseText(responseBody: any): string {
   type Choice =
     | {
-        message: {
+        delta: {
           content: string;
         };
       }
@@ -313,8 +313,8 @@ function getResponseText(responseBody: any): string {
     const choices = responseBody.choices;
     return (choices as Choice[])
       .map((c) => {
-        if ("message" in c) {
-          return c.message.content;
+        if ("delta" in c) {
+          return c.delta.content;
         } else if ("text" in c) {
           return c.text;
         } else {
@@ -324,6 +324,68 @@ function getResponseText(responseBody: any): string {
       .join("");
   } else {
     throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
+  }
+}
+
+function consolidateTextFields(responseBody: any[]): any {
+  try {
+    const consolidated = responseBody.reduce((acc, cur) => {
+      if (!cur) {
+        return acc;
+      } else if (acc.choices === undefined) {
+        return cur;
+      } else {
+        return {
+          ...acc,
+          choices: acc.choices.map((c: any, i: number) => {
+            if (!cur.choices) {
+              return c;
+            } else if (
+              c.delta !== undefined &&
+              cur.choices[i]?.delta !== undefined
+            ) {
+              return {
+                delta: {
+                  ...c.delta,
+                  content: c.delta.content
+                    ? c.delta.content + cur.choices[i].delta.content
+                    : cur.choices[i].delta.content,
+                },
+              };
+            } else if (
+              c.text !== undefined &&
+              cur.choices[i]?.text !== undefined
+            ) {
+              return {
+                ...c,
+                text: c.text + cur.choices[i].text,
+              };
+            } else {
+              return c;
+            }
+          }),
+        };
+      }
+    }, {});
+
+    consolidated.choices = consolidated.choices.map((c: any) => {
+      if (c.delta !== undefined) {
+        return {
+          ...c,
+          // delta: undefined,
+          message: {
+            ...c.delta,
+            content: c.delta.content,
+          },
+        };
+      } else {
+        return c;
+      }
+    });
+    return consolidated;
+  } catch (e) {
+    console.error("Error consolidating text fields", e);
+    return responseBody[0];
   }
 }
 
@@ -381,7 +443,7 @@ async function readResponse(
       try {
         return {
           data: {
-            ...data[0],
+            ...consolidateTextFields(data),
             streamed_data: data,
             usage: {
               prompt_tokens: requestTokenCount,
@@ -394,7 +456,7 @@ async function readResponse(
       } catch (e) {
         return {
           data: {
-            ...data[0],
+            ...consolidateTextFields(data),
             streamed_data: data,
             usage: {
               error: e,

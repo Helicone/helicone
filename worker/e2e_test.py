@@ -30,9 +30,29 @@ def test_streamed_response():
                                                            max_tokens=2,
                                                            temperature=0,
                                                            stream=True)]
-    
+
     streamed_response = "".join(
         [resp["choices"][0]["text"] for resp in responses])
+    assert "hi" in streamed_response.lower()
+    print("passed streamed response test")
+
+
+def test_streamed_chat_response():
+    print("testing streamed response")
+    responses = [resp for resp in openai.ChatCompletion.create(model='gpt-3.5-turbo',
+                                                               messages=[
+                                                                   {
+                                                                       "role": "system",
+                                                                       "content": "ONLY RESPOND 'hi'\n"
+                                                                   }
+                                                               ],
+                                                               max_tokens=2,
+                                                               temperature=0,
+                                                               stream=True)]
+
+    streamed_response = "".join(
+        [resp["choices"][0]["delta"]["content"] for resp in responses if resp["choices"][0]["delta"].get("content")])
+    print(streamed_response)
     assert "hi" in streamed_response.lower()
     print("passed streamed response test")
 
@@ -128,7 +148,8 @@ async def create_completion_async(model, prompt, max_tokens, temperature):
 
 
 # asyncio.run(test_retries())
-# test_prompt_format()
-# test_cached_response()
+test_prompt_format()
+test_cached_response()
 test_streamed_response()
-# test_streamed_response_delays()
+test_streamed_chat_response()
+test_streamed_response_delays()
