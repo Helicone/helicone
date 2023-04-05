@@ -298,7 +298,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   <>
                     <Popover.Button
                       className={clsx(
-                        open
+                        open || layout.currentLayout !== null
                           ? "bg-sky-100 text-sky-900"
                           : "hover:bg-sky-100 hover:text-sky-900",
                         "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
@@ -309,7 +309,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                         aria-hidden="true"
                       />
                       <span className="sm:inline hidden lg:inline">
-                        Layouts
+                        {layout.currentLayout !== null
+                          ? layout.currentLayout.name
+                          : "Layouts"}
                       </span>
                     </Popover.Button>
 
