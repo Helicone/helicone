@@ -489,7 +489,8 @@ async function readAndLogResponse(
   readable: ReadableStream<any>,
   requestId: string,
   dbClient: SupabaseClient,
-  requestBody: any
+  requestBody: any,
+  startTime: Date
 ): Promise<void> {
   const responseResult = await readResponse(
     requestSettings,
@@ -497,9 +498,20 @@ async function readAndLogResponse(
     requestBody
   );
   if (responseResult.data !== null) {
+    console.log(
+      "Total response time: ",
+      new Date().getTime() - startTime.getTime(),
+      "ms"
+    );
     const { data, error } = await dbClient
       .from("response")
-      .insert([{ request: requestId, body: responseResult.data }])
+      .insert([
+        {
+          request: requestId,
+          body: responseResult.data,
+          delay_ms: new Date().getTime() - startTime.getTime(),
+        },
+      ])
       .select("id");
     if (error !== null) {
       console.error(error);
@@ -524,6 +536,7 @@ async function forwardAndLog(
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
   }
+  const startTime = new Date();
 
   const response = await (retryOptions
     ? forwardRequestToOpenAiWithRetry(
@@ -587,7 +600,8 @@ async function forwardAndLog(
           readableLog,
           requestResult.data,
           dbClient,
-          requestBody
+          requestBody,
+          startTime
         );
       }
     })()
