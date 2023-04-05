@@ -2,11 +2,18 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
+import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
+import {
+  forwardRequestToOpenAiWithRetry,
+  getRetryOptions,
+  RetryOptions,
+} from "./retry";
 // import bcrypt from "bcrypt";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
+  TOKENIZER_COUNT_API: string;
 }
 
 interface SuccessResult<T> {
@@ -18,18 +25,20 @@ interface ErrorResult<T> {
   error: T;
 }
 
-interface RequestSettings {
+export interface RequestSettings {
   stream: boolean;
+  tokenizer_count_api: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
 }
 
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
-function forwardRequestToOpenAi(
+export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
-  body?: string
+  body?: string,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
@@ -37,26 +46,34 @@ function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+
+  let response;
   if (requestSettings.ff_increase_timeout) {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    return fetch(new_url.href, { ...init, signal });
+    response = await fetch(new_url.href, { ...init, signal });
   } else {
-    return fetch(new_url.href, init);
+    response = await fetch(new_url.href, init);
   }
+
+  if (retryOptions && response.status === 429) {
+    throw new Error("429 Too Many Requests");
+  }
+
+  return response;
 }
 
 type HeliconeRequest = {
   dbClient: SupabaseClient;
   request: Request;
   auth: string;
+  requestId: string;
   body?: string;
   prompt?: Prompt;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
-  requestId: string;
   userId: string | null;
   promptId: string | null;
   properties?: Record<string, string>;
@@ -194,19 +211,6 @@ async function logRequest({
   }
 }
 
-function heliconeHeaders(
-  requestResult: Result<string, string>
-): Record<string, string> {
-  if (requestResult.error !== null) {
-    console.error(requestResult.error);
-    return {
-      "Helicone-Error": requestResult.error,
-      "Helicone-Status": "error",
-    };
-  } else {
-    return { "Helicone-Status": "success", "Helicone-Id": requestResult.data };
-  }
-}
 async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
@@ -237,9 +241,6 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       headers.get("User-Id")?.substring(0, 128) ??
       null,
     promptId: headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
-    requestId:
-      headers.get("Helicone-Request-Id")?.substring(0, 128) ??
-      crypto.randomUUID(),
     properties: Object.keys(properties).length === 0 ? undefined : properties,
     isPromptRegexOn: headers.get("Helicone-Prompt-Format") !== null,
     promptName: headers.get("Helicone-Prompt-Name")?.substring(0, 128) ?? null,
@@ -256,9 +257,152 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
+async function getTokenCount(
+  inputText: string,
+  tokenizer_count_api: string
+): Promise<number> {
+  console.log(inputText);
+  const response = await fetch(tokenizer_count_api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text: inputText, model: "gpt2" }),
+  });
+
+  const data = await response.json<number>();
+  return data;
+}
+
+async function getRequestCount(
+  requestBody: any,
+  tokenCount: (inputText: string) => Promise<number>
+): Promise<number> {
+  if (requestBody.prompt !== undefined) {
+    const prompt = requestBody.prompt;
+    if (typeof prompt === "string") {
+      return tokenCount(requestBody.prompt);
+    } else if ("length" in prompt) {
+      return (
+        await Promise.all(
+          (prompt as string[]).map(async (p) => await tokenCount(p))
+        )
+      ).reduce((a, b) => a + b, 0);
+    } else {
+      throw new Error("Invalid prompt type");
+    }
+  } else if (requestBody.messages !== undefined) {
+    const baseTokens = 3;
+    const messages = requestBody.messages;
+    return (
+      baseTokens +
+      (
+        await Promise.all(
+          (messages as { content: string }[]).map(
+            async (m) => (await tokenCount(m.content)) + 5
+          )
+        )
+      ).reduce((a, b) => a + b, 0)
+    );
+  } else {
+    throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
+  }
+}
+
+function getResponseText(responseBody: any): string {
+  type Choice =
+    | {
+        delta: {
+          content: string;
+        };
+      }
+    | {
+        text: string;
+      };
+  if (responseBody.choices !== undefined) {
+    const choices = responseBody.choices;
+    return (choices as Choice[])
+      .map((c) => {
+        if ("delta" in c) {
+          return c.delta.content;
+        } else if ("text" in c) {
+          return c.text;
+        } else {
+          throw new Error("Invalid choice type");
+        }
+      })
+      .join("");
+  } else {
+    throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
+  }
+}
+
+function consolidateTextFields(responseBody: any[]): any {
+  try {
+    const consolidated = responseBody.reduce((acc, cur) => {
+      if (!cur) {
+        return acc;
+      } else if (acc.choices === undefined) {
+        return cur;
+      } else {
+        return {
+          ...acc,
+          choices: acc.choices.map((c: any, i: number) => {
+            if (!cur.choices) {
+              return c;
+            } else if (
+              c.delta !== undefined &&
+              cur.choices[i]?.delta !== undefined
+            ) {
+              return {
+                delta: {
+                  ...c.delta,
+                  content: c.delta.content
+                    ? c.delta.content + (cur.choices[i].delta.content ?? "")
+                    : cur.choices[i].delta.content,
+                },
+              };
+            } else if (
+              c.text !== undefined &&
+              cur.choices[i]?.text !== undefined
+            ) {
+              return {
+                ...c,
+                text: c.text + (cur.choices[i].text ?? ""),
+              };
+            } else {
+              return c;
+            }
+          }),
+        };
+      }
+    }, {});
+
+    consolidated.choices = consolidated.choices.map((c: any) => {
+      if (c.delta !== undefined) {
+        return {
+          ...c,
+          // delta: undefined,
+          message: {
+            ...c.delta,
+            content: c.delta.content,
+          },
+        };
+      } else {
+        return c;
+      }
+    });
+    return consolidated;
+  } catch (e) {
+    console.error("Error consolidating text fields", e);
+    return responseBody[0];
+  }
+}
+
 async function readResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>
+  readable: ReadableStream<any>,
+  requestBody: string
 ): Promise<Result<any, string>> {
   const reader = await readable?.getReader();
   let result = "";
@@ -276,23 +420,62 @@ async function readResponse(
     i++;
     if (i > MAX_LOOPS) break;
   }
+
   try {
     if (!requestSettings.stream) {
       return {
         data: JSON.parse(result),
         error: null,
       };
-    }
-    const lines = result.split("\n").filter((line) => line !== "");
-    const data = lines.map((line, i) => {
-      if (i === lines.length - 1) return {};
+    } else {
+      const lines = result.split("\n").filter((line) => line !== "");
+      const data = lines.map((line, i) => {
+        if (i === lines.length - 1) return {};
+        return JSON.parse(line.replace("data:", ""));
+      });
 
-      return JSON.parse(line.replace("data:", ""));
-    });
-    return {
-      data: data,
-      error: null,
-    };
+      const responseTokenCount = await getTokenCount(
+        data
+          .filter((d) => "id" in d)
+          .map((d) => getResponseText(d))
+          .join(""),
+        requestSettings.tokenizer_count_api
+      );
+      const requestTokenCount = await getRequestCount(
+        JSON.parse(requestBody),
+        (inputText) =>
+          getTokenCount(inputText, requestSettings.tokenizer_count_api)
+      );
+
+      console.log("requestTokenCount", requestTokenCount);
+      console.log("responseTokenCount", responseTokenCount);
+
+      try {
+        return {
+          data: {
+            ...consolidateTextFields(data),
+            streamed_data: data,
+            usage: {
+              prompt_tokens: requestTokenCount,
+              completion_tokens: responseTokenCount,
+              total_tokens: requestTokenCount + responseTokenCount,
+            },
+          },
+          error: null,
+        };
+      } catch (e) {
+        return {
+          data: {
+            ...consolidateTextFields(data),
+            streamed_data: data,
+            usage: {
+              error: e,
+            },
+          },
+          error: null,
+        };
+      }
+    }
   } catch (e) {
     return {
       data: null,
@@ -305,9 +488,14 @@ async function readAndLogResponse(
   requestSettings: RequestSettings,
   readable: ReadableStream<any>,
   requestId: string,
-  dbClient: SupabaseClient
+  dbClient: SupabaseClient,
+  requestBody: any
 ): Promise<void> {
-  const responseResult = await readResponse(requestSettings, readable);
+  const responseResult = await readResponse(
+    requestSettings,
+    readable,
+    requestBody
+  );
   if (responseResult.data !== null) {
     const { data, error } = await dbClient
       .from("response")
@@ -329,6 +517,7 @@ async function forwardAndLog(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
+  retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
@@ -336,22 +525,14 @@ async function forwardAndLog(
     return new Response("No authorization header found!", { status: 401 });
   }
 
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  const [response, requestResult] = await Promise.all([
-    forwardRequestToOpenAi(request, requestSettings, body),
-    logRequest({
-      dbClient,
-      request,
-      auth,
-      body: body === "" ? undefined : body,
-      prompt: prompt,
-      ...getHeliconeHeaders(request.headers),
-    }),
-  ]);
+  const response = await (retryOptions
+    ? forwardRequestToOpenAiWithRetry(
+        request,
+        requestSettings,
+        retryOptions,
+        body
+      )
+    : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
 
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 
@@ -378,21 +559,44 @@ async function forwardAndLog(
     readable = readable?.pipeThrough(transformer);
   }
 
+  const requestId =
+    request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
   ctx.waitUntil(
-    readableLog && requestResult.data !== null
-      ? readAndLogResponse(
+    (async () => {
+      if (!readableLog) {
+        return;
+      }
+      const dbClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      const requestBody = body === "" ? undefined : body;
+      const requestResult = await logRequest({
+        dbClient,
+        request,
+        auth,
+        body: requestBody,
+        prompt: prompt,
+        ...getHeliconeHeaders(request.headers),
+        requestId,
+      });
+      if (requestResult.data !== null) {
+        await readAndLogResponse(
           requestSettings,
           readableLog,
           requestResult.data,
-          dbClient
-        )
-      : Promise.resolve()
+          dbClient,
+          requestBody
+        );
+      }
+    })()
   );
 
   const responseHeaders = new Headers(response.headers);
-  for (const [key, value] of Object.entries(heliconeHeaders(requestResult))) {
-    responseHeaders.set(key, value);
-  }
+  responseHeaders.set("Helicone-Status", "success");
+  responseHeaders.set("Helicone-Id", requestId);
+
   return new Response(readable, {
     ...response,
     headers: responseHeaders,
@@ -403,7 +607,8 @@ async function uncachedRequest(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-  requestSettings: RequestSettings
+  requestSettings: RequestSettings,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   const result = await extractPrompt(request);
   if (result.data !== null) {
@@ -414,6 +619,7 @@ async function uncachedRequest(
       formattedRequest,
       env,
       ctx,
+      retryOptions,
       prompt
     );
   } else {
@@ -445,7 +651,6 @@ async function buildCachedRequest(
 
   const pathName = cacheUrl.pathname.replaceAll("/", "_");
   cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
-  console.log("PATHNAME", cacheUrl.pathname);
 
   return new Request(cacheUrl, {
     method: "GET",
@@ -549,60 +754,96 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const requestBody =
-      request.method === "POST"
-        ? await request.clone().json<{ stream?: boolean }>()
-        : {};
-    const requestSettings: RequestSettings = {
-      stream: requestBody.stream ?? false,
-      ff_stream_force_format:
-        request.headers.get("helicone-ff-stream-force-format") === "true",
-      ff_increase_timeout:
-        request.headers.get("helicone-ff-increase-timeout") === "true",
-    };
-
-    const { data: cacheSettings, error: cacheError } = getCacheSettings(
-      request.headers,
-      requestBody.stream ?? false
-    );
-
-    if (cacheError !== null) {
-      return new Response(cacheError, { status: 400 });
-    }
-
-    if (cacheSettings.shouldReadFromCache) {
-      const cachedResponse = await getCachedResponse(
-        request.clone(),
-        cacheSettings.bucketSettings
-      );
-      if (cachedResponse) {
-        ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
-        return cachedResponse;
+    try {
+      if (isLoggingEndpoint(request)) {
+        const response = await handleLoggingEndpoint(request, env);
+        return response;
       }
-    }
 
-    let requestClone = cacheSettings.shouldSaveToCache ? request.clone() : null;
+      const requestBody =
+        request.method === "POST"
+          ? await request.clone().json<{ stream?: boolean }>()
+          : {};
+      const requestSettings: RequestSettings = {
+        stream: requestBody.stream ?? false,
+        tokenizer_count_api: env.TOKENIZER_COUNT_API,
+        ff_stream_force_format:
+          request.headers.get("helicone-ff-stream-force-format") === "true",
+        ff_increase_timeout:
+          request.headers.get("helicone-ff-increase-timeout") === "true",
+      };
 
-    const response = await uncachedRequest(request, env, ctx, requestSettings);
+      const retryOptions = getRetryOptions(request);
 
-    if (cacheSettings.shouldSaveToCache && requestClone) {
-      ctx.waitUntil(
-        saveToCache(
-          requestClone,
-          response,
-          cacheSettings.cacheControl,
+      const { data: cacheSettings, error: cacheError } = getCacheSettings(
+        request.headers,
+        requestBody.stream ?? false
+      );
+
+      if (cacheError !== null) {
+        return new Response(cacheError, { status: 400 });
+      }
+
+      if (cacheSettings.shouldReadFromCache) {
+        const cachedResponse = await getCachedResponse(
+          request.clone(),
           cacheSettings.bucketSettings
-        )
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
+          return cachedResponse;
+        }
+      }
+
+      let requestClone = cacheSettings.shouldSaveToCache
+        ? request.clone()
+        : null;
+
+      const response = await uncachedRequest(
+        request,
+        env,
+        ctx,
+        requestSettings,
+        retryOptions
+      );
+
+      if (cacheSettings.shouldSaveToCache && requestClone) {
+        ctx.waitUntil(
+          saveToCache(
+            requestClone,
+            response,
+            cacheSettings.cacheControl,
+            cacheSettings.bucketSettings
+          )
+        );
+      }
+      const responseHeaders = new Headers(response.headers);
+      if (cacheSettings.shouldReadFromCache) {
+        responseHeaders.append("Helicone-Cache", "MISS");
+      }
+
+      return new Response(response.body, {
+        ...response,
+        headers: responseHeaders,
+      });
+    } catch (e) {
+      console.error(e);
+      return new Response(
+        JSON.stringify({
+          "helicone-message":
+            "oh no :( this is embarrassing, Helicone ran into an error proxy-ing your request. Please try again later",
+          support:
+            "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+          "helicone-error": JSON.stringify(e),
+        }),
+        {
+          status: 500,
+          headers: {
+            "content-type": "application/json;charset=UTF-8",
+            "helicone-error": "true",
+          },
+        }
       );
     }
-    const responseHeaders = new Headers(response.headers);
-    if (cacheSettings.shouldReadFromCache) {
-      responseHeaders.append("Helicone-Cache", "MISS");
-    }
-
-    return new Response(response.body, {
-      ...response,
-      headers: responseHeaders,
-    });
   },
 };

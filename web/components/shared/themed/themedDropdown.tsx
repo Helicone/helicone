@@ -1,6 +1,10 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpDownIcon,
+} from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
 import { Column } from "../../ThemedTableV2";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -18,10 +22,18 @@ interface ThemedDropdownProps<T> {
   align?: "left" | "right";
   className?: string;
   label?: string;
+  placeholder?: string;
 }
 
 export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
-  const { selectedValue, onSelect, className, label, align = "left" } = props;
+  const {
+    selectedValue,
+    onSelect,
+    className,
+    label,
+    align = "left",
+    placeholder = "Select an option",
+  } = props;
   let { options } = props;
   const selected = options.find((option) => option.value === selectedValue);
   const categories: {
@@ -86,10 +98,10 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                 )}
 
                 <span className="block truncate">
-                  {selected?.label || "Select a column"}
+                  {selected?.label || placeholder}
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                  <ChevronUpDownIcon
+                  <ChevronDownIcon
                     className="h-5 w-5 text-gray-400"
                     aria-hidden="true"
                   />
@@ -106,7 +118,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   ref={transitionRef}
                   className={clsx(
                     align === "left" ? "left-0" : "right-0",
-                    "overflow-hidden absolute z-30 mt-1.5 max-h-80 w-full min-w-[300px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    "overflow-hidden absolute z-30 mt-1.5 max-h-80 w-full min-w-[200px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
                   {Object.keys(categories).length >= 2 && (

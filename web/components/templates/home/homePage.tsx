@@ -168,7 +168,7 @@ export default function HomePage() {
             />
           </svg>
           <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:py-28 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+            <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8 space-y-4 sm:space-y-8">
               <div className="mt-24 sm:mt-32 lg:mt-8">
                 <div className="inline-flex space-x-6">
                   <span className="rounded-full bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
@@ -178,7 +178,7 @@ export default function HomePage() {
                     href="https://github.com/Helicone/helicone"
                     className="sm:inline-flex hidden items-center space-x-2 text-m font-medium leading-6 text-gray-600"
                   >
-                    <span>We&apos;re open-source</span>
+                    <span className="underline">We&apos;re open source</span>
                     <ChevronRightIcon
                       className="h-5 w-5 text-gray-400"
                       aria-hidden="true"
@@ -186,15 +186,14 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <h1 className="mt-8 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                Observability for Generative AI applications
+              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                Observability for Generative AI
               </h1>
-              <p className="mt-6 text-xl leading-8 text-gray-600">
-                Track usage, costs, and latency metrics with one line of code.
-                We&apos;re an open-source observability platform that helps you
-                better understand your GPT-3 application.
+              <p className="text-lg sm:text-2xl leading-8 text-gray-600">
+                Track costs, usage, and latency for GPT applications with one
+                line of code.
               </p>
-              <div className="mt-10 flex items-center gap-x-4">
+              <div className="flex items-center gap-x-4">
                 <OnboardingButton variant="secondary" title={"Get Started"} />
                 <button
                   onClick={() => {
@@ -226,7 +225,7 @@ export default function HomePage() {
               <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
                 <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                   <img
-                    src="/assets/test.png"
+                    src="/assets/landing/preview.webp"
                     alt="App screenshot"
                     width={2432}
                     height={1442}
@@ -238,7 +237,7 @@ export default function HomePage() {
           </div>
         </div>
         {/* FEATURE */}
-        <div className="relative isolate bg-white pt-24 pb-6 sm:pt-32">
+        <div className="relative isolate bg-white py-24 sm:py-32">
           <div className="absolute inset-x-0 top-0 -z-10 flex transform-gpu overflow-hidden pt-32 opacity-25 blur-3xl sm:pt-40 xl:justify-end">
             <svg
               viewBox="0 0 1313 771"
@@ -249,15 +248,13 @@ export default function HomePage() {
             </svg>
           </div>
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <div className="mx-auto max-w-2xl text-center space-y-4 sm:space-y-8">
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                 Get integrated with only one line of code
               </h2>
-              <p className="mt-6 text-base leading-7 text-gray-600 sm:text-2xl">
-                Trusted by leading companies building with OpenAI
-              </p>
-              <p className="mt-2 text-base leading-5 text-gray-600 italic sm:text-m">
-                Anthropic, Cohere, Google AI, and more coming soon...
+              <p className="text-lg leading-7 text-gray-600 sm:text-xl">
+                Trusted by leading companies building with OpenAI. We will
+                support Anthropic, Cohere, Google AI, and more coming soon...
               </p>
             </div>
             <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
@@ -315,64 +312,50 @@ export default function HomePage() {
         {/* DetailsV2 */}
         <Details />
         {/* ONE LINE OF CODE */}
-        <div className="bg-white py-24 sm:py-16">
+        <div className="bg-white py-24 sm:py-32">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:mx-0">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Even wonder how much you spend on GPT-4? We do too.
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Tools built for savvy developers
               </h2>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                Creating an internal tool for observability and monitoring is
-                difficult to build and even harder to maintain. Helicone is a
-                platform built specifically for developers using LLMs.
+              <p className="mt-6 text-lg sm:text-xl leading-7 text-gray-600">
+                Cache requests to save on latency and money, proactively track
+                errors in your application, handle rate limits and reliability
+                concerns with Helicone.
               </p>
             </div>
             <div className="mx-auto mt-16 flex max-w-2xl flex-col gap-8 lg:mx-0 lg:mt-20 lg:max-w-none lg:flex-row lg:items-end">
               <div className="flex flex-col-reverse justify-between gap-x-16 gap-y-8 rounded-2xl bg-gray-100 p-8 sm:w-3/4 sm:max-w-md sm:flex-row-reverse sm:items-end lg:w-72 lg:max-w-none lg:flex-none lg:flex-col lg:items-start">
-                <p className="flex-none text-3xl font-bold tracking-tight text-gray-900">
+                <p className="flex-none text-2xl font-bold tracking-tight text-gray-900">
                   100+ Projects
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-gray-900">
-                    Active Projects
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-gray-600">
-                    Over a hundred active projects using Helicone
+                  <p className="mt-2 leading-7 text-gray-600 text-lg">
+                    Battle-tested in live production applications
                   </p>
                 </div>
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-gray-900 p-8 sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-sm lg:flex-auto lg:flex-col lg:items-start lg:gap-y-44">
-                <p className="flex-none text-3xl font-bold tracking-tight text-white">
+                <p className="flex-none text-2xl font-bold tracking-tight text-white">
                   {Math.floor(
                     (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
                   )}
                   m+ Requests
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    We&apos;re proud that our customers have made over{" "}
-                    {Math.floor(
-                      (globalMetrics?.data[0].count ?? 5_700_000) / 1_000_000
-                    )}{" "}
-                    million requests.
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-gray-400">
-                    We currently support all OpenAI models and have plans to add
-                    other providers
+                  <p className="mt-2 leading-7 text-gray-200 text-lg">
+                    Logging millions of requests at scale
                   </p>
                 </div>
               </div>
               <div className="flex flex-col-reverse justify-between gap-y-8 gap-x-16 rounded-2xl bg-sky-600 p-8 sm:w-11/12 sm:max-w-xl sm:flex-row-reverse sm:items-end lg:w-full lg:max-w-none lg:flex-auto lg:flex-col lg:items-start lg:gap-y-28">
-                <p className="flex-none text-3xl font-bold tracking-tight text-white">
-                  250+ Community
+                <p className="flex-none text-2xl font-bold tracking-tight text-sky-50">
+                  250+ Developer Community
                 </p>
                 <div className="sm:w-80 sm:shrink lg:w-auto lg:flex-none">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    Discord Community
-                  </p>
-                  <p className="mt-2 text-base leading-7 text-indigo-200">
-                    Join our community on Discord to get help, ask questions,
-                    and share your projects.
+                  <p className="mt-2 leading-7 text-sky-50 text-lg">
+                    Trusted by hundreds of developers who share their projects
+                    in Helicone&apos;s vibrant community
                   </p>
                 </div>
               </div>
@@ -382,15 +365,22 @@ export default function HomePage() {
         {/* Open Source */}
         <div className="bg-gray-50 py-24 sm:py-32">
           <div className="flex flex-col sm:flex-row w-full justify-between mx-auto max-w-7xl px-6 lg:px-8 items-start sm:items-center space-y-6 sm:space-y-0">
-            <div className="mx-auto max-w-2xl lg:mx-0">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <div className="mx-auto max-w-2xl lg:mx-0 space-y-4 sm:space-y-8">
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                 Join our fast-growing open source community
               </h2>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                We&apos;ve been developerdriven from the start, and we&apos;re
-                committed to keeping it that way. We&apos;re always looking for
-                new contributors to help us build the best open source
-                observability platform for generative AI.
+              <p className="text-lg sm:text-xl leading-7 text-gray-600">
+                Helicone is developer-driven and committed to keeping it that
+                way. Contributors actively participate in{" "}
+                <a
+                  href="https://www.helicone.ai/roadmap"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sky-500 hover:text-sky-700 underline"
+                >
+                  shaping the platform
+                </a>{" "}
+                by voting on features and collaboratively pushing updates.
               </p>
             </div>
             <div className="block space-x-4">
