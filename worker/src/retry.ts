@@ -10,9 +10,9 @@ export interface RetryOptions {
 
 export function getRetryOptions(request: Request): RetryOptions | undefined {
     const headers = request.headers;
-  
+ 
     const enabled =
-      headers.get("helicone-retry-enabled") !== undefined ? true : false;
+      headers.get("helicone-retry-enabled") !== null ? true : false;
 
     if (!enabled) {
         return undefined;
@@ -48,48 +48,52 @@ export function getRetryOptions(request: Request): RetryOptions | undefined {
     return retryOptions;
   }
 
-export async function forwardRequestToOpenAiWithRetry(
-  request: Request,
-  requestSettings: RequestSettings,
-  retryOptions: RetryOptions,
-  body?: string,
-): Promise<Response> {
-  let lastError;
-  let lastResponse;
+  export async function forwardRequestToOpenAiWithRetry(
+    request: Request,
+    requestSettings: RequestSettings,
+    retryOptions: RetryOptions,
+    body?: string,
+  ): Promise<Response> {
+    let lastError;
+    let lastResponse;
+  
+    try {
+      // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
+      await retry(
+        async (bail, attempt) => {
+          try {
+            const res = await forwardRequestToOpenAi(request, requestSettings, body);
 
-  // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
-  const response = await retry(
-    async (bail, attempt) => {
-      try {
-        const res = await forwardRequestToOpenAi(request, requestSettings, body);
-        lastResponse = res;
-        // Throw an error if the status code is 429
-        if (res.status === 429) {
-          throw new Error("429 Too Many Requests");
+            lastResponse = res;
+            // Throw an error if the status code is 429
+            if (res.status === 429) {
+              throw new Error("429 Too Many Requests");
+            }
+            return res;
+          } catch (e) {
+            lastError = e;
+            // If we reach the maximum number of retries, bail with the error
+            if (attempt >= retryOptions.retries) {
+              bail(e as Error);
+            }
+            // Otherwise, retry with exponential backoff
+            throw e;
+          }
+        },
+        {
+          ...retryOptions,
+          onRetry: (error, attempt) => {
+            console.log(`Retry attempt ${attempt}. Error: ${error}`);
+          },
         }
-        return res;
-      } catch (e) {
-        lastError = e;
-        // If we reach the maximum number of retries, do not retry anymore
-        if (attempt >= retryOptions.retries) {
-          bail(e);
-        }
-        // Otherwise, retry with exponential backoff
-        throw e;
-      }
-    },
-    {
-      ...retryOptions,
-      onRetry: (error, attempt) => {
-        console.log(`Retry attempt ${attempt}. Error: ${error}`);
-      },
+      );
+    } catch (e) {
+      console.warn(`Retried ${retryOptions.retries} times but still failed. Error: ${e}`);
     }
-  );
 
-  if (lastError && lastResponse) {
-    console.warn(`Retried ${retryOptions.retries} times but still failed. Error: ${lastError}`);
+    if (lastResponse === undefined) {
+      throw new Error("500 An error occured while retrying your requests");
+    }
+  
     return lastResponse;
   }
-
-  return response;
-}
