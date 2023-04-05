@@ -30,7 +30,7 @@ def test_streamed_response():
                                                            max_tokens=2,
                                                            temperature=0,
                                                            stream=True)]
-
+    
     streamed_response = "".join(
         [resp["choices"][0]["text"] for resp in responses])
     assert "hi" in streamed_response.lower()
@@ -128,7 +128,7 @@ async def create_completion_async(model, prompt, max_tokens, temperature):
 
 
 # asyncio.run(test_retries())
-test_prompt_format()
-test_cached_response()
+# test_prompt_format()
+# test_cached_response()
 test_streamed_response()
-test_streamed_response_delays()
+# test_streamed_response_delays()

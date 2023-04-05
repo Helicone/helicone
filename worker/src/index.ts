@@ -3,11 +3,13 @@ import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
+
 // import bcrypt from "bcrypt";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
+  TOKENIZER_COUNT_API: string;
 }
 
 interface SuccessResult<T> {
@@ -21,6 +23,7 @@ interface ErrorResult<T> {
 
 interface RequestSettings {
   stream: boolean;
+  tokenizer_count_api: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
 }
@@ -244,9 +247,90 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
+async function getTokenCount(
+  inputText: string,
+  tokenizer_count_api: string
+): Promise<number> {
+  console.log(inputText);
+  const response = await fetch(tokenizer_count_api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text: inputText, model: "gpt2" }),
+  });
+
+  const data = await response.json<number>();
+  return data;
+}
+
+async function getRequestCount(
+  requestBody: any,
+  tokenCount: (inputText: string) => Promise<number>
+): Promise<number> {
+  if (requestBody.prompt !== undefined) {
+    const prompt = requestBody.prompt;
+    if (typeof prompt === "string") {
+      return tokenCount(requestBody.prompt);
+    } else if ("length" in prompt) {
+      return (
+        await Promise.all(
+          (prompt as string[]).map(async (p) => await tokenCount(p))
+        )
+      ).reduce((a, b) => a + b, 0);
+    } else {
+      throw new Error("Invalid prompt type");
+    }
+  } else if (requestBody.messages !== undefined) {
+    const baseTokens = 3;
+    const messages = requestBody.messages;
+    return (
+      baseTokens +
+      (
+        await Promise.all(
+          (messages as { content: string }[]).map(
+            async (m) => (await tokenCount(m.content)) + 5
+          )
+        )
+      ).reduce((a, b) => a + b, 0)
+    );
+  } else {
+    throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
+  }
+}
+
+function getResponseText(responseBody: any): string {
+  type Choice =
+    | {
+        message: {
+          content: string;
+        };
+      }
+    | {
+        text: string;
+      };
+  if (responseBody.choices !== undefined) {
+    const choices = responseBody.choices;
+    return (choices as Choice[])
+      .map((c) => {
+        if ("message" in c) {
+          return c.message.content;
+        } else if ("text" in c) {
+          return c.text;
+        } else {
+          throw new Error("Invalid choice type");
+        }
+      })
+      .join("");
+  } else {
+    throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
+  }
+}
+
 async function readResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>
+  readable: ReadableStream<any>,
+  requestBody: string
 ): Promise<Result<any, string>> {
   const reader = await readable?.getReader();
   let result = "";
@@ -264,23 +348,62 @@ async function readResponse(
     i++;
     if (i > MAX_LOOPS) break;
   }
+
   try {
     if (!requestSettings.stream) {
       return {
         data: JSON.parse(result),
         error: null,
       };
-    }
-    const lines = result.split("\n").filter((line) => line !== "");
-    const data = lines.map((line, i) => {
-      if (i === lines.length - 1) return {};
+    } else {
+      const lines = result.split("\n").filter((line) => line !== "");
+      const data = lines.map((line, i) => {
+        if (i === lines.length - 1) return {};
+        return JSON.parse(line.replace("data:", ""));
+      });
 
-      return JSON.parse(line.replace("data:", ""));
-    });
-    return {
-      data: data,
-      error: null,
-    };
+      const responseTokenCount = await getTokenCount(
+        data
+          .filter((d) => "id" in d)
+          .map((d) => getResponseText(d))
+          .join(""),
+        requestSettings.tokenizer_count_api
+      );
+      const requestTokenCount = await getRequestCount(
+        JSON.parse(requestBody),
+        (inputText) =>
+          getTokenCount(inputText, requestSettings.tokenizer_count_api)
+      );
+
+      console.log("requestTokenCount", requestTokenCount);
+      console.log("responseTokenCount", responseTokenCount);
+
+      try {
+        return {
+          data: {
+            ...data[0],
+            streamed_data: data,
+            usage: {
+              prompt_tokens: requestTokenCount,
+              completion_tokens: responseTokenCount,
+              total_tokens: requestTokenCount + responseTokenCount,
+            },
+          },
+          error: null,
+        };
+      } catch (e) {
+        return {
+          data: {
+            ...data[0],
+            streamed_data: data,
+            usage: {
+              error: e,
+            },
+          },
+          error: null,
+        };
+      }
+    }
   } catch (e) {
     return {
       data: null,
@@ -293,9 +416,14 @@ async function readAndLogResponse(
   requestSettings: RequestSettings,
   readable: ReadableStream<any>,
   requestId: string,
-  dbClient: SupabaseClient
+  dbClient: SupabaseClient,
+  requestBody: any
 ): Promise<void> {
-  const responseResult = await readResponse(requestSettings, readable);
+  const responseResult = await readResponse(
+    requestSettings,
+    readable,
+    requestBody
+  );
   if (responseResult.data !== null) {
     const { data, error } = await dbClient
       .from("response")
@@ -323,11 +451,6 @@ async function forwardAndLog(
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
   }
-
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
 
   const response = await forwardRequestToOpenAi(request, requestSettings, body);
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
@@ -360,11 +483,17 @@ async function forwardAndLog(
       if (!readableLog) {
         return;
       }
+      const dbClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      const requestBody = body === "" ? undefined : body;
       const requestResult = await logRequest({
         dbClient,
         request,
         auth,
-        body: body === "" ? undefined : body,
+        body: requestBody,
         prompt: prompt,
         ...getHeliconeHeaders(request.headers),
       });
@@ -373,7 +502,8 @@ async function forwardAndLog(
             requestSettings,
             readableLog,
             requestResult.data,
-            dbClient
+            dbClient,
+            requestBody
           )
         : Promise.resolve();
     })()
@@ -550,6 +680,7 @@ export default {
           : {};
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
+        tokenizer_count_api: env.TOKENIZER_COUNT_API,
         ff_stream_force_format:
           request.headers.get("helicone-ff-stream-force-format") === "true",
         ff_increase_timeout:

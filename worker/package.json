@@ -12,6 +12,8 @@
     "deploy": "wrangler publish"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.1.1"
+    "@dqbd/tiktoken": "^1.0.2",
+    "@supabase/supabase-js": "^2.1.1",
+    "gpt-3-encoder": "^1.1.4"
   }
 }
