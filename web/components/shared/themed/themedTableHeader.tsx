@@ -339,38 +339,49 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                               </button>
                             </div>
                             <fieldset className="min-w-[250px] w-full overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
-                              <div className="divide-y divide-gray-200 border-gray-200">
-                                {layout.layouts!.map((l, idx) => (
-                                  <div
-                                    className="flex flex-row justify-between items-center"
-                                    key={idx}
-                                  >
-                                    <button
-                                      className={clsx(
-                                        l.id === layout.currentLayout?.id
-                                          ? "bg-sky-100 text-sky-900"
-                                          : "text-gray-900 hover:bg-gray-50",
-                                        "relative p-4 select-none font-medium w-full justify-between items-center flex hover:cursor-pointer"
-                                      )}
-                                      onClick={() => {
-                                        layout.setLayout(l.name);
-                                      }}
+                              {layout.layouts!.length < 1 ? (
+                                <div className="p-4 items-center h-[200px] flex flex-col justify-center text-center text-gray-500 space-y-4">
+                                  <Squares2X2Icon className="h-8 w-8" />
+                                  <p>
+                                    Create layouts to easily switch between
+                                    different filters, column selections, and
+                                    sort orders.
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="divide-y divide-gray-200 border-gray-200">
+                                  {layout.layouts!.map((l, idx) => (
+                                    <div
+                                      className="flex flex-row justify-between items-center"
+                                      key={idx}
                                     >
-                                      <span>{l.name}</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="absolute right-3 inline-flex items-center rounded-md bg-red-500 p-1 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                                      onClick={() => {
-                                        setDeleteLayout(l);
-                                        setOpenDelete(true);
-                                      }}
-                                    >
-                                      <TrashIcon className="h-4 w-4" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
+                                      <button
+                                        className={clsx(
+                                          l.id === layout.currentLayout?.id
+                                            ? "bg-sky-100 text-sky-900"
+                                            : "text-gray-900 hover:bg-gray-50",
+                                          "relative p-4 select-none font-medium w-full justify-between items-center flex hover:cursor-pointer"
+                                        )}
+                                        onClick={() => {
+                                          layout.setLayout(l.name);
+                                        }}
+                                      >
+                                        <span>{l.name}</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="absolute right-3 inline-flex items-center rounded-md bg-red-500 p-1 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                                        onClick={() => {
+                                          setDeleteLayout(l);
+                                          setOpenDelete(true);
+                                        }}
+                                      >
+                                        <TrashIcon className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </fieldset>
                           </div>
                         )}
