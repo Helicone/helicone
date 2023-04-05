@@ -59,6 +59,7 @@ export async function forwardRequestToOpenAi(
 
   if (retryOptions && (response.status === 429 || response.status === 500)) {
     throw new Error(`Status code ${response.status}`);
+  }
 
   return response;
 }
