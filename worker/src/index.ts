@@ -3,7 +3,11 @@ import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
-
+import {
+  forwardRequestToOpenAiWithRetry,
+  getRetryOptions,
+  RetryOptions,
+} from "./retry";
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -21,7 +25,7 @@ interface ErrorResult<T> {
   error: T;
 }
 
-interface RequestSettings {
+export interface RequestSettings {
   stream: boolean;
   tokenizer_count_api: string;
   ff_stream_force_format?: boolean;
@@ -30,10 +34,11 @@ interface RequestSettings {
 
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
-function forwardRequestToOpenAi(
+export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
-  body?: string
+  body?: string,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
@@ -41,26 +46,34 @@ function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+
+  let response;
   if (requestSettings.ff_increase_timeout) {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    return fetch(new_url.href, { ...init, signal });
+    response = await fetch(new_url.href, { ...init, signal });
   } else {
-    return fetch(new_url.href, init);
+    response = await fetch(new_url.href, init);
   }
+
+  if (retryOptions && response.status === 429) {
+    throw new Error("429 Too Many Requests");
+  }
+
+  return response;
 }
 
 type HeliconeRequest = {
   dbClient: SupabaseClient;
   request: Request;
   auth: string;
+  requestId: string;
   body?: string;
   prompt?: Prompt;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
-  requestId: string;
   userId: string | null;
   promptId: string | null;
   properties?: Record<string, string>;
@@ -228,9 +241,6 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       headers.get("User-Id")?.substring(0, 128) ??
       null,
     promptId: headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
-    requestId:
-      headers.get("Helicone-Request-Id")?.substring(0, 128) ??
-      crypto.randomUUID(),
     properties: Object.keys(properties).length === 0 ? undefined : properties,
     isPromptRegexOn: headers.get("Helicone-Prompt-Format") !== null,
     promptName: headers.get("Helicone-Prompt-Name")?.substring(0, 128) ?? null,
@@ -507,6 +517,7 @@ async function forwardAndLog(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
+  retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
@@ -514,7 +525,16 @@ async function forwardAndLog(
     return new Response("No authorization header found!", { status: 401 });
   }
 
-  const response = await forwardRequestToOpenAi(request, requestSettings, body);
+
+  const response = await (retryOptions
+    ? forwardRequestToOpenAiWithRetry(
+        request,
+        requestSettings,
+        retryOptions,
+        body
+      )
+    : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
+
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 
   if (requestSettings.ff_stream_force_format) {
@@ -540,6 +560,8 @@ async function forwardAndLog(
     readable = readable?.pipeThrough(transformer);
   }
 
+  const requestId =
+    request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
   ctx.waitUntil(
     (async () => {
       if (!readableLog) {
@@ -558,6 +580,7 @@ async function forwardAndLog(
         body: requestBody,
         prompt: prompt,
         ...getHeliconeHeaders(request.headers),
+        requestId,
       });
       requestResult.data !== null
         ? readAndLogResponse(
@@ -573,6 +596,7 @@ async function forwardAndLog(
 
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
+  responseHeaders.set("Helicone-Id", requestId);
 
   return new Response(readable, {
     ...response,
@@ -584,7 +608,8 @@ async function uncachedRequest(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-  requestSettings: RequestSettings
+  requestSettings: RequestSettings,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   const result = await extractPrompt(request);
   if (result.data !== null) {
@@ -595,6 +620,7 @@ async function uncachedRequest(
       formattedRequest,
       env,
       ctx,
+      retryOptions,
       prompt
     );
   } else {
@@ -626,7 +652,6 @@ async function buildCachedRequest(
 
   const pathName = cacheUrl.pathname.replaceAll("/", "_");
   cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
-  console.log("PATHNAME", cacheUrl.pathname);
 
   return new Request(cacheUrl, {
     method: "GET",
@@ -749,6 +774,8 @@ export default {
           request.headers.get("helicone-ff-increase-timeout") === "true",
       };
 
+      const retryOptions = getRetryOptions(request);
+
       const { data: cacheSettings, error: cacheError } = getCacheSettings(
         request.headers,
         requestBody.stream ?? false
@@ -777,7 +804,8 @@ export default {
         request,
         env,
         ctx,
-        requestSettings
+        requestSettings,
+        retryOptions
       );
 
       if (cacheSettings.shouldSaveToCache && requestClone) {
