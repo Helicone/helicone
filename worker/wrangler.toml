@@ -17,6 +17,7 @@ routes = [
 
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+TOKENIZER_COUNT_API = "https://www.helicone.ai/api/tokenizer/open-ai/streaming/count"
 
 [env.preview]
 name = "helicone-worker-preview"
