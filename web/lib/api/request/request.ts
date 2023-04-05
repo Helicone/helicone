@@ -32,6 +32,7 @@ export interface HeliconeRequest {
   cache_count: number;
   request_prompt: string | null;
   response_prompt: string | null;
+  delay_ms: number | null;
 }
 
 export async function getRequests(
@@ -58,6 +59,7 @@ export async function getRequests(
     request.properties AS request_properties,
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
+    response.delay_ms as delay_ms,
     user_api_keys.api_key_preview as user_api_key_preview,
     user_api_keys.user_id as user_api_key_user_id,
     user_api_keys.api_key_hash as user_api_key_hash,

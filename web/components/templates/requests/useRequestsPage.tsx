@@ -187,9 +187,9 @@ const useRequestsPage = (
 
   const wrappedRequests: RequestWrapper[] = requests.map((request) => {
     const latency =
-      (new Date(request.response_created_at!).getTime() -
-        new Date(request.request_created_at!).getTime()) /
-      1000;
+      (request.delay_ms ??
+        new Date(request.response_created_at!).getTime() -
+          new Date(request.request_created_at!).getTime()) / 1000;
 
     const logProbs = request.response_body.choices?.[0]?.logprobs
       ?.token_logprobs
