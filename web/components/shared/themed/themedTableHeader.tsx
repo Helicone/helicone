@@ -529,9 +529,10 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               </button>
               <button
                 className="flex flex-row items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium border border-red-500 hover:bg-red-700 text-gray-50 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-                onClick={() =>
-                  deleteLayout?.id && onDeleteHandler(deleteLayout.id)
-                }
+                onClick={() => {
+                  deleteLayout?.id && onDeleteHandler(deleteLayout.id);
+                  setOpenDelete(false);
+                }}
               >
                 Delete Layout
               </button>
