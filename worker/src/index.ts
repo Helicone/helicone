@@ -3,7 +3,11 @@ import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
-import { forwardRequestToOpenAiWithRetry, getRetryOptions, RetryOptions } from "./retry";
+import {
+  forwardRequestToOpenAiWithRetry,
+  getRetryOptions,
+  RetryOptions,
+} from "./retry";
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -32,7 +36,7 @@ export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
   body?: string,
-  retryOptions?: RetryOptions,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
@@ -62,12 +66,12 @@ type HeliconeRequest = {
   dbClient: SupabaseClient;
   request: Request;
   auth: string;
+  requestId: string;
   body?: string;
   prompt?: Prompt;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
-  requestId: string;
   userId: string | null;
   promptId: string | null;
   properties?: Record<string, string>;
@@ -235,9 +239,6 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       headers.get("User-Id")?.substring(0, 128) ??
       null,
     promptId: headers.get("Helicone-Prompt-Id")?.substring(0, 128) ?? null,
-    requestId:
-      headers.get("Helicone-Request-Id")?.substring(0, 128) ??
-      crypto.randomUUID(),
     properties: Object.keys(properties).length === 0 ? undefined : properties,
     isPromptRegexOn: headers.get("Helicone-Prompt-Format") !== null,
     promptName: headers.get("Helicone-Prompt-Name")?.substring(0, 128) ?? null,
@@ -340,7 +341,14 @@ async function forwardAndLog(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const response = await (retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
+  const response = await (retryOptions
+    ? forwardRequestToOpenAiWithRetry(
+        request,
+        requestSettings,
+        retryOptions,
+        body
+      )
+    : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
 
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 
@@ -367,6 +375,8 @@ async function forwardAndLog(
     readable = readable?.pipeThrough(transformer);
   }
 
+  const requestId =
+    request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
   ctx.waitUntil(
     (async () => {
       if (!readableLog) {
@@ -379,6 +389,7 @@ async function forwardAndLog(
         body: body === "" ? undefined : body,
         prompt: prompt,
         ...getHeliconeHeaders(request.headers),
+        requestId,
       });
       requestResult.data !== null
         ? readAndLogResponse(
@@ -393,6 +404,7 @@ async function forwardAndLog(
 
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
+  responseHeaders.set("Helicone-Id", requestId);
 
   return new Response(readable, {
     ...response,
@@ -569,7 +581,7 @@ export default {
           request.headers.get("helicone-ff-increase-timeout") === "true",
       };
 
-      const retryOptions = getRetryOptions(request)
+      const retryOptions = getRetryOptions(request);
 
       const { data: cacheSettings, error: cacheError } = getCacheSettings(
         request.headers,
@@ -600,7 +612,7 @@ export default {
         env,
         ctx,
         requestSettings,
-        retryOptions, 
+        retryOptions
       );
 
       if (cacheSettings.shouldSaveToCache && requestClone) {
