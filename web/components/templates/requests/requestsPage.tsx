@@ -91,9 +91,6 @@ const RequestsPage = (props: RequestsPageProps) => {
 
   const truncLength = 30;
 
-  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
-    "Condensed"
-  );
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
   const [columns, setColumns] = useState<Column[]>([]);
@@ -107,9 +104,8 @@ const RequestsPage = (props: RequestsPageProps) => {
   });
   const { data: layouts, refetch: refetchLayouts } = useLayouts();
 
-  function saveLayout(name: string) {
-    console.log("HELLo");
-    supabaseClient
+  const onCreateLayout = async (name: string) => {
+    const { data, error } = await supabaseClient
       .from("layout")
       .insert({
         user_id: user!.id,
@@ -121,10 +117,15 @@ const RequestsPage = (props: RequestsPageProps) => {
         filters: { advancedFilters, timeFilter } as unknown as Json,
         name,
       })
-      .then(console.log)
-      .then(() => refetchLayouts())
-      .then(() => setNotification("Layout saved!", "success"));
-  }
+      .select();
+    if (error) {
+      setNotification("Error creating layout", "error");
+      return;
+    }
+    setNotification("Layout created!", "success");
+    refetchLayouts();
+    setLayout(data[0].name);
+  };
 
   const [currentLayout, setCurrentLayout] = useState<{
     columns: Json;
@@ -134,6 +135,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     name: string;
     user_id: string;
   } | null>(null);
+
   function setLayout(name: string) {
     type Columns = {
       columnSizing: typeof columnSizing;
@@ -432,12 +434,82 @@ const RequestsPage = (props: RequestsPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPropertiesLoading, isValuesLoading]);
 
+  const clearLayout = () => {
+    const propertiesColumns: Column[] = properties.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "property",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
+
+    const valuesColumns: Column[] = values.map((p) => {
+      return {
+        key: p,
+        label: capitalizeWords(p),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          values: {
+            [p]: direction,
+          },
+        }),
+        columnOrigin: "value",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+      };
+    });
+
+    const newColumns = [
+      ...initialColumns,
+      ...valuesColumns,
+      ...propertiesColumns,
+    ];
+
+    setColumns((prev) => {
+      return newColumns.map((c) => {
+        const prevColumn = prev.find((p) => p.key === c.key);
+        if (prevColumn) {
+          return {
+            ...c,
+            ...prevColumn,
+          };
+        }
+        return c;
+      });
+    });
+    setColumnSizing({});
+    setColumnOrder([]);
+    setColumns(newColumns);
+    setAdvancedFilters([]);
+    setTimeFilter({
+      request: {
+        created_at: {
+          gte: getTimeIntervalAgo("7d").toISOString(),
+        },
+      },
+    });
+    setCurrentLayout(null);
+  };
+
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }
-
-  const columnHelper = createColumnHelper<RequestWrapper>();
 
   async function downloadCSV() {
     try {
@@ -506,10 +578,6 @@ const RequestsPage = (props: RequestsPageProps) => {
         <div className="mt-4 space-y-2">
           <div className="space-y-4">
             <ThemedTableHeader
-              view={{
-                viewMode,
-                setViewMode,
-              }}
               editColumns={{
                 columns: columns,
                 onColumnCallback: setColumns,
@@ -535,15 +603,18 @@ const RequestsPage = (props: RequestsPageProps) => {
                 onAdvancedFilter: setAdvancedFilters,
                 filters: advancedFilters,
               }}
+              layout={{
+                onCreateLayout,
+                currentLayout,
+                layouts: layouts?.data || [],
+                setLayout,
+                clearLayout,
+              }}
             />
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <ThemedTableV3
-                saveLayout={saveLayout}
-                currentLayout={currentLayout}
-                layouts={layouts?.data?.map((l) => l.name) ?? []}
-                setLayout={setLayout}
                 columnOrder={{
                   columnOrder,
                   setColumnOrder,
@@ -554,22 +625,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 }}
                 data={requests}
                 sortColumns={columns}
-                columns={columns
-                  .filter((c) => c.active)
-                  .map((c) =>
-                    columnHelper.accessor(c.key as string, {
-                      cell: (info) =>
-                        c.format ? (
-                          <span className="whitespace-pre-wrap max-w-7xl break-all">
-                            {c.format(info.getValue(), viewMode)}
-                          </span>
-                        ) : (
-                          info.getValue()
-                        ),
-                      header: () => <span>{c.label}</span>,
-                      size: c.minWidth,
-                    })
-                  )}
+                columns={columns}
                 count={count || 0}
                 page={page}
                 from={from}

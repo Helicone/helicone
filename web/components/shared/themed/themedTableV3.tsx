@@ -18,8 +18,10 @@ import { truncString } from "../../../lib/stringHelpers";
 import { useRouter } from "next/router";
 import { Column } from "../../ThemedTableV2";
 import {
+  ArrowsPointingOutIcon,
   ArrowUpIcon,
   Bars3Icon,
+  Square3Stack3DIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
@@ -29,6 +31,7 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import ThemedDropdown from "./themedDropdown";
 import DeleteLayoutButton from "./themedDeleteLayout";
 import { Json } from "../../../supabase/database.types";
+import ThemedTabs from "./themedTabs";
 
 export type ColumnFormatted = {
   name: string;
@@ -51,17 +54,6 @@ interface ThemedTableV3Props {
     columnOrder: ColumnOrderState;
     setColumnOrder: React.Dispatch<React.SetStateAction<ColumnOrderState>>;
   };
-  saveLayout: (name: string) => void;
-  setLayout: (name: string) => void;
-  currentLayout: {
-    columns: Json;
-    created_at: string | null;
-    filters: Json;
-    id: number;
-    name: string;
-    user_id: string;
-  } | null;
-  layouts: string[];
   onPageChangeHandler?: (page: number) => void;
   onPageSizeChangeHandler?: (pageSize: number) => void;
   onSelectHandler?: (row: any, idx: number) => void;
@@ -83,10 +75,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     onPageSizeChangeHandler,
     onSelectHandler,
     onSortHandler,
-    saveLayout,
-    setLayout,
-    currentLayout,
-    layouts,
   } = props;
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
@@ -103,9 +91,32 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
 
+  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
+    "Condensed"
+  );
+
+  const columnHelper = createColumnHelper<RequestWrapper>();
+
+  const filteredColumns = columns
+    .filter((c) => c.active)
+    .map((c) =>
+      columnHelper.accessor(c.key as string, {
+        cell: (info) =>
+          c.format ? (
+            <span className="whitespace-pre-wrap max-w-7xl break-all">
+              {c.format(info.getValue(), viewMode)}
+            </span>
+          ) : (
+            info.getValue()
+          ),
+        header: () => <span>{c.label}</span>,
+        size: c.minWidth,
+      })
+    );
+
   const table = useReactTable({
     data,
-    columns,
+    columns: filteredColumns,
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
     onColumnSizingChange: resizeHandler,
@@ -128,32 +139,22 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
           of <span className="font-medium">{count}</span> results
         </p>
-
-        <div className="flex flex-row space-x-2 items">
-          <SaveLayoutButton saveLayout={saveLayout} />
-          {currentLayout !== null && layouts.length > 0 && (
-            <DeleteLayoutButton
-              layoutId={currentLayout.id}
-              layoutName={currentLayout.name}
-            />
-          )}
-          {layouts.length > 0 && (
-            <ThemedDropdown
-              options={layouts.map((layout, i) => ({
-                label: layout,
-                value: i,
-              }))}
-              onSelect={(idx: number) => {
-                setLayout(layouts[idx]);
-              }}
-              selectedValue={
-                layouts.findIndex((layout) => layout === currentLayout?.name) ||
-                0
-              }
-              align="right"
-              placeholder="Layouts"
-            />
-          )}
+        <div className="flex text-sm">
+          <ThemedTabs
+            options={[
+              {
+                label: "Condensed",
+                icon: Square3Stack3DIcon,
+              },
+              {
+                label: "Expanded",
+                icon: ArrowsPointingOutIcon,
+              },
+            ]}
+            onOptionSelect={(option) =>
+              setViewMode(option as "Condensed" | "Expanded")
+            }
+          />
         </div>
       </div>
 
