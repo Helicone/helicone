@@ -3,6 +3,7 @@ import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
 import { PassThrough } from "stream";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
+import { forwardRequestToOpenAiWithRetry, getRetryOptions, RetryOptions } from "./retry";
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -19,7 +20,7 @@ interface ErrorResult<T> {
   error: T;
 }
 
-interface RequestSettings {
+export interface RequestSettings {
   stream: boolean;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
@@ -27,10 +28,11 @@ interface RequestSettings {
 
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
-function forwardRequestToOpenAi(
+export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
-  body?: string
+  body?: string,
+  retryOptions?: RetryOptions,
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
@@ -38,14 +40,22 @@ function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+
+  let response;
   if (requestSettings.ff_increase_timeout) {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    return fetch(new_url.href, { ...init, signal });
+    response = await fetch(new_url.href, { ...init, signal });
   } else {
-    return fetch(new_url.href, init);
+    response = await fetch(new_url.href, init);
   }
+
+  if (retryOptions && response.status === 429) {
+    throw new Error("429 Too Many Requests");
+  }
+
+  return response;
 }
 
 type HeliconeRequest = {
@@ -317,6 +327,7 @@ async function forwardAndLog(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
+  retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
   const auth = request.headers.get("Authorization");
@@ -329,7 +340,8 @@ async function forwardAndLog(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const response = await forwardRequestToOpenAi(request, requestSettings, body);
+  const response = await (retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
+
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 
   if (requestSettings.ff_stream_force_format) {
@@ -392,7 +404,8 @@ async function uncachedRequest(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-  requestSettings: RequestSettings
+  requestSettings: RequestSettings,
+  retryOptions?: RetryOptions
 ): Promise<Response> {
   const result = await extractPrompt(request);
   if (result.data !== null) {
@@ -403,6 +416,7 @@ async function uncachedRequest(
       formattedRequest,
       env,
       ctx,
+      retryOptions,
       prompt
     );
   } else {
@@ -434,7 +448,6 @@ async function buildCachedRequest(
 
   const pathName = cacheUrl.pathname.replaceAll("/", "_");
   cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
-  console.log("PATHNAME", cacheUrl.pathname);
 
   return new Request(cacheUrl, {
     method: "GET",
@@ -556,6 +569,8 @@ export default {
           request.headers.get("helicone-ff-increase-timeout") === "true",
       };
 
+      const retryOptions = getRetryOptions(request)
+
       const { data: cacheSettings, error: cacheError } = getCacheSettings(
         request.headers,
         requestBody.stream ?? false
@@ -584,7 +599,8 @@ export default {
         request,
         env,
         ctx,
-        requestSettings
+        requestSettings,
+        retryOptions, 
       );
 
       if (cacheSettings.shouldSaveToCache && requestClone) {
