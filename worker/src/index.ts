@@ -57,9 +57,8 @@ export async function forwardRequestToOpenAi(
     response = await fetch(new_url.href, init);
   }
 
-  if (retryOptions && response.status === 429) {
-    throw new Error("429 Too Many Requests");
-  }
+  if (retryOptions && (response.status === 429 || response.status === 500)) {
+    throw new Error(`Status code ${response.status}`);
 
   return response;
 }

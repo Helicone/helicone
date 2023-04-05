@@ -66,8 +66,8 @@ export function getRetryOptions(request: Request): RetryOptions | undefined {
 
             lastResponse = res;
             // Throw an error if the status code is 429
-            if (res.status === 429) {
-              throw new Error("429 Too Many Requests");
+            if (res.status === 429 || res.status === 500) {
+              throw new Error(`Status code ${res.status}`);
             }
             return res;
           } catch (e) {
