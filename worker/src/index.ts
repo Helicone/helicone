@@ -57,9 +57,8 @@ export async function forwardRequestToOpenAi(
     response = await fetch(new_url.href, init);
   }
 
-  if (retryOptions && response.status === 429) {
-    throw new Error("429 Too Many Requests");
-  }
+  if (retryOptions && (response.status === 429 || response.status === 500)) {
+    throw new Error(`Status code ${response.status}`);
 
   return response;
 }
@@ -358,7 +357,7 @@ function consolidateTextFields(responseBody: any[]): any {
                 delta: {
                   ...c.delta,
                   content: c.delta.content
-                    ? c.delta.content + (cur.choices[i].delta.content ?? "")
+                    ? c.delta.content + cur.choices[i].delta.content
                     : cur.choices[i].delta.content,
                 },
               };
@@ -368,7 +367,7 @@ function consolidateTextFields(responseBody: any[]): any {
             ) {
               return {
                 ...c,
-                text: c.text + (cur.choices[i].text ?? ""),
+                text: c.text + cur.choices[i].text,
               };
             } else {
               return c;
