@@ -326,7 +326,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       leaveFrom="opacity-100 translate-y-0"
                       leaveTo="opacity-0 translate-y-1"
                     >
-                      <Popover.Panel className="absolute right-0 z-10 mt-2.5 flex">
+                      <Popover.Panel className="absolute left-0 right-auto lg:left-auto lg:right-0 z-10 mt-2.5 flex">
                         {({ close }) => (
                           <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
                             <div className="grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
