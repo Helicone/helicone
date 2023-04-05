@@ -16,7 +16,6 @@ export function isLoggingEndpoint(request: Request): boolean {
 export async function handleLoggingEndpoint(request: Request, env: Env): Promise<Response> {
     const body = await request.json() as LoggingRequestBody;
     const heliconeId = body['helicone-id'];
-
     const propTag = "helicone-property-";
     const heliconeHeaders = Object.fromEntries(
       [...request.headers.entries()]
