@@ -338,7 +338,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                                 Create Layout
                               </button>
                             </div>
-                            <fieldset className="min-w-[250px] w-full overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
+                            <fieldset className="min-w-[250px] max-h-[400px] w-full overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
                               {layout.layouts!.length < 1 ? (
                                 <div className="p-4 items-center h-[200px] flex flex-col justify-center text-center text-gray-500 space-y-4">
                                   <Squares2X2Icon className="h-8 w-8" />
