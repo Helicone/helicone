@@ -28,11 +28,11 @@ export interface RequestSettings {
 
 export type Result<T, K> = SuccessResult<T> | ErrorResult<K>;
 
-
 export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
-  body?: string
+  body?: string,
+  retryOptions?: RetryOptions,
 ): Promise<Response> {
   let url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
@@ -51,8 +51,7 @@ export async function forwardRequestToOpenAi(
     response = await fetch(new_url.href, init);
   }
 
-  // Throw an error if the status code is 429
-  if (response.status === 429) {
+  if (retryOptions && response.status === 429) {
     throw new Error("429 Too Many Requests");
   }
 
@@ -341,7 +340,7 @@ async function forwardAndLog(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const response = await (retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body));
+  const response = await (retryOptions ? forwardRequestToOpenAiWithRetry(request, requestSettings, retryOptions, body) : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
 
   let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
 

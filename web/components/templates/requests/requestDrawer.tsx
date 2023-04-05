@@ -84,14 +84,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                 : "n/a"}
             </dd>
           </div>
-          <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
-            <dt className="text-gray-500">Probability</dt>
-            <dd className="text-gray-900">
-              {wrappedRequest.probability
-                ? (wrappedRequest.probability * 100).toFixed(0) + "%"
-                : "n/a"}
-            </dd>
-          </div>
           {properties !== undefined &&
             properties.map((property) => {
               return makePropertyRow(
