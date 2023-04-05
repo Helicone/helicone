@@ -13,6 +13,7 @@ import {
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
+  TOKENIZER_COUNT_API: string;
 }
 
 interface SuccessResult<T> {
@@ -26,6 +27,7 @@ interface ErrorResult<T> {
 
 export interface RequestSettings {
   stream: boolean;
+  tokenizer_count_api: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
 }
@@ -255,9 +257,152 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
+async function getTokenCount(
+  inputText: string,
+  tokenizer_count_api: string
+): Promise<number> {
+  console.log(inputText);
+  const response = await fetch(tokenizer_count_api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text: inputText, model: "gpt2" }),
+  });
+
+  const data = await response.json<number>();
+  return data;
+}
+
+async function getRequestCount(
+  requestBody: any,
+  tokenCount: (inputText: string) => Promise<number>
+): Promise<number> {
+  if (requestBody.prompt !== undefined) {
+    const prompt = requestBody.prompt;
+    if (typeof prompt === "string") {
+      return tokenCount(requestBody.prompt);
+    } else if ("length" in prompt) {
+      return (
+        await Promise.all(
+          (prompt as string[]).map(async (p) => await tokenCount(p))
+        )
+      ).reduce((a, b) => a + b, 0);
+    } else {
+      throw new Error("Invalid prompt type");
+    }
+  } else if (requestBody.messages !== undefined) {
+    const baseTokens = 3;
+    const messages = requestBody.messages;
+    return (
+      baseTokens +
+      (
+        await Promise.all(
+          (messages as { content: string }[]).map(
+            async (m) => (await tokenCount(m.content)) + 5
+          )
+        )
+      ).reduce((a, b) => a + b, 0)
+    );
+  } else {
+    throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
+  }
+}
+
+function getResponseText(responseBody: any): string {
+  type Choice =
+    | {
+        delta: {
+          content: string;
+        };
+      }
+    | {
+        text: string;
+      };
+  if (responseBody.choices !== undefined) {
+    const choices = responseBody.choices;
+    return (choices as Choice[])
+      .map((c) => {
+        if ("delta" in c) {
+          return c.delta.content;
+        } else if ("text" in c) {
+          return c.text;
+        } else {
+          throw new Error("Invalid choice type");
+        }
+      })
+      .join("");
+  } else {
+    throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
+  }
+}
+
+function consolidateTextFields(responseBody: any[]): any {
+  try {
+    const consolidated = responseBody.reduce((acc, cur) => {
+      if (!cur) {
+        return acc;
+      } else if (acc.choices === undefined) {
+        return cur;
+      } else {
+        return {
+          ...acc,
+          choices: acc.choices.map((c: any, i: number) => {
+            if (!cur.choices) {
+              return c;
+            } else if (
+              c.delta !== undefined &&
+              cur.choices[i]?.delta !== undefined
+            ) {
+              return {
+                delta: {
+                  ...c.delta,
+                  content: c.delta.content
+                    ? c.delta.content + cur.choices[i].delta.content
+                    : cur.choices[i].delta.content,
+                },
+              };
+            } else if (
+              c.text !== undefined &&
+              cur.choices[i]?.text !== undefined
+            ) {
+              return {
+                ...c,
+                text: c.text + cur.choices[i].text,
+              };
+            } else {
+              return c;
+            }
+          }),
+        };
+      }
+    }, {});
+
+    consolidated.choices = consolidated.choices.map((c: any) => {
+      if (c.delta !== undefined) {
+        return {
+          ...c,
+          // delta: undefined,
+          message: {
+            ...c.delta,
+            content: c.delta.content,
+          },
+        };
+      } else {
+        return c;
+      }
+    });
+    return consolidated;
+  } catch (e) {
+    console.error("Error consolidating text fields", e);
+    return responseBody[0];
+  }
+}
+
 async function readResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>
+  readable: ReadableStream<any>,
+  requestBody: string
 ): Promise<Result<any, string>> {
   const reader = await readable?.getReader();
   let result = "";
@@ -275,23 +420,62 @@ async function readResponse(
     i++;
     if (i > MAX_LOOPS) break;
   }
+
   try {
     if (!requestSettings.stream) {
       return {
         data: JSON.parse(result),
         error: null,
       };
-    }
-    const lines = result.split("\n").filter((line) => line !== "");
-    const data = lines.map((line, i) => {
-      if (i === lines.length - 1) return {};
+    } else {
+      const lines = result.split("\n").filter((line) => line !== "");
+      const data = lines.map((line, i) => {
+        if (i === lines.length - 1) return {};
+        return JSON.parse(line.replace("data:", ""));
+      });
 
-      return JSON.parse(line.replace("data:", ""));
-    });
-    return {
-      data: data,
-      error: null,
-    };
+      const responseTokenCount = await getTokenCount(
+        data
+          .filter((d) => "id" in d)
+          .map((d) => getResponseText(d))
+          .join(""),
+        requestSettings.tokenizer_count_api
+      );
+      const requestTokenCount = await getRequestCount(
+        JSON.parse(requestBody),
+        (inputText) =>
+          getTokenCount(inputText, requestSettings.tokenizer_count_api)
+      );
+
+      console.log("requestTokenCount", requestTokenCount);
+      console.log("responseTokenCount", responseTokenCount);
+
+      try {
+        return {
+          data: {
+            ...consolidateTextFields(data),
+            streamed_data: data,
+            usage: {
+              prompt_tokens: requestTokenCount,
+              completion_tokens: responseTokenCount,
+              total_tokens: requestTokenCount + responseTokenCount,
+            },
+          },
+          error: null,
+        };
+      } catch (e) {
+        return {
+          data: {
+            ...consolidateTextFields(data),
+            streamed_data: data,
+            usage: {
+              error: e,
+            },
+          },
+          error: null,
+        };
+      }
+    }
   } catch (e) {
     return {
       data: null,
@@ -304,9 +488,14 @@ async function readAndLogResponse(
   requestSettings: RequestSettings,
   readable: ReadableStream<any>,
   requestId: string,
-  dbClient: SupabaseClient
+  dbClient: SupabaseClient,
+  requestBody: any
 ): Promise<void> {
-  const responseResult = await readResponse(requestSettings, readable);
+  const responseResult = await readResponse(
+    requestSettings,
+    readable,
+    requestBody
+  );
   if (responseResult.data !== null) {
     const { data, error } = await dbClient
       .from("response")
@@ -335,11 +524,6 @@ async function forwardAndLog(
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
   }
-
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
 
   const response = await (retryOptions
     ? forwardRequestToOpenAiWithRetry(
@@ -382,11 +566,17 @@ async function forwardAndLog(
       if (!readableLog) {
         return;
       }
+      const dbClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      const requestBody = body === "" ? undefined : body;
       const requestResult = await logRequest({
         dbClient,
         request,
         auth,
-        body: body === "" ? undefined : body,
+        body: requestBody,
         prompt: prompt,
         ...getHeliconeHeaders(request.headers),
         requestId,
@@ -396,7 +586,8 @@ async function forwardAndLog(
           requestSettings,
           readableLog,
           requestResult.data,
-          dbClient
+          dbClient,
+          requestBody
         );
       }
     })()
@@ -575,6 +766,7 @@ export default {
           : {};
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
+        tokenizer_count_api: env.TOKENIZER_COUNT_API,
         ff_stream_force_format:
           request.headers.get("helicone-ff-stream-force-format") === "true",
         ff_increase_timeout:
@@ -639,7 +831,7 @@ export default {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "oh no :( this is embarrassing, Helicone ran into an error proxying your request. Please try again later",
+            "oh no :( this is embarrassing, Helicone ran into an error proxy-ing your request. Please try again later",
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
           "helicone-error": JSON.stringify(e),
