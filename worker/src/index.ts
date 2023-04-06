@@ -8,6 +8,8 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
+import GPT3Tokenizer from "gpt3-tokenizer";
+
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -261,18 +263,10 @@ async function getTokenCount(
   inputText: string,
   tokenizer_count_api: string
 ): Promise<number> {
-  // console.log(inputText);
-  // const response = await fetch(tokenizer_count_api, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify({ text: inputText, model: "gpt2" }),
-  // });
-
-  // const data = await response.json<number>();
-  return 0;
-  // return data;
+  const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
+  const encoded: { bpe: number[]; text: string[] } =
+    tokenizer.encode(inputText);
+  return encoded.bpe.length;
 }
 
 async function getRequestCount(
