@@ -46,6 +46,8 @@ interface ThemedTableV3Props {
   from: number;
   to: number;
   count: number | null;
+  viewMode: "Condensed" | "Expanded";
+  setViewMode: React.Dispatch<React.SetStateAction<"Condensed" | "Expanded">>;
   columnSizing: {
     columnSizing: ColumnSizingState;
     setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
@@ -69,6 +71,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
     to,
     count,
     page,
+    viewMode,
+    setViewMode,
     columnSizing: { columnSizing, setColumnSizing },
     columnOrder: { columnOrder, setColumnOrder },
     onPageChangeHandler,
@@ -90,10 +94,6 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
   const router = useRouter();
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
-
-  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
-    "Condensed"
-  );
 
   const columnHelper = createColumnHelper<RequestWrapper>();
 

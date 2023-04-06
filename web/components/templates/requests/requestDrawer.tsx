@@ -9,6 +9,7 @@ import {
 import { wrap } from "module";
 import { useState } from "react";
 import { useGetRequestMetaData } from "../../../services/hooks/requestMetaData";
+import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedToggle from "../../shared/themed/themedTabs";
@@ -25,15 +26,20 @@ interface RequestDrawerProps {
   setOpen: (open: boolean) => void;
   wrappedRequest: RequestWrapper;
   values: string[];
+  initialViewMode: "Condensed" | "Expanded";
   properties?: string[];
 }
 
 const RequestDrawer = (props: RequestDrawerProps) => {
-  const { open, setOpen, wrappedRequest, values, properties } = props;
+  const { open, setOpen, wrappedRequest, values, properties, initialViewMode } =
+    props;
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest.id
   );
-  const [viewMode, setViewMode] = useState<"Pretty" | "JSON">("Pretty");
+  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
+    initialViewMode
+  );
+  const [jsonView, setJsonView] = useState<"Pretty" | "JSON">("Pretty");
 
   const makePropertyRow = (name: string, val: string | undefined) => {
     if (val === undefined) return null;
@@ -51,9 +57,16 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       setOpen={setOpen}
       title="Request Information"
       copyData={JSON.stringify(wrappedRequest, null, 2)}
+      viewMode={viewMode}
+      setViewMode={setViewMode}
     >
       <div className="flex flex-col space-y-2">
-        <dl className="mt-2 grid grid-cols-2">
+        <dl
+          className={clsx(
+            viewMode === "Condensed" ? "grid-cols-2" : "grid-cols-3",
+            "mt-2 grid"
+          )}
+        >
           <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
             <dt className="text-gray-500">Time</dt>
             <dd className="text-gray-900">
@@ -125,11 +138,11 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                 },
               ]}
               onOptionSelect={(option) =>
-                setViewMode(option as "Pretty" | "JSON")
+                setJsonView(option as "Pretty" | "JSON")
               }
             />
           </div>
-          {viewMode === "Pretty" ? (
+          {jsonView === "Pretty" ? (
             <>
               {wrappedRequest.api.chat ? (
                 <Chat

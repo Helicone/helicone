@@ -102,7 +102,12 @@ const RequestsPage = (props: RequestsPageProps) => {
       },
     },
   });
+
   const { data: layouts, refetch: refetchLayouts } = useLayouts();
+
+  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
+    "Condensed"
+  );
 
   const onCreateLayout = async (name: string) => {
     const { data, error } = await supabaseClient
@@ -630,6 +635,8 @@ const RequestsPage = (props: RequestsPageProps) => {
                 page={page}
                 from={from}
                 to={to}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
                 onSelectHandler={selectRowHandler}
                 onPageChangeHandler={onPageChangeHandler}
                 onPageSizeChangeHandler={onPageSizeChangeHandler}
@@ -665,6 +672,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           setOpen={setOpen}
           values={values}
           properties={properties}
+          initialViewMode={viewMode}
         />
       )}
     </>

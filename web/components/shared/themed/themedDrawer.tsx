@@ -1,9 +1,11 @@
 import { Dialog, Transition } from "@headlessui/react";
 import {
+  ArrowLeftIcon,
   ClipboardDocumentListIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 
 interface ThemedDrawerProps {
@@ -11,11 +13,14 @@ interface ThemedDrawerProps {
   setOpen: (open: boolean) => void;
   children: React.ReactNode;
   title: string;
+  viewMode?: "Condensed" | "Expanded";
+  setViewMode?: (viewMode: "Condensed" | "Expanded") => void;
   copyData?: string;
 }
 
 const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const { open, setOpen, children, title, copyData } = props;
+  const { open, setOpen, children, title, copyData, viewMode, setViewMode } =
+    props;
 
   const { setNotification } = useNotification();
 
@@ -33,7 +38,6 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
         >
           <div className="fixed inset-0 bg-gray-300 bg-opacity-50 transition-opacity" />
         </Transition.Child>
-
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
@@ -46,7 +50,28 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-3xl">
+                <Dialog.Panel
+                  className={clsx(
+                    viewMode === "Condensed" ? "max-w-lg" : "max-w-3xl",
+                    "pointer-events-auto w-screen relative"
+                  )}
+                >
+                  <button
+                    onClick={() =>
+                      setViewMode &&
+                      setViewMode(
+                        viewMode === "Condensed" ? "Expanded" : "Condensed"
+                      )
+                    }
+                    className="hidden md:block bg-white absolute p-2 rounded-full -left-4 top-2 border border-gray-200"
+                  >
+                    {viewMode === "Condensed" ? (
+                      <ArrowLeftIcon className="h-4 w-4" />
+                    ) : (
+                      <ArrowLeftIcon className="h-4 w-4 transform rotate-180" />
+                    )}
+                  </button>
+
                   <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-2xl">
                     <div className="px-4 sm:px-6">
                       <div className="flex justify-between items-center">
