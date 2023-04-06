@@ -490,6 +490,7 @@ async function readAndLogResponse(
   requestId: string,
   dbClient: SupabaseClient,
   requestBody: any,
+  responseStatus: number,
   startTime: Date
 ): Promise<void> {
   const responseResult = await readResponse(
@@ -510,6 +511,7 @@ async function readAndLogResponse(
           request: requestId,
           body: responseResult.data,
           delay_ms: new Date().getTime() - startTime.getTime(),
+          status: responseStatus,
         },
       ])
       .select("id");
@@ -594,6 +596,7 @@ async function forwardAndLog(
         ...getHeliconeHeaders(request.headers),
         requestId,
       });
+      const responseStatus = response.status;
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
@@ -601,6 +604,7 @@ async function forwardAndLog(
           requestResult.data,
           dbClient,
           requestBody,
+          responseStatus,
           startTime
         );
       }
@@ -838,6 +842,7 @@ export default {
 
       return new Response(response.body, {
         ...response,
+        status: response.status,
         headers: responseHeaders,
       });
     } catch (e) {

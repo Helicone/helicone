@@ -35,6 +35,7 @@ const whereKeyMappings: KeyMappings = {
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model: "request.body ->> 'model'",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
+    status: "response.status",
   },
   values: (key) => `prompt_values ->> '${key}'`,
 };
