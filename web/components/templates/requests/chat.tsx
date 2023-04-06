@@ -15,13 +15,16 @@ import {
   ChatCompletionRequestMessage,
   ChatCompletionRequestMessageRoleEnum,
   Configuration,
+  CreateChatCompletionResponse,
   OpenAIApi,
 } from "openai"; // Use import instead of require
+import { Result } from "../../../lib/result";
 
 // Set up OpenAI API
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: "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",
 });
+console.log(process.env.OPENAI_API_KEY);
 const openai = new OpenAIApi(configuration);
 
 interface ChatProps {
@@ -35,12 +38,12 @@ export interface Prompt {
   values: { [key: string]: string };
 }
 
-export interface Result {
+export interface PromptResult {
   data: JSX.Element;
   error: string | null;
 }
 
-export function formatPrompt(prompt: Prompt): Result {
+export function formatPrompt(prompt: Prompt): PromptResult {
   const missingValues = [];
   let formattedString = prompt.prompt;
   const elements = formattedString.split(/({{[^}]+}})/g).map((part, index) => {
@@ -112,15 +115,23 @@ export const Chat = (props: ChatProps) => {
       });
 
     try {
-      const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        messages: completionRequestMessages,
-      });
+      const completion = await fetch("/api/open_ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: completionRequestMessages,
+        }),
+      }).then(
+        (res) =>
+          res.json() as Promise<Result<CreateChatCompletionResponse, string>>
+      );
 
       const heliconeMessage: Message = {
-        role: completion.data.choices[0].message?.role.toString() || "system",
+        role: completion.data?.choices[0].message?.role.toString() || "system",
         content:
-          completion.data.choices[0].message?.content || "missing content",
+          completion.data?.choices[0].message?.content || "missing content",
       };
 
       setEditableMessages((prevEditableMessages) => {
