@@ -1,4 +1,10 @@
-import { UserCircleIcon, UserIcon } from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  PencilSquareIcon,
+  UserCircleIcon,
+  UserIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
@@ -14,7 +20,7 @@ import {
 
 // Set up OpenAI API
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: "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",
 });
 const openai = new OpenAIApi(configuration);
 
@@ -87,9 +93,11 @@ export const Chat = (props: ChatProps) => {
 
   // Add state for messages
   const [editableMessages, setEditableMessages] = useState(messages);
+  const [isRunning, setIsRunning] = useState(false);
 
   // Function to run chat completion
   const runChatCompletion = async () => {
+    setIsRunning(true);
     const completionRequestMessages: ChatCompletionRequestMessage[] =
       editableMessages.slice(0, -1).map((message: Message) => {
         return {
@@ -104,10 +112,9 @@ export const Chat = (props: ChatProps) => {
       });
 
     try {
-      console.log("INPUT MESSAGES", completionRequestMessages);
       const completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
-        messages: completionRequestMessages, // Use the edited messages from the state
+        messages: completionRequestMessages,
       });
 
       const heliconeMessage: Message = {
@@ -116,15 +123,15 @@ export const Chat = (props: ChatProps) => {
           completion.data.choices[0].message?.content || "missing content",
       };
 
-      // Update the last message in the editableMessages state
       setEditableMessages((prevEditableMessages) => {
         const updatedMessages = [...prevEditableMessages];
         updatedMessages[updatedMessages.length - 1] = heliconeMessage;
         return updatedMessages;
       });
-
+      setIsRunning(false);
       return heliconeMessage;
     } catch (error) {
+      setIsRunning(false);
       console.error("Error making chat completion request:", error);
     }
   };
@@ -143,16 +150,52 @@ export const Chat = (props: ChatProps) => {
     setEditableMessages(updatedMessages);
   };
 
+  const renderMessage = (
+    messageContent: string | JSX.Element,
+    isLastMessage: boolean,
+    index: number
+  ) => {
+    if (isLastMessage) {
+      return isRunning ? (
+        <p className="text-sm">Loading...</p>
+      ) : (
+        <p className="text-sm">{messageContent}</p>
+      );
+    } else if (isEditMode && typeof messageContent === "string") {
+      return (
+        <input
+          type="text"
+          value={messageContent}
+          className="w-full border border-gray-300 text-sm focus:ring-1 focus:ring-sky-500 
+          focus:border-sky-500"
+          onChange={(e) => {
+            // Update the message content in the state when it's edited
+            handleContentChange(e, index);
+          }}
+        />
+      );
+    } else {
+      return <p className="text-sm">{messageContent}</p>;
+    }
+  };
+
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center space-x-2">
         <p className="text-gray-500 font-medium">Messages</p>
         {/* Add an onClick event handler to toggle edit mode */}
-        <button className="text-blue-500" onClick={toggleEditMode}>
-          {isEditMode ? "Exit Edit Mode" : "Edit Mode"}
+        <button
+          className="text-gray-700 bg-gray-300 p-1 rounded-md"
+          onClick={toggleEditMode}
+        >
+          {isEditMode ? (
+            <XMarkIcon className="h-4 w-4" />
+          ) : (
+            <PencilSquareIcon className="h-4 w-4" />
+          )}
         </button>
       </div>
-      <div className="w-full border border-gray-300 rounded-md divide-y divide-gray-200 h-full">
+      <div className="w-full border border-gray-300 bg-gray-100 rounded-md divide-y divide-gray-200 h-full">
         {editableMessages.length > 0 ? (
           editableMessages.map((message, index) => {
             const isLastMessage = index === editableMessages.length - 1;
@@ -172,42 +215,31 @@ export const Chat = (props: ChatProps) => {
             }
 
             return (
-              <div key={index} className="">
-                <div
-                  className={clsx(
-                    isAssistant || isSystem ? "bg-gray-100" : "bg-white",
-                    "items-start px-4 py-4 text-left grid grid-cols-12",
-                    isSystem ? "font-semibold" : ""
+              <div
+                className={clsx(
+                  isAssistant || isSystem ? "bg-gray-100" : "bg-white",
+                  "items-center p-4 text-left grid grid-cols-12",
+                  isSystem ? "font-semibold" : "",
+                  index === 0 ? "rounded-t-md" : "",
+                  index === editableMessages.length - 1 ? "rounded-b-md" : ""
+                )}
+                key={index}
+              >
+                <div className="col-span-1">
+                  {isAssistant || isSystem ? (
+                    <Image
+                      src={"/assets/chatGPT.png"}
+                      className="h-6 w-6 rounded-md"
+                      height={30}
+                      width={30}
+                      alt="ChatGPT Logo"
+                    />
+                  ) : (
+                    <UserCircleIcon className="h-6 w-6 bg-white rounded-full" />
                   )}
-                >
-                  <div className="col-span-1">
-                    {isAssistant || isSystem ? (
-                      <Image
-                        src={"/assets/chatGPT.png"}
-                        className="h-7 w-7 rounded-md"
-                        height={30}
-                        width={30}
-                        alt="ChatGPT Logo"
-                      />
-                    ) : (
-                      <UserCircleIcon className="h-7 w-7 bg-white rounded-full" />
-                    )}
-                  </div>
-                  <div className="whitespace-pre-wrap col-span-11 leading-6">
-                    {isEditMode && !isLastMessage ? (
-                      <input
-                        type="text"
-                        value={formattedMessageContent}
-                        className="w-full border border-gray-300 px-2 py-1"
-                        onChange={(e) => {
-                          // Update the message content in the state when it's edited
-                          handleContentChange(e, index);
-                        }}
-                      />
-                    ) : (
-                      formattedMessageContent
-                    )}
-                  </div>
+                </div>
+                <div className="whitespace-pre-wrap col-span-11 items-center">
+                  {renderMessage(formattedMessageContent, isLastMessage, index)}
                 </div>
               </div>
             );
@@ -225,12 +257,14 @@ export const Chat = (props: ChatProps) => {
         )}
       </div>
       {isEditMode && (
-        <button
-          className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"
-          onClick={runChatCompletion} // Call the runChatCompletion function when the button is clicked
-        >
-          Run
-        </button>
+        <div className="flex w-full justify-center">
+          <button
+            className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 mt-4 rounded"
+            onClick={runChatCompletion}
+          >
+            Run Chat Completion
+          </button>
+        </div>
       )}
     </div>
   );
