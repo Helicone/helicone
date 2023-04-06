@@ -45,6 +45,7 @@ type ResponseTableToOperators = {
   body_tokens: SingleKey<NumberOperators>;
   body_model: SingleKey<TextOperators>;
   body_completion: SingleKey<TextOperators>;
+  status: SingleKey<NumberOperators>;
 };
 
 export type FilterLeafResponse = SingleKey<ResponseTableToOperators>;
