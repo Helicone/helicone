@@ -6,6 +6,7 @@ import {
   CreateChatCompletionResponse,
   OpenAIApi,
 } from "openai";
+import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 
 const configuration = new Configuration({
@@ -20,6 +21,10 @@ export default async function handler(
   const client = createServerSupabaseClient({ req, res });
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
+    res.status(401).json({ error: "Unauthorized", data: null });
+    return;
+  }
+  if (user.data.user.email === DEMO_EMAIL) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
