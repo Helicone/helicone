@@ -4,6 +4,19 @@ import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import Hover from "./hover";
 import { ChatProperties, CsvData, Message } from "./requestsPage";
+import { useState } from "react";
+import {
+  ChatCompletionRequestMessage,
+  ChatCompletionRequestMessageRoleEnum,
+  Configuration,
+  OpenAIApi,
+} from "openai"; // Use import instead of require
+
+// Set up OpenAI API
+const configuration = new Configuration({
+  apiKey: "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",
+});
+const openai = new OpenAIApi(configuration);
 
 interface ChatProps {
   chatProperties: ChatProperties;
@@ -64,12 +77,85 @@ export const Chat = (props: ChatProps) => {
     messages = messages.concat([response]);
   }
 
+  // Add state for edit mode and run button visibility
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // Function to handle edit mode toggle
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  // Add state for messages
+  const [editableMessages, setEditableMessages] = useState(messages);
+
+  // Function to run chat completion
+  const runChatCompletion = async () => {
+    const completionRequestMessages: ChatCompletionRequestMessage[] =
+      editableMessages.slice(0, -1).map((message: Message) => {
+        return {
+          role:
+            message.role === "assistant"
+              ? ChatCompletionRequestMessageRoleEnum.Assistant
+              : message.role === "system"
+              ? ChatCompletionRequestMessageRoleEnum.System
+              : ChatCompletionRequestMessageRoleEnum.User,
+          content: message.content,
+        };
+      });
+
+    try {
+      console.log("INPUT MESSAGES", completionRequestMessages);
+      const completion = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: completionRequestMessages, // Use the edited messages from the state
+      });
+
+      const heliconeMessage: Message = {
+        role: completion.data.choices[0].message?.role.toString() || "system",
+        content:
+          completion.data.choices[0].message?.content || "missing content",
+      };
+
+      // Update the last message in the editableMessages state
+      setEditableMessages((prevEditableMessages) => {
+        const updatedMessages = [...prevEditableMessages];
+        updatedMessages[updatedMessages.length - 1] = heliconeMessage;
+        return updatedMessages;
+      });
+
+      return heliconeMessage;
+    } catch (error) {
+      console.error("Error making chat completion request:", error);
+    }
+  };
+
+  // Function to handle message content changes
+  const handleContentChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const updatedMessages = editableMessages.map((message, i) => {
+      if (i === index) {
+        return { ...message, content: e.target.value };
+      }
+      return message;
+    });
+    setEditableMessages(updatedMessages);
+  };
+
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <p className="text-gray-500 font-medium">Messages</p>
+      <div className="flex justify-between items-center">
+        <p className="text-gray-500 font-medium">Messages</p>
+        {/* Add an onClick event handler to toggle edit mode */}
+        <button className="text-blue-500" onClick={toggleEditMode}>
+          {isEditMode ? "Exit Edit Mode" : "Edit Mode"}
+        </button>
+      </div>
       <div className="w-full border border-gray-300 rounded-md divide-y divide-gray-200 h-full">
-        {messages.length > 0 ? (
-          messages.map((message, index) => {
+        {editableMessages.length > 0 ? (
+          editableMessages.map((message, index) => {
+            const isLastMessage = index === editableMessages.length - 1;
             const isAssistant = message.role === "assistant";
             const isSystem = message.role === "system";
 
@@ -108,7 +194,19 @@ export const Chat = (props: ChatProps) => {
                     )}
                   </div>
                   <div className="whitespace-pre-wrap col-span-11 leading-6">
-                    {formattedMessageContent}
+                    {isEditMode && !isLastMessage ? (
+                      <input
+                        type="text"
+                        value={formattedMessageContent}
+                        className="w-full border border-gray-300 px-2 py-1"
+                        onChange={(e) => {
+                          // Update the message content in the state when it's edited
+                          handleContentChange(e, index);
+                        }}
+                      />
+                    ) : (
+                      formattedMessageContent
+                    )}
                   </div>
                 </div>
               </div>
@@ -126,6 +224,14 @@ export const Chat = (props: ChatProps) => {
           </div>
         )}
       </div>
+      {isEditMode && (
+        <button
+          className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"
+          onClick={runChatCompletion} // Call the runChatCompletion function when the button is clicked
+        >
+          Run
+        </button>
+      )}
     </div>
   );
 };
