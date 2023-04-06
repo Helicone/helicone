@@ -261,17 +261,18 @@ async function getTokenCount(
   inputText: string,
   tokenizer_count_api: string
 ): Promise<number> {
-  console.log(inputText);
-  const response = await fetch(tokenizer_count_api, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ text: inputText, model: "gpt2" }),
-  });
+  // console.log(inputText);
+  // const response = await fetch(tokenizer_count_api, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({ text: inputText, model: "gpt2" }),
+  // });
 
-  const data = await response.json<number>();
-  return data;
+  // const data = await response.json<number>();
+  return 0;
+  // return data;
 }
 
 async function getRequestCount(
@@ -402,7 +403,8 @@ function consolidateTextFields(responseBody: any[]): any {
 async function readResponse(
   requestSettings: RequestSettings,
   readable: ReadableStream<any>,
-  requestBody: string
+  requestBody: string,
+  responseStatus: number
 ): Promise<Result<any, string>> {
   const reader = await readable?.getReader();
   let result = "";
@@ -422,7 +424,7 @@ async function readResponse(
   }
 
   try {
-    if (!requestSettings.stream) {
+    if (!requestSettings.stream || responseStatus !== 200) {
       return {
         data: JSON.parse(result),
         error: null,
@@ -441,6 +443,7 @@ async function readResponse(
           .join(""),
         requestSettings.tokenizer_count_api
       );
+
       const requestTokenCount = await getRequestCount(
         JSON.parse(requestBody),
         (inputText) =>
@@ -451,6 +454,11 @@ async function readResponse(
       console.log("responseTokenCount", responseTokenCount);
 
       try {
+        const totalTokens = requestTokenCount + responseTokenCount;
+        if (isNaN(totalTokens)) {
+          throw new Error("Invalid token count");
+        }
+
         return {
           data: {
             ...consolidateTextFields(data),
@@ -496,7 +504,8 @@ async function readAndLogResponse(
   const responseResult = await readResponse(
     requestSettings,
     readable,
-    requestBody
+    requestBody,
+    responseStatus
   );
   if (responseResult.data !== null) {
     console.log(
