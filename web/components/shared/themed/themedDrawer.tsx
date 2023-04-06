@@ -52,7 +52,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
               >
                 <Dialog.Panel
                   className={clsx(
-                    viewMode === "Condensed" ? "max-w-lg" : "max-w-3xl",
+                    viewMode === "Condensed" ? "max-w-lg" : "max-w-screen",
                     "pointer-events-auto w-screen relative"
                   )}
                 >
