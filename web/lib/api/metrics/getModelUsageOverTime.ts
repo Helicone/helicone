@@ -6,10 +6,7 @@ import {
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
 import { dbExecute } from "../db/dbExecute";
-import {
-  buildFilter,
-  buildFilterWithAuth,
-} from "../../../services/lib/filters/filters";
+import { buildFilter } from "../../../services/lib/filters/filters";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
@@ -40,7 +37,7 @@ export async function getModelUsageOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const builtFilter = await buildFilterWithAuth(userId, filter, []);
+  const builtFilter = buildFilter(filter, []);
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT
@@ -51,8 +48,10 @@ SELECT
   sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens
 FROM response
   left join request on response.request = request.id
+  left join user_api_keys on request.auth_hash = user_api_keys.api_key_hash
 WHERE (
-  response.body ->> 'model'::text is not null
+  user_api_keys.user_id = '${userId}'
+  AND response.body ->> 'model'::text is not null
   AND (${builtFilter.filter})
 )
 GROUP BY response.body ->> 'model'::text, ${dateTrunc}
