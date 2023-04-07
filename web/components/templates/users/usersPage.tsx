@@ -5,7 +5,7 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 import { truncString } from "../../../lib/stringHelpers";
 import { useUsers } from "../../../services/hooks/users";
@@ -23,6 +23,10 @@ import ThemedTableV2, { Column } from "../../ThemedTableV2";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import UserTable from "./userTable";
+import { ColumnSizingState, ColumnOrderState } from "@tanstack/react-table";
+import { UserMetric } from "../../../lib/api/users/users";
+import { SortDirection } from "../../../services/lib/sorts/sorts";
 
 const monthNames = [
   "Jan",
@@ -49,21 +53,35 @@ const UsersPage = (props: UsersPageProps) => {
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
-  const { users, count, from, isLoading, to } = useUsers(
-    page,
-    pageSize,
+  const [currentPage, setCurrentPage] = useState<number>(page);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+
+  const { users, count, from, isLoading, to, refetch } = useUsers(
+    currentPage,
+    currentPageSize,
     filterListToTree(
       filterUIToFilterLeafs(userTableFilters, advancedFilters),
       "and"
     )
   );
-  const router = useRouter();
 
   const { setNotification } = useNotification();
 
   const [open, setOpen] = useState(true);
   const [index, setIndex] = useState<number>();
   const [selectedUser, setSelectedUser] = useState<UserRow>();
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+
+  const onPageSizeChangeHandler = async (newPageSize: number) => {
+    setCurrentPageSize(newPageSize);
+    refetch();
+  };
+
+  const onPageChangeHandler = async (newPageNumber: number) => {
+    setCurrentPage(newPageNumber);
+    refetch();
+  };
 
   const selectRowHandler = (row: UserRow, idx: number) => {
     setIndex(idx);
@@ -80,7 +98,7 @@ const UsersPage = (props: UsersPageProps) => {
       .slice(-2)}`;
   };
 
-  const columns: Column[] = [
+  const initialColumns: Column[] = [
     {
       key: "user_id",
       active: true,
@@ -139,6 +157,8 @@ const UsersPage = (props: UsersPageProps) => {
     },
   ];
 
+  const [columns, setColumns] = useState<Column[]>(initialColumns);
+
   async function downloadCSV() {
     try {
       const response = await fetch("/api/export/users", {
@@ -182,6 +202,12 @@ const UsersPage = (props: UsersPageProps) => {
           csvExport={{
             onClick: downloadCSV,
           }}
+          editColumns={{
+            columns,
+            onColumnCallback: (newColumns) => {
+              setColumns(newColumns);
+            },
+          }}
           isFetching={isLoading}
           advancedFilter={{
             filterMap: userTableFilters,
@@ -192,17 +218,43 @@ const UsersPage = (props: UsersPageProps) => {
         {isLoading || from === undefined || to === undefined ? (
           <LoadingAnimation title="Getting users" />
         ) : (
-          <>
-            <ThemedTableV2
-              columns={columns}
-              rows={users}
-              page={page}
-              from={from}
-              to={to}
-              count={count || 0}
-              onSelectHandler={selectRowHandler}
-            />
-          </>
+          <UserTable
+            columnOrder={{
+              columnOrder,
+              setColumnOrder,
+            }}
+            columnSizing={{
+              columnSizing,
+              setColumnSizing,
+            }}
+            data={users}
+            columns={columns}
+            count={count}
+            page={page}
+            from={from}
+            to={to}
+            onSelectHandler={selectRowHandler}
+            onPageChangeHandler={onPageChangeHandler}
+            onPageSizeChangeHandler={onPageSizeChangeHandler}
+            // onSortHandler={(key) => {
+            //   if (key.key === orderBy.column) {
+            //     setOrderBy({
+            //       column: key.key,
+            //       direction: orderBy.direction === "asc" ? "desc" : "asc",
+            //     });
+            //     key.toSortLeaf &&
+            //       setSortLeaf(
+            //         key.toSortLeaf(orderBy.direction === "asc" ? "desc" : "asc")
+            //       );
+            //   } else {
+            //     key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+            //     setOrderBy({
+            //       column: key.key,
+            //       direction: "asc",
+            //     });
+            //   }
+            // }}
+          />
         )}
       </div>
       {open && selectedUser !== undefined && index !== undefined && (
