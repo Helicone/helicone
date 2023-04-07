@@ -1,7 +1,7 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { UIFilterRow } from "../../components/shared/themed/themedAdvancedFilters";
-import { ColumnFormatted } from "../../components/shared/themed/themedTableV3";
+import { ColumnFormatted } from "../../components/templates/requests/requestTable";
 import { Database, Json } from "../../supabase/database.types";
 import { FilterNode } from "../lib/filters/filterDefs";
 export interface SaveLayoutInputs {
