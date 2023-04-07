@@ -8,6 +8,8 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
+import GPT3Tokenizer from "gpt3-tokenizer";
+
 // import bcrypt from "bcrypt";
 
 export interface Env {
@@ -261,17 +263,10 @@ async function getTokenCount(
   inputText: string,
   tokenizer_count_api: string
 ): Promise<number> {
-  console.log(inputText);
-  const response = await fetch(tokenizer_count_api, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ text: inputText, model: "gpt2" }),
-  });
-
-  const data = await response.json<number>();
-  return data;
+  const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
+  const encoded: { bpe: number[]; text: string[] } =
+    tokenizer.encode(inputText);
+  return encoded.bpe.length;
 }
 
 async function getRequestCount(
@@ -402,7 +397,8 @@ function consolidateTextFields(responseBody: any[]): any {
 async function readResponse(
   requestSettings: RequestSettings,
   readable: ReadableStream<any>,
-  requestBody: string
+  requestBody: string,
+  responseStatus: number
 ): Promise<Result<any, string>> {
   const reader = await readable?.getReader();
   let result = "";
@@ -422,7 +418,7 @@ async function readResponse(
   }
 
   try {
-    if (!requestSettings.stream) {
+    if (!requestSettings.stream || responseStatus !== 200) {
       return {
         data: JSON.parse(result),
         error: null,
@@ -441,6 +437,7 @@ async function readResponse(
           .join(""),
         requestSettings.tokenizer_count_api
       );
+
       const requestTokenCount = await getRequestCount(
         JSON.parse(requestBody),
         (inputText) =>
@@ -451,6 +448,11 @@ async function readResponse(
       console.log("responseTokenCount", responseTokenCount);
 
       try {
+        const totalTokens = requestTokenCount + responseTokenCount;
+        if (isNaN(totalTokens)) {
+          throw new Error("Invalid token count");
+        }
+
         return {
           data: {
             ...consolidateTextFields(data),
@@ -490,12 +492,14 @@ async function readAndLogResponse(
   requestId: string,
   dbClient: SupabaseClient,
   requestBody: any,
+  responseStatus: number,
   startTime: Date
 ): Promise<void> {
   const responseResult = await readResponse(
     requestSettings,
     readable,
-    requestBody
+    requestBody,
+    responseStatus
   );
   if (responseResult.data !== null) {
     console.log(
@@ -510,6 +514,7 @@ async function readAndLogResponse(
           request: requestId,
           body: responseResult.data,
           delay_ms: new Date().getTime() - startTime.getTime(),
+          status: responseStatus,
         },
       ])
       .select("id");
@@ -594,6 +599,7 @@ async function forwardAndLog(
         ...getHeliconeHeaders(request.headers),
         requestId,
       });
+      const responseStatus = response.status;
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
@@ -601,6 +607,7 @@ async function forwardAndLog(
           requestResult.data,
           dbClient,
           requestBody,
+          responseStatus,
           startTime
         );
       }
@@ -838,6 +845,7 @@ export default {
 
       return new Response(response.body, {
         ...response,
+        status: response.status,
         headers: responseHeaders,
       });
     } catch (e) {
