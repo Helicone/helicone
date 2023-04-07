@@ -14,18 +14,9 @@ import { useState } from "react";
 import {
   ChatCompletionRequestMessage,
   ChatCompletionRequestMessageRoleEnum,
-  Configuration,
   CreateChatCompletionResponse,
-  OpenAIApi,
 } from "openai"; // Use import instead of require
 import { Result } from "../../../lib/result";
-
-// Set up OpenAI API
-const configuration = new Configuration({
-  apiKey: "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",
-});
-console.log(process.env.OPENAI_API_KEY);
-const openai = new OpenAIApi(configuration);
 
 interface ChatProps {
   chatProperties: ChatProperties;
@@ -68,6 +59,29 @@ export function formatPrompt(prompt: Prompt): PromptResult {
 
   return {
     data: <div>{output}</div>,
+    error: null,
+  };
+}
+
+export function formatPrompt2(prompt: Prompt): any {
+  const missingValues = [];
+  let formattedString = prompt.prompt;
+  const elements = formattedString.split(/({{[^}]+}})/g).map((part, index) => {
+    const match = part.match(/{{([^}]+)}}/);
+    if (match) {
+      const key = match[1];
+      const value = prompt.values[key];
+      if (value === undefined) {
+        missingValues.push(key);
+        return part;
+      }
+      return value;
+    }
+    return part;
+  });
+
+  return {
+    data: elements.join(""),
     error: null,
   };
 }
@@ -154,7 +168,8 @@ export const Chat = (props: ChatProps) => {
   ) => {
     const updatedMessages = editableMessages.map((message, i) => {
       if (i === index) {
-        return { ...message, content: e.target.value };
+        let updatedContent = e.target.value;
+        return { ...message, content: updatedContent };
       }
       return message;
     });
@@ -167,18 +182,20 @@ export const Chat = (props: ChatProps) => {
     index: number
   ) => {
     if (isLastMessage) {
-      return isRunning ? (
-        <p className="text-sm">Loading...</p>
-      ) : (
-        <p className="text-sm">{messageContent}</p>
-      );
-    } else if (isEditMode && typeof messageContent === "string") {
+      return isRunning ? <p>Loading...</p> : <p>{messageContent}</p>;
+    } else if (isEditMode) {
+      const originalMessageContent = editableMessages[index].content;
+      const formattedPrompt = formatPrompt2({
+        prompt: originalMessageContent,
+        values: props.keys,
+      });
+      const filledInMessageContent = formattedPrompt.data;
+
       return (
-        <input
-          type="text"
-          value={messageContent}
-          className="w-full border border-gray-300 text-sm focus:ring-1 focus:ring-sky-500 
-          focus:border-sky-500"
+        <textarea
+          value={filledInMessageContent}
+          className="w-full border border-gray-300 text-sm leading-6 focus:ring-1 focus:ring-sky-500 
+          focus:border-sky-500 resize overflow-auto"
           onChange={(e) => {
             // Update the message content in the state when it's edited
             handleContentChange(e, index);
@@ -249,7 +266,7 @@ export const Chat = (props: ChatProps) => {
                     <UserCircleIcon className="h-6 w-6 bg-white rounded-full" />
                   )}
                 </div>
-                <div className="whitespace-pre-wrap col-span-11 items-center">
+                <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
                   {renderMessage(formattedMessageContent, isLastMessage, index)}
                 </div>
               </div>

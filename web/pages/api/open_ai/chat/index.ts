@@ -30,7 +30,6 @@ export default async function handler(
   }
 
   const { messages } = req.body as { messages: ChatCompletionRequestMessage[] };
-
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: messages,
