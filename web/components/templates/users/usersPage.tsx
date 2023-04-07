@@ -106,8 +106,7 @@ const UsersPage = (props: UsersPageProps) => {
       type: "text",
       filter: true,
       minWidth: 170,
-      format: (value: string) =>
-        value ? truncString(value, 10) : "No user ID",
+      format: (value: string) => (value ? value : "No user ID"),
     },
     {
       key: "active_for",
