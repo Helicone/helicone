@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ColumnFormatted } from "./themedTableV3";
+import { ColumnFormatted } from "../../templates/requests/requestTable";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { UIFilterRow } from "./themedAdvancedFilters";
 import { NextApiRequest, NextApiResponse } from "next";

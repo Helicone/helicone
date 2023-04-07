@@ -33,7 +33,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader, {
   escapeCSVString,
 } from "../../shared/themed/themedTableHeader";
-import ThemedTableV3 from "../../shared/themed/themedTableV3";
+import ThemedTableV3 from "./requestTable";
 import {
   capitalizeWords,
   getUSDate,
@@ -43,6 +43,7 @@ import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
 import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
+import RequestTable from "./requestTable";
 
 export type Message = {
   role: string;
@@ -614,7 +615,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             {isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
-              <ThemedTableV3
+              <RequestTable
                 columnOrder={{
                   columnOrder,
                   setColumnOrder,
@@ -624,7 +625,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                   setColumnSizing,
                 }}
                 data={requests}
-                sortColumns={columns}
                 columns={columns}
                 count={count || 0}
                 page={page}
