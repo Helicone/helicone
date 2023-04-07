@@ -30,7 +30,6 @@ export type RequestTableToOperators = {
   prompt: SingleKey<TextOperators>;
   created_at: SingleKey<TimestampOperators>;
   user_id: SingleKey<TextOperators>;
-  auth_hash: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
