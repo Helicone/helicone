@@ -1,164 +1,118 @@
-import * as React from "react";
-
-import {
-  ColumnOrderState,
-  ColumnSizingState,
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  OnChangeFn,
-  SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { clsx } from "../clsx";
-import { RequestWrapper } from "../../templates/requests/useRequestsPage";
-import { getUSDate } from "../utils/utils";
-import { truncString } from "../../../lib/stringHelpers";
-import { useRouter } from "next/router";
-import { Column } from "../../ThemedTableV2";
 import {
   ArrowsPointingOutIcon,
   ArrowUpIcon,
-  Bars3Icon,
   Square3Stack3DIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import SaveLayoutButton from "./themedSaveLayout";
-import { UIFilterRow } from "./themedAdvancedFilters";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import ThemedDropdown from "./themedDropdown";
-import DeleteLayoutButton from "./themedDeleteLayout";
-import { Json } from "../../../supabase/database.types";
+import {
+  ColumnOrderState,
+  ColumnSizingState,
+  flexRender,
+  HeaderGroup,
+  OnChangeFn,
+  Row,
+} from "@tanstack/react-table";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { ColumnType } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/sorts";
+import { RequestWrapper } from "../../templates/requests/useRequestsPage";
+import { clsx } from "../clsx";
 import ThemedTabs from "./themedTabs";
 
-export type ColumnFormatted = {
-  name: string;
-  sizing: string;
-};
-
-interface ThemedTableV3Props {
-  data: RequestWrapper[];
-  columns: any[]; // abstract this to a <T>
-  sortColumns: Column[];
-  page: number;
-  from: number;
-  to: number;
-  count: number | null;
-  columnSizing: {
-    columnSizing: ColumnSizingState;
-    setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
-  };
-  columnOrder: {
-    columnOrder: ColumnOrderState;
-    setColumnOrder: React.Dispatch<React.SetStateAction<ColumnOrderState>>;
-  };
-  onPageChangeHandler?: (page: number) => void;
-  onPageSizeChangeHandler?: (pageSize: number) => void;
-  onSelectHandler?: (row: any, idx: number) => void;
-  onSortHandler?: (key: any) => void; // use the same type as the column type above
+export interface Column {
+  key: any;
+  label: string;
+  active: boolean;
+  type?: ColumnType;
+  filter?: boolean;
+  sortBy?: SortDirection;
+  columnOrigin?: "property" | "value";
+  minWidth?: number;
+  align?: "center" | "inherit" | "left" | "right" | "justify";
+  toSortLeaf?: (direction: SortDirection) => SortLeafRequest;
+  format?: (value: any, mode: "Condensed" | "Expanded") => string;
 }
 
-const ThemedTableV3 = (props: ThemedTableV3Props) => {
+interface ThemedTableV4Props<T> {
+  from: number;
+  to: number;
+  count: number;
+  page: number;
+  columns: Column[];
+  tableCenterTableSize: number;
+  headerGroups: HeaderGroup<T>[];
+  isResizingColumn: string | false;
+  currentCols: string[];
+  rows: Row<T>[];
+  onSortHandler?: (key: Column) => void;
+  onSelectHandler?: (row: any, idx: number) => void;
+  onPageSizeChangeHandler?: (pageSize: number) => void;
+  onPageChangeHandler?: (page: number) => void;
+  orderHandler?: (newState: ColumnOrderState) => void;
+  setViewMode?: React.Dispatch<React.SetStateAction<"Condensed" | "Expanded">>;
+}
+
+export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
   const {
-    data,
-    columns,
-    sortColumns,
     from,
     to,
     count,
     page,
-    columnSizing: { columnSizing, setColumnSizing },
-    columnOrder: { columnOrder, setColumnOrder },
-    onPageChangeHandler,
-    onPageSizeChangeHandler,
-    onSelectHandler,
+    columns,
+    tableCenterTableSize,
+    headerGroups,
+    isResizingColumn,
+    currentCols,
+    rows,
     onSortHandler,
+    onSelectHandler,
+    onPageSizeChangeHandler,
+    onPageChangeHandler,
+    orderHandler,
+    setViewMode,
   } = props;
 
-  const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
-    setColumnSizing(newState);
-    localStorage.setItem("requestsColumnSizing", JSON.stringify(columnSizing));
-  };
-
-  const orderHandler: OnChangeFn<ColumnOrderState> = (newState) => {
-    setColumnOrder(newState);
-    localStorage.setItem("requestsColumnOrder", JSON.stringify(newState));
-  };
-
+  let columnBeingDragged: number;
   const router = useRouter();
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
 
-  const [viewMode, setViewMode] = useState<"Condensed" | "Expanded">(
-    "Condensed"
-  );
-
-  const columnHelper = createColumnHelper<RequestWrapper>();
-
-  const filteredColumns = columns
-    .filter((c) => c.active)
-    .map((c) =>
-      columnHelper.accessor(c.key as string, {
-        cell: (info) =>
-          c.format ? (
-            <span className="whitespace-pre-wrap max-w-7xl break-all">
-              {c.format(info.getValue(), viewMode)}
-            </span>
-          ) : (
-            info.getValue()
-          ),
-        header: () => <span>{c.label}</span>,
-        size: c.minWidth,
-      })
-    );
-
-  const table = useReactTable({
-    data,
-    columns: filteredColumns,
-    getCoreRowModel: getCoreRowModel(),
-    enableColumnResizing: true,
-    onColumnSizingChange: resizeHandler,
-    onColumnOrderChange: orderHandler,
-    columnResizeMode: "onChange",
-    state: {
-      columnSizing,
-      columnOrder,
-    },
-    getSortedRowModel: getSortedRowModel(),
-  });
-
-  let columnBeingDragged: number;
+  console.log(columns.length);
 
   return (
     <div className="space-y-2">
       <div className="w-full flex flex-row justify-between items-end">
         <p className="text-sm text-gray-700">
           Showing <span className="font-medium">{from + 1}</span> to{" "}
-          <span className="font-medium">{Math.min(to, count as number)}</span>{" "}
-          of <span className="font-medium">{count}</span> results
+          <span className="font-medium">{Math.min(to, count)}</span> of{" "}
+          <span className="font-medium">{count}</span> results
         </p>
-        <div className="flex text-sm">
-          <ThemedTabs
-            options={[
-              {
-                label: "Condensed",
-                icon: Square3Stack3DIcon,
-              },
-              {
-                label: "Expanded",
-                icon: ArrowsPointingOutIcon,
-              },
-            ]}
-            onOptionSelect={(option) =>
-              setViewMode(option as "Condensed" | "Expanded")
-            }
-          />
-        </div>
+        {setViewMode && (
+          <div className="flex text-sm">
+            <ThemedTabs
+              options={[
+                {
+                  label: "Condensed",
+                  icon: Square3Stack3DIcon,
+                },
+                {
+                  label: "Expanded",
+                  icon: ArrowsPointingOutIcon,
+                },
+              ]}
+              onOptionSelect={(option) =>
+                setViewMode(option as "Condensed" | "Expanded")
+              }
+            />
+          </div>
+        )}
       </div>
 
-      {columns.length < 1 ? (
+      {columns.filter((c) => c.active).length < 1 ? (
         <div className="w-full h-48 items-center justify-center align-middle flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm p-2">
           <TableCellsIcon className="h-12 w-12 text-gray-500" />
           <p className="italic text-gray-500">No columns selected</p>
@@ -168,16 +122,17 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
           <table
             {...{
               style: {
-                width: table.getCenterTotalSize(),
+                width: tableCenterTableSize,
+                // width: table.getCenterTotalSize(),
               },
             }}
             className="inline-block w-full bg-white border border-gray-200 rounded-lg shadow-sm p-2"
           >
             <thead className="text-left text-sm font-semibold text-gray-900">
-              {table.getHeaderGroups().map((headerGroup) => (
+              {headerGroups.map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header, idx) => {
-                    const currentCol = sortColumns.find(
+                    const currentCol = columns.find(
                       (col) => col.key === header.id
                     );
                     return (
@@ -192,7 +147,8 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                         }}
                         data-column-index={header.index}
                         draggable={
-                          !table.getState().columnSizingInfo.isResizingColumn
+                          !isResizingColumn
+                          //   !table.getState().columnSizingInfo.isResizingColumn
                         }
                         onDragStart={(e) => {
                           columnBeingDragged = Number(
@@ -207,17 +163,14 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                           const newPosition = Number(
                             e.currentTarget.dataset.columnIndex
                           );
-                          const currentCols = table
-                            .getVisibleLeafColumns()
-                            .map((c) => c.id);
+
                           const colToBeMoved = currentCols.splice(
                             columnBeingDragged,
                             1
                           );
 
                           currentCols.splice(newPosition, 0, colToBeMoved[0]);
-                          orderHandler(currentCols);
-                          // table.setColumnOrder(currentCols);
+                          orderHandler && orderHandler(currentCols);
                         }}
                       >
                         {header.isPlaceholder
@@ -226,6 +179,7 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                               header.column.columnDef.header,
                               header.getContext()
                             )}
+
                         <button
                           onClick={() =>
                             header.column.getToggleSortingHandler()
@@ -250,20 +204,23 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
                             )}
                           />
                         </button>
-                        <button
-                          onClick={() => {
-                            if (onSortHandler) {
-                              onSortHandler(currentCol);
-                            }
-                          }}
-                          className="text-gray-700 hover:text-gray-900 hover:scale-105 ml-0.5"
-                        >
-                          {currentCol?.sortBy === "asc" ? (
-                            <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
-                          ) : (
-                            <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
-                          )}
-                        </button>
+                        {onSortHandler && (
+                          <button
+                            onClick={() => {
+                              if (currentCol) {
+                                onSortHandler(currentCol);
+                              }
+                            }}
+                            className="text-gray-700 hover:text-gray-900 hover:scale-105 ml-0.5"
+                          >
+                            {currentCol?.sortBy === "asc" ? (
+                              <ArrowUpIcon className="h-3 w-3 ml-1 transition ease-in-out duration-300 " />
+                            ) : (
+                              <ArrowUpIcon className="h-3 w-3 ml-1 transform rotate-180 transition ease-in-out duration-300 " />
+                            )}
+                          </button>
+                        )}
+
                         <div className="self-end mt-[1px] h-4 w-2.5 inline-grid grid-cols-2 justify-between hide absolute left-2 mr-2 items-center">
                           <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
                           <span className="h-[3px] w-[3px] bg-gray-400 rounded-full"></span>
@@ -279,8 +236,10 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row, idx) => {
-                const hasError = row.original.error;
+              {rows.map((row, idx) => {
+                const original = row.original as any;
+                const hasError = original.error;
+
                 return (
                   <tr
                     key={row.id}
@@ -384,6 +343,4 @@ const ThemedTableV3 = (props: ThemedTableV3Props) => {
       </div>
     </div>
   );
-};
-
-export default ThemedTableV3;
+}
