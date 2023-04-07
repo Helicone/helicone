@@ -163,7 +163,7 @@ export const Chat = (props: ChatProps) => {
 
   // Function to handle message content changes
   const handleContentChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLTextAreaElement>,
     index: number
   ) => {
     const updatedMessages = editableMessages.map((message, i) => {
