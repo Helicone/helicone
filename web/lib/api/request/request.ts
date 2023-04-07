@@ -90,8 +90,6 @@ export async function getRequests(
   OFFSET ${offset}
 `;
 
-  console.log(query, builtFilter.argsAcc);
-
   const { data, error } = await dbExecute<HeliconeRequest>(
     query,
     builtFilter.argsAcc
