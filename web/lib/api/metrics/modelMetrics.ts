@@ -1,8 +1,5 @@
 import { dbExecute } from "../db/dbExecute";
-import {
-  buildFilter,
-  buildFilterWithAuth,
-} from "../../../services/lib/filters/filters";
+import { buildFilter } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export interface ModelMetrics {
@@ -16,7 +13,7 @@ export async function getModelMetrics(
   user_id: string,
   cached: boolean
 ) {
-  const builtFilter = await buildFilterWithAuth(user_id, filter, []);
+  const builtFilter = buildFilter(filter, []);
   const query = `
 SELECT response.body ->> 'model'::text as model,
   sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
@@ -24,9 +21,11 @@ SELECT response.body ->> 'model'::text as model,
   sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens
 FROM response 
   left join request on response.request = request.id
-  -- ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
+  left join user_api_keys on request.auth_hash = user_api_keys.api_key_hash
+  ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
 WHERE (
-  (${builtFilter.filter})
+  user_api_keys.user_id = '${user_id}'
+  AND (${builtFilter.filter})
 )
 GROUP BY response.body ->> 'model'::text;
     `;
@@ -61,7 +60,7 @@ FROM response
 WHERE (
   user_api_keys.user_id = '${user_id}'
   AND (
-    request.user_id IN (${users //TODO WTF is this? delete this shit
+    request.user_id IN (${users
       .filter((u) => u !== null)
       .map((u) => `'${u}'`)
       .join(", ")})
