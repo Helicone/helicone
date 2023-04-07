@@ -3,9 +3,17 @@ import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
 import { Database, Json } from "../../../supabase/database.types";
-import { buildFilter } from "../../../services/lib/filters/filters";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  buildFilter,
+  buildFilterWithAuth,
+} from "../../../services/lib/filters/filters";
+import {
+  FilterLeaf,
+  filterListToTree,
+  FilterNode,
+} from "../../../services/lib/filters/filterDefs";
 import { buildSort, SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import { supabaseServer } from "../../supabaseServer";
 
 export interface HeliconeRequest {
   response_id: string;
@@ -45,8 +53,9 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = buildFilter(filter, []);
+  const builtFilter = await buildFilterWithAuth(user_id, filter, []);
   const sortSQL = buildSort(sort);
+
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
@@ -74,13 +83,14 @@ export async function getRequests(
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
-    user_api_keys.user_id = '${user_id}'
-    AND (${builtFilter.filter})
+   (${builtFilter.filter})
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+
+  console.log(query, builtFilter.argsAcc);
 
   const { data, error } = await dbExecute<HeliconeRequest>(
     query,

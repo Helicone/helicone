@@ -43,7 +43,7 @@ export const getServerSideProps = async (
 
   const [{ data: keyData }, isRequestLimitOver] = await Promise.all([
     getKeys(supabase),
-    requestOverLimit(supabase),
+    false,
   ]);
   if (keyData?.length === 0) {
     return {

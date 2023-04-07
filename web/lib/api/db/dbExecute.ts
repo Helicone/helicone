@@ -18,6 +18,7 @@ export async function dbExecute<T>(
     const result = await client.query(query, parameters);
 
     await client.end();
+    // console.log("Done Executing ", query, parameters);
 
     return { data: result.rows, error: null };
   } catch (err) {
