@@ -11,6 +11,11 @@ import { Result } from "../../../../lib/result";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
+  baseOptions: {
+    header: {
+      "OpenAI-Organization": "",
+    },
+  },
 });
 const openai = new OpenAIApi(configuration);
 
