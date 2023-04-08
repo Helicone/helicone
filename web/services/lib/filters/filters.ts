@@ -1,7 +1,9 @@
+import { supabaseServer } from "../../../lib/supabaseServer";
 import {
   AllOperators,
   FilterBranch,
   FilterLeaf,
+  filterListToTree,
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
@@ -29,6 +31,7 @@ const whereKeyMappings: KeyMappings = {
       "(coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text",
     created_at: "request.created_at",
     user_id: "request.user_id",
+    auth_hash: "request.auth_hash",
   },
   response: {
     body_completion:
@@ -172,4 +175,45 @@ export function buildFilter(
     filter: res.filters.join(" AND "),
     argsAcc: res.argsAcc,
   };
+}
+
+async function getUserIdHashes(user_id: string): Promise<string[]> {
+  const { data: user_api_keys, error } = await supabaseServer
+    .from("user_api_keys")
+    .select("api_key_hash")
+    .eq("user_id", user_id);
+  if (error) {
+    throw error;
+  }
+  if (!user_api_keys || user_api_keys.length === 0) {
+    throw new Error("No API keys found for user");
+  }
+  return user_api_keys.map((x) => x.api_key_hash);
+}
+
+async function buildUserIdHashesFilter(user_id: string): Promise<FilterNode> {
+  const userIdHashes = await getUserIdHashes(user_id);
+  const filters: FilterLeaf[] = userIdHashes.map((hash) => ({
+    request: {
+      auth_hash: {
+        equals: hash,
+      },
+    },
+  }));
+  return filterListToTree(filters, "or");
+}
+
+export async function buildFilterWithAuth(
+  user_id: string,
+  filter: FilterNode,
+  argsAcc: any[],
+  having?: boolean
+): Promise<{ filter: string; argsAcc: any[] }> {
+  const userIdHashesFilter = await buildUserIdHashesFilter(user_id);
+  const filterNode: FilterNode = {
+    left: userIdHashesFilter,
+    operator: "and",
+    right: filter,
+  };
+  return buildFilter(filterNode, argsAcc, having);
 }
