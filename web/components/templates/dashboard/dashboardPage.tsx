@@ -35,7 +35,7 @@ export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const [interval, setInterval] = useState<TimeInterval>("7d");
+  const [interval, setInterval] = useState<TimeInterval>("24h");
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
