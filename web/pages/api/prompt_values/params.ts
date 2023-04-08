@@ -19,6 +19,5 @@ export default async function handler(
     return;
   }
   const properties = await getValueParams(user.data.user.id);
-  console.log("properties", properties);
   res.status(properties.error === null ? 200 : 500).json(properties);
 }
