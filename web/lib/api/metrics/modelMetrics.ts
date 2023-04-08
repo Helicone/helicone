@@ -24,7 +24,7 @@ SELECT response.body ->> 'model'::text as model,
   sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens
 FROM response 
   left join request on response.request = request.id
-  -- ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
+ ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
 WHERE (
   (${builtFilter.filter})
 )
