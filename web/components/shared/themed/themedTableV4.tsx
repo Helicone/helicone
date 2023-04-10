@@ -81,8 +81,6 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
 
-  console.log(columns.length);
-
   return (
     <div className="space-y-2">
       <div className="w-full flex flex-row justify-between items-end">

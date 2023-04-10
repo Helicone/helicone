@@ -26,7 +26,10 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import UserTable from "./userTable";
 import { ColumnSizingState, ColumnOrderState } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
-import { SortDirection } from "../../../services/lib/sorts/sorts";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/sorts";
 
 const monthNames = [
   "Jan",
@@ -56,9 +59,21 @@ const UsersPage = (props: UsersPageProps) => {
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
+  const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
+    last_active: "desc",
+  });
+  const [orderBy, setOrderBy] = useState<{
+    column: keyof UserMetric;
+    direction: SortDirection;
+  }>({
+    column: "last_active",
+    direction: "desc",
+  });
+
   const { users, count, from, isLoading, to, refetch } = useUsers(
     currentPage,
     currentPageSize,
+    sortLeaf,
     filterListToTree(
       filterUIToFilterLeafs(userTableFilters, advancedFilters),
       "and"
@@ -158,6 +173,11 @@ const UsersPage = (props: UsersPageProps) => {
 
   const [columns, setColumns] = useState<Column[]>(initialColumns);
 
+  const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
+  if (columnOrderIndex > -1) {
+    columns[columnOrderIndex].sortBy = orderBy.direction;
+  }
+
   async function downloadCSV() {
     try {
       const response = await fetch("/api/export/users", {
@@ -235,24 +255,24 @@ const UsersPage = (props: UsersPageProps) => {
             onSelectHandler={selectRowHandler}
             onPageChangeHandler={onPageChangeHandler}
             onPageSizeChangeHandler={onPageSizeChangeHandler}
-            // onSortHandler={(key) => {
-            //   if (key.key === orderBy.column) {
-            //     setOrderBy({
-            //       column: key.key,
-            //       direction: orderBy.direction === "asc" ? "desc" : "asc",
-            //     });
-            //     key.toSortLeaf &&
-            //       setSortLeaf(
-            //         key.toSortLeaf(orderBy.direction === "asc" ? "desc" : "asc")
-            //       );
-            //   } else {
-            //     key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-            //     setOrderBy({
-            //       column: key.key,
-            //       direction: "asc",
-            //     });
-            //   }
-            // }}
+            onSortHandler={(key) => {
+              if (key.key === orderBy.column) {
+                setOrderBy({
+                  column: key.key,
+                  direction: orderBy.direction === "asc" ? "desc" : "asc",
+                });
+                key.toSortLeaf &&
+                  setSortLeaf(
+                    key.toSortLeaf(orderBy.direction === "asc" ? "desc" : "asc")
+                  );
+              } else {
+                key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+                setOrderBy({
+                  column: key.key,
+                  direction: "asc",
+                });
+              }
+            }}
           />
         )}
       </div>
