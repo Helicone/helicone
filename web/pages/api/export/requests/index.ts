@@ -3,7 +3,7 @@ import Papa, { unparse } from "papaparse";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getRequests } from "../../../../lib/api/request/request";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
-import { SortLeafRequest } from "../../../../services/lib/sorts/sorts";
+import { SortLeafRequest } from "../../../../services/lib/sorts/requests/sorts";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 interface FlatObject {

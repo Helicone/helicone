@@ -11,7 +11,10 @@ import { clsx } from "./shared/clsx";
 import { useRouter } from "next/router";
 import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 
-import { SortDirection, SortLeafRequest } from "../services/lib/sorts/sorts";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../services/lib/sorts/requests/sorts";
 import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
 import { RequestWrapper } from "./templates/requests/useRequestsPage";
 

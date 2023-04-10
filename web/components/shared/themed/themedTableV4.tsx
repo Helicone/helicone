@@ -18,7 +18,7 @@ import { ColumnType } from "../../../services/lib/filters/frontendFilterDefs";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../services/lib/sorts/sorts";
+} from "../../../services/lib/sorts/requests/sorts";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { clsx } from "../clsx";
 import ThemedTabs from "./themedTabs";

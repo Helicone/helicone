@@ -7,7 +7,8 @@ import { getModelMetricsForUsers } from "../../../lib/api/metrics/modelMetrics";
 import { UserMetric, userMetrics } from "../../../lib/api/users/users";
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,7 +24,7 @@ export default async function handler(
     filter: FilterNode;
     offset: number;
     limit: number;
-    sort: SortLeafRequest;
+    sort: SortLeafUsers;
   };
   const { error: metricsError, data: metrics } = await userMetrics(
     user.data.user.id,

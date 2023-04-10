@@ -29,7 +29,8 @@ import { UserMetric } from "../../../lib/api/users/users";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../services/lib/sorts/sorts";
+} from "../../../services/lib/sorts/requests/sorts";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 const monthNames = [
   "Jan",
@@ -59,7 +60,7 @@ const UsersPage = (props: UsersPageProps) => {
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
-  const [sortLeaf, setSortLeaf] = useState<SortLeafRequest>({
+  const [sortLeaf, setSortLeaf] = useState<SortLeafUsers>({
     last_active: "desc",
   });
   const [orderBy, setOrderBy] = useState<{

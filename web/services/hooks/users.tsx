@@ -5,13 +5,12 @@ import { Column } from "../../components/ThemedTableV2";
 import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafRequest } from "../lib/sorts/sorts";
-import { getUsers } from "../lib/users";
+import { SortLeafUsers } from "../lib/sorts/users/sorts";
 
 const useUsers = (
   currentPage: number,
   currentPageSize: number,
-  sortLeaf: SortLeafRequest,
+  sortLeaf: SortLeafUsers,
   advancedFilter?: FilterNode
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({

@@ -23,7 +23,7 @@ import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../services/lib/sorts/sorts";
+} from "../../../services/lib/sorts/requests/sorts";
 import { Database, Json } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
