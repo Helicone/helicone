@@ -18,6 +18,44 @@ import {
 } from "openai"; // Use import instead of require
 import { Result } from "../../../lib/result";
 
+import React, { useRef, useEffect, TextareaHTMLAttributes } from 'react';
+
+interface AutoSizeTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  message: string;
+  handleContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void;
+  index: number;
+}
+
+const AutoSizeTextarea: React.FC<AutoSizeTextareaProps> = ({
+  message,
+  handleContentChange,
+  index,
+  ...rest
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [message]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={message}
+      onChange={(e) => {
+        handleContentChange(e, index);
+      }}
+      className="w-full resize-none border-none focus:ring-0"
+      style={{ overflow: 'hidden', overflowWrap: 'break-word' }}
+      {...rest}
+    />
+  );
+};
+
+
 interface ChatProps {
   chatProperties: ChatProperties;
   prompt_regex?: string;
@@ -103,6 +141,40 @@ export const Chat = (props: ChatProps) => {
   // Add state for edit mode and run button visibility
   const [isEditMode, setIsEditMode] = useState(false);
 
+  const [userMessage, setUserMessage] = useState<string>("");
+
+  const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const editMessage = (index: number) => {
+    setEditableIndex(index);
+  };
+
+  const submitEdit = async (index: number) => {
+    console.log("RUN INDEX", index, userMessage);
+
+    let messages = []
+    if (index == editableMessages.length) {
+      const newEditableMessages = [...editableMessages, {role: 'user', content: userMessage}]
+      console.log("SETTING NEW EDITABLE MESSAGES", newEditableMessages)
+      setEditableMessages(newEditableMessages)
+      setUserMessage("")
+      messages = newEditableMessages
+    } else {
+      messages = editableMessages.slice(0, index+1);
+    }
+
+
+    await runChatCompletion(index, messages);
+    setEditableIndex(null);
+  };
+
+  const submitSave = async (index: number) => {
+    setEditableIndex(null);
+  };
+  
+  const cancelEdit = () => {
+    setEditableIndex(null);
+  };
+
   // Function to handle edit mode toggle
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
@@ -113,10 +185,11 @@ export const Chat = (props: ChatProps) => {
   const [isRunning, setIsRunning] = useState(false);
 
   // Function to run chat completion
-  const runChatCompletion = async () => {
+  const runChatCompletion = async (index: number, heliconeMessagesInput: Message[]) => {
     setIsRunning(true);
+    console.log("EDITABLE MESSAGES", heliconeMessagesInput)
     const completionRequestMessages: ChatCompletionRequestMessage[] =
-      editableMessages.slice(0, -1).map((message: Message) => {
+      heliconeMessagesInput.slice(0, index+1).map((message: Message) => {
         return {
           role:
             message.role === "assistant"
@@ -128,6 +201,7 @@ export const Chat = (props: ChatProps) => {
         };
       });
 
+    console.log("MESSAGES", completionRequestMessages)
     try {
       const completion = await fetch("/api/open_ai/chat", {
         method: "POST",
@@ -142,23 +216,63 @@ export const Chat = (props: ChatProps) => {
           res.json() as Promise<Result<CreateChatCompletionResponse, string>>
       );
 
-      const heliconeMessage: Message = {
+      console.log("COMPLETION", completion)
+
+      const heliconeMessageCompletion: Message = {
         role: completion.data?.choices[0].message?.role.toString() || "system",
         content:
           completion.data?.choices[0].message?.content || "missing content",
       };
+      const heliconeMessages = [...heliconeMessagesInput, heliconeMessageCompletion];
 
       setEditableMessages((prevEditableMessages) => {
-        const updatedMessages = [...prevEditableMessages];
-        updatedMessages[updatedMessages.length - 1] = heliconeMessage;
-        return updatedMessages;
+        return heliconeMessages;
       });
       setIsRunning(false);
-      return heliconeMessage;
+      return heliconeMessageCompletion;
     } catch (error) {
       setIsRunning(false);
       console.error("Error making chat completion request:", error);
     }
+  };
+
+  const renderEditableUserCell = () => {
+    if (isEditMode) {
+      return (
+        <div
+          className={clsx(
+            "bg-white",
+            "items-center p-4 text-left grid grid-cols-12",
+            "rounded-b-md"
+          )}
+        >
+          <div className="col-span-1">
+            <UserCircleIcon className="h-6 w-6 bg-white rounded-full" />
+          </div>
+          <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
+            <div className="relative">
+            <AutoSizeTextarea message={userMessage} handleContentChange={handleContentChange} index={editableMessages.length} placeholder={"Type your message here"}/>
+              {/* Add Submit and Cancel buttons when editing */}
+              <div className="flex w-full justify-end mt-2 space-x-2">
+                <button
+                  className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded"
+                  onClick={() => submitEdit(editableMessages.length)}
+                >
+                  Run
+                </button>
+                <button
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded"
+                  onClick={cancelEdit}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   // Function to handle message content changes
@@ -166,24 +280,32 @@ export const Chat = (props: ChatProps) => {
     e: React.ChangeEvent<HTMLTextAreaElement>,
     index: number
   ) => {
+    if (editableMessages.length <= index) {
+      setEditableMessages([ ...editableMessages, { role: "user", content: "" }])
+    }
     const updatedMessages = editableMessages.map((message, i) => {
       if (i === index) {
         let updatedContent = e.target.value;
+        console.log("UDPATED CONTENT", { ...message, content: updatedContent })
         return { ...message, content: updatedContent };
       }
       return message;
     });
+
+    if (index == editableMessages.length) {
+      setUserMessage(e.target.value)
+    }
+
     setEditableMessages(updatedMessages);
   };
 
   const renderMessage = (
     messageContent: string | JSX.Element,
     isLastMessage: boolean,
-    index: number
+    index: number,
+    isUser: boolean
   ) => {
-    if (isLastMessage) {
-      return isRunning ? <p>Loading...</p> : <p>{messageContent}</p>;
-    } else if (isEditMode) {
+    if (isEditMode) {
       const originalMessageContent = editableMessages[index].content;
       const formattedPrompt = formatPrompt2({
         prompt: originalMessageContent,
@@ -192,15 +314,53 @@ export const Chat = (props: ChatProps) => {
       const filledInMessageContent = formattedPrompt.data;
 
       return (
-        <textarea
-          value={filledInMessageContent}
-          className="w-full border border-gray-300 text-sm leading-6 focus:ring-1 focus:ring-sky-500 
-          focus:border-sky-500 resize overflow-auto"
-          onChange={(e) => {
-            // Update the message content in the state when it's edited
-            handleContentChange(e, index);
-          }}
-        />
+        <div className="relative">
+          {editableIndex === index ? (
+          //   <textarea
+          //   value={filledInMessageContent}
+          //   onChange={(e) => {
+          //     handleContentChange(e, index);
+          //   }}
+          //   className="w-full resize-none border-none focus:ring-0"
+          //   style={{ overflow: 'hidden', overflowWrap: 'break-word' }}
+          //   onInput={(e) => {
+          //     e.currentTarget.style.height = 'auto';
+          //     e.currentTarget.style.height = Math.min(e.currentTarget.scrollHeight, e.currentTarget.scrollHeight) + 'px';
+          //   }}
+          // />
+          <AutoSizeTextarea message={filledInMessageContent} handleContentChange={handleContentChange} index={index} />
+          ) : (
+            <p className="text-sm">{messageContent}</p>
+          )}
+    
+          {/* Add edit button to each cell */}
+          {editableIndex !== index && (
+            <button
+              className="absolute top-0 right-0 text-gray-700 bg-gray-300 p-1 rounded-md"
+              onClick={() => editMessage(index)}
+            >
+              <PencilIcon className="h-4 w-4" />
+            </button>
+          )}
+    
+          {/* Add Submit and Cancel buttons when editing */}
+          {editableIndex === index && (
+            <div className="flex w-full justify-end mt-2 space-x-2">
+              <button
+                className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded"
+                onClick={() => isUser ? submitEdit(index) : submitSave(index)}
+              >
+                {isUser ? "Submit" : "Save"}
+              </button>
+              <button
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded"
+                onClick={cancelEdit}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       );
     } else {
       return <p className="text-sm">{messageContent}</p>;
@@ -267,7 +427,7 @@ export const Chat = (props: ChatProps) => {
                   )}
                 </div>
                 <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
-                  {renderMessage(formattedMessageContent, isLastMessage, index)}
+                  {renderMessage(formattedMessageContent, isLastMessage, index, !(isAssistant || isSystem))}
                 </div>
               </div>
             );
@@ -283,17 +443,8 @@ export const Chat = (props: ChatProps) => {
             </div>
           </div>
         )}
+        {!isRunning && renderEditableUserCell()}
       </div>
-      {isEditMode && (
-        <div className="flex w-full justify-center">
-          <button
-            className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 mt-4 rounded"
-            onClick={runChatCompletion}
-          >
-            Run Chat Completion
-          </button>
-        </div>
-      )}
     </div>
   );
 };
