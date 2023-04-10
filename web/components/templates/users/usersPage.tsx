@@ -120,6 +120,9 @@ const UsersPage = (props: UsersPageProps) => {
       filter: true,
       minWidth: 170,
       format: (value: string) => (value ? value : "No user ID"),
+      toSortLeaf: (direction) => ({
+        user_id: direction,
+      }),
     },
     {
       key: "active_for",
@@ -127,6 +130,9 @@ const UsersPage = (props: UsersPageProps) => {
       active: true,
       filter: false,
       format: (value: string) => `${value} days`,
+      toSortLeaf: (direction) => ({
+        active_for: direction,
+      }),
     },
     {
       key: "last_active",
@@ -136,6 +142,9 @@ const UsersPage = (props: UsersPageProps) => {
       filter: true,
       minWidth: 170,
       format: (value: string) => getUSDate(value),
+      toSortLeaf: (direction) => ({
+        last_active: direction,
+      }),
     },
     {
       key: "total_requests",
@@ -144,6 +153,9 @@ const UsersPage = (props: UsersPageProps) => {
       type: "number",
       filter: true,
       format: (value: string) => Number(value).toFixed(2),
+      toSortLeaf: (direction) => ({
+        total_requests: direction,
+      }),
     },
     {
       key: "average_requests_per_day_active",
@@ -152,6 +164,9 @@ const UsersPage = (props: UsersPageProps) => {
       type: "number",
       filter: true,
       format: (value: string) => Number(value).toFixed(2),
+      toSortLeaf: (direction) => ({
+        average_requests_per_day_active: direction,
+      }),
     },
     {
       key: "average_tokens_per_request",
@@ -160,6 +175,9 @@ const UsersPage = (props: UsersPageProps) => {
       type: "number",
       filter: true,
       format: (value: string) => Number(value).toFixed(2),
+      toSortLeaf: (direction) => ({
+        average_tokens_per_request: direction,
+      }),
     },
     {
       key: "cost",

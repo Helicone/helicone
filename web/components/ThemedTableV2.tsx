@@ -17,6 +17,7 @@ import {
 } from "../services/lib/sorts/requests/sorts";
 import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
 import { RequestWrapper } from "./templates/requests/useRequestsPage";
+import { SortLeafUsers } from "../services/lib/sorts/users/sorts";
 
 export interface Column {
   key: keyof RequestWrapper;
@@ -28,7 +29,7 @@ export interface Column {
   columnOrigin?: "property" | "value";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
-  toSortLeaf?: (direction: SortDirection) => SortLeafRequest;
+  toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;
   format?: (value: any, mode: "Condensed" | "Expanded") => string;
 }
 
