@@ -4,6 +4,8 @@ import {
   UserCircleIcon,
   UserIcon,
   XMarkIcon,
+  PaperAirplaneIcon,
+  CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
@@ -18,26 +20,33 @@ import {
 } from "openai"; // Use import instead of require
 import { Result } from "../../../lib/result";
 
-import React, { useRef, useEffect, TextareaHTMLAttributes } from 'react';
+import React, { useRef, useEffect, TextareaHTMLAttributes } from "react";
 
-interface AutoSizeTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface AutoSizeTextareaProps
+  extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   message: string;
-  handleContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => void;
+  handleContentChange: (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+    index: number
+  ) => void;
   index: number;
+  background: string;
 }
 
 const AutoSizeTextarea: React.FC<AutoSizeTextareaProps> = ({
   message,
   handleContentChange,
   index,
+  background,
   ...rest
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
     }
   }, [message]);
 
@@ -48,13 +57,15 @@ const AutoSizeTextarea: React.FC<AutoSizeTextareaProps> = ({
       onChange={(e) => {
         handleContentChange(e, index);
       }}
-      className="w-full resize-none border-none focus:ring-0"
-      style={{ overflow: 'hidden', overflowWrap: 'break-word' }}
+      className={clsx(
+        "w-full resize-none border-none focus:ring-0 px-0 py-0 text-sm",
+        background
+      )}
+      style={{ overflow: "hidden", overflowWrap: "break-word" }}
       {...rest}
     />
   );
 };
-
 
 interface ChatProps {
   chatProperties: ChatProperties;
@@ -138,6 +149,8 @@ export const Chat = (props: ChatProps) => {
     messages = messages.concat([response]);
   }
 
+  const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
+
   // Add state for edit mode and run button visibility
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -149,19 +162,18 @@ export const Chat = (props: ChatProps) => {
   };
 
   const submitEdit = async (index: number) => {
-    console.log("RUN INDEX", index, userMessage);
-
-    let messages = []
+    let messages = [];
     if (index == editableMessages.length) {
-      const newEditableMessages = [...editableMessages, {role: 'user', content: userMessage}]
-      console.log("SETTING NEW EDITABLE MESSAGES", newEditableMessages)
-      setEditableMessages(newEditableMessages)
-      setUserMessage("")
-      messages = newEditableMessages
+      const newEditableMessages = [
+        ...editableMessages,
+        { role: "user", content: userMessage },
+      ];
+      setEditableMessages(newEditableMessages);
+      setUserMessage("");
+      messages = newEditableMessages;
     } else {
-      messages = editableMessages.slice(0, index+1);
+      messages = editableMessages.slice(0, index + 1);
     }
-
 
     await runChatCompletion(index, messages);
     setEditableIndex(null);
@@ -170,7 +182,7 @@ export const Chat = (props: ChatProps) => {
   const submitSave = async (index: number) => {
     setEditableIndex(null);
   };
-  
+
   const cancelEdit = () => {
     setEditableIndex(null);
   };
@@ -185,11 +197,19 @@ export const Chat = (props: ChatProps) => {
   const [isRunning, setIsRunning] = useState(false);
 
   // Function to run chat completion
-  const runChatCompletion = async (index: number, heliconeMessagesInput: Message[]) => {
+  const runChatCompletion = async (
+    index: number,
+    heliconeMessagesInput: Message[]
+  ) => {
     setIsRunning(true);
-    console.log("EDITABLE MESSAGES", heliconeMessagesInput)
     const completionRequestMessages: ChatCompletionRequestMessage[] =
-      heliconeMessagesInput.slice(0, index+1).map((message: Message) => {
+      heliconeMessagesInput.slice(0, index + 1).map((message: Message) => {
+        const formattedPrompt = formatPrompt2({
+          prompt: message.content,
+          values: props.keys,
+        });
+        const content = formattedPrompt.data;
+
         return {
           role:
             message.role === "assistant"
@@ -197,11 +217,11 @@ export const Chat = (props: ChatProps) => {
               : message.role === "system"
               ? ChatCompletionRequestMessageRoleEnum.System
               : ChatCompletionRequestMessageRoleEnum.User,
-          content: message.content,
+          content: content,
         };
       });
 
-    console.log("MESSAGES", completionRequestMessages)
+    console.log("MESSAGES", completionRequestMessages);
     try {
       const completion = await fetch("/api/open_ai/chat", {
         method: "POST",
@@ -216,14 +236,17 @@ export const Chat = (props: ChatProps) => {
           res.json() as Promise<Result<CreateChatCompletionResponse, string>>
       );
 
-      console.log("COMPLETION", completion)
+      console.log("COMPLETION", completion);
 
       const heliconeMessageCompletion: Message = {
         role: completion.data?.choices[0].message?.role.toString() || "system",
         content:
           completion.data?.choices[0].message?.content || "missing content",
       };
-      const heliconeMessages = [...heliconeMessagesInput, heliconeMessageCompletion];
+      const heliconeMessages = [
+        ...heliconeMessagesInput,
+        heliconeMessageCompletion,
+      ];
 
       setEditableMessages((prevEditableMessages) => {
         return heliconeMessages;
@@ -242,7 +265,7 @@ export const Chat = (props: ChatProps) => {
         <div
           className={clsx(
             "bg-white",
-            "items-center p-4 text-left grid grid-cols-12",
+            "items-start p-4 text-left grid grid-cols-12",
             "rounded-b-md"
           )}
         >
@@ -251,20 +274,20 @@ export const Chat = (props: ChatProps) => {
           </div>
           <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
             <div className="relative">
-            <AutoSizeTextarea message={userMessage} handleContentChange={handleContentChange} index={editableMessages.length} placeholder={"Type your message here"}/>
+              <AutoSizeTextarea
+                message={userMessage}
+                handleContentChange={handleContentChange}
+                index={editableMessages.length}
+                placeholder={"Type your message here"}
+                background="bg-white"
+              />
               {/* Add Submit and Cancel buttons when editing */}
               <div className="flex w-full justify-end mt-2 space-x-2">
                 <button
-                  className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded"
+                  className="hover:bg-gray-300 text-white px-2 py-1 rounded"
                   onClick={() => submitEdit(editableMessages.length)}
                 >
-                  Run
-                </button>
-                <button
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded"
-                  onClick={cancelEdit}
-                >
-                  Cancel
+                  <PaperAirplaneIcon className="h-5 w-5 mr-1 font-bold text-black" />
                 </button>
               </div>
             </div>
@@ -281,19 +304,18 @@ export const Chat = (props: ChatProps) => {
     index: number
   ) => {
     if (editableMessages.length <= index) {
-      setEditableMessages([ ...editableMessages, { role: "user", content: "" }])
+      setEditableMessages([...editableMessages, { role: "user", content: "" }]);
     }
     const updatedMessages = editableMessages.map((message, i) => {
       if (i === index) {
         let updatedContent = e.target.value;
-        console.log("UDPATED CONTENT", { ...message, content: updatedContent })
         return { ...message, content: updatedContent };
       }
       return message;
     });
 
     if (index == editableMessages.length) {
-      setUserMessage(e.target.value)
+      setUserMessage(e.target.value);
     }
 
     setEditableMessages(updatedMessages);
@@ -316,47 +338,42 @@ export const Chat = (props: ChatProps) => {
       return (
         <div className="relative">
           {editableIndex === index ? (
-          //   <textarea
-          //   value={filledInMessageContent}
-          //   onChange={(e) => {
-          //     handleContentChange(e, index);
-          //   }}
-          //   className="w-full resize-none border-none focus:ring-0"
-          //   style={{ overflow: 'hidden', overflowWrap: 'break-word' }}
-          //   onInput={(e) => {
-          //     e.currentTarget.style.height = 'auto';
-          //     e.currentTarget.style.height = Math.min(e.currentTarget.scrollHeight, e.currentTarget.scrollHeight) + 'px';
-          //   }}
-          // />
-          <AutoSizeTextarea message={filledInMessageContent} handleContentChange={handleContentChange} index={index} />
+            <AutoSizeTextarea
+              message={filledInMessageContent}
+              handleContentChange={handleContentChange}
+              index={index}
+              background={isUser ? "bg-white" : "bg-gray-100"}
+            />
           ) : (
             <p className="text-sm">{messageContent}</p>
           )}
-    
+
           {/* Add edit button to each cell */}
-          {editableIndex !== index && (
+          {hoveredRowIndex === index && (
             <button
               className="absolute top-0 right-0 text-gray-700 bg-gray-300 p-1 rounded-md"
-              onClick={() => editMessage(index)}
+              onClick={() =>
+                editableIndex === index ? cancelEdit() : editMessage(index)
+              }
             >
-              <PencilIcon className="h-4 w-4" />
+              {editableIndex === index ? (
+                <XMarkIcon className="h-4 w-4" />
+              ) : (
+                <PencilIcon className="h-4 w-4" />
+              )}
             </button>
           )}
-    
-          {/* Add Submit and Cancel buttons when editing */}
+
+          {/* Add Submit and Save buttons when editing */}
           {editableIndex === index && (
             <div className="flex w-full justify-end mt-2 space-x-2">
               <button
-                className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded"
-                onClick={() => isUser ? submitEdit(index) : submitSave(index)}
+                className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded"
+                onClick={() => (isUser ? submitEdit(index) : submitSave(index))}
               >
+                {/* <PaperAirplaneIcon className="h-5 w-5 mr-1" /> */}
                 {isUser ? "Submit" : "Save"}
-              </button>
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded"
-                onClick={cancelEdit}
-              >
-                Cancel
+                {/* {isUser ? <PaperAirplaneIcon className="h-5 w-5 mr-1 font-bold text-black" /> : <CheckCircleIcon className="h-5 w-5 mr-1 font-bold text-black" />} */}
               </button>
             </div>
           )}
@@ -406,12 +423,14 @@ export const Chat = (props: ChatProps) => {
               <div
                 className={clsx(
                   isAssistant || isSystem ? "bg-gray-100" : "bg-white",
-                  "items-center p-4 text-left grid grid-cols-12",
+                  "items-start p-4 text-left grid grid-cols-12",
                   isSystem ? "font-semibold" : "",
                   index === 0 ? "rounded-t-md" : "",
                   index === editableMessages.length - 1 ? "rounded-b-md" : ""
                 )}
                 key={index}
+                onMouseEnter={() => setHoveredRowIndex(index)}
+                onMouseLeave={() => setHoveredRowIndex(null)}
               >
                 <div className="col-span-1">
                   {isAssistant || isSystem ? (
@@ -427,7 +446,12 @@ export const Chat = (props: ChatProps) => {
                   )}
                 </div>
                 <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
-                  {renderMessage(formattedMessageContent, isLastMessage, index, !(isAssistant || isSystem))}
+                  {renderMessage(
+                    formattedMessageContent,
+                    isLastMessage,
+                    index,
+                    !(isAssistant || isSystem)
+                  )}
                 </div>
               </div>
             );
