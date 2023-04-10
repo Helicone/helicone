@@ -191,7 +191,6 @@ const UsersPage = (props: UsersPageProps) => {
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
 
-  console.log("INDEX----------------", columnOrderIndex);
   if (columnOrderIndex > -1) {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }

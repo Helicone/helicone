@@ -41,8 +41,6 @@ export async function userMetrics(
     true
   );
   const sortSQL = buildUserSort(sort);
-  console.log("RAW SORT++++++++++++++++____________+++++++++++++", sort);
-  console.log("SORTSQL+++++++++____________++++++++++++", sortSQL);
   const query = `
 SELECT request.user_id,
   count(DISTINCT date_trunc('day'::text, request.created_at)) AS active_for,
