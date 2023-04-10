@@ -19,6 +19,7 @@ import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 import { RequestWrapper } from "../../templates/requests/useRequestsPage";
 import { clsx } from "../clsx";
 import ThemedTabs from "./themedTabs";
@@ -33,7 +34,7 @@ export interface Column {
   columnOrigin?: "property" | "value";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
-  toSortLeaf?: (direction: SortDirection) => SortLeafRequest;
+  toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;
   format?: (value: any, mode: "Condensed" | "Expanded") => string;
 }
 

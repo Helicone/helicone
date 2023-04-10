@@ -26,10 +26,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import UserTable from "./userTable";
 import { ColumnSizingState, ColumnOrderState } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 const monthNames = [
@@ -175,6 +172,8 @@ const UsersPage = (props: UsersPageProps) => {
   const [columns, setColumns] = useState<Column[]>(initialColumns);
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
+
+  console.log("INDEX----------------", columnOrderIndex);
   if (columnOrderIndex > -1) {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }
@@ -257,7 +256,9 @@ const UsersPage = (props: UsersPageProps) => {
             onPageChangeHandler={onPageChangeHandler}
             onPageSizeChangeHandler={onPageSizeChangeHandler}
             onSortHandler={(key) => {
+              console.log(key);
               if (key.key === orderBy.column) {
+                console.log(1);
                 setOrderBy({
                   column: key.key,
                   direction: orderBy.direction === "asc" ? "desc" : "asc",
@@ -267,6 +268,7 @@ const UsersPage = (props: UsersPageProps) => {
                     key.toSortLeaf(orderBy.direction === "asc" ? "desc" : "asc")
                   );
               } else {
+                console.log(2);
                 key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
                 setOrderBy({
                   column: key.key,
