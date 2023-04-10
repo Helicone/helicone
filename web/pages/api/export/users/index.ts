@@ -34,7 +34,8 @@ export default async function handler(
     user.data.user.id,
     filter,
     offset,
-    limit
+    limit,
+    sort
   );
 
   if (metricsError !== null) {
