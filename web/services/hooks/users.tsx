@@ -5,19 +5,21 @@ import { Column } from "../../components/ThemedTableV2";
 import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
-import { getUsers } from "../lib/users";
+import { SortLeafUsers } from "../lib/sorts/users/sorts";
 
 const useUsers = (
   currentPage: number,
   currentPageSize: number,
+  sortLeaf: SortLeafUsers,
   advancedFilter?: FilterNode
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["users", currentPage, currentPageSize, advancedFilter],
+    queryKey: ["users", currentPage, currentPageSize, advancedFilter, sortLeaf],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
       const currentPageSize = query.queryKey[2] as number;
       const advancedFilter = query.queryKey[3];
+      const sortLeaf = query.queryKey[4];
       const [response, count] = await Promise.all([
         fetch("/api/request_users", {
           method: "POST",
@@ -28,6 +30,7 @@ const useUsers = (
             filter: advancedFilter,
             offset: (currentPage - 1) * currentPageSize,
             limit: currentPageSize,
+            sort: sortLeaf,
           }),
         }).then((res) => res.json() as Promise<Result<UserMetric[], string>>),
         fetch("/api/request_users/count", {

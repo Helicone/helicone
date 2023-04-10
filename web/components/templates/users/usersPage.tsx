@@ -26,7 +26,8 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import UserTable from "./userTable";
 import { ColumnSizingState, ColumnOrderState } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
-import { SortDirection } from "../../../services/lib/sorts/sorts";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 const monthNames = [
   "Jan",
@@ -56,9 +57,21 @@ const UsersPage = (props: UsersPageProps) => {
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
 
+  const [sortLeaf, setSortLeaf] = useState<SortLeafUsers>({
+    last_active: "desc",
+  });
+  const [orderBy, setOrderBy] = useState<{
+    column: keyof UserMetric;
+    direction: SortDirection;
+  }>({
+    column: "last_active",
+    direction: "desc",
+  });
+
   const { users, count, from, isLoading, to, refetch } = useUsers(
     currentPage,
     currentPageSize,
+    sortLeaf,
     filterListToTree(
       filterUIToFilterLeafs(userTableFilters, advancedFilters),
       "and"
@@ -107,6 +120,9 @@ const UsersPage = (props: UsersPageProps) => {
       filter: true,
       minWidth: 170,
       format: (value: string) => (value ? value : "No user ID"),
+      toSortLeaf: (direction) => ({
+        user_id: direction,
+      }),
     },
     {
       key: "active_for",
@@ -114,6 +130,9 @@ const UsersPage = (props: UsersPageProps) => {
       active: true,
       filter: false,
       format: (value: string) => `${value} days`,
+      toSortLeaf: (direction) => ({
+        active_for: direction,
+      }),
     },
     {
       key: "last_active",
@@ -123,6 +142,9 @@ const UsersPage = (props: UsersPageProps) => {
       filter: true,
       minWidth: 170,
       format: (value: string) => getUSDate(value),
+      toSortLeaf: (direction) => ({
+        last_active: direction,
+      }),
     },
     {
       key: "total_requests",
@@ -131,6 +153,9 @@ const UsersPage = (props: UsersPageProps) => {
       type: "number",
       filter: true,
       format: (value: string) => Number(value).toFixed(2),
+      toSortLeaf: (direction) => ({
+        total_requests: direction,
+      }),
     },
     {
       key: "average_requests_per_day_active",
@@ -139,6 +164,9 @@ const UsersPage = (props: UsersPageProps) => {
       type: "number",
       filter: true,
       format: (value: string) => Number(value).toFixed(2),
+      toSortLeaf: (direction) => ({
+        average_requests_per_day_active: direction,
+      }),
     },
     {
       key: "average_tokens_per_request",
@@ -147,6 +175,9 @@ const UsersPage = (props: UsersPageProps) => {
       type: "number",
       filter: true,
       format: (value: string) => Number(value).toFixed(2),
+      toSortLeaf: (direction) => ({
+        average_tokens_per_request: direction,
+      }),
     },
     {
       key: "cost",
@@ -157,6 +188,12 @@ const UsersPage = (props: UsersPageProps) => {
   ];
 
   const [columns, setColumns] = useState<Column[]>(initialColumns);
+
+  const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
+
+  if (columnOrderIndex > -1) {
+    columns[columnOrderIndex].sortBy = orderBy.direction;
+  }
 
   async function downloadCSV() {
     try {
@@ -235,24 +272,27 @@ const UsersPage = (props: UsersPageProps) => {
             onSelectHandler={selectRowHandler}
             onPageChangeHandler={onPageChangeHandler}
             onPageSizeChangeHandler={onPageSizeChangeHandler}
-            // onSortHandler={(key) => {
-            //   if (key.key === orderBy.column) {
-            //     setOrderBy({
-            //       column: key.key,
-            //       direction: orderBy.direction === "asc" ? "desc" : "asc",
-            //     });
-            //     key.toSortLeaf &&
-            //       setSortLeaf(
-            //         key.toSortLeaf(orderBy.direction === "asc" ? "desc" : "asc")
-            //       );
-            //   } else {
-            //     key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
-            //     setOrderBy({
-            //       column: key.key,
-            //       direction: "asc",
-            //     });
-            //   }
-            // }}
+            onSortHandler={(key) => {
+              console.log(key);
+              if (key.key === orderBy.column) {
+                console.log(1);
+                setOrderBy({
+                  column: key.key,
+                  direction: orderBy.direction === "asc" ? "desc" : "asc",
+                });
+                key.toSortLeaf &&
+                  setSortLeaf(
+                    key.toSortLeaf(orderBy.direction === "asc" ? "desc" : "asc")
+                  );
+              } else {
+                console.log(2);
+                key.toSortLeaf && setSortLeaf(key.toSortLeaf("asc"));
+                setOrderBy({
+                  column: key.key,
+                  direction: "asc",
+                });
+              }
+            }}
           />
         )}
       </div>
