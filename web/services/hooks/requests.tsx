@@ -5,7 +5,7 @@ import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterLeaf, FilterNode } from "../lib/filters/filterDefs";
 import { getRequests } from "../lib/requests";
-import { SortLeafRequest } from "../lib/sorts/sorts";
+import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 
 const useGetRequests = (
   currentPage: number,

@@ -5,7 +5,7 @@ import { getRequests, HeliconeRequest } from "../../../lib/api/request/request";
 
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 
 export default async function handler(
   req: NextApiRequest,

@@ -16,7 +16,7 @@ import {
   requestTableFilters,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { Message } from "./requestsPage";

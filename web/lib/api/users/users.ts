@@ -5,6 +5,10 @@ import { Result } from "../../result";
 import { Database } from "../../../supabase/database.types";
 import { buildFilter } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  buildUserSort,
+  SortLeafUsers,
+} from "../../../services/lib/sorts/users/sorts";
 
 export interface UserMetric {
   user_id: string;
@@ -21,7 +25,8 @@ export async function userMetrics(
   user_id: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  sort: SortLeafUsers
 ): Promise<Result<UserMetric[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -35,8 +40,7 @@ export async function userMetrics(
     whereArgsAcc,
     true
   );
-  console.log("WHERE", whereFilterString);
-  console.log("HAVING", havingFilterString);
+  const sortSQL = buildUserSort(sort);
   const query = `
 SELECT request.user_id,
   count(DISTINCT date_trunc('day'::text, request.created_at)) AS active_for,
@@ -57,10 +61,11 @@ SELECT request.user_id,
     true
     AND (${havingFilterString})
   )
-  ORDER BY last_active DESC
+  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+
   const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
   if (error !== null) {
     return { data: null, error: error };
