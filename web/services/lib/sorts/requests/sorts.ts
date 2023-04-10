@@ -28,7 +28,7 @@ function assertValidSortDirection(direction: SortDirection) {
   }
 }
 
-export function buildSort(sort: SortLeafRequest) {
+export function buildRequestSort(sort: SortLeafRequest) {
   if (sort.created_at) {
     assertValidSortDirection(sort.created_at);
     return `request.created_at ${sort.created_at}`;

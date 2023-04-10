@@ -3,11 +3,12 @@ import Papa, { unparse } from "papaparse";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getRequests } from "../../../../lib/api/request/request";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
-import { SortLeafRequest } from "../../../../services/lib/sorts/sorts";
+import { SortLeafRequest } from "../../../../services/lib/sorts/requests/sorts";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { userMetrics } from "../../../../lib/api/users/users";
 import { getModelMetricsForUsers } from "../../../../lib/api/metrics/modelMetrics";
 import { modelCost } from "../../../../lib/api/metrics/costCalc";
+import { SortLeafUsers } from "../../../../services/lib/sorts/users/sorts";
 
 interface FlatObject {
   [key: string]: string | number | boolean | null;
@@ -27,14 +28,15 @@ export default async function handler(
     filter: FilterNode;
     offset: number;
     limit: number;
-    sort: SortLeafRequest;
+    sort: SortLeafUsers;
   };
 
   const { error: metricsError, data: metrics } = await userMetrics(
     user.data.user.id,
     filter,
     offset,
-    limit
+    limit,
+    sort
   );
 
   if (metricsError !== null) {

@@ -5,7 +5,10 @@ import { Result } from "../../result";
 import { Database, Json } from "../../../supabase/database.types";
 import { buildFilter } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildSort, SortLeafRequest } from "../../../services/lib/sorts/sorts";
+import {
+  buildRequestSort,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
 
 export interface HeliconeRequest {
   response_id: string;
@@ -46,7 +49,7 @@ export async function getRequests(
     return { data: null, error: "Invalid offset or limit" };
   }
   const builtFilter = buildFilter(filter, []);
-  const sortSQL = buildSort(sort);
+  const sortSQL = buildRequestSort(sort);
   const query = `
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
