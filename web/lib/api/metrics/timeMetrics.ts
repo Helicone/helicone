@@ -20,9 +20,9 @@ export async function getAggregatedAvgMetrics(
     []
   );
   const query = `
-  SELECT avg(response.delay_ms/1000)::float AS average_response_time,
-  avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer)::float AS average_tokens_per_response
-  FROM  request
+  SELECT avg(response.delay_ms::float/1000.0)::float AS average_response_time,
+  avg(response.completion_tokens + response.prompt_tokens)::float AS average_tokens_per_response
+  FROM request
     LEFT JOIN response ON response.request = request.id
 WHERE (
   (${filterString})
@@ -32,6 +32,8 @@ WHERE (
   if (error !== null) {
     return { data: null, error: error };
   }
+
+  console.log(data[0]);
 
   return { data: data[0], error: null };
 }
