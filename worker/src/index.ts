@@ -486,6 +486,8 @@ async function readAndLogResponse(
           body: responseResult.data,
           delay_ms: new Date().getTime() - startTime.getTime(),
           status: responseStatus,
+          completion_tokens: responseResult.data.usage?.completion_tokens,
+          prompt_tokens: responseResult.data.usage?.prompt_tokens,
         },
       ])
       .select("id");
