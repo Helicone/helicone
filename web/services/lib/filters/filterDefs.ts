@@ -119,8 +119,8 @@ export function filterUIToFilterLeafs(
 
 export const parseKey = (keyString: string): FilterLeaf => {
   return {
-    user_api_keys: {
-      api_key_hash: {
+    request: {
+      auth_hash: {
         equals: keyString,
       },
     },

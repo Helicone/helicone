@@ -16,6 +16,13 @@ export async function getModelMetrics(
   user_id: string,
   cached: boolean
 ) {
+  if (cached) {
+    // TEMPORARILY DISABLED
+    return {
+      data: [],
+      error: null,
+    };
+  }
   const builtFilter = await buildFilterWithAuth(user_id, filter, []);
   const query = `
 SELECT response.body ->> 'model'::text as model,
