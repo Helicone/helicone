@@ -33,7 +33,5 @@ WHERE (
     return { data: null, error: error };
   }
 
-  console.log(data[0]);
-
   return { data: data[0], error: null };
 }
