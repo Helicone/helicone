@@ -259,46 +259,27 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
-async function getTokenCount(
-  inputText: string,
-  tokenizer_count_api: string
-): Promise<number> {
+async function getTokenCount(inputText: string): Promise<number> {
   const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
   const encoded: { bpe: number[]; text: string[] } =
     tokenizer.encode(inputText);
   return encoded.bpe.length;
 }
 
-async function getRequestCount(
-  requestBody: any,
-  tokenCount: (inputText: string) => Promise<number>
-): Promise<number> {
+function getRequestString(requestBody: any): [string, number] {
   if (requestBody.prompt !== undefined) {
     const prompt = requestBody.prompt;
     if (typeof prompt === "string") {
-      return tokenCount(requestBody.prompt);
+      return [requestBody.prompt, 0];
     } else if ("length" in prompt) {
-      return (
-        await Promise.all(
-          (prompt as string[]).map(async (p) => await tokenCount(p))
-        )
-      ).reduce((a, b) => a + b, 0);
+      return [(prompt as string[]).join(""), 0];
     } else {
       throw new Error("Invalid prompt type");
     }
   } else if (requestBody.messages !== undefined) {
-    const baseTokens = 3;
-    const messages = requestBody.messages;
-    return (
-      baseTokens +
-      (
-        await Promise.all(
-          (messages as { content: string }[]).map(
-            async (m) => (await tokenCount(m.content)) + 5
-          )
-        )
-      ).reduce((a, b) => a + b, 0)
-    );
+    const messages = requestBody.messages as { content: string }[];
+
+    return [messages.map((m) => m.content).join(""), 3 + messages.length * 5];
   } else {
     throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
   }
@@ -434,18 +415,13 @@ async function readResponse(
         data
           .filter((d) => "id" in d)
           .map((d) => getResponseText(d))
-          .join(""),
-        requestSettings.tokenizer_count_api
+          .join("")
       );
-
-      const requestTokenCount = await getRequestCount(
-        JSON.parse(requestBody),
-        (inputText) =>
-          getTokenCount(inputText, requestSettings.tokenizer_count_api)
+      const [requestString, paddingTokenCount] = getRequestString(
+        JSON.parse(requestBody)
       );
-
-      console.log("requestTokenCount", requestTokenCount);
-      console.log("responseTokenCount", responseTokenCount);
+      const requestTokenCount =
+        (await getTokenCount(requestString)) + paddingTokenCount;
 
       try {
         const totalTokens = requestTokenCount + responseTokenCount;
@@ -502,11 +478,6 @@ async function readAndLogResponse(
     responseStatus
   );
   if (responseResult.data !== null) {
-    console.log(
-      "Total response time: ",
-      new Date().getTime() - startTime.getTime(),
-      "ms"
-    );
     const { data, error } = await dbClient
       .from("response")
       .insert([
@@ -558,7 +529,6 @@ async function forwardAndLog(
     let buffer: any = null;
     const transformer = new TransformStream({
       transform(chunk, controller) {
-        console.log("buffer", buffer, chunk);
         if (chunk.length < 50) {
           buffer = chunk;
         } else {
