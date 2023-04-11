@@ -20,7 +20,7 @@ export async function getAggregatedAvgMetrics(
     []
   );
   const query = `
-  SELECT avg(EXTRACT(epoch FROM response.created_at - request.created_at))::float AS average_response_time,
+  SELECT avg(response.delay_ms/1000)::float AS average_response_time,
   avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer)::float AS average_tokens_per_response
   FROM  request
     LEFT JOIN response ON response.request = request.id
