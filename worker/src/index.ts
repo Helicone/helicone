@@ -9,6 +9,7 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import { checkThrottle, getThrottleOptions } from "./throttle";
 
 // import bcrypt from "bcrypt";
 
@@ -751,6 +752,33 @@ export default {
       if (isLoggingEndpoint(request)) {
         const response = await handleLoggingEndpoint(request, env);
         return response;
+      }
+
+      const throttleOptions = getThrottleOptions(request);
+
+      if (throttleOptions !== undefined) {
+        const auth = request.headers.get("Authorization");
+
+        if (auth === null) {
+          return new Response("No authorization header found!", { status: 401 });
+        }
+
+        const hashedKey = await hash(auth);
+        const throttleCheckResult = await checkThrottle(request, env, throttleOptions, hashedKey);
+        if (throttleCheckResult.status === "throttled") {
+          return new Response(
+            JSON.stringify({
+              message: "Request limit reached. Please wait before making more requests.",
+            }),
+            {
+              status: 429,
+              headers: {
+                "content-type": "application/json;charset=UTF-8",
+                "helicone-throttle": "true",
+              },
+            }
+          );
+        }
       }
 
       const requestBody =
