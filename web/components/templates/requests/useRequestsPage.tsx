@@ -223,9 +223,7 @@ const useRequestsPage = (
       error: request.response_body.error || undefined,
       latency,
       totalTokens: request.response_body.usage?.total_tokens || 0,
-      model: request.request_body.error
-        ? request.request_body.model || ""
-        : request.request_body.model || "",
+      model: request.request_body.model || request.response_body.model || "",
       requestText:
         request.request_body.messages?.at(-1) ||
         request.request_body.input ||
