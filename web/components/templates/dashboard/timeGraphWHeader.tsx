@@ -46,12 +46,12 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
           requestsOverTime === "loading" ? "animate-pulse" : ""
         )}
       >
-        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md py-4 pb-8 space-y-1 bg-white">
+        {/* <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md py-4 pb-8 space-y-1 bg-white">
           <h3 className="text-md font-semibold text-gray-900 text-center">
             Live Logs
           </h3>
           <LogPanel />
-        </div>
+        </div> */}
 
         {/* Requests over time */}
         <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1 bg-white">
