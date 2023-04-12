@@ -29,6 +29,17 @@ const getUSDate = (value: string) => {
     .slice(-2)}`;
 };
 
+const getUSDateMin = (value: string) => {
+  const date = new Date(value);
+  const day = date.getDate();
+  return `${date.getMonth()}/${day}/${date
+    .getFullYear()
+    .toString()
+    .slice(-2)}, ${date.toLocaleTimeString().slice(0, -6)} ${date
+    .toLocaleTimeString()
+    .slice(-2)}`;
+};
+
 const capitalizeWords = (str: string) => {
   // replace underscores with spaces
   const strWithSpaces = str.replace(/_/g, " ");
@@ -49,4 +60,10 @@ function removeLeadingWhitespace(str: string): string {
   return str.replace(/^\s+/, ""); // Replace one or more whitespace characters at the beginning of the string with an empty string
 }
 
-export { getUSDate, getUSDateShort, capitalizeWords, removeLeadingWhitespace };
+export {
+  getUSDate,
+  getUSDateShort,
+  capitalizeWords,
+  removeLeadingWhitespace,
+  getUSDateMin,
+};
