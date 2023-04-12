@@ -34,7 +34,6 @@ const LogPanel = (props: LogPanelProps) => {
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "request" },
       (payload) => {
-        console.log("Request!", payload);
         setLiveLogs((logs) =>
           logs.concat([
             {
@@ -52,7 +51,6 @@ const LogPanel = (props: LogPanelProps) => {
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "response" },
       (payload) => {
-        console.log("Response!", payload);
         setLiveLogs((logs) =>
           logs.concat([
             {
