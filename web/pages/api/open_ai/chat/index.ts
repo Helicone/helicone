@@ -9,20 +9,22 @@ import {
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseOptions: {
-    header: {
-      "OpenAI-Organization": "",
-    },
-  },
-});
-const openai = new OpenAIApi(configuration);
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<CreateChatCompletionResponse, string>>
 ) {
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+    basePath: "https://oai.hconeai.com/v1",
+    baseOptions: {
+      header: {
+        "OpenAI-Organization": "",
+        "Helicone-Property-Tag": "prompt_edit",
+      },
+    },
+  });
+  const openai = new OpenAIApi(configuration);
+
   const client = createServerSupabaseClient({ req, res });
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
@@ -38,6 +40,7 @@ export default async function handler(
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: messages,
+    user: user.data.user.email,
   });
 
   if (completion.status !== 200) {
