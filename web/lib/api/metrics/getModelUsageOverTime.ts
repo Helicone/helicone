@@ -46,9 +46,9 @@ export async function getModelUsageOverTime({
 SELECT
   response.body ->> 'model'::text as model,
   ${dateTrunc} as created_at_trunc,
-  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS sum_prompt_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens
+  sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
+  sum(response.prompt_tokens) AS sum_prompt_tokens,
+  sum(response.completion_tokens) AS sum_completion_tokens
 FROM response
   left join request on response.request = request.id
 WHERE (
