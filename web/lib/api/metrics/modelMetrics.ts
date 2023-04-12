@@ -26,9 +26,9 @@ export async function getModelMetrics(
   const builtFilter = await buildFilterWithAuth(user_id, filter, []);
   const query = `
 SELECT response.body ->> 'model'::text as model,
-  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS sum_prompt_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens
+  sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
+  sum(response.prompt_tokens) AS sum_prompt_tokens,
+  sum(response.completion_tokens) AS sum_completion_tokens
 FROM response 
   left join request on response.request = request.id
  ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
@@ -57,9 +57,9 @@ export async function getModelMetricsForUsers(
   const builtFilter = buildFilter(filter, []);
   const query = `
 SELECT response.body ->> 'model'::text as model,
-  sum(((response.body -> 'usage'::text) ->> 'total_tokens'::text)::bigint)::bigint AS sum_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'prompt_tokens'::text)::bigint)::bigint AS sum_prompt_tokens,
-  sum(((response.body -> 'usage'::text) ->> 'completion_tokens'::text)::bigint)::bigint AS sum_completion_tokens,
+  sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
+  sum(response.prompt_tokens) AS sum_prompt_tokens,
+  sum(response.completion_tokens) AS sum_completion_tokens
   request.user_id
 FROM response 
   left join request on response.request = request.id
