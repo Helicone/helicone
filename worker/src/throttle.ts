@@ -91,7 +91,8 @@ export async function checkThrottle(
   
     const segmentKeyValue = await getSegmentKeyValue(request, segment);
     const kvKey = `throttle_${segmentKeyValue}_${hashedKey}`;
-    const timestamps = await env.THROTTLE_KV.get(kvKey, "json") || [];
+    const kv = await env.THROTTLE_KV.get(kvKey, "text");
+    const timestamps = kv !== null ? JSON.parse(kv) : [];
 
     if (timestamps.length < threshold) {
         return { status: "ok" };
@@ -134,8 +135,8 @@ export async function updateThrottleCounter(
     const period = throttleOptions.period;
   
     const kvKey = `throttle_${segment}_${hashedKey}`;
-  
-    const timestamps = await env.THROTTLE_KV.get(kvKey, "json") || [];
+    const kv = await env.THROTTLE_KV.get(kvKey, "text");
+    const timestamps = kv !== null ? JSON.parse(kv) : [];
   
     let timeWindowMillis = getTimeWindowMillis(period);
   
