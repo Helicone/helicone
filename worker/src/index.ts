@@ -17,6 +17,7 @@ export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
+  THROTTLE_KV: KVNamespace;
 }
 
 interface SuccessResult<T> {
