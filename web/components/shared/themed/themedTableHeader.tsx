@@ -496,7 +496,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 Export CSV
               </p>
               <p className="text-sm sm:text-md text-gray-600">
-                Exporting by CSV is limited to 1500 rows. For larger exports,
+                Exporting by CSV is limited to 1000 rows. For larger exports,
                 please use our{" "}
                 <Link
                   href="/"

@@ -519,7 +519,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       body: JSON.stringify({
         filter: advancedFilters,
         offset: 0,
-        limit: 1500,
+        limit: 1000,
         sort: sortLeaf,
       }),
     })
