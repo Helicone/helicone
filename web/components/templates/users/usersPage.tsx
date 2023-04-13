@@ -204,8 +204,8 @@ const UsersPage = (props: UsersPageProps) => {
       },
       body: JSON.stringify({
         filter: advancedFilters,
-        offset: (currentPage - 1) * currentPageSize,
-        limit: currentPageSize,
+        offset: 0,
+        limit: 1500,
         sort: sortLeaf,
       }),
     })
