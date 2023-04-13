@@ -196,7 +196,11 @@ const UsersPage = (props: UsersPageProps) => {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }
 
+  const [openExport, setOpenExport] = useState(false);
+  const [downloadingCSV, setDownloadingCSV] = useState<boolean>(false);
+
   const csvDownload = async (filtered: boolean) => {
+    setDownloadingCSV(true);
     fetch("/api/request_users", {
       method: "POST",
       headers: {
@@ -239,6 +243,11 @@ const UsersPage = (props: UsersPageProps) => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+      })
+      .catch((e) => console.error(e))
+      .finally(() => {
+        setDownloadingCSV(false);
+        setOpenExport(false);
       });
   };
 
@@ -249,6 +258,9 @@ const UsersPage = (props: UsersPageProps) => {
         <ThemedTableHeader
           csvExport={{
             onClick: csvDownload,
+            downloadingCSV,
+            openExport,
+            setOpenExport,
           }}
           editColumns={{
             columns,
