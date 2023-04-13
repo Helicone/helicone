@@ -256,12 +256,12 @@ const UsersPage = (props: UsersPageProps) => {
       <AuthHeader title={"Users"} />
       <div className="space-y-2">
         <ThemedTableHeader
-          csvExport={{
-            onClick: csvDownload,
-            downloadingCSV,
-            openExport,
-            setOpenExport,
-          }}
+          // csvExport={{
+          //   onClick: csvDownload,
+          //   downloadingCSV,
+          //   openExport,
+          //   setOpenExport,
+          // }}
           editColumns={{
             columns,
             onColumnCallback: (newColumns) => {
