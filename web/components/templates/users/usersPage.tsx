@@ -184,7 +184,10 @@ const UsersPage = (props: UsersPageProps) => {
       key: "cost",
       active: true,
       label: "Total Cost (USD)",
-      format: (value: any) => Number(value).toFixed(2),
+      format: (value: any) =>
+        Number(value) > 0.01
+          ? Number(value).toFixed(2)
+          : Number(value).toString(),
     },
   ];
 
@@ -256,12 +259,12 @@ const UsersPage = (props: UsersPageProps) => {
       <AuthHeader title={"Users"} />
       <div className="space-y-2">
         <ThemedTableHeader
-          // csvExport={{
-          //   onClick: csvDownload,
-          //   downloadingCSV,
-          //   openExport,
-          //   setOpenExport,
-          // }}
+          csvExport={{
+            onClick: csvDownload,
+            downloadingCSV,
+            openExport,
+            setOpenExport,
+          }}
           editColumns={{
             columns,
             onColumnCallback: (newColumns) => {
