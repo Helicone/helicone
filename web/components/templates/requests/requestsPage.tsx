@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
-import { HeliconeRequest } from "../../../lib/api/request/request";
+import { getRequests, HeliconeRequest } from "../../../lib/api/request/request";
 import { Result } from "../../../lib/result";
 import { truncString } from "../../../lib/stringHelpers";
 import {
@@ -42,7 +42,10 @@ import {
 import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
-import useRequestsPage, { RequestWrapper } from "./useRequestsPage";
+import useRequestsPage, {
+  convertRequest,
+  RequestWrapper,
+} from "./useRequestsPage";
 import RequestTable from "./requestTable";
 
 export type Message = {
@@ -507,45 +510,62 @@ const RequestsPage = (props: RequestsPageProps) => {
     setCurrentLayout(null);
   };
 
+  const [openExport, setOpenExport] = useState(false);
+  const [downloadingCSV, setDownloadingCSV] = useState<boolean>(false);
+
+  const csvDownload = async (filtered: boolean) => {
+    setDownloadingCSV(true);
+    fetch("/api/request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filter: advancedFilters,
+        offset: 0,
+        limit: 500,
+        sort: sortLeaf,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        const requests = res.data as HeliconeRequest[];
+        const wrappedRequests = requests.map((request) => {
+          const wrappedRequest = convertRequest(request, values);
+          const obj: any = {};
+          columns.forEach((col) => {
+            if (filtered) {
+              if (col.active) {
+                obj[col.key] = wrappedRequest[col.key];
+              }
+            } else {
+              obj[col.key] = wrappedRequest[col.key];
+            }
+          });
+          return obj;
+        });
+        // Convert JSON data to CSV
+        const csv = Papa.unparse(wrappedRequests);
+        // Create a blob with the CSV data
+        const blob = new Blob([csv], { type: "text/csv" });
+        // Create a download link and click it to start the download
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "requests.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+      .catch((e) => console.error(e))
+      .finally(() => {
+        setDownloadingCSV(false);
+        setOpenExport(false);
+      });
+  };
+
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
   if (columnOrderIndex > -1) {
     columns[columnOrderIndex].sortBy = orderBy.direction;
-  }
-
-  async function downloadCSV() {
-    try {
-      const response = await fetch("/api/export/requests", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: advancedFilters,
-          offset: (currentPage - 1) * currentPageSize,
-          limit: 5000,
-          sort: sortLeaf,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error("An error occurred while downloading the CSV file");
-      }
-
-      const csvData = await response.text();
-      const blob = new Blob([csvData], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "requests.csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Release the Blob URL
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   return (
@@ -596,7 +616,10 @@ const RequestsPage = (props: RequestsPageProps) => {
                 ],
               }}
               csvExport={{
-                onClick: downloadCSV,
+                onClick: csvDownload,
+                downloadingCSV,
+                openExport,
+                setOpenExport,
               }}
               isFetching={isLoading}
               advancedFilter={{

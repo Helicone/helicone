@@ -18,9 +18,10 @@ import {
 import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
 import { RequestWrapper } from "./templates/requests/useRequestsPage";
 import { SortLeafUsers } from "../services/lib/sorts/users/sorts";
+import { UserMetric } from "../lib/api/users/users";
 
 export interface Column {
-  key: keyof RequestWrapper;
+  key: keyof RequestWrapper | keyof UserMetric;
   label: string;
   active: boolean;
   type?: ColumnType;
