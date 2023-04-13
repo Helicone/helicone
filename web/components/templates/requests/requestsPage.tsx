@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
-import { HeliconeRequest } from "../../../lib/api/request/request";
+import { getRequests, HeliconeRequest } from "../../../lib/api/request/request";
 import { Result } from "../../../lib/result";
 import { truncString } from "../../../lib/stringHelpers";
 import {
@@ -519,7 +519,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       body: JSON.stringify({
         filter: advancedFilters,
         offset: 0,
-        limit: 1000,
+        limit: 10,
         sort: sortLeaf,
       }),
     })
