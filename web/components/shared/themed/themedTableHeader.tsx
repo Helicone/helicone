@@ -61,6 +61,9 @@ interface ThemedHeaderProps {
   };
   csvExport?: {
     onClick: (filtered: boolean) => void;
+    downloadingCSV: boolean;
+    openExport: boolean;
+    setOpenExport: (open: boolean) => void;
   };
   timeFilter?: {
     timeFilterOptions: { key: string; value: string }[];
@@ -115,7 +118,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [openExport, setOpenExport] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
   const [openLayout, setOpenLayout] = useState(false);
   const [name, setName] = useState("");
@@ -128,7 +130,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     name: string;
     user_id: string;
   }>();
-  const [downloadingCSV, setDownloadingCSV] = useState<boolean>(false);
 
   const supabaseClient = useSupabaseClient();
   const { setNotification } = useNotification();
@@ -149,20 +150,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     setNotification("Layout deleted", "success");
     refetchLayouts();
     layout?.clearLayout();
-  };
-
-  const handleCloseCSV = () => {
-    setDownloadingCSV(false);
-    setOpenExport(false);
-  };
-
-  const handleDownloadCSV = async () => {
-    setDownloadingCSV(true);
-    if (csvExport) {
-      await csvExport.onClick(exportFiltered);
-    }
-    setDownloadingCSV(false);
-    setOpenExport(false);
   };
 
   return (
@@ -426,7 +413,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
                   <button
-                    onClick={() => setOpenExport(true)}
+                    onClick={() => csvExport.setOpenExport(true)}
                     className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
                   >
                     <ArrowDownTrayIcon
@@ -503,40 +490,43 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
         )}
       </div>
-      {csvExport && openExport && (
-        <ThemedModal open={openExport} setOpen={handleCloseCSV}>
+      {csvExport && (
+        <ThemedModal
+          open={csvExport.openExport}
+          setOpen={csvExport.setOpenExport}
+        >
           <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
-            <div className="flex flex-col space-y-4">
-              <p className="text-md sm:text-lg font-semibold text-gray-900">
-                Export CSV
-              </p>
-              <p className="text-sm sm:text-md text-gray-600">
-                Exporting by CSV is limited to 500 rows due to the huge amounts
-                of data in the requests. For larger exports, please use our{" "}
-                <Link
-                  href="/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline font-semibold text-blue-600"
-                >
-                  API
-                </Link>{" "}
-                and read our{" "}
-                <Link
-                  href="/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline font-semibold text-blue-600"
-                >
-                  docs
-                </Link>{" "}
-                as a guide.
-              </p>
-              <p className="text-sm sm:text-md text-gray-600">
-                Export may take a lot of time. Please do not close this modal
-                once export is started.
-              </p>
-              <fieldset className="pt-4 space-y-2">
+            <div className="flex flex-col space-y-8">
+              <div className="flex flex-col space-y-4">
+                <p className="text-md sm:text-lg font-semibold text-gray-900">
+                  Export CSV
+                </p>
+                <p className="text-sm sm:text-md text-gray-600">
+                  Exporting by CSV is limited to 500 rows due to the huge
+                  amounts of data in the requests. For larger exports, please
+                  use our{" "}
+                  <Link
+                    href="/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-semibold text-blue-600"
+                  >
+                    API
+                  </Link>{" "}
+                  and read our{" "}
+                  <Link
+                    href="/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-semibold text-blue-600"
+                  >
+                    docs
+                  </Link>{" "}
+                  as a guide.
+                </p>
+              </div>
+
+              <fieldset className="space-y-2">
                 <p className="text-xs text-gray-600">Properties on export</p>
                 <legend className="sr-only">Notification method</legend>
                 <div className="space-y-2">
@@ -565,21 +555,25 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   ))}
                 </div>
               </fieldset>
+              <p className="text-sm sm:text-md text-gray-600">
+                Export may take a lot of time. Please do not close this modal
+                once export is started.
+              </p>
             </div>
 
             <div className="w-full flex justify-end text-sm space-x-4">
               <button
                 type="button"
-                onClick={handleCloseCSV}
+                onClick={() => csvExport.setOpenExport(false)}
                 className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
               >
                 Cancel
               </button>
               <button
                 className="items-center rounded-md bg-black px-4 py-2 text-md flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                onClick={handleDownloadCSV}
+                onClick={() => csvExport.onClick(exportFiltered)}
               >
-                {downloadingCSV ? (
+                {csvExport.downloadingCSV ? (
                   <>
                     <ArrowPathIcon
                       className={clsx("h-5 w-5 inline animate-spin mr-2")}

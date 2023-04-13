@@ -510,7 +510,11 @@ const RequestsPage = (props: RequestsPageProps) => {
     setCurrentLayout(null);
   };
 
+  const [openExport, setOpenExport] = useState(false);
+  const [downloadingCSV, setDownloadingCSV] = useState<boolean>(false);
+
   const csvDownload = async (filtered: boolean) => {
+    setDownloadingCSV(true);
     fetch("/api/request", {
       method: "POST",
       headers: {
@@ -552,7 +556,11 @@ const RequestsPage = (props: RequestsPageProps) => {
         link.click();
         document.body.removeChild(link);
       })
-      .catch((e) => console.error(e));
+      .catch((e) => console.error(e))
+      .finally(() => {
+        setDownloadingCSV(false);
+        setOpenExport(false);
+      });
   };
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
@@ -609,6 +617,9 @@ const RequestsPage = (props: RequestsPageProps) => {
               }}
               csvExport={{
                 onClick: csvDownload,
+                downloadingCSV,
+                openExport,
+                setOpenExport,
               }}
               isFetching={isLoading}
               advancedFilter={{
