@@ -420,7 +420,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                       className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
                       aria-hidden="true"
                     />
-                    <p className="sm:inline md:hidden lg:inline">Export</p>
+                    <span className="sm:inline hidden lg:inline">Export</span>
                   </button>
                 </Menu>
               </div>
@@ -506,23 +506,14 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   amounts of data in the requests. For larger exports, please
                   use our{" "}
                   <Link
-                    href="/"
+                    href="https://docs.helicone.ai/helicone-api/getting-started"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline font-semibold text-blue-600"
                   >
                     API
-                  </Link>{" "}
-                  and read our{" "}
-                  <Link
-                    href="/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline font-semibold text-blue-600"
-                  >
-                    docs
-                  </Link>{" "}
-                  as a guide.
+                  </Link>
+                  .
                 </p>
               </div>
 
