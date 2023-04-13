@@ -18,6 +18,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Result } from "../../../lib/result";
 import { useRouter } from "next/router";
 
+import React from "react";
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+
 interface DashboardPageProps {
   user: User;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
@@ -117,6 +122,36 @@ export const BaseUrlInstructions = () => {
                   <p className="text-blue-300">{`"https://oai.hconeai.com/v1"`}</p>
                   <p className="text-gray-300">,</p>
                 </div>
+              </div>
+              <div className="flex flex-row gap-2 pl-4 bg-green-900">
+                <div className="flex flex-row">
+                  <p className="text-green-700 -ml-3 pr-1">+</p>
+                  <p className="text-gray-300">baseOptions:</p>
+                </div>
+                <p className="text-orange-500">{`{`}</p>
+              </div>
+              <div className="flex flex-row gap-0 bg-green-900">
+                <p className="text-green-700 pl-1 pr-5">+</p>
+                <p className="text-gray-300 pr-1">headers:</p>
+                <p className="text-orange-500">{`{`}</p>
+              </div>
+              <div className="flex flex-row gap-2 bg-green-900">
+                <div className="flex flex-row">
+                  <p className="text-green-700 pl-1 pr-9">+</p>
+                  <p className="text-gray-300">{'"Helicone-Auth":'}</p>
+                </div>
+                <div className="flex flex-row">
+                  <p className="text-blue-300">{`"{KEY}"`}</p>
+                  <p className="text-gray-300">,</p>
+                </div>
+              </div>
+              <div className="flex flex-row bg-green-900">
+                <p className="text-green-700 pl-1 pr-9">+</p>
+                <p className="text-orange-500">{`}`}</p>
+              </div>
+              <div className="flex flex-row bg-green-900">
+                <p className="text-green-700 pl-1 pr-1">+</p>
+                <p className="text-orange-500">{`}`}</p>
               </div>
               <div className="flex flex-row">
                 <p className="text-orange-500">{`}`}</p>
@@ -264,8 +299,16 @@ const RenderStepActions = ({
     );
   }
 };
-
 const Step1 = () => {
+  return (
+    <div>
+      {" "}
+      <p className="text-gray-500"></p>
+      <KeyPage hideTabs={true} />
+    </div>
+  );
+};
+const Step2 = () => {
   return (
     <div className="flex flex-col gap-4">
       {" "}
@@ -274,16 +317,6 @@ const Step1 = () => {
         snippet.
       </p>
       <BaseUrlInstructions />
-    </div>
-  );
-};
-
-const Step2 = () => {
-  return (
-    <div>
-      {" "}
-      <p className="text-gray-500"></p>
-      <KeyPage hideTabs={true} />
     </div>
   );
 };
@@ -404,8 +437,8 @@ const WelcomePage = (props: DashboardPageProps) => {
   const stepMessage: {
     [key in Steps]: string;
   } = {
-    1: "Replace you OpenAI base url",
-    2: "Add your OpenAI API Key to Helicone",
+    1: "Generate Helicone API key",
+    2: "Replace you OpenAI base url",
     3: "Wait for your first event",
   };
 

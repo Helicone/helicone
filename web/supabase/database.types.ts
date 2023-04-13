@@ -53,18 +53,24 @@ export interface Database {
           api_key_hash: string
           api_key_name: string
           created_at: string
+          id: number
+          soft_delete: boolean
           user_id: string
         }
         Insert: {
           api_key_hash: string
           api_key_name: string
           created_at?: string
+          id?: number
+          soft_delete?: boolean
           user_id: string
         }
         Update: {
           api_key_hash?: string
           api_key_name?: string
           created_at?: string
+          id?: number
+          soft_delete?: boolean
           user_id?: string
         }
       }
@@ -123,6 +129,8 @@ export interface Database {
           body: Json
           created_at: string
           formatted_prompt_id: string | null
+          helicone_api_key_id: number | null
+          helicone_user: string | null
           id: string
           path: string
           prompt_id: string | null
@@ -135,6 +143,8 @@ export interface Database {
           body: Json
           created_at?: string
           formatted_prompt_id?: string | null
+          helicone_api_key_id?: number | null
+          helicone_user?: string | null
           id?: string
           path: string
           prompt_id?: string | null
@@ -147,6 +157,8 @@ export interface Database {
           body?: Json
           created_at?: string
           formatted_prompt_id?: string | null
+          helicone_api_key_id?: number | null
+          helicone_user?: string | null
           id?: string
           path?: string
           prompt_id?: string | null
@@ -158,21 +170,33 @@ export interface Database {
       response: {
         Row: {
           body: Json
+          completion_tokens: number | null
           created_at: string
+          delay_ms: number | null
           id: string
+          prompt_tokens: number | null
           request: string
+          status: number | null
         }
         Insert: {
           body: Json
+          completion_tokens?: number | null
           created_at?: string
+          delay_ms?: number | null
           id?: string
+          prompt_tokens?: number | null
           request: string
+          status?: number | null
         }
         Update: {
           body?: Json
+          completion_tokens?: number | null
           created_at?: string
+          delay_ms?: number | null
           id?: string
+          prompt_tokens?: number | null
           request?: string
+          status?: number | null
         }
       }
       user_api_keys: {
@@ -326,13 +350,13 @@ export interface Database {
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
@@ -412,6 +436,7 @@ export interface Database {
           owner: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          version: string | null
         }
         Insert: {
           bucket_id?: string | null
@@ -423,6 +448,7 @@ export interface Database {
           owner?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          version?: string | null
         }
         Update: {
           bucket_id?: string | null
@@ -434,6 +460,7 @@ export interface Database {
           owner?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          version?: string | null
         }
       }
     }
@@ -441,6 +468,15 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      can_insert_object: {
+        Args: {
+          bucketid: string
+          name: string
+          owner: string
+          metadata: Json
+        }
+        Returns: undefined
+      }
       extension: {
         Args: {
           name: string

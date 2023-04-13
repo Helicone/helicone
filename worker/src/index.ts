@@ -9,6 +9,7 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import { Database } from "../supabase/database.types";
 
 // import bcrypt from "bcrypt";
 
@@ -30,6 +31,7 @@ interface ErrorResult<T> {
 export interface RequestSettings {
   stream: boolean;
   tokenizer_count_api: string;
+  helicone_api_key?: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
 }
@@ -67,12 +69,13 @@ export async function forwardRequestToOpenAi(
 }
 
 type HeliconeRequest = {
-  dbClient: SupabaseClient;
+  dbClient: SupabaseClient<Database>;
   request: Request;
   auth: string;
   requestId: string;
   body?: string;
   prompt?: Prompt;
+  heliconeApiKey?: string;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
@@ -154,6 +157,38 @@ async function getPromptId(
   }
 }
 
+async function getHeliconeUserId(
+  dbClient: SupabaseClient<Database>,
+  heliconeApiKey?: string
+): Promise<
+  Result<
+    {
+      id: number;
+      user_id: string;
+    },
+    string
+  >
+> {
+  if (!heliconeApiKey) {
+    return { data: null, error: "No helicone api key" };
+  }
+  if (!heliconeApiKey.includes("Bearer ")) {
+    return { data: null, error: "Must included Bearer in API Key" };
+  }
+  const apiKey = heliconeApiKey.replace("Bearer ", "").trim();
+  const apiKeyHash = await hash(`Bearer ${apiKey}`);
+  const { data, error } = await dbClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("api_key_hash", apiKeyHash)
+    .eq("soft_delete", false)
+    .single();
+  if (error !== null) {
+    return { data: null, error: error.message };
+  }
+  return { data: data, error: null };
+}
+
 async function logRequest({
   dbClient,
   request,
@@ -166,6 +201,7 @@ async function logRequest({
   prompt,
   isPromptRegexOn,
   promptName,
+  heliconeApiKey,
 }: HeliconeRequest): Promise<Result<string, string>> {
   try {
     const json = body ? JSON.parse(body) : {};
@@ -185,6 +221,17 @@ async function logRequest({
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
+    const { data: heliconeUserId, error: userIdError } =
+      await getHeliconeUserId(dbClient, heliconeApiKey);
+    if (userIdError !== null) {
+      console.error(userIdError);
+    }
+
+    // TODO - once we deprecate using OpenAI API keys, we can remove this
+    // if (userIdError !== null) {
+    //   return { data: null, error: userIdError };
+    // }
+
     const { data, error } = await dbClient
       .from("request")
       .insert([
@@ -198,6 +245,8 @@ async function logRequest({
           properties: properties,
           formatted_prompt_id: formattedPromptId,
           prompt_values: prompt_values,
+          helicone_user: heliconeUserId?.user_id,
+          helicone_api_key_id: heliconeUserId?.id,
         },
       ])
       .select("id")
@@ -570,6 +619,7 @@ async function forwardAndLog(
         prompt: prompt,
         ...getHeliconeHeaders(request.headers),
         requestId,
+        heliconeApiKey: requestSettings.helicone_api_key,
       });
       const responseStatus = response.status;
       if (requestResult.data !== null) {
@@ -760,6 +810,7 @@ export default {
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
         tokenizer_count_api: env.TOKENIZER_COUNT_API,
+        helicone_api_key: request.headers.get("helicone-auth") ?? undefined,
         ff_stream_force_format:
           request.headers.get("helicone-ff-stream-force-format") === "true",
         ff_increase_timeout:

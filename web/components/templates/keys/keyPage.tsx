@@ -35,13 +35,14 @@ interface KeyPageProps {
 
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
-  const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
   const [selectedKey, setSelectedKey] =
     useState<Database["public"]["Tables"]["user_api_keys"]["Row"]>();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<string>("OpenAI Keys");
+  const [selectedTab, setSelectedTab] = useState<
+    "Helicone Keys" | "OpenAI Keys"
+  >("Helicone Keys");
 
   // Helicone states
   const [name, setName] = useState<string>("");
@@ -193,7 +194,7 @@ const KeyPage = (props: KeyPageProps) => {
             },
           ]}
           onOptionSelect={(option) => {
-            setSelectedTab(option);
+            setSelectedTab(option as any);
           }}
         />
       )}
@@ -251,17 +252,19 @@ const KeyPage = (props: KeyPageProps) => {
             <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
               <div className="sm:flex-auto items-center flex flex-row space-x-4 justify-between">
                 <h1 className="text-lg font-semibold text-gray-900">
-                  Helicone API (beta)
+                  Helicone API
                 </h1>
-                <Link
-                  href="/api/graphql"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <button className="text-xs w-full mx-auto bg-sky-600 hover:bg-sky-800 text-white font-semibold py-2 px-4 rounded-md">
-                    Visit GraphQL playground
-                  </button>
-                </Link>
+                {!props.hideTabs && (
+                  <Link
+                    href="/api/graphql"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <button className="text-xs w-full mx-auto bg-sky-600 hover:bg-sky-800 text-white font-semibold py-2 px-4 rounded-md">
+                      Visit GraphQL playground
+                    </button>
+                  </Link>
+                )}
               </div>
             </div>
             <p className="text-sm text-gray-900">
@@ -357,7 +360,9 @@ const KeyPage = (props: KeyPageProps) => {
 
                   supabaseClient
                     .from("helicone_api_keys")
-                    .delete()
+                    .update({
+                      soft_delete: true,
+                    })
                     .eq("api_key_hash", selectedHeliconeKey.api_key_hash)
                     .then((res) => {
                       setDeleteHeliconeOpen(false);
