@@ -615,12 +615,12 @@ const RequestsPage = (props: RequestsPageProps) => {
                   { key: "all", value: "All" },
                 ],
               }}
-              csvExport={{
-                onClick: csvDownload,
-                downloadingCSV,
-                openExport,
-                setOpenExport,
-              }}
+              // csvExport={{
+              //   onClick: csvDownload,
+              //   downloadingCSV,
+              //   openExport,
+              //   setOpenExport,
+              // }}
               isFetching={isLoading}
               advancedFilter={{
                 filterMap,
