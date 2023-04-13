@@ -42,6 +42,7 @@ import ThemedModal from "./themedModal";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../notification/useNotification";
 import { useLayouts } from "../../../services/hooks/useLayouts";
+import Link from "next/link";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -58,7 +59,7 @@ interface ThemedHeaderProps {
     onColumnCallback: (columns: Column[]) => void;
   };
   csvExport?: {
-    onClick: () => void;
+    onClick: (filtered: boolean) => void;
   };
   timeFilter?: {
     timeFilterOptions: { key: string; value: string }[];
@@ -97,6 +98,11 @@ interface ThemedHeaderProps {
   };
 }
 
+const notificationMethods = [
+  { id: "filtered", title: "Only selected columns", filtered: true },
+  { id: "all", title: "All event properties", filtered: false },
+];
+
 export default function ThemedHeader(props: ThemedHeaderProps) {
   const {
     isFetching,
@@ -108,7 +114,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   } = props;
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [openExport, setOpenExport] = useState(false);
+  const [exportFiltered, setExportFiltered] = useState(false);
+  const [openLayout, setOpenLayout] = useState(false);
   const [name, setName] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteLayout, setDeleteLayout] = useState<{
@@ -124,7 +132,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
   const { setNotification } = useNotification();
   const { refetch: refetchLayouts } = useLayouts();
 
-  const onDeleteHandler = async (layoutId: number) => {
+  const onDeleteLayoutHandler = async (layoutId: number) => {
     const { error } = await supabaseClient
       .from("layout")
       .delete()
@@ -132,10 +140,10 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
 
     if (error) {
       setNotification("Error deleting layout", "error");
-      setOpen(false);
+      setOpenLayout(false);
       return;
     }
-    setOpen(false);
+    setOpenLayout(false);
     setNotification("Layout deleted", "success");
     refetchLayouts();
     layout?.clearLayout();
@@ -332,7 +340,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                             <div className="grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
                               <button
                                 type="button"
-                                onClick={() => setOpen(true)}
+                                onClick={() => setOpenLayout(true)}
                                 className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
                               >
                                 <PlusCircleIcon
@@ -398,11 +406,12 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               </Popover>
             )}
 
-            {/* {csvExport && (
+            {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
                   <button
-                    onClick={csvExport.onClick}
+                    // onClick={() => csvExport.onClick(false)}
+                    onClick={() => setOpenExport(true)}
                     className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
                   >
                     <ArrowDownTrayIcon
@@ -413,7 +422,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   </button>
                 </Menu>
               </div>
-            )} */}
+            )}
           </div>
         </div>
         {advancedFilter && (
@@ -479,8 +488,89 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
         )}
       </div>
-      {layout && open && (
-        <ThemedModal open={open} setOpen={setOpen}>
+      {csvExport && openExport && (
+        <ThemedModal open={openExport} setOpen={setOpenExport}>
+          <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
+            <div className="flex flex-col space-y-4">
+              <p className="text-md sm:text-lg font-semibold text-gray-900">
+                Export CSV
+              </p>
+              <p className="text-sm sm:text-md text-gray-600">
+                Exporting by CSV is limited to 2000 rows. For larger exports,
+                please use our{" "}
+                <Link
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-semibold text-blue-600"
+                >
+                  API
+                </Link>{" "}
+                and read our{" "}
+                <Link
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-semibold text-blue-600"
+                >
+                  docs
+                </Link>{" "}
+                as a guide. Do you want to export by CSV?
+              </p>
+              <fieldset className="pt-4 space-y-2">
+                <p className="text-xs text-gray-600">Properties on export</p>
+                <legend className="sr-only">Notification method</legend>
+                <div className="space-y-2">
+                  {notificationMethods.map((notificationMethod) => (
+                    <div
+                      key={notificationMethod.id}
+                      className="flex items-center"
+                    >
+                      <input
+                        id={notificationMethod.id}
+                        name="notification-method"
+                        type="radio"
+                        defaultChecked={notificationMethod.id === "filtered"}
+                        className="h-4 w-4 border-gray-300 text-sky-600 focus:ring-sky-600 hover:cursor-pointer"
+                        onClick={() => {
+                          setExportFiltered(notificationMethod.filtered);
+                        }}
+                      />
+                      <label
+                        htmlFor={notificationMethod.id}
+                        className="ml-3 block text-sm font-medium leading-6 text-gray-600"
+                      >
+                        {notificationMethod.title}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+
+            <div className="w-full flex justify-end text-sm space-x-4">
+              <button
+                type="button"
+                onClick={() => setOpenExport(false)}
+                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                className="items-center rounded-md bg-black px-4 py-2 text-md flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                onClick={() => {
+                  csvExport.onClick(exportFiltered);
+                  setOpenExport(false);
+                }}
+              >
+                Export
+              </button>
+            </div>
+          </div>
+        </ThemedModal>
+      )}
+      {layout && openLayout && (
+        <ThemedModal open={openLayout} setOpen={setOpenLayout}>
           <div className="flex flex-col space-y-4 sm:space-y-8 max-w-sm">
             <div className="flex flex-col space-y-2">
               <p className="text-sm sm:text-md font-semibold text-gray-900">
@@ -504,7 +594,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 className="items-center rounded-md bg-black px-3 py-1.5 text-md flex font-normal text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 onClick={() => {
                   layout.onCreateLayout(name);
-                  setOpen(false);
+                  setOpenLayout(false);
                 }}
               >
                 <PlusIcon className="h-4 w-4 inline" />
@@ -537,7 +627,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               <button
                 className="flex flex-row items-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium border border-red-500 hover:bg-red-700 text-gray-50 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
                 onClick={() => {
-                  deleteLayout?.id && onDeleteHandler(deleteLayout.id);
+                  deleteLayout?.id && onDeleteLayoutHandler(deleteLayout.id);
                   setOpenDelete(false);
                 }}
               >

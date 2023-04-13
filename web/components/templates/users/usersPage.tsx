@@ -28,6 +28,7 @@ import { ColumnSizingState, ColumnOrderState } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
+import Papa from "papaparse";
 
 const monthNames = [
   "Jan",
@@ -195,40 +196,51 @@ const UsersPage = (props: UsersPageProps) => {
     columns[columnOrderIndex].sortBy = orderBy.direction;
   }
 
-  async function downloadCSV() {
-    try {
-      const response = await fetch("/api/export/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: advancedFilters,
-          offset: (page - 1) * pageSize,
-          limit: 100000,
-        }),
+  const csvDownload = async (filtered: boolean) => {
+    fetch("/api/request_users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filter: advancedFilters,
+        offset: (currentPage - 1) * currentPageSize,
+        limit: currentPageSize,
+        sort: sortLeaf,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        const users = res.data;
+        const filteredUsers = users.map((user: any) => {
+          const obj: any = {};
+          columns.forEach((col) => {
+            if (filtered) {
+              if (col.active) {
+                obj[col.key] = user[col.key];
+              }
+            } else {
+              obj[col.key] = user[col.key];
+            }
+          });
+          return obj;
+        });
+
+        // Convert JSON data to CSV
+        const csv = Papa.unparse(filteredUsers);
+
+        // Create a blob with the CSV data
+        const blob = new Blob([csv], { type: "text/csv" });
+
+        // Create a download link and click it to start the download
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "users.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       });
-      if (!response.ok) {
-        throw new Error("An error occurred while downloading the CSV file");
-      }
-
-      const csvData = await response.text();
-      const blob = new Blob([csvData], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "users.csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Release the Blob URL
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  };
 
   return (
     <>
@@ -236,7 +248,7 @@ const UsersPage = (props: UsersPageProps) => {
       <div className="space-y-2">
         <ThemedTableHeader
           csvExport={{
-            onClick: downloadCSV,
+            onClick: csvDownload,
           }}
           editColumns={{
             columns,
