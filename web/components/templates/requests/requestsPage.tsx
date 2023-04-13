@@ -525,37 +525,34 @@ const RequestsPage = (props: RequestsPageProps) => {
     })
       .then((res) => res.json())
       .then((res) => {
-        console.log(res);
-        // const requests = res.data as HeliconeRequest[];
-        // const wrappedRequests = requests.map((request) => {
-        //   const wrappedRequest = convertRequest(request, values);
-        //   const obj: any = {};
-        //   columns.forEach((col) => {
-        //     if (filtered) {
-        //       if (col.active) {
-        //         obj[col.key] = wrappedRequest[col.key];
-        //       }
-        //     } else {
-        //       obj[col.key] = wrappedRequest[col.key];
-        //     }
-        //   });
-        //   return obj;
-        // });
-
-        // // Convert JSON data to CSV
-        // const csv = Papa.unparse(wrappedRequests);
-
-        // // Create a blob with the CSV data
-        // const blob = new Blob([csv], { type: "text/csv" });
-
-        // // Create a download link and click it to start the download
-        // const link = document.createElement("a");
-        // link.href = URL.createObjectURL(blob);
-        // link.download = "requests.csv";
-        // document.body.appendChild(link);
-        // link.click();
-        // document.body.removeChild(link);
-      });
+        const requests = res.data as HeliconeRequest[];
+        const wrappedRequests = requests.map((request) => {
+          const wrappedRequest = convertRequest(request, values);
+          const obj: any = {};
+          columns.forEach((col) => {
+            if (filtered) {
+              if (col.active) {
+                obj[col.key] = wrappedRequest[col.key];
+              }
+            } else {
+              obj[col.key] = wrappedRequest[col.key];
+            }
+          });
+          return obj;
+        });
+        // Convert JSON data to CSV
+        const csv = Papa.unparse(wrappedRequests);
+        // Create a blob with the CSV data
+        const blob = new Blob([csv], { type: "text/csv" });
+        // Create a download link and click it to start the download
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "requests.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+      .catch((e) => console.error(e));
   };
 
   const columnOrderIndex = columns.findIndex((c) => c.key === orderBy.column);
