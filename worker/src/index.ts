@@ -8,7 +8,6 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
-import GPT3Tokenizer from "gpt3-tokenizer";
 
 // import bcrypt from "bcrypt";
 
@@ -259,11 +258,17 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
-async function getTokenCount(inputText: string): Promise<number> {
-  const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
-  const encoded: { bpe: number[]; text: string[] } =
-    tokenizer.encode(inputText);
-  return encoded.bpe.length;
+async function getTokenCount(
+  inputText: string,
+  tokenCalcUrl: string
+): Promise<number> {
+  return await fetch(tokenCalcUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/text",
+    },
+    body: inputText,
+  }).then((response) => +response);
 }
 
 function getRequestString(requestBody: any): [string, number] {
@@ -415,13 +420,17 @@ async function readResponse(
         data
           .filter((d) => "id" in d)
           .map((d) => getResponseText(d))
-          .join("")
+          .join(""),
+        requestSettings.tokenizer_count_api
       );
       const [requestString, paddingTokenCount] = getRequestString(
         JSON.parse(requestBody)
       );
       const requestTokenCount =
-        (await getTokenCount(requestString)) + paddingTokenCount;
+        (await getTokenCount(
+          requestString,
+          requestSettings.tokenizer_count_api
+        )) + paddingTokenCount;
 
       try {
         const totalTokens = requestTokenCount + responseTokenCount;
