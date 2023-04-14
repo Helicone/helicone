@@ -17,6 +17,7 @@ routes = [
 
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
 
 
 [env.production_staging]
@@ -27,6 +28,7 @@ routes = [
 
 [env.production_staging.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
 
 [env.preview]
 name = "helicone-worker-preview"
@@ -36,3 +38,4 @@ routes = [
 
 [env.preview.vars]
 SUPABASE_URL = "https://wldkumawyhruufmucrrc.supabase.co"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
