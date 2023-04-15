@@ -384,7 +384,6 @@ async function parseResponse(
   responseStatus: number
 ): Promise<Result<any, string>> {
   let result = responseBody;
-  console.log("Response body", result);
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -458,7 +457,6 @@ async function readAndLogResponse(
   responseStatus: number,
   startTime: Date
 ): Promise<void> {
-  console.log("Response status", responseStatus);
   const responseResult = await parseResponse(
     requestSettings,
     responseBody,
