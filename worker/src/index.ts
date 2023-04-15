@@ -9,6 +9,8 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import { EventEmitter } from "events";
+import { once } from "./helpers";
 
 // import bcrypt from "bcrypt";
 
@@ -375,29 +377,13 @@ function consolidateTextFields(responseBody: any[]): any {
   }
 }
 
-async function readResponse(
+async function parseResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>,
+  responseBody: string,
   requestBody: string,
   responseStatus: number
 ): Promise<Result<any, string>> {
-  const reader = await readable?.getReader();
-  let result = "";
-  const MAX_LOOPS = 10_000;
-  let i = 0;
-  while (true) {
-    if (reader === undefined) break;
-    const res = await reader?.read();
-    if (res?.done) break;
-    if (typeof res?.value === "string") {
-      result += res?.value;
-    } else if (res?.value instanceof Uint8Array) {
-      result += new TextDecoder().decode(res?.value);
-    }
-    i++;
-    if (i > MAX_LOOPS) break;
-  }
-
+  let result = responseBody;
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -464,16 +450,16 @@ async function readResponse(
 
 async function readAndLogResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>,
+  responseBody: string,
   requestId: string,
   dbClient: SupabaseClient,
   requestBody: any,
   responseStatus: number,
   startTime: Date
 ): Promise<void> {
-  const responseResult = await readResponse(
+  const responseResult = await parseResponse(
     requestSettings,
-    readable,
+    responseBody,
     requestBody,
     responseStatus
   );
@@ -524,8 +510,19 @@ async function forwardAndLog(
         body
       )
     : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
-
-  let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
+  const chunkEmitter = new EventEmitter();
+  const decoder = new TextDecoder();
+  let globalResponseBody = "";
+  const loggingTransformStream = new TransformStream({
+    transform(chunk, controller) {
+      globalResponseBody += decoder.decode(chunk);
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      chunkEmitter.emit("done", globalResponseBody);
+    },
+  });
+  let readable = response.body?.pipeThrough(loggingTransformStream);
 
   if (requestSettings.ff_stream_force_format) {
     let buffer: any = null;
@@ -551,11 +548,9 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+
   ctx.waitUntil(
     (async () => {
-      if (!readableLog) {
-        return;
-      }
       const dbClient = createClient(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -575,7 +570,7 @@ async function forwardAndLog(
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
-          readableLog,
+          await once(chunkEmitter, "done"),
           requestResult.data,
           dbClient,
           requestBody,
