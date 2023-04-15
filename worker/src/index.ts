@@ -455,7 +455,8 @@ async function readAndLogResponse(
   dbClient: SupabaseClient,
   requestBody: any,
   responseStatus: number,
-  startTime: Date
+  startTime: Date,
+  wasTimeout: boolean
 ): Promise<void> {
   const responseResult = await parseResponse(
     requestSettings,
@@ -469,7 +470,10 @@ async function readAndLogResponse(
       .insert([
         {
           request: requestId,
-          body: responseResult.data,
+          body: {
+            ...responseResult.data,
+            timedOut: wasTimeout,
+          },
           delay_ms: new Date().getTime() - startTime.getTime(),
           status: responseStatus,
           completion_tokens: responseResult.data.usage?.completion_tokens,
@@ -549,7 +553,11 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
-
+  async function responseBodyTimeout(delay_ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, delay_ms));
+    console.log("response body timeout");
+    return globalResponseBody;
+  }
   ctx.waitUntil(
     (async () => {
       const dbClient = createClient(
@@ -568,15 +576,21 @@ async function forwardAndLog(
         requestId,
       });
       const responseStatus = response.status;
+      const [wasTimeout, responseText] = await Promise.race([
+        Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
+        Promise.all([false, responseBodySubscriber]),
+      ]);
+
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
-          await responseBodySubscriber,
+          responseText,
           requestResult.data,
           dbClient,
           requestBody,
           responseStatus,
-          startTime
+          startTime,
+          wasTimeout
         );
       }
     })()
