@@ -8,6 +8,9 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
+import GPT3Tokenizer from "gpt3-tokenizer";
+import { EventEmitter } from "events";
+import { once } from "./helpers";
 
 // import bcrypt from "bcrypt";
 
@@ -258,17 +261,11 @@ function removeHeliconeHeaders(request: Headers): Headers {
   return newHeaders;
 }
 
-async function getTokenCount(
-  inputText: string,
-  tokenCalcUrl: string
-): Promise<number> {
-  return await fetch(tokenCalcUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/text",
-    },
-    body: inputText,
-  }).then((response) => +response);
+async function getTokenCount(inputText: string): Promise<number> {
+  const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
+  const encoded: { bpe: number[]; text: string[] } =
+    tokenizer.encode(inputText);
+  return encoded.bpe.length;
 }
 
 function getRequestString(requestBody: any): [string, number] {
@@ -380,29 +377,13 @@ function consolidateTextFields(responseBody: any[]): any {
   }
 }
 
-async function readResponse(
+async function parseResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>,
+  responseBody: string,
   requestBody: string,
   responseStatus: number
 ): Promise<Result<any, string>> {
-  const reader = await readable?.getReader();
-  let result = "";
-  const MAX_LOOPS = 10_000;
-  let i = 0;
-  while (true) {
-    if (reader === undefined) break;
-    const res = await reader?.read();
-    if (res?.done) break;
-    if (typeof res?.value === "string") {
-      result += res?.value;
-    } else if (res?.value instanceof Uint8Array) {
-      result += new TextDecoder().decode(res?.value);
-    }
-    i++;
-    if (i > MAX_LOOPS) break;
-  }
-
+  let result = responseBody;
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -420,17 +401,13 @@ async function readResponse(
         data
           .filter((d) => "id" in d)
           .map((d) => getResponseText(d))
-          .join(""),
-        requestSettings.tokenizer_count_api
+          .join("")
       );
       const [requestString, paddingTokenCount] = getRequestString(
         JSON.parse(requestBody)
       );
       const requestTokenCount =
-        (await getTokenCount(
-          requestString,
-          requestSettings.tokenizer_count_api
-        )) + paddingTokenCount;
+        (await getTokenCount(requestString)) + paddingTokenCount;
 
       try {
         const totalTokens = requestTokenCount + responseTokenCount;
@@ -473,16 +450,16 @@ async function readResponse(
 
 async function readAndLogResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>,
+  responseBody: string,
   requestId: string,
   dbClient: SupabaseClient,
   requestBody: any,
   responseStatus: number,
   startTime: Date
 ): Promise<void> {
-  const responseResult = await readResponse(
+  const responseResult = await parseResponse(
     requestSettings,
-    readable,
+    responseBody,
     requestBody,
     responseStatus
   );
@@ -533,8 +510,19 @@ async function forwardAndLog(
         body
       )
     : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
-
-  let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
+  const chunkEmitter = new EventEmitter();
+  const decoder = new TextDecoder();
+  let globalResponseBody = "";
+  const loggingTransformStream = new TransformStream({
+    transform(chunk, controller) {
+      globalResponseBody += decoder.decode(chunk);
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      chunkEmitter.emit("done", globalResponseBody);
+    },
+  });
+  let readable = response.body?.pipeThrough(loggingTransformStream);
 
   if (requestSettings.ff_stream_force_format) {
     let buffer: any = null;
@@ -560,11 +548,9 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+
   ctx.waitUntil(
     (async () => {
-      if (!readableLog) {
-        return;
-      }
       const dbClient = createClient(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -584,7 +570,7 @@ async function forwardAndLog(
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
-          readableLog,
+          await once(chunkEmitter, "done"),
           requestResult.data,
           dbClient,
           requestBody,
