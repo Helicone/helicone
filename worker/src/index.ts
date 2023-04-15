@@ -511,6 +511,7 @@ async function forwardAndLog(
       )
     : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
   const chunkEmitter = new EventEmitter();
+  const responseBodySubscriber = once(chunkEmitter, "done");
   const decoder = new TextDecoder();
   let globalResponseBody = "";
   const loggingTransformStream = new TransformStream({
@@ -570,7 +571,7 @@ async function forwardAndLog(
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
-          await once(chunkEmitter, "done"),
+          await responseBodySubscriber,
           requestResult.data,
           dbClient,
           requestBody,
