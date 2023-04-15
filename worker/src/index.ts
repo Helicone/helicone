@@ -384,6 +384,7 @@ async function parseResponse(
   responseStatus: number
 ): Promise<Result<any, string>> {
   let result = responseBody;
+  console.log("Response body", result);
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -457,6 +458,7 @@ async function readAndLogResponse(
   responseStatus: number,
   startTime: Date
 ): Promise<void> {
+  console.log("Response status", responseStatus);
   const responseResult = await parseResponse(
     requestSettings,
     responseBody,
@@ -511,6 +513,7 @@ async function forwardAndLog(
       )
     : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
   const chunkEmitter = new EventEmitter();
+  const responseBodySubscriber = once(chunkEmitter, "done");
   const decoder = new TextDecoder();
   let globalResponseBody = "";
   const loggingTransformStream = new TransformStream({
@@ -570,7 +573,7 @@ async function forwardAndLog(
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
-          await once(chunkEmitter, "done"),
+          await responseBodySubscriber,
           requestResult.data,
           dbClient,
           requestBody,
