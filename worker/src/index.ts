@@ -11,6 +11,7 @@ import {
 import GPT3Tokenizer from "gpt3-tokenizer";
 import { EventEmitter } from "events";
 import { once } from "./helpers";
+import { Database } from "../supabase/database.types";
 
 // import bcrypt from "bcrypt";
 
@@ -452,12 +453,28 @@ async function readAndLogResponse(
   requestSettings: RequestSettings,
   responseBody: string,
   requestId: string,
-  dbClient: SupabaseClient,
+  dbClient: SupabaseClient<Database>,
   requestBody: any,
   responseStatus: number,
   startTime: Date,
   wasTimeout: boolean
 ): Promise<void> {
+  const { data: insertData, error: insertError } = await dbClient
+    .from("response")
+    .insert([
+      {
+        request: requestId,
+        body: {},
+        status: -1,
+      },
+    ])
+    .select("id")
+    .single();
+  if (insertError !== null) {
+    console.error(insertError);
+    return;
+  }
+
   const responseResult = await parseResponse(
     requestSettings,
     responseBody,
@@ -467,19 +484,18 @@ async function readAndLogResponse(
   if (responseResult.data !== null) {
     const { data, error } = await dbClient
       .from("response")
-      .insert([
-        {
-          request: requestId,
-          body: {
-            ...responseResult.data,
-            timedOut: wasTimeout,
-          },
-          delay_ms: new Date().getTime() - startTime.getTime(),
-          status: responseStatus,
-          completion_tokens: responseResult.data.usage?.completion_tokens,
-          prompt_tokens: responseResult.data.usage?.prompt_tokens,
+      .update({
+        request: requestId,
+        body: {
+          ...responseResult.data,
+          timedOut: wasTimeout,
         },
-      ])
+        delay_ms: new Date().getTime() - startTime.getTime(),
+        status: responseStatus,
+        completion_tokens: responseResult.data.usage?.completion_tokens,
+        prompt_tokens: responseResult.data.usage?.prompt_tokens,
+      })
+      .eq("id", insertData.id)
       .select("id");
     if (error !== null) {
       console.error(error);
