@@ -126,32 +126,32 @@ export async function checkThrottle(
 }
 
 export async function updateThrottleCounter(
-    request: Request,
-    env: Env,
-    throttleOptions: ThrottleOptions,
-    hashedKey: string,
-  ): Promise<void> {
-    const segment = throttleOptions.segment;
-    const period = throttleOptions.period;
+  request: Request,
+  env: Env,
+  throttleOptions: ThrottleOptions,
+  hashedKey: string,
+): Promise<void> {
+  const segment = throttleOptions.segment;
+  const period = throttleOptions.period;
   
-    const kvKey = `throttle_${segment}_${hashedKey}`;
-    const kv = await env.THROTTLE_KV.get(kvKey, "text");
-    const timestamps = kv !== null ? JSON.parse(kv) : [];
+  const kvKey = `throttle_${segment}_${hashedKey}`;
+  const kv = await env.THROTTLE_KV.get(kvKey, "text");
+  const timestamps = kv !== null ? JSON.parse(kv) : [];
   
-    let timeWindowMillis = getTimeWindowMillis(period);
+  let timeWindowMillis = getTimeWindowMillis(period);
   
-    const now = Date.now();
-    const prunedTimestamps = timestamps.filter((timestamp: number) => {
-      return now - timestamp < timeWindowMillis;
-    });
+  const now = Date.now();
+  const prunedTimestamps = timestamps.filter((timestamp: number) => {
+    return now - timestamp < timeWindowMillis;
+  });
   
-    prunedTimestamps.push(now);
+  prunedTimestamps.push(now);
   
-    await env.THROTTLE_KV.put(
-      kvKey,
-      JSON.stringify(prunedTimestamps),
-      {
-        expirationTtl: Math.ceil(timeWindowMillis),
-      }
-    );
-  }
+  await env.THROTTLE_KV.put(
+    kvKey,
+    JSON.stringify(prunedTimestamps),
+    {
+      expirationTtl: Math.ceil(timeWindowMillis),
+    }
+  );
+}

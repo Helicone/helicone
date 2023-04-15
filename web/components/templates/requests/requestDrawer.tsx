@@ -147,6 +147,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                     }
                     return acc;
                   }, {})}
+                  wrappedRequest={wrappedRequest}
                 />
               ) : wrappedRequest.api.moderation ? (
                 <Moderation
