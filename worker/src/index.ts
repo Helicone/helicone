@@ -381,7 +381,6 @@ function consolidateTextFields(responseBody: any[]): any {
 async function parseResponse(
   requestSettings: RequestSettings,
   responseBody: string,
-  requestBody: string,
   responseStatus: number
 ): Promise<Result<any, string>> {
   let result = responseBody;
@@ -398,44 +397,18 @@ async function parseResponse(
         return JSON.parse(line.replace("data:", ""));
       });
 
-      const responseTokenCount = await getTokenCount(
-        data
-          .filter((d) => "id" in d)
-          .map((d) => getResponseText(d))
-          .join("")
-      );
-      const [requestString, paddingTokenCount] = getRequestString(
-        JSON.parse(requestBody)
-      );
-      const requestTokenCount =
-        (await getTokenCount(requestString)) + paddingTokenCount;
-
       try {
-        const totalTokens = requestTokenCount + responseTokenCount;
-        if (isNaN(totalTokens)) {
-          throw new Error("Invalid token count");
-        }
-
         return {
           data: {
             ...consolidateTextFields(data),
             streamed_data: data,
-            usage: {
-              prompt_tokens: requestTokenCount,
-              completion_tokens: responseTokenCount,
-              total_tokens: requestTokenCount + responseTokenCount,
-            },
           },
           error: null,
         };
       } catch (e) {
         return {
           data: {
-            ...consolidateTextFields(data),
             streamed_data: data,
-            usage: {
-              error: e,
-            },
           },
           error: null,
         };
@@ -464,6 +437,7 @@ async function readAndLogResponse(
     .insert([
       {
         request: requestId,
+        delay_ms: new Date().getTime() - startTime.getTime(),
         body: {},
         status: -1,
       },
@@ -478,7 +452,6 @@ async function readAndLogResponse(
   const responseResult = await parseResponse(
     requestSettings,
     responseBody,
-    requestBody,
     responseStatus
   );
   if (responseResult.data !== null) {
@@ -486,11 +459,7 @@ async function readAndLogResponse(
       .from("response")
       .update({
         request: requestId,
-        body: {
-          ...responseResult.data,
-          timedOut: wasTimeout,
-        },
-        delay_ms: new Date().getTime() - startTime.getTime(),
+        body: responseResult.data,
         status: responseStatus,
         completion_tokens: responseResult.data.usage?.completion_tokens,
         prompt_tokens: responseResult.data.usage?.prompt_tokens,
@@ -504,6 +473,55 @@ async function readAndLogResponse(
     }
   } else {
     console.error(responseResult.error);
+  }
+
+  if (
+    requestSettings.stream &&
+    !responseResult.data.usage?.completion_tokens &&
+    responseResult.data?.streamed_data
+  ) {
+    const streamed_data: any[] = responseResult.data.streamed_data;
+    const responseTokenCount = await getTokenCount(
+      streamed_data
+        .filter((d) => "id" in d)
+        .map((d) => getResponseText(d))
+        .join("")
+    );
+    const [requestString, paddingTokenCount] = getRequestString(
+      JSON.parse(requestBody)
+    );
+    const requestTokenCount =
+      (await getTokenCount(requestString)) + paddingTokenCount;
+    const totalTokens = requestTokenCount + responseTokenCount;
+    if (isNaN(totalTokens)) {
+      throw new Error("Invalid token count");
+    }
+
+    const { data, error } = await dbClient
+      .from("response")
+      .update({
+        request: requestId,
+        body: {
+          ...responseResult.data,
+          usage: {
+            completion_tokens: responseTokenCount,
+            prompt_tokens: requestTokenCount,
+            total_tokens: totalTokens,
+            helicone_calculated: true,
+          },
+        },
+        delay_ms: new Date().getTime() - startTime.getTime(),
+        status: responseStatus,
+        completion_tokens: responseTokenCount,
+        prompt_tokens: requestTokenCount,
+      })
+      .eq("id", insertData.id)
+      .select("id");
+    if (error !== null) {
+      console.error(error);
+    } else {
+      console.log(data);
+    }
   }
 }
 
