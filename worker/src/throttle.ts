@@ -1,46 +1,68 @@
 import { Env } from ".";
 
 interface ThrottleOptions {
-    segment: string;
-    threshold: number;
-    quantity: number;
-    period: string;
+    time_window: number;
+    segment: string | undefined;
+    quota: number;
+    unit: "token" | "request" | "dollar";
 }
+
+function parsePolicy(input: string): ThrottleOptions {
+  const regex = /^(\d+);w=(\d+);(?:u=(request|token|dollar);?)?(?:s=([\w-]+);?)?$/;
+
+  const match = input.match(regex);
+  if (!match) {
+      throw new Error("Invalid rate limit string format");
+  }
+
+  const quota = parseInt(match[1], 10);
+  const time_window = parseInt(match[2], 10);
+  const unit = match[3] as "request" | "token" | "dollar" | undefined;
+  const segment = match[4];
+
+  return {
+      quota,
+      time_window,
+      unit: unit || "request",
+      segment,
+  };
+}
+
 
 export const getThrottleOptions = (request: Request): ThrottleOptions | undefined => {
-    const enabled = request.headers.get("Helicone-Throttle-Enabled") === "true";
-    const segment = request.headers.get("Helicone-Throttle-Segment");
-    const threshold = request.headers.get("Helicone-Throttle-Threshold");
-    const quantity = request.headers.get("Helicone-Throttle-Quantity");
-    const period = request.headers.get("Helicone-Throttle-Period");
-
-    if (!enabled) {
-        return undefined;
+    const policy = request.headers.get("Helicone-RateLimit-Policy");
+    if (policy) {
+      return parsePolicy(policy);
     }
-
-    const throttleOptions: ThrottleOptions = {
-        segment: segment!,
-        threshold: parseInt(threshold!, 10),
-        quantity: parseInt(quantity!, 10),
-        period: period!,
-    };
-
-    return throttleOptions;
+    return undefined;
 }
 
-async function getSegmentKeyValue(request: Request, segment: string): Promise<string> {
-    if (segment === 'global') {
-      return 'global';
-    } else {
-      const propTag = "helicone-property-";
-      const heliconeHeaders = Object.fromEntries(
-        [...request.headers.entries()]
-          .filter(([key, _]) => key.startsWith(propTag) && key.length > propTag.length)
-          .map(([key, value]) => [key.substring(propTag.length), value])
-      );
-  
-      return `${segment}=${heliconeHeaders[segment]}`;
+async function getSegmentKeyValue(request: Request, segment: string | undefined, user: string | undefined): Promise<string> {
+  if (segment === undefined) {
+    return 'global';
+  } else if (segment === 'user') {
+    const heliconeUserIdHeader = "helicone-user-id";
+    const userId = request.headers.get(heliconeUserIdHeader) || (
+        request.body ? user : undefined
+    );
+    console.log("USER ID", userId, user)
+    if (userId === undefined) {
+        throw new Error('Missing user ID');
     }
+    return `user=${userId}`;
+} else {
+    const propTag = "helicone-property-";
+    const heliconeHeaders = Object.fromEntries(
+      [...request.headers.entries()]
+        .filter(([key, _]) => key.startsWith(propTag) && key.length > propTag.length)
+        .map(([key, value]) => [key.substring(propTag.length), value])
+    );
+    const headerValue = heliconeHeaders[segment];
+    if (headerValue === undefined) {
+      throw new Error(`Missing "${segment}" header`);
+    }
+    return `${segment}=${headerValue}`;
+  }
 }
 
 const getTimeWindowMillis = (period: string): number => {
@@ -84,24 +106,26 @@ export async function checkThrottle(
     env: Env,
     throttleOptions: ThrottleOptions,
     hashedKey: string,
+    user: string | undefined,
 ): Promise<{ status: "ok" | "throttled" }> {
     const segment = throttleOptions.segment;
-    const threshold = throttleOptions.threshold;
-    const period = throttleOptions.period;
-  
-    const segmentKeyValue = await getSegmentKeyValue(request, segment);
+    const quota = throttleOptions.quota;
+    const time_window = throttleOptions.time_window;
+
+    const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
     const kvKey = `throttle_${segmentKeyValue}_${hashedKey}`;
     const kv = await env.THROTTLE_KV.get(kvKey, "text");
+    console.log("checkThrottle after get is ", kv)
     const timestamps = kv !== null ? JSON.parse(kv) : [];
 
-    if (timestamps.length < threshold) {
+    if (timestamps.length < quota) {
         return { status: "ok" };
     }
 
-    // Check if the first timestamp is within the time window when the length is exactly equal to the threshold
-    if (timestamps.length === threshold) {
+    // Check if the first timestamp is within the time window when the length is exactly equal to the quota
+    if (timestamps.length === quota) {
         const now = Date.now();
-        const timeWindowMillis = getTimeWindowMillis(period);
+        const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
         if (now - timestamps[0] >= timeWindowMillis) {
             return { status: "ok" };
         } else {
@@ -109,38 +133,38 @@ export async function checkThrottle(
         }
     }
 
-
-    // Calculate the time window based on the period
-    let timeWindowMillis = getTimeWindowMillis(period);
-
     const now = Date.now();
-    const firstRelevantIndex = binarySearchFirstRelevantIndex(timestamps, now, timeWindowMillis);
+    const firstRelevantIndex = binarySearchFirstRelevantIndex(timestamps, now, time_window * 1000);
 
     const relevantTimestampsCount = timestamps.length - firstRelevantIndex;
 
-    if (relevantTimestampsCount >= threshold) {
+    if (relevantTimestampsCount >= quota) {
         return { status: "throttled" };
     }
 
     return { status: "ok" };
 }
 
+
 export async function updateThrottleCounter(
   request: Request,
   env: Env,
   throttleOptions: ThrottleOptions,
   hashedKey: string,
+  user: string | undefined,
 ): Promise<void> {
+  console.log("IN THE UPDATE THROTTLE COUNTER CODE")
   const segment = throttleOptions.segment;
-  const period = throttleOptions.period;
+  const time_window = throttleOptions.time_window;
   
-  const kvKey = `throttle_${segment}_${hashedKey}`;
+  const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
+  const kvKey = `throttle_${segmentKeyValue}_${hashedKey}`;
   const kv = await env.THROTTLE_KV.get(kvKey, "text");
+  console.log("updateCounter after get is ", kv)
   const timestamps = kv !== null ? JSON.parse(kv) : [];
   
-  let timeWindowMillis = getTimeWindowMillis(period);
-  
   const now = Date.now();
+  const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
   const prunedTimestamps = timestamps.filter((timestamp: number) => {
     return now - timestamp < timeWindowMillis;
   });
@@ -151,7 +175,9 @@ export async function updateThrottleCounter(
     kvKey,
     JSON.stringify(prunedTimestamps),
     {
-      expirationTtl: Math.ceil(timeWindowMillis),
+      expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl
     }
   );
+
+  console.log("updateCounter after put is ", await env.THROTTLE_KV.get(kvKey, "text"))
 }

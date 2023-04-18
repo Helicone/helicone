@@ -4,14 +4,14 @@ compatibility_date = "2022-11-29"
 compatibility_flags = [ "transformstream_enable_standard_constructor" , "streams_enable_constructors"]
 logpush = true
 
+kv_namespaces = [
+  { binding = "THROTTLE_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
+]
+
 [vars]
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 SUPABASE_URL = "http://localhost:54321"
 TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
-
-kv_namespaces = [
-  { binding = "THROTTLE_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "0492dc9511cb4ed5b6f012a85354fa34" },
-]
 
 [env.production]
 name = "helicone-worker-prod"

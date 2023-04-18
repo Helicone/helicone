@@ -9,7 +9,7 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { checkThrottle, getThrottleOptions } from "./throttle";
+import { checkThrottle, getThrottleOptions, updateThrottleCounter } from "./throttle";
 import { EventEmitter } from "events";
 import { once } from "./helpers";
 import { Database } from "../supabase/database.types";
@@ -800,7 +800,14 @@ export default {
       }
 
       const throttleOptions = getThrottleOptions(request);
+      console.log("THROTTLE OPTIONS", throttleOptions)
 
+      const requestBody =
+        request.method === "POST"
+          ? await request.clone().json<{ stream?: boolean, user?: string }>()
+          : {};
+
+      console.log("REQUEST BODY", requestBody.user)
       if (throttleOptions !== undefined) {
         const auth = request.headers.get("Authorization");
 
@@ -809,11 +816,11 @@ export default {
         }
 
         const hashedKey = await hash(auth);
-        const throttleCheckResult = await checkThrottle(request, env, throttleOptions, hashedKey);
+        const throttleCheckResult = await checkThrottle(request, env, throttleOptions, hashedKey, requestBody.user);
         if (throttleCheckResult.status === "throttled") {
           return new Response(
             JSON.stringify({
-              message: "Request limit reached. Please wait before making more requests.",
+              message: "Rate limit reached. Please wait before making more requests.",
             }),
             {
               status: 429,
@@ -826,10 +833,6 @@ export default {
         }
       }
 
-      const requestBody =
-        request.method === "POST"
-          ? await request.clone().json<{ stream?: boolean }>()
-          : {};
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
         tokenizer_count_api: env.TOKENIZER_COUNT_API,
@@ -888,6 +891,22 @@ export default {
         responseHeaders.append("Helicone-Cache", "MISS");
       }
 
+      if (throttleOptions !== undefined) {
+        const auth = request.headers.get("Authorization");
+
+        if (auth === null) {
+          return new Response("No authorization header found!", { status: 401 });
+        }
+        const hashedKey = await hash(auth);
+        updateThrottleCounter(
+          request,
+          env,
+          throttleOptions,
+          hashedKey,
+          requestBody.user,
+        )
+      }
+
       return new Response(response.body, {
         ...response,
         status: response.status,
@@ -898,7 +917,7 @@ export default {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "oh no :( this is embarrassing, Helicone ran into an error proxy-ing your request. Please try again later",
+            "this is embarrassing, Helicone ran into an error with your request. This was the issue: " + e,
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
           "helicone-error": JSON.stringify(e),
