@@ -21,7 +21,6 @@ import {
 import { Result } from "../../../lib/result";
 
 import React, { useRef, useEffect, TextareaHTMLAttributes } from "react";
-import { RequestWrapper } from "./useRequestsPage";
 
 interface AutoSizeTextareaProps
   extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -70,7 +69,6 @@ const AutoSizeTextarea: React.FC<AutoSizeTextareaProps> = ({
 
 interface ChatProps {
   chatProperties: ChatProperties;
-  wrappedRequest: RequestWrapper,
   prompt_regex?: string;
   [keys: string]: any;
 }
@@ -139,7 +137,7 @@ export function formatPrompt2(prompt: Prompt): any {
 
 export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
-  const { prompt_regex, keys, wrappedRequest } = props;
+  const { prompt_regex, keys } = props;
 
   let messages: Message[] = prompt_regex
     ? JSON.parse(prompt_regex)
