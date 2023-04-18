@@ -1,7 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
-import { PassThrough } from "stream";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import {
   forwardRequestToOpenAiWithRetry,
@@ -9,7 +8,13 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { checkThrottle, getThrottleOptions, updateThrottleCounter } from "./throttle";
+import {
+  checkThrottle,
+  getThrottleOptions,
+  ThrottleOptions,
+  ThrottleResponse,
+  updateThrottleCounter,
+} from "./throttle";
 import { EventEmitter } from "events";
 import { once } from "./helpers";
 import { Database } from "../supabase/database.types";
@@ -47,7 +52,7 @@ export async function forwardRequestToOpenAi(
   body?: string,
   retryOptions?: RetryOptions
 ): Promise<Response> {
-  let url = new URL(request.url);
+  const url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
   const headers = removeHeliconeHeaders(request.headers);
   const method = request.method;
@@ -113,15 +118,14 @@ async function getPromptId(
       newPromptName = name;
     } else {
       // First, query the database to find the highest prompt name suffix
-      const { data: highestSuffixData, error: highestSuffixError } =
-        await dbClient
-          .from("prompt")
-          .select("name")
-          .order("name", { ascending: false })
-          .like("name", "Prompt (%)")
-          .eq("auth_hash", auth_hash)
-          .limit(1)
-          .single();
+      const { data: highestSuffixData } = await dbClient
+        .from("prompt")
+        .select("name")
+        .order("name", { ascending: false })
+        .like("name", "Prompt (%)")
+        .eq("auth_hash", auth_hash)
+        .limit(1)
+        .single();
 
       // Extract the highest suffix number from the highest prompt name suffix found
       let highestSuffix = 0;
@@ -169,7 +173,6 @@ async function logRequest({
   body,
   properties,
   prompt,
-  isPromptRegexOn,
   promptName,
 }: HeliconeRequest): Promise<Result<string, string>> {
   try {
@@ -237,9 +240,7 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
   const propTag = "helicone-property-";
   const properties = Object.fromEntries(
     [...headers.entries()]
-      .filter(
-        ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
-      )
+      .filter(([key]) => key.startsWith(propTag) && key.length > propTag.length)
       .map(([key, value]) => [key.substring(propTag.length), value])
   );
   return {
@@ -385,7 +386,7 @@ async function parseResponse(
   responseBody: string,
   responseStatus: number
 ): Promise<Result<any, string>> {
-  let result = responseBody;
+  const result = responseBody;
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -787,6 +788,24 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
+function generateThrottleHeaders(
+  throttleCheckResult: ThrottleResponse,
+  throttleOptions: ThrottleOptions
+): { [key: string]: string } {
+  const policy = `${throttleOptions.quota};w=${throttleOptions.time_window};u=${throttleOptions.unit}`;
+  const headers: { [key: string]: string } = {
+    "Helicone-RateLimit-Limit": throttleCheckResult.limit.toString(),
+    "Helicone-RateLimit-Remaining": throttleCheckResult.remaining.toString(),
+    "Helicone-RateLimit-Policy": policy,
+  };
+
+  if (throttleCheckResult.reset !== undefined) {
+    headers["Helicone-RateLimit-Reset"] = throttleCheckResult.reset.toString();
+  }
+
+  return headers;
+}
+
 export default {
   async fetch(
     request: Request,
@@ -800,41 +819,47 @@ export default {
       }
 
       const throttleOptions = getThrottleOptions(request);
-      console.log("THROTTLE OPTIONS", throttleOptions)
 
       const requestBody =
         request.method === "POST"
-          ? await request.clone().json<{ stream?: boolean, user?: string }>()
+          ? await request.clone().json<{ stream?: boolean; user?: string }>()
           : {};
 
-      console.log("REQUEST BODY", requestBody.user)
+      let additionalHeaders: { [key: string]: string } = {};
       if (throttleOptions !== undefined) {
         const auth = request.headers.get("Authorization");
-
+      
         if (auth === null) {
-          return new Response("No authorization header found!", { status: 401 });
+          return new Response("No authorization header found!", {
+            status: 401,
+          });
         }
-
+      
         const hashedKey = await hash(auth);
-        const throttleCheckResult = await checkThrottle(request, env, throttleOptions, hashedKey, requestBody.user);
-if (throttleCheckResult.status === "throttled") {
-  const policy = `${throttleOptions.quota};w=${throttleOptions.time_window};u=${throttleOptions.unit}`;
-  return new Response(
-    JSON.stringify({
-      message: "Rate limit reached. Please wait before making more requests.",
-    }),
-    {
-      status: 429,
-      headers: {
-        "content-type": "application/json;charset=UTF-8",
-        "Helicone-RateLimit-Limit": throttleCheckResult.limit.toString(),
-        "Helicone-RateLimit-Remaining": throttleCheckResult.remaining.toString(),
-        "Helicone-RateLimit-Reset": throttleCheckResult.reset.toString(),
-        "Helicone-RateLimit-Policy": policy,
-      },
-    }
-  );
-}
+        const throttleCheckResult = await checkThrottle(
+          request,
+          env,
+          throttleOptions,
+          hashedKey,
+          requestBody.user
+        );
+      
+        additionalHeaders = generateThrottleHeaders(throttleCheckResult, throttleOptions);
+      
+        if (throttleCheckResult.status === "throttled") {
+          return new Response(
+            JSON.stringify({
+              message: "Rate limit reached. Please wait before making more requests.",
+            }),
+            {
+              status: 429,
+              headers: {
+                "content-type": "application/json;charset=UTF-8",
+                ...additionalHeaders,
+              },
+            }
+          );
+        }
       }
 
       const requestSettings: RequestSettings = {
@@ -868,7 +893,7 @@ if (throttleCheckResult.status === "throttled") {
         }
       }
 
-      let requestClone = cacheSettings.shouldSaveToCache
+      const requestClone = cacheSettings.shouldSaveToCache
         ? request.clone()
         : null;
 
@@ -894,13 +919,17 @@ if (throttleCheckResult.status === "throttled") {
       if (cacheSettings.shouldReadFromCache) {
         responseHeaders.append("Helicone-Cache", "MISS");
       }
+      Object.entries(additionalHeaders).forEach(([key, value]) => {
+        responseHeaders.append(key, value);
+      });
 
       if (throttleOptions !== undefined) {
-        console.log("UPDATING THROTTLE COUNTER")
         const auth = request.headers.get("Authorization");
 
         if (auth === null) {
-          return new Response("No authorization header found!", { status: 401 });
+          return new Response("No authorization header found!", {
+            status: 401,
+          });
         }
         const hashedKey = await hash(auth);
         updateThrottleCounter(
@@ -908,8 +937,8 @@ if (throttleCheckResult.status === "throttled") {
           env,
           throttleOptions,
           hashedKey,
-          requestBody.user,
-        )
+          requestBody.user
+        );
       }
 
       return new Response(response.body, {
@@ -922,7 +951,8 @@ if (throttleCheckResult.status === "throttled") {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "this is embarrassing, Helicone ran into an error with your request. This was the issue: " + e,
+            "this is embarrassing, Helicone ran into an error with your request. This was the issue: " +
+            e,
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
           "helicone-error": JSON.stringify(e),
