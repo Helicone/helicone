@@ -817,20 +817,24 @@ export default {
 
         const hashedKey = await hash(auth);
         const throttleCheckResult = await checkThrottle(request, env, throttleOptions, hashedKey, requestBody.user);
-        if (throttleCheckResult.status === "throttled") {
-          return new Response(
-            JSON.stringify({
-              message: "Rate limit reached. Please wait before making more requests.",
-            }),
-            {
-              status: 429,
-              headers: {
-                "content-type": "application/json;charset=UTF-8",
-                "helicone-throttle": "true",
-              },
-            }
-          );
-        }
+if (throttleCheckResult.status === "throttled") {
+  const policy = `${throttleOptions.quota};w=${throttleOptions.time_window};u=${throttleOptions.unit}`;
+  return new Response(
+    JSON.stringify({
+      message: "Rate limit reached. Please wait before making more requests.",
+    }),
+    {
+      status: 429,
+      headers: {
+        "content-type": "application/json;charset=UTF-8",
+        "Helicone-RateLimit-Limit": throttleCheckResult.limit.toString(),
+        "Helicone-RateLimit-Remaining": throttleCheckResult.remaining.toString(),
+        "Helicone-RateLimit-Reset": throttleCheckResult.reset.toString(),
+        "Helicone-RateLimit-Policy": policy,
+      },
+    }
+  );
+}
       }
 
       const requestSettings: RequestSettings = {
@@ -892,6 +896,7 @@ export default {
       }
 
       if (throttleOptions !== undefined) {
+        console.log("UPDATING THROTTLE COUNTER")
         const auth = request.headers.get("Authorization");
 
         if (auth === null) {

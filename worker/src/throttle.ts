@@ -7,6 +7,13 @@ interface ThrottleOptions {
     unit: "token" | "request" | "dollar";
 }
 
+interface ThrottleResponse {
+  status: "ok" | "throttled";
+  limit?: number;
+  remaining?: number;
+  reset?: number;
+}
+
 function parsePolicy(input: string): ThrottleOptions {
   const regex = /^(\d+);w=(\d+);(?:u=(request|token|dollar);?)?(?:s=([\w-]+);?)?$/;
 
@@ -101,13 +108,13 @@ function binarySearchFirstRelevantIndex(
     return result;
   }
 
-export async function checkThrottle(
+  export async function checkThrottle(
     request: Request,
     env: Env,
     throttleOptions: ThrottleOptions,
     hashedKey: string,
     user: string | undefined,
-): Promise<{ status: "ok" | "throttled" }> {
+): Promise<{ status: "ok" | "throttled", limit: number, remaining: number, reset: number }> {
     const segment = throttleOptions.segment;
     const quota = throttleOptions.quota;
     const time_window = throttleOptions.time_window;
@@ -115,35 +122,36 @@ export async function checkThrottle(
     const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
     const kvKey = `throttle_${segmentKeyValue}_${hashedKey}`;
     const kv = await env.THROTTLE_KV.get(kvKey, "text");
-    console.log("checkThrottle after get is ", kv)
     const timestamps = kv !== null ? JSON.parse(kv) : [];
 
+    const now = Date.now();
+    const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
+
+    const firstRelevantIndex = binarySearchFirstRelevantIndex(timestamps, now, timeWindowMillis);
+    const relevantTimestampsCount = timestamps.length - firstRelevantIndex;
+
+    const remaining = Math.max(0, quota - relevantTimestampsCount);
+    const reset = Math.ceil((timestamps[firstRelevantIndex] + timeWindowMillis - now) / 1000);
+
     if (timestamps.length < quota) {
-        return { status: "ok" };
+        return { status: "ok", limit: quota, remaining, reset };
     }
 
     // Check if the first timestamp is within the time window when the length is exactly equal to the quota
     if (timestamps.length === quota) {
-        const now = Date.now();
-        const timeWindowMillis = time_window * 1000; // Convert time_window to milliseconds
         if (now - timestamps[0] >= timeWindowMillis) {
-            return { status: "ok" };
+            return { status: "ok", limit: quota, remaining, reset };
         } else {
-            return { status: "throttled" };
+            return { status: "throttled", limit: quota, remaining, reset };
         }
     }
 
-    const now = Date.now();
-    const firstRelevantIndex = binarySearchFirstRelevantIndex(timestamps, now, time_window * 1000);
-
-    const relevantTimestampsCount = timestamps.length - firstRelevantIndex;
-
     if (relevantTimestampsCount >= quota) {
-        return { status: "throttled" };
+        return { status: "throttled", limit: quota, remaining, reset };
     }
 
-    return { status: "ok" };
-}
+    return { status: "ok", limit: quota, remaining, reset };
+} 
 
 
 export async function updateThrottleCounter(
