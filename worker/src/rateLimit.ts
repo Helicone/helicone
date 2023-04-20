@@ -1,22 +1,22 @@
 import { Env } from ".";
 
-export interface ThrottleOptions {
+export interface RateLimitOptions {
   time_window: number;
   segment: string | undefined;
   quota: number;
   unit: "token" | "request" | "dollar";
 }
 
-export interface ThrottleResponse {
-  status: "ok" | "throttled";
+export interface RateLimitResponse {
+  status: "ok" | "rate_limited";
   limit: number;
   remaining: number;
   reset?: number;
 }
 
-function parsePolicy(input: string): ThrottleOptions {
+function parsePolicy(input: string): RateLimitOptions {
   const regex =
-    /^(\d+);w=(\d+);(?:u=(request|token|dollar);?)?(?:s=([\w-]+);?)?$/;
+    /^(\d+);w=(\d+)(?:;u=(request|token|dollar))?(?:;s=([\w-]+))?$/;
 
   const match = input.match(regex);
   if (!match) {
@@ -36,9 +36,9 @@ function parsePolicy(input: string): ThrottleOptions {
   };
 }
 
-export const getThrottleOptions = (
+export const getRateLimitOptions = (
   request: Request
-): ThrottleOptions | undefined => {
+): RateLimitOptions | undefined => {
   const policy = request.headers.get("Helicone-RateLimit-Policy");
   if (policy) {
     return parsePolicy(policy);
@@ -101,20 +101,20 @@ function binarySearchFirstRelevantIndex(
   return result;
 }
 
-export async function checkThrottle(
+export async function checkRateLimit(
   request: Request,
   env: Env,
-  throttleOptions: ThrottleOptions,
+  rateLimitOptions: RateLimitOptions,
   hashedKey: string,
   user: string | undefined
-): Promise<ThrottleResponse> {
-  const segment = throttleOptions.segment;
-  const quota = throttleOptions.quota;
-  const time_window = throttleOptions.time_window;
+): Promise<RateLimitResponse> {
+  const segment = rateLimitOptions.segment;
+  const quota = rateLimitOptions.quota;
+  const time_window = rateLimitOptions.time_window;
 
   const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
-  const kvKey = `throttle_${segmentKeyValue}_${hashedKey}`;
-  const kv = await env.THROTTLE_KV.get(kvKey, "text");
+  const kvKey = `rl_${segmentKeyValue}_${hashedKey}`;
+  const kv = await env.RATE_LIMIT_KV.get(kvKey, "text");
   const timestamps = kv !== null ? JSON.parse(kv) : [];
 
   const now = Date.now();
@@ -141,30 +141,30 @@ export async function checkThrottle(
     if (now - timestamps[0] >= timeWindowMillis) {
       return { status: "ok", limit: quota, remaining };
     } else {
-      return { status: "throttled", limit: quota, remaining, reset };
+      return { status: "rate_limited", limit: quota, remaining, reset };
     }
   }
 
   if (relevantTimestampsCount >= quota) {
-    return { status: "throttled", limit: quota, remaining, reset };
+    return { status: "rate_limited", limit: quota, remaining, reset };
   }
 
   return { status: "ok", limit: quota, remaining };
 }
 
-export async function updateThrottleCounter(
+export async function updateRateLimitCounter(
   request: Request,
   env: Env,
-  throttleOptions: ThrottleOptions,
+  rateLimitOptions: RateLimitOptions,
   hashedKey: string,
   user: string | undefined
 ): Promise<void> {
-  const segment = throttleOptions.segment;
-  const time_window = throttleOptions.time_window;
+  const segment = rateLimitOptions.segment;
+  const time_window = rateLimitOptions.time_window;
 
   const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
-  const kvKey = `throttle_${segmentKeyValue}_${hashedKey}`;
-  const kv = await env.THROTTLE_KV.get(kvKey, "text");
+  const kvKey = `rl_${segmentKeyValue}_${hashedKey}`;
+  const kv = await env.RATE_LIMIT_KV.get(kvKey, "text");
   const timestamps = kv !== null ? JSON.parse(kv) : [];
 
   const now = Date.now();
@@ -175,7 +175,7 @@ export async function updateThrottleCounter(
 
   prunedTimestamps.push(now);
 
-  await env.THROTTLE_KV.put(kvKey, JSON.stringify(prunedTimestamps), {
+  await env.RATE_LIMIT_KV.put(kvKey, JSON.stringify(prunedTimestamps), {
     expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl
   });
 }

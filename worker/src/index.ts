@@ -9,12 +9,12 @@ import {
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
 import {
-  checkThrottle,
-  getThrottleOptions,
-  ThrottleOptions,
-  ThrottleResponse,
-  updateThrottleCounter,
-} from "./throttle";
+  checkRateLimit,
+  getRateLimitOptions,
+  RateLimitOptions,
+  RateLimitResponse,
+  updateRateLimitCounter,
+} from "./rateLimit";
 import { EventEmitter } from "events";
 import { once } from "./helpers";
 import { Database } from "../supabase/database.types";
@@ -25,7 +25,7 @@ export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
-  THROTTLE_KV: KVNamespace;
+  RATE_LIMIT_KV: KVNamespace;
 }
 
 interface SuccessResult<T> {
@@ -788,19 +788,19 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
-function generateThrottleHeaders(
-  throttleCheckResult: ThrottleResponse,
-  throttleOptions: ThrottleOptions
+function generateRateLimitHeaders(
+  rateLimitCheckResult: RateLimitResponse,
+  rateLimitOptions: RateLimitOptions
 ): { [key: string]: string } {
-  const policy = `${throttleOptions.quota};w=${throttleOptions.time_window};u=${throttleOptions.unit}`;
+  const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
   const headers: { [key: string]: string } = {
-    "Helicone-RateLimit-Limit": throttleCheckResult.limit.toString(),
-    "Helicone-RateLimit-Remaining": throttleCheckResult.remaining.toString(),
+    "Helicone-RateLimit-Limit": rateLimitCheckResult.limit.toString(),
+    "Helicone-RateLimit-Remaining": rateLimitCheckResult.remaining.toString(),
     "Helicone-RateLimit-Policy": policy,
   };
 
-  if (throttleCheckResult.reset !== undefined) {
-    headers["Helicone-RateLimit-Reset"] = throttleCheckResult.reset.toString();
+  if (rateLimitCheckResult.reset !== undefined) {
+    headers["Helicone-RateLimit-Reset"] = rateLimitCheckResult.reset.toString();
   }
 
   return headers;
@@ -818,7 +818,7 @@ export default {
         return response;
       }
 
-      const throttleOptions = getThrottleOptions(request);
+      const rateLimitOptions = getRateLimitOptions(request);
 
       const requestBody =
         request.method === "POST"
@@ -826,7 +826,7 @@ export default {
           : {};
 
       let additionalHeaders: { [key: string]: string } = {};
-      if (throttleOptions !== undefined) {
+      if (rateLimitOptions !== undefined) {
         const auth = request.headers.get("Authorization");
       
         if (auth === null) {
@@ -836,17 +836,17 @@ export default {
         }
       
         const hashedKey = await hash(auth);
-        const throttleCheckResult = await checkThrottle(
+        const rateLimitCheckResult = await checkRateLimit(
           request,
           env,
-          throttleOptions,
+          rateLimitOptions,
           hashedKey,
           requestBody.user
         );
       
-        additionalHeaders = generateThrottleHeaders(throttleCheckResult, throttleOptions);
+        additionalHeaders = generateRateLimitHeaders(rateLimitCheckResult, rateLimitOptions);
       
-        if (throttleCheckResult.status === "throttled") {
+        if (rateLimitCheckResult.status === "rate_limited") {
           return new Response(
             JSON.stringify({
               message: "Rate limit reached. Please wait before making more requests.",
@@ -923,7 +923,7 @@ export default {
         responseHeaders.append(key, value);
       });
 
-      if (throttleOptions !== undefined) {
+      if (rateLimitOptions !== undefined) {
         const auth = request.headers.get("Authorization");
 
         if (auth === null) {
@@ -932,10 +932,10 @@ export default {
           });
         }
         const hashedKey = await hash(auth);
-        updateThrottleCounter(
+        updateRateLimitCounter(
           request,
           env,
-          throttleOptions,
+          rateLimitOptions,
           hashedKey,
           requestBody.user
         );
@@ -951,7 +951,7 @@ export default {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "this is embarrassing, Helicone ran into an error with your request. This was the issue: " +
+            "Helicone ran into an error servicing your request: " +
             e,
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
