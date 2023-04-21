@@ -9,6 +9,8 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import { EventEmitter } from "events";
+import { once } from "./helpers";
 import { Database } from "../supabase/database.types";
 
 // import bcrypt from "bcrypt";
@@ -424,29 +426,12 @@ function consolidateTextFields(responseBody: any[]): any {
   }
 }
 
-async function readResponse(
+async function parseResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>,
-  requestBody: string,
+  responseBody: string,
   responseStatus: number
 ): Promise<Result<any, string>> {
-  const reader = await readable?.getReader();
-  let result = "";
-  const MAX_LOOPS = 10_000;
-  let i = 0;
-  while (true) {
-    if (reader === undefined) break;
-    const res = await reader?.read();
-    if (res?.done) break;
-    if (typeof res?.value === "string") {
-      result += res?.value;
-    } else if (res?.value instanceof Uint8Array) {
-      result += new TextDecoder().decode(res?.value);
-    }
-    i++;
-    if (i > MAX_LOOPS) break;
-  }
-
+  let result = responseBody;
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -460,44 +445,18 @@ async function readResponse(
         return JSON.parse(line.replace("data:", ""));
       });
 
-      const responseTokenCount = await getTokenCount(
-        data
-          .filter((d) => "id" in d)
-          .map((d) => getResponseText(d))
-          .join("")
-      );
-      const [requestString, paddingTokenCount] = getRequestString(
-        JSON.parse(requestBody)
-      );
-      const requestTokenCount =
-        (await getTokenCount(requestString)) + paddingTokenCount;
-
       try {
-        const totalTokens = requestTokenCount + responseTokenCount;
-        if (isNaN(totalTokens)) {
-          throw new Error("Invalid token count");
-        }
-
         return {
           data: {
             ...consolidateTextFields(data),
             streamed_data: data,
-            usage: {
-              prompt_tokens: requestTokenCount,
-              completion_tokens: responseTokenCount,
-              total_tokens: requestTokenCount + responseTokenCount,
-            },
           },
           error: null,
         };
       } catch (e) {
         return {
           data: {
-            ...consolidateTextFields(data),
             streamed_data: data,
-            usage: {
-              error: e,
-            },
           },
           error: null,
         };
@@ -513,32 +472,47 @@ async function readResponse(
 
 async function readAndLogResponse(
   requestSettings: RequestSettings,
-  readable: ReadableStream<any>,
+  responseBody: string,
   requestId: string,
-  dbClient: SupabaseClient,
+  dbClient: SupabaseClient<Database>,
   requestBody: any,
   responseStatus: number,
-  startTime: Date
+  startTime: Date,
+  wasTimeout: boolean
 ): Promise<void> {
-  const responseResult = await readResponse(
+  const { data: insertData, error: insertError } = await dbClient
+    .from("response")
+    .insert([
+      {
+        request: requestId,
+        delay_ms: new Date().getTime() - startTime.getTime(),
+        body: {},
+        status: -1,
+      },
+    ])
+    .select("id")
+    .single();
+  if (insertError !== null) {
+    console.error(insertError);
+    return;
+  }
+
+  const responseResult = await parseResponse(
     requestSettings,
-    readable,
-    requestBody,
+    responseBody,
     responseStatus
   );
   if (responseResult.data !== null) {
     const { data, error } = await dbClient
       .from("response")
-      .insert([
-        {
-          request: requestId,
-          body: responseResult.data,
-          delay_ms: new Date().getTime() - startTime.getTime(),
-          status: responseStatus,
-          completion_tokens: responseResult.data.usage?.completion_tokens,
-          prompt_tokens: responseResult.data.usage?.prompt_tokens,
-        },
-      ])
+      .update({
+        request: requestId,
+        body: responseResult.data,
+        status: responseStatus,
+        completion_tokens: responseResult.data.usage?.completion_tokens,
+        prompt_tokens: responseResult.data.usage?.prompt_tokens,
+      })
+      .eq("id", insertData.id)
       .select("id");
     if (error !== null) {
       console.error(error);
@@ -547,6 +521,55 @@ async function readAndLogResponse(
     }
   } else {
     console.error(responseResult.error);
+  }
+
+  if (
+    requestSettings.stream &&
+    !responseResult.data.usage?.completion_tokens &&
+    responseResult.data?.streamed_data
+  ) {
+    const streamed_data: any[] = responseResult.data.streamed_data;
+    const responseTokenCount = await getTokenCount(
+      streamed_data
+        .filter((d) => "id" in d)
+        .map((d) => getResponseText(d))
+        .join("")
+    );
+    const [requestString, paddingTokenCount] = getRequestString(
+      JSON.parse(requestBody)
+    );
+    const requestTokenCount =
+      (await getTokenCount(requestString)) + paddingTokenCount;
+    const totalTokens = requestTokenCount + responseTokenCount;
+    if (isNaN(totalTokens)) {
+      throw new Error("Invalid token count");
+    }
+
+    const { data, error } = await dbClient
+      .from("response")
+      .update({
+        request: requestId,
+        body: {
+          ...responseResult.data,
+          usage: {
+            completion_tokens: responseTokenCount,
+            prompt_tokens: requestTokenCount,
+            total_tokens: totalTokens,
+            helicone_calculated: true,
+          },
+        },
+        delay_ms: new Date().getTime() - startTime.getTime(),
+        status: responseStatus,
+        completion_tokens: responseTokenCount,
+        prompt_tokens: requestTokenCount,
+      })
+      .eq("id", insertData.id)
+      .select("id");
+    if (error !== null) {
+      console.error(error);
+    } else {
+      console.log(data);
+    }
   }
 }
 
@@ -573,8 +596,20 @@ async function forwardAndLog(
         body
       )
     : forwardRequestToOpenAi(request, requestSettings, body, retryOptions));
-
-  let [readable, readableLog] = response.body?.tee() ?? [undefined, undefined];
+  const chunkEmitter = new EventEmitter();
+  const responseBodySubscriber = once(chunkEmitter, "done");
+  const decoder = new TextDecoder();
+  let globalResponseBody = "";
+  const loggingTransformStream = new TransformStream({
+    transform(chunk, controller) {
+      globalResponseBody += decoder.decode(chunk);
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      chunkEmitter.emit("done", globalResponseBody);
+    },
+  });
+  let readable = response.body?.pipeThrough(loggingTransformStream);
 
   if (requestSettings.ff_stream_force_format) {
     let buffer: any = null;
@@ -600,11 +635,13 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+  async function responseBodyTimeout(delay_ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, delay_ms));
+    console.log("response body timeout");
+    return globalResponseBody;
+  }
   ctx.waitUntil(
     (async () => {
-      if (!readableLog) {
-        return;
-      }
       const dbClient = createClient(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
@@ -622,15 +659,21 @@ async function forwardAndLog(
         heliconeApiKey: requestSettings.helicone_api_key,
       });
       const responseStatus = response.status;
+      const [wasTimeout, responseText] = await Promise.race([
+        Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
+        Promise.all([false, responseBodySubscriber]),
+      ]);
+
       if (requestResult.data !== null) {
         await readAndLogResponse(
           requestSettings,
-          readableLog,
+          responseText,
           requestResult.data,
           dbClient,
           requestBody,
           responseStatus,
-          startTime
+          startTime,
+          wasTimeout
         );
       }
     })()

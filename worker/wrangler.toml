@@ -2,12 +2,12 @@ name = "helicone-worker-dev"
 main = "src/index.ts"
 compatibility_date = "2022-11-29"
 compatibility_flags = [ "transformstream_enable_standard_constructor" , "streams_enable_constructors"]
-
+logpush = true
 
 [vars]
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 SUPABASE_URL = "http://localhost:54321"
-TOKENIZER_COUNT_API = "http://localhost:3000/api/tokenizer/open-ai/streaming/count"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
 
 [env.production]
 name = "helicone-worker-prod"
@@ -17,7 +17,7 @@ routes = [
 
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
-TOKENIZER_COUNT_API = "https://www.helicone.ai/api/tokenizer/open-ai/streaming/count"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
 
 
 [env.production_staging]
@@ -28,6 +28,7 @@ routes = [
 
 [env.production_staging.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"
 
 [env.preview]
 name = "helicone-worker-preview"
@@ -37,3 +38,4 @@ routes = [
 
 [env.preview.vars]
 SUPABASE_URL = "https://wldkumawyhruufmucrrc.supabase.co"
+TOKENIZER_COUNT_API = "https://token_calc.hconeai.com"

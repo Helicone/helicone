@@ -59,7 +59,7 @@ export async function getModelMetricsForUsers(
 SELECT response.body ->> 'model'::text as model,
   sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
   sum(response.prompt_tokens) AS sum_prompt_tokens,
-  sum(response.completion_tokens) AS sum_completion_tokens
+  sum(response.completion_tokens) AS sum_completion_tokens,
   request.user_id
 FROM response 
   left join request on response.request = request.id
