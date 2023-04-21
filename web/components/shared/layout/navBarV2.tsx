@@ -68,9 +68,11 @@ const NavBarV2 = (props: NavBarV2Props) => {
             {/* 1324 × 364 */}
             <Image
               className="hidden sm:block rounded-md"
-              src="/assets/heli-full-logo.png"
+              // src="/assets/heli-full-logo.png"
+              src="/assets/landing/helicone.png"
               width={150}
-              height={150 / (1324 / 364)}
+              height={150 / (1876 / 528)}
+              // height={150 / (1324 / 364)}
               alt="Helicone-full-logo"
             />
             <Image
