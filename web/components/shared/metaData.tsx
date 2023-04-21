@@ -11,23 +11,19 @@ const MetaData = (props: MetaDataProps) => {
   return (
     <>
       <Head>
-        <title>
-          {`${title} | Helicone - Providing meaningful and insightful analytics for
-          your GPT-3 usage`}
-        </title>
-        <link rel="icon" href="/assets/heli-logo.png" />
+        <title>{`${title} | Helicone - Observability for Generative AI`}</title>
+        <link rel="icon" href="/assets/landing/helicone-mobile.webp" />
         <meta
           property="og:title"
-          content="Helicone - Providing meaningful and insightful analytics for
-          your GPT-3 usage"
+          content="Helicone | Observability for Generative AI"
         />
         <meta
           property="og:description"
           name="description"
-          content="Monitoring your GPT-3 usage and costs shouldn't be a hassle. With Helicone, you can focus on building your product, not building and maintaining your own analytics solution."
+          content="Monitoring usage and costs for language models shouldn't be a hassle. With Helicone, you can focus on building your product, not building and maintaining your own analytics solution."
           key="desc"
         />
-        <meta property="og:image" content="/assets/heli-logo.png" />
+        <meta property="og:image" content="/assets/landing/helicone.webp" />
       </Head>
       {children}
     </>

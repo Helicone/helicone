@@ -147,10 +147,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </Transition.Child>
                       <div className="flex flex-shrink-0 items-center px-4">
                         <Image
-                          className="rounded-md"
-                          src="/assets/heli-full-logo.png"
+                          className="block rounded-md"
+                          src="/assets/landing/helicone.webp"
                           width={150}
-                          height={75}
+                          height={150 / (1876 / 528)}
                           alt="Helicone-full-logo"
                         />
                       </div>
@@ -380,10 +380,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     }}
                   >
                     <Image
-                      className="rounded-md"
-                      src="/assets/heli-full-logo.png"
+                      className="block rounded-md"
+                      src="/assets/landing/helicone.webp"
                       width={150}
-                      height={75}
+                      height={150 / (1876 / 528)}
                       alt="Helicone-full-logo"
                     />
                   </button>
