@@ -231,6 +231,7 @@ async function logRequest({
     const formattedPromptId =
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
+    const hashed_auth = await hash(auth);
 
     const { data: heliconeUserId, error: userIdError } =
       await getHeliconeUserId(dbClient, heliconeApiKey);
@@ -250,7 +251,7 @@ async function logRequest({
           id: requestId,
           path: request.url,
           body: json,
-          auth_hash: await hash(auth),
+          auth_hash: hashed_auth,
           user_id: jsonUserId ?? userId,
           prompt_id: promptId,
           properties: properties,
@@ -266,6 +267,18 @@ async function logRequest({
     if (error !== null) {
       return { data: null, error: error.message };
     } else {
+      // Log custom properties and then return request id
+      const customProperties = Object.entries(properties ?? {}).map(
+        (entry) => ({
+          request_id: requestId,
+          auth_hash: hashed_auth,
+          user_id: null,
+          key: entry[0],
+          value: entry[1],
+        })
+      );
+      await dbClient.from("properties").insert(customProperties).select();
+
       return { data: data.id, error: null };
     }
   } catch (e) {
@@ -701,6 +714,7 @@ async function forwardAndLog(
         requestId,
         heliconeApiKey: requestSettings.helicone_api_key,
       });
+
       const responseStatus = response.status;
       const [wasTimeout, responseText] = await Promise.race([
         Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
@@ -917,13 +931,13 @@ export default {
       let additionalHeaders: { [key: string]: string } = {};
       if (rateLimitOptions !== undefined) {
         const auth = request.headers.get("Authorization");
-      
+
         if (auth === null) {
           return new Response("No authorization header found!", {
             status: 401,
           });
         }
-      
+
         const hashedKey = await hash(auth);
         const rateLimitCheckResult = await checkRateLimit(
           request,
@@ -932,13 +946,17 @@ export default {
           hashedKey,
           requestBody.user
         );
-      
-        additionalHeaders = generateRateLimitHeaders(rateLimitCheckResult, rateLimitOptions);
-      
+
+        additionalHeaders = generateRateLimitHeaders(
+          rateLimitCheckResult,
+          rateLimitOptions
+        );
+
         if (rateLimitCheckResult.status === "rate_limited") {
           return new Response(
             JSON.stringify({
-              message: "Rate limit reached. Please wait before making more requests.",
+              message:
+                "Rate limit reached. Please wait before making more requests.",
             }),
             {
               status: 429,
@@ -1041,8 +1059,7 @@ export default {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "Helicone ran into an error servicing your request: " +
-            e,
+            "Helicone ran into an error servicing your request: " + e,
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
           "helicone-error": JSON.stringify(e),
