@@ -195,7 +195,7 @@ async function generateAndEnsureOnlyOneApiKey(
   return apiKey;
 }
 
-const Step2 = () => {
+const KeySetup = () => {
   const { setNotification } = useNotification();
   const [apiKey, setApiKey] = useState<string>("<API_KEY>");
   const supabase = useSupabaseClient();
@@ -259,7 +259,7 @@ const Step2 = () => {
   );
 };
 
-const Step3 = () => {
+const WaitingForFirstEvent = () => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const router = useRouter();
 
@@ -356,7 +356,6 @@ const Step3 = () => {
 
 const WelcomePage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const [step, setStep] = useState<number>(0);
 
   return (
     <AuthLayout user={user} hideSidebar={true}>
@@ -366,8 +365,8 @@ const WelcomePage = (props: DashboardPageProps) => {
         </h1>
 
         <div className="flex flex-col space-y-2 gap-5">
-          <Step2 />
-          <Step3 />
+          <KeySetup />
+          <WaitingForFirstEvent />
         </div>
       </div>
     </AuthLayout>
