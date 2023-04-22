@@ -19,9 +19,7 @@ import { Result } from "../../../lib/result";
 import { useRouter } from "next/router";
 
 import React from "react";
-import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
-import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { DiffHighlight } from "./diffHighlight";
 
 interface DashboardPageProps {
   user: User;
@@ -30,173 +28,116 @@ interface DashboardPageProps {
 
 export type Loading<T> = T | "loading";
 
-export const BaseUrlInstructions = () => {
-  const { setNotification } = useNotification();
-  const [lang, setLang] = useState<"python" | "curl" | "node">("node");
+interface BaseUrlInstructionsProps {
+  apiKey: string;
+}
 
-  const codeSnippet = () => {
-    switch (lang) {
-      case "python":
-        return (
-          <>
-            <div className="flex flex-row gap-2">
-              <p className="text-gray-300">
-                # Change the default base API url to Helicone&apos;s
-              </p>
-            </div>
-            <div className="flex flex-row gap-2">
-              <p className="text-red-500">import </p>
-              <p className="text-gray-300">openai </p>
-            </div>
-            <div className="flex flex-row gap-2 -ml-4 bg-green-900">
-              <p className="text-green-700 pl-1 -mr-1 bg-green-900">+</p>
-              <p className="text-gray-300">openai.api_base</p>
-              <p className="text-blue-300">=</p>
-              <p className="text-blue-400">
-                &quot;https://oai.hconeai.com/v1&quot;
-              </p>
-            </div>
-          </>
-        );
-      case "curl":
-        return (
-          <>
-            <div className="flex flex-row gap-2">
-              <p className="text-gray-300">Replace the OpenAI base url</p>
-            </div>
-            <div className="flex flex-row gap-2">
-              <p className="text-purple-500">POST </p>
-              <p className="text-red-500">https://api.openai.com/v1</p>
-            </div>
-            <div className="flex flex-row gap-2 mt-4">
-              <p className="text-gray-300">with Helicone</p>
-            </div>
-            <div className="flex flex-row gap-2 -ml-4 bg-green-900">
-              <p className="text-green-700 pl-1 -mr-1 bg-green-900">+</p>
-              <p className="text-purple-500">POST </p>
-              <p className="text-green-500">https://oai.hconeai.com/v1</p>
-            </div>
-          </>
-        );
-      case "node":
-        return (
-          <>
-            <div className="flex flex-row gap-2">
-              <p className="text-gray-300">
-                {`//`} Add a basePath to the Configuration:
-              </p>
-            </div>
-            <div className="flex flex-row xs:gap-0.5 gap-1">
-              <p className="text-red-500">import</p>
-              <p className="text-blue-300">{`{`}</p>
-              <p className="text-gray-300">Configuration,OpenAIApi </p>
-              <p className="text-blue-300">{`}`}</p>
-              <p className="text-red-500">from</p>
-              <p className="text-blue-300">{`"openai"`}</p>
-            </div>
-            <div className="flex flex-col">
-              <div className="flex flex-row gap-2">
-                <p className="text-red-500">const </p>
-                <p className="text-blue-300">configuration </p>
-                <p className="text-red-500">= new</p>
-                <div className="flex flex-row">
-                  <p className="text-purple-400">Configuration</p>
-                  <p className="text-blue-300">{`(`} </p>
-                  <p className="text-orange-500">{`{`}</p>
-                </div>
-              </div>
-              <div className="flex flex-row gap-0 ml-4">
-                <p className="text-gray-300">apiKey: process.env.</p>
-                <div className="flex flex-row">
-                  <p className="text-blue-300">OPENAI_API_KEY</p>
-                  <p className="text-gray-300">,</p>
-                </div>
-              </div>
-              <div className="flex flex-row gap-2 pl-4 bg-green-900">
-                <div className="flex flex-row">
-                  <p className="text-green-700 -ml-3 pr-1">+</p>
-                  <p className="text-gray-300">basePath:</p>
-                </div>
+const CODE_CONVERTS = {
+  typescript: (key: string) => `
+import {Configuration, OpenAIApi} from "openai";
 
-                <div className="flex flex-row">
-                  <p className="text-blue-300">{`"https://oai.hconeai.com/v1"`}</p>
-                  <p className="text-gray-300">,</p>
-                </div>
-              </div>
-              <div className="flex flex-row gap-2 pl-4 bg-green-900">
-                <div className="flex flex-row">
-                  <p className="text-green-700 -ml-3 pr-1">+</p>
-                  <p className="text-gray-300">baseOptions:</p>
-                </div>
-                <p className="text-orange-500">{`{`}</p>
-              </div>
-              <div className="flex flex-row gap-0 bg-green-900">
-                <p className="text-green-700 pl-1 pr-5">+</p>
-                <p className="text-gray-300 pr-1">headers:</p>
-                <p className="text-orange-500">{`{`}</p>
-              </div>
-              <div className="flex flex-row gap-2 bg-green-900">
-                <div className="flex flex-row">
-                  <p className="text-green-700 pl-1 pr-9">+</p>
-                  <p className="text-gray-300">{'"Helicone-Auth":'}</p>
-                </div>
-                <div className="flex flex-row">
-                  <p className="text-blue-300">{`"{KEY}"`}</p>
-                  <p className="text-gray-300">,</p>
-                </div>
-              </div>
-              <div className="flex flex-row bg-green-900">
-                <p className="text-green-700 pl-1 pr-9">+</p>
-                <p className="text-orange-500">{`}`}</p>
-              </div>
-              <div className="flex flex-row bg-green-900">
-                <p className="text-green-700 pl-1 pr-1">+</p>
-                <p className="text-orange-500">{`}`}</p>
-              </div>
-              <div className="flex flex-row">
-                <p className="text-orange-500">{`}`}</p>
-                <p className="text-blue-300">{`)`} </p>
-                <p className="text-gray-300">;</p>
-              </div>
-            </div>
-            <div className="flex flex-row gap-2">
-              <p className="text-red-500">const </p>
-              <p className="text-blue-300">openai </p>
-              <p className="text-red-500">= new</p>
-              <div className="flex flex-row">
-                <p className="text-purple-400">OpenAIApi</p>
-                <p className="text-blue-300">{`(configuration)`} </p>
-                <p className="text-gray-300">;</p>
-              </div>
-            </div>
-          </>
-        );
-      default:
-        return <div></div>;
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  // Add a basePath to the Configuartion
+  basePath: "https://oai.hconeai.com/v1",
+  {
+    headers: {
+      // Add your Helicone API Key
+      "Helicone-Auth": "${key}",
+    },
+  }
+});
+
+const openai = new OpenAIApi(configuration);`,
+
+  python: (key: string) => `
+openai.api_base = "https://oai.hconeai.com/v1"
+
+openai.Completion.create(
+    # ...other parameters
+    headers={
+      "Helicone-Auth": "${key}",
     }
+)
+`,
+
+  curl: (key: string) => `
+curl -X POST https://oai.hconeai.com/v1/[path] \
+  -H "Helicone-Auth: ${key}" \
+  -H "Content-Type: application/json" \
+  -d '[request body]'
+`,
+  langchain_python: (key: string) => `
+openai.api_base = "https://oai.hconeai.com/v1"
+
+llm = OpenAI(temperature=0.9, headers={"Helicone-Auth": "${key}"})
+`,
+  langchain_typescript: (key: string) => `
+const model = new OpenAI(
+  {},
+  {
+    basePath: "https://oai.hconeai.com/v1",
+    baseOptions: {
+      headers: {
+        "Helicone-Auth": "${key}"
+      },
+    },
+  }
+);
+`,
+};
+
+type SupportedLanguages = keyof typeof CODE_CONVERTS;
+
+const DIFF_LINES: {
+  [key in SupportedLanguages]: number[];
+} = {
+  typescript: [5, 9],
+  python: [1, 2],
+  curl: [1, 2],
+  langchain_python: [1, 2],
+  langchain_typescript: [1, 2],
+};
+
+export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
+  const { setNotification } = useNotification();
+  const [lang, setLang] = useState<SupportedLanguages>("typescript");
+
+  const codeSnippet = {
+    curl: (
+      <DiffHighlight
+        code={CURL_CODE}
+        language="bash"
+        newLines={[1, 2]}
+        oldLines={[3]}
+      />
+    ),
+    python: (
+      <DiffHighlight
+        code={PYTHON_CODE}
+        language="python"
+        newLines={[1, 2]}
+        oldLines={[3]}
+      />
+    ),
+    node: (
+      <DiffHighlight
+        code={TYPESCRIPT_CODE("hello")}
+        language="typescript"
+        newLines={[5, 9]}
+        oldLines={[]}
+      />
+    ),
   };
 
   const copyLineHandler = () => {
-    switch (lang) {
-      case "node":
-        navigator.clipboard.writeText(
-          `basePath: "https://oai.hconeai.com/v1" `
-        );
-        setNotification("Copied Node code to clipboard", "success");
-        break;
-      case "python":
-        navigator.clipboard.writeText(
-          `openai.api_base="https://oai.hconeai.com/v1"`
-        );
-        setNotification("Copied Python code to clipboard", "success");
-        break;
-      case "curl":
-        navigator.clipboard.writeText(`https://oai.hconeai.com/v1`);
-        setNotification("Copied cURL code to clipboard", "success");
-        break;
-      default:
-        navigator.clipboard.writeText("hello");
-    }
+    const code = {
+      curl: CURL_CODE,
+      python: PYTHON_CODE,
+      node: TYPESCRIPT_CODE(props.apiKey),
+    };
+
+    navigator.clipboard.writeText(code[lang]);
   };
 
   return (
@@ -233,11 +174,9 @@ export const BaseUrlInstructions = () => {
           Curl
         </button>
       </span>
-      <div className="overflow-hidden rounded-md bg-gray-900 ring-1 ring-white/10">
-        <div className="px-6 pt-6 pb-8 min-h-[20em] flex flex-col gap-4 font-mono text-[10px] sm:text-sm">
-          {codeSnippet()}
-        </div>
-      </div>
+
+      {codeSnippet[lang]}
+
       <button
         onClick={copyLineHandler}
         className="flex flex-row w-full justify-center items-center rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -299,6 +238,7 @@ const RenderStepActions = ({
     );
   }
 };
+
 const Step1 = () => {
   return (
     <div>
