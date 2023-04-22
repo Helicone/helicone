@@ -177,7 +177,7 @@ async function generateAPIKey() {
     method: "base32",
     dashes: true,
   }).toString()}`.toLowerCase();
-  return await hashAuth(apiKey);
+  return apiKey;
 }
 async function generateAndEnsureOnlyOneApiKey(
   supabaseClient: SupabaseClient<Database>,
@@ -208,7 +208,7 @@ const KeySetup = () => {
     }
     generateAPIKey().then(async (key) => {
       setApiKey(key);
-      await generateAndEnsureOnlyOneApiKey(supabase, user, key);
+      await generateAndEnsureOnlyOneApiKey(supabase, user, await hashAuth(key));
     });
   }, [supabase, user]);
 
