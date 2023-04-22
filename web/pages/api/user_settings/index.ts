@@ -81,13 +81,13 @@ function getHighestSubscription(
 
 function getRequestLimit(tier: Tier): number {
   if (tier === "free") {
-    return 1000;
+    return 100_000;
   } else if (tier === "starter") {
-    return 50_000;
+    return 500_000;
   } else if (tier === "starter-pending-cancel") {
-    return 50_000;
+    return 500_000;
   } else if (tier === "enterprise") {
-    return 1_000_000;
+    return 10_000_000;
   } else {
     throw new Error("Unknown tier");
   }
