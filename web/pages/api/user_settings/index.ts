@@ -103,23 +103,12 @@ async function syncSettingsWithStripe(
 ): Promise<Result<undefined, string>> {
   const [activeSubscription, currentTier] =
     getHighestSubscription(subscriptions);
-  if (currentTier === userSettings.tier) {
+
+  if (
+    currentTier === userSettings.tier &&
+    getRequestLimit(currentTier) <= userSettings.request_limit
+  ) {
     return { data: undefined, error: null };
-  } else if (activeSubscription === null || currentTier === "free") {
-    const { error: updateUserSettingsError } = await supabaseServer
-      .from("user_settings")
-      .update({
-        tier: "free",
-        request_limit: 1000,
-      })
-      .eq("user", userSettings.user)
-      .select("*")
-      .single();
-    if (updateUserSettingsError !== null) {
-      return { data: null, error: updateUserSettingsError.message };
-    } else {
-      return { data: undefined, error: null };
-    }
   } else {
     const { error: updateUserSettingsError } = await supabaseServer
       .from("user_settings")
