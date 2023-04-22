@@ -350,13 +350,13 @@ export interface Database {
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }

@@ -1,7 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { getCacheSettings } from "./cache";
 import { extractPrompt, Prompt } from "./prompt";
-import { PassThrough } from "stream";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import {
   forwardRequestToOpenAiWithRetry,
@@ -9,6 +8,13 @@ import {
   RetryOptions,
 } from "./retry";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import {
+  checkRateLimit,
+  getRateLimitOptions,
+  RateLimitOptions,
+  RateLimitResponse,
+  updateRateLimitCounter,
+} from "./rateLimit";
 import { EventEmitter } from "events";
 import { once } from "./helpers";
 import { Database } from "../supabase/database.types";
@@ -19,6 +25,7 @@ export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
+  RATE_LIMIT_KV: KVNamespace;
 }
 
 interface SuccessResult<T> {
@@ -46,7 +53,7 @@ export async function forwardRequestToOpenAi(
   body?: string,
   retryOptions?: RetryOptions
 ): Promise<Response> {
-  let url = new URL(request.url);
+  const url = new URL(request.url);
   const new_url = new URL(`https://api.openai.com${url.pathname}`);
   const headers = removeHeliconeHeaders(request.headers);
   const method = request.method;
@@ -113,15 +120,14 @@ async function getPromptId(
       newPromptName = name;
     } else {
       // First, query the database to find the highest prompt name suffix
-      const { data: highestSuffixData, error: highestSuffixError } =
-        await dbClient
-          .from("prompt")
-          .select("name")
-          .order("name", { ascending: false })
-          .like("name", "Prompt (%)")
-          .eq("auth_hash", auth_hash)
-          .limit(1)
-          .single();
+      const { data: highestSuffixData } = await dbClient
+        .from("prompt")
+        .select("name")
+        .order("name", { ascending: false })
+        .like("name", "Prompt (%)")
+        .eq("auth_hash", auth_hash)
+        .limit(1)
+        .single();
 
       // Extract the highest suffix number from the highest prompt name suffix found
       let highestSuffix = 0;
@@ -205,7 +211,6 @@ async function logRequest({
   body,
   properties,
   prompt,
-  isPromptRegexOn,
   promptName,
   heliconeApiKey,
 }: HeliconeRequest): Promise<Result<string, string>> {
@@ -287,9 +292,7 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
   const propTag = "helicone-property-";
   const properties = Object.fromEntries(
     [...headers.entries()]
-      .filter(
-        ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
-      )
+      .filter(([key]) => key.startsWith(propTag) && key.length > propTag.length)
       .map(([key, value]) => [key.substring(propTag.length), value])
   );
   return {
@@ -435,7 +438,7 @@ async function parseResponse(
   responseBody: string,
   responseStatus: number
 ): Promise<Result<any, string>> {
-  let result = responseBody;
+  const result = responseBody;
   try {
     if (!requestSettings.stream || responseStatus !== 200) {
       return {
@@ -874,6 +877,24 @@ async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
   }
 }
 
+function generateRateLimitHeaders(
+  rateLimitCheckResult: RateLimitResponse,
+  rateLimitOptions: RateLimitOptions
+): { [key: string]: string } {
+  const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
+  const headers: { [key: string]: string } = {
+    "Helicone-RateLimit-Limit": rateLimitCheckResult.limit.toString(),
+    "Helicone-RateLimit-Remaining": rateLimitCheckResult.remaining.toString(),
+    "Helicone-RateLimit-Policy": policy,
+  };
+
+  if (rateLimitCheckResult.reset !== undefined) {
+    headers["Helicone-RateLimit-Reset"] = rateLimitCheckResult.reset.toString();
+  }
+
+  return headers;
+}
+
 export default {
   async fetch(
     request: Request,
@@ -886,10 +907,50 @@ export default {
         return response;
       }
 
+      const rateLimitOptions = getRateLimitOptions(request);
+
       const requestBody =
         request.method === "POST"
-          ? await request.clone().json<{ stream?: boolean }>()
+          ? await request.clone().json<{ stream?: boolean; user?: string }>()
           : {};
+
+      let additionalHeaders: { [key: string]: string } = {};
+      if (rateLimitOptions !== undefined) {
+        const auth = request.headers.get("Authorization");
+      
+        if (auth === null) {
+          return new Response("No authorization header found!", {
+            status: 401,
+          });
+        }
+      
+        const hashedKey = await hash(auth);
+        const rateLimitCheckResult = await checkRateLimit(
+          request,
+          env,
+          rateLimitOptions,
+          hashedKey,
+          requestBody.user
+        );
+      
+        additionalHeaders = generateRateLimitHeaders(rateLimitCheckResult, rateLimitOptions);
+      
+        if (rateLimitCheckResult.status === "rate_limited") {
+          return new Response(
+            JSON.stringify({
+              message: "Rate limit reached. Please wait before making more requests.",
+            }),
+            {
+              status: 429,
+              headers: {
+                "content-type": "application/json;charset=UTF-8",
+                ...additionalHeaders,
+              },
+            }
+          );
+        }
+      }
+
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
         tokenizer_count_api: env.TOKENIZER_COUNT_API,
@@ -922,7 +983,7 @@ export default {
         }
       }
 
-      let requestClone = cacheSettings.shouldSaveToCache
+      const requestClone = cacheSettings.shouldSaveToCache
         ? request.clone()
         : null;
 
@@ -948,6 +1009,27 @@ export default {
       if (cacheSettings.shouldReadFromCache) {
         responseHeaders.append("Helicone-Cache", "MISS");
       }
+      Object.entries(additionalHeaders).forEach(([key, value]) => {
+        responseHeaders.append(key, value);
+      });
+
+      if (rateLimitOptions !== undefined) {
+        const auth = request.headers.get("Authorization");
+
+        if (auth === null) {
+          return new Response("No authorization header found!", {
+            status: 401,
+          });
+        }
+        const hashedKey = await hash(auth);
+        updateRateLimitCounter(
+          request,
+          env,
+          rateLimitOptions,
+          hashedKey,
+          requestBody.user
+        );
+      }
 
       return new Response(response.body, {
         ...response,
@@ -959,7 +1041,8 @@ export default {
       return new Response(
         JSON.stringify({
           "helicone-message":
-            "oh no :( this is embarrassing, Helicone ran into an error proxy-ing your request. Please try again later",
+            "Helicone ran into an error servicing your request: " +
+            e,
           support:
             "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
           "helicone-error": JSON.stringify(e),
