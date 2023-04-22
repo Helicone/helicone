@@ -15,6 +15,7 @@ import {
   stripeEnterpriseProductId,
   stripeStarterProductId,
 } from "../checkout_sessions";
+import { REQUEST_LIMITS } from "../../../lib/constants";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
 export type UserSettingsResponse = {
@@ -79,20 +80,6 @@ function getHighestSubscription(
   }
 }
 
-function getRequestLimit(tier: Tier): number {
-  if (tier === "free") {
-    return 100_000;
-  } else if (tier === "starter") {
-    return 500_000;
-  } else if (tier === "starter-pending-cancel") {
-    return 500_000;
-  } else if (tier === "enterprise") {
-    return 10_000_000;
-  } else {
-    throw new Error("Unknown tier");
-  }
-}
-
 type Subscription = Stripe.Subscription & {
   plan?: Stripe.Plan;
 };
@@ -106,7 +93,7 @@ async function syncSettingsWithStripe(
 
   if (
     currentTier === userSettings.tier &&
-    getRequestLimit(currentTier) <= userSettings.request_limit
+    REQUEST_LIMITS[currentTier] <= userSettings.request_limit
   ) {
     return { data: undefined, error: null };
   } else {
@@ -114,7 +101,7 @@ async function syncSettingsWithStripe(
       .from("user_settings")
       .update({
         tier: currentTier,
-        request_limit: getRequestLimit(currentTier),
+        request_limit: REQUEST_LIMITS[currentTier],
       })
       .eq("user", userSettings.user)
       .select("*")
