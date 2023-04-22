@@ -40,6 +40,7 @@ interface ErrorResult<T> {
 export interface RequestSettings {
   stream: boolean;
   tokenizer_count_api: string;
+  helicone_api_key?: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
 }
@@ -77,12 +78,13 @@ export async function forwardRequestToOpenAi(
 }
 
 type HeliconeRequest = {
-  dbClient: SupabaseClient;
+  dbClient: SupabaseClient<Database>;
   request: Request;
   auth: string;
   requestId: string;
   body?: string;
   prompt?: Prompt;
+  heliconeApiKey?: string;
 } & HeliconeHeaders;
 
 interface HeliconeHeaders {
@@ -163,6 +165,42 @@ async function getPromptId(
   }
 }
 
+async function getHeliconeUserId(
+  dbClient: SupabaseClient<Database>,
+  heliconeApiKey?: string
+): Promise<
+  Result<
+    {
+      api_key_hash: string;
+      api_key_name: string;
+      created_at: string;
+      id: number;
+      soft_delete: boolean;
+      user_id: string;
+    },
+    string
+  >
+> {
+  if (!heliconeApiKey) {
+    return { data: null, error: "No helicone api key" };
+  }
+  if (!heliconeApiKey.includes("Bearer ")) {
+    return { data: null, error: "Must included Bearer in API Key" };
+  }
+  const apiKey = heliconeApiKey.replace("Bearer ", "").trim();
+  const apiKeyHash = await hash(`Bearer ${apiKey}`);
+  const { data, error } = await dbClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("api_key_hash", apiKeyHash)
+    .eq("soft_delete", false)
+    .single();
+  if (error !== null) {
+    return { data: null, error: error.message };
+  }
+  return { data: data, error: null };
+}
+
 async function logRequest({
   dbClient,
   request,
@@ -174,6 +212,7 @@ async function logRequest({
   properties,
   prompt,
   promptName,
+  heliconeApiKey,
 }: HeliconeRequest): Promise<Result<string, string>> {
   try {
     const json = body ? JSON.parse(body) : {};
@@ -193,6 +232,17 @@ async function logRequest({
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
+    const { data: heliconeUserId, error: userIdError } =
+      await getHeliconeUserId(dbClient, heliconeApiKey);
+    if (userIdError !== null) {
+      console.error(userIdError);
+    }
+
+    // TODO - once we deprecate using OpenAI API keys, we can remove this
+    // if (userIdError !== null) {
+    //   return { data: null, error: userIdError };
+    // }
+
     const { data, error } = await dbClient
       .from("request")
       .insert([
@@ -206,6 +256,8 @@ async function logRequest({
           properties: properties,
           formatted_prompt_id: formattedPromptId,
           prompt_values: prompt_values,
+          helicone_user: heliconeUserId?.user_id,
+          helicone_api_key_id: heliconeUserId?.id,
         },
       ])
       .select("id")
@@ -528,6 +580,26 @@ async function readAndLogResponse(
   }
 }
 
+async function ensureApiKeyAddedToAccount(
+  useId: string,
+  openAIApiKeyHash: string,
+  preview: string,
+  dbClient: SupabaseClient<Database>
+) {
+  await dbClient.from("user_api_keys").upsert(
+    {
+      user_id: useId,
+      api_key_hash: openAIApiKeyHash,
+      api_key_preview: preview,
+      key_name: "automatically added",
+    },
+    {
+      ignoreDuplicates: true,
+      onConflict: "api_key_hash,user_id",
+    }
+  );
+}
+
 async function forwardAndLog(
   requestSettings: RequestSettings,
   body: string,
@@ -601,7 +673,23 @@ async function forwardAndLog(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
       );
-
+      if (requestSettings.helicone_api_key) {
+        const { data: heliconeUserId, error: userIdError } =
+          await getHeliconeUserId(dbClient, requestSettings.helicone_api_key);
+        if (userIdError !== null) {
+          console.error(userIdError);
+        } else {
+          console.log("helicone user id", heliconeUserId);
+          await ensureApiKeyAddedToAccount(
+            heliconeUserId.user_id,
+            await hash(auth),
+            auth.replace("Bearer", "").trim().slice(0, 5) +
+              "..." +
+              auth.trim().slice(-3),
+            dbClient
+          );
+        }
+      }
       const requestBody = body === "" ? undefined : body;
       const requestResult = await logRequest({
         dbClient,
@@ -611,6 +699,7 @@ async function forwardAndLog(
         prompt: prompt,
         ...getHeliconeHeaders(request.headers),
         requestId,
+        heliconeApiKey: requestSettings.helicone_api_key,
       });
       const responseStatus = response.status;
       const [wasTimeout, responseText] = await Promise.race([
@@ -865,6 +954,7 @@ export default {
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
         tokenizer_count_api: env.TOKENIZER_COUNT_API,
+        helicone_api_key: request.headers.get("helicone-auth") ?? undefined,
         ff_stream_force_format:
           request.headers.get("helicone-ff-stream-force-format") === "true",
         ff_increase_timeout:
