@@ -82,7 +82,7 @@ const tiers = [
     price: "$0",
     description: "The basic essentials for any project using GPT-3.",
     features: [
-      "Up to 100,000 total requests",
+      "Up to 100,000 requests per month",
       "Basic Support",
       "Simple Metrics",
     ],
