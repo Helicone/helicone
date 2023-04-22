@@ -172,15 +172,18 @@ export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
   );
 };
 
-async function generateAndEnsureOnlyOneApiKey(
-  supabaseClient: SupabaseClient<Database>,
-  user: User
-): Promise<string> {
+async function generateAPIKey() {
   const apiKey = `sk-${generateApiKey({
     method: "base32",
     dashes: true,
   }).toString()}`.toLowerCase();
-  const hashedKey = await hashAuth(apiKey);
+  return await hashAuth(apiKey);
+}
+async function generateAndEnsureOnlyOneApiKey(
+  supabaseClient: SupabaseClient<Database>,
+  user: User,
+  hashedKey: string
+): Promise<void> {
   await supabaseClient
     .from("helicone_api_keys")
     .delete()
@@ -191,8 +194,6 @@ async function generateAndEnsureOnlyOneApiKey(
     user_id: user.id,
     api_key_name: "first api key",
   });
-
-  return apiKey;
 }
 
 const KeySetup = () => {
@@ -205,8 +206,9 @@ const KeySetup = () => {
     if (user == null) {
       return;
     }
-    generateAndEnsureOnlyOneApiKey(supabase, user).then((apiKey) => {
-      setApiKey(apiKey);
+    generateAPIKey().then(async (key) => {
+      setApiKey(key);
+      await generateAndEnsureOnlyOneApiKey(supabase, user, key);
     });
   }, [supabase, user]);
 
