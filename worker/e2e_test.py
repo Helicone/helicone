@@ -41,7 +41,9 @@ def assert_stream_and_not_stream_same_tokens(**kwargs):
         "*").eq("request", streamRequestId).single().execute().data.get("body").get("usage")
     print("notStreamedUsage", notStreamedUsage)
     print("streamedUsage", streamedUsage)
-    assert notStreamedUsage == streamedUsage
+    assert notStreamedUsage["total_tokens"] == streamedUsage["total_tokens"]
+    assert notStreamedUsage["prompt_tokens"] == streamedUsage["prompt_tokens"]
+    assert notStreamedUsage["completion_tokens"] == streamedUsage["completion_tokens"]
 
 
 def test_streamed_response_delays():

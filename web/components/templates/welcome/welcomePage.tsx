@@ -1,6 +1,6 @@
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
-import { User } from "@supabase/supabase-js";
-import { Dispatch, SetStateAction, useState } from "react";
+import { SupabaseClient, User } from "@supabase/supabase-js";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import * as DashboardAnimation from "../../../public/lottie/DashboardAnimation.json";
 import * as PartyParrot from "../../../public/lottie/PartyParrot.json";
@@ -20,6 +20,9 @@ import { useRouter } from "next/router";
 
 import React from "react";
 import { DiffHighlight } from "./diffHighlight";
+import generateApiKey from "generate-api-key";
+import { hashAuth } from "../../../lib/hashClient";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 
 interface DashboardPageProps {
   user: User;
@@ -33,6 +36,24 @@ interface BaseUrlInstructionsProps {
 }
 
 const CODE_CONVERTS = {
+  curl: (key: string) => `
+  curl --request POST \\
+  --url https://oai.hconeai.com/v1/chat/completions \\
+  --header 'Authorization: Bearer <OPEN_AI_API_KEY>' \\
+  --header 'Helicone-Auth: Bearer ${key}' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+	"model": "gpt-3.5-turbo",
+	"messages": [
+		{
+			"role": "system",
+			"content": "Say Hello!"
+		}
+	],
+	"temperature": 1,
+	"max_tokens": 10
+}'
+`,
   typescript: (key: string) => `
 import {Configuration, OpenAIApi} from "openai";
 
@@ -43,7 +64,7 @@ const configuration = new Configuration({
   {
     headers: {
       // Add your Helicone API Key
-      "Helicone-Auth": "${key}",
+      "Helicone-Auth": "Bearer ${key}",
     },
   }
 });
@@ -56,21 +77,20 @@ openai.api_base = "https://oai.hconeai.com/v1"
 openai.Completion.create(
     # ...other parameters
     headers={
-      "Helicone-Auth": "${key}",
+      "Helicone-Auth": "Bearer ${key}",
     }
 )
 `,
 
-  curl: (key: string) => `
-curl -X POST https://oai.hconeai.com/v1/[path] \
-  -H "Helicone-Auth: ${key}" \
-  -H "Content-Type: application/json" \
-  -d '[request body]'
-`,
   langchain_python: (key: string) => `
 openai.api_base = "https://oai.hconeai.com/v1"
 
-llm = OpenAI(temperature=0.9, headers={"Helicone-Auth": "${key}"})
+llm = OpenAI(
+  temperature=0.9,
+  headers={
+    "Helicone-Auth": "Bearer ${key}"
+  }
+)
 `,
   langchain_typescript: (key: string) => `
 const model = new OpenAI(
@@ -79,7 +99,7 @@ const model = new OpenAI(
     basePath: "https://oai.hconeai.com/v1",
     baseOptions: {
       headers: {
-        "Helicone-Auth": "${key}"
+        "Helicone-Auth": "Bearer ${key}"
       },
     },
   }
@@ -93,92 +113,56 @@ const DIFF_LINES: {
   [key in SupportedLanguages]: number[];
 } = {
   typescript: [5, 9],
-  python: [1, 2],
-  curl: [1, 2],
-  langchain_python: [1, 2],
-  langchain_typescript: [1, 2],
+  python: [0, 5],
+  curl: [],
+  langchain_python: [0, 5],
+  langchain_typescript: [3, 6],
+};
+
+const NAMES: {
+  [key in SupportedLanguages]: string;
+} = {
+  curl: "cURL",
+  typescript: "Node.js",
+  python: "Python",
+  langchain_python: "LangChain",
+  langchain_typescript: "LangChainJS",
 };
 
 export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
   const { setNotification } = useNotification();
   const [lang, setLang] = useState<SupportedLanguages>("typescript");
 
-  const codeSnippet = {
-    curl: (
-      <DiffHighlight
-        code={CURL_CODE}
-        language="bash"
-        newLines={[1, 2]}
-        oldLines={[3]}
-      />
-    ),
-    python: (
-      <DiffHighlight
-        code={PYTHON_CODE}
-        language="python"
-        newLines={[1, 2]}
-        oldLines={[3]}
-      />
-    ),
-    node: (
-      <DiffHighlight
-        code={TYPESCRIPT_CODE("hello")}
-        language="typescript"
-        newLines={[5, 9]}
-        oldLines={[]}
-      />
-    ),
-  };
-
-  const copyLineHandler = () => {
-    const code = {
-      curl: CURL_CODE,
-      python: PYTHON_CODE,
-      node: TYPESCRIPT_CODE(props.apiKey),
-    };
-
-    navigator.clipboard.writeText(code[lang]);
-  };
-
   return (
     <div className="space-y-4">
       <span className="isolate inline-flex rounded-md shadow-sm w-full">
-        <button
-          onClick={() => setLang("node")}
-          type="button"
-          className={clsx(
-            lang === "node" ? "bg-gray-200" : "",
-            "w-full text-center justify-center relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          )}
-        >
-          Node.js
-        </button>
-        <button
-          onClick={() => setLang("python")}
-          type="button"
-          className={clsx(
-            lang === "python" ? "bg-gray-200" : "",
-            "w-full text-center justify-center relative -ml-px inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          )}
-        >
-          Python
-        </button>
-        <button
-          onClick={() => setLang("curl")}
-          type="button"
-          className={clsx(
-            lang === "curl" ? "bg-gray-200" : "",
-            "w-full text-center justify-center relative -ml-px inline-flex items-center rounded-r-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          )}
-        >
-          Curl
-        </button>
+        {Object.entries(NAMES).map(([key, name], i) => (
+          <button
+            onClick={() => setLang(key as SupportedLanguages)}
+            type="button"
+            className={clsx(
+              lang === key ? "bg-gray-200" : "",
+              "w-full text-center justify-center relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500",
+              i === 0 ? "rounded-l-md" : "",
+              i === Object.entries(NAMES).length - 1 ? "rounded-r-md" : ""
+            )}
+            key={key}
+          >
+            {name}
+          </button>
+        ))}
       </span>
-
-      {codeSnippet[lang]}
-
+      <DiffHighlight
+        code={CODE_CONVERTS[lang](props.apiKey)}
+        language="bash"
+        newLines={DIFF_LINES[lang]}
+        oldLines={[]}
+      />
       <button
-        onClick={copyLineHandler}
+        onClick={() => {
+          navigator.clipboard.writeText(CODE_CONVERTS[lang](props.apiKey));
+          setNotification("Copied to clipboard", "success");
+        }}
         className="flex flex-row w-full justify-center items-center rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         <ClipboardDocumentListIcon className="w-5 h-5 mr-2" />
@@ -188,75 +172,89 @@ export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
   );
 };
 
-const RenderStepActions = ({
-  currentStep,
-  setCurrentStep,
-  totalSteps,
-}: {
-  currentStep: number;
-  setCurrentStep: Dispatch<SetStateAction<Steps>>;
-  totalSteps: number;
-}) => {
-  if (currentStep === totalSteps) {
-    return (
-      <div className="bottom-0 relative flex flex-row justify-start flex-1 pt-8">
-        <button
-          onClick={() => setCurrentStep((currentStep - 1) as Steps)}
-          className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          Back
-        </button>
-      </div>
-    );
-  } else if (currentStep === 1) {
-    return (
-      <div className="bottom-0 relative flex flex-row justify-end flex-1 pt-8">
-        <button
-          onClick={() => setCurrentStep((currentStep + 1) as Steps)}
-          className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          Next
-        </button>
-      </div>
-    );
-  } else {
-    return (
-      <div className="bottom-0 relative flex flex-row justify-between flex-1 pt-8">
-        <button
-          onClick={() => setCurrentStep((currentStep - 1) as Steps)}
-          className="rounded-md bg-gray-200 text-black px-3.5 py-1.5 text-base font-semibold leading-7 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          Back
-        </button>
-        <button
-          onClick={() => setCurrentStep((currentStep + 1) as Steps)}
-          className="rounded-md bg-black px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          Next
-        </button>
-      </div>
-    );
-  }
-};
+async function generateAndEnsureOnlyOneApiKey(
+  supabaseClient: SupabaseClient<Database>,
+  user: User
+): Promise<string> {
+  const apiKey = `sk-${generateApiKey({
+    method: "base32",
+    dashes: true,
+  }).toString()}`.toLowerCase();
+  const hashedKey = await hashAuth(apiKey);
+  await supabaseClient
+    .from("helicone_api_keys")
+    .delete()
+    .eq("user_id", user.id);
 
-const Step1 = () => {
-  return (
-    <div>
-      {" "}
-      <p className="text-gray-500"></p>
-      <KeyPage hideTabs={true} />
-    </div>
-  );
-};
+  await supabaseClient.from("helicone_api_keys").insert({
+    api_key_hash: hashedKey,
+    user_id: user.id,
+    api_key_name: "first api key",
+  });
+
+  return apiKey;
+}
+
 const Step2 = () => {
+  const { setNotification } = useNotification();
+  const [apiKey, setApiKey] = useState<string>("<API_KEY>");
+  const supabase = useSupabaseClient();
+  const user = useUser();
+
+  useEffect(() => {
+    if (user == null) {
+      return;
+    }
+    generateAndEnsureOnlyOneApiKey(supabase, user).then((apiKey) => {
+      setApiKey(apiKey);
+    });
+  }, [supabase, user]);
+
   return (
     <div className="flex flex-col gap-4">
-      {" "}
-      <p className="text-gray-500">
-        Within your codebase, replace your OpenAI call with the following code
-        snippet.
-      </p>
-      <BaseUrlInstructions />
+      <h1 className="text-2xl font-bold leading-6 text-gray-900 mb-3">
+        Change your endpoint to point to Helicone
+      </h1>
+      <div className="flex flex-col gap-4 space-y-2 w-full max-w-6xl">
+        <h3 className="text-lg font-medium leading-6 text-gray-700 ">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-row items-center gap-3">
+              <input
+                className="border border-gray-300 rounded-md p-2 w-full"
+                value={apiKey}
+                disabled={true}
+                onClick={() => {
+                  navigator.clipboard.writeText(apiKey);
+                  setNotification("Copied to clipboard!", "success");
+                }}
+              />
+              <button
+                className="bg-green-500 h-10 w-10 items-center flex flex-col justify-center rounded-md"
+                onClick={() => {
+                  navigator.clipboard.writeText(apiKey);
+                  setNotification("Copied to clipboard!", "success");
+                }}
+              >
+                <ClipboardDocumentListIcon className="h-6 w-6 text-white" />
+              </button>
+            </div>
+            <i className="font-light">
+              note: This will be the only time you will see this key, if you
+              refresh the page or lose this key you will need to generate a new
+              one.
+            </i>
+          </div>
+        </h3>
+      </div>
+      <div>
+        Don{"'"}t see your language? We probably support it, check out our{" "}
+        <a href="https://docs.helicone.ai" className="font-bold">
+          docs
+        </a>{" "}
+        or reach on discord and we can work with you to support whatever
+        language you are using
+      </div>
+      <BaseUrlInstructions apiKey={apiKey} />
     </div>
   );
 };
@@ -311,7 +309,7 @@ const Step3 = () => {
           <div>
             Once we receive your first event you can visit your dashboard
           </div>
-          {timeElapsed > 30 && (
+          {timeElapsed > 60 && (
             <div className="text-sm mt-10">
               Note: This should be instant, but if you{"'"}re still waiting
               after 30 seconds, please join our discord and we{"'"}ll help you
@@ -356,60 +354,20 @@ const Step3 = () => {
   }
 };
 
-type Steps = 1 | 2 | 3;
-
-const stepComponents: {
-  [key in Steps]: () => JSX.Element;
-} = {
-  1: Step1,
-  2: Step2,
-  3: Step3,
-};
-const StepComponent = ({ step }: { step: Steps }) => {
-  const Step = stepComponents[step];
-  return <Step />;
-};
-
 const WelcomePage = (props: DashboardPageProps) => {
   const { user, keys } = props;
-  const [step, setStep] = useState<Steps>(1);
-  const totalSteps = Object.keys(stepComponents).length;
-  const stepMessage: {
-    [key in Steps]: string;
-  } = {
-    1: "Generate Helicone API key",
-    2: "Replace you OpenAI base url",
-    3: "Wait for your first event",
-  };
+  const [step, setStep] = useState<number>(0);
 
   return (
     <AuthLayout user={user} hideSidebar={true}>
-      <div className="flex flex-col flex-1 gap-5 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-        <div
-          className="
-        sm:max-w-2xl flex flex-col space-y-2 w-full min-w-[300px] sm:min-w-[450px]"
-        >
-          <h1 className="text-3xl font-bold text-gray-900 w-full text-center mb-10">
-            Welcome to Helicone 🚀
-          </h1>
-          <div className="w-full border-b border-gray-300 pb-4 justify-between flex flex-col items-center text-center space-y-4">
-            <p className="text-lg font-medium w-full">{`Step ${step}: ${stepMessage[step]}`}</p>
-            <div className="w-full justify-center items-center mx-auto flex">
-              <ProgressBar currentStep={step} totalSteps={totalSteps} />
-            </div>
-          </div>
-          <div className="flex flex-col space-y-2">
-            <div className="h-full flex flex-col w-full pt-2">
-              <div className="pt-2 w-full flex-auto">
-                <StepComponent step={step} />
-              </div>
-            </div>
-            <RenderStepActions
-              currentStep={step}
-              setCurrentStep={setStep}
-              totalSteps={totalSteps}
-            />
-          </div>
+      <div className="flex flex-col flex-1 gap-5 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <h1 className="text-3xl font-bold text-gray-900 w-full text-center mb-10">
+          Welcome to Helicone 🚀
+        </h1>
+
+        <div className="flex flex-col space-y-2 gap-5">
+          <Step2 />
+          <Step3 />
         </div>
       </div>
     </AuthLayout>

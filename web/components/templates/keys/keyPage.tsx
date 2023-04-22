@@ -17,7 +17,7 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 import { hashAuth } from "../../../lib/hashClient";
 import { middleTruncString } from "../../../lib/stringHelpers";
 
-import { useDeleteKey, useGetKeys } from "../../../services/hooks/keys";
+import { useGetKeys } from "../../../services/hooks/keys";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -74,8 +74,6 @@ const KeyPage = (props: KeyPageProps) => {
     refetchHeliconeKeys,
     refetchKeys,
   } = useKeysPage();
-
-  const { deleteKey, error } = useDeleteKey();
 
   const { setNotification } = useNotification();
 
@@ -185,12 +183,12 @@ const KeyPage = (props: KeyPageProps) => {
         <ThemedTabs
           options={[
             {
-              icon: KeyIcon,
-              label: "OpenAI Keys",
-            },
-            {
               icon: BuildingOfficeIcon,
               label: "Helicone Keys",
+            },
+            {
+              icon: KeyIcon,
+              label: "OpenAI Keys",
             },
           ]}
           onOptionSelect={(option) => {
@@ -268,8 +266,9 @@ const KeyPage = (props: KeyPageProps) => {
               </div>
             </div>
             <p className="text-sm text-gray-900">
-              The keys below are used for the Helicone API. This is currently in
-              beta and will be subject to change.
+              These keys can be used to read and write data to Helicone. Please
+              do not share these keys and make sure you store them somewhere
+              secure.
             </p>
             {isLoading ? (
               <LoadingAnimation title={"Loading your keys..."} />
@@ -408,16 +407,20 @@ const KeyPage = (props: KeyPageProps) => {
                     setNotification("Demo key can not be deleted", "error");
                     return;
                   }
-
-                  deleteKey(selectedKey.api_key_hash);
-
-                  if (error) {
-                    setNotification("Error deleting key", "error");
-                    return;
-                  }
-
-                  setNotification("Key successfully deleted", "success");
-                  setDeleteOpen(false);
+                  supabaseClient
+                    .from("user_api_keys")
+                    .delete()
+                    .eq("api_key_hash", selectedKey.api_key_hash)
+                    .then((res) => {
+                      if (res.error) {
+                        setNotification(res.error.message, "error");
+                      } else {
+                        console.log(res);
+                        setDeleteOpen(false);
+                        setNotification("Key successfully deleted", "success");
+                        refetchKeys();
+                      }
+                    });
                 }}
                 className={clsx(
                   "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"

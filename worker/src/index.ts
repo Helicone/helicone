@@ -165,7 +165,11 @@ async function getHeliconeUserId(
 ): Promise<
   Result<
     {
+      api_key_hash: string;
+      api_key_name: string;
+      created_at: string;
       id: number;
+      soft_delete: boolean;
       user_id: string;
     },
     string
@@ -573,6 +577,26 @@ async function readAndLogResponse(
   }
 }
 
+async function ensureApiKeyAddedToAccount(
+  useId: string,
+  openAIApiKeyHash: string,
+  preview: string,
+  dbClient: SupabaseClient<Database>
+) {
+  await dbClient.from("user_api_keys").upsert(
+    {
+      user_id: useId,
+      api_key_hash: openAIApiKeyHash,
+      api_key_preview: preview,
+      key_name: "automatically added",
+    },
+    {
+      ignoreDuplicates: true,
+      onConflict: "api_key_hash,user_id",
+    }
+  );
+}
+
 async function forwardAndLog(
   requestSettings: RequestSettings,
   body: string,
@@ -646,7 +670,23 @@ async function forwardAndLog(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
       );
-
+      if (requestSettings.helicone_api_key) {
+        const { data: heliconeUserId, error: userIdError } =
+          await getHeliconeUserId(dbClient, requestSettings.helicone_api_key);
+        if (userIdError !== null) {
+          console.error(userIdError);
+        } else {
+          console.log("helicone user id", heliconeUserId);
+          await ensureApiKeyAddedToAccount(
+            heliconeUserId.user_id,
+            await hash(auth),
+            auth.replace("Bearer", "").trim().slice(0, 5) +
+              "..." +
+              auth.trim().slice(-3),
+            dbClient
+          );
+        }
+      }
       const requestBody = body === "" ? undefined : body;
       const requestResult = await logRequest({
         dbClient,
