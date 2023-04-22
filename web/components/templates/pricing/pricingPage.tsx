@@ -7,6 +7,9 @@ import {
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { SVGProps } from "react";
+import { REQUEST_LIMITS } from "../../../lib/constants";
+import { numberWithCommas } from "../../../lib/textHelpers";
+
 import OnboardingButton from "../../shared/auth/onboardingButton";
 import { clsx } from "../../shared/clsx";
 import BasePageV2 from "../../shared/layout/basePageV2";
@@ -80,9 +83,9 @@ const tiers = [
     id: "free",
     href: "#",
     price: "$0",
-    description: "The basic essentials for any project using GPT-3.",
+    description: "Basic analytics for small projects.",
     features: [
-      "Up to 100,000 requests per month",
+      `Up to ${numberWithCommas(REQUEST_LIMITS["free"])} requests per month`,
       "Basic Support",
       "Simple Metrics",
     ],
@@ -96,7 +99,7 @@ const tiers = [
     price: "$50",
     description: "A plan that scales with your rapidly growing business.",
     features: [
-      "Up to 500,000 requests per month",
+      `Up to ${numberWithCommas(REQUEST_LIMITS["starter"])} requests per month`,
       "Priority Support",
       "Advanced Insights",
       "Rate Limits and Analytics",
@@ -111,7 +114,7 @@ const tiers = [
     price: "Custom",
     description: "Dedicated support and infrastructure for your company.",
     features: [
-      "Over 500,000 requests per month",
+      `${numberWithCommas(REQUEST_LIMITS["starter"])}+  requests per month`,
       "Design Consultation",
       "Prompt Discovery",
       "Caching",
