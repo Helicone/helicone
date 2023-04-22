@@ -82,7 +82,7 @@ const tiers = [
     price: "$0",
     description: "The basic essentials for any project using GPT-3.",
     features: [
-      "Up to 1,000 requests per month",
+      "Up to 100,000 total requests",
       "Basic Support",
       "Simple Metrics",
     ],
@@ -96,7 +96,7 @@ const tiers = [
     price: "$50",
     description: "A plan that scales with your rapidly growing business.",
     features: [
-      "Up to 50,000 requests per month",
+      "Up to 500,000 requests per month",
       "Priority Support",
       "Advanced Insights",
       "Rate Limits and Analytics",
@@ -111,7 +111,7 @@ const tiers = [
     price: "Custom",
     description: "Dedicated support and infrastructure for your company.",
     features: [
-      "Over 50,000 requests per month",
+      "Over 500,000 requests per month",
       "Design Consultation",
       "Prompt Discovery",
       "Caching",
