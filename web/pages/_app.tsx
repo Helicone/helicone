@@ -11,9 +11,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import posthog from "posthog-js";
 
-if (typeof window !== "undefined") {
-  posthog.init("phc_jeluwNoJNpc7zEzkQrPbjyMOqdnJQjFAVr849LaEaPG", {
-    api_host: "https://e.helicone.ai",
+if (
+  typeof window !== "undefined" &&
+  process.env.NEXT_PUBLIC_POSTHOG_API_KEY &&
+  process.env.NEXT_PUBLIC_ENDPOINT
+) {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+    api_host: process.env.NEXT_PUBLIC_ENDPOINT,
   });
 }
 
