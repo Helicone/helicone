@@ -9,7 +9,10 @@ export const useHeliconeKeys = () => {
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: ["helicone-keys"],
     queryFn: async () => {
-      return await client.from("helicone_api_keys").select("*");
+      return await client
+        .from("helicone_api_keys")
+        .select("*")
+        .eq("soft_delete", false);
     },
     refetchOnWindowFocus: false,
   });
