@@ -15,6 +15,7 @@ import {
   stripeEnterpriseProductId,
   stripeStarterProductId,
 } from "../checkout_sessions";
+import { REQUEST_LIMITS } from "../../../lib/constants";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
 export type UserSettingsResponse = {
@@ -79,20 +80,6 @@ function getHighestSubscription(
   }
 }
 
-function getRequestLimit(tier: Tier): number {
-  if (tier === "free") {
-    return 100_000;
-  } else if (tier === "starter") {
-    return 500_000;
-  } else if (tier === "starter-pending-cancel") {
-    return 500_000;
-  } else if (tier === "enterprise") {
-    return 10_000_000;
-  } else {
-    throw new Error("Unknown tier");
-  }
-}
-
 type Subscription = Stripe.Subscription & {
   plan?: Stripe.Plan;
 };
@@ -103,29 +90,18 @@ async function syncSettingsWithStripe(
 ): Promise<Result<undefined, string>> {
   const [activeSubscription, currentTier] =
     getHighestSubscription(subscriptions);
-  if (currentTier === userSettings.tier) {
+
+  if (
+    currentTier === userSettings.tier &&
+    REQUEST_LIMITS[currentTier] <= userSettings.request_limit
+  ) {
     return { data: undefined, error: null };
-  } else if (activeSubscription === null || currentTier === "free") {
-    const { error: updateUserSettingsError } = await supabaseServer
-      .from("user_settings")
-      .update({
-        tier: "free",
-        request_limit: 1000,
-      })
-      .eq("user", userSettings.user)
-      .select("*")
-      .single();
-    if (updateUserSettingsError !== null) {
-      return { data: null, error: updateUserSettingsError.message };
-    } else {
-      return { data: undefined, error: null };
-    }
   } else {
     const { error: updateUserSettingsError } = await supabaseServer
       .from("user_settings")
       .update({
         tier: currentTier,
-        request_limit: getRequestLimit(currentTier),
+        request_limit: REQUEST_LIMITS[currentTier],
       })
       .eq("user", userSettings.user)
       .select("*")

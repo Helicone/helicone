@@ -74,54 +74,6 @@ const navigation = [
   },
 ];
 
-const tiers = [
-  {
-    name: "Free",
-    id: "free",
-    href: "#",
-    price: "$0",
-    description: "The basic essentials for any project using GPT-3.",
-    features: [
-      "Up to 100,000 requests per month",
-      "Basic Support",
-      "Simple Metrics",
-    ],
-    featured: false,
-    cta: "Get Started",
-  },
-  {
-    name: "Starter",
-    id: "tier-starter",
-    href: "#",
-    price: "$50",
-    description: "A plan that scales with your rapidly growing business.",
-    features: [
-      "Up to 500,000 requests per month",
-      "Priority Support",
-      "Advanced Insights",
-      "Rate Limits and Analytics",
-    ],
-    featured: false,
-    cta: "Get Started",
-  },
-  {
-    name: "Enterprise",
-    id: "tier-enterprise",
-    href: "#",
-    price: "Custom",
-    description: "Dedicated support and infrastructure for your company.",
-    features: [
-      "Over 500,000 requests per month",
-      "Design Consultation",
-      "Prompt Discovery",
-      "Caching",
-      "Custom Features and Integrations",
-    ],
-    featured: true,
-    cta: "Contact sales",
-  },
-];
-
 export default function VideoDemoPage() {
   return (
     <BasePageV2>
