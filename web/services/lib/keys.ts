@@ -1,5 +1,6 @@
 import { SupabaseClient, User } from "@supabase/auth-helpers-nextjs";
 import { DEMO_EMAIL } from "../../lib/constants";
+import { Database } from "../../supabase/database.types";
 
 const getKeys = async (client: SupabaseClient<any, "public", any>) => {
   const { data, error, count } = await client
@@ -10,7 +11,7 @@ const getKeys = async (client: SupabaseClient<any, "public", any>) => {
 };
 
 const deleteKey = async (
-  client: SupabaseClient<any, "public", any>,
+  client: SupabaseClient<Database>,
   apiKeyHash: string
 ) => {
   const { data, error } = await client

@@ -35,27 +35,6 @@ const useGetKeys = () => {
   };
 };
 
-const useDeleteKey = () => {
-  const client = useSupabaseClient();
-  const queryClient = useQueryClient();
-
-  const { mutate, isLoading, error } = useMutation({
-    mutationKey: ["deleteKey"],
-    mutationFn: async (apiKeyHash: string) => {
-      return deleteKey(client, apiKeyHash).then((res) => res);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["keys"] });
-    },
-  });
-
-  return {
-    deleteKey: mutate,
-    isLoading,
-    error,
-  };
-};
-
 const useAddKey = () => {
   const client = useSupabaseClient();
   const queryClient = useQueryClient();
@@ -77,4 +56,4 @@ const useAddKey = () => {
   };
 };
 
-export { useGetKeys, useDeleteKey, useAddKey };
+export { useGetKeys, useAddKey };
