@@ -179,21 +179,33 @@ async function generateAPIKey() {
   }).toString()}`.toLowerCase();
   return apiKey;
 }
+
 async function generateAndEnsureOnlyOneApiKey(
   supabaseClient: SupabaseClient<Database>,
-  user: User,
-  hashedKey: string
-): Promise<void> {
+  user: User
+): Promise<string> {
+  const localStorageHeliconeAPIKey = localStorage.getItem("helicone_api_key");
+  if (localStorageHeliconeAPIKey != null) {
+    return localStorageHeliconeAPIKey;
+  }
+
+  const apiKey = await generateAPIKey();
+
+  localStorage.setItem("helicone_api_key", apiKey);
+
   await supabaseClient
     .from("helicone_api_keys")
-    .delete()
+    .update({
+      soft_delete: true,
+    })
     .eq("user_id", user.id);
 
   await supabaseClient.from("helicone_api_keys").insert({
-    api_key_hash: hashedKey,
+    api_key_hash: await hashAuth(apiKey),
     user_id: user.id,
     api_key_name: "first api key",
   });
+  return apiKey;
 }
 
 const KeySetup = () => {
@@ -206,9 +218,9 @@ const KeySetup = () => {
     if (user == null) {
       return;
     }
-    generateAPIKey().then(async (key) => {
+
+    generateAndEnsureOnlyOneApiKey(supabase, user).then((key) => {
       setApiKey(key);
-      await generateAndEnsureOnlyOneApiKey(supabase, user, await hashAuth(key));
     });
   }, [supabase, user]);
 
@@ -242,8 +254,7 @@ const KeySetup = () => {
             </div>
             <i className="font-light">
               note: This will be the only time you will see this key, if you
-              refresh the page or lose this key you will need to generate a new
-              one.
+              lose this key you will need to generate a new one.
             </i>
           </div>
         </h3>
