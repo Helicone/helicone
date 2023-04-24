@@ -23,7 +23,7 @@ const Home = (props: HomeProps) => {
               <p className="text-5xl font-sans">Migration</p>
               <p className="text-lg font-sans">
                 Helicone is committed to providing the best and most secure
-                experience for our users. To ensure your data is secure we will
+                experience for our users. To ensure your data is secure, we will
                 be changing our integration strategy with your endpoint to
                 consume a Helicone API key.
               </p>
@@ -49,7 +49,7 @@ const Home = (props: HomeProps) => {
                 Generate API Key
               </button>
               <p className="text-lg font-sans">
-                You need to replace the OpenAI base url with Helicone. You can
+                You need to replace the OpenAI base URL with Helicone. You can
                 find the instructions for your language below.
               </p>
               <BaseUrlInstructions apiKey="<HELICONE_API_KEY>" />
@@ -59,26 +59,26 @@ const Home = (props: HomeProps) => {
               <p className="text-lg font-sans">
                 1. This change will allow us to provide a more secure experience
                 for our users. We will be able to provide more granular control
-                over your API key and provide more features in the future.
+                over your API key and offer more features in the future.
               </p>
               <p className="text-lg font-sans">
-                2. If you lose your OpenAI key you do{"'"}t have to worry about
-                contacting us to lock down your data, since we are no longer
-                using it as a way of authentication.
+                2. If you lose your OpenAI key, you don{"'"}t have to worry
+                about contacting us to lock down your data, since we are no
+                longer using it as a way of authentication.
               </p>
               <p className="text-lg font-sans">
-                3. You will no longer need to enter in your OpenAI API key into
-                our system. This will allow you to keep your API key secure and
-                not have to worry about it being leaked.
+                3. You will no longer need to enter your OpenAI API key into our
+                system. This will allow you to keep your API key secure and not
+                have to worry about it being leaked.
               </p>
               <p className="text-lg font-sans">
-                4. If you OpenAI key changes or if you have multiple API keys,
-                you will not have to add it back into our system.
+                4. If your OpenAI key changes or if you have multiple API keys,
+                you will not have to add them back into our system.
               </p>
               <p className="text-lg font-sans">
                 5. Your dashboard and overall user experience using the app will
-                be faster and smoother since we do not have cross reference your
-                OpenAI API key.
+                be faster and smoother since we do not have to cross-reference
+                your OpenAI API key.
               </p>
             </div>
             <div className="flex flex-col space-y-4">
@@ -96,7 +96,7 @@ const Home = (props: HomeProps) => {
               <p className="pl-5 text-lg font-sans">
                 For the few users that fall under this category, we will work
                 with you and provide a solution, please check your emails or
-                discord for our messages.
+                Discord for our messages.
               </p>
 
               <p className="text-lg font-sans">
