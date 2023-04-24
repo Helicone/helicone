@@ -113,21 +113,21 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
       return {
         chat: {
           request: request.request_body.messages,
-          response: request.response_body.choices?.[0]?.message,
+          response: request.response_body?.choices?.[0]?.message,
         },
       };
     } else if (request.request_path?.includes("/moderations")) {
       return {
         moderation: {
           request: request.request_body.input,
-          results: request.response_body.results,
+          results: request.response_body?.results,
         },
       };
     } else {
       return {
         gpt3: {
           request: request.request_body.prompt,
-          response: request.response_body.choices?.[0]?.text,
+          response: request.response_body?.choices?.[0]?.text,
         },
       };
     }
@@ -138,8 +138,8 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
       new Date(request.response_created_at!).getTime() -
         new Date(request.request_created_at!).getTime()) / 1000;
 
-  const logProbs = request.response_body.choices?.[0]?.logprobs?.token_logprobs
-    ? getLogProbs(request.response_body.choices?.[0]?.logprobs?.token_logprobs)
+  const logProbs = request.response_body?.choices?.[0]?.logprobs?.token_logprobs
+    ? getLogProbs(request.response_body?.choices?.[0]?.logprobs?.token_logprobs)
     : null;
 
   const obj: RequestWrapper = {
@@ -164,21 +164,21 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
 
     // More information about the request
     api: getRequestAndResponse(request),
-    error: request.response_body.error || undefined,
+    error: request.response_body?.error || undefined,
     latency,
-    totalTokens: request.response_body.usage?.total_tokens || 0,
-    model: request.request_body.model || request.response_body.model || "",
+    totalTokens: request.response_body?.usage?.total_tokens || 0,
+    model: request.request_body.model || request.response_body?.model || "",
     requestText:
       request.request_body.messages?.at(-1) ||
       request.request_body.input ||
       request.request_body.prompt ||
       "",
     responseText:
-      (request.response_body.error?.message &&
-        `error: ${request.response_body.error?.message}`) ||
-      request.response_body.choices?.[0]?.text ||
-      request.response_body.choices?.[0]?.message?.content ||
-      JSON.stringify(request.response_body.results?.[0], null, 2) ||
+      (request.response_body?.error?.message &&
+        `error: ${request.response_body?.error?.message}`) ||
+      request.response_body?.choices?.[0]?.text ||
+      request.response_body?.choices?.[0]?.message?.content ||
+      JSON.stringify(request.response_body?.results?.[0], null, 2) ||
       "",
     logProbs: logProbs,
     probability: logProbs ? Math.exp(logProbs) : null,
@@ -215,29 +215,28 @@ const useRequestsPage = (
   sortLeaf: SortLeafRequest
 ) => {
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
-  const { values, isLoading: isValuesLoading } = useGetPromptValues();
+  // const { values, isLoading: isValuesLoading } = useGetPromptValues();
   const { propertyParams } = useGetPropertyParams();
-  const { valueParams } = useGetValueParams();
+  // const { valueParams } = useGetValueParams();
 
-  const filterMap = (requestTableFilters as SingleFilterDef<any>[])
-    .concat(
-      getPropertyFilters(
-        properties,
-        propertyParams.map((p) => ({
-          param: p.property_param,
-          key: p.property_key,
-        }))
-      )
+  const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
+    getPropertyFilters(
+      properties,
+      propertyParams.map((p) => ({
+        param: p.property_param,
+        key: p.property_key,
+      }))
     )
-    .concat(
-      getValueFilters(
-        values,
-        valueParams.map((v) => ({
-          param: v.value_param,
-          key: v.value_key,
-        }))
-      )
-    );
+  );
+  // .concat(
+  //   getValueFilters(
+  //     values,
+  //     valueParams.map((v) => ({
+  //       param: v.value_param,
+  //       key: v.value_key,
+  //     }))
+  //   )
+  // );
   const filter: FilterNode = {
     left: filterListToTree(
       filterUIToFilterLeafs(filterMap, iuFilterIdxs),
@@ -258,10 +257,10 @@ const useRequestsPage = (
   } = useGetRequests(currentPage, currentPageSize, filter, sortLeaf);
 
   const isLoading =
-    isRequestsLoading || isPropertiesLoading || isValuesLoading || isRefetching;
+    isRequestsLoading || isPropertiesLoading || false || isRefetching;
 
   const wrappedRequests: RequestWrapper[] = requests.map((request) =>
-    convertRequest(request, values)
+    convertRequest(request, [])
   );
 
   return {
@@ -270,12 +269,12 @@ const useRequestsPage = (
     from,
     to,
     isPropertiesLoading,
-    isValuesLoading,
+    isValuesLoading: false,
     isLoading,
     filterMap,
     refetch,
     properties,
-    values,
+    values: [],
   };
 };
 
