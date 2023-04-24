@@ -7,17 +7,25 @@ import {
 } from "@heroicons/react/20/solid";
 import { Combobox, Dialog, Transition } from "@headlessui/react";
 import { clsx } from "../clsx";
+import { Result } from "../../../lib/result";
 
 interface ThemedTextDropDownProps {
   options: string[];
   onChange: (option: string | null) => void;
   value: string;
+  onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
-  const { options, onChange, value } = props;
+  const { options: parentOptions, onChange, value, onSearchHandler } = props;
   const [selected, setSelected] = useState(value);
   const [query, setQuery] = useState("");
+
+  const customOption = query && !parentOptions.includes(query) ? query : null;
+
+  const options = customOption
+    ? parentOptions.concat([customOption])
+    : parentOptions;
 
   const filteredPeople =
     query === ""
@@ -28,6 +36,11 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
             .replace(/\s+/g, "")
             .includes(query.toLowerCase().replace(/\s+/g, ""))
         );
+
+  useEffect(() => {
+    onSearchHandler?.(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   return (
     <div className="z-30">
@@ -43,6 +56,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
             <Combobox.Button
               as="div"
               className="right-0 flex items-center pr-2"
+              onClick={() => onSearchHandler?.(query)}
             >
               <Combobox.Input
                 className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
@@ -65,6 +79,11 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
               static
               className="z-30 absolute mt-1 max-h-60 w-full shadow-2xl overflow-auto rounded-md bg-white py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
             >
+              {parentOptions.length === 0 && query === "" && (
+                <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                  Searching...
+                </div>
+              )}
               {filteredPeople.length === 0 && query !== "" ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                   Nothing found.
