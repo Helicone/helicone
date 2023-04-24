@@ -15,9 +15,15 @@ interface ThemedTextDropDownProps {
 }
 
 export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
-  const { options, onChange, value } = props;
+  const { options: parentOptions, onChange, value } = props;
   const [selected, setSelected] = useState(value);
   const [query, setQuery] = useState("");
+
+  const customOption = query && !parentOptions.includes(query) ? query : null;
+
+  const options = customOption
+    ? parentOptions.concat([customOption])
+    : parentOptions;
 
   const filteredPeople =
     query === ""
