@@ -14,7 +14,6 @@ export async function getProperties(
 ): Promise<Result<Property[], string>> {
   const builtFilter = await buildFilterWithAuthProperties(user_id);
   const query = `
-
   SELECT distinct key as property
   from properties
   where (
