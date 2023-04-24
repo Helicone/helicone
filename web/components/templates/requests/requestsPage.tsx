@@ -332,7 +332,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     filterMap,
     requests,
     to,
-    searchPropertyFilters,
   } = useRequestsPage(
     currentPage,
     currentPageSize,
@@ -627,7 +626,6 @@ const RequestsPage = (props: RequestsPageProps) => {
                 filterMap,
                 onAdvancedFilter: setAdvancedFilters,
                 filters: advancedFilters,
-                searchPropertyFilters,
               }}
               layout={{
                 onCreateLayout,
