@@ -17,7 +17,6 @@ export async function getProperties(
 
   SELECT distinct key as property
   from properties
-  left join request on properties.request_id = request.id
   where (
     ${builtFilter.filter}
   )
