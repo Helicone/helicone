@@ -276,6 +276,10 @@ const UsersPage = (props: UsersPageProps) => {
             filterMap: userTableFilters,
             onAdvancedFilter: setAdvancedFilters,
             filters: advancedFilters,
+            searchPropertyFilters: async () => ({
+              data: null,
+              error: "Not implemented",
+            }),
           }}
         />
         {isLoading || from === undefined || to === undefined ? (

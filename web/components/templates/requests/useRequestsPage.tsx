@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
+import { ok, Result } from "../../../lib/result";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { useGetValueParams } from "../../../services/hooks/valueParams";
 import {
@@ -16,6 +17,7 @@ import {
   requestTableFilters,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
+import { getPropertyParams } from "../../../services/lib/propertyParams";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
@@ -214,20 +216,20 @@ const useRequestsPage = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest
 ) => {
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+
+    propertyFilters,
+    searchPropertyFilters,
+  } = useGetProperties();
   // const { values, isLoading: isValuesLoading } = useGetPromptValues();
-  const { propertyParams } = useGetPropertyParams();
   // const { valueParams } = useGetValueParams();
 
   const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
-    getPropertyFilters(
-      properties,
-      propertyParams.map((p) => ({
-        param: p.property_param,
-        key: p.property_key,
-      }))
-    )
+    propertyFilters
   );
+
   // .concat(
   //   getValueFilters(
   //     values,
@@ -275,6 +277,7 @@ const useRequestsPage = (
     refetch,
     properties,
     values: [],
+    searchPropertyFilters,
   };
 };
 

@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Result } from "../../../lib/result";
 import {
   ColumnType,
   SingleFilterDef,
@@ -19,10 +20,15 @@ export function AdvancedFilters({
   filterMap,
   filters,
   setAdvancedFilters,
+  searchPropertyFilters,
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
   setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+  searchPropertyFilters: (
+    property: string,
+    search: string
+  ) => Promise<Result<void, string>>;
 }) {
   return (
     <div className="flex flex-col bg-white p-4 rounded-md border border-gray-300 border-dashed">
@@ -53,6 +59,7 @@ export function AdvancedFilters({
                     return newFilters;
                   });
                 }}
+                onSearchHandler={searchPropertyFilters}
               />
             </div>
           );
@@ -81,11 +88,13 @@ function AdvancedFilterInput({
   value,
   onChange,
   inputParams,
+  onSearchHandler,
 }: {
   type: ColumnType;
   value: string;
   onChange: (value: string | null) => void;
   inputParams?: string[];
+  onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
   switch (type) {
     case "text":
@@ -127,6 +136,7 @@ function AdvancedFilterInput({
             options={inputParams ?? []}
             onChange={(e) => onChange(e)}
             value={value}
+            onSearchHandler={onSearchHandler}
           />
         </>
       );
@@ -144,11 +154,16 @@ function AdvancedFilterRow({
   filter,
   setFilter,
   onDeleteHandler,
+  onSearchHandler,
 }: {
   filterMap: SingleFilterDef<any>[];
   filter: UIFilterRow;
   setFilter: Dispatch<SetStateAction<UIFilterRow>>;
   onDeleteHandler: () => void;
+  onSearchHandler: (
+    property: string,
+    search: string
+  ) => Promise<Result<void, string>>;
 }) {
   return (
     <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center">
@@ -210,6 +225,12 @@ function AdvancedFilterRow({
               value: value ?? "",
             }));
           }}
+          onSearchHandler={(search: string) =>
+            onSearchHandler(
+              filterMap[filter.filterMapIdx]?.column as string,
+              search
+            )
+          }
         />
       </div>
       <div className="w-full lg:w-fit">
