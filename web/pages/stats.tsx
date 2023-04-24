@@ -28,7 +28,7 @@ const Home = (props: HomeProps) => {
         ) : (
           <div>
             <h1 className="text-3xl font-bold text-center">
-              Active Integrations/week
+              Active Users/week
             </h1>
             <div className="h-96">
               <RenderLineChart
@@ -47,7 +47,7 @@ const Home = (props: HomeProps) => {
                     })) ?? []
                 }
                 timeMap={(v) => v.toLocaleDateString()}
-                valueFormatter={(v) => [v.toString(), "Active Integrations"]}
+                valueFormatter={(v) => [v.toString(), "Active Users"]}
               />
             </div>
             <h1 className="text-3xl font-bold text-center">Total Users</h1>
