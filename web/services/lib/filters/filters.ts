@@ -41,6 +41,9 @@ const whereKeyMappings: KeyMappings = {
     status: "response.status",
   },
   values: (key) => `prompt_values ->> '${key}'`,
+  properties_table: {
+    auth_hash: "properties.auth_hash",
+  },
 };
 
 const havingKeyMappings: KeyMappings = {
@@ -53,6 +56,7 @@ const havingKeyMappings: KeyMappings = {
   request: {},
   response: {},
   values: {},
+  properties_table: {},
 };
 
 export function buildFilterLeaf(
@@ -201,6 +205,25 @@ async function buildUserIdHashesFilter(user_id: string): Promise<FilterNode> {
     },
   }));
   return filterListToTree(filters, "or");
+}
+
+async function buildPropertyHashesFilter(user_id: string): Promise<FilterNode> {
+  const userIdHashes = await getUserIdHashes(user_id);
+  const filters: FilterLeaf[] = userIdHashes.map((hash) => ({
+    properties_table: {
+      auth_hash: {
+        equals: hash,
+      },
+    },
+  }));
+  return filterListToTree(filters, "or");
+}
+
+export async function buildFilterWithAuthProperties(
+  user_id: string
+): Promise<{ filter: string; argsAcc: any[] }> {
+  const userIdHashesFilter = await buildPropertyHashesFilter(user_id);
+  return buildFilter(userIdHashesFilter, [], false);
 }
 
 export async function buildFilterWithAuth(

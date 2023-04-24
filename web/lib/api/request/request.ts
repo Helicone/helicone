@@ -3,7 +3,10 @@ import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
 import { Database, Json } from "../../../supabase/database.types";
-import { buildFilter } from "../../../services/lib/filters/filters";
+import {
+  buildFilter,
+  buildFilterWithAuth,
+} from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildRequestSort,
@@ -13,7 +16,7 @@ import {
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
-  response_body: any;
+  response_body?: any;
   request_id: string;
   request_created_at: string;
   request_body: any;
@@ -48,7 +51,7 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = buildFilter(filter, []);
+  const builtFilter = await buildFilterWithAuth(user_id, filter, []);
   const sortSQL = buildRequestSort(sort);
   const query = `
   SELECT response.id AS response_id,
@@ -72,13 +75,12 @@ export async function getRequests(
     (select count(*) from cache_hits ch where ch.request_id = request.id) as cache_count,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
-  FROM response
-    left join request on request.id = response.request
+  FROM request
+    left join response on request.id = response.request
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
-    user_api_keys.user_id = '${user_id}'
-    AND (${builtFilter.filter})
+    (${builtFilter.filter})
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
@@ -99,16 +101,13 @@ export async function getRequestCount(
   user_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const builtFilter = buildFilter(filter, []);
+  const builtFilter = await buildFilterWithAuth(user_id, "all", []);
+  // TODO Once we migrate to clickhouse, this should be moved and filters should be added back
   const query = `
   SELECT count(*) as count
-  FROM response
-    left join request on request.id = response.request
-    left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
-    left join prompt on request.formatted_prompt_id = prompt.id
+  FROM request
   WHERE (
-    user_api_keys.user_id = '${user_id}'
-    AND (${builtFilter.filter})
+    (${builtFilter.filter})
   )
   `;
 

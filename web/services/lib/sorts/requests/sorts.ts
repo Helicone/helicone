@@ -35,7 +35,7 @@ export function buildRequestSort(sort: SortLeafRequest) {
   }
   if (sort.latency) {
     assertValidSortDirection(sort.latency);
-    return `response.created_at - request.created_at ${sort.latency}`;
+    return `response.delay_ms ${sort.latency}`;
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);

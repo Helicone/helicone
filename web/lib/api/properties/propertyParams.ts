@@ -3,6 +3,10 @@ import { getPagination } from "../../../components/shared/getPagination";
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
 import { Database } from "../../../supabase/database.types";
+import {
+  buildFilterWithAuth,
+  buildFilterWithAuthProperties,
+} from "../../../services/lib/filters/filters";
 
 export interface PropertyParam {
   property_param: string;
@@ -12,16 +16,23 @@ export interface PropertyParam {
 export async function getPropertyParams(
   user_id: string
 ): Promise<Result<PropertyParam[], string>> {
+  const builtFilter = await buildFilterWithAuthProperties(user_id);
   const query = `
-SELECT DISTINCT properties->>keys AS property_param,
-keys AS property_key
 
-FROM request r
-JOIN user_api_keys u ON r.auth_hash = u.api_key_hash
-CROSS JOIN LATERAL jsonb_object_keys(properties) keys
-WHERE (u.user_id = '${user_id}');`;
+  SELECT distinct key as property_key, value as property_param
+  from properties
+  left join request on properties.request_id = request.id
+  where (
+    ${builtFilter.filter}
+  )
+`;
+  console.log(query);
+  console.log(builtFilter.argsAcc);
 
-  const { data, error } = await dbExecute<PropertyParam>(query, []);
+  const { data, error } = await dbExecute<PropertyParam>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }
