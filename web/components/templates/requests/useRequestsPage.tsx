@@ -4,7 +4,6 @@ import { ok, Result } from "../../../lib/result";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { useGetValueParams } from "../../../services/hooks/valueParams";
 import {
@@ -217,59 +216,15 @@ const useRequestsPage = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest
 ) => {
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+
+    propertyFilters,
+    searchPropertyFilters,
+  } = useGetProperties();
   // const { values, isLoading: isValuesLoading } = useGetPromptValues();
   // const { valueParams } = useGetValueParams();
-
-  const [propertyFilters, setPropertyFilters] = useState<
-    SingleFilterDef<"properties">[]
-  >(getPropertyFilters(properties, []));
-
-  const [propertySearch, setPropertySearch] = useState({
-    property: "",
-    search: "",
-  });
-  const debouncedPropertySearch = useDebounce(propertySearch, 500);
-
-  useEffect(() => {
-    setPropertyFilters(getPropertyFilters(properties, []));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPropertiesLoading]);
-
-  useEffect(() => {
-    const { property, search } = debouncedPropertySearch;
-    async function doSearch() {
-      const values = await getPropertyParams(property, search);
-      console.log("values", values);
-      if (values.error !== null) {
-        console.error(values.error);
-        return;
-      }
-      const propertyFilters = getPropertyFilters(
-        properties,
-        values.data?.map((v) => ({
-          param: v.property_param,
-          key: v.property_key,
-        }))
-      );
-      console.log("propertyFilters", propertyFilters);
-      setPropertyFilters(propertyFilters);
-      console.log("searchPropertyFilters", property, search);
-    }
-
-    if (property !== "") {
-      doSearch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedPropertySearch]);
-
-  async function searchPropertyFilters(
-    property: string,
-    search: string
-  ): Promise<Result<void, string>> {
-    setPropertySearch({ property, search });
-    return ok(undefined);
-  }
 
   const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
     propertyFilters

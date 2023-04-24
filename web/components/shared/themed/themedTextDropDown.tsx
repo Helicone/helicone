@@ -59,7 +59,8 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
               onClick={() => onSearchHandler?.(query)}
             >
               <Combobox.Input
-                className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0 auto"
+                autoComplete="off"
                 onChange={(event) => setQuery(event.target.value)}
               />
               <ChevronDownIcon
