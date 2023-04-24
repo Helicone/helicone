@@ -19,7 +19,7 @@ export async function getPropertyParams(
   const builtFilter = await buildFilterWithAuthProperties(user_id);
   const query = `
 
-  SELECT distinct key as property_key, value as property_param
+  SELECT distinct substring(key for 100) as property_key, substring(value for 100) as property_param
   from properties
   left join request on properties.request_id = request.id
   where (
