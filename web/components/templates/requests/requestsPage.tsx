@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
-import { getRequests, HeliconeRequest } from "../../../lib/api/request/request";
+import { HeliconeRequest } from "../../../lib/api/request/request";
 import { Result } from "../../../lib/result";
 import { truncString } from "../../../lib/stringHelpers";
 import {
