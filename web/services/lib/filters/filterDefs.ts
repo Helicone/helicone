@@ -37,6 +37,8 @@ export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
 
 export type PropertiesTableToOperators = {
   auth_hash: SingleKey<TextOperators>;
+  key: SingleKey<TextOperators>;
+  value: SingleKey<TextOperators>;
 };
 
 export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
@@ -69,7 +71,7 @@ export type TablesAndViews = {
   user_api_keys: FilterLeafUserApiKeys;
   response: FilterLeafResponse;
   request: FilterLeafRequest;
-  properties_table: FilterLeafRequest;
+  properties_table: FilterLeafPropertiesTable;
   properties: {
     [key: string]: SingleKey<TextOperators>;
   };
