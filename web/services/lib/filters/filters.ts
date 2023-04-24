@@ -43,8 +43,6 @@ const whereKeyMappings: KeyMappings = {
   values: (key) => `prompt_values ->> '${key}'`,
   properties_table: {
     auth_hash: "properties.auth_hash",
-    key: "properties.key",
-    value: "properties.value",
   },
 };
 
@@ -222,18 +220,10 @@ async function buildPropertyHashesFilter(user_id: string): Promise<FilterNode> {
 }
 
 export async function buildFilterWithAuthProperties(
-  user_id: string,
-  filter: FilterNode = "all",
-  argsAcc: any[] = [],
-  having: boolean = false
+  user_id: string
 ): Promise<{ filter: string; argsAcc: any[] }> {
   const userIdHashesFilter = await buildPropertyHashesFilter(user_id);
-  const filterNode: FilterNode = {
-    left: userIdHashesFilter,
-    operator: "and",
-    right: filter,
-  };
-  return buildFilter(filterNode, argsAcc, having);
+  return buildFilter(userIdHashesFilter, [], false);
 }
 
 export async function buildFilterWithAuth(
