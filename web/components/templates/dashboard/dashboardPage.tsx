@@ -2,10 +2,9 @@ import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { GraphDataState } from "../../../lib/dashboardGraphs";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
@@ -22,7 +21,6 @@ import AuthLayout from "../../shared/layout/authLayout";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { Filters } from "./filters";
-import LogPanel from "./logPanel";
 
 import { MetricsPanel } from "./metricsPanel";
 import TimeGraphWHeader from "./timeGraphWHeader";
@@ -67,12 +65,18 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
-  const { metrics, filterMap, errorsOverTime, requestsOverTime, costOverTime } =
-    useDashboardPage({
-      timeFilter,
-      uiFilters: debouncedAdvancedFilters,
-      apiKeyFilter,
-    });
+  const {
+    metrics,
+    filterMap,
+    errorsOverTime,
+    requestsOverTime,
+    costOverTime,
+    searchPropertyFilters,
+  } = useDashboardPage({
+    timeFilter,
+    uiFilters: debouncedAdvancedFilters,
+    apiKeyFilter,
+  });
 
   const timeData: GraphDataState = {
     costOverTime: costOverTime.data ?? "loading",
@@ -179,6 +183,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               filterMap,
               onAdvancedFilter: setAdvancedFilters,
               filters: advancedFilters,
+              searchPropertyFilters,
             }}
           />
           <MetricsPanel metrics={metrics.data ?? "loading"} />

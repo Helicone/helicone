@@ -44,6 +44,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../notification/useNotification";
 import { useLayouts } from "../../../services/hooks/useLayouts";
 import Link from "next/link";
+import { Result } from "../../../lib/result";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -75,6 +76,10 @@ interface ThemedHeaderProps {
     filterMap: SingleFilterDef<any>[];
     onAdvancedFilter: Dispatch<SetStateAction<UIFilterRow[]>>;
     filters: UIFilterRow[];
+    searchPropertyFilters: (
+      property: string,
+      search: string
+    ) => Promise<Result<void, string>>;
   };
   layout?: {
     currentLayout: {
@@ -436,6 +441,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                     filterMap={advancedFilter.filterMap}
                     filters={advancedFilter.filters}
                     setAdvancedFilters={advancedFilter.onAdvancedFilter}
+                    searchPropertyFilters={advancedFilter.searchPropertyFilters}
                   />
                 )}
                 {advancedFilter.filters.length > 0 && !showAdvancedFilters && (

@@ -46,3 +46,7 @@ export function resultMap<T, K, Z>(
   }
   return { data: f(result.data), error: null };
 }
+
+export function ok<T, K>(data: T): Result<T, K> {
+  return { data: data, error: null };
+}

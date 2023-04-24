@@ -11,7 +11,7 @@ import { getTimeInterval } from "../../../lib/timeCalculations/time";
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 import { useGetProperties } from "../../../services/hooks/properties";
-import { useGetPropertyParams } from "../../../services/hooks/propertyParams";
+
 import {
   FilterLeaf,
   filterListToTree,
@@ -67,16 +67,9 @@ export const useDashboardPage = ({
   uiFilters,
   apiKeyFilter,
 }: DashboardPageData) => {
-  const { properties } = useGetProperties();
-  const { propertyParams } = useGetPropertyParams();
+  const { propertyFilters, searchPropertyFilters } = useGetProperties();
   const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
-    getPropertyFilters(
-      properties,
-      propertyParams.map((p) => ({
-        param: p.property_param,
-        key: p.property_key,
-      }))
-    )
+    propertyFilters
   );
   const userFilters =
     apiKeyFilter !== null
@@ -259,5 +252,6 @@ export const useDashboardPage = ({
   return {
     ...ret,
     isLoading,
+    searchPropertyFilters,
   };
 };
