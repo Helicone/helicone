@@ -18,11 +18,7 @@ const Home = (props: HomeProps) => {
 
   if (user && user.email !== DEMO_EMAIL) {
     router.push("/dashboard");
-    return (
-      <AuthLayout user={user}>
-        <LoadingAnimation title="Redirecting you to your dashboard..." />
-      </AuthLayout>
-    );
+    return <LoadingAnimation title="Redirecting you to your dashboard..." />;
   }
 
   return (
