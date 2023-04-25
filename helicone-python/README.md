@@ -23,9 +23,7 @@ Then, in your Python code, replace your existing OpenAI library imports with Hel
 import helicone_openai as openai  # replace `import openai` with this line
 ```
 
-That's it! Now all your API requests made through the OpenAI library will be logged and tracked by Helicone.
+That's it! Now all your API requests made through the OpenAI library will be logged by Helicone and you can view your results in the [web application](https://www.helicone.ai/).
 
 ## Requirements
 - Python 3.6 or higher is required.
-
-[1]: https://www.helicone.ai/
