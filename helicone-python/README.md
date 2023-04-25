@@ -1,10 +1,10 @@
 # Helicone OpenAI Python Library
 
-This package is a simple and convenient way to log all requests made through the OpenAI API with Helicone, with just a one-line code change. By using the  OpenAI Python wrapper, you can easily track and manage your OpenAI API usage and monitor your GPT-3 models' performance on the Helicone platform.
+This package is a simple and convenient way to log all requests made through the OpenAI API with Helicone, with just a one-line code change. By using the  OpenAI Python wrapper, you can easily track and manage your OpenAI API usage and monitor your GPT models' cost, latency, and performance on the Helicone platform.
 
 ## Installation
 
-To install the Helicone OpenAI Python wrapper, simply run the following command:
+To install the Helicone OpenAI Python library, simply run the following command:
 
 ```bash
 pip install helicone-openai
