@@ -12,50 +12,72 @@ const Home = (props: HomeProps) => {
     <MetaData title="Home">
       <BasePageV2>
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8">
-          <div className="py-16 max-w-3xl space-y-16">
-            <div className="flex flex-row gap-3 space-y-4 items-center text-center">
-              <div className="text-2xl font-sans">STOP: </div>
-              If you are already using the `Helicone-Auth` header, you do not
-              need to do anything.
+          <div className="py-4 max-w-3xl space-y-8">
+            <div
+              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
+              <strong className="font-bold text-xl font-sans">Note:</strong>
+              <span className="block sm:inline ml-2 text-lg font-sans">
+                If you are already integrated with the{" "}
+                <code className="bg-gray-100 p-1 rounded">Helicone-Auth</code>{" "}
+                header, no further action is required.
+              </span>
             </div>
 
             <div className="flex flex-col space-y-4">
-              <p className="text-5xl font-sans">Migration</p>
+              <h2 className="text-3xl font-sans font-semibold">
+                Transition from authenticating with your OpenAI Key to a
+                Helicone API Key
+              </h2>
               <p className="text-lg font-sans">
                 Helicone is committed to providing the best and most secure
-                experience for our users. To ensure your data is secure, we will
-                be changing our integration strategy with your endpoint to
-                consume a Helicone API key.
+                experience for our users. To ensure your data is secure and to
+                authenticate your data more safely, we will be transitioning
+                from OpenAI key-based authentication to using a Helicone API
+                key.
               </p>
               <p className="text-lg font-sans">
-                We are asking users to make this change ASAP. We will be
-                migrating our systems to use the Helicone API key on{" "}
+                We kindly request users to make this change as soon as possible.
+                Our systems will begin using the Helicone API key on{" "}
                 <b>05/05/2023</b>.
               </p>
             </div>
 
             <div className="flex flex-col space-y-4">
-              <p className="text-3xl font-sans">What do I need to do?</p>
-              <p className="text-lg font-sans">
-                Generate a Helicone API key and put it in the Helicone-Auth.
-              </p>
-              <button
-                className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => {
-                  // push to a new tab
-                  window.open("/keys", "_blank", "noopener,noreferrer");
-                }}
-              >
-                Generate API Key
-              </button>
-              <p className="text-lg font-sans">
-                You need to replace the OpenAI base URL with Helicone. You can
-                find the instructions for your language below.
-              </p>
-              <BaseUrlInstructions apiKey="<HELICONE_API_KEY>" />
+              <h3 className="text-2xl font-sans font-semibold">
+                How to Switch?
+              </h3>
+              <ol className="list-decimal list-inside text-lg font-sans">
+                <li>
+                  Generate a Helicone API key by visiting the{" "}
+                  <a
+                    className="text-purple-500 hover:text-purple-700 font-bold"
+                    href="/keys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Keys page
+                  </a>{" "}
+                  (you may need to log in).
+                </li>
+                <li>
+                  In your existing integrations, authenticate with the Helicone
+                  API key in a header{" "}
+                  {
+                    <code className="bg-gray-100 p-1 rounded">
+                      Helicone-Auth
+                    </code>
+                  }
+                  . Find the instructions for your package below.
+                </li>
+              </ol>
+              <BaseUrlInstructions apiKey="HELICONE_API_KEY" />
             </div>
             <div className="flex flex-col space-y-4">
-              <p className="text-3xl font-sans">Benefits of this change</p>
+              <h3 className="text-2xl font-sans font-semibold">
+                Why this transition?
+              </h3>
               <p className="text-lg font-sans">
                 1. This change will allow us to provide a more secure experience
                 for our users. We will be able to provide more granular control
@@ -82,32 +104,43 @@ const Home = (props: HomeProps) => {
               </p>
             </div>
             <div className="flex flex-col space-y-4">
-              <p className="text-3xl font-sans">FAQ</p>
-              <p className="text-lg font-sans">What will happen to my data?</p>
-              <p className="pl-5 text-lg font-sans">
-                Your data will be safe and secure. Once all of our customers
-                have started using the Helicone API key, we will migrate all of
-                your data to the new system.
-              </p>
-
-              <p className="text-lg font-sans">
-                What if I have multiple accounts using the same OpenAI API key?
-              </p>
-              <p className="pl-5 text-lg font-sans">
-                For the few users that fall under this category, we will work
-                with you and provide a solution, please check your emails or
-                Discord for our messages.
-              </p>
-
-              <p className="text-lg font-sans">
-                Do I have to make this change by the deadline? What if I don
-                {"'"}t?
-              </p>
-              <p className="pl-5 text-lg font-sans">
-                We will continue logging your data using the old system until
-                June 2023, but your data will not be showing up in the dashboard
-                and will require a manual migration to the new system.
-              </p>
+              <h3 className="text-2xl font-sans font-semibold">
+                Frequently Asked Questions
+              </h3>
+              <dl className="text-lg font-sans space-y-4">
+                <dt>What will happen to my data?</dt>
+                <dd className="pl-5 text-lg font-sans">
+                  Your data will remain safe and secure. Once all users have
+                  switched to the Helicone API key, we will seamlessly transfer
+                  your data to the new system.
+                </dd>
+                <dt>
+                  What if I have multiple accounts using the same OpenAI API
+                  key?
+                </dt>
+                <dd className="pl-5 text-lg font-sans">
+                  For users with this configuration, we will provide a tailored
+                  solution. Please check your emails or Discord for our
+                  communications.
+                </dd>
+                <dt>
+                  Do I have to make this change by the deadline? What if I
+                  don&apos;t?
+                </dt>
+                <dd className="pl-5 text-lg font-sans">
+                  We will continue logging your data using the old system until
+                  June 2023. However, your data will not appear in the dashboard
+                  and will require a manual transition to the new system.
+                </dd>
+                <dt>
+                  Will my API forwarding to OpenAI stop working during the
+                  transition?
+                </dt>
+                <dd className="pl-5 text-lg font-sans">
+                  No, your API forwarding to OpenAI will continue to function
+                  without interruption during the transition process.
+                </dd>
+              </dl>
             </div>
           </div>
         </div>
