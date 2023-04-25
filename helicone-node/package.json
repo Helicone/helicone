@@ -1,0 +1,17 @@
+{
+    "name": "helicone-openai",
+    "version": "0.1.0",
+    "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
+    "main": "index.js",
+    "scripts": {
+        "test": "node test.js"
+    },
+    "author": "Helicone, Inc.",
+    "license": "MIT",
+    "dependencies": {
+        "openai": "^3.2.1"
+    },
+    "devDependencies": {
+        "dotenv": "^16.0.3"
+    }
+}
