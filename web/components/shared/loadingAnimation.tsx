@@ -3,15 +3,13 @@ import * as chicky from "../../public/lottie/Polite Chicky.json";
 import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
 import * as dashboard from "../../public/lottie/DashboardAnimation.json";
-import * as loading from "../../public/lottie/Loading.json";
 import { useEffect, useState } from "react";
 
 type Animation =
   | typeof chicky
   | typeof hamster
   | typeof plane
-  | typeof dashboard
-  | typeof loading;
+  | typeof dashboard;
 
 interface LoadingAnimationProps {
   title: string;
