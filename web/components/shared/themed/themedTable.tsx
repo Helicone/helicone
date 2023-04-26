@@ -43,7 +43,10 @@ const ThemedTable = (props: ThemedTableProps) => {
                 );
               }
             })}
-            <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+            <th
+              scope="col"
+              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
+            >
               <span className="sr-only">Actions</span>
             </th>
           </tr>
@@ -86,15 +89,16 @@ const ThemedTable = (props: ThemedTableProps) => {
                   }
                 })}
                 <td
+                  scope="col"
                   className={clsx(
                     rowIdx === 0 ? "" : "border-t border-transparent",
-                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium space-x-4"
+                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
                   )}
                 >
                   {editHandler && (
                     <button
                       type="button"
-                      className="inline-flex items-center rounded-md bg-gray-500 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="inline-flex items-center rounded-md bg-gray-500 p-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => editHandler(row)}
                     >
                       <PencilIcon className="h-4 w-4" />
@@ -103,7 +107,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {deleteHandler && (
                     <button
                       type="button"
-                      className="inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => deleteHandler(row)}
                     >
                       <TrashIcon className="h-4 w-4" />
