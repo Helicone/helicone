@@ -12,6 +12,21 @@ from openai.api_resources import (
     Moderation,
 )
 
+class HeliconeRateLimit:
+    def __init__(self, limit=None, remaining=None, reset=None, policy=None):
+        self.limit = limit
+        self.remaining = remaining
+        self.reset = reset
+        self.policy = policy
+
+class HeliconeResponse:
+    def __init__(self, cache=None, rate_limit=None):
+        self.rate_limit = rate_limit
+        self.cache = cache
+
+    def __repr__(self):
+        return f"<HeliconeResponse response={self.response} rate_limit={self.rate_limit}>"
+
 class Helicone:
     def __init__(self):
         self.api_key = None
@@ -30,37 +45,17 @@ class Helicone:
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            # Retrieve properties from kwargs and convert them into headers
-            properties = kwargs.pop("properties", {})
-            property_headers = {
-                f"Helicone-Property-{key}": str(value)
-                for key, value in properties.items()
-            }
-
             headers = kwargs.get("headers", {})
+
             if "Helicone-Auth" not in headers and self.api_key:
                 headers["Helicone-Auth"] = f"Bearer {self.api_key}"
-                headers.update(property_headers)
 
-                # Add cache header if cache kwarg is provided and set to True
-                cache = kwargs.pop("cache", None)
-                if cache is True:
-                    headers["Helicone-Cache-Enabled"] = "true"
+            headers.update(self._get_property_headers(kwargs.pop("properties", {})))
+            headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
+            headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
+            headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
 
-                # Add retry header if retry kwarg is provided and set to True
-                retry = kwargs.pop("retry", None)
-                if retry is True:
-                    headers["Helicone-Retry-Enabled"] = "true"
-
-                # Add rate limit policy header if rate_limit_policy kwarg is provided
-                rate_limit_policy = kwargs.pop("rate_limit_policy", None)
-                if rate_limit_policy:
-                    policy = f'{rate_limit_policy["quota"]};w={rate_limit_policy["time_window"]}'
-                    if "segment" in rate_limit_policy:
-                        policy += f';s={rate_limit_policy["segment"]}'
-                    headers["Helicone-RateLimit-Policy"] = policy
-
-                kwargs["headers"] = headers
+            kwargs["headers"] = headers
 
             original_api_base = openai.api_base
             openai.api_base = "https://oai.hconeai.com/v1"
@@ -69,10 +64,61 @@ class Helicone:
             finally:
                 openai.api_base = original_api_base
 
+            # Check if retries are enabled
+            if headers.get("Helicone-Retry-Enabled") == "true":
+                self._add_helicone_rate_limit_attributes(result)
+
             return result
 
         return wrapper
+    
+    def _add_helicone_rate_limit_attributes(self, response):
+        rate_limit_headers = {
+            "Helicone-RateLimit-Limit": "limit",
+            "Helicone-RateLimit-Remaining": "remaining",
+            "Helicone-RateLimit-Reset": "reset",
+            "Helicone-RateLimit-Policy": "policy",
+        }
 
+        rate_limit = {}
+        for header, attr_name in rate_limit_headers.items():
+            if header in response.headers:
+                rate_limit[attr_name] = response.headers[header]
+
+        helicone_rate_limit = HeliconeRateLimit(**rate_limit)
+        helicone_cache = response.headers.get("Helicone-Cache", None)
+        response["helicone"] = HeliconeResponse(rate_limit=helicone_rate_limit, cache=helicone_cache)
+
+    def _get_property_headers(self, properties):
+        return {f"Helicone-Property-{key}": str(value) for key, value in properties.items()}
+
+    def _get_cache_headers(self, cache):
+        return {"Helicone-Cache-Enabled": "true"} if cache is True else {}
+
+    def _get_retry_headers(self, retry):
+        if isinstance(retry, bool) and retry:
+            return {"Helicone-Retry-Enabled": "true"}
+        elif isinstance(retry, dict):
+            headers = {"Helicone-Retry-Enabled": "true"}
+            if "num" in retry:
+                headers["Helicone-Retry-Num"] = str(retry["num"])
+            if "factor" in retry:
+                headers["Helicone-Retry-Factor"] = str(retry["factor"])
+            if "min_timeout" in retry:
+                headers["Helicone-Retry-Min-Timeout"] = str(retry["min_timeout"])
+            if "max_timeout" in retry:
+                headers["Helicone-Retry-Max-Timeout"] = str(retry["max_timeout"])
+            return headers
+        return {}
+
+    def _get_rate_limit_policy_headers(self, rate_limit_policy):
+        if rate_limit_policy:
+            policy = f'{rate_limit_policy["quota"]};w={rate_limit_policy["time_window"]}'
+            print("POLICY", policy)
+            if "segment" in rate_limit_policy:
+                policy += f';s={rate_limit_policy["segment"]}'
+            return {"Helicone-RateLimit-Policy": policy}
+        return {}
 
     def apply_helicone_auth(self):
         api_resources_classes = [

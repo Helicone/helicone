@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from helicone import openai
+import uuid
 
 load_dotenv()
 
@@ -16,7 +17,6 @@ response = openai.Completion.create(
         "App": "mobile",
     }
 )
-print(response)
 
 # Test createChatCompletion
 completion = openai.ChatCompletion.create(
@@ -28,29 +28,26 @@ completion = openai.ChatCompletion.create(
         "App": "mobile",
     }
 )
-print(completion)
 
-# Test createEdit
-response = openai.Edit.create(
-    model="text-davinci-edit-001",
-    input="What Helicone day of the wek is it?",
-    instruction="Fix the spelling mistakes",
-    properties={
-        "Session": "24",
-        "Conversation": "support_issue_2",
-        "App": "mobile",
-    }
-)
-print(response)
+# Cache test
+test_prompt = f"Generate a UUID: {uuid.uuid4()}"
 
-# Test createEmbedding
-response = openai.Embedding.create(
-    model="text-embedding-ada-002",
-    input="The helicone package is delicious...",
-    properties={
-        "Session": "24",
-        "Conversation": "support_issue_2",
-        "App": "mobile",
-    }
+# First completion should be a MISS
+response1 = openai.Completion.create(
+    model="text-ada-001",
+    prompt=test_prompt,
+    max_tokens=12,
+    temperature=0,
+    cache=True,
 )
-print(response)
+print(response1.helicone.cache)  # Expected output: MISS
+
+# Second completion should be a HIT
+response2 = openai.Completion.create(
+    model="text-ada-001",
+    prompt=test_prompt,
+    max_tokens=12,
+    temperature=0,
+    cache=True,
+)
+print(response2.helicone.cache)  # Expected output: HIT
