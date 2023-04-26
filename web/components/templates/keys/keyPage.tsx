@@ -160,24 +160,7 @@ const KeyPage = (props: KeyPageProps) => {
           rows={heliconeKeys?.data?.map((key) => {
             return {
               ...key,
-              key_name: (
-                <input
-                  type="string"
-                  defaultValue={key.api_key_name ?? "No Name"}
-                  className="max-w-sm border-none outline-none"
-                  onChange={(e) => {
-                    supabaseClient
-                      .from("helicone_api_keys")
-                      .update({
-                        api_key_name: e.target.value,
-                      })
-                      .eq("api_key_hash", key.api_key_hash)
-                      .then((res) => {
-                        console.log(res);
-                      });
-                  }}
-                />
-              ),
+              key_name: <p>{key.api_key_name}</p>,
             };
           })}
           editHandler={onEditHandler}
@@ -292,12 +275,8 @@ const KeyPage = (props: KeyPageProps) => {
                       type="text"
                       name="api-key"
                       id="api-key"
-                      disabled={apiKey !== ""}
                       value={name}
                       className={clsx(
-                        apiKey !== ""
-                          ? "bg-gray-100 hover:cursor-not-allowed"
-                          : "",
                         "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
                       )}
                       placeholder="My Helicone Key"
