@@ -10,8 +10,8 @@ import useNotification from "../../shared/notification/useNotification";
 import React from "react";
 import { DiffHighlight } from "./diffHighlight";
 import WelcomeSteps from "./welcomeSteps";
-import GenerateApiKey from "./generateAPIKey";
 import ListeningForEvent from "./listeningForEvent";
+import GenerateApiKey from "./generateAPIKey";
 
 interface DashboardPageProps {
   user: User;
