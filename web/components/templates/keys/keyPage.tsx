@@ -38,6 +38,7 @@ const KeyPage = (props: KeyPageProps) => {
   const supabaseClient = useSupabaseClient<Database>();
   const [selectedKey, setSelectedKey] =
     useState<Database["public"]["Tables"]["user_api_keys"]["Row"]>();
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<
@@ -51,6 +52,14 @@ const KeyPage = (props: KeyPageProps) => {
   const [deleteHeliconeOpen, setDeleteHeliconeOpen] = useState(false);
   const [selectedHeliconeKey, setSelectedHeliconeKey] =
     useState<Database["public"]["Tables"]["helicone_api_keys"]["Row"]>();
+  const [editName, setEditName] = useState<string>("");
+
+  const onEditHandler = (
+    key: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
+  ) => {
+    setSelectedHeliconeKey(key);
+    setEditOpen(true);
+  };
 
   const onDeleteHandler = (
     key: Database["public"]["Tables"]["user_api_keys"]["Row"]
@@ -171,6 +180,7 @@ const KeyPage = (props: KeyPageProps) => {
               ),
             };
           })}
+          editHandler={onEditHandler}
           deleteHandler={onDeleteHeliconeHandler}
         />
       );
@@ -275,18 +285,22 @@ const KeyPage = (props: KeyPageProps) => {
             ) : (
               <div className="space-y-6 pt-2">
                 {renderHeliconeKeyTable()}
-                <div className="mt-5 sm:flex sm:items-center gap-5">
-                  <div className="w-full sm:max-w-xs">
-                    <label htmlFor="api-key" className="sr-only">
-                      name
-                    </label>
+                <div className="mt-5 flex flex-row items-end gap-5">
+                  <div className="w-full space-y-1.5 text-sm">
+                    <label htmlFor="api-key">Key Name</label>
                     <input
                       type="text"
                       name="api-key"
                       id="api-key"
+                      disabled={apiKey !== ""}
                       value={name}
-                      className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-theme-primary-dark focus:ring-theme-primary-dark sm:text-sm p-2"
-                      placeholder="API key name"
+                      className={clsx(
+                        apiKey !== ""
+                          ? "bg-gray-100 hover:cursor-not-allowed"
+                          : "",
+                        "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+                      )}
+                      placeholder="My Helicone Key"
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
@@ -309,9 +323,9 @@ const KeyPage = (props: KeyPageProps) => {
                           .then((res) => refetchHeliconeKeys());
                       });
                     }}
-                    className="items-center rounded-md bg-black px-3.5 py-1.5 text-base font-medium leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                   >
-                    Generate Key
+                    Generate New Key
                   </button>
                 </div>
               </div>
@@ -329,11 +343,70 @@ const KeyPage = (props: KeyPageProps) => {
           apiKey={apiKey}
         />
       }
+      {editOpen && selectedHeliconeKey !== undefined && (
+        <ThemedModal open={editOpen} setOpen={setEditOpen}>
+          <div className="flex flex-col gap-4 w-[400px]">
+            <p className="font-semibold text-lg">Edit Helicone Key</p>
+            <div className="w-full space-y-1.5 text-sm">
+              <label htmlFor="api-key">Key Name</label>
+              <input
+                type="text"
+                name="api-key"
+                id="api-key"
+                disabled={apiKey !== ""}
+                value={editName}
+                className={clsx(
+                  apiKey !== "" ? "bg-gray-100 hover:cursor-not-allowed" : "",
+                  "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+                )}
+                placeholder={selectedHeliconeKey.api_key_name}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="w-full flex justify-end gap-4 mt-4">
+              <button
+                onClick={() => {
+                  setEditOpen(false);
+                }}
+                className={clsx(
+                  "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (user?.email === DEMO_EMAIL) {
+                    setNotification("Demo key can not be deleted", "error");
+                    return;
+                  }
+                  supabaseClient
+                    .from("helicone_api_keys")
+                    .update({
+                      api_key_name: editName,
+                    })
+                    .eq("api_key_hash", selectedHeliconeKey.api_key_hash)
+                    .then((res) => {
+                      setEditOpen(false);
+                      setNotification("Key successfully updated", "success");
+                      refetchHeliconeKeys();
+                    });
+                }}
+                className={clsx(
+                  "relative inline-flex items-center rounded-md hover:bg-sky-400 bg-sky-500 px-4 py-2 text-sm font-medium text-white"
+                )}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </ThemedModal>
+      )}
 
       {deleteHeliconeOpen && selectedHeliconeKey !== undefined && (
         <ThemedModal open={deleteHeliconeOpen} setOpen={setDeleteHeliconeOpen}>
           <div className="flex flex-col gap-4 w-full">
-            <p className="font-bold text-lg">Delete Helicone Key</p>
+            <p className="font-semibold text-lg">Delete Helicone Key</p>
             <p className="text-gray-700 w-[400px] whitespace-pre-wrap text-sm">
               This Helicone key will be deleted from your account. You will no
               longer be able to use this for the your API requests. Are you sure
