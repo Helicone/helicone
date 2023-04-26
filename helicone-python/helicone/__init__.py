@@ -1,3 +1,4 @@
+import functools
 import os
 import openai
 import warnings
@@ -27,10 +28,38 @@ class Helicone:
         self.api_key = key
 
     def _with_helicone_auth(self, func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            # Retrieve properties from kwargs and convert them into headers
+            properties = kwargs.pop("properties", {})
+            property_headers = {
+                f"Helicone-Property-{key}": str(value)
+                for key, value in properties.items()
+            }
+
             headers = kwargs.get("headers", {})
             if "Helicone-Auth" not in headers and self.api_key:
                 headers["Helicone-Auth"] = f"Bearer {self.api_key}"
+                headers.update(property_headers)
+
+                # Add cache header if cache kwarg is provided and set to True
+                cache = kwargs.pop("cache", None)
+                if cache is True:
+                    headers["Helicone-Cache-Enabled"] = "true"
+
+                # Add retry header if retry kwarg is provided and set to True
+                retry = kwargs.pop("retry", None)
+                if retry is True:
+                    headers["Helicone-Retry-Enabled"] = "true"
+
+                # Add rate limit policy header if rate_limit_policy kwarg is provided
+                rate_limit_policy = kwargs.pop("rate_limit_policy", None)
+                if rate_limit_policy:
+                    policy = f'{rate_limit_policy["quota"]};w={rate_limit_policy["time_window"]}'
+                    if "segment" in rate_limit_policy:
+                        policy += f';s={rate_limit_policy["segment"]}'
+                    headers["Helicone-RateLimit-Policy"] = policy
+
                 kwargs["headers"] = headers
 
             original_api_base = openai.api_base
@@ -43,6 +72,7 @@ class Helicone:
             return result
 
         return wrapper
+
 
     def apply_helicone_auth(self):
         api_resources_classes = [
@@ -65,4 +95,3 @@ helicone_instance = Helicone()
 # Expose the methods for easy user access
 api_key = helicone_instance.api_key
 set_api_key = helicone_instance.set_api_key
-openai = openai

@@ -20,7 +20,7 @@ export HELICONE_API_KEY=your_helicone_api_key_here
 Then, in your Python code, replace your existing OpenAI library imports with Helicone's wrapper:
 
 ```python
-import helicone_openai as openai  # replace `import openai` with this line
+import helicone import openai  # replace `import openai` with this line
 ```
 
 That's it! Now all your API requests made through the OpenAI library will be logged by Helicone and you can view your results in the [web application](https://www.helicone.ai/).

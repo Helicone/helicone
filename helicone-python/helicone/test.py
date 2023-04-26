@@ -10,6 +10,11 @@ response = openai.Completion.create(
     prompt="Say this is a Helicone test",
     max_tokens=12,
     temperature=0,
+    properties={
+        "Session": "24",
+        "Conversation": "support_issue_2",
+        "App": "mobile",
+    }
 )
 print(response)
 
@@ -17,6 +22,11 @@ print(response)
 completion = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[{"role": "user", "content": "Hello are you Helicone?"}],
+    properties={
+        "Session": "24",
+        "Conversation": "support_issue_2",
+        "App": "mobile",
+    }
 )
 print(completion)
 
@@ -25,6 +35,11 @@ response = openai.Edit.create(
     model="text-davinci-edit-001",
     input="What Helicone day of the wek is it?",
     instruction="Fix the spelling mistakes",
+    properties={
+        "Session": "24",
+        "Conversation": "support_issue_2",
+        "App": "mobile",
+    }
 )
 print(response)
 
@@ -32,5 +47,10 @@ print(response)
 response = openai.Embedding.create(
     model="text-embedding-ada-002",
     input="The helicone package is delicious...",
+    properties={
+        "Session": "24",
+        "Conversation": "support_issue_2",
+        "App": "mobile",
+    }
 )
 print(response)
