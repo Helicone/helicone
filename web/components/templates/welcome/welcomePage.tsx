@@ -22,7 +22,7 @@ export type Loading<T> = T | "loading";
 
 interface BaseUrlInstructionsProps {
   apiKey: string;
-  nextStep: () => void;
+  nextStep?: () => void;
 }
 
 const CODE_CONVERTS = {
@@ -160,15 +160,17 @@ export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
           Copy
         </button>
       </div>
-      <div className="flex flex-row justify-end items-center">
-        <button
-          onClick={props.nextStep}
-          className="items-center flex flex-row rounded-md bg-black px-4 py-2 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          Code change completed
-          <ChevronRightIcon className="h-4 w-4 inline" />
-        </button>
-      </div>
+      {props.nextStep && (
+        <div className="flex flex-row justify-end items-center">
+          <button
+            onClick={props.nextStep}
+            className="items-center flex flex-row rounded-md bg-black px-4 py-2 text-base font-semibold leading-7 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Code change completed
+            <ChevronRightIcon className="h-4 w-4 inline" />
+          </button>
+        </div>
+      )}
     </>
   );
 };
