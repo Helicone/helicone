@@ -1,15 +1,16 @@
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import { clsx } from "../clsx";
 
 interface ThemedTableProps {
   columns: { name: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
   rows?: any[];
+  editHandler?: (row: any) => void;
   deleteHandler?: (row: any) => void;
 }
 
 const ThemedTable = (props: ThemedTableProps) => {
-  const { columns, rows, deleteHandler } = props;
+  const { columns, rows, editHandler, deleteHandler } = props;
 
   return (
     <div className="ring-1 ring-gray-300 rounded-lg bg-white">
@@ -43,7 +44,7 @@ const ThemedTable = (props: ThemedTableProps) => {
               }
             })}
             <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-              <span className="sr-only">Select</span>
+              <span className="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
@@ -84,13 +85,22 @@ const ThemedTable = (props: ThemedTableProps) => {
                     );
                   }
                 })}
-                {deleteHandler && (
-                  <td
-                    className={clsx(
-                      rowIdx === 0 ? "" : "border-t border-transparent",
-                      "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
-                    )}
-                  >
+                <td
+                  className={clsx(
+                    rowIdx === 0 ? "" : "border-t border-transparent",
+                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium space-x-4"
+                  )}
+                >
+                  {editHandler && (
+                    <button
+                      type="button"
+                      className="inline-flex items-center rounded-md bg-gray-500 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      onClick={() => editHandler(row)}
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  {deleteHandler && (
                     <button
                       type="button"
                       className="inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
@@ -98,11 +108,12 @@ const ThemedTable = (props: ThemedTableProps) => {
                     >
                       <TrashIcon className="h-4 w-4" />
                     </button>
-                    {rowIdx !== 0 ? (
-                      <div className="absolute right-6 left-0 -top-px h-px bg-gray-200" />
-                    ) : null}
-                  </td>
-                )}
+                  )}
+
+                  {rowIdx !== 0 ? (
+                    <div className="absolute right-6 left-0 -top-px h-px bg-gray-200" />
+                  ) : null}
+                </td>
               </tr>
             ))}
         </tbody>
