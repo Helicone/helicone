@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { User, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
+import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import WelcomePage from "../components/templates/welcome/welcomePage";
@@ -17,8 +18,10 @@ const Dashboard = (props: DashboardProps) => {
   const { user, keys } = props;
 
   return (
-    <MetaData title="Welcome to Helicone">
-      <WelcomePage user={user} keys={keys} />
+    <MetaData title="Welcome">
+      <BasePageV2>
+        <WelcomePage user={user} keys={keys} />
+      </BasePageV2>
     </MetaData>
   );
 };
