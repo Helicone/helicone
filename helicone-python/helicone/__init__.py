@@ -14,7 +14,7 @@ from openai.api_resources import (
 
 class Helicone:
     def __init__(self):
-        self.api_key = None
+        self._api_key = None
         self._check_env_var()
         self.apply_helicone_auth()
 
@@ -24,8 +24,13 @@ class Helicone:
         else:
             warnings.warn("Helicone API key is not set as an environment variable.")
 
-    def set_api_key(self, key: str):
-        self.api_key = key
+    @property
+    def api_key(self):
+        return self._api_key
+    
+    @api_key.setter
+    def api_key(self, key: str):
+        self._api_key = key
 
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
@@ -39,7 +44,6 @@ class Helicone:
             headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
             headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
             headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
-            print(headers)
 
             kwargs["headers"] = headers
 
@@ -110,4 +114,3 @@ helicone_instance = Helicone()
 
 # Expose the methods for easy user access
 api_key = helicone_instance.api_key
-set_api_key = helicone_instance.set_api_key
