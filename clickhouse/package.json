@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@clickhouse/client": "^0.0.14"
+  }
+}
