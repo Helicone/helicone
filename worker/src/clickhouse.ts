@@ -91,7 +91,6 @@ export function encodeValues<T>(
         // date must be 2023-04-27T18:40:36.311693
         .map((value) => {
           const ret = value instanceof Date ? value.toISOString() : value;
-          console.log("dgsgd", ret);
           return ret;
         })
         .map((value) => encodeJSON(value, format))
@@ -180,14 +179,14 @@ class ClickhouseClient {
     // console.log("method", xParams.method);
 
     // console.log("To run this in curl, try:");
-    console.log(
-      `curl -X ${
-        xParams.method
-      } -H "Content-Type: text/plain" -H "Authorization: Basic ${Buffer.from(
-        `${this.config.username}:${this.config.password}`
-      ).toString("base64")}" -d '${xParams.body}' ${xParams.url.toString()}`
-    );
-    const fetchResult = await fetch(xParams.url.toString(), {
+    // console.log(
+    //   `curl -X ${
+    //     xParams.method
+    //   } -H "Content-Type: text/plain" -H "Authorization: Basic ${Buffer.from(
+    //     `${this.config.username}:${this.config.password}`
+    //   ).toString("base64")}" -d '${xParams.body}' ${xParams.url.toString()}`
+    // );
+    await fetch(xParams.url.toString(), {
       method: xParams.method,
       headers: {
         "Content-Type": "text/plain",
@@ -199,7 +198,7 @@ class ClickhouseClient {
         typeof xParams.body === "string" ? xParams.body : xParams.body.read(),
       signal: xParams.abort_signal,
     });
-    console.log("fetchResult", fetchResult);
+
     return { query_id };
   }
 
@@ -207,7 +206,6 @@ class ClickhouseClient {
     const format = params.format || "JSONCompactEachRow";
 
     const query = `INSERT INTO ${params.table.trim()} FORMAT ${format}`;
-    console.log("query", query);
 
     return await this.connection_insert({
       query,
