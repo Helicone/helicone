@@ -2,7 +2,7 @@ import { InsertParams as ConnectionInsertParams } from "@clickhouse/client/dist/
 import { Result } from "./results";
 import { InsertResult, TLSParams } from "@clickhouse/client/dist/connection";
 import * as http_search_params from "@clickhouse/client/dist/connection/adapter/http_search_params";
-import { transformUrl } from "@clickhouse/client/dist/connection/adapter/transform_url";
+
 import { ClickHouseSettings } from "@clickhouse/client/dist/settings";
 import { DataFormat, encodeJSON } from "@clickhouse/client/dist/data_formatter";
 
@@ -107,6 +107,28 @@ export function encodeValues<T>(
   );
 }
 
+export function transformUrl({
+  url,
+  pathname,
+  searchParams,
+}: {
+  url: URL;
+  pathname?: string;
+  searchParams?: URLSearchParams;
+}): URL {
+  const newUrl = new URL(url);
+
+  if (pathname) {
+    newUrl.pathname = pathname;
+  }
+
+  if (searchParams) {
+    newUrl.search = searchParams?.toString();
+  }
+
+  return newUrl;
+}
+
 type NormalizedConfig = ReturnType<typeof normalizeConfig>;
 class ClickhouseClient {
   private readonly config: NormalizedConfig;
@@ -151,30 +173,33 @@ class ClickhouseClient {
       body: params.values,
       abort_signal: params.abort_signal,
     };
-    console.log("url", xParams.url.toString());
-    console.log("xParams Body", xParams.body);
-    console.log("xParams Type", typeof xParams.body);
-    console.log("method", xParams.method);
+    // DEBUG LOGS
+    // console.log("url", xParams.url.toString());
+    // console.log("xParams Body", xParams.body);
+    // console.log("xParams Type", typeof xParams.body);
+    // console.log("method", xParams.method);
 
-    console.log("To run this in curl, try:");
-    console.log(
-      `curl -X ${
-        xParams.method
-      } ${xParams.url.toString()} -H "Content-Type: text/plain" -d '${
-        xParams.body
-      }'`
-    );
-    await fetch(xParams.url.toString(), {
+    // console.log("To run this in curl, try:");
+    // console.log(
+    //   `curl -X ${
+    //     xParams.method
+    //   } -H "Content-Type: text/plain" -H "Authorization: Basic ${Buffer.from(
+    //     `${this.config.username}:${this.config.password}`
+    //   ).toString("base64")}" -d '${xParams.body}' ${xParams.url.toString()}`
+    // );
+    const fetchResult = await fetch(xParams.url.toString(), {
       method: xParams.method,
       headers: {
         "Content-Type": "text/plain",
+        Authorization: `Basic ${Buffer.from(
+          `${this.config.username}:${this.config.password}`
+        ).toString("base64")}`,
       },
       body:
         typeof xParams.body === "string" ? xParams.body : xParams.body.read(),
       signal: xParams.abort_signal,
     });
-    // console.log("rez", await rez.text());
-    console.log("query_id", query_id);
+    console.log("fetchResult", fetchResult);
     return { query_id };
   }
 
@@ -219,6 +244,7 @@ export async function dbInsertClickhouse<
     });
     return { data: queryResult.query_id, error: null };
   } catch (err) {
+    console.error("dbInsertClickhouseError", err);
     return {
       data: null,
       error: JSON.stringify(err),
