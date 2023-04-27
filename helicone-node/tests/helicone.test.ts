@@ -8,43 +8,57 @@ if (!apiKey || !heliconeApiKey) {
   throw new Error("API keys must be set as environment variables.");
 }
 
-const configuration = new Configuration({
-    apiKey,
-    heliconeApiKey,
-    cache: true,
-});
-
-const openai = new OpenAIApi(configuration);
-
 // Test cache behavior
 test("cache", async () => {
-  const uniqueId = uuidv4();
-  const prompt = `Cache test with UUID: ${uniqueId}`;
+    const uniqueId = uuidv4();
+    const prompt = `Cache test with UUID: ${uniqueId}`;
 
-  await openai.createCompletion({
-    model: "text-ada-001",
-    prompt,
-    max_tokens: 10,
-  });
-});
+    const configuration = new Configuration({
+        apiKey,
+        heliconeApiKey,
+        cache: true,
+    });
+
+    const openai = new OpenAIApi(configuration);
+
+    await openai.createCompletion({
+        model: "text-ada-001",
+        prompt,
+        max_tokens: 10,
+    });
+}, 60000);
 
 // Test rate limit policy
 test("rate limit policy", async () => {
   const rateLimitPolicyDict = { quota: 10, time_window: 60 };
   const rateLimitPolicyStr = "10;w=60";
 
-  await openai.ChatCompletion.create({
+    let configuration = new Configuration({
+        apiKey,
+        heliconeApiKey,
+        rateLimitPolicy: rateLimitPolicyDict,
+    });
+
+    let openai = new OpenAIApi(configuration);
+
+  await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: "Rate limit policy test" }],
-    rate_limit_policy: rateLimitPolicyDict,
   });
 
-  await openai.ChatCompletion.create({
+    configuration = new Configuration({
+        apiKey,
+        heliconeApiKey,
+        rateLimitPolicy: rateLimitPolicyStr,
+    });
+
+    openai = new OpenAIApi(configuration);
+
+  await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: "Rate limit policy test" }],
-    rate_limit_policy: rateLimitPolicyStr,
   });
-});
+}, 60000);
 
 // Test custom properties
 test("custom properties", async () => {
@@ -54,10 +68,17 @@ test("custom properties", async () => {
     App: "mobile",
   };
 
-  await openai.Completion.create({
+    const configuration = new Configuration({
+        apiKey,
+        heliconeApiKey,
+        properties,
+    });
+
+    const openai = new OpenAIApi(configuration);
+
+  await openai.createCompletion({
     model: "text-ada-001",
     prompt: "Custom properties test",
     max_tokens: 10,
-    properties,
   });
-});
+}, 60000);
