@@ -2,7 +2,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import { Database } from "../supabase/database.types";
 import { getCacheSettings } from "./cache";
-import { dbInsertClickhouse } from "./clickhouse";
+import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
 import { readAndLogResponse } from "./logResponse";
 import { extractPrompt, Prompt } from "./prompt";
@@ -26,6 +26,9 @@ export interface Env {
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
   RATE_LIMIT_KV: KVNamespace;
+  CLICKHOUSE_HOST: string;
+  CLICKHOUSE_USER: string;
+  CLICKHOUSE_PASSWORD: string;
 }
 
 export interface RequestSettings {
@@ -366,9 +369,10 @@ function formatTimeString(timeString: string): string {
 async function logInClickhouse(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Row"],
-  properties: Database["public"]["Tables"]["properties"]["Row"][]
+  properties: Database["public"]["Tables"]["properties"]["Row"][],
+  env: ClickhouseEnv
 ) {
-  await dbInsertClickhouse("response_copy_v1", [
+  await dbInsertClickhouse(env, "response_copy_v1", [
     {
       auth_hash: request.auth_hash,
       user_id: request.user_id,
@@ -385,6 +389,7 @@ async function logInClickhouse(
   ]);
 
   await dbInsertClickhouse(
+    env,
     "properties_copy_v1",
     properties.map((p) => ({
       key: p.key,
@@ -522,7 +527,8 @@ async function forwardAndLog(
           logInClickhouse(
             requestResult.data.request,
             responseResult.data,
-            requestResult.data.properties
+            requestResult.data.properties,
+            env
           );
         }
       }

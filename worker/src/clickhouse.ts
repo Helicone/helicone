@@ -16,6 +16,12 @@ export interface InsertParams<T = unknown> extends BaseParams {
   format?: DataFormat;
 }
 
+export interface ClickhouseEnv {
+  CLICKHOUSE_HOST: string;
+  CLICKHOUSE_USER: string;
+  CLICKHOUSE_PASSWORD: string;
+}
+
 interface BaseParams {
   /** ClickHouse settings that can be applied on query level. */
   clickhouse_settings?: ClickHouseSettings;
@@ -189,14 +195,15 @@ class ClickhouseClient {
 export async function dbInsertClickhouse<
   T extends keyof ClickhouseDB["Tables"]
 >(
+  env: ClickhouseEnv,
   table: T,
   values: ClickhouseDB["Tables"][T][]
 ): Promise<Result<string, string>> {
   try {
     const client = new ClickhouseClient({
-      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
-      username: process.env.CLICKHOUSE_USER ?? "default",
-      password: process.env.CLICKHOUSE_PASSWORD ?? "",
+      host: env.CLICKHOUSE_HOST,
+      username: env.CLICKHOUSE_USER,
+      password: env.CLICKHOUSE_PASSWORD,
     });
     const queryResult = await client.insert({
       table: table,
