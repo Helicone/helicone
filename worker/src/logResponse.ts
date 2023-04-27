@@ -195,11 +195,12 @@ async function parseResponse(
           data: {
             ...consolidateTextFields(data),
             streamed_data: data,
-            usage: getUsage(data, requestBody),
+            usage: await getUsage(data, requestBody),
           },
           error: null,
         };
       } catch (e) {
+        console.error("Error parsing response", e);
         return {
           data: {
             streamed_data: data,
