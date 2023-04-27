@@ -372,35 +372,36 @@ async function logInClickhouse(
   properties: Database["public"]["Tables"]["properties"]["Row"][],
   env: ClickhouseEnv
 ) {
-  await dbInsertClickhouse(env, "response_copy_v1", [
-    {
-      auth_hash: request.auth_hash,
-      user_id: request.user_id,
-      request_id: request.id,
-      completion_tokens: response.completion_tokens,
-      latency: response.delay_ms,
-      model: ((response.body as any)?.model as string) || null,
-      prompt_tokens: response.prompt_tokens,
-      request_created_at: formatTimeString(request.created_at),
-      response_created_at: formatTimeString(response.created_at),
-      response_id: response.id,
-      status: response.status,
-    },
+  return Promise.all([
+    dbInsertClickhouse(env, "response_copy_v1", [
+      {
+        auth_hash: request.auth_hash,
+        user_id: request.user_id,
+        request_id: request.id,
+        completion_tokens: response.completion_tokens,
+        latency: response.delay_ms,
+        model: ((response.body as any)?.model as string) || null,
+        prompt_tokens: response.prompt_tokens,
+        request_created_at: formatTimeString(request.created_at),
+        response_created_at: formatTimeString(response.created_at),
+        response_id: response.id,
+        status: response.status,
+      },
+    ]),
+    dbInsertClickhouse(
+      env,
+      "properties_copy_v1",
+      properties.map((p) => ({
+        key: p.key,
+        value: p.value,
+        user_id: p.user_id,
+        auth_hash: request.auth_hash,
+        request_id: request.id,
+        created_at: p.created_at ? formatTimeString(p.created_at) : null,
+        id: p.id,
+      }))
+    ),
   ]);
-
-  await dbInsertClickhouse(
-    env,
-    "properties_copy_v1",
-    properties.map((p) => ({
-      key: p.key,
-      value: p.value,
-      user_id: p.user_id,
-      auth_hash: request.auth_hash,
-      request_id: request.id,
-      created_at: p.created_at ? formatTimeString(p.created_at) : null,
-      id: p.id,
-    }))
-  );
 }
 
 async function forwardAndLog(
@@ -524,7 +525,7 @@ async function forwardAndLog(
         });
 
         if (responseResult.data !== null) {
-          logInClickhouse(
+          await logInClickhouse(
             requestResult.data.request,
             responseResult.data,
             requestResult.data.properties,

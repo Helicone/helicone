@@ -180,13 +180,13 @@ class ClickhouseClient {
     // console.log("method", xParams.method);
 
     // console.log("To run this in curl, try:");
-    // console.log(
-    //   `curl -X ${
-    //     xParams.method
-    //   } -H "Content-Type: text/plain" -H "Authorization: Basic ${Buffer.from(
-    //     `${this.config.username}:${this.config.password}`
-    //   ).toString("base64")}" -d '${xParams.body}' ${xParams.url.toString()}`
-    // );
+    console.log(
+      `curl -X ${
+        xParams.method
+      } -H "Content-Type: text/plain" -H "Authorization: Basic ${Buffer.from(
+        `${this.config.username}:${this.config.password}`
+      ).toString("base64")}" -d '${xParams.body}' ${xParams.url.toString()}`
+    );
     const fetchResult = await fetch(xParams.url.toString(), {
       method: xParams.method,
       headers: {
