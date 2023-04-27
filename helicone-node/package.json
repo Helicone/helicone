@@ -4,7 +4,7 @@
     "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
     "main": "index.js",
     "scripts": {
-        "test": "node test.js"
+        "test": "jest"
     },
     "author": "Helicone, Inc.",
     "license": "MIT",
@@ -12,6 +12,10 @@
         "openai": "^3.2.1"
     },
     "devDependencies": {
-        "dotenv": "^16.0.3"
+        "@types/jest": "^29.5.1",
+        "dotenv": "^16.0.3",
+        "jest": "^29.5.0",
+        "ts-jest": "^29.1.0",
+        "uuid": "^9.0.0"
     }
 }

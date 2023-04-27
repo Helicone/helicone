@@ -86,21 +86,30 @@ class Helicone {
   }
 }
     
-class Configuration extends OpenAIConfiguration {
-  heliconeApiKey?: string;
+class Configuration {
+  constructor(public options: HeliconeConfigurationOptions) {}
 
-  constructor(options: HeliconeConfigurationOptions) {
-    super({ apiKey: options.apiKey });
-    this.heliconeApiKey = options.heliconeApiKey;
+  get openAIApi(): OpenAIApi {
+    const heliconeInstance = new Helicone(this.options.heliconeApiKey);
+    return heliconeInstance.getOpenAIApi(this.options);
   }
 }
 
-function HeliconeOpenAIApi(configuration: Configuration): OpenAIApi {
-  const heliconeInstance = new Helicone(configuration.heliconeApiKey);
-  return heliconeInstance.getOpenAIApi(configuration);
+const apiKey = process.env.OPENAI_API_KEY;
+const heliconeApiKey = process.env.HELICONE_API_KEY;
+
+if (!apiKey || !heliconeApiKey) {
+  throw new Error("API keys must be set as environment variables.");
 }
 
-export {
-  Configuration,
-  HeliconeOpenAIApi as OpenAIApi,
-};
+const openAIConfiguration = new OpenAIConfiguration({
+  apiKey: apiKey as string,
+});
+
+const configuration = new Configuration({
+  ...openAIConfiguration.baseOptions,
+  heliconeApiKey: heliconeApiKey as string,
+  isJsonMime: openAIConfiguration.isJsonMime.bind(openAIConfiguration),
+});
+
+const openai = configuration.openAIApi;
