@@ -1,5 +1,3 @@
-import { GenericResult, Result } from ".";
-
 export interface Prompt {
   prompt: string;
   values: { [key: string]: string };
