@@ -11,6 +11,44 @@ from openai.api_resources import (
     Image,
     Moderation,
 )
+import requests
+from requests.adapters import HTTPAdapter
+
+import requests
+from requests.adapters import HTTPAdapter
+import openai
+from openai.api_requestor import APIRequestor
+
+original_request = APIRequestor.request
+
+class HeliconeAdapter(HTTPAdapter):
+    def send(self, request, **kwargs):
+        response = super().send(request, **kwargs)
+        if response.status_code == 200:
+            # Extract headers and call the _add_helicone_rate_limit_attributes method
+            headers = response.headers
+            print("Headers:", headers)  # Example: print headers
+            # Add your logic here to process the headers and update the response object accordingly
+        return response
+
+def custom_request(self, method, url, params=None, headers=None, stream=False, request_id=None, request_timeout=None):
+    if headers is None:
+        headers = {}
+    
+    # Create a new session with the custom adapter
+    session = requests.Session()
+    session.mount('https://oai.hconeai.com', HeliconeAdapter())
+    
+    # Call the original request method with the new session object
+    response, status_code = original_request(self, method, url, params=params, headers=headers, stream=stream, session=session)
+    
+    # Extract response headers and store them in the response object
+    response_headers = session.headers
+    response['response_headers'] = response_headers
+    
+    return response, status_code
+
+openai.api_requestor.APIRequestor.request = custom_request
 
 class HeliconeRateLimit:
     def __init__(self, limit=None, remaining=None, reset=None, policy=None):
