@@ -113,3 +113,8 @@ const configuration = new Configuration({
 });
 
 const openai = configuration.openAIApi;
+
+export {
+  Configuration,
+  openai as OpenAIApi,
+};
