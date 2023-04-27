@@ -25,7 +25,7 @@ class HeliconeResponse:
         self.cache = cache
 
     def __repr__(self):
-        return f"<HeliconeResponse response={self.response} rate_limit={self.rate_limit}>"
+        return f"<HeliconeResponse cache={self.cache} rate_limit={self.rate_limit}>"
 
 class Helicone:
     def __init__(self):
@@ -66,7 +66,11 @@ class Helicone:
 
             # Check if retries are enabled
             if headers.get("Helicone-Retry-Enabled") == "true":
-                self._add_helicone_rate_limit_attributes(result)
+                helicone_rate_limit = self._add_helicone_rate_limit_attributes(result)
+            else:
+                helicone_rate_limit = None
+
+            result["helicone"] = HeliconeResponse(rate_limit=helicone_rate_limit, cache=result.headers.get("Helicone-Cache", None))
 
             return result
 
@@ -86,8 +90,7 @@ class Helicone:
                 rate_limit[attr_name] = response.headers[header]
 
         helicone_rate_limit = HeliconeRateLimit(**rate_limit)
-        helicone_cache = response.headers.get("Helicone-Cache", None)
-        response["helicone"] = HeliconeResponse(rate_limit=helicone_rate_limit, cache=helicone_cache)
+        return helicone_rate_limit
 
     def _get_property_headers(self, properties):
         return {f"Helicone-Property-{key}": str(value) for key, value in properties.items()}
@@ -113,12 +116,17 @@ class Helicone:
 
     def _get_rate_limit_policy_headers(self, rate_limit_policy):
         if rate_limit_policy:
-            policy = f'{rate_limit_policy["quota"]};w={rate_limit_policy["time_window"]}'
-            print("POLICY", policy)
-            if "segment" in rate_limit_policy:
-                policy += f';s={rate_limit_policy["segment"]}'
+            if isinstance(rate_limit_policy, str):
+                policy = rate_limit_policy
+            elif isinstance(rate_limit_policy, dict):
+                policy = f'{rate_limit_policy["quota"]};w={rate_limit_policy["time_window"]}'
+                if "segment" in rate_limit_policy:
+                    policy += f';s={rate_limit_policy["segment"]}'
+            else:
+                raise TypeError("rate_limit_policy must be either a string or a dictionary")
             return {"Helicone-RateLimit-Policy": policy}
         return {}
+
 
     def apply_helicone_auth(self):
         api_resources_classes = [
