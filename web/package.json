@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.10",
+    "@clickhouse/client": "^0.0.14",
     "@dqbd/tiktoken": "^1.0.2",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
