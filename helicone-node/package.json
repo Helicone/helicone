@@ -5,24 +5,27 @@
     "main": "index.js",
     "scripts": {
         "test": "jest",
-        "lint": "eslint ."
+        "lint": "eslint --ext .ts . --fix"
     },
     "author": "Helicone, Inc.",
-    "license": "MIT",
     "dependencies": {
         "openai": "^3.2.1"
     },
     "devDependencies": {
+        "@babel/core": "^7.21.4",
+        "@babel/eslint-parser": "^7.21.3",
         "@types/jest": "^29.5.1",
         "dotenv": "^16.0.3",
         "eslint": "^8.39.0",
         "eslint-config-next": "^13.3.1",
+        "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-import": "^2.27.5",
         "eslint-plugin-jsx-a11y": "^6.7.1",
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "jest": "^29.5.0",
+        "next": "^13.3.1",
         "prettier": "^2.8.8",
         "ts-jest": "^29.1.0",
         "uuid": "^9.0.0"

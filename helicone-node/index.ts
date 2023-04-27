@@ -1,4 +1,7 @@
-import { Configuration as OpenAIConfiguration, OpenAIApi as OpenAIApiOriginal } from "openai";
+import {
+  Configuration as OpenAIConfiguration,
+  OpenAIApi as OpenAIApiOriginal,
+} from "openai";
 
 interface HeliconeConfigurationOptions {
   apiKey: string;
@@ -31,7 +34,9 @@ class HeliconeConfiguration extends OpenAIConfiguration {
   }
 }
 
-function getPropertyHeaders(properties?: { [key: string]: any }): { [key: string]: string } {
+function getPropertyHeaders(properties?: { [key: string]: any }): {
+  [key: string]: string;
+} {
   if (!properties) return {};
   const headers: { [key: string]: string } = {};
   for (const key in properties) {
@@ -44,12 +49,17 @@ function getCacheHeaders(cache?: boolean): { [key: string]: string } {
   return cache ? { "Helicone-Cache-Enabled": "true" } : {};
 }
 
-function getRetryHeaders(retry?: boolean | { [key: string]: any }): { [key: string]: string } {
+function getRetryHeaders(retry?: boolean | { [key: string]: any }): {
+  [key: string]: string;
+} {
   if (!retry) return {};
-  const headers: { [key: string]: string } = { "Helicone-Retry-Enabled": "true" };
+  const headers: { [key: string]: string } = {
+    "Helicone-Retry-Enabled": "true",
+  };
   if (typeof retry === "object") {
     if (retry.num) headers["Helicone-Retry-Num"] = retry.num.toString();
-    if (retry.factor) headers["Helicone-Retry-Factor"] = retry.factor.toString();
+    if (retry.factor)
+      headers["Helicone-Retry-Factor"] = retry.factor.toString();
     if (retry.min_timeout)
       headers["Helicone-Retry-Min-Timeout"] = retry.min_timeout.toString();
     if (retry.max_timeout)
@@ -69,7 +79,9 @@ function getRateLimitPolicyHeaders(
     policy = `${rateLimitPolicy.quota};w=${rateLimitPolicy.time_window}`;
     if (rateLimitPolicy.segment) policy += `;s=${rateLimitPolicy.segment}`;
   } else {
-    throw new TypeError("rate_limit_policy must be either a string or a dictionary");
+    throw new TypeError(
+      "rate_limit_policy must be either a string or a dictionary"
+    );
   }
   return { "Helicone-RateLimit-Policy": policy };
 }

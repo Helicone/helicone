@@ -10,22 +10,22 @@ if (!apiKey || !heliconeApiKey) {
 
 // Test cache behavior
 test("cache", async () => {
-    const uniqueId = uuidv4();
-    const prompt = `Cache test with UUID: ${uniqueId}`;
+  const uniqueId = uuidv4();
+  const prompt = `Cache test with UUID: ${uniqueId}`;
 
-    const configuration = new Configuration({
-        apiKey,
-        heliconeApiKey,
-        cache: true,
-    });
+  const configuration = new Configuration({
+    apiKey,
+    heliconeApiKey,
+    cache: true,
+  });
 
-    const openai = new OpenAIApi(configuration);
+  const openai = new OpenAIApi(configuration);
 
-    await openai.createCompletion({
-        model: "text-ada-001",
-        prompt,
-        max_tokens: 10,
-    });
+  await openai.createCompletion({
+    model: "text-ada-001",
+    prompt,
+    max_tokens: 10,
+  });
 }, 60000);
 
 // Test rate limit policy
@@ -33,26 +33,26 @@ test("rate limit policy", async () => {
   const rateLimitPolicyDict = { quota: 10, time_window: 60 };
   const rateLimitPolicyStr = "10;w=60";
 
-    let configuration = new Configuration({
-        apiKey,
-        heliconeApiKey,
-        rateLimitPolicy: rateLimitPolicyDict,
-    });
+  let configuration = new Configuration({
+    apiKey,
+    heliconeApiKey,
+    rateLimitPolicy: rateLimitPolicyDict,
+  });
 
-    let openai = new OpenAIApi(configuration);
+  let openai = new OpenAIApi(configuration);
 
   await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: "Rate limit policy test" }],
   });
 
-    configuration = new Configuration({
-        apiKey,
-        heliconeApiKey,
-        rateLimitPolicy: rateLimitPolicyStr,
-    });
+  configuration = new Configuration({
+    apiKey,
+    heliconeApiKey,
+    rateLimitPolicy: rateLimitPolicyStr,
+  });
 
-    openai = new OpenAIApi(configuration);
+  openai = new OpenAIApi(configuration);
 
   await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
@@ -68,13 +68,13 @@ test("custom properties", async () => {
     App: "mobile",
   };
 
-    const configuration = new Configuration({
-        apiKey,
-        heliconeApiKey,
-        properties,
-    });
+  const configuration = new Configuration({
+    apiKey,
+    heliconeApiKey,
+    properties,
+  });
 
-    const openai = new OpenAIApi(configuration);
+  const openai = new OpenAIApi(configuration);
 
   await openai.createCompletion({
     model: "text-ada-001",
