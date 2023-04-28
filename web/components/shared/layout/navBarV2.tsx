@@ -15,6 +15,7 @@ import Image from "next/image";
 import { Fragment, useState } from "react";
 import OnboardingButton from "../auth/onboardingButton";
 import { SocialMeta } from "./basePageV2";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 
 const navigation = [
   {
@@ -54,7 +55,10 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const { setOpenLogin, setOpenOnboarding, socials } = props;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const user = useUser();
   const router = useRouter();
+  const supabaseClient = useSupabaseClient();
 
   return (
     <header className="bg-gray-50 border-b border-gray-200">
@@ -110,13 +114,28 @@ const NavBarV2 = (props: NavBarV2Props) => {
               </a>
             ))}
           </div>
-          <button
-            onClick={() => setOpenLogin(true)}
-            className="whitespace-nowrap rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold border border-gray-300 hover:bg-sky-50 text-gray-900 shadow-sm hover:text-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-          >
-            Log In
-          </button>
-          <OnboardingButton variant="secondary" title={"Sign Up"} />
+          {user ? (
+            <button
+              onClick={() => {
+                supabaseClient.auth.signOut().then(() => {
+                  router.push("/");
+                });
+              }}
+              className="whitespace-nowrap rounded-md bg-sky-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setOpenLogin(true)}
+                className="whitespace-nowrap rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold border border-gray-300 hover:bg-sky-50 text-gray-900 shadow-sm hover:text-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                Log In
+              </button>
+              <OnboardingButton variant="secondary" title={"Sign Up"} />
+            </>
+          )}
         </div>
         <div className="flex lg:hidden">
           <button

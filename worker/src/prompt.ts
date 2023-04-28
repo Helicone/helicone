@@ -1,4 +1,4 @@
-import { GenericResult, Result } from ".";
+import { GenericResult } from "./results";
 
 export interface Prompt {
   prompt: string;
