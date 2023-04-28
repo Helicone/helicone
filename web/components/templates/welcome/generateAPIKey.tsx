@@ -43,14 +43,15 @@ const GenerateApiKey = (props: GenerateApiKeyProps) => {
     user: User,
     keyName: string
   ): Promise<string> {
-    const localStorageHeliconeAPIKey = localStorage.getItem("helicone_api_key");
-    if (localStorageHeliconeAPIKey != null) {
-      return localStorageHeliconeAPIKey;
+    const sessionStorageHeliconeAPIKey =
+      sessionStorage.getItem("helicone_api_key");
+    if (sessionStorageHeliconeAPIKey != null) {
+      return sessionStorageHeliconeAPIKey;
     }
 
     const apiKey = await generateAPIKey();
 
-    localStorage.setItem("helicone_api_key", apiKey);
+    sessionStorage.setItem("helicone_api_key", apiKey);
 
     await supabaseClient
       .from("helicone_api_keys")
