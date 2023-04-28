@@ -31,6 +31,7 @@ async function getOrCreateUserSettings(
     .select("*")
     .eq("user", user.id)
     .single();
+
   if (userSettingsError !== null || userSettings === null) {
     const { error: createUserSettingsError, data: createUserSettingsData } =
       await supabaseServer
@@ -149,6 +150,8 @@ export default async function handler(
     }
     const { data: subscriptions, error: subscriptionError } =
       await getSubscriptions(req, res);
+
+    console.log("subs", subscriptions);
 
     const syncSettingsWithStripeResult = await syncSettingsWithStripe(
       userSettings,

@@ -4,8 +4,11 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 
 import { GetServerSidePropsContext } from "next";
+import AuthHeader from "../components/shared/authHeader";
+import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import BillingPage from "../components/templates/usage/usagePage";
+import UsagePageV2 from "../components/templates/usage/usagePageV2";
 import { UserSettingsResponse } from "./api/user_settings";
 
 interface UsageProps {
@@ -18,7 +21,11 @@ const Usage = (props: UsageProps) => {
 
   return (
     <MetaData title="Usage">
-      <BillingPage user={user} />
+      <AuthLayout user={user}>
+        <AuthHeader title={"Usage"} />
+        <UsagePageV2 user={user} />
+      </AuthLayout>
+      {/* <BillingPage user={user} /> */}
     </MetaData>
   );
 };
@@ -47,7 +54,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     props: {
       initialSession: session,
       user: session.user,
-      // userSettings: data,
     },
   };
 };
