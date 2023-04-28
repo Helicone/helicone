@@ -64,8 +64,8 @@ response = openai.create_completion(
     prompt="What is the meaning of life?",
     max_tokens=10,
     rate_limit_policy={
-        "quota": 60,
-        "time_window": 60,
+        "quota": 100, 
+        "time_window": 60, # in seconds
         "segment": "user",
     },
 )
