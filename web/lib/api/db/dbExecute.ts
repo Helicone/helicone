@@ -1,6 +1,41 @@
 import { Client, Pool } from "pg";
 import { Result } from "../../result";
 
+import { createClient as clickhouseCreateClient } from "@clickhouse/client";
+
+export async function dbQueryClickhouse<T>(
+  query: string,
+  parameters: Record<string, number | string>
+): Promise<Result<T[], string>> {
+  try {
+    const client = clickhouseCreateClient({
+      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:8123",
+      username: process.env.CLICKHOUSE_USER ?? "default",
+      password: process.env.CLICKHOUSE_PASSWORD ?? "",
+    });
+    const queryResult = await client.query({
+      query: `
+${query}
+    `,
+      query_params: parameters,
+      format: "JSONEachRow",
+      // Recommended for cluster usage to avoid situations
+      // where a query processing error occurred after the response code
+      // and HTTP headers were sent to the client.
+      // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
+      clickhouse_settings: {
+        wait_end_of_query: 1,
+      },
+    });
+    return { data: await queryResult.json<T[]>(), error: null };
+  } catch (err) {
+    return {
+      data: null,
+      error: JSON.stringify(err),
+    };
+  }
+}
+
 export async function dbExecute<T>(
   query: string,
   parameters: any[]
