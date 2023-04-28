@@ -55,7 +55,11 @@ const configuration = new Configuration({
     Session: "24",
     Conversation: "support_issue_2",
   },
-  rateLimitPolicy: { quota: 10, time_window: 60 }
+  rateLimitPolicy: { 
+    quota: 10, 
+    time_window: 60,
+    segment: "Session",
+  }
 });
 ```
 
