@@ -1,6 +1,6 @@
 # Helicone OpenAI Node.js Library
 
-This package is a simple and convenient way to log all requests made through the OpenAI API with Helicone, with just a one-line code change. By using the Helicone OpenAI Node.js wrapper, you can easily track and manage your OpenAI API usage and monitor your GPT models' cost, latency, and performance on the Helicone platform.
+This package is a simple and convenient way to log all requests made through the OpenAI API with Helicone. You can easily track and manage your OpenAI API usage and monitor your GPT models' cost, latency, and performance on the Helicone platform.
 
 ## Installation
 
@@ -22,6 +22,44 @@ Then, in your JavaScript or TypeScript code, replace your existing OpenAI librar
 ```javascript
 const { Configuration, OpenAIApi } = require("helicone-openai"); // replace `require("openai")` with this line
 ```
+
+The usage is the same as the OpenAI SDK, with the new require statement and adding a heliconeApiKey parameter:
+
+```javascript
+const { Configuration, OpenAIApi } = require("helicone-openai");
+
+const configuration = new Configuration({
+  apiKey: OPENAI_API_KEY,
+  heliconeApiKey: HELICONE_API_KEY,
+});
+
+const openai = new OpenAIApi(configuration);
+
+await openai.createCompletion({
+  model: "text-davinci-003",
+  prompt: "What is the meaning of life?",
+  max_tokens: 10,
+});
+```
+
+## Advanced Features
+Helicone offers caching, retries, custom properties, and rate limits for your APIs. For all of the advanced features, instantiate them through the configuration:
+
+```javascript
+const configuration = new Configuration({
+  apiKey,
+  heliconeApiKey,
+  cache: true,
+  retry: true,
+  properties: {
+    Session: "24",
+    Conversation: "support_issue_2",
+  },
+  rateLimitPolicy: { quota: 10, time_window: 60 }
+});
+```
+
+For more information see our [documentation](https://docs.helicone.ai/advanced-usage/custom-properties).
 
 ## Requirements
 - Node.js version 12 or higher is required.
