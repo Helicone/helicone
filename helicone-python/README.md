@@ -7,7 +7,7 @@ This package is a simple and convenient way to log all requests made through the
 To install the Helicone OpenAI Python library, simply run the following command:
 
 ```bash
-pip install helicone-openai
+pip install helicone
 ```
 
 ## Usage
@@ -24,6 +24,69 @@ import helicone import openai  # replace `import openai` with this line
 ```
 
 That's it! Now all your API requests made through the OpenAI library will be logged by Helicone and you can view your results in the [web application](https://www.helicone.ai/).
+
+## Advanced Usage
+Helicone allows you to customize your requests using additional options like caching, retries, rate limits, and custom properties. Here's how to use these advanced features:
+
+### Custom Properties
+You can add custom properties to your API requests by passing the properties parameter:
+
+```python
+response = openai.create_completion(
+    model="text-ada-001",
+    prompt="What is the meaning of life?",
+    max_tokens=10,
+    properties={
+        "user_id": "123",
+        "project": "example_project",
+    },
+)
+```
+
+### Caching
+To enable caching for a specific API request, simply pass the cache parameter as True:
+
+```python
+response = openai.create_completion(
+    model="text-ada-001",
+    prompt="What is the meaning of life?",
+    max_tokens=10,
+    cache=True,
+)
+```
+
+### Rate Limits
+You can set a custom rate limit policy for your API requests by passing the rate_limit_policy parameter:
+
+```python
+response = openai.create_completion(
+    model="text-ada-001",
+    prompt="What is the meaning of life?",
+    max_tokens=10,
+    rate_limit_policy={
+        "quota": 60,
+        "time_window": 60,
+        "segment": "user",
+    },
+)
+```
+
+### Retries
+You can enable retries and customize retry settings by passing the retry parameter:
+
+```python
+response = openai.create_completion(
+    model="text-ada-001",
+    prompt="What is the meaning of life?",
+    max_tokens=10,
+    retry={
+        "num": 3,
+        "factor": 2,
+        "min_timeout": 1,
+        "max_timeout": 10,
+    },
+)
+```
 
 ## Requirements
 - Python 3.6 or higher is required.
