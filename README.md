@@ -52,6 +52,17 @@ npm install -g yarn
 brew install supabase/tap/supabase
 ```
 
+#### Setting up clickhouse
+
+```
+# https://clickhouse.com/docs/en/install
+curl https://clickhouse.com/ | sh
+
+
+# This will start clickhouse locally
+python3 clickhouse/ch_hcone.py --start
+```
+
 #### Running
 
 ```bash

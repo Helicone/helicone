@@ -644,6 +644,14 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@clickhouse/client@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@clickhouse/client/-/client-0.0.14.tgz#7f622102e6a8a82d60b82cbfe51a9cbf306cefbb"
+  integrity sha512-JkqPN0PhHyvf+jvPiD50LdXtemwJ+GZxDdWs0ysEL1qnVduDyvudzUECSqa29TG6Ho2NUFAEf5XjeUb+dMaT8A==
+  dependencies:
+    node-abort-controller "^3.0.1"
+    uuid "^9.0.0"
+
 "@dqbd/tiktoken@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@dqbd/tiktoken/-/tiktoken-1.0.2.tgz#f180afc887426343bab2adc41106d04dbd3627c0"

@@ -29,7 +29,7 @@ const CODE_CONVERTS = {
   curl: (key: string) => `
   curl --request POST \\
   --url https://oai.hconeai.com/v1/chat/completions \\
-  --header 'Authorization: Bearer <OPEN_AI_API_KEY>' \\
+  --header 'Authorization: Bearer OPENAI_API_KEY' \\
   --header 'Helicone-Auth: Bearer ${key}' \\
   --header 'Content-Type: application/json' \\
   --data '{
