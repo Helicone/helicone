@@ -26,10 +26,7 @@ import helicone import openai  # replace `import openai` with this line
 That's it! Now all your API requests made through the OpenAI library will be logged by Helicone and you can view your results in the [web application](https://www.helicone.ai/).
 
 ## Advanced Usage
-Helicone allows you to customize your requests using additional options like caching, retries, rate limits, and custom properties. Here's how to use these advanced features:
-
-### [Custom Properties](https://docs.helicone.ai/advanced-usage/custom-properties)
-You can add custom properties to your API requests by passing in arbitrary key-values in the properties parameter:
+Helicone allows you to customize your requests using additional options like [caching](https://docs.helicone.ai/advanced-usage/caching), [retries](https://docs.helicone.ai/advanced-usage/retries), [rate limits](https://docs.helicone.ai/advanced-usage/custom-rate-limits), and [custom properties](https://docs.helicone.ai/advanced-usage/custom-properties). Here's how to use these advanced features in a single API request:
 
 ```python
 response = openai.create_completion(
@@ -40,45 +37,12 @@ response = openai.create_completion(
         "session_id": "123",
         "project": "example_project",
     },
-)
-```
-
-### [Caching](https://docs.helicone.ai/advanced-usage/caching)
-To enable caching for a specific API request, simply pass the cache parameter as True:
-
-```python
-response = openai.create_completion(
-    model="text-ada-001",
-    prompt="What is the meaning of life?",
-    max_tokens=10,
     cache=True,
-)
-```
-
-### [Rate Limits](https://docs.helicone.ai/advanced-usage/custom-rate-limits)
-You can set a custom rate limit policy for your API requests by passing the `rate_limit_policy` parameter. `segment` can be `user` or the name of any custom property.
-
-```python
-response = openai.create_completion(
-    model="text-ada-001",
-    prompt="What is the meaning of life?",
-    max_tokens=10,
     rate_limit_policy={
         "quota": 100, 
         "time_window": 60, # in seconds
         "segment": "user",
     },
-)
-```
-
-### [Retries](https://docs.helicone.ai/advanced-usage/retries)
-You can enable retries and customize retry settings by passing the retry parameter:
-
-```python
-response = openai.create_completion(
-    model="text-ada-001",
-    prompt="What is the meaning of life?",
-    max_tokens=10,
     retry=True,
 )
 ```
