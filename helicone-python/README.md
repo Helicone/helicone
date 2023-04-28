@@ -28,8 +28,8 @@ That's it! Now all your API requests made through the OpenAI library will be log
 ## Advanced Usage
 Helicone allows you to customize your requests using additional options like caching, retries, rate limits, and custom properties. Here's how to use these advanced features:
 
-### Custom Properties
-You can add custom properties to your API requests by passing the properties parameter:
+### [Custom Properties](https://docs.helicone.ai/advanced-usage/custom-properties)
+You can add custom properties to your API requests by passing in arbitrary key-values in the properties parameter:
 
 ```python
 response = openai.create_completion(
@@ -37,13 +37,13 @@ response = openai.create_completion(
     prompt="What is the meaning of life?",
     max_tokens=10,
     properties={
-        "user_id": "123",
+        "session_id": "123",
         "project": "example_project",
     },
 )
 ```
 
-### Caching
+### [Caching](https://docs.helicone.ai/advanced-usage/caching)
 To enable caching for a specific API request, simply pass the cache parameter as True:
 
 ```python
@@ -55,8 +55,8 @@ response = openai.create_completion(
 )
 ```
 
-### Rate Limits
-You can set a custom rate limit policy for your API requests by passing the rate_limit_policy parameter:
+### [Rate Limits](https://docs.helicone.ai/advanced-usage/custom-rate-limits)
+You can set a custom rate limit policy for your API requests by passing the `rate_limit_policy` parameter. `segment` can be `user` or the name of any custom property.
 
 ```python
 response = openai.create_completion(
@@ -71,7 +71,7 @@ response = openai.create_completion(
 )
 ```
 
-### Retries
+### [Retries](https://docs.helicone.ai/advanced-usage/retries)
 You can enable retries and customize retry settings by passing the retry parameter:
 
 ```python
@@ -79,12 +79,7 @@ response = openai.create_completion(
     model="text-ada-001",
     prompt="What is the meaning of life?",
     max_tokens=10,
-    retry={
-        "num": 3,
-        "factor": 2,
-        "min_timeout": 1,
-        "max_timeout": 10,
-    },
+    retry=True,
 )
 ```
 
