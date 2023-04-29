@@ -101,7 +101,6 @@ const Login = (props: LoginProps) => {
           } as Stripe.SubscriptionCreateParams),
         }
       ).then((res) => res.json());
-      console.log(subscription);
     }
 
     setLoading(false);
