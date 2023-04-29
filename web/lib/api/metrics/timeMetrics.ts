@@ -3,6 +3,7 @@ import { dbExecute } from "../db/dbExecute";
 import {
   buildFilter,
   buildFilterWithAuth,
+  buildFilterWithAuthRequest,
 } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
@@ -14,11 +15,11 @@ export async function getAggregatedAvgMetrics(
   filter: FilterNode,
   user_id: string
 ): Promise<Result<AverageResponseTime, string>> {
-  const { filter: filterString, argsAcc } = await buildFilterWithAuth(
-    user_id,
+  const { filter: filterString, argsAcc } = await buildFilterWithAuthRequest({
     filter,
-    []
-  );
+    argsAcc: [],
+    user_id,
+  });
   const query = `
   SELECT avg(response.delay_ms::float/1000.0)::float AS average_response_time,
   avg(response.completion_tokens + response.prompt_tokens)::float AS average_tokens_per_response
