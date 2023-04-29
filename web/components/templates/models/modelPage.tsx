@@ -16,6 +16,7 @@ import AuthHeader from "../../shared/authHeader";
 import { useQuery } from "@tanstack/react-query";
 import { ModelMetric } from "../../../lib/api/models/models";
 import { Result } from "../../../lib/result";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface ModelPageProps {}
 
@@ -40,30 +41,35 @@ const ModelPage = (props: ModelPageProps) => {
     },
     refetchOnWindowFocus: false,
   });
+
+  console.log(data?.data);
   return (
     <>
       <AuthHeader title={"Models"} />
-      {isLoading && <div>Loading...</div>}
-      <ThemedTable
-        columns={[
-          { name: "Model", key: "model", hidden: false },
-          { name: "Requests", key: "total_requests", hidden: false },
-          {
-            name: "Prompt Tokens",
-            key: "total_completion_tokens",
-            hidden: false,
-          },
-          {
-            name: "Completion Tokens",
-            key: "total_prompt_token",
-            hidden: false,
-          },
-          { name: "Total Tokens", key: "total_tokens", hidden: false },
+      {isLoading ? (
+        <LoadingAnimation title="Getting model metrics" />
+      ) : (
+        <ThemedTable
+          columns={[
+            { name: "Model", key: "model", hidden: false },
+            { name: "Requests", key: "total_requests", hidden: false },
+            {
+              name: "Prompt Tokens",
+              key: "total_completion_tokens",
+              hidden: false,
+            },
+            {
+              name: "Completion Tokens",
+              key: "total_prompt_token",
+              hidden: false,
+            },
+            { name: "Total Tokens", key: "total_tokens", hidden: false },
 
-          { name: "Cost (USD)", key: "cost", hidden: false },
-        ]}
-        rows={data?.data ?? []}
-      />
+            { name: "Cost (USD)", key: "cost", hidden: false },
+          ]}
+          rows={data?.data ?? []}
+        />
+      )}
     </>
   );
 };
