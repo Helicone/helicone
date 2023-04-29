@@ -3,6 +3,7 @@ import { dbExecute } from "../db/dbExecute";
 import {
   buildFilter,
   buildFilterWithAuth,
+  buildFilterWithAuthRequest,
 } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
@@ -14,11 +15,11 @@ export async function getXRequestDate(
   user_id: string,
   first: boolean
 ): Promise<Result<Date, string>> {
-  const { filter: filterString, argsAcc } = await buildFilterWithAuth(
-    user_id,
+  const { filter: filterString, argsAcc } = await buildFilterWithAuthRequest({
     filter,
-    []
-  );
+    argsAcc: [],
+    user_id,
+  });
   const query = `
 SELECT 
   request.created_at

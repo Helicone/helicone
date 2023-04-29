@@ -29,6 +29,7 @@ import { UserMetric } from "../../../lib/api/users/users";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 import Papa from "papaparse";
+import { useDebounce } from "../../../services/hooks/debounce";
 
 const monthNames = [
   "Jan",
@@ -54,6 +55,7 @@ const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const debouncedAdvancedFilters = useDebounce(advancedFilters, 2_000); // 2 seconds
 
   const [currentPage, setCurrentPage] = useState<number>(page);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
@@ -74,7 +76,7 @@ const UsersPage = (props: UsersPageProps) => {
     currentPageSize,
     sortLeaf,
     filterListToTree(
-      filterUIToFilterLeafs(userTableFilters, advancedFilters),
+      filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
       "and"
     )
   );
@@ -188,6 +190,11 @@ const UsersPage = (props: UsersPageProps) => {
         Number(value) > 0.01
           ? Number(value).toFixed(2)
           : Number(value).toString(),
+      toSortLeaf(direction) {
+        return {
+          cost: direction,
+        };
+      },
     },
   ];
 

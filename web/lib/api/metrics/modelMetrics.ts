@@ -1,9 +1,10 @@
-import { dbExecute } from "../db/dbExecute";
-import {
-  buildFilter,
-  buildFilterWithAuth,
-} from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  buildFilterWithAuth,
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthRequest,
+} from "../../../services/lib/filters/filters";
+import { dbExecute } from "../db/dbExecute";
 
 export interface ModelMetrics {
   model: string;
@@ -23,7 +24,11 @@ export async function getModelMetrics(
       error: null,
     };
   }
-  const builtFilter = await buildFilterWithAuth(user_id, filter, []);
+  const builtFilter = await buildFilterWithAuthRequest({
+    user_id,
+    argsAcc: [],
+    filter,
+  });
   const query = `
 SELECT response.body ->> 'model'::text as model,
   sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
@@ -50,11 +55,20 @@ export interface ModelMetricsUsers {
 export async function getModelMetricsForUsers(
   filter: FilterNode,
   user_id: string,
-  cached: boolean,
   users: (string | null)[]
 ) {
+  console.log("getModelMetricsForUsers", users);
   const containsNullUser = users.includes(null);
-  const builtFilter = buildFilter(filter, []);
+
+  const builtFilter = await buildFilterWithAuthRequest({
+    user_id,
+    filter,
+    argsAcc: [],
+  });
+  const userList = users
+    .filter((u) => u !== null)
+    .map((u) => `'${u}'`)
+    .join(", ");
   const query = `
 SELECT response.body ->> 'model'::text as model,
   sum(response.completion_tokens + response.prompt_tokens) AS sum_tokens,
@@ -63,15 +77,9 @@ SELECT response.body ->> 'model'::text as model,
   request.user_id
 FROM response 
   left join request on response.request = request.id
-  left join user_api_keys on request.auth_hash = user_api_keys.api_key_hash
-  ${cached ? "inner join cache_hits ch ON ch.request_id = request.id" : ""}
 WHERE (
-  user_api_keys.user_id = '${user_id}'
-  AND (
-    request.user_id IN (${users //TODO WTF is this? delete this shit
-      .filter((u) => u !== null)
-      .map((u) => `'${u}'`)
-      .join(", ")})
+  (
+    request.user_id IN (${userList})
     ${containsNullUser ? "OR request.user_id IS NULL" : ""}  
   )
   AND (${builtFilter.filter})
