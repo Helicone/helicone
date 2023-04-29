@@ -1,10 +1,11 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { getPagination } from "../../../components/shared/getPagination";
-import { dbExecute } from "../db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { Result } from "../../result";
 import { Database } from "../../../supabase/database.types";
 import {
   buildFilterWithAuth,
+  buildFilterWithAuthClickhouseProperties,
   buildFilterWithAuthProperties,
 } from "../../../services/lib/filters/filters";
 import {
@@ -22,7 +23,7 @@ function getFilterSearchFilterNode(
   search: string
 ): FilterNode {
   const propertyFilter: FilterLeaf = {
-    properties_table: {
+    properties_copy_v1: {
       key: {
         equals: property,
       },
@@ -32,7 +33,7 @@ function getFilterSearchFilterNode(
     return propertyFilter;
   }
   const searchFilter: FilterLeaf = {
-    properties_table: {
+    properties_copy_v1: {
       value: {
         contains: search,
       },
@@ -50,27 +51,27 @@ export async function getPropertyParams(
   property: string,
   search: string
 ): Promise<Result<PropertyParam[], string>> {
-  const builtFilter = await buildFilterWithAuthProperties(
+  const builtFilter = await buildFilterWithAuthClickhouseProperties({
     user_id,
-    getFilterSearchFilterNode(property, search)
-  );
+    filter: getFilterSearchFilterNode(property, search),
+    argsAcc: [],
+  });
 
   const query = `
-  SELECT distinct substring(key for 100) as property_key, substring(value for 100) as property_param
-  from properties
-  left join request on properties.request_id = request.id
+  SELECT distinct key as property_key, value as property_param
+  from properties_copy_v1
   where (
     ${builtFilter.filter}
   )
   limit 100
 `;
   console.log(query);
-  console.log(builtFilter.argsAcc);
 
-  const { data, error } = await dbExecute<PropertyParam>(
+  const { data, error } = await dbQueryClickhouse<PropertyParam>(
     query,
     builtFilter.argsAcc
   );
+  console.log(data, error);
 
   if (error !== null) {
     return { data: null, error: error };

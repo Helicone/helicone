@@ -2,11 +2,7 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  UserMetric,
-  userMetrics,
-  userMetricsCount,
-} from "../../../lib/api/users/users";
+import { userMetricsCount } from "../../../lib/api/users/users";
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 

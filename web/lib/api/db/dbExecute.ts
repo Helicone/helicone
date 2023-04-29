@@ -5,19 +5,25 @@ import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 
 export async function dbQueryClickhouse<T>(
   query: string,
-  parameters: Record<string, number | string>
+  parameters: (number | string | boolean | Date)[]
 ): Promise<Result<T[], string>> {
   try {
+    const query_params = parameters.reduce((acc, parameter, index) => {
+      return {
+        ...acc,
+        [`val_${index}`]: parameter,
+      };
+    }, {});
+
     const client = clickhouseCreateClient({
-      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:8123",
+      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
       username: process.env.CLICKHOUSE_USER ?? "default",
       password: process.env.CLICKHOUSE_PASSWORD ?? "",
     });
+
     const queryResult = await client.query({
-      query: `
-${query}
-    `,
-      query_params: parameters,
+      query,
+      query_params,
       format: "JSONEachRow",
       // Recommended for cluster usage to avoid situations
       // where a query processing error occurred after the response code

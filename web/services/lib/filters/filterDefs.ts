@@ -66,6 +66,29 @@ type UserMetricsToOperators = {
 };
 
 export type FilterLeafUserMetrics = SingleKey<UserMetricsToOperators>;
+
+type ResponseCopyV1ToOperators = {
+  latency: SingleKey<NumberOperators>;
+  status: SingleKey<NumberOperators>;
+  request_created_at: SingleKey<TimestampOperators>;
+  auth_hash: SingleKey<TextOperators>;
+  model: SingleKey<TextOperators>;
+  user_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafResponseCopyV1 = SingleKey<ResponseCopyV1ToOperators>;
+
+type UserViewToOperators = {
+  user_id: SingleKey<TextOperators>;
+  active_for: SingleKey<NumberOperators>;
+  first_active: SingleKey<TimestampOperators>;
+  last_active: SingleKey<TimestampOperators>;
+  total_requests: SingleKey<NumberOperators>;
+  cost: SingleKey<NumberOperators>;
+};
+
+export type FilterLeafUserView = SingleKey<UserViewToOperators>;
+
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
   user_api_keys: FilterLeafUserApiKeys;
@@ -78,6 +101,11 @@ export type TablesAndViews = {
   values: {
     [key: string]: SingleKey<TextOperators>;
   };
+
+  // CLICKHOUSE TABLES
+  response_copy_v1: FilterLeafResponseCopyV1;
+  users_view: FilterLeafUserView;
+  properties_copy_v1: FilterLeafPropertiesTable;
 };
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
