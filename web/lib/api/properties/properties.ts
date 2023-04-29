@@ -12,7 +12,11 @@ export interface Property {
 export async function getProperties(
   user_id: string
 ): Promise<Result<Property[], string>> {
-  const builtFilter = await buildFilterWithAuthProperties(user_id);
+  const builtFilter = await buildFilterWithAuthProperties({
+    user_id,
+    argsAcc: [],
+    filter: "all",
+  });
   const query = `
   SELECT distinct key as property
   from properties
@@ -20,8 +24,6 @@ export async function getProperties(
     ${builtFilter.filter}
   )
 `;
-  console.log(query);
-  console.log(builtFilter.argsAcc);
 
   const { data, error } = await dbExecute<Property>(query, builtFilter.argsAcc);
   if (error !== null) {

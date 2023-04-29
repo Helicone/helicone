@@ -1,6 +1,7 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilter,
+  buildFilterPostgres,
   buildFilterWithAuth,
 } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
@@ -15,13 +16,15 @@ export async function getRequestCount(
   user_id: string,
   cached: boolean
 ): Promise<Result<number, string>> {
-  console.log("GETTING REQUEST COUNT", cached);
   if (cached) {
     // TEMPORARILY DISABLED
     return { data: 0, error: null };
   }
 
-  const { filter: filterString, argsAcc } = buildFilter(filter, []);
+  const { filter: filterString, argsAcc } = buildFilterPostgres({
+    filter,
+    argsAcc: [],
+  });
   const query = `
 SELECT 
   COUNT(*) AS count

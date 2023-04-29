@@ -1,10 +1,7 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
-import { Column } from "../../components/ThemedTableV2";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
-import { FilterLeaf, FilterNode } from "../lib/filters/filterDefs";
-import { getRequests } from "../lib/requests";
+import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 
 const useGetRequests = (
