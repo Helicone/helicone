@@ -66,7 +66,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         )}
                       >
                         <div className="font-medium text-gray-900 overflow-ellipsis max-w-[120px] overflow-hidden">
-                          {row[col.key]}
+                          {row[col.key] || "n/a"}
                         </div>
                         {rowIdx !== 0 ? (
                           <div className="absolute right-0 left-6 -top-px h-px bg-gray-200" />
@@ -83,7 +83,9 @@ const ThemedTable = (props: ThemedTableProps) => {
                           "px-3 py-2.5 text-sm text-gray-500 lg:table-cell overflow-ellipsis max-w-[120px] overflow-hidden"
                         )}
                       >
-                        {row[col.key]}
+                        {col.key === "cost"
+                          ? Number(row[col.key]).toFixed(2)
+                          : row[col.key] || "n/a"}
                       </td>
                     );
                   }
