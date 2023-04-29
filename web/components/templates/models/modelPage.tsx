@@ -56,12 +56,12 @@ const ModelPage = (props: ModelPageProps) => {
             {
               name: "Prompt Tokens",
               key: "total_completion_tokens",
-              hidden: false,
+              hidden: true,
             },
             {
               name: "Completion Tokens",
               key: "total_prompt_token",
-              hidden: false,
+              hidden: true,
             },
             { name: "Total Tokens", key: "total_tokens", hidden: false },
 
