@@ -1,11 +1,11 @@
 {
     "name": "helicone-openai",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
-    "main": "index.ts",
+    "main": "index.js",
     "scripts": {
         "test": "jest",
-        "lint": "eslint --ext .ts . --fix"
+        "lint": "eslint --ext .js . --fix"
     },
     "author": "Helicone, Inc.",
     "dependencies": {
