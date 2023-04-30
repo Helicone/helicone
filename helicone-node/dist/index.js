@@ -15,6 +15,7 @@ class HeliconeConfiguration extends openai_1.Configuration {
         super({ apiKey: options.apiKey });
         const heliconeHeaders = Object.assign(Object.assign(Object.assign(Object.assign({ "Helicone-Auth": `Bearer ${options.heliconeApiKey}` }, getPropertyHeaders(options.properties)), getCacheHeaders(options.cache)), getRetryHeaders(options.retry)), getRateLimitPolicyHeaders(options.rateLimitPolicy));
         this.baseOptions = Object.assign(Object.assign({}, this.baseOptions), { headers: Object.assign(Object.assign({}, this.baseOptions.headers), heliconeHeaders) });
+        this.basePath = "https://oai.hconeai.com/v1";
     }
 }
 exports.Configuration = HeliconeConfiguration;
