@@ -32,8 +32,8 @@ pip install helicone
 from helicone import openai
 
 response = openai.Completion.create(
-    model="text-davinci-003",
-    prompt="What is Helicone?",
+	model="text-davinci-003",
+	prompt="What is Helicone?",
 	user="alice@bob.com",
 	# Optional Helicone features:
 	cache=True,
