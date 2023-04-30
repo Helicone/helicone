@@ -1,19 +1,17 @@
-import {
-  Configuration as OpenAIConfiguration,
-  OpenAIApi as OpenAIApiOriginal,
-} from "openai";
-
-interface HeliconeConfigurationOptions {
-  apiKey: string;
-  heliconeApiKey?: string;
-  properties?: { [key: string]: any };
-  cache?: boolean;
-  retry?: boolean | { [key: string]: any };
-  rateLimitPolicy?: string | { [key: string]: any };
-}
+const {
+  ChatCompletionRequestMessageRoleEnum,
+  ChatCompletionResponseMessageRoleEnum,
+  CreateImageRequestSizeEnum,
+  CreateImageRequestResponseFormatEnum,
+  OpenAIApiAxiosParamCreator,
+  OpenAIApiFp,
+  OpenAIApiFactory,
+  OpenAIApi: OpenAIApiOriginal,
+  Configuration: OpenAIConfiguration,
+} = require("openai");
 
 class HeliconeConfiguration extends OpenAIConfiguration {
-  constructor(options: HeliconeConfigurationOptions) {
+  constructor(options) {
     super({ apiKey: options.apiKey });
 
     const heliconeHeaders = {
@@ -34,26 +32,22 @@ class HeliconeConfiguration extends OpenAIConfiguration {
   }
 }
 
-function getPropertyHeaders(properties?: { [key: string]: any }): {
-  [key: string]: string;
-} {
+function getPropertyHeaders(properties) {
   if (!properties) return {};
-  const headers: { [key: string]: string } = {};
+  const headers = {};
   for (const key in properties) {
     headers[`Helicone-Property-${key}`] = properties[key].toString();
   }
   return headers;
 }
 
-function getCacheHeaders(cache?: boolean): { [key: string]: string } {
+function getCacheHeaders(cache) {
   return cache ? { "Helicone-Cache-Enabled": "true" } : {};
 }
 
-function getRetryHeaders(retry?: boolean | { [key: string]: any }): {
-  [key: string]: string;
-} {
+function getRetryHeaders(retry) {
   if (!retry) return {};
-  const headers: { [key: string]: string } = {
+  const headers = {
     "Helicone-Retry-Enabled": "true",
   };
   if (typeof retry === "object") {
@@ -68,9 +62,7 @@ function getRetryHeaders(retry?: boolean | { [key: string]: any }): {
   return headers;
 }
 
-function getRateLimitPolicyHeaders(
-  rateLimitPolicy?: string | { [key: string]: any }
-): { [key: string]: string } {
+function getRateLimitPolicyHeaders(rateLimitPolicy) {
   if (!rateLimitPolicy) return {};
   let policy = "";
   if (typeof rateLimitPolicy === "string") {
@@ -86,7 +78,14 @@ function getRateLimitPolicyHeaders(
   return { "Helicone-RateLimit-Policy": policy };
 }
 
-export {
-  HeliconeConfiguration as Configuration,
-  OpenAIApiOriginal as OpenAIApi,
+module.exports = {
+  ChatCompletionRequestMessageRoleEnum,
+  ChatCompletionResponseMessageRoleEnum,
+  CreateImageRequestSizeEnum,
+  CreateImageRequestResponseFormatEnum,
+  OpenAIApiAxiosParamCreator,
+  OpenAIApiFp,
+  OpenAIApiFactory,
+  OpenAIApi: OpenAIApiOriginal,
+  Configuration: HeliconeConfiguration,
 };
