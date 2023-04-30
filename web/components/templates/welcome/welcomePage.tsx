@@ -49,7 +49,7 @@ import {Configuration, OpenAIApi} from "openai";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  // Add a basePath to the Configuartion
+  // Add a basePath to the Configuration
   basePath: "https://oai.hconeai.com/v1",
   {
     headers: {
