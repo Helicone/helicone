@@ -144,7 +144,9 @@ NEXT_PUBLIC_SUPABASE_URL="http://localhost:54321"
 SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 ```
 
-# Supported integrations 🔗
+# Community 🌍
+
+## Packages that use Helicone
 
 | Name                                                               | Docs                                                                                      |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
@@ -152,6 +154,8 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 | [langchain](https://github.com/hwchase17/langchain)                | [Docs](https://python.langchain.com/en/latest/ecosystem/helicone.html?highlight=helicone) |
 | [langchainjs](https://github.com/hwchase17/langchainjs)            | [Docs](https://js.langchain.com/docs/ecosystem/helicone)                                  |
 
-# Community 🌍
-- Join [Discord](https://discord.gg/zsSTcH2qhG) to ask questions.
-- Create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap).
+## Contributing
+We are extremely open to contributors on documentation, integrations, and feature requests.
+
+- If you have an idea for how Helicone can be better, create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap)
+- Join [discord](https://discord.gg/zsSTcH2qhG) to ask questions
