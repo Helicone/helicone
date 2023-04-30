@@ -1,7 +1,12 @@
 {
     "name": "helicone-openai",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:Helicone/helicone.git",
+        "directory": "helicone/helicone-node"
+    },
     "keywords": [
         "openai",
         "open",
