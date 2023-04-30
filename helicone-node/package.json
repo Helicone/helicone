@@ -2,12 +2,25 @@
     "name": "helicone-openai",
     "version": "0.1.2",
     "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
-    "main": "index.js",
+    "keywords": [
+        "openai",
+        "open",
+        "ai",
+        "gpt-3",
+        "gpt3",
+        "gpt4",
+        "helicone",
+        "observability"
+      ],
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
+        "build": "tsc --outDir dist/",
         "test": "jest",
-        "lint": "eslint --ext .js . --fix"
+        "lint": "eslint --ext .ts . --fix"
     },
     "author": "Helicone, Inc.",
+    "license": "Apache-2.0",
     "dependencies": {
         "openai": "^3.2.1"
     },
@@ -15,6 +28,8 @@
         "@babel/core": "^7.21.4",
         "@babel/eslint-parser": "^7.21.3",
         "@types/jest": "^29.5.1",
+        "@types/node": "^12.11.5",
+        "@types/uuid": "^9.0.1",
         "dotenv": "^16.0.3",
         "eslint": "^8.39.0",
         "eslint-config-next": "^13.3.1",
@@ -28,6 +43,7 @@
         "next": "^13.3.1",
         "prettier": "^2.8.8",
         "ts-jest": "^29.1.0",
+        "typescript": "^5.0.4",
         "uuid": "^9.0.0"
     }
 }
