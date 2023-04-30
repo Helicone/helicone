@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from "./../index";
+import { Configuration, OpenAIApi } from "../dist";
 import { v4 as uuidv4 } from "uuid";
 
 const apiKey = process.env.OPENAI_API_KEY;
