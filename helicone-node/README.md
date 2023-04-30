@@ -23,7 +23,7 @@ Then, in your JavaScript or TypeScript code, replace your existing OpenAI librar
 const { Configuration, OpenAIApi } = require("helicone-openai"); // replace `require("openai")` with this line
 ```
 
-The usage is the same as the OpenAI SDK, with the new require statement and adding the `heliconeApiKey` parameter to the configuration:
+The usage is the same as the OpenAI SDK, except you now require `helicone-openai` and add the `heliconeApiKey` parameter to the configuration:
 
 ```javascript
 const { Configuration, OpenAIApi } = require("helicone-openai");
