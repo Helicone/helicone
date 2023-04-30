@@ -38,6 +38,8 @@ class HeliconeConfiguration extends OpenAIConfiguration {
         ...heliconeHeaders,
       },
     };
+
+    this.basePath = "https://oai.hconeai.com/v1";
   }
 }
 
