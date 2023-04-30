@@ -53,10 +53,10 @@ response = openai.Completion.create(
 Helicone's [cloud offering](https://www.helicone.ai) is deployed on Cloudflare and ensures the lowest latency add-on to your API requests.
 
 To get started locally, Helicone is comprised of four services:
-- The frontend (Node)
+- Frontend (Node)
+- The proxy worker (Wrangler)
 - Application database (Supabase)
 - Analytics database (ClickHouse)
-- The proxy worker (Wrangler)
 
 If you have any questions, contact help@helicone.ai or join [discord](https://discord.gg/zsSTcH2qhG).
 
@@ -69,7 +69,7 @@ npm install -g wrangler
 npm install -g yarn
 ```
 
-## Install Supabase (https://supabase.com/docs/guides/cli)
+## Install [Supabase](https://supabase.com/docs/guides/cli)
 
 ```bash
 brew install supabase/tap/supabase
