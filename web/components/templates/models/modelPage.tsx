@@ -13,6 +13,10 @@ import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
 import AuthHeader from "../../shared/authHeader";
+import { useQuery } from "@tanstack/react-query";
+import { ModelMetric } from "../../../lib/api/models/models";
+import { Result } from "../../../lib/result";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface ModelPageProps {}
 
@@ -20,46 +24,52 @@ type ModelMetrics = Database["public"]["Views"]["model_metrics"]["Row"];
 
 const ModelPage = (props: ModelPageProps) => {
   const client = useSupabaseClient<Database>();
-  const [modelMetrics, setModelMetrics] = useState<ModelMetrics[]>([]);
+  const { data, isLoading } = useQuery({
+    queryKey: ["modelMetrics"],
+    queryFn: async (query) => {
+      return await fetch("/api/models", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: "all",
+          offset: 0,
+          limit: 100,
+        }),
+      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
+    },
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    client
-      .from("model_metrics")
-      .select("*")
-
-      .then(({ data: metrics, error }) => {
-        if (error !== null) {
-          console.error(error);
-          return;
-        }
-        setModelMetrics(metrics);
-      });
-  }, [client]);
-
+  console.log(data?.data);
   return (
     <>
       <AuthHeader title={"Models"} />
-      <ThemedTable
-        columns={[
-          { name: "Model", key: "model", hidden: false },
-          { name: "Requests", key: "request_count", hidden: false },
-          { name: "Prompt Tokens", key: "sum_prompt_tokens", hidden: false },
-          {
-            name: "Completion Tokens",
-            key: "sum_completion_tokens",
-            hidden: false,
-          },
-          { name: "Total Tokens", key: "sum_tokens", hidden: false },
+      {isLoading ? (
+        <LoadingAnimation title="Getting model metrics" />
+      ) : (
+        <ThemedTable
+          columns={[
+            { name: "Model", key: "model", hidden: false },
+            { name: "Requests", key: "total_requests", hidden: false },
+            {
+              name: "Prompt Tokens",
+              key: "total_completion_tokens",
+              hidden: true,
+            },
+            {
+              name: "Completion Tokens",
+              key: "total_prompt_token",
+              hidden: true,
+            },
+            { name: "Total Tokens", key: "total_tokens", hidden: false },
 
-          { name: "Cost (USD)", key: "cost", hidden: false },
-        ]}
-        rows={modelMetrics
-          .filter((m) => m.model !== null)
-          .map((m) => ({
-            ...m,
-            cost: modelCost(m as any).toFixed(2),
-          }))}
-      />
+            { name: "Cost (USD)", key: "cost", hidden: false },
+          ]}
+          rows={data?.data ?? []}
+        />
+      )}
     </>
   );
 };

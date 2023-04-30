@@ -126,7 +126,7 @@ export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
   return (
     <>
       <div className="space-y-4 text-sm">
-        <span className="isolate inline-flex rounded-md shadow-sm w-full">
+        <span className="isolate flex flex-col sm:flex-row rounded-md shadow-sm w-full">
           {Object.entries(NAMES).map(([key, name], i) => (
             <button
               onClick={() => setLang(key as SupportedLanguages)}
@@ -211,7 +211,7 @@ const WelcomePage = (props: DashboardPageProps) => {
   ];
 
   return (
-    <div className="flex flex-col py-24 w-full max-w-2xl mx-auto min-h-max">
+    <div className="flex flex-col py-24 w-full max-w-2xl mx-auto min-h-max px-4 mx-auto">
       <h1 className="text-3xl font-semibold text-gray-900 w-full text-center mb-10">
         Get Started with Helicone
       </h1>

@@ -171,7 +171,9 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     totalTokens: request.response_body?.usage?.total_tokens || 0,
     model: request.request_body.model || request.response_body?.model || "",
     requestText:
-      request.request_body.messages?.at(-1) ||
+      (request.request_body?.messages &&
+        request.request_body?.messages?.length > 0 &&
+        request.request_body.messages?.at(-1)) ||
       request.request_body.input ||
       request.request_body.prompt ||
       "",

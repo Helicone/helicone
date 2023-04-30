@@ -9,6 +9,7 @@ import { dbExecute } from "../db/dbExecute";
 import {
   buildFilter,
   buildFilterWithAuth,
+  buildFilterWithAuthRequest,
 } from "../../../services/lib/filters/filters";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
@@ -40,7 +41,11 @@ export async function getModelUsageOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const builtFilter = await buildFilterWithAuth(userId, filter, []);
+  const builtFilter = await buildFilterWithAuthRequest({
+    filter,
+    argsAcc: [],
+    user_id: userId,
+  });
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT
