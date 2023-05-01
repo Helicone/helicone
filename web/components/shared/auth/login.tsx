@@ -97,7 +97,10 @@ const Login = (props: LoginProps) => {
           },
           body: JSON.stringify({
             customer: customer.id,
-            items: [{ price: "price_1N1DPfFeVmeixR9w7eTOtXq7" }],
+            // Prod test
+            items: [{ price: "price_1N329XFeVmeixR9wsIsim9Yn" }],
+            // DEV
+            // items: [{ price: "price_1N1DPfFeVmeixR9w7eTOtXq7" }],
           } as Stripe.SubscriptionCreateParams),
         }
       ).then((res) => res.json());
