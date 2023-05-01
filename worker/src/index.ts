@@ -716,6 +716,16 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     try {
+      if (request.url.includes("audio")) {
+        const url = new URL(request.url);
+        const new_url = new URL(`https://api.openai.com${url.pathname}`);
+        console.log("new url", new_url.href);
+        return await fetch(new_url.href, {
+          method: request.method,
+          headers: request.headers,
+          body: request.body,
+        });
+      }
       if (isLoggingEndpoint(request)) {
         const response = await handleLoggingEndpoint(request, env);
         return response;
