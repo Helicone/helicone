@@ -10,7 +10,10 @@ import MetaData from "../components/shared/metaData";
 import UsagePage from "../components/templates/usage/usagePage";
 import BillingPage from "../components/templates/usage/usagePage";
 import { getUserSettings } from "../services/lib/user";
-import { UserSettingsResponse } from "./api/user_settings";
+import {
+  getOrCreateUserSettings,
+  UserSettingsResponse,
+} from "./api/user_settings";
 
 interface UsageProps {
   user: User;
@@ -26,6 +29,7 @@ const Usage = (props: UsageProps) => {
         <AuthHeader title={"Usage"} />
         <UsagePage user={user} />
       </AuthLayout>
+      {/* <BillingPage user={user} /> */}
     </MetaData>
   );
 };
@@ -48,7 +52,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
-  const data = await getUserSettings();
+  await getOrCreateUserSettings(session.user);
 
   return {
     props: {
