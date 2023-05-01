@@ -181,6 +181,32 @@ export default async function handler(
     return res.status(200).json({
       user_settings: userSettings,
     });
+  } else if (req.method === "POST") {
+    // CREATE a new user setting
+    const client = createServerSupabaseClient({ req, res });
+
+    const {
+      data: { user },
+      error: userError,
+    } = await client.auth.getUser();
+    if (userError !== null) {
+      console.error(userError);
+      res.status(500).json(userError.message);
+      return;
+    }
+    if (user === null) {
+      console.error("User not found");
+      res.status(404).json("User not found");
+      return;
+    }
+    const obj = req.body as { user: string; tier: string };
+    await client.from("user_settings").insert([
+      {
+        user: obj.user,
+        tier: obj.tier,
+      },
+    ]);
+    res.status(200).json("ok");
   } else {
     res.setHeader("Allow", "GET");
     res.status(405).end("Method Not Allowed");
