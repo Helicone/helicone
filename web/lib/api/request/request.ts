@@ -1,11 +1,13 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 
-import { dbExecute } from "../db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { Result } from "../../result";
 import { Database, Json } from "../../../supabase/database.types";
 import {
   buildFilter,
   buildFilterWithAuth,
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthRequest,
 } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
@@ -51,7 +53,11 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuth(user_id, filter, []);
+  const builtFilter = await buildFilterWithAuthRequest({
+    user_id,
+    filter,
+    argsAcc: [],
+  });
   const sortSQL = buildRequestSort(sort);
   const query = `
   SELECT response.id AS response_id,
@@ -101,16 +107,22 @@ export async function getRequestCount(
   user_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuth(user_id, "all", []);
-  // TODO Once we migrate to clickhouse, this should be moved and filters should be added back
+  const builtFilter = await buildFilterWithAuthRequest({
+    user_id,
+    argsAcc: [],
+    filter,
+  });
+
   const query = `
-  SELECT count(*) as count
+  SELECT count(request.id) as count
   FROM request
+    left join response on request.id = response.request
+    left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
+    left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})
   )
   `;
-
   const { data, error } = await dbExecute<{ count: number }>(
     query,
     builtFilter.argsAcc
@@ -118,5 +130,31 @@ export async function getRequestCount(
   if (error !== null) {
     return { data: null, error: error };
   }
-  return { data: +data[0].count, error: null };
+  return { data: data[0].count, error: null };
+}
+
+export async function getRequestCountClickhouse(
+  user_id: string,
+  filter: FilterNode
+): Promise<Result<number, string>> {
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    user_id,
+    argsAcc: [],
+    filter,
+  });
+
+  const query = `
+SELECT
+  count(DISTINCT r.request_id) as count
+from response_copy_v1 r
+WHERE (${builtFilter.filter})
+  `;
+  const { data, error } = await dbQueryClickhouse<{ count: number }>(
+    query,
+    builtFilter.argsAcc
+  );
+  if (error !== null) {
+    return { data: null, error: error };
+  }
+  return { data: data[0].count, error: null };
 }

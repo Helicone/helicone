@@ -11,7 +11,7 @@ interface DiffHighlightProps {
 
 export function DiffHighlight(props: DiffHighlightProps) {
   return (
-    <div className=" bg-black ph-no-capture">
+    <div className="bg-black ph-no-capture w-full overflow-auto">
       <Prism
         {...defaultProps}
         code={props.code.trim()}

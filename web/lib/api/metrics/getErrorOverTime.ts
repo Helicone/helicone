@@ -6,7 +6,10 @@ import {
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
 import { dbExecute } from "../db/dbExecute";
-import { buildFilter } from "../../../services/lib/filters/filters";
+import {
+  buildFilter,
+  buildFilterPostgres,
+} from "../../../services/lib/filters/filters";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
@@ -33,7 +36,7 @@ export async function getErrorOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const builtFilter = buildFilter(filter, []);
+  const builtFilter = buildFilterPostgres({ filter, argsAcc: [] });
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT

@@ -1,14 +1,20 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 
-import { dbExecute } from "../db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { Result } from "../../result";
 import { Database } from "../../../supabase/database.types";
-import { buildFilter } from "../../../services/lib/filters/filters";
+import {
+  buildFilter,
+  buildFilterClickHouse,
+  buildFilterWithAuth,
+  buildFilterWithAuthClickHouse,
+} from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildUserSort,
   SortLeafUsers,
 } from "../../../services/lib/sorts/users/sorts";
+import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 
 export interface UserMetric {
   user_id: string;
@@ -18,7 +24,7 @@ export interface UserMetric {
   total_requests: number;
   average_requests_per_day_active: number;
   average_tokens_per_request: number;
-  cost?: number;
+  cost: number;
 }
 
 export async function userMetrics(
@@ -31,42 +37,44 @@ export async function userMetrics(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const { filter: whereFilterString, argsAcc: whereArgsAcc } = buildFilter(
+  const { argsAcc, orderByString } = buildUserSort(sort);
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    user_id,
+    argsAcc: argsAcc,
     filter,
-    []
-  );
-  const { filter: havingFilterString, argsAcc: havingArgsAcc } = buildFilter(
-    filter,
-    whereArgsAcc,
-    true
-  );
-  const sortSQL = buildUserSort(sort);
-  const query = `
-SELECT request.user_id,
-  count(DISTINCT date_trunc('day'::text, request.created_at)) AS active_for,
-  min(request.created_at) AS first_active,
-  max(request.created_at) AS last_active,
-  count(request.id) AS total_requests,
-  count(request.id)::double precision / count(DISTINCT date_trunc('day'::text, request.created_at))::double precision AS average_requests_per_day_active,
-  avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer) AS average_tokens_per_request
- FROM request
-  LEFT JOIN response ON response.request = request.id
-  LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
-  WHERE (
-    user_api_keys.user_id = '${user_id}'
-    AND (${whereFilterString})
-  )
-  GROUP BY request.user_id
-  HAVING (
-    true
-    AND (${havingFilterString})
-  )
-  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
-  LIMIT ${limit}
-  OFFSET ${offset}
-`;
+  });
 
-  const { data, error } = await dbExecute<UserMetric>(query, havingArgsAcc);
+  const havingFilter = buildFilterClickHouse({
+    filter,
+    having: true,
+    argsAcc: builtFilter.argsAcc,
+  });
+
+  const query = `
+SELECT
+  r.user_id as user_id,
+  count(DISTINCT date_trunc('day', r.request_created_at)) as active_for,
+  min(r.request_created_at) as first_active,
+  max(r.request_created_at) as last_active,
+  count(r.request_id)::Int32 as total_requests,
+  count(r.request_id) / count(DISTINCT date_trunc('day', r.request_created_at)) as average_requests_per_day_active,
+  (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
+  sum(r.completion_tokens) as total_completion_tokens,
+  sum(r.prompt_tokens) as total_prompt_token,
+  (${CLICKHOUSE_PRICE_CALC}) as cost
+from response_copy_v1 r
+WHERE (${builtFilter.filter})
+GROUP BY r.user_id
+HAVING (${havingFilter.filter})
+ORDER BY ${orderByString}
+LIMIT ${limit}
+OFFSET ${offset}
+  `;
+
+  const { data, error } = await dbQueryClickhouse<UserMetric>(
+    query,
+    havingFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }
@@ -77,44 +85,21 @@ export async function userMetricsCount(
   user_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const { filter: whereFilterString, argsAcc: whereArgsAcc } = buildFilter(
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    user_id,
+    argsAcc: [],
     filter,
-    []
-  );
-  const { filter: havingFilterString, argsAcc: havingArgsAcc } = buildFilter(
-    filter,
-    whereArgsAcc,
-    true
-  );
-  const query = `
-SELECT count(*) as count
-  FROM (
-    SELECT request.user_id,
-      count(DISTINCT date_trunc('day'::text, request.created_at)) AS active_for,
-      min(request.created_at) AS first_active,
-      max(request.created_at) AS last_active,
-      count(request.id) AS total_requests,
-      count(request.id)::double precision / count(DISTINCT date_trunc('day'::text, request.created_at))::double precision AS average_requests_per_day_active,
-      avg((((response.body ->> 'usage'::text)::json) ->> 'total_tokens'::text)::integer) AS average_tokens_per_request
-    FROM request
-      LEFT JOIN response ON response.request = request.id
-      LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
-    WHERE (
-      user_api_keys.user_id = '${user_id}'
-      AND (${whereFilterString})
-    )
-    GROUP BY request.user_id
-    HAVING (
-      true
-      AND (${havingFilterString})
-    )
-    ORDER BY last_active DESC
-  ) as x
-`;
+  });
 
-  const { data, error } = await dbExecute<{ count: number }>(
+  const query = `
+SELECT
+  count(DISTINCT r.user_id) as count
+from response_copy_v1 r
+WHERE (${builtFilter.filter})
+  `;
+  const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,
-    havingArgsAcc
+    builtFilter.argsAcc
   );
   if (error !== null) {
     return { data: null, error: error };
