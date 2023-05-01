@@ -10,12 +10,12 @@ import { deleteSubscription } from "../../../lib/api/subscription/delete";
 import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
-import { Tier } from "../../../components/templates/usage/usagePage";
+// import { Tier } from "../../../components/templates/usage/usagePage";
 import {
   stripeEnterpriseProductId,
   stripeStarterProductId,
 } from "../checkout_sessions";
-import { REQUEST_LIMITS } from "../../../lib/constants";
+// import { REQUEST_LIMITS } from "../../../lib/constants";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
 export type UserSettingsResponse = {
@@ -54,66 +54,66 @@ async function getOrCreateUserSettings(
   }
 }
 
-function getHighestSubscription(
-  subscriptions: Subscription[]
-): [Subscription | null, Tier] {
-  const activeSubscriptions = subscriptions.filter(
-    (subscription) => subscription.status === "active"
-  );
-  const enterprise = activeSubscriptions.find(
-    (subscription) => subscription.plan?.product === stripeEnterpriseProductId
-  );
-  const starter = activeSubscriptions.find(
-    (subscription) => subscription.plan?.product === stripeStarterProductId
-  );
+// function getHighestSubscription(
+//   subscriptions: Subscription[]
+// ): [Subscription | null, Tier] {
+//   const activeSubscriptions = subscriptions.filter(
+//     (subscription) => subscription.status === "active"
+//   );
+//   const enterprise = activeSubscriptions.find(
+//     (subscription) => subscription.plan?.product === stripeEnterpriseProductId
+//   );
+//   const starter = activeSubscriptions.find(
+//     (subscription) => subscription.plan?.product === stripeStarterProductId
+//   );
 
-  if (enterprise) {
-    return [enterprise, "enterprise"];
-  } else if (starter) {
-    const isPendingCancellation = starter?.cancel_at_period_end === true;
-    if (isPendingCancellation) {
-      return [starter, "starter-pending-cancel"];
-    } else {
-      return [starter, "starter"];
-    }
-  } else {
-    return [null, "free"];
-  }
-}
+//   if (enterprise) {
+//     return [enterprise, "enterprise"];
+//   } else if (starter) {
+//     const isPendingCancellation = starter?.cancel_at_period_end === true;
+//     if (isPendingCancellation) {
+//       return [starter, "starter-pending-cancel"];
+//     } else {
+//       return [starter, "starter"];
+//     }
+//   } else {
+//     return [null, "free"];
+//   }
+// }
 
 type Subscription = Stripe.Subscription & {
   plan?: Stripe.Plan;
 };
 
-async function syncSettingsWithStripe(
-  userSettings: UserSettings,
-  subscriptions: Subscription[]
-): Promise<Result<undefined, string>> {
-  const [activeSubscription, currentTier] =
-    getHighestSubscription(subscriptions);
+// async function syncSettingsWithStripe(
+//   userSettings: UserSettings,
+//   subscriptions: Subscription[]
+// ): Promise<Result<undefined, string>> {
+//   const [activeSubscription, currentTier] =
+//     getHighestSubscription(subscriptions);
 
-  if (
-    currentTier === userSettings.tier &&
-    REQUEST_LIMITS[currentTier] <= userSettings.request_limit
-  ) {
-    return { data: undefined, error: null };
-  } else {
-    const { error: updateUserSettingsError } = await supabaseServer
-      .from("user_settings")
-      .update({
-        tier: currentTier,
-        request_limit: REQUEST_LIMITS[currentTier],
-      })
-      .eq("user", userSettings.user)
-      .select("*")
-      .single();
-    if (updateUserSettingsError !== null) {
-      return { data: null, error: updateUserSettingsError.message };
-    } else {
-      return { data: undefined, error: null };
-    }
-  }
-}
+//   if (
+//     currentTier === userSettings.tier &&
+//     REQUEST_LIMITS[currentTier] <= userSettings.request_limit
+//   ) {
+//     return { data: undefined, error: null };
+//   } else {
+//     const { error: updateUserSettingsError } = await supabaseServer
+//       .from("user_settings")
+//       .update({
+//         tier: currentTier,
+//         request_limit: REQUEST_LIMITS[currentTier],
+//       })
+//       .eq("user", userSettings.user)
+//       .select("*")
+//       .single();
+//     if (updateUserSettingsError !== null) {
+//       return { data: null, error: updateUserSettingsError.message };
+//     } else {
+//       return { data: undefined, error: null };
+//     }
+//   }
+// }
 
 export default async function handler(
   req: NextApiRequest,
@@ -153,14 +153,14 @@ export default async function handler(
 
     console.log("subs", subscriptions);
 
-    const syncSettingsWithStripeResult = await syncSettingsWithStripe(
-      userSettings,
-      subscriptions ?? []
-    );
-    if (syncSettingsWithStripeResult.error !== null) {
-      res.status(500).json(syncSettingsWithStripeResult.error);
-      return;
-    }
+    // const syncSettingsWithStripeResult = await syncSettingsWithStripe(
+    //   userSettings,
+    //   subscriptions ?? []
+    // );
+    // if (syncSettingsWithStripeResult.error !== null) {
+    //   res.status(500).json(syncSettingsWithStripeResult.error);
+    //   return;
+    // }
 
     if (subscriptionError !== null) {
       res.status(500).json(subscriptionError);
