@@ -65,16 +65,16 @@ const Login = (props: LoginProps) => {
 
     if (user.user?.id) {
       // Create a user entry in the user_settings table
-      await fetch("/api/user_settings/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user: user.user.id,
-          tier: "basic_flex",
-        }),
-      });
+      // await fetch("/api/user_settings", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     user: user.user.id,
+      //     tier: "basic_flex",
+      //   }),
+      // });
 
       // Create a stripe customer account
       const { data: customer, error: customerError } = await fetch(
