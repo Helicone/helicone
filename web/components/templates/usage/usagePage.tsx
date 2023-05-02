@@ -50,6 +50,20 @@ interface UsagePageProps {
 }
 
 const useUsagePage = () => {
+  function getBeginningOfMonthISO(): string {
+    const now = new Date();
+    const beginningOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+      0,
+      0,
+      0,
+      0
+    );
+    return beginningOfMonth.toISOString();
+  }
+
   const { data, isLoading } = useQuery({
     queryKey: ["usagePage"],
     queryFn: async (query) => {
@@ -59,7 +73,17 @@ const useUsagePage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          filter: "all",
+          filter: {
+            left: {
+              request: {
+                created_at: {
+                  gte: getBeginningOfMonthISO(),
+                },
+              },
+            },
+            operator: "and",
+            right: "all",
+          },
         }),
       }).then((res) => res.json() as Promise<Result<number, string>>);
       return data;
@@ -154,7 +178,9 @@ const UsagePage = (props: UsagePageProps) => {
             Requests
           </dt>
           <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-            {isLoading ? "Loading..." : Number(count?.data || 0)}
+            {isLoading
+              ? "Loading..."
+              : Number(count?.data || 0).toLocaleString()}
           </dd>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">

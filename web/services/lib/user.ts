@@ -1,7 +1,6 @@
 import { UserSettingsResponse } from "../../pages/api/user_settings";
 
 const getUserSettings = async () => {
-  console.log("HERE");
   fetch("/api/user_settings").then((res) => {
     if (res.status === 200) {
       return res.json() as Promise<UserSettingsResponse>;
