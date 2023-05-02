@@ -20,15 +20,15 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const body = req.body as Stripe.SubscriptionCreateParams;
-  const { customer, items } = body;
-  if (!customer || !items) {
+  const { customer } = body;
+  if (!customer) {
     res.status(400).json({ data: null, error: "Invalid request" });
     return;
   }
   try {
     const params: Stripe.SubscriptionCreateParams = {
       customer,
-      items,
+      items: [{ price: process.env.STRIPE_BASIC_FLEX_PRICE_ID }],
     };
     const subscription = await stripeServer.subscriptions.create(params);
     res.status(200).json({ data: subscription, error: null });
