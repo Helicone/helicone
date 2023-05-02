@@ -142,7 +142,7 @@ const UsagePage = (props: UsagePageProps) => {
             <div
               className="aboslute h-full bg-purple-500 rounded-md"
               style={{
-                width: `${calculatePercentage() * 100}%`,
+                width: `${calculatePercentage()}%`,
               }}
             ></div>
           </div>
