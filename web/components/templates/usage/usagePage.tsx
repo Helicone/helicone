@@ -119,10 +119,10 @@ const UsagePage = (props: UsagePageProps) => {
       return 0;
     }
     const number = Number(count?.data || 0);
-    if (number > 100000) {
+    if (number > 100_000) {
       return 100;
     }
-    return Number(count?.data || 0) / 100000;
+    return Number(count?.data || 0) / 100_000;
   };
 
   return (
@@ -150,7 +150,7 @@ const UsagePage = (props: UsagePageProps) => {
             <p>
               {isLoading
                 ? "Loading..."
-                : Number(count?.data || 0) > 100000
+                : Number(count?.data || 0) > 100_000
                 ? "100,000"
                 : count?.data}{" "}
               / 100,000
@@ -190,8 +190,8 @@ const UsagePage = (props: UsagePageProps) => {
           <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
             {isLoading
               ? "Loading..."
-              : Number(count?.data || 0) > 100000
-              ? `$${Number(count?.data || 0 - 10000) / 10000}`
+              : Number(count?.data || 0) > 100_000
+              ? `$${Number(Number(count?.data || 0) - 100_000) / 10_000}`
               : "$0.00"}
           </dd>
         </div>
