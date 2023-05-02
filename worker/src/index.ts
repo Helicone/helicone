@@ -20,6 +20,7 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
+import { handleFeedbackEndpoint, isFeedbackEndpoint } from "./feedback";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -298,7 +299,7 @@ async function logRequest({
   }
 }
 
-async function hash(key: string): Promise<string> {
+export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
     { name: "SHA-256" },
@@ -728,6 +729,10 @@ export default {
       }
       if (isLoggingEndpoint(request)) {
         const response = await handleLoggingEndpoint(request, env);
+        return response;
+      }
+      if (isFeedbackEndpoint(request)) {
+        const response = await handleFeedbackEndpoint(request, env);
         return response;
       }
 

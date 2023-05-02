@@ -15,8 +15,7 @@ export interface RateLimitResponse {
 }
 
 function parsePolicy(input: string): RateLimitOptions {
-  const regex =
-    /^(\d+);w=(\d+)(?:;u=(request|token|dollar))?(?:;s=([\w-]+))?$/;
+  const regex = /^(\d+);w=(\d+)(?:;u=(request|token|dollar))?(?:;s=([\w-]+))?$/;
 
   const match = input.match(regex);
   if (!match) {
@@ -67,7 +66,9 @@ async function getSegmentKeyValue(
     const heliconeHeaders = Object.fromEntries(
       [...request.headers.entries()]
         .filter(
-          ([key]) => key.toLowerCase().startsWith(propTag.toLowerCase()) && key.length > propTag.length
+          ([key]) =>
+            key.toLowerCase().startsWith(propTag.toLowerCase()) &&
+            key.length > propTag.length
         )
         .map(([key, value]) => [key.substring(propTag.length), value])
     );
