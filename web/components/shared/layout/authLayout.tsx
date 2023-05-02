@@ -29,6 +29,9 @@ import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { useGetKeys } from "../../../services/hooks/keys";
 import ThemedModal from "../themed/themedModal";
+import { useQuery } from "@tanstack/react-query";
+import { Database } from "../../../supabase/database.types";
+import { Result } from "../../../lib/result";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -39,7 +42,7 @@ interface AuthLayoutProps {
 const AuthLayout = (props: AuthLayoutProps) => {
   const { children, user, hideSidebar } = props;
   const router = useRouter();
-  const supabaseClient = useSupabaseClient();
+  const supabaseClient = useSupabaseClient<Database>();
   const { pathname } = router;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -87,6 +90,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
   ];
 
   const { count, isLoading, keys, refetch } = useGetKeys();
+  const { data: hasConverted, isLoading: hasConvertedLoading } = useQuery({
+    queryKey: ["HasConvertedToHeliconeKeys"],
+    queryFn: async (query) => {
+      const hasConverted: Result<boolean, string> = await fetch(
+        "/api/has_converted"
+      ).then((res) => res.json());
+      return hasConverted?.data === true;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return (
     <>
@@ -598,6 +611,38 @@ const AuthLayout = (props: AuthLayoutProps) => {
           <main className="flex-1 bg">
             <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
               {/* Replace with your content */}
+              {user?.email !== DEMO_EMAIL &&
+                !hasConvertedLoading &&
+                !hasConverted && (
+                  <div className="pointer-events-none flex sm:justify-center mt-4">
+                    <div className="w-full pointer-events-auto flex flex-col items-left justify-between gap-x-6 bg-red-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
+                      <div className="text-sm leading-6 text-yellow-200 items-center">
+                        ⚠️ Action Required ⚠️
+                      </div>
+                      <div className="text-sm leading-6 text-white items-center">
+                        <strong className="font-semibold">
+                          We have detected you have not switched to using
+                          Helicone Keys. We are deprecating this way of matching
+                          requests to your account.
+                        </strong>
+                      </div>
+                      <div className="text-sm leading-6 text-white items-center">
+                        Please see our transition docs:{" "}
+                        <Link
+                          href="https://www.helicone.ai/auth-transition"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          <p className="inline font-semibold">
+                            Auth Transition
+                          </p>
+                          <ArrowTopRightOnSquareIcon className="h-4 w-4 mb-1 ml-1 inline" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
               {user?.email === DEMO_EMAIL && (
                 <div className="pointer-events-none flex sm:justify-center mt-4">
                   <div className="w-full pointer-events-auto flex items-center justify-between gap-x-6 bg-red-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
