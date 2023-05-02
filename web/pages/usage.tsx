@@ -4,9 +4,15 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 
 import { GetServerSidePropsContext } from "next";
+import AuthHeader from "../components/shared/authHeader";
+import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import BillingPage from "../components/templates/usage/usagePage";
-import { UserSettingsResponse } from "./api/user_settings";
+import UsagePage from "../components/templates/usage/usagePage";
+import { getUserSettings } from "../services/lib/user";
+import {
+  getOrCreateUserSettings,
+  UserSettingsResponse,
+} from "./api/user_settings";
 
 interface UsageProps {
   user: User;
@@ -18,7 +24,10 @@ const Usage = (props: UsageProps) => {
 
   return (
     <MetaData title="Usage">
-      <BillingPage user={user} />
+      <AuthLayout user={user}>
+        <AuthHeader title={"Usage"} />
+        <UsagePage user={user} />
+      </AuthLayout>
     </MetaData>
   );
 };
@@ -41,13 +50,12 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
-  // const data = await getUserSettings();
+  await getOrCreateUserSettings(session.user);
 
   return {
     props: {
       initialSession: session,
       user: session.user,
-      // userSettings: data,
     },
   };
 };
