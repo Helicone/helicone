@@ -54,6 +54,7 @@ export interface Database {
           api_key_name: string
           created_at: string
           id: number
+          organization_id: string | null
           soft_delete: boolean
           user_id: string
         }
@@ -62,6 +63,7 @@ export interface Database {
           api_key_name: string
           created_at?: string
           id?: number
+          organization_id?: string | null
           soft_delete?: boolean
           user_id: string
         }
@@ -70,6 +72,7 @@ export interface Database {
           api_key_name?: string
           created_at?: string
           id?: number
+          organization_id?: string | null
           soft_delete?: boolean
           user_id?: string
         }
@@ -98,6 +101,43 @@ export interface Database {
           id?: number
           name?: string
           user_id?: string
+        }
+      }
+      organization: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          owner: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          owner: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          owner?: string
+        }
+      }
+      organization_member: {
+        Row: {
+          created_at: string | null
+          member: string
+          organization: string
+        }
+        Insert: {
+          created_at?: string | null
+          member: string
+          organization: string
+        }
+        Update: {
+          created_at?: string | null
+          member?: string
+          organization?: string
         }
       }
       prompt: {
@@ -159,6 +199,7 @@ export interface Database {
           created_at: string
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
+          helicone_org_id: string | null
           helicone_user: string | null
           id: string
           path: string
@@ -173,6 +214,7 @@ export interface Database {
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
+          helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
           path: string
@@ -187,6 +229,7 @@ export interface Database {
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
+          helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
           path?: string
