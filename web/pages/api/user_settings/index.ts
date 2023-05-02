@@ -32,8 +32,12 @@ export async function getOrCreateUserSettings(
     .select("*")
     .eq("user", user.id)
     .single();
+  const customer = await stripeServer.customers.list({
+    email: user.email,
+    limit: 1,
+  });
   // Convert all free users to basic flex users
-  if (userSettings?.tier === "free") {
+  if (userSettings?.tier === "free" || customer.data.length === 0) {
     const { error: updateUserSettingsError, data: updateUserSettingsData } =
       await supabaseServer
         .from("user_settings")

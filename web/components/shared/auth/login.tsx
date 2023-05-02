@@ -35,6 +35,7 @@ const Login = (props: LoginProps) => {
 
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
+  const user = useUser();
 
   const signUpHandler = async (email: string, password: string) => {
     if (email === "") {
@@ -54,8 +55,6 @@ const Login = (props: LoginProps) => {
         emailRedirectTo: `https://${origin}/welcome`,
       },
     });
-
-    user.user?.email;
 
     if (authError) {
       setAuthError(authError.message);
@@ -89,7 +88,6 @@ const Login = (props: LoginProps) => {
           },
           body: JSON.stringify({
             customer: customer.id,
-            items: [{ price: process.env.STRIPE_BASIC_FLEX_PRICE_ID }],
           } as Stripe.SubscriptionCreateParams),
         }
       ).then((res) => res.json());
@@ -289,6 +287,36 @@ const Login = (props: LoginProps) => {
                         if (error) {
                           setAuthError(error.message);
                         }
+                        // get the user id
+                        if (user) {
+                          // Create a stripe customer account
+                          const { data: customer, error: customerError } =
+                            await fetch("/api/stripe/create_account", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                email: user.email,
+                                name: user.email,
+                              } as Stripe.CustomerCreateParams),
+                            }).then((res) => res.json());
+
+                          // Subscribe the customer to the basic_flex plan
+                          const {
+                            data: subscription,
+                            error: subscriptionError,
+                          } = await fetch("/api/stripe/create_subscription", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              customer: customer.id,
+                            } as Stripe.SubscriptionCreateParams),
+                          }).then((res) => res.json());
+                        }
+
                         setLoading(false);
                       }}
                       type="button"
