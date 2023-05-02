@@ -31,6 +31,7 @@ export interface HeliconeRequest {
   request_prompt_values: {
     [key: string]: Json;
   } | null;
+  helicone_user: string | null;
   user_api_key_preview: string;
   user_api_key_user_id: string;
   user_api_key_hash: string;
@@ -71,6 +72,7 @@ export async function getRequests(
     request.properties AS request_properties,
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
+    request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
     user_api_keys.api_key_preview as user_api_key_preview,
     user_api_keys.user_id as user_api_key_user_id,
