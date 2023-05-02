@@ -123,6 +123,35 @@ export interface Database {
           prompt?: string
         }
       }
+      properties: {
+        Row: {
+          auth_hash: string | null
+          created_at: string | null
+          id: number
+          key: string | null
+          request_id: string | null
+          user_id: string | null
+          value: string | null
+        }
+        Insert: {
+          auth_hash?: string | null
+          created_at?: string | null
+          id?: number
+          key?: string | null
+          request_id?: string | null
+          user_id?: string | null
+          value?: string | null
+        }
+        Update: {
+          auth_hash?: string | null
+          created_at?: string | null
+          id?: number
+          key?: string | null
+          request_id?: string | null
+          user_id?: string | null
+          value?: string | null
+        }
+      }
       request: {
         Row: {
           auth_hash: string
@@ -336,13 +365,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
