@@ -39,7 +39,9 @@ export async function requestOverLimit(client: SupabaseClient<Database>) {
     if (error !== null || count === null) {
       return false;
     }
-
+    if (userSettings.tier === "basic_flex") {
+      return false;
+    }
     return count > userSettings.request_limit;
   } catch (e) {
     return false;

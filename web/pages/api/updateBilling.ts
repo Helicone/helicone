@@ -11,7 +11,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const stripe = await loadStripe(
-    "sk_test_51MUEfoFeVmeixR9wyagajKHIPIAlZwpfBNidL8GMEluFgMT0TqCKNlN1AADsXA6niqPJxgdE4RtxskMeBiNenpKp00YziQAcNs"
+    "sk_test_51MUEfoFeVmeixR9wo5rQfV6pLNhZpQYYcXclEqUxYsMyREpKBC054irVCORFgcNBC3N4g4Zn35MbeBWSM5AUGBc1002dy4iDYA"
   );
   var charge = await stripe!.paymentRequest({
     country: "US",

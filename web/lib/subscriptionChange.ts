@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextRouter } from "next/router";
 import Stripe from "stripe";
-import { Tier } from "../components/templates/usage/usagePage";
+// import { Tier } from "../components/templates/usage/usagePage";
 import getStripe from "../utlis/getStripe";
 import { DEMO_EMAIL } from "./constants";
 import { Result } from "./result";
@@ -50,35 +50,35 @@ const heliconeContactLink = process.env.NEXT_PUBLIC_HELICONE_CONTACT_LINK;
 const heliconeBillingPortalLink =
   process.env.NEXT_PUBLIC_HELICONE_BILLING_PORTAL_LINK;
 
-export async function subscriptionChange(
-  changeTo: Tier,
-  changeFrom: Tier,
-  client: SupabaseClient,
-  discountCode: string
-): Promise<Result<Stripe.Subscription, string>> {
-  if ((await client.auth.getUser()).data.user?.email === DEMO_EMAIL) {
-    alert("This is a demo account. You can't change your subscription.");
-    return { error: "Not implemented", data: null };
-  }
-  if (changeTo === "starter") {
-    if (changeFrom === "free") {
-      await subscribeToPro(discountCode);
-    } else if (changeFrom === "enterprise") {
-      window.open(heliconeContactLink, "_ blank");
-    } else if (changeFrom === "starter-pending-cancel") {
-      window.open(heliconeBillingPortalLink, "_ blank");
-    } else if (changeFrom === "starter") {
-      window.open(heliconeBillingPortalLink, "_ blank");
-    }
-  } else if (changeTo === "enterprise") {
-    window.open(heliconeContactLink, "_ blank");
-  } else if (changeTo === "free") {
-    if (changeFrom === "starter") {
-      window.open(heliconeBillingPortalLink, "_ blank");
-    } else if (changeFrom === "enterprise") {
-      window.open(heliconeContactLink, "_ blank");
-    }
-  }
+// export async function subscriptionChange(
+//   changeTo: Tier,
+//   changeFrom: Tier,
+//   client: SupabaseClient,
+//   discountCode: string
+// ): Promise<Result<Stripe.Subscription, string>> {
+//   if ((await client.auth.getUser()).data.user?.email === DEMO_EMAIL) {
+//     alert("This is a demo account. You can't change your subscription.");
+//     return { error: "Not implemented", data: null };
+//   }
+//   if (changeTo === "starter") {
+//     if (changeFrom === "free") {
+//       await subscribeToPro(discountCode);
+//     } else if (changeFrom === "enterprise") {
+//       window.open(heliconeContactLink, "_ blank");
+//     } else if (changeFrom === "starter-pending-cancel") {
+//       window.open(heliconeBillingPortalLink, "_ blank");
+//     } else if (changeFrom === "starter") {
+//       window.open(heliconeBillingPortalLink, "_ blank");
+//     }
+//   } else if (changeTo === "enterprise") {
+//     window.open(heliconeContactLink, "_ blank");
+//   } else if (changeTo === "free") {
+//     if (changeFrom === "starter") {
+//       window.open(heliconeBillingPortalLink, "_ blank");
+//     } else if (changeFrom === "enterprise") {
+//       window.open(heliconeContactLink, "_ blank");
+//     }
+//   }
 
-  return { error: "Not implemented", data: null };
-}
+//   return { error: "Not implemented", data: null };
+// }
