@@ -17,7 +17,7 @@ export default async function handler(
   }
 
   const requests = await getRequests(user.data.user.id, "all", 0, 1, {
-    created_at: "asc",
+    created_at: "desc",
   });
 
   if (requests.error !== null) {
