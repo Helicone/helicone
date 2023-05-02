@@ -64,18 +64,6 @@ const Login = (props: LoginProps) => {
     }
 
     if (user.user?.id) {
-      // Create a user entry in the user_settings table
-      // await fetch("/api/user_settings", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     user: user.user.id,
-      //     tier: "basic_flex",
-      //   }),
-      // });
-
       // Create a stripe customer account
       const { data: customer, error: customerError } = await fetch(
         "/api/stripe/create_account",
@@ -101,10 +89,7 @@ const Login = (props: LoginProps) => {
           },
           body: JSON.stringify({
             customer: customer.id,
-            // Prod test
-            // items: [{ price: "price_1N329XFeVmeixR9wsIsim9Yn" }],
-            // DEV
-            items: [{ price: "price_1N1DPfFeVmeixR9w7eTOtXq7" }],
+            items: [{ price: process.env.STRIPE_BASIC_FLEX_PRICE_ID }],
           } as Stripe.SubscriptionCreateParams),
         }
       ).then((res) => res.json());

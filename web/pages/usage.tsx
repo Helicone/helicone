@@ -8,7 +8,6 @@ import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import UsagePage from "../components/templates/usage/usagePage";
-import BillingPage from "../components/templates/usage/usagePage";
 import { getUserSettings } from "../services/lib/user";
 import {
   getOrCreateUserSettings,
@@ -29,7 +28,6 @@ const Usage = (props: UsageProps) => {
         <AuthHeader title={"Usage"} />
         <UsagePage user={user} />
       </AuthLayout>
-      {/* <BillingPage user={user} /> */}
     </MetaData>
   );
 };

@@ -15,6 +15,7 @@ import {
   stripeEnterpriseProductId,
   stripeStarterProductId,
 } from "../checkout_sessions";
+import { stripeServer } from "../../../utlis/stripeServer";
 // import { REQUEST_LIMITS } from "../../../lib/constants";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 
@@ -31,8 +32,43 @@ export async function getOrCreateUserSettings(
     .select("*")
     .eq("user", user.id)
     .single();
+  // Convert all free users to basic flex users
+  if (userSettings?.tier === "free") {
+    const { error: updateUserSettingsError, data: updateUserSettingsData } =
+      await supabaseServer
+        .from("user_settings")
+        .update({
+          tier: "basic_flex",
+        })
+        .eq("user", user.id)
+        .select("*")
+        .single();
+    if (updateUserSettingsError !== null) {
+      return { data: null, error: updateUserSettingsError.message };
+    } else {
+      // create a new account in stripe
+      const createParams: Stripe.CustomerCreateParams = {
+        email: user.email,
+        name: user.email,
+        expand: ["subscriptions"],
+      };
 
-  if (userSettingsError !== null || userSettings === null) {
+      const customer = await stripeServer.customers.create(createParams);
+
+      // Subscribe the customer to the basic_flex plan
+      const subParams: Stripe.SubscriptionCreateParams = {
+        customer: customer.id,
+        items: [{ price: process.env.STRIPE_BASIC_FLEX_PRICE_ID }],
+      };
+
+      await stripeServer.subscriptions.create(subParams);
+
+      return {
+        data: updateUserSettingsData,
+        error: null,
+      };
+    }
+  } else if (userSettingsError !== null || userSettings === null) {
     const { error: createUserSettingsError, data: createUserSettingsData } =
       await supabaseServer
         .from("user_settings")
