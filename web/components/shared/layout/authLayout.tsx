@@ -32,6 +32,11 @@ import ThemedModal from "../themed/themedModal";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../../lib/result";
+import ThemedDropdown from "../themed/themedDropdown";
+import { SpeedDialIcon } from "@mui/material";
+import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
+import { useGetOrgs } from "../../../services/hooks/organizations";
+import OrgContext from "./organizationContext";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -516,6 +521,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
+
                 <ul className="p-4 font-medium text-sm text-gray-500 space-y-4">
                   <li>
                     <Link
@@ -537,6 +543,21 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Discord
                     </Link>
                   </li>
+                  {org && orgs && orgs.length > 1 && (
+                    <ThemedDropdown
+                      selectedValue={org.id}
+                      options={orgs.map((org) => ({
+                        label: org.name,
+                        value: org.id,
+                      }))}
+                      onSelect={(value) => {
+                        if (value) {
+                          setOrg(orgs?.find((org) => org.id === value)!);
+                        }
+                      }}
+                      align="right"
+                    />
+                  )}
                 </ul>
                 <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
                   <div className="group block w-full flex-shrink-0">

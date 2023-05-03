@@ -1,0 +1,15 @@
+import React, { useContext } from "react";
+import { Database } from "../../../supabase/database.types";
+
+export interface OrgContextValue {
+  currentOrg: Database["public"]["Tables"]["organization"]["Row"];
+  allOrgs: Database["public"]["Tables"]["organization"]["Row"][];
+  setCurrentOrg: (
+    orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]
+  ) => void;
+}
+
+const OrgContext = React.createContext<OrgContextValue | null>(null);
+
+export const useOrg = () => useContext(OrgContext);
+export default OrgContext;
