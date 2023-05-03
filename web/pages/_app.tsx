@@ -15,6 +15,7 @@ import {
   useOrgsContextManager,
 } from "../services/hooks/organizations";
 import OrgContext, {
+  OrgContextProvider,
   OrgContextValue,
 } from "../components/shared/layout/organizationContext";
 
@@ -35,8 +36,6 @@ export default function MyApp({
   initialSession: Session;
 }>) {
   const queryClient = new QueryClient();
-  const orgContextValue = useOrgsContextManager();
-
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
   if (typeof window !== "undefined") {
@@ -51,9 +50,9 @@ export default function MyApp({
       >
         <QueryClientProvider client={queryClient}>
           <NotificationProvider>
-            <OrgContext.Provider value={orgContextValue}>
+            <OrgContextProvider>
               <Component {...pageProps} />
-            </OrgContext.Provider>
+            </OrgContextProvider>
             <Notification />
           </NotificationProvider>
         </QueryClientProvider>
