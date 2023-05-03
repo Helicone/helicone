@@ -1,4 +1,4 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Members } from "../../pages/api/organization/[id]/members";
 import { Owner } from "../../pages/api/organization/[id]/owner";
@@ -43,9 +43,13 @@ const useGetOrgOwner = (orgId: string) => {
 
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
+  const user = useUser();
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["Organizations"],
+    queryKey: ["Organizations", user?.id ?? ""],
     queryFn: async (query) => {
+      if (!user?.id) {
+        return [];
+      }
       const { data, error } = await supabaseClient
         .from("organization")
         .select(`*`);
