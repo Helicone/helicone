@@ -558,22 +558,20 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Discord
                     </Link>
                   </li>
-                  {org && (
+                  {org && orgs && orgs.length > 1 && (
                     <ThemedDropdown
                       selectedValue={org.id}
-                      options={
-                        orgs?.map((org) => ({
-                          label: org.name,
-                          value: org.id,
-                        })) ?? []
-                      }
+                      options={orgs.map((org) => ({
+                        label: org.name,
+                        value: org.id,
+                      }))}
                       onSelect={(value) => {
                         if (value) {
                           setOrg(orgs?.find((org) => org.id === value)!);
                         }
                       }}
                       align="right"
-                    ></ThemedDropdown>
+                    />
                   )}
                 </ul>
                 <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
