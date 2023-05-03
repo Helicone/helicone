@@ -67,6 +67,10 @@ const OrgsPage = (props: OrgsPageProps) => {
         </div>
         <button
           onClick={async () => {
+            if (!orgName || orgName === "") {
+              setNotification("Please provide an organization name", "error");
+              return;
+            }
             const { data, error } = await supabaseClient
               .from("organization")
               .insert([
@@ -77,9 +81,9 @@ const OrgsPage = (props: OrgsPageProps) => {
               ])
               .select("*");
             if (error) {
-              setNotification("User added successfully", "error");
+              setNotification("Failed to create organization", "error");
             } else {
-              setNotification("User added successfully", "success");
+              setNotification("Organization created successfully", "success");
             }
             console.log(1);
             orgContext?.refetchOrgs();
