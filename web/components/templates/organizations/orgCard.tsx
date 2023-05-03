@@ -1,6 +1,7 @@
 import {
   BuildingOffice2Icon,
   BuildingOfficeIcon,
+  BuildingStorefrontIcon,
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
@@ -53,7 +54,12 @@ const OrgCard = (props: OrgCardProps) => {
       >
         <div className="bg-gray-200 p-4 flex flex-row justify-between">
           <div className="flex flex-row space-x-4 items-center">
-            <BuildingOffice2Icon className="h-8 w-8 bg-white p-1.5 rounded-md" />
+            {org.is_personal ? (
+              <BuildingStorefrontIcon className="h-8 w-8 bg-white p-1.5 rounded-md" />
+            ) : (
+              <BuildingOffice2Icon className="h-8 w-8 bg-white p-1.5 rounded-md" />
+            )}
+
             <p className="text-md font-semibold flex-1 overflow-ellipsis truncate w-[160px]">
               {org.name}
             </p>
@@ -66,12 +72,14 @@ const OrgCard = (props: OrgCardProps) => {
               >
                 <PlusIcon className="h-4 w-4" />
               </button>
-              <button
-                onClick={() => setDeleteOpen(true)}
-                className="hover:bg-white rounded-md p-1.5"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
+              {!org.is_personal && (
+                <button
+                  onClick={() => setDeleteOpen(true)}
+                  className="hover:bg-white rounded-md p-1.5"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -143,14 +151,11 @@ const OrgCard = (props: OrgCardProps) => {
                         setNotification(res.error, "error");
                         console.error(res);
                       } else {
-                        setNotification(
-                          "Error adding user: see console",
-                          "error"
-                        );
+                        setNotification("Error adding member", "error");
                         console.error(res);
                       }
                     } else {
-                      setNotification("User added successfully", "success");
+                      setNotification("Member added successfully", "success");
                     }
                     refetch();
                     setAddOpen(false);
@@ -172,9 +177,11 @@ const OrgCard = (props: OrgCardProps) => {
           <p className="text-gray-700 w-[400px] whitespace-pre-wrap text-sm">
             This organization will be deleted from your account. API requests
             already made with this organization&apos;s will still be stored on
-            our servers. If you delete this organization and re-add the keys to
-            it later, the requests made with this organization will become
-            visible again.
+            our servers.
+          </p>
+          <p className="text-gray-700 w-[400px] whitespace-pre-wrap text-sm">
+            If you delete this organization and re-add the keys to it later, the
+            requests made with this organization will become visible again.
           </p>
           <div className="w-full flex justify-end gap-4 mt-4">
             <button
@@ -196,7 +203,10 @@ const OrgCard = (props: OrgCardProps) => {
                 if (error) {
                   setNotification("Error deleting organization", "error");
                 } else {
-                  setNotification("User added successfully", "success");
+                  setNotification(
+                    "Organization deleted successfully",
+                    "success"
+                  );
                 }
                 refetchOrgs();
                 setDeleteOpen(false);
