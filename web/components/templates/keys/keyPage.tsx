@@ -172,7 +172,6 @@ const KeyPage = (props: KeyPageProps) => {
     }
   };
 
-  const org = useOrg();
   return (
     <>
       {props.hideTabs !== true && (
@@ -192,8 +191,7 @@ const KeyPage = (props: KeyPageProps) => {
           }}
         />
       )}
-      Jello
-      {org && org.name}
+      {org && org.currentOrg.name}
       {selectedTab === "OpenAI Keys" && (
         <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
           <div className="text-gray-900 space-y-4 text-sm">
