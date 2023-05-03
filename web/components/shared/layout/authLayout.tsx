@@ -17,6 +17,7 @@ import {
   WrenchScrewdriverIcon,
   XMarkIcon,
   TableCellsIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import {
   ExclamationCircleIcon,
@@ -102,9 +103,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname === "/keys",
     },
     {
-      name: "Orgs",
+      name: "Organizations",
       href: "/organizations",
-      icon: PaperAirplaneIcon,
+      icon: BuildingOfficeIcon,
       current: pathname === "/organizations",
     },
   ];

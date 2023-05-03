@@ -50,10 +50,10 @@ const useGetOrgs = () => {
       if (error) {
         throw error;
       }
-      if (!data.find((d) => d.is_personal)) {
-        await supabaseClient.rpc("ensure_personal");
-        refetch();
-      }
+      // if (!data.find((d) => d.is_personal)) {
+      //   await supabaseClient.rpc("ensure_personal");
+      //   refetch();
+      // }
       return data;
     },
     refetchOnWindowFocus: false,

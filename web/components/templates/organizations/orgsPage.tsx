@@ -31,116 +31,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Members } from "../../../pages/api/organization/[id]/members";
 import { Owner } from "../../../pages/api/organization/[id]/owner";
 import { useGetOrgs } from "../../../services/hooks/organizations";
+import { getUSDate } from "../../shared/utils/utils";
+import OrgCard from "./orgCard";
 
-interface OrgsPageProps {
-  hideTabs?: boolean;
-}
-
-const OrganizationCard = ({
-  organization,
-  refetchOrganizations,
-}: {
-  organization: Database["public"]["Tables"]["organization"]["Row"];
-  refetchOrganizations: () => void;
-}) => {
-  const supabaseClient = useSupabaseClient<Database>();
-  const user = useUser();
-  const [member, setMember] = useState("");
-  const { setNotification } = useNotification();
-  const { data, refetch: refetchMembers } = useQuery({
-    queryKey: ["OrganizationsMembers", organization.id],
-    queryFn: async (query) => {
-      return fetch(`/api/organization/${organization.id}/members`).then(
-        (res) => res.json() as Promise<Members>
-      );
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: owner } = useQuery({
-    queryKey: ["OrganizationsMembersOwner", organization.id],
-    queryFn: async (query) => {
-      return fetch(`/api/organization/${organization.id}/owner`).then(
-        (res) => res.json() as Promise<Owner>
-      );
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const isOwner = user?.id === organization.owner;
-  console.log("MEMBERS", owner);
-
-  return (
-    <div className="flex flex-col p-4 border gap-5 w-full">
-      <div className="flex flex-row items-center justify-between">
-        <h1>Org name: {organization.name}</h1>
-        {isOwner && (
-          <button
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => {
-              supabaseClient
-                .from("organization")
-                .delete()
-                .match({ id: organization.id })
-                .then((res) => {
-                  console.log(res);
-                });
-            }}
-          >
-            Delete
-          </button>
-        )}
-      </div>
-      <div>
-        <h2>Owner: {owner?.data![0].email}</h2>
-        <div>
-          <h2>Members:</h2>
-          <ul>
-            {data?.data?.map((d, i) => (
-              <li key={i}>{d.email}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      {isOwner && (
-        <div className="flex flex-row">
-          <input
-            type="text"
-            placeholder="Member email"
-            onChange={(e) => setMember(e.target.value)}
-            value={member}
-          />
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => {
-              fetch(
-                `/api/organization/${organization.id}/add_member?email=${member}`
-              )
-                .then((res) => res.json())
-                .then((res) => {
-                  refetchMembers();
-                  if (res.error) {
-                    if (res.error.length < 30) {
-                      setNotification(res.error, "error");
-                      console.error(res);
-                    } else {
-                      setNotification(
-                        "Error adding user: see console",
-                        "error"
-                      );
-                      console.error(res);
-                    }
-                  }
-                });
-            }}
-          >
-            Add member
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+interface OrgsPageProps {}
 
 const OrgsPage = (props: OrgsPageProps) => {
   const [orgName, setOrgName] = useState("");
@@ -148,6 +42,7 @@ const OrgsPage = (props: OrgsPageProps) => {
   const user = useUser();
   const supabaseClient = useSupabaseClient<Database>();
   const { data, isLoading, refetch } = useGetOrgs();
+  const { setNotification } = useNotification();
 
   const yourOrgs = data?.filter((d) => d.owner === user?.id);
   const otherOrgs = data?.filter((d) => d.owner !== user?.id);
@@ -169,75 +64,52 @@ const OrgsPage = (props: OrgsPageProps) => {
             value={orgName}
           />
         </div>
-        <button className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+        <button
+          onClick={async () => {
+            const { data, error } = await supabaseClient
+              .from("organization")
+              .insert([
+                {
+                  name: orgName,
+                  owner: user?.id!,
+                },
+              ])
+              .select("*");
+            if (error) {
+              setNotification("User added successfully", "error");
+            } else {
+              setNotification("User added successfully", "success");
+            }
+            console.log(1);
+            refetch();
+          }}
+          className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        >
           Create New Organization
         </button>
       </div>
-      <ul className="border-t border-gray-200 py-8">
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          data?.map((org) => (
-            <li
-              key={org.id}
-              className="overflow-hidden border border-gray-200 rounded-xl w-full max-w-xs"
-            >
-              <div className="bg-gray-200 p-4 flex flex-row justify-between">
-                <div className="flex flex-row space-x-2 items-center">
-                  <BuildingOfficeIcon className="h-8 w-8 bg-white p-1.5 rounded-md" />
-                  <p className="text-md font-semibold">{org.name}</p>
-                </div>
-                <button className="flex flex-row space-x-2 items-center">
-                  <PencilIcon className="h-4 w-4" />
-                  <TrashIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </li>
-          ))
-        )}
-      </ul>
-      <div>Your orgs:</div>
-
-      <div>
-        {yourOrgs?.map((d, i) => (
-          <div key={i} className="flex flex-row">
-            <OrganizationCard organization={d} refetchOrganizations={refetch} />
-          </div>
-        ))}
+      <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
+        <p className="text-md font-semibold">Your Organizations</p>
+        <ul className="flex flex-wrap gap-4">
+          {isLoading ? (
+            <div className="h-40 w-full max-w-xs bg-gray-300 rounded-xl animate-pulse" />
+          ) : (
+            yourOrgs?.map((org) => (
+              <OrgCard org={org} key={org.id} refetchOrgs={refetch} isOwner />
+            ))
+          )}
+        </ul>
       </div>
-      <div>Other orgs:</div>
-      <div>
-        {otherOrgs?.map((d, i) => (
-          <div key={i} className="flex flex-row">
-            <OrganizationCard organization={d} refetchOrganizations={refetch} />
-          </div>
-        ))}
-      </div>
-      <input
-        type="text"
-        placeholder="Org name"
-        onChange={(e) => setOrgName(e.target.value)}
-        value={orgName}
-      />
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => {
-          supabaseClient
-            .from("organization")
-            .insert([
-              {
-                name: orgName,
-                owner: user?.id!,
-              },
-            ])
-            .then((res) => {
-              console.log("res", res);
-              refetch();
-            });
-        }}
-      >
-        Add org
-      </button>
+      {isLoading === false && otherOrgs?.length !== 0 && (
+        <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
+          <p className="text-md font-semibold">Other Organizations</p>
+          <ul className="flex flex-wrap gap-4">
+            {otherOrgs?.map((org) => (
+              <OrgCard org={org} key={org.id} refetchOrgs={refetch} />
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
