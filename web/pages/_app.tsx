@@ -1,7 +1,7 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { AppProps } from "next/app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../styles/globals.css";
 import "../styles/index.css";
 import { Analytics } from "@vercel/analytics/react";
@@ -10,6 +10,14 @@ import Notification from "../components/shared/notification/Notification";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import posthog from "posthog-js";
+import {
+  useGetOrgs,
+  useOrgsContextManager,
+} from "../services/hooks/organizations";
+import OrgContext, {
+  OrgContextProvider,
+  OrgContextValue,
+} from "../components/shared/layout/organizationContext";
 
 if (
   typeof window !== "undefined" &&
@@ -28,7 +36,6 @@ export default function MyApp({
   initialSession: Session;
 }>) {
   const queryClient = new QueryClient();
-
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
   if (typeof window !== "undefined") {
@@ -43,7 +50,9 @@ export default function MyApp({
       >
         <QueryClientProvider client={queryClient}>
           <NotificationProvider>
-            <Component {...pageProps} />
+            <OrgContextProvider>
+              <Component {...pageProps} />
+            </OrgContextProvider>
             <Notification />
           </NotificationProvider>
         </QueryClientProvider>
