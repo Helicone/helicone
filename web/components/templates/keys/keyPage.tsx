@@ -28,6 +28,7 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import AddHeliconeKeyModal from "./addHeliconeKeyModal";
 import AddKeyModal from "./addKeyModal";
 import { useKeysPage } from "./useKeysPage";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -35,6 +36,7 @@ interface KeyPageProps {
 
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
+  const org = useOrg();
   const supabaseClient = useSupabaseClient<Database>();
   const [selectedKey, setSelectedKey] =
     useState<Database["public"]["Tables"]["user_api_keys"]["Row"]>();
@@ -298,6 +300,7 @@ const KeyPage = (props: KeyPageProps) => {
                             api_key_hash: res,
                             user_id: user?.id!,
                             api_key_name: name,
+                            organization_id: org?.currentOrg?.id,
                           })
                           .then((res) => refetchHeliconeKeys());
                       });
