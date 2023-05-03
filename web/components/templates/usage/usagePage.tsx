@@ -125,6 +125,69 @@ const UsagePage = (props: UsagePageProps) => {
     return Number(count?.data || 0) / 100_000;
   };
 
+  const renderInfo = () => {
+    if (userSettings.tier === "basic_flex") {
+      return (
+        <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
+          <div className="flex flex-row gap-2 w-full h-4">
+            <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
+              <div
+                className="aboslute h-full bg-purple-500 rounded-md"
+                style={{
+                  width: `${calculatePercentage()}%`,
+                }}
+              ></div>
+            </div>
+            <div className="flex-1 w-full whitespace-nowrap">
+              <p>
+                {isLoading
+                  ? "Loading..."
+                  : Number(count?.data || 0) > 100_000
+                  ? "100,000"
+                  : count?.data}{" "}
+                / 100,000
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-row items-center text-gray-600 w-fit gap-4">
+            <LightBulbIcon className="h-4 w-4 text-gray-600 hidden sm:inline" />
+            Your first 100,000 requests are free every month. After that, you
+            will be charged $1.00 per 10,000 requests.
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
+          <div className="flex flex-row gap-2 w-full h-4">
+            <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
+              <div
+                className="aboslute h-full bg-purple-500 rounded-md"
+                style={{
+                  width: `${
+                    Math.max(Number(count?.data) / userSettings.request_limit) *
+                    100
+                  }%`,
+                }}
+              ></div>
+            </div>
+            <div className="flex-1 w-full whitespace-nowrap">
+              <p>
+                {Number(count?.data).toLocaleString()} /{" "}
+                {userSettings.request_limit.toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-row items-center text-gray-600 w-fit gap-4">
+            <LightBulbIcon className="h-4 w-4 text-gray-600 hidden sm:inline" />
+            We continue logging your requests after your limit is reached, but
+            you will lose access to the dashboard until you upgrade.
+          </div>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
       <div className="flex flex-col space-y-6">
@@ -136,34 +199,12 @@ const UsagePage = (props: UsagePageProps) => {
           help@helicone.ai if you have any questions.
         </p>
       </div>
-      <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
-        <div className="flex flex-row gap-2 w-full h-4">
-          <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
-            <div
-              className="aboslute h-full bg-purple-500 rounded-md"
-              style={{
-                width: `${calculatePercentage()}%`,
-              }}
-            ></div>
-          </div>
-          <div className="flex-1 w-full whitespace-nowrap">
-            <p>
-              {isLoading
-                ? "Loading..."
-                : Number(count?.data || 0) > 100_000
-                ? "100,000"
-                : count?.data}{" "}
-              / 100,000
-            </p>
-          </div>
-        </div>
+      {isLoading ? (
+        <div className="h-24 w-full bg-gray-300 animate-pulse rounded-md"></div>
+      ) : (
+        renderInfo()
+      )}
 
-        <div className="flex flex-row items-center text-gray-600 w-fit gap-4">
-          <LightBulbIcon className="h-4 w-4 text-gray-600 hidden sm:inline" />
-          Your first 100,000 requests are free every month. After that, you will
-          be charged $1.00 per 10,000 requests.
-        </div>
-      </div>
       <div className="flex flex-col sm:flex-row sm:space-x-4">
         <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
           <dt className="text-sm font-medium leading-6 text-gray-700">
