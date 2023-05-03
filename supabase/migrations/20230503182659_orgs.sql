@@ -2,7 +2,8 @@ create table "public"."organization" (
     "id" uuid not null default uuid_generate_v4(),
     "created_at" timestamp with time zone default now(),
     "name" text not null,
-    "owner" uuid not null
+    "owner" uuid not null,
+    "is_personal" boolean not null default false
 );
 
 

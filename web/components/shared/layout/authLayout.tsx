@@ -35,6 +35,8 @@ import { Result } from "../../../lib/result";
 import ThemedDropdown from "../themed/themedDropdown";
 import { SpeedDialIcon } from "@mui/material";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
+import { useGetOrgs } from "../../../services/hooks/organizations";
+import OrgContext from "./organizationContext";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -49,6 +51,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: orgs } = useGetOrgs();
+
+  const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
+
+  useEffect(() => {
+    if (orgs) {
+      setOrg(orgs[0]);
+    }
+  }, [orgs]);
 
   const navigation = [
     {
@@ -547,21 +558,23 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Discord
                     </Link>
                   </li>
-                  <ThemedDropdown
-                    selectedValue={"Personal"}
-                    options={[
-                      {
-                        label: "Personal",
-                        value: "Personal",
-                      },
-                      {
-                        label: "new +",
-                        value: "new",
-                      },
-                    ]}
-                    onSelect={(value) => {}}
-                    align="right"
-                  ></ThemedDropdown>
+                  {org && (
+                    <ThemedDropdown
+                      selectedValue={org.id}
+                      options={
+                        orgs?.map((org) => ({
+                          label: org.name,
+                          value: org.id,
+                        })) ?? []
+                      }
+                      onSelect={(value) => {
+                        if (value) {
+                          setOrg(orgs?.find((org) => org.id === value)!);
+                        }
+                      }}
+                      align="right"
+                    ></ThemedDropdown>
+                  )}
                 </ul>
                 <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
                   <div className="group block w-full flex-shrink-0">
@@ -707,7 +720,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </div>
                 </div>
               )}
-              <div className="py-4 sm:py-8">{children}</div>
+              <OrgContext.Provider value={org}>
+                <div className="py-4 sm:py-8">{children}</div>
+              </OrgContext.Provider>
               {/* /End replace */}
             </div>
           </main>

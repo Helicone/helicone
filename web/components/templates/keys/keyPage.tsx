@@ -28,6 +28,7 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import AddHeliconeKeyModal from "./addHeliconeKeyModal";
 import AddKeyModal from "./addKeyModal";
 import { useKeysPage } from "./useKeysPage";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -170,6 +171,7 @@ const KeyPage = (props: KeyPageProps) => {
     }
   };
 
+  const org = useOrg();
   return (
     <>
       {props.hideTabs !== true && (
@@ -189,6 +191,8 @@ const KeyPage = (props: KeyPageProps) => {
           }}
         />
       )}
+      Jello
+      {org && org.name}
       {selectedTab === "OpenAI Keys" && (
         <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
           <div className="text-gray-900 space-y-4 text-sm">
@@ -312,9 +316,7 @@ const KeyPage = (props: KeyPageProps) => {
           </div>
         </div>
       )}
-
       {addOpen && <AddKeyModal open={addOpen} setOpen={setAddOpen} />}
-
       {
         <AddHeliconeKeyModal
           open={addHeliconeOpen}
@@ -381,7 +383,6 @@ const KeyPage = (props: KeyPageProps) => {
           </div>
         </ThemedModal>
       )}
-
       {deleteHeliconeOpen && selectedHeliconeKey !== undefined && (
         <ThemedModal open={deleteHeliconeOpen} setOpen={setDeleteHeliconeOpen}>
           <div className="flex flex-col gap-4 w-full">
@@ -431,7 +432,6 @@ const KeyPage = (props: KeyPageProps) => {
           </div>
         </ThemedModal>
       )}
-
       {deleteOpen && selectedKey !== undefined && (
         <ThemedModal open={deleteOpen} setOpen={setDeleteOpen}>
           <div className="flex flex-col gap-4 w-full">

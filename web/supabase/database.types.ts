@@ -107,18 +107,21 @@ export interface Database {
         Row: {
           created_at: string | null
           id: string
+          is_personal: boolean
           name: string
           owner: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          is_personal?: boolean
           name: string
           owner: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          is_personal?: boolean
           name?: string
           owner?: string
         }
@@ -432,6 +435,10 @@ export interface Database {
             }
             Returns: Record<string, unknown>[]
           }
+      ensure_personal: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
