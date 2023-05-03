@@ -4,6 +4,8 @@ import {
   BuildingOfficeIcon,
   CreditCardIcon,
   KeyIcon,
+  PencilIcon,
+  TrashIcon,
   UserIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -28,6 +30,7 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import { useQuery } from "@tanstack/react-query";
 import { Members } from "../../../pages/api/organization/[id]/members";
 import { Owner } from "../../../pages/api/organization/[id]/owner";
+import { useGetOrgs } from "../../../services/hooks/organizations";
 
 interface OrgsPageProps {
   hideTabs?: boolean;
@@ -144,29 +147,55 @@ const OrgsPage = (props: OrgsPageProps) => {
 
   const user = useUser();
   const supabaseClient = useSupabaseClient<Database>();
-  const {
-    data,
-    isLoading: hasConvertedLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["Organizations"],
-    queryFn: async (query) => {
-      const { data, error } = await supabaseClient
-        .from("organization")
-        .select(`*`);
-      if (error) {
-        throw error;
-      }
-      return data;
-    },
-    refetchOnWindowFocus: false,
-  });
-  console.log("data", data);
+  const { data, isLoading, refetch } = useGetOrgs();
+
   const yourOrgs = data?.filter((d) => d.owner === user?.id);
   const otherOrgs = data?.filter((d) => d.owner !== user?.id);
 
   return (
-    <>
+    <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
+      <div className="flex flex-row items-end gap-5">
+        <div className="w-full space-y-1.5 text-sm">
+          <label htmlFor="api-key">Organization Name</label>
+          <input
+            type="text"
+            name="api-key"
+            id="api-key"
+            className={clsx(
+              "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+            )}
+            placeholder="Your shiny org name"
+            onChange={(e) => setOrgName(e.target.value)}
+            value={orgName}
+          />
+        </div>
+        <button className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+          Create New Organization
+        </button>
+      </div>
+      <ul className="border-t border-gray-200 py-8">
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          data?.map((org) => (
+            <li
+              key={org.id}
+              className="overflow-hidden border border-gray-200 rounded-xl w-full max-w-xs"
+            >
+              <div className="bg-gray-200 p-4 flex flex-row justify-between">
+                <div className="flex flex-row space-x-2 items-center">
+                  <BuildingOfficeIcon className="h-8 w-8 bg-white p-1.5 rounded-md" />
+                  <p className="text-md font-semibold">{org.name}</p>
+                </div>
+                <button className="flex flex-row space-x-2 items-center">
+                  <PencilIcon className="h-4 w-4" />
+                  <TrashIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </li>
+          ))
+        )}
+      </ul>
       <div>Your orgs:</div>
 
       <div>
@@ -209,7 +238,7 @@ const OrgsPage = (props: OrgsPageProps) => {
       >
         Add org
       </button>
-    </>
+    </div>
   );
 };
 
