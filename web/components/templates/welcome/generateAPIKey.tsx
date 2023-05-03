@@ -15,6 +15,7 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import AddHeliconeKeyModal from "../keys/addHeliconeKeyModal";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface GenerateApiKeyProps {
   apiKey: string;
@@ -27,6 +28,7 @@ const GenerateApiKey = (props: GenerateApiKeyProps) => {
   const supabaseClient = useSupabaseClient();
   const user = useUser();
   const [name, setName] = useState<string>("");
+  const org = useOrg();
 
   const { setNotification } = useNotification();
 
@@ -64,6 +66,7 @@ const GenerateApiKey = (props: GenerateApiKeyProps) => {
       api_key_hash: await hashAuth(apiKey),
       user_id: user.id,
       api_key_name: keyName,
+      organization_id: org?.currentOrg.id,
     });
     return apiKey;
   }

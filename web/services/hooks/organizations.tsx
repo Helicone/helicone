@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Members } from "../../pages/api/organization/[id]/members";
 import { Owner } from "../../pages/api/organization/[id]/owner";
 import { Database } from "../../supabase/database.types";
+import { useEffect, useState } from "react";
+import { OrgContextValue } from "../../components/shared/layout/organizationContext";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = useQuery({
@@ -48,12 +50,12 @@ const useGetOrgs = () => {
         .from("organization")
         .select(`*`);
       if (error) {
-        throw error;
+        return [];
       }
-      // if (!data.find((d) => d.is_personal)) {
-      //   await supabaseClient.rpc("ensure_personal");
-      //   refetch();
-      // }
+      if (!data.find((d) => d.is_personal)) {
+        await supabaseClient.rpc("ensure_personal");
+        refetch();
+      }
       return data;
     },
     refetchOnWindowFocus: false,
@@ -66,4 +68,30 @@ const useGetOrgs = () => {
   };
 };
 
-export { useGetOrgMembers, useGetOrgOwner, useGetOrgs };
+const useOrgsContextManager = () => {
+  const { data: orgs } = useGetOrgs();
+
+  const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
+
+  useEffect(() => {
+    if (orgs) {
+      setOrg(orgs[0]);
+    }
+  }, [orgs]);
+  let orgContextValue: OrgContextValue | null = null;
+  if (org && orgs) {
+    orgContextValue = {
+      allOrgs: orgs,
+      currentOrg: org,
+      setCurrentOrg: (orgId) => {
+        const org = orgs?.find((org) => org.id === orgId);
+        if (org) {
+          setOrg(org);
+        }
+      },
+    };
+  }
+  return orgContextValue;
+};
+
+export { useGetOrgMembers, useGetOrgOwner, useGetOrgs, useOrgsContextManager };

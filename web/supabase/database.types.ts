@@ -205,6 +205,7 @@ export interface Database {
           helicone_org_id: string | null
           helicone_user: string | null
           id: string
+          organization_id: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
@@ -220,6 +221,7 @@ export interface Database {
           helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
+          organization_id?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -235,6 +237,7 @@ export interface Database {
           helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
+          organization_id?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null

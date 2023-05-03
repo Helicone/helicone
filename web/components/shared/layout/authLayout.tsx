@@ -37,7 +37,7 @@ import ThemedDropdown from "../themed/themedDropdown";
 import { SpeedDialIcon } from "@mui/material";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useGetOrgs } from "../../../services/hooks/organizations";
-import OrgContext from "./organizationContext";
+import OrgContext, { useOrg } from "./organizationContext";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -52,15 +52,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data: orgs } = useGetOrgs();
-
-  const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
-
-  useEffect(() => {
-    if (orgs) {
-      setOrg(orgs[0]);
-    }
-  }, [orgs]);
+  const org = useOrg();
 
   const navigation = [
     {
@@ -559,16 +551,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Discord
                     </Link>
                   </li>
-                  {org && orgs && orgs.length > 1 && (
+                  {org && (
                     <ThemedDropdown
-                      selectedValue={org.id}
-                      options={orgs.map((org) => ({
+                      selectedValue={org.currentOrg.id}
+                      options={org.allOrgs.map((org) => ({
                         label: org.name,
                         value: org.id,
                       }))}
                       onSelect={(value) => {
                         if (value) {
-                          setOrg(orgs?.find((org) => org.id === value)!);
+                          org.setCurrentOrg(value);
                         }
                       }}
                       align="right"
