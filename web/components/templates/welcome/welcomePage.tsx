@@ -51,7 +51,7 @@ const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   // Add a basePath to the Configuration
   basePath: "https://oai.hconeai.com/v1",
-  {
+  baseOptions: {
     headers: {
       // Add your Helicone API Key
       "Helicone-Auth": "Bearer ${key}",
