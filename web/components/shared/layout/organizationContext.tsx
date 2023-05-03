@@ -18,6 +18,7 @@ export const OrgContextProvider = ({
   children: React.ReactNode;
 }) => {
   const orgContextValue = useOrgsContextManager();
+  console.log("orgContextValue", orgContextValue);
   return (
     <OrgContext.Provider value={orgContextValue}>
       {children}
