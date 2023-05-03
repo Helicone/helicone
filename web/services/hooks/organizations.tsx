@@ -48,7 +48,8 @@ const useGetOrgs = () => {
     queryFn: async (query) => {
       const { data, error } = await supabaseClient
         .from("organization")
-        .select(`*`);
+        .select(`*`)
+        .eq("soft_delete", false);
       if (error) {
         return [];
       }
@@ -69,7 +70,7 @@ const useGetOrgs = () => {
 };
 
 const useOrgsContextManager = () => {
-  const { data: orgs } = useGetOrgs();
+  const { data: orgs, refetch } = useGetOrgs();
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
 
@@ -89,6 +90,7 @@ const useOrgsContextManager = () => {
           setOrg(org);
         }
       },
+      refetchOrgs: refetch,
     };
   }
   return orgContextValue;

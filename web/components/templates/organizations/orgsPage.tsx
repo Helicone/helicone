@@ -33,6 +33,7 @@ import { Owner } from "../../../pages/api/organization/[id]/owner";
 import { useGetOrgs } from "../../../services/hooks/organizations";
 import { getUSDate } from "../../shared/utils/utils";
 import OrgCard from "./orgCard";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface OrgsPageProps {}
 
@@ -41,11 +42,11 @@ const OrgsPage = (props: OrgsPageProps) => {
 
   const user = useUser();
   const supabaseClient = useSupabaseClient<Database>();
-  const { data, isLoading, refetch } = useGetOrgs();
+  const orgContext = useOrg();
   const { setNotification } = useNotification();
 
-  const yourOrgs = data?.filter((d) => d.owner === user?.id);
-  const otherOrgs = data?.filter((d) => d.owner !== user?.id);
+  const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
+  const otherOrgs = orgContext?.allOrgs?.filter((d) => d.owner !== user?.id);
 
   return (
     <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
@@ -81,7 +82,7 @@ const OrgsPage = (props: OrgsPageProps) => {
               setNotification("User added successfully", "success");
             }
             console.log(1);
-            refetch();
+            orgContext?.refetchOrgs();
           }}
           className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
         >
@@ -91,21 +92,30 @@ const OrgsPage = (props: OrgsPageProps) => {
       <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
         <p className="text-md font-semibold">Your Organizations</p>
         <ul className="flex flex-wrap gap-4">
-          {isLoading ? (
-            <div className="h-40 w-full max-w-xs bg-gray-300 rounded-xl animate-pulse" />
-          ) : (
+          {orgContext ? (
             yourOrgs?.map((org) => (
-              <OrgCard org={org} key={org.id} refetchOrgs={refetch} isOwner />
+              <OrgCard
+                org={org}
+                key={org.id}
+                refetchOrgs={orgContext.refetchOrgs}
+                isOwner
+              />
             ))
+          ) : (
+            <div className="h-40 w-full max-w-xs bg-gray-300 rounded-xl animate-pulse" />
           )}
         </ul>
       </div>
-      {isLoading === false && otherOrgs?.length !== 0 && (
+      {orgContext?.allOrgs && (
         <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
           <p className="text-md font-semibold">Other Organizations</p>
           <ul className="flex flex-wrap gap-4">
             {otherOrgs?.map((org) => (
-              <OrgCard org={org} key={org.id} refetchOrgs={refetch} />
+              <OrgCard
+                org={org}
+                key={org.id}
+                refetchOrgs={orgContext.refetchOrgs}
+              />
             ))}
           </ul>
         </div>

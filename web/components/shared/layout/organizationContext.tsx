@@ -8,6 +8,7 @@ export interface OrgContextValue {
   setCurrentOrg: (
     orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]
   ) => void;
+  refetchOrgs: () => void;
 }
 
 const OrgContext = React.createContext<OrgContextValue | null>(null);

@@ -29,7 +29,7 @@ const OrgCard = (props: OrgCardProps) => {
   const [addOpen, setAddOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
 
-  const supabaseClient = useSupabaseClient();
+  const supabaseClient = useSupabaseClient<Database>();
 
   const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
     org.owner
@@ -189,14 +189,16 @@ const OrgCard = (props: OrgCardProps) => {
             </button>
             <button
               onClick={async () => {
+                console.log("deleting org", org.id);
                 const { data, error } = await supabaseClient
                   .from("organization")
-                  .delete()
-                  .match({ id: org.id });
+                  .update({ soft_delete: true })
+                  .eq("id", org.id);
+                console.log(data, error);
                 if (error) {
                   setNotification("Error deleting organization", "error");
                 } else {
-                  setNotification("User added successfully", "success");
+                  setNotification("Deleted org successfully", "success");
                 }
                 refetchOrgs();
                 setDeleteOpen(false);

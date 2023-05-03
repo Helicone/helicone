@@ -110,6 +110,7 @@ export interface Database {
           is_personal: boolean
           name: string
           owner: string
+          soft_delete: boolean
         }
         Insert: {
           created_at?: string | null
@@ -117,6 +118,7 @@ export interface Database {
           is_personal?: boolean
           name: string
           owner: string
+          soft_delete?: boolean
         }
         Update: {
           created_at?: string | null
@@ -124,6 +126,7 @@ export interface Database {
           is_personal?: boolean
           name?: string
           owner?: string
+          soft_delete?: boolean
         }
       }
       organization_member: {
