@@ -45,15 +45,7 @@ const GenerateApiKey = (props: GenerateApiKeyProps) => {
     user: User,
     keyName: string
   ): Promise<string> {
-    const sessionStorageHeliconeAPIKey =
-      sessionStorage.getItem("helicone_api_key");
-    if (sessionStorageHeliconeAPIKey != null) {
-      return sessionStorageHeliconeAPIKey;
-    }
-
     const apiKey = await generateAPIKey();
-
-    sessionStorage.setItem("helicone_api_key", apiKey);
 
     await supabaseClient
       .from("helicone_api_keys")
@@ -62,12 +54,18 @@ const GenerateApiKey = (props: GenerateApiKeyProps) => {
       })
       .eq("user_id", user.id);
 
-    await supabaseClient.from("helicone_api_keys").insert({
+    const res = await supabaseClient.from("helicone_api_keys").insert({
       api_key_hash: await hashAuth(apiKey),
       user_id: user.id,
       api_key_name: keyName,
       organization_id: org?.currentOrg.id,
     });
+
+    if (res.error) {
+      setNotification("Failed to generate API key", "error");
+      console.error(res.error);
+    }
+    console.log("Generated API key", apiKey, res);
     return apiKey;
   }
 
