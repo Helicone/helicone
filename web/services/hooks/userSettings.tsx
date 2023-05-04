@@ -23,8 +23,9 @@ const useUserSettings = (userId: string) => {
   });
 
   return {
-    userSettings:
-      data?.data as Database["public"]["Tables"]["user_settings"]["Row"],
+    userSettings: data
+      ? (data?.data as Database["public"]["Tables"]["user_settings"]["Row"])
+      : null,
     isLoading,
     error,
     refetch,
