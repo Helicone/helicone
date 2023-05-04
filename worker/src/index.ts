@@ -157,22 +157,10 @@ async function getPromptId(
   }
 }
 
-async function getHeliconeUserId(
+async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
   heliconeApiKey?: string
-): Promise<
-  Result<
-    {
-      api_key_hash: string;
-      api_key_name: string;
-      created_at: string;
-      id: number;
-      soft_delete: boolean;
-      user_id: string;
-    },
-    string
-  >
-> {
+) {
   if (!heliconeApiKey) {
     return { data: null, error: "No helicone api key" };
   }
@@ -187,6 +175,7 @@ async function getHeliconeUserId(
     .eq("api_key_hash", apiKeyHash)
     .eq("soft_delete", false)
     .single();
+
   if (error !== null) {
     return { data: null, error: error.message };
   }
@@ -233,8 +222,8 @@ async function logRequest({
     const prompt_values = prompt !== undefined ? prompt.values : null;
     const hashed_auth = await hash(auth);
 
-    const { data: heliconeUserId, error: userIdError } =
-      await getHeliconeUserId(dbClient, heliconeApiKey);
+    const { data: heliconeApiKeyRow, error: userIdError } =
+      await getHeliconeApiKeyRow(dbClient, heliconeApiKey);
     if (userIdError !== null) {
       console.error(userIdError);
     }
@@ -257,8 +246,9 @@ async function logRequest({
           properties: properties,
           formatted_prompt_id: formattedPromptId,
           prompt_values: prompt_values,
-          helicone_user: heliconeUserId?.user_id,
-          helicone_api_key_id: heliconeUserId?.id,
+          helicone_user: heliconeApiKeyRow?.user_id,
+          helicone_api_key_id: heliconeApiKeyRow?.id,
+          helicone_org_id: heliconeApiKeyRow?.organization_id,
         },
       ])
       .select("*")
@@ -388,6 +378,23 @@ async function logInClickhouse(
         status: response.status,
       },
     ]),
+    dbInsertClickhouse(env, "response_copy_v2", [
+      {
+        auth_hash: request.auth_hash,
+        user_id: request.user_id,
+        request_id: request.id,
+        completion_tokens: response.completion_tokens,
+        latency: response.delay_ms,
+        model: ((response.body as any)?.model as string) || null,
+        prompt_tokens: response.prompt_tokens,
+        request_created_at: formatTimeString(request.created_at),
+        response_created_at: formatTimeString(response.created_at),
+        response_id: response.id,
+        status: response.status,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      },
+    ]),
     dbInsertClickhouse(
       env,
       "properties_copy_v1",
@@ -477,9 +484,14 @@ async function forwardAndLog(
         env.SUPABASE_URL,
         env.SUPABASE_SERVICE_ROLE_KEY
       );
+
+      // THIS IS A TEMPORARY SHIM UNTIL WE BACKFILL AND MIGRATE EVERYONE TO USING HELICONE KEYS
       if (requestSettings.helicone_api_key) {
         const { data: heliconeUserId, error: userIdError } =
-          await getHeliconeUserId(dbClient, requestSettings.helicone_api_key);
+          await getHeliconeApiKeyRow(
+            dbClient,
+            requestSettings.helicone_api_key
+          );
         if (userIdError !== null) {
           console.error(userIdError);
         } else {
