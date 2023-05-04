@@ -56,14 +56,11 @@ const colors = [
 ];
 
 const OrgsPage = (props: OrgsPageProps) => {
-  const [orgName, setOrgName] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(colors[1]);
 
   const user = useUser();
-  const supabaseClient = useSupabaseClient<Database>();
+
   const orgContext = useOrg();
-  const { setNotification } = useNotification();
 
   const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
   const otherOrgs = orgContext?.allOrgs?.filter((d) => d.owner !== user?.id);
@@ -115,7 +112,7 @@ const OrgsPage = (props: OrgsPageProps) => {
         )}
       </div>
       <ThemedModal open={createOpen} setOpen={setCreateOpen}>
-        <CreateOrgForm setCreateOpen={setCreateOpen} />
+        <CreateOrgForm onCancelHandler={setCreateOpen} />
       </ThemedModal>
     </>
   );

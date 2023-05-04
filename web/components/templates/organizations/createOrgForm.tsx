@@ -13,45 +13,41 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 
-interface CreateOrgFormProps {
-  setCreateOpen: (open: boolean) => void;
-}
-
 export const ORGANIZATION_COLORS = [
   {
     name: "gray",
-    bgColor: "bg-gray-500",
-    textColor: "text-gray-700",
+    bgColor: "bg-gray-200",
+    textColor: "text-gray-800",
     selectedColor: "ring-gray-500",
   },
   {
     name: "red",
-    bgColor: "bg-red-500",
-    textColor: "text-red-700",
+    bgColor: "bg-red-300",
+    textColor: "text-red-800",
     selectedColor: "ring-red-500",
   },
   {
     name: "yellow",
-    bgColor: "bg-yellow-500",
-    textColor: "text-yellow-700",
+    bgColor: "bg-yellow-200",
+    textColor: "text-yellow-800",
     selectedColor: "ring-yellow-500",
   },
   {
     name: "green",
-    bgColor: "bg-green-500",
-    textColor: "text-green-700",
+    bgColor: "bg-green-300",
+    textColor: "text-green-800",
     selectedColor: "ring-green-500",
   },
   {
     name: "blue",
-    bgColor: "bg-blue-500",
-    textColor: "text-blue-700",
+    bgColor: "bg-blue-300",
+    textColor: "text-blue-800",
     selectedColor: "ring-blue-500",
   },
   {
     name: "purple",
-    bgColor: "bg-purple-500",
-    textColor: "text-purple-700",
+    bgColor: "bg-purple-300",
+    textColor: "text-purple-800",
     selectedColor: "ring-purple-500",
   },
 ];
@@ -89,11 +85,31 @@ export const ORGANIZATION_ICONS: OrgIconType[] = [
   },
 ];
 
+interface CreateOrgFormProps {
+  onCancelHandler: (open: boolean) => void;
+  initialValues?: {
+    name: string;
+    color: string | null;
+    icon: string | null;
+  };
+}
+
 const CreateOrgForm = (props: CreateOrgFormProps) => {
-  const { setCreateOpen } = props;
-  const [orgName, setOrgName] = useState("");
-  const [selectedColor, setSelectedColor] = useState(ORGANIZATION_COLORS[0]);
-  const [selectedIcon, setSelectedIcon] = useState(ORGANIZATION_ICONS[0]);
+  const { onCancelHandler, initialValues } = props;
+
+  const [orgName, setOrgName] = useState(initialValues?.name || "");
+  const [selectedColor, setSelectedColor] = useState(
+    initialValues?.color
+      ? ORGANIZATION_COLORS.find((c) => c.name === initialValues.color) ||
+          ORGANIZATION_COLORS[0]
+      : ORGANIZATION_COLORS[0]
+  );
+  const [selectedIcon, setSelectedIcon] = useState(
+    initialValues?.icon
+      ? ORGANIZATION_ICONS.find((i) => i.name === initialValues.icon) ||
+          ORGANIZATION_ICONS[0]
+      : ORGANIZATION_ICONS[0]
+  );
 
   const user = useUser();
   const orgContext = useOrg();
@@ -102,7 +118,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
 
   return (
     <div className="flex flex-col gap-4 w-full space-y-4">
-      <p className="font-semibold text-lg">Create New Organization</p>
+      {initialValues ? (
+        <p className="font-semibold text-lg">Update Organization</p>
+      ) : (
+        <p className="font-semibold text-lg">Create New Organization</p>
+      )}
       <div className="space-y-1.5 text-sm w-[400px]">
         <label
           htmlFor="org-name"
@@ -181,16 +201,19 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         </div>
       </RadioGroup>
       <div className="w-full flex justify-end gap-4 mt-4">
-        <button
-          onClick={() => {
-            setCreateOpen(false);
-          }}
-          className={clsx(
-            "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-          )}
-        >
-          Cancel
-        </button>
+        {!initialValues && (
+          <button
+            onClick={() => {
+              onCancelHandler(false);
+            }}
+            className={clsx(
+              "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+            )}
+          >
+            Cancel
+          </button>
+        )}
+
         <button
           onClick={async () => {
             if (!orgName || orgName === "") {
@@ -213,14 +236,14 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             } else {
               setNotification("Organization created successfully", "success");
             }
-            setCreateOpen(false);
+            onCancelHandler(false);
             orgContext?.refetchOrgs();
           }}
           className={clsx(
             "relative inline-flex items-center rounded-md hover:bg-sky-400 bg-sky-500 px-4 py-2 text-sm font-medium text-white"
           )}
         >
-          Create
+          {initialValues ? "Update" : "Create"}
         </button>
       </div>
     </div>

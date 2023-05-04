@@ -84,6 +84,7 @@ const useOrgsContextManager = () => {
       setOrg(orgs[0]);
     }
   }, [orgs]);
+
   let orgContextValue: OrgContextValue | null = null;
   if (org && orgs) {
     orgContextValue = {
