@@ -266,6 +266,21 @@ interface ResponseCopyV1 {
   user_id: Nullable<string>;
 }
 
+interface ResponseCopyV2 {
+  response_id: Nullable<string>;
+  response_created_at: Nullable<string>;
+  latency: Nullable<number>;
+  status: Nullable<number>;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  model: Nullable<string>;
+  request_id: string;
+  request_created_at: string;
+  auth_hash: string;
+  user_id: Nullable<string>;
+  organization_id: string;
+}
+
 interface PropertiesCopyV1 {
   id: number;
   created_at: Nullable<string>;
@@ -280,5 +295,6 @@ export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
     properties_copy_v1: PropertiesCopyV1;
+    response_copy_v2: ResponseCopyV2;
   };
 }
