@@ -16,9 +16,19 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate } from "../../shared/utils/utils";
+import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "./createOrgForm";
 
 interface OrgCardProps {
-  org: Database["public"]["Tables"]["organization"]["Row"];
+  org: {
+    created_at: string | null;
+    id: string;
+    is_personal: boolean;
+    name: string;
+    owner: string;
+    soft_delete: boolean;
+    color: string;
+    icon: string;
+  };
   refetchOrgs: () => void;
   isOwner?: boolean;
 }
@@ -46,21 +56,33 @@ const OrgCard = (props: OrgCardProps) => {
 
   const isLoading = isOrgOwnerLoading || isOrgMembersLoading;
 
+  const icon = ORGANIZATION_ICONS.find((icon) => icon.name === org.icon);
+  const color = ORGANIZATION_COLORS.find((color) => color.name === org.color);
+
   return (
     <>
       <li
         key={org.id}
-        className="overflow-hidden border border-gray-300 rounded-xl w-full max-w-xs"
+        className="overflow-hidden border border-gray-300 rounded-xl w-full"
       >
-        <div className="bg-gray-200 p-4 flex flex-row justify-between">
+        <div
+          className={clsx(
+            color ? color.bgColor : "bg-gray-200",
+            "p-4 flex flex-row justify-between"
+          )}
+        >
           <div className="flex flex-row space-x-4 items-center">
-            {org.is_personal ? (
-              <BuildingStorefrontIcon className="h-8 w-8 bg-white p-1.5 rounded-md" />
+            {icon ? (
+              <icon.icon
+                className={clsx(
+                  color ? color.textColor : "text-gray-200",
+                  "h-8 w-8 bg-white p-1.5 rounded-md"
+                )}
+              />
             ) : (
-              <BuildingOffice2Icon className="h-8 w-8 bg-white p-1.5 rounded-md" />
+              <BuildingOfficeIcon className="h-8 w-8 bg-white p-1.5 rounded-md" />
             )}
-
-            <p className="text-md font-semibold flex-1 overflow-ellipsis truncate w-[160px]">
+            <p className="text-md font-semibold flex-1 overflow-ellipsis truncate w-[150px]">
               {org.name}
             </p>
           </div>

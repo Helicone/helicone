@@ -1,4 +1,4 @@
-import { Tab } from "@headlessui/react";
+import { RadioGroup, Tab } from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import {
   BuildingOfficeIcon,
@@ -34,11 +34,31 @@ import { useGetOrgs } from "../../../services/hooks/organizations";
 import { getUSDate } from "../../shared/utils/utils";
 import OrgCard from "./orgCard";
 import { useOrg } from "../../shared/layout/organizationContext";
+import CreateOrgForm from "./createOrgForm";
 
 interface OrgsPageProps {}
 
+const colors = [
+  {
+    name: "gray",
+    bgColor: "bg-gray-500",
+    selectedColor: "ring-gray-500",
+  },
+  { name: "red", bgColor: "bg-red-500", selectedColor: "ring-red-500" },
+
+  { name: "green", bgColor: "bg-green-500", selectedColor: "ring-green-500" },
+  { name: "blue", bgColor: "bg-blue-500", selectedColor: "ring-blue-500" },
+  {
+    name: "purple",
+    bgColor: "bg-purple-500",
+    selectedColor: "ring-purple-500",
+  },
+];
+
 const OrgsPage = (props: OrgsPageProps) => {
   const [orgName, setOrgName] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(colors[1]);
 
   const user = useUser();
   const supabaseClient = useSupabaseClient<Database>();
@@ -48,83 +68,56 @@ const OrgsPage = (props: OrgsPageProps) => {
   const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
   const otherOrgs = orgContext?.allOrgs?.filter((d) => d.owner !== user?.id);
 
+  console.log(orgContext?.allOrgs);
+
   return (
-    <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
-      <div className="flex flex-row items-end gap-5">
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="api-key">Organization Name</label>
-          <input
-            type="text"
-            name="api-key"
-            id="api-key"
-            className={clsx(
-              "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+    <>
+      <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
+        <div className=" flex flex-col space-y-4">
+          <div className="flex flex-row justify-between items-center">
+            <p className="text-md font-semibold">Your Organizations</p>
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            >
+              Create New Organization
+            </button>
+          </div>
+
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {orgContext ? (
+              yourOrgs?.map((org) => (
+                <OrgCard
+                  org={org}
+                  key={org.id}
+                  refetchOrgs={orgContext.refetchOrgs}
+                  isOwner
+                />
+              ))
+            ) : (
+              <div className="h-40 w-full max-w-xs bg-gray-300 rounded-xl animate-pulse" />
             )}
-            placeholder="Your shiny org name"
-            onChange={(e) => setOrgName(e.target.value)}
-            value={orgName}
-          />
-        </div>
-        <button
-          onClick={async () => {
-            if (!orgName || orgName === "") {
-              setNotification("Please provide an organization name", "error");
-              return;
-            }
-            const { data, error } = await supabaseClient
-              .from("organization")
-              .insert([
-                {
-                  name: orgName,
-                  owner: user?.id!,
-                },
-              ])
-              .select("*");
-            if (error) {
-              setNotification("Failed to create organization", "error");
-            } else {
-              setNotification("Organization created successfully", "success");
-            }
-            console.log(1);
-            orgContext?.refetchOrgs();
-          }}
-          className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-        >
-          Create New Organization
-        </button>
-      </div>
-      <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
-        <p className="text-md font-semibold">Your Organizations</p>
-        <ul className="flex flex-wrap gap-4">
-          {orgContext ? (
-            yourOrgs?.map((org) => (
-              <OrgCard
-                org={org}
-                key={org.id}
-                refetchOrgs={orgContext.refetchOrgs}
-                isOwner
-              />
-            ))
-          ) : (
-            <div className="h-40 w-full max-w-xs bg-gray-300 rounded-xl animate-pulse" />
-          )}
-        </ul>
-      </div>
-      {orgContext?.allOrgs && (
-        <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
-          <p className="text-md font-semibold">Other Organizations</p>
-          <ul className="flex flex-wrap gap-4">
-            {otherOrgs?.map((org) => (
-              <OrgCard
-                org={org}
-                key={org.id}
-                refetchOrgs={orgContext.refetchOrgs}
-              />
-            ))}
           </ul>
         </div>
-      )}
-    </div>
+        {orgContext?.allOrgs && otherOrgs && otherOrgs.length > 0 && (
+          <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
+            <p className="text-md font-semibold">Other Organizations</p>
+            <ul className="flex flex-wrap gap-4">
+              {otherOrgs?.map((org) => (
+                <OrgCard
+                  org={org}
+                  key={org.id}
+                  refetchOrgs={orgContext.refetchOrgs}
+                />
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      <ThemedModal open={createOpen} setOpen={setCreateOpen}>
+        <CreateOrgForm setCreateOpen={setCreateOpen} />
+      </ThemedModal>
+    </>
   );
 };
 
