@@ -237,6 +237,7 @@ export async function dbInsertClickhouse<
       // and HTTP headers were sent to the client.
       // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
       clickhouse_settings: {
+        async_insert: 1,
         wait_end_of_query: 1,
       },
     });
