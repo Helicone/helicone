@@ -5,22 +5,14 @@ import {
   useGetOrgMembers,
   useGetOrgOwner,
 } from "../../../services/hooks/organizations";
+import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import CreateOrgForm from "../organizations/createOrgForm";
 
 interface OrgIdPageProps {
-  org: {
-    created_at: string | null;
-    id: string;
-    is_personal: boolean;
-    name: string;
-    owner: string;
-    soft_delete: boolean;
-    color: string | null;
-    icon: string | null;
-  };
+  org: Database["public"]["Tables"]["organization"]["Row"];
 }
 
 const OrgIdPage = (props: OrgIdPageProps) => {
@@ -78,7 +70,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
           </div>
         </div>
         {isOwner && !org.is_personal && (
-          <div className="py-16 flex flex-col">
+          <div className="py-28 flex flex-col">
             <div className="flex flex-row">
               <button
                 type="button"

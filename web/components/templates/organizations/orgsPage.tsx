@@ -38,23 +38,6 @@ import CreateOrgForm from "./createOrgForm";
 
 interface OrgsPageProps {}
 
-const colors = [
-  {
-    name: "gray",
-    bgColor: "bg-gray-500",
-    selectedColor: "ring-gray-500",
-  },
-  { name: "red", bgColor: "bg-red-500", selectedColor: "ring-red-500" },
-
-  { name: "green", bgColor: "bg-green-500", selectedColor: "ring-green-500" },
-  { name: "blue", bgColor: "bg-blue-500", selectedColor: "ring-blue-500" },
-  {
-    name: "purple",
-    bgColor: "bg-purple-500",
-    selectedColor: "ring-purple-500",
-  },
-];
-
 const OrgsPage = (props: OrgsPageProps) => {
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -64,8 +47,6 @@ const OrgsPage = (props: OrgsPageProps) => {
 
   const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
   const otherOrgs = orgContext?.allOrgs?.filter((d) => d.owner !== user?.id);
-
-  console.log(orgContext?.allOrgs);
 
   return (
     <>

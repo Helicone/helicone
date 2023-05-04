@@ -9,6 +9,7 @@ import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
 import OrgIdPage from "../../components/templates/organizationId/orgIdPage";
 import { useGetOrgs } from "../../services/hooks/organizations";
+import { Database } from "../../supabase/database.types";
 
 interface OrganizationIdProps {
   user: User;
@@ -21,18 +22,9 @@ const OrganizationId = (props: OrganizationIdProps) => {
 
   const { data, isLoading } = useGetOrgs();
 
-  const organization = data?.find((org) => org.id === orgId) as {
-    created_at: string | null;
-    id: string;
-    is_personal: boolean;
-    name: string;
-    owner: string;
-    soft_delete: boolean;
-    color: string | null;
-    icon: string | null;
-  };
+  const organization = data?.find((org) => org.id === orgId);
 
-  if (isLoading) {
+  if (isLoading || !organization) {
     return (
       <MetaData title="Organizations">
         <AuthLayout user={user}>

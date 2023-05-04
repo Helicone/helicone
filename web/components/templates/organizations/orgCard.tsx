@@ -20,16 +20,7 @@ import { getUSDate } from "../../shared/utils/utils";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "./createOrgForm";
 
 interface OrgCardProps {
-  org: {
-    created_at: string | null;
-    id: string;
-    is_personal: boolean;
-    name: string;
-    owner: string;
-    soft_delete: boolean;
-    color: string | null;
-    icon: string | null;
-  };
+  org: Database["public"]["Tables"]["organization"]["Row"];
   refetchOrgs: () => void;
   isOwner?: boolean;
 }
