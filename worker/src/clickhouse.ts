@@ -238,7 +238,7 @@ export async function dbInsertClickhouse<
       // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
       clickhouse_settings: {
         async_insert: 1,
-        wait_end_of_query: 1,
+        wait_end_of_query: 0,
       },
     });
     return { data: queryResult.query_id, error: null };
