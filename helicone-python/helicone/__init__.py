@@ -1,6 +1,8 @@
 import functools
+import uuid
 import os
 import openai
+import requests
 import warnings
 from openai.api_resources import (
     Audio,
@@ -12,10 +14,13 @@ from openai.api_resources import (
     Moderation,
 )
 
+api_key = os.environ.get("HELICONE_API_KEY", None)
+base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
+
 class Helicone:
     def __init__(self):
-        self._api_key = None
-        self._check_env_var()
+        # self._check_env_var()
+        self.openai = openai
         self.apply_helicone_auth()
 
     def _check_env_var(self):
@@ -24,21 +29,43 @@ class Helicone:
         else:
             warnings.warn("Helicone API key is not set as an environment variable.")
 
-    @property
-    def api_key(self):
-        return self._api_key
-    
-    @api_key.setter
-    def api_key(self, key: str):
-        self._api_key = key
+    def log(self, response, name, value, data_type=None):
+        helicone_id = response.get("helicone", {}).get("id")
+        if not helicone_id:
+            raise ValueError("The provided response does not have a valid Helicone ID.")
+
+        feedback_data = {
+            "helicone-id": helicone_id,
+            "name": name,
+            "value": value,
+        }
+        if data_type:
+            feedback_data["data-type"] = data_type
+
+        url = f"{base_url}/feedback"
+        print("URLLLLL", url)
+        headers = {
+            "Content-Type": "application/json",
+            "Helicone-Auth": f"Bearer {api_key}",
+        }
+
+        response = requests.post(url, headers=headers, json=feedback_data)
+        response.raise_for_status()
+        return response.json()
+
 
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            print("WRAPPER")
             headers = kwargs.get("headers", {})
 
-            if "Helicone-Auth" not in headers and self.api_key:
-                headers["Helicone-Auth"] = f"Bearer {self.api_key}"
+            if "Helicone-Auth" not in headers and api_key:
+                headers["Helicone-Auth"] = f"Bearer {api_key}"
+
+            # Generate a UUID and add it to the headers
+            helicone_request_id = str(uuid.uuid4())
+            headers["helicone-request-id"] = helicone_request_id
 
             headers.update(self._get_property_headers(kwargs.pop("properties", {})))
             headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
@@ -48,15 +75,20 @@ class Helicone:
             kwargs["headers"] = headers
 
             original_api_base = openai.api_base
-            openai.api_base = "https://oai.hconeai.com/v1"
+            openai.api_base = base_url
+            print("API BASE", openai.api_base)
             try:
                 result = func(*args, **kwargs)
             finally:
                 openai.api_base = original_api_base
 
+            # Add the "helicone" field to the response object
+            result["helicone"] = {"id": helicone_request_id}
+
             return result
 
         return wrapper
+
 
     def _get_property_headers(self, properties):
         return {f"Helicone-Property-{key}": str(value) for key, value in properties.items()}
@@ -109,8 +141,43 @@ class Helicone:
             create_method = getattr(api_resource_class, method)
             setattr(api_resource_class, "create", self._with_helicone_auth(create_method))
 
-# Initialize Helicone and apply authentication to the specified classes
-helicone_instance = Helicone()
+class HeliconeSingleton:
+    _instance = None
 
-# Expose the methods for easy user access
-api_key = helicone_instance.api_key
+    @staticmethod
+    def get_instance():
+        if HeliconeSingleton._instance is None:
+            HeliconeSingleton._instance = Helicone()
+            HeliconeSingleton._instance.apply_helicone_auth()
+        return HeliconeSingleton._instance
+    
+    def __init__(self):
+        self.get_instance().apply_helicone_auth()
+
+    @property
+    def api_key(self):
+        return self.get_instance().api_key
+
+    @api_key.setter
+    def api_key(self, key: str):
+        self.get_instance().api_key = key
+
+    @property
+    def base_url(self):
+        print("getting property base url")
+        return self.get_instance().base_url
+
+    @base_url.setter
+    def base_url(self, base_url: str):
+        print("HEY")
+        self.get_instance().base_url = base_url
+
+    def log(self, *args, **kwargs):
+        return self.get_instance().log(*args, **kwargs)
+
+# Expose a singleton instance
+helicone = HeliconeSingleton()
+
+log = helicone.log
+
+# Expose the properties at the module level
