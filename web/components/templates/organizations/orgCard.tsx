@@ -34,7 +34,7 @@ const OrgCard = (props: OrgCardProps) => {
   const supabaseClient = useSupabaseClient<Database>();
 
   const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
-    org.owner
+    org.id
   );
 
   const {

@@ -114,7 +114,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   );
 
   const user = useUser();
-  const router = useRouter();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient<Database>();
@@ -238,7 +237,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               } else {
                 setNotification("Organization updated successfully", "success");
               }
-              router.push("/organizations");
               orgContext?.refetchOrgs();
             } else {
               const { data, error } = await supabaseClient

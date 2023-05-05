@@ -80,7 +80,7 @@ const OrgsPage = (props: OrgsPageProps) => {
         {orgContext?.allOrgs && otherOrgs && otherOrgs.length > 0 && (
           <div className="border-t border-gray-200 flex flex-col space-y-4 py-4">
             <p className="text-md font-semibold">Other Organizations</p>
-            <ul className="flex flex-wrap gap-4">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {otherOrgs?.map((org) => (
                 <OrgCard
                   org={org}
@@ -93,7 +93,9 @@ const OrgsPage = (props: OrgsPageProps) => {
         )}
       </div>
       <ThemedModal open={createOpen} setOpen={setCreateOpen}>
-        <CreateOrgForm onCancelHandler={setCreateOpen} />
+        <div className="w-[400px]">
+          <CreateOrgForm onCancelHandler={setCreateOpen} />
+        </div>
       </ThemedModal>
     </>
   );

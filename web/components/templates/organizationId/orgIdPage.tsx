@@ -21,9 +21,12 @@ interface OrgIdPageProps {
 const OrgIdPage = (props: OrgIdPageProps) => {
   const { org } = props;
   const { data, isLoading, refetch } = useGetOrgMembers(org.id);
-  console.log(data);
 
   const orgContext = useOrg();
+
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    org.id
+  );
 
   const user = useUser();
   const router = useRouter();
@@ -36,16 +39,29 @@ const OrgIdPage = (props: OrgIdPageProps) => {
 
   const isOwner = org.owner === user?.id;
 
+  const members = data?.data
+    ? data?.data.map((d) => {
+        return {
+          ...d,
+          isOwner: false,
+        };
+      })
+    : [];
+
   const orgMembers = [
-    { email: user?.email, member: user?.id },
-    ...(data?.data || []),
+    {
+      email: orgOwner?.data?.at(0)?.email,
+      member: "",
+      isOwner: true,
+    },
+    ...members,
   ];
 
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-3xl space-y-8">
-        <div className="flex flex-col md:flex-row gap-8 divide-x divide-gray-300">
-          <div className="flex flex-col w-full min-w-[400px]">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col w-full min-w-[400px] border-r border-gray-300 pr-8">
             <CreateOrgForm
               initialValues={{
                 id: org.id,
@@ -65,22 +81,30 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                 Add
               </button>
             </div>
-            <ul className="divide-y divide-gray-300">
-              {isLoading ? (
-                <p>Loading...</p>
-              ) : (
-                orgMembers.map((member, index) => (
+
+            {isLoading || isOrgOwnerLoading ? (
+              <ul className="flex flex-col space-y-6">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <li
+                    key={index}
+                    className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                  ></li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="divide-y divide-gray-300">
+                {orgMembers.map((member, index) => (
                   <OrgMemberItem
                     key={index}
                     index={index}
                     orgMember={member}
                     orgId={org.id}
                     refetch={refetch}
-                    deleteable={isOwner && member.member !== user?.id}
+                    refreshOrgs={() => orgContext && orgContext?.refetchOrgs}
                   />
-                ))
-              )}
-            </ul>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
