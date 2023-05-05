@@ -87,7 +87,6 @@ class Helicone:
 
         response = requests.post(url, headers=headers, json=feedback_data)
         response.raise_for_status()
-        print("RESPONSE", response.content)
         return response.json()
 
 

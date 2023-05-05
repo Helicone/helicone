@@ -87,7 +87,6 @@ export async function addFeedback(
   env: Env,
   heliconeAuth?: string
 ): Promise<void> {
-  console.log("begin add feedback")
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
@@ -97,11 +96,8 @@ export async function addFeedback(
     throw new Error("Authentication required.");
   }
 
-  console.log("HELICONE AUTH", heliconeAuth)
   const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-  console.log("API KEY", apiKey)
   const apiKeyHash = await hash(`Bearer ${apiKey}`);
-  console.log("apiKeyHash", apiKeyHash)
 
   // Fetch the response with the matching heliconeId
   const { data: response, error: responseError } = await dbClient
@@ -150,7 +146,6 @@ export async function addFeedback(
     .eq("name", name)
     .eq("helicone_api_key_id", matchingApiKeyId)
     .single();
-  console.log("CHECKED FEEDBACK METRIC")
 
   let metricId;
   if (metricError || !metricData) {
@@ -181,7 +176,6 @@ export async function addFeedback(
 
     metricId = metricData.id;
   }
-  console.log("HI")
 
   // Prepare feedback data
   const feedbackData: {
@@ -195,7 +189,6 @@ export async function addFeedback(
     created_by: "API",
   };
 
-  console.log("DATA TYPE", dataType, value)
 
   switch (dataType) {
     case "boolean":
@@ -228,8 +221,6 @@ export async function addFeedback(
   const { error: insertError } = await dbClient
     .from("feedback")
     .insert(feedbackData);
-
-  console.log("FEEDBACK DATA", feedbackData)
 
   if (insertError) {
     console.error("Error inserting feedback:", insertError.message);
