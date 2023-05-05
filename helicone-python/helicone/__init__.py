@@ -29,6 +29,26 @@ class Helicone:
         else:
             warnings.warn("Helicone API key is not set as an environment variable.")
 
+    @property
+    def api_key(self):
+        global api_key
+        return api_key
+
+    @api_key.setter
+    def api_key(self, value):
+        global api_key
+        api_key = value
+
+    @property
+    def base_url(self):
+        global base_url
+        return base_url
+
+    @base_url.setter
+    def base_url(self, value):
+        global base_url
+        base_url = value
+
     def log(self, response, name, value, data_type=None):
         helicone_id = response.get("helicone", {}).get("id")
         if not helicone_id:
@@ -43,7 +63,7 @@ class Helicone:
             feedback_data["data-type"] = data_type
 
         url = f"{base_url}/feedback"
-        print("URLLLLL", url)
+
         headers = {
             "Content-Type": "application/json",
             "Helicone-Auth": f"Bearer {api_key}",
@@ -57,7 +77,6 @@ class Helicone:
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            print("WRAPPER")
             headers = kwargs.get("headers", {})
 
             if "Helicone-Auth" not in headers and api_key:
@@ -76,7 +95,6 @@ class Helicone:
 
             original_api_base = openai.api_base
             openai.api_base = base_url
-            print("API BASE", openai.api_base)
             try:
                 result = func(*args, **kwargs)
             finally:
@@ -141,43 +159,5 @@ class Helicone:
             create_method = getattr(api_resource_class, method)
             setattr(api_resource_class, "create", self._with_helicone_auth(create_method))
 
-class HeliconeSingleton:
-    _instance = None
-
-    @staticmethod
-    def get_instance():
-        if HeliconeSingleton._instance is None:
-            HeliconeSingleton._instance = Helicone()
-            HeliconeSingleton._instance.apply_helicone_auth()
-        return HeliconeSingleton._instance
-    
-    def __init__(self):
-        self.get_instance().apply_helicone_auth()
-
-    @property
-    def api_key(self):
-        return self.get_instance().api_key
-
-    @api_key.setter
-    def api_key(self, key: str):
-        self.get_instance().api_key = key
-
-    @property
-    def base_url(self):
-        print("getting property base url")
-        return self.get_instance().base_url
-
-    @base_url.setter
-    def base_url(self, base_url: str):
-        print("HEY")
-        self.get_instance().base_url = base_url
-
-    def log(self, *args, **kwargs):
-        return self.get_instance().log(*args, **kwargs)
-
-# Expose a singleton instance
-helicone = HeliconeSingleton()
-
+helicone = Helicone()
 log = helicone.log
-
-# Expose the properties at the module level
