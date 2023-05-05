@@ -26,10 +26,9 @@ export default async function handler(
     return;
   }
   const { id, email } = req.query;
-  console.log("id", id);
-  console.log("email", email);
 
   let { data: userId, error: userIdError } = await getUserId(email as string);
+
   if (userIdError !== null) {
     res.status(500).json({ error: userIdError, data: null });
     return;
@@ -43,13 +42,16 @@ export default async function handler(
     userId = res.data;
     userIdError = res.error;
   }
+
   if (userIdError !== null) {
     res.status(500).json({ error: userIdError, data: null });
     return;
   }
+
   const { error: insertError } = await supabaseServer
     .from("organization_member")
     .insert([{ organization: id as string, member: userId![0].id }]);
+
   if (insertError !== null) {
     console.error("Error", insertError);
     if (insertError.code === "23505") {

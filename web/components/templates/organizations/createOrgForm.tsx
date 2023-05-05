@@ -7,6 +7,7 @@ import {
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
@@ -86,8 +87,9 @@ export const ORGANIZATION_ICONS: OrgIconType[] = [
 ];
 
 interface CreateOrgFormProps {
-  onCancelHandler: (open: boolean) => void;
+  onCancelHandler?: (open: boolean) => void;
   initialValues?: {
+    id: string;
     name: string;
     color: string | null;
     icon: string | null;
@@ -112,6 +114,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   );
 
   const user = useUser();
+  const router = useRouter();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient<Database>();
@@ -123,7 +126,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
       ) : (
         <p className="font-semibold text-lg">Create New Organization</p>
       )}
-      <div className="space-y-1.5 text-sm w-[400px]">
+      <div className="space-y-1.5 text-sm">
         <label
           htmlFor="org-name"
           className="block text-sm font-medium leading-6 text-gray-900"
@@ -195,7 +198,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               <RadioGroup.Label as="span" className="sr-only">
                 {icon.name}
               </RadioGroup.Label>
-              {<icon.icon className="h-6 w-6" />}
+              {<icon.icon className="h-6 w-6 hover:cursor-pointer" />}
             </RadioGroup.Option>
           ))}
         </div>
@@ -204,7 +207,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         {!initialValues && (
           <button
             onClick={() => {
-              onCancelHandler(false);
+              onCancelHandler && onCancelHandler(false);
             }}
             className={clsx(
               "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
@@ -220,24 +223,43 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               setNotification("Please provide an organization name", "error");
               return;
             }
-            const { data, error } = await supabaseClient
-              .from("organization")
-              .insert([
-                {
+            if (initialValues) {
+              const { data, error } = await supabaseClient
+                .from("organization")
+                .update({
                   name: orgName,
-                  owner: user?.id!,
                   color: selectedColor.name,
                   icon: selectedIcon.name,
-                },
-              ])
-              .select("*");
-            if (error) {
-              setNotification("Failed to create organization", "error");
+                })
+                .eq("id", initialValues.id)
+                .select("*");
+              if (error) {
+                setNotification("Failed to update organization", "error");
+              } else {
+                setNotification("Organization updated successfully", "success");
+              }
+              router.push("/organizations");
+              orgContext?.refetchOrgs();
             } else {
-              setNotification("Organization created successfully", "success");
+              const { data, error } = await supabaseClient
+                .from("organization")
+                .insert([
+                  {
+                    name: orgName,
+                    owner: user?.id!,
+                    color: selectedColor.name,
+                    icon: selectedIcon.name,
+                  },
+                ])
+                .select("*");
+              if (error) {
+                setNotification("Failed to create organization", "error");
+              } else {
+                setNotification("Organization created successfully", "success");
+              }
+              onCancelHandler && onCancelHandler(false);
+              orgContext?.refetchOrgs();
             }
-            onCancelHandler(false);
-            orgContext?.refetchOrgs();
           }}
           className={clsx(
             "relative inline-flex items-center rounded-md hover:bg-sky-400 bg-sky-500 px-4 py-2 text-sm font-medium text-white"

@@ -51,7 +51,7 @@ const OrgsPage = (props: OrgsPageProps) => {
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
-        <div className=" flex flex-col space-y-4">
+        <div className=" flex flex-col space-y-6">
           <div className="flex flex-row justify-between items-center">
             <p className="text-md font-semibold">Your Organizations</p>
             <button

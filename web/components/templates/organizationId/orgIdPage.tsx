@@ -1,3 +1,4 @@
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -7,9 +8,11 @@ import {
 } from "../../../services/hooks/organizations";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
+import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import CreateOrgForm from "../organizations/createOrgForm";
+import OrgMemberItem from "./orgMemberItem";
 
 interface OrgIdPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -18,6 +21,9 @@ interface OrgIdPageProps {
 const OrgIdPage = (props: OrgIdPageProps) => {
   const { org } = props;
   const { data, isLoading, refetch } = useGetOrgMembers(org.id);
+  console.log(data);
+
+  const orgContext = useOrg();
 
   const user = useUser();
   const router = useRouter();
@@ -30,24 +36,27 @@ const OrgIdPage = (props: OrgIdPageProps) => {
 
   const isOwner = org.owner === user?.id;
 
+  const orgMembers = [
+    { email: user?.email, member: user?.id },
+    ...(data?.data || []),
+  ];
+
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
-        <div className="flex flex-col sm:flex-row space-x-4 sm:divide-x divide-gray-200 items-start h-[420px]">
-          <div className="flex flex-col w-[400px] h-full ">
+      <div className="py-4 flex flex-col text-gray-900 max-w-3xl space-y-8">
+        <div className="flex flex-col md:flex-row gap-8 divide-x divide-gray-300">
+          <div className="flex flex-col w-full min-w-[400px]">
             <CreateOrgForm
-              onCancelHandler={() => {
-                console.log("Clear changes");
-              }}
               initialValues={{
+                id: org.id,
                 name: org.name,
                 color: org.color || "",
                 icon: org.icon || "",
               }}
             />
           </div>
-          <div className="flex flex-col flex-1 w-full h-full pl-4 space-y-4">
-            <div className="flex flex-row justify-between items-center w-full">
+          <div className="flex flex-col h-full pl-4 space-y-4 w-full max-w-screen md:max-w-[300px]">
+            <div className="flex flex-row justify-between items-center">
               <p className="text-lg font-semibold">Members</p>
               <button
                 onClick={() => setAddOpen(true)}
@@ -56,19 +65,25 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                 Add
               </button>
             </div>
-            <ul className="divide-y divide-gray-300 w-full max-w-[250px]">
+            <ul className="divide-y divide-gray-300">
               {isLoading ? (
                 <p>Loading...</p>
               ) : (
-                data?.data?.map((member, index) => (
-                  <li key={index} className="py-2 truncate overflow-ellipsis">
-                    {member.email}
-                  </li>
+                orgMembers.map((member, index) => (
+                  <OrgMemberItem
+                    key={index}
+                    index={index}
+                    orgMember={member}
+                    orgId={org.id}
+                    refetch={refetch}
+                    deleteable={isOwner && member.member !== user?.id}
+                  />
                 ))
               )}
             </ul>
           </div>
         </div>
+
         {isOwner && !org.is_personal && (
           <div className="py-28 flex flex-col">
             <div className="flex flex-row">
@@ -176,9 +191,10 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                   setNotification("Error deleting organization", "error");
                   setDeleteOpen(false);
                 } else {
-                  setNotification("Deleted. Redirecting...", "success");
+                  orgContext?.refetchOrgs();
                   setDeleteOpen(false);
                   router.push("/organizations");
+                  setNotification("Delete organization", "success");
                 }
               }}
               className={clsx(

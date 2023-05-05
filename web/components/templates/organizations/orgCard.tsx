@@ -2,6 +2,7 @@ import {
   BuildingOffice2Icon,
   BuildingOfficeIcon,
   BuildingStorefrontIcon,
+  EllipsisVerticalIcon,
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
@@ -59,7 +60,7 @@ const OrgCard = (props: OrgCardProps) => {
           <div
             className={clsx(
               color ? color.bgColor : "bg-gray-200",
-              "p-4 flex flex-row justify-between"
+              "p-4 flex flex-row justify-between items-center"
             )}
           >
             <div className="flex flex-row space-x-4 items-center">
@@ -73,10 +74,11 @@ const OrgCard = (props: OrgCardProps) => {
               ) : (
                 <BuildingOfficeIcon className="h-8 w-8 bg-white p-1.5 rounded-md" />
               )}
-              <p className="text-md font-semibold flex-1 overflow-ellipsis truncate w-[150px]">
+              <p className="text-md font-semibold flex-1 overflow-ellipsis truncate w-[200px]">
                 {org.name}
               </p>
             </div>
+            <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
           </div>
           <div className="bg-white px-4 flex flex-col divide-y divide-gray-200 text-sm">
             {isOwner ? (

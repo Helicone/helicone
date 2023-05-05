@@ -52,7 +52,8 @@ const useGetOrgs = () => {
       }
       const { data, error } = await supabaseClient
         .from("organization")
-        .select(`*`);
+        .select(`*`)
+        .eq("soft_delete", false);
       if (error) {
         return [];
       }
