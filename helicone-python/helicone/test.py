@@ -78,15 +78,18 @@ def hash(key: str) -> str:
 
 
 def fetch_feedback(helicone_id):
-    api_key_hash = hash(os.getenv("HELICONE_API_KEY_LOCAL"))
+    api_key_hash = hash(f'Bearer {os.getenv("HELICONE_API_KEY_LOCAL")}')
+    print("API KEY HASH", api_key_hash)
 
     # Fetch the response with the corresponding helicone_id
     response_query = supabase.table("response").select("id, request").eq("request", helicone_id)
-    response_data, _ = response_query.single().execute()
+    response_result = response_query.single().execute()
+    response_data = response_result["data"]
 
     # Fetch the request with the corresponding response.request value
     request_query = supabase.table("request").select("id, helicone_api_keys (id, api_key_hash)").eq("id", response_data["request"])
-    request_data, _ = request_query.single().execute()
+    request_result = request_query.single().execute()
+    request_data = request_result["data"]
 
     matching_api_key_hash = request_data["helicone_api_keys"]["api_key_hash"]
     matching_api_key_id = request_data["helicone_api_keys"]["id"]
@@ -96,8 +99,11 @@ def fetch_feedback(helicone_id):
         raise ValueError("Not authorized to fetch feedback.")
 
     # Fetch feedback_metrics for the given api_key_id
-    metric_query = supabase.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", matching_api_key_id)
-    metric_data, _ = metric_query.execute()
+    print("MATCHING API KEY ID", matching_api_key_id)
+    metric_query = supabase.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", str(matching_api_key_id))
+    metric_result = metric_query.execute()
+    metric_data = metric_result["data"]
+    print("DONE!")
 
     # Fetch feedback for each feedback_metric and the response
     feedback_data = []
@@ -105,18 +111,22 @@ def fetch_feedback(helicone_id):
         feedback_query = (
             supabase.table("feedback")
             .select("created_by, boolean_value, float_value, string_value, categorical_value")
-            .eq("response_id", response_data["id"])
-            .eq("feedback_metric_id", metric["id"])
+            .eq("response_id", str(response_data["id"]))
+            .eq("feedback_metric_id", str(metric["id"]))
         )
-        feedback, _ = feedback_query.execute()
+        feedback_result = feedback_query.execute()
+        feedback = feedback_result["data"]
+
         feedback_data.extend(feedback)
 
-    return feedback_data
+    return feedback_data, metric_data
+
 
 
 def test_log_feedback():
-    helicone.base_url("http://127.0.0.1:8787/v1")
-    helicone.api_key(os.getenv("HELICONE_API_KEY_LOCAL"))
+    import time
+    helicone.base_url = "http://127.0.0.1:8787/v1"
+    helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
     prompt = "Integration test for logging feedback"
 
     # Generate a completion
@@ -125,16 +135,20 @@ def test_log_feedback():
         prompt=prompt,
         max_tokens=10,
     )
+    # time.sleep(2)
 
     # Log feedback using the new log function
-    helicone_id = response['helicone']['id']
-    log(response, name="score", value="100", data_type="bool")
+    log(response, "score", True, data_type="boolean")
 
-    feedback_data = fetch_feedback(helicone_id)
-    print("DATA", feedback_data)
+    helicone_id = response['helicone']['id']
+    feedback_data, metric_data = fetch_feedback(helicone_id)
 
     assert len(feedback_data) == 1
-    assert feedback_data[0]["helicone_id"] == helicone_id
-    assert feedback_data[0]["name"] == "score"
-    assert feedback_data[0]["value"] == "100"
-    assert feedback_data[0]["data_type"] == "bool"
+    assert feedback_data[0]["boolean_value"] is True
+    assert feedback_data[0]["float_value"] is None
+    assert feedback_data[0]["string_value"] is None
+    assert feedback_data[0]["categorical_value"] is None
+
+    assert len(metric_data) == 1
+    assert metric_data[0]["name"] == "score"
+    assert metric_data[0]["data_type"] == "boolean"

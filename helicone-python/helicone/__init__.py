@@ -17,6 +17,22 @@ from openai.api_resources import (
 api_key = os.environ.get("HELICONE_API_KEY", None)
 base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
 
+def normalize_data_type(data_type):
+    if isinstance(data_type, str):
+        data_type = data_type.lower()
+
+    if data_type in (str, "str", "string"):
+        return "string"
+    elif data_type in (bool, "bool", "boolean"):
+        return "boolean"
+    elif data_type in (float, int, "float", "int", "numerical"):
+        return "numerical"
+    elif data_type in (object, "object", "categorical"):
+        return "categorical"
+    else:
+        raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+
+
 class Helicone:
     def __init__(self):
         # self._check_env_var()
@@ -60,7 +76,7 @@ class Helicone:
             "value": value,
         }
         if data_type:
-            feedback_data["data-type"] = data_type
+            feedback_data["data-type"] = normalize_data_type(data_type)
 
         url = f"{base_url}/feedback"
 
@@ -71,6 +87,7 @@ class Helicone:
 
         response = requests.post(url, headers=headers, json=feedback_data)
         response.raise_for_status()
+        print("RESPONSE", response.content)
         return response.json()
 
 
