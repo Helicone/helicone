@@ -105,7 +105,9 @@ export interface Database {
       }
       organization: {
         Row: {
+          color: string | null
           created_at: string | null
+          icon: string | null
           id: string
           is_personal: boolean
           name: string
@@ -113,7 +115,9 @@ export interface Database {
           soft_delete: boolean
         }
         Insert: {
+          color?: string | null
           created_at?: string | null
+          icon?: string | null
           id?: string
           is_personal?: boolean
           name: string
@@ -121,7 +125,9 @@ export interface Database {
           soft_delete?: boolean
         }
         Update: {
+          color?: string | null
           created_at?: string | null
+          icon?: string | null
           id?: string
           is_personal?: boolean
           name?: string
@@ -417,13 +423,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }

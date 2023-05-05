@@ -59,25 +59,25 @@ const AuthLayout = (props: AuthLayoutProps) => {
       name: "Dashboard",
       href: "/dashboard",
       icon: HomeIcon,
-      current: pathname === "/dashboard",
+      current: pathname.includes("/dashboard"),
     },
     {
       name: "Requests",
       href: "/requests",
       icon: TableCellsIcon,
-      current: pathname === "/requests",
+      current: pathname.includes("/requests"),
     },
     {
       name: "Users",
       href: "/users",
       icon: UsersIcon,
-      current: pathname === "/users",
+      current: pathname.includes("/users"),
     },
     {
       name: "Models",
       href: "/models",
       icon: CubeTransparentIcon,
-      current: pathname === "/models",
+      current: pathname.includes("/models"),
     },
   ];
 
@@ -86,19 +86,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       name: "Usage",
       href: "/usage",
       icon: BeakerIcon,
-      current: pathname === "/usage",
-    },
-    {
-      name: "Keys",
-      href: "/keys",
-      icon: KeyIcon,
-      current: pathname === "/keys",
+      current: pathname.includes("/usage"),
     },
     {
       name: "Organizations",
       href: "/organizations",
       icon: BuildingOfficeIcon,
-      current: pathname === "/organizations",
+      current: pathname.includes("/organizations"),
+    },
+    {
+      name: "Keys",
+      href: "/keys",
+      icon: KeyIcon,
+      current: pathname.includes("/keys"),
     },
   ];
 

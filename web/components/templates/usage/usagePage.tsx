@@ -126,7 +126,13 @@ const UsagePage = (props: UsagePageProps) => {
   };
 
   const renderInfo = () => {
-    if (userSettings.tier === "basic_flex") {
+    if (!userSettings) {
+      return (
+        <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
+          <p>Had an issue getting your user settings</p>
+        </div>
+      );
+    } else if (userSettings.tier === "basic_flex") {
       return (
         <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
           <div className="flex flex-row gap-2 w-full h-4">
@@ -211,7 +217,9 @@ const UsagePage = (props: UsagePageProps) => {
             Your Plan
           </dt>
           <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-            {isLoading ? "Loading..." : capitalizeHelper(userSettings.tier)}
+            {isLoading
+              ? "Loading..."
+              : capitalizeHelper(userSettings?.tier || "")}
           </dd>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">

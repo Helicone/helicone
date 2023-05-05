@@ -4,21 +4,21 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 
 import { GetServerSidePropsContext } from "next";
-import AuthHeader from "../components/shared/authHeader";
-import AuthLayout from "../components/shared/layout/authLayout";
-import MetaData from "../components/shared/metaData";
-import KeyPage from "../components/templates/keys/keyPage";
-import OrgsPage from "../components/templates/organizations/orgsPage";
+import AuthHeader from "../../components/shared/authHeader";
+import AuthLayout from "../../components/shared/layout/authLayout";
+import MetaData from "../../components/shared/metaData";
+import KeyPage from "../../components/templates/keys/keyPage";
+import OrgsPage from "../../components/templates/organizations/orgsPage";
 
-interface KeysProps {
+interface OrgProps {
   user: User;
 }
 
-const Keys = (props: KeysProps) => {
+const Org = (props: OrgProps) => {
   const { user } = props;
 
   return (
-    <MetaData title="Keys">
+    <MetaData title="Organizations">
       <AuthLayout user={user}>
         <AuthHeader title="Organizations" />
         <OrgsPage />
@@ -27,7 +27,7 @@ const Keys = (props: KeysProps) => {
   );
 };
 
-export default Keys;
+export default Org;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client

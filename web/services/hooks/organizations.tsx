@@ -52,7 +52,8 @@ const useGetOrgs = () => {
       }
       const { data, error } = await supabaseClient
         .from("organization")
-        .select(`*`);
+        .select(`*`)
+        .eq("soft_delete", false);
       if (error) {
         return [];
       }
@@ -84,6 +85,7 @@ const useOrgsContextManager = () => {
       setOrg(orgs[0]);
     }
   }, [orgs]);
+
   let orgContextValue: OrgContextValue | null = null;
   if (org && orgs) {
     orgContextValue = {
