@@ -1,9 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getRequests, HeliconeRequest } from "../../../lib/api/request/request";
+import { HeliconeRequest, getRequests } from "../../../lib/api/request/request";
 
 import { Result } from "../../../lib/result";
+import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 
@@ -11,7 +11,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<HeliconeRequest[], string>>
 ) {
-  const client = createServerSupabaseClient({ req, res });
+  const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });

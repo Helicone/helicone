@@ -1,7 +1,7 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { Result } from "../lib/result";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { stripeServer } from "./stripeServer";
 
 export async function getStripeCustomer(
@@ -32,7 +32,7 @@ export async function getStripeCustomerFromNext(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<Result<Stripe.Customer, string>> {
-  const supabase = createServerSupabaseClient({ req, res });
+  const supabase = new SupabaseServerWrapper({ req, res }).getClient();
   const email = (await supabase.auth.getUser())?.data.user?.email;
   if (!email) {
     return { data: null, error: "Unauthorized" };
