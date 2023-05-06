@@ -1,0 +1,10 @@
+
+FROM ubuntu:20.04
+
+RUN apt update -y
+RUN apt install curl git -y
+
+WORKDIR /app
+RUN git clone https://github.com/Helicone/helicone.git
+
+CMD for file in /app/helicone/clickhouse/migrations/*; do cat "$file" | curl ${CLICKHOUSE_HOST} --data-binary @-; done

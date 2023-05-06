@@ -1,5 +1,5 @@
 
-CREATE TABLE default.properties_copy_v1
+CREATE TABLE IF NOT EXISTS default.properties_copy_v1
 (
    `id` Int64,
    `created_at` DateTime64,

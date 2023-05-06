@@ -1,52 +1,28 @@
-# Local Development
+# Running locally
 
-## Initial requirements
-You need to have installed Supabase (https://supabase.com/docs/guides/cli)
-
-You need to create the .env file that docker-compose will use.
-It must have the following environment variables:
-    
-    - DATABASE_URL
-    - SUPABASE_URL
-    - SUPABASE_ANON_KEY
-    - SUPABASE_SERVICE_ROLE_KEY
-
-
-NOTE: You must change all instances of "localhost" to "host.docker.internal" for the docker container to communicate with ports on your host system.
-
-
-## Getting Started
-First, create all helicone images
-```bash
-make images
+```
+cp .env.example .env
+docker compose up
 ```
 
-Then, run the local supabase development stack:
+Default URLs:
 
-```bash
-supabase start
+- Helicone Webpage: localhost:3000
+- Helicone Worker: localhost:8787
+
+# Maintenance
+
+### Helicone container builds
+
+```
+docker build --platform linux/amd64 -t helicone/supabase-migration-runner -f dockerfiles/dockerfile_migration_runner .
+docker build -t helicone/worker -f dockerfiles/dockerfile_worker .
+docker build -t helicone/web -f dockerfiles/dockerfile_web .
+docker build -t helicone/clickhouse-migration-runner -f dockerfiles/dockerfile_clickhouse_migration_runner . --no-cache
 ```
 
-This will initialize the database for your local environment. After completion, the terminal will provide the necessary environment variables above:
+### Background
 
-![Supabase Output Example](https://github.com/Helicone/helicone/blob/main/web/public/assets/supabase-example.png)
+This folder is forked from [supabase](https://github.com/supabase/supabase/tree/master/docker)'s docker
 
-If you would like to hook into your own databasem, please checkout the [Supabase documentation](https://supabase.com/docs/guides/self-hosting/docker#using-an-external-database)
-
-
-Finally, fill in an .env file in this directory:
-
-```bash
-DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
-SUPABASE_URL="http://localhost:54321"
-SUPABASE_ANON_KEY="ThisIsAnExampleSupabaseAnonKey.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-SUPABASE_SERVICE_ROLE_KEY="ThisIsAnExampleSupabaseServiceRoleKey.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
-```
-
-## Running
-```bash
-docker-compose --env-file=.env up
-```
-
-The frontend will be open on http://localhost:3001
-The worker (simulating oai.hconeai.com) will be available on http://localhost:8787
+Here is a helpful guide for getting started: [here](https://supabase.com/docs/guides/hosting/docker)
