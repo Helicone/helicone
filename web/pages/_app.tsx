@@ -1,23 +1,16 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Analytics } from "@vercel/analytics/react";
 import { AppProps } from "next/app";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Notification from "../components/shared/notification/Notification";
+import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "../styles/globals.css";
 import "../styles/index.css";
-import { Analytics } from "@vercel/analytics/react";
-import { NotificationProvider } from "../components/shared/notification/NotificationContext";
-import Notification from "../components/shared/notification/Notification";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import posthog from "posthog-js";
-import {
-  useGetOrgs,
-  useOrgsContextManager,
-} from "../services/hooks/organizations";
-import OrgContext, {
-  OrgContextProvider,
-  OrgContextValue,
-} from "../components/shared/layout/organizationContext";
+import { OrgContextProvider } from "../components/shared/layout/organizationContext";
 
 if (
   typeof window !== "undefined" &&

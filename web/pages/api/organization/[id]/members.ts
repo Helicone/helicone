@@ -1,9 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Result } from "../../../../lib/result";
-import { supabaseServer } from "../../../../lib/supabaseServer";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
+import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export async function getMembers(orgId: String, userId: string) {
   const query = `
@@ -32,7 +30,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Members>
 ) {
-  const client = createServerSupabaseClient({ req, res });
+  const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });

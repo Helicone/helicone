@@ -1,10 +1,9 @@
-import { Pool } from "pg";
-import Papa, { unparse } from "papaparse";
 import { NextApiRequest, NextApiResponse } from "next";
+import Papa from "papaparse";
 import { getRequests } from "../../../../lib/api/request/request";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 import { SortLeafRequest } from "../../../../services/lib/sorts/requests/sorts";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 interface FlatObject {
   [key: string]: string | number | boolean | null;
@@ -14,7 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const client = createServerSupabaseClient({ req, res });
+  const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });

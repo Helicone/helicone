@@ -1,17 +1,8 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import {
-  GetServerSidePropsContext,
-  PreviewData,
-  NextApiRequest,
-  NextApiResponse,
-} from "next";
-import { ParsedUrlQuery } from "querystring";
-import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useEffect, useState } from "react";
-import AuthenticationForm from "../components/shared/AuthenticationForm";
-import { redirectIfLoggedIn, SSRContext } from "../lib/redirectIdLoggedIn";
-import { redirectIfLoggedOut } from "../lib/redirectIdLoggedOut";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import AuthenticationForm from "../components/shared/AuthenticationForm";
+import { SSRContext, SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 const Login = () => {
   const supabaseClient = useSupabaseClient();
@@ -69,8 +60,8 @@ const Login = () => {
   }
 };
 
-export const getServerSideProps = async (ctx: SSRContext) => {
-  const supabase = createServerSupabaseClient(ctx);
+export const getServerSideProps = async (ctx: SSRContext<any>) => {
+  const supabase = new SupabaseServerWrapper(ctx).getClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
