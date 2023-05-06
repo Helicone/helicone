@@ -1,4 +1,4 @@
-CREATE TABLE default.response_copy_v2
+CREATE TABLE IF NOT EXISTS default.response_copy_v2
 (
    `response_id` Nullable(UUID),
    `response_created_at` Nullable(DateTime64),

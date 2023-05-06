@@ -1,0 +1,11 @@
+FROM node:18.11.0
+
+WORKDIR /worker
+
+RUN npm install -g wrangler
+
+RUN git clone https://github.com/Helicone/helicone.git
+WORKDIR /worker/helicone/worker
+RUN yarn
+
+CMD env > .dev.vars && echo "n" | wrangler dev --local
