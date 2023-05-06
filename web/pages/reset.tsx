@@ -2,8 +2,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import AuthenticationForm from "../components/shared/AuthenticationForm";
-import { SSRContext } from "../lib/redirectIdLoggedIn";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import { SSRContext, SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 const Login = () => {
   const supabaseClient = useSupabaseClient();
@@ -61,7 +60,7 @@ const Login = () => {
   }
 };
 
-export const getServerSideProps = async (ctx: SSRContext) => {
+export const getServerSideProps = async (ctx: SSRContext<any>) => {
   const supabase = new SupabaseServerWrapper(ctx).getClient();
   const {
     data: { session },
