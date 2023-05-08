@@ -1,9 +1,7 @@
-import { ArrowDownIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
 import MetaData from "../components/shared/metaData";
 import OnboardingPage from "../components/templates/onboarding/onboardingPage";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 interface OnboardingProps {
   origin: string;
@@ -23,7 +21,7 @@ const Onboarding = (props: OnboardingProps) => {
 export default Onboarding;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const supabase = createServerSupabaseClient(context);
+  const supabase = new SupabaseServerWrapper(context).getClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

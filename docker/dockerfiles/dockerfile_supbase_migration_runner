@@ -1,0 +1,21 @@
+FROM ubuntu:20.04
+
+WORKDIR /app
+RUN apt update -y
+RUN apt install curl git -y
+# Install gcc
+RUN apt install build-essential -y
+
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+
+USER root
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
+
+RUN brew install supabase/tap/supabase
+
+RUN git clone https://github.com/Helicone/helicone.git
+WORKDIR /app/helicone
+
+# CMD [ "supabase", "db", "push", "--db-url", ${DATABASE_URL} ]
+CMD supabase db push --db-url ${DATABASE_URL}
+# CMD echo ${DATABASE_URL}

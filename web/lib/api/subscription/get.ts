@@ -1,11 +1,7 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { Result } from "../../../lib/result";
-import {
-  getStripeCustomer,
-  getStripeCustomerFromNext,
-} from "../../../utlis/stripeHelpers";
+import { getStripeCustomerFromNext } from "../../../utlis/stripeHelpers";
 
 export async function getSubscriptions(
   req: NextApiRequest,
