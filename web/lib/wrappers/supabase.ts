@@ -8,6 +8,7 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
+import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }
@@ -19,7 +20,7 @@ interface SupabaseServerWrapperOptions {
 export class SupabaseServerWrapper<T> {
   client: SupabaseClient<Database>;
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
-    const supabaseUrl = options?.supabaseUrl ?? process.env.SUPABASE_URL ?? "";
+    const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
 
     this.client = createServerSupabaseClient<Database>(ctx, {
       supabaseUrl,
