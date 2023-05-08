@@ -474,6 +474,7 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+  console.log("request id", requestId);
   async function responseBodyTimeout(delay_ms: number) {
     await new Promise((resolve) => setTimeout(resolve, delay_ms));
     console.log("response body timeout");

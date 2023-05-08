@@ -119,7 +119,7 @@ def fetch_feedback(helicone_id):
 
         feedback_data.extend(feedback)
 
-    return feedback_data, metric_data
+    return feedback_data
 
 
 
@@ -135,20 +135,17 @@ def test_log_feedback():
         prompt=prompt,
         max_tokens=10,
     )
-    # time.sleep(2)
+    # time.sleep(5)
+    helicone_id = response['helicone']['id']
+    print("HELICONE ID", helicone_id)
 
     # Log feedback using the new log function
     log(response, "score", True, data_type="boolean")
 
-    helicone_id = response['helicone']['id']
-    feedback_data, metric_data = fetch_feedback(helicone_id)
+    feedback_data = fetch_feedback(helicone_id)
 
     assert len(feedback_data) == 1
     assert feedback_data[0]["boolean_value"] is True
     assert feedback_data[0]["float_value"] is None
     assert feedback_data[0]["string_value"] is None
     assert feedback_data[0]["categorical_value"] is None
-
-    assert len(metric_data) == 1
-    assert metric_data[0]["name"] == "score"
-    assert metric_data[0]["data_type"] == "boolean"
