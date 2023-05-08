@@ -54,6 +54,7 @@ export interface Database {
           api_key_name: string
           created_at: string
           id: number
+          organization_id: string | null
           soft_delete: boolean
           user_id: string
         }
@@ -62,6 +63,7 @@ export interface Database {
           api_key_name: string
           created_at?: string
           id?: number
+          organization_id?: string | null
           soft_delete?: boolean
           user_id: string
         }
@@ -70,6 +72,7 @@ export interface Database {
           api_key_name?: string
           created_at?: string
           id?: number
+          organization_id?: string | null
           soft_delete?: boolean
           user_id?: string
         }
@@ -100,6 +103,46 @@ export interface Database {
           user_id?: string
         }
       }
+      organization: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_personal: boolean
+          name: string
+          owner: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_personal?: boolean
+          name: string
+          owner: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_personal?: boolean
+          name?: string
+          owner?: string
+        }
+      }
+      organization_member: {
+        Row: {
+          created_at: string | null
+          member: string
+          organization: string
+        }
+        Insert: {
+          created_at?: string | null
+          member: string
+          organization: string
+        }
+        Update: {
+          created_at?: string | null
+          member?: string
+          organization?: string
+        }
+      }
       prompt: {
         Row: {
           auth_hash: string
@@ -123,6 +166,35 @@ export interface Database {
           prompt?: string
         }
       }
+      properties: {
+        Row: {
+          auth_hash: string | null
+          created_at: string | null
+          id: number
+          key: string | null
+          request_id: string | null
+          user_id: string | null
+          value: string | null
+        }
+        Insert: {
+          auth_hash?: string | null
+          created_at?: string | null
+          id?: number
+          key?: string | null
+          request_id?: string | null
+          user_id?: string | null
+          value?: string | null
+        }
+        Update: {
+          auth_hash?: string | null
+          created_at?: string | null
+          id?: number
+          key?: string | null
+          request_id?: string | null
+          user_id?: string | null
+          value?: string | null
+        }
+      }
       request: {
         Row: {
           auth_hash: string
@@ -130,8 +202,10 @@ export interface Database {
           created_at: string
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
+          helicone_org_id: string | null
           helicone_user: string | null
           id: string
+          organization_id: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
@@ -144,8 +218,10 @@ export interface Database {
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
+          helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
+          organization_id?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -158,8 +234,10 @@ export interface Database {
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
+          helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
+          organization_id?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -336,13 +414,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
@@ -360,6 +438,10 @@ export interface Database {
             }
             Returns: Record<string, unknown>[]
           }
+      ensure_personal: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,9 +1,9 @@
 import { ArrowPathIcon, InboxArrowDownIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { BsGoogle } from "react-icons/bs";
+import Stripe from "stripe";
 
 interface LoginProps {
   formState: "login" | "reset" | "signup";
@@ -35,9 +35,9 @@ const Login = (props: LoginProps) => {
 
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
+  const user = useUser();
 
   const signUpHandler = async (email: string, password: string) => {
-    console.log("signUpHandler", email, password);
     if (email === "") {
       setAuthError("Email is required");
       return;
@@ -57,10 +57,40 @@ const Login = (props: LoginProps) => {
     });
 
     if (authError) {
-      console.log("authError", authError);
       setAuthError(authError.message);
       setLoading(false);
       return;
+    }
+
+    if (user.user?.id) {
+      // Create a stripe customer account
+      const { data: customer, error: customerError } = await fetch(
+        "/api/stripe/create_account",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user.user.email,
+            name: user.user.email,
+          } as Stripe.CustomerCreateParams),
+        }
+      ).then((res) => res.json());
+
+      // Subscribe the customer to the basic_flex plan
+      const { data: subscription, error: subscriptionError } = await fetch(
+        "/api/stripe/create_subscription",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer: customer.id,
+          } as Stripe.SubscriptionCreateParams),
+        }
+      ).then((res) => res.json());
     }
 
     setLoading(false);
@@ -257,6 +287,36 @@ const Login = (props: LoginProps) => {
                         if (error) {
                           setAuthError(error.message);
                         }
+                        // get the user id
+                        if (user) {
+                          // Create a stripe customer account
+                          const { data: customer, error: customerError } =
+                            await fetch("/api/stripe/create_account", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                email: user.email,
+                                name: user.email,
+                              } as Stripe.CustomerCreateParams),
+                            }).then((res) => res.json());
+
+                          // Subscribe the customer to the basic_flex plan
+                          const {
+                            data: subscription,
+                            error: subscriptionError,
+                          } = await fetch("/api/stripe/create_subscription", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              customer: customer.id,
+                            } as Stripe.SubscriptionCreateParams),
+                          }).then((res) => res.json());
+                        }
+
                         setLoading(false);
                       }}
                       type="button"

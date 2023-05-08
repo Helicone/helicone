@@ -1,4 +1,3 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import {
   FilterLeaf,
@@ -8,6 +7,7 @@ import {
 import { Result } from "../../result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { timeBackfill } from "../../timeCalculations/time";
+import { SupabaseServerWrapper } from "../../wrappers/supabase";
 
 export interface DataOverTimeRequest {
   timeFilter: {
@@ -63,7 +63,8 @@ export async function getTimeDataHandler<T>(
   res: NextApiResponse<Result<T[], string>>,
   dataExtractor: (d: DataOverTimeRequest) => Promise<Result<T[], string>>
 ) {
-  const client = createServerSupabaseClient({ req, res });
+  const client = new SupabaseServerWrapper({ req, res }).getClient();
+
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });

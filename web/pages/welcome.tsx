@@ -1,11 +1,10 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { User, useUser } from "@supabase/auth-helpers-react";
+import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
-import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import WelcomePage from "../components/templates/welcome/welcomePage";
 import { requestOverLimit } from "../lib/checkRequestLimit";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
 
@@ -31,7 +30,7 @@ export default Dashboard;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = createServerSupabaseClient(context);
+  const supabase = new SupabaseServerWrapper(context).getClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

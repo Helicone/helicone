@@ -1,11 +1,9 @@
-import {
-  createServerSupabaseClient,
-  User,
-} from "@supabase/auth-helpers-nextjs";
+import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import UsersPage from "../components/templates/users/usersPage";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 interface UsersProps {
   user: User;
@@ -30,7 +28,7 @@ export default Users;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = createServerSupabaseClient(context);
+  const supabase = new SupabaseServerWrapper(context).getClient();
 
   const {
     data: { session },
