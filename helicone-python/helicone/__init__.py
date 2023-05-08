@@ -65,7 +65,7 @@ class Helicone:
         global base_url
         base_url = value
 
-    def log(self, response, name, value, data_type=None):
+    def log_feedback(self, response, name, value, data_type=None):
         helicone_id = response.get("helicone", {}).get("id")
         if not helicone_id:
             raise ValueError("The provided response does not have a valid Helicone ID.")
@@ -176,4 +176,4 @@ class Helicone:
             setattr(api_resource_class, "create", self._with_helicone_auth(create_method))
 
 helicone = Helicone()
-log = helicone.log
+log_feedback = helicone.log_feedback

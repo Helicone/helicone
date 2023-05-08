@@ -56,21 +56,45 @@ export async function handleFeedbackEndpoint(
 
   const heliconeAuth = request.headers.get("helicone-auth") ?? undefined;
 
-  try {
-    await addFeedback(heliconeId, name, dataType, value, env, heliconeAuth);
-    return new Response(JSON.stringify({
-      message:
-        "Feedback added successfully.",
-    }), { status: 200 });
-  } catch (error) {
-    console.error("Error adding feedback:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    return new Response(`Error adding feedback: ${errorMessage}`, {
+  let responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
+
+  // If response not logged, retry up to two more times
+  if (responseId === undefined) {
+    console.log("Response not logged, retrying up to two more times.")
+    for (let i = 0; i < 2; i++) {
+      console.log(`Retry ${i + 1}...`)
+      const sleepDuration = i === 0 ? 100 : 1000;
+      await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+
+      responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
+
+      if (responseId !== undefined) {
+        break;
+      }
+    }
+  }
+
+  if (responseId !== undefined) {
+    try {
+      await addFeedback(heliconeId, responseId, name, dataType, value, env, heliconeAuth);
+      return new Response(JSON.stringify({
+        message: "Feedback added successfully.",
+      }), { status: 200 });
+    } catch (error) {
+      console.error("Error adding feedback:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      return new Response(`Error adding feedback: ${errorMessage}`, {
+        status: 500,
+      });
+    }
+  } else {
+    return new Response(`Error: Response not found for heliconeId "${heliconeId}".`, {
       status: 500,
     });
   }
 }
+
 
 interface ResponseData {
   id: number;
@@ -79,8 +103,41 @@ interface ResponseData {
   };
 }
 
+async function isResponseLogged(
+  heliconeId: string,
+  env: Env,
+  heliconeAuth?: string
+): Promise<string | undefined> {
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  if (!heliconeAuth) {
+    throw new Error("Authentication required.");
+  }
+
+  // Fetch the response with the matching heliconeId
+  const { data: response, error: responseError } = await dbClient
+    .from("response")
+    .select("id, request")
+    .eq("request", heliconeId)
+    .single();
+
+  if (responseError) {
+    console.error("Error fetching response:", responseError.message);
+    return undefined;
+  }
+
+  // Return the response.id if the response exists, otherwise return undefined
+  return response ? response.id : undefined;
+}
+
+
+// Assumes that the request and response for the heliconeId exists!
 export async function addFeedback(
   heliconeId: string,
+  responseId: string,
   name: string,
   dataType: DataType,
   value: any,
@@ -99,23 +156,11 @@ export async function addFeedback(
   const apiKey = heliconeAuth.replace("Bearer ", "").trim();
   const apiKeyHash = await hash(`Bearer ${apiKey}`);
 
-  // Fetch the response with the matching heliconeId
-  const { data: response, error: responseError } = await dbClient
-    .from("response")
-    .select("id, request")
-    .eq("request", heliconeId)
-    .single();
-
-  if (responseError || !response) {
-    console.error("Error fetching response:", responseError ? responseError.message : "No matching response found.");
-    throw new Error(`No matching response found for heliconeId "${heliconeId}".`);
-  }
-
   // Fetch the request with the corresponding response.request value
   const { data: requestData, error: requestError } = await dbClient
     .from("request")
     .select("id, helicone_api_keys (id, api_key_hash)")
-    .eq("id", response.request)
+    .eq("id", heliconeId)
     .single();
 
   if (requestError) {
@@ -133,6 +178,7 @@ export async function addFeedback(
   } else {
     throw new Error("Internal error.");
   }
+
 
   // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
   if (!requestData || matchingApiKeyHash !== apiKeyHash) {
@@ -184,7 +230,7 @@ export async function addFeedback(
     created_by: string;
     [key: string]: boolean | number | string;
   } = {
-    response_id: response.id,
+    response_id: responseId,
     feedback_metric_id: metricId,
     created_by: "API",
   };
