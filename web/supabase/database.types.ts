@@ -105,43 +105,34 @@ export interface Database {
       }
       organization: {
         Row: {
-<<<<<<< Updated upstream
-          created_at: string | null
-=======
           color: string
           created_at: string | null
           icon: string
->>>>>>> Stashed changes
           id: string
           is_personal: boolean
           name: string
           owner: string
+          soft_delete: boolean
         }
         Insert: {
-<<<<<<< Updated upstream
-          created_at?: string | null
-=======
           color?: string
           created_at?: string | null
           icon?: string
->>>>>>> Stashed changes
           id?: string
           is_personal?: boolean
           name: string
           owner: string
+          soft_delete?: boolean
         }
         Update: {
-<<<<<<< Updated upstream
-          created_at?: string | null
-=======
           color?: string
           created_at?: string | null
           icon?: string
->>>>>>> Stashed changes
           id?: string
           is_personal?: boolean
           name?: string
           owner?: string
+          soft_delete?: boolean
         }
       }
       organization_member: {
@@ -187,7 +178,7 @@ export interface Database {
       properties: {
         Row: {
           auth_hash: string | null
-          created_at: string | null
+          created_at: string
           id: number
           key: string
           request_id: string | null
@@ -196,7 +187,7 @@ export interface Database {
         }
         Insert: {
           auth_hash?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
           key: string
           request_id?: string | null
@@ -205,7 +196,7 @@ export interface Database {
         }
         Update: {
           auth_hash?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
           key?: string
           request_id?: string | null
