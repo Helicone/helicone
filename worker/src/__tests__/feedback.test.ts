@@ -1,4 +1,3 @@
-// Import necessary libraries
 import { createClient } from "@supabase/supabase-js";
 import axios from "axios";
 
@@ -13,7 +12,6 @@ const dbClient = createClient(
 
 const app = "http://127.0.0.1:8787";
 
-// Helper function to truncate the feedback and feedback_metrics tables
 async function truncateTables() {
   await dbClient.from("feedback").delete();
   await dbClient.from("feedback_metrics").delete();

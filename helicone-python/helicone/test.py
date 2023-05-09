@@ -99,11 +99,9 @@ def fetch_feedback(helicone_id):
         raise ValueError("Not authorized to fetch feedback.")
 
     # Fetch feedback_metrics for the given api_key_id
-    print("MATCHING API KEY ID", matching_api_key_id)
     metric_query = supabase.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", str(matching_api_key_id))
     metric_result = metric_query.execute()
     metric_data = metric_result["data"]
-    print("DONE!")
 
     # Fetch feedback for each feedback_metric and the response
     feedback_data = []
@@ -124,7 +122,6 @@ def fetch_feedback(helicone_id):
 
 
 def test_log_feedback():
-    import time
     helicone.base_url = "http://127.0.0.1:8787/v1"
     helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
     prompt = "Integration test for logging feedback"
