@@ -292,10 +292,19 @@ interface PropertiesCopyV1 {
   value: Nullable<string>;
 }
 
+interface PropertiesCopyV2 {
+  id: number;
+  created_at: string;
+  request_id: string;
+  key: string;
+  value: string;
+  organization_id: string;
+}
 export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
     properties_copy_v1: PropertiesCopyV1;
     response_copy_v2: ResponseCopyV2;
+    properties_copy_v2: PropertiesCopyV2;
   };
 }
