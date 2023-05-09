@@ -17,6 +17,9 @@ import {
   WrenchScrewdriverIcon,
   XMarkIcon,
   TableCellsIcon,
+  CloudIcon,
+  WalletIcon,
+  CalculatorIcon,
 } from "@heroicons/react/24/outline";
 import {
   ExclamationCircleIcon,
@@ -78,13 +81,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: CubeTransparentIcon,
       current: pathname === "/models",
     },
+    {
+      name: "Playground",
+      href: "/playground",
+      icon: BeakerIcon,
+      current: pathname === "/playground",
+    },
   ];
 
   const accountNav = [
     {
       name: "Usage",
       href: "/usage",
-      icon: BeakerIcon,
+      icon: CalculatorIcon,
       current: pathname === "/usage",
     },
     {

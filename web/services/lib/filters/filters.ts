@@ -32,6 +32,7 @@ const whereKeyMappings: KeyMappings = {
     created_at: "request.created_at",
     user_id: "request.user_id",
     auth_hash: "request.auth_hash",
+    id: "request.id",
   },
   response: {
     body_completion:

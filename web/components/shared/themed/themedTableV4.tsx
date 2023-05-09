@@ -90,7 +90,7 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
           <span className="font-medium">{Math.min(to, count)}</span> of{" "}
           <span className="font-medium">{count}</span> results
         </p>
-        {setViewMode && (
+        {/* {setViewMode && (
           <div className="flex text-sm">
             <ThemedTabs
               options={[
@@ -108,7 +108,7 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
               }
             />
           </div>
-        )}
+        )} */}
       </div>
 
       {columns.filter((c) => c.active).length < 1 ? (

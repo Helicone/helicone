@@ -31,6 +31,7 @@ export type RequestTableToOperators = {
   created_at: SingleKey<TimestampOperators>;
   user_id: SingleKey<TextOperators>;
   auth_hash: SingleKey<TextOperators>;
+  id: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;

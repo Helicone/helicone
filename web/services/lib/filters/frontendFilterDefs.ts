@@ -101,6 +101,7 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
 
 export const requestTableFilters: [
   SingleFilterDef<"request">,
+  SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
@@ -108,6 +109,13 @@ export const requestTableFilters: [
   SingleFilterDef<"user_api_keys">,
   SingleFilterDef<"response">
 ] = [
+  {
+    label: "ID",
+    operators: textOperators,
+    table: "request",
+    column: "id",
+    category: "request",
+  },
   {
     label: "Request",
     operators: textOperators,
