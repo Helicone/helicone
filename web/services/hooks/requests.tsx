@@ -12,7 +12,6 @@ const useGetRequests = (
   sortLeaf: SortLeafRequest,
   options?: QueryObserverOptions
 ) => {
-  const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "requests",
