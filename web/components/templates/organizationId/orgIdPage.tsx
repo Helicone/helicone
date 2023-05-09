@@ -60,8 +60,8 @@ const OrgIdPage = (props: OrgIdPageProps) => {
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-3xl space-y-8">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col w-full min-w-[400px] border-r border-gray-300 pr-8">
+        <div className="flex flex-col md:flex-row space-y-16 md:space-y-0 space-x-0 md:space-x-4">
+          <div className="flex flex-col w-full md:min-w-[400px] border-b md:border-b-0 md:border-r border-gray-300 py-8 pr-0 md:py-0 md:pr-8">
             <CreateOrgForm
               initialValues={{
                 id: org.id,
