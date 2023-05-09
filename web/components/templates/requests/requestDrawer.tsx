@@ -1,12 +1,8 @@
+import { ArrowsPointingOutIcon } from "@heroicons/react/20/solid";
 import {
-  ArrowsPointingOutIcon,
-  BeakerIcon,
-  ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
-  ClipboardIcon,
   CodeBracketIcon,
   EyeIcon,
-  Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import { wrap } from "module";
 import { useRouter } from "next/router";
@@ -57,27 +53,25 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       setOpen={setOpen}
       title="Request"
       actions={
-        <div className="flex flex-row items-center space-x-4">
+        <div className="flex flex-row flex-1 w-full items-center justify-between space-x-2 text-gray-500">
           <button
             onClick={() => {
-              navigator.clipboard.writeText(
-                JSON.stringify(wrappedRequest, null, 2)
-              );
-              setNotification("Copied to clipboard", "success");
+              router.push(`/requests/${wrappedRequest?.id}`);
             }}
-            className="bg-gray-200 flex space-x-1 rounded-lg shadow-sm w-full flex-row px-3 py-2 text-sm font-medium leading-5 items-center"
+            className="hover:bg-gray-200 rounded-md p-1.5"
           >
-            <ClipboardDocumentListIcon className="h-5 w-5" />
-            <p>Copy</p>
+            <ArrowsPointingOutIcon className="h-4 w-4" />
           </button>
           <button
             onClick={() => {
-              router.push("/requests/" + wrappedRequest?.id);
+              navigator.clipboard.writeText(
+                JSON.stringify(wrappedRequest, null, 4)
+              );
+              setNotification("Copied to clipboard", "success");
             }}
-            className="bg-gray-200 flex space-x-1 rounded-lg shadow-sm w-full flex-row px-3 py-2 text-sm font-medium leading-5 items-center"
+            className="hover:bg-gray-200 rounded-md -m-1 p-1"
           >
-            <BeakerIcon className="h-5 w-5" />
-            <p>Playground</p>
+            <ClipboardDocumentListIcon className="h-5 w-5" />
           </button>
         </div>
       }

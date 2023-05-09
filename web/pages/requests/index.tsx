@@ -1,8 +1,8 @@
 import { GetServerSidePropsContext } from "next";
-import AuthLayout from "../components/shared/layout/authLayout";
-import MetaData from "../components/shared/metaData";
-import RequestsPage from "../components/templates/requests/requestsPage";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import AuthLayout from "../../components/shared/layout/authLayout";
+import MetaData from "../../components/shared/metaData";
+import RequestsPage from "../../components/templates/requests/requestsPage";
+import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 interface RequestsProps {
   user: any;
