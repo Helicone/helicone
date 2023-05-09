@@ -69,7 +69,8 @@ const useGetOrgs = () => {
     },
     refetchOnWindowFocus: false,
   });
-  data && data.sort((a, b) => (a.is_personal ? -1 : 1));
+  data && data.sort((a, b) => (a.name > b.name ? -1 : 1));
+  data && data.sort((a, b) => (b.is_personal ? -1 : 1));
   return {
     data,
     isLoading,
