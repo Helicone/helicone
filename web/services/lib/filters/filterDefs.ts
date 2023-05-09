@@ -83,6 +83,14 @@ interface ResponseCopyV2ToOperators extends ResponseCopyV1ToOperators {
 
 export type FilterLeafResponseCopyV2 = SingleKey<ResponseCopyV2ToOperators>;
 
+type PropertiesCopyV2ToOperators = {
+  key: SingleKey<TextOperators>;
+  value: SingleKey<TextOperators>;
+  organization_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafPropertiesCopyV2 = SingleKey<PropertiesCopyV2ToOperators>;
+
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
   active_for: SingleKey<NumberOperators>;
@@ -118,6 +126,7 @@ export type TablesAndViews = {
   response_copy_v2: FilterLeafResponseCopyV2;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
+  properties_copy_v2: FilterLeafPropertiesCopyV2;
 };
 
 export type FilterLeaf = SingleKey<TablesAndViews>;

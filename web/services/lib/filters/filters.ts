@@ -70,6 +70,11 @@ const whereKeyMappings: KeyMappings = {
     value: "properties_copy_v1.value",
     auth_hash: "properties_copy_v1.auth_hash",
   },
+  properties_copy_v2: {
+    key: "properties_copy_v2.key",
+    value: "properties_copy_v2.value",
+    organization_id: "properties_copy_v2.organization_id",
+  },
 };
 
 const havingKeyMappings: KeyMappings = {
@@ -89,6 +94,7 @@ const havingKeyMappings: KeyMappings = {
     cost: "cost",
   },
   response_copy_v2: {},
+  properties_copy_v2: {},
 };
 
 export function buildFilterLeaf(
@@ -301,46 +307,47 @@ export type ExternalBuildFilterArgs = Omit<
   "argPlaceHolder" | "user_id"
 >;
 
-export async function buildFilterWithAuthClickhouseProperties(
-  args: ExternalBuildFilterArgs & { user_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(
-    {
-      ...args,
-      hashToFilter: (hash) => ({
-        properties_copy_v1: {
-          auth_hash: {
-            equals: hash,
-          },
-        },
-      }),
-    },
-    "clickhouse"
-  );
-}
-
 export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "clickhouse");
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    response_copy_v2: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseProperties(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    properties_copy_v2: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
 }
 
 export async function buildFilterWithAuth(
   args: ExternalBuildFilterArgs & {
     org_id: string;
   },
-  database: "postgres" | "clickhouse" = "postgres"
+  database: "postgres" | "clickhouse" = "postgres",
+  getOrgIdFilter: (orgId: string) => FilterLeaf = (orgId) => ({
+    request: {
+      org_id: {
+        equals: orgId,
+      },
+    },
+  })
 ): Promise<{ filter: string; argsAcc: any[] }> {
   const { org_id, filter } = args;
 
   const filterNode: FilterNode = {
-    left: {
-      request: {
-        org_id: {
-          equals: org_id,
-        },
-      },
-    },
+    left: getOrgIdFilter(org_id),
     operator: "and",
     right: filter,
   };

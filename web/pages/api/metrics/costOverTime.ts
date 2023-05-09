@@ -1,5 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  HandlerWrapperOptions,
+  withAuth,
+} from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
 
 import { getModelUsageOverTime } from "../../../lib/api/metrics/getModelUsageOverTime";
@@ -8,10 +11,6 @@ import {
   getTimeDataHandler,
 } from "../../../lib/api/metrics/timeDataHandlerWrapper";
 import { Result } from "../../../lib/result";
-import {
-  HandlerWrapperOptions,
-  withAuth,
-} from "../../../lib/api/handlerWrappers";
 
 export interface CostOverTime {
   cost: number;

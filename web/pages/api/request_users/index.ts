@@ -1,15 +1,13 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
 
-import { UserMetric, userMetrics } from "../../../lib/api/users/users";
-import { Result } from "../../../lib/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
-import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
+import { UserMetric, userMetrics } from "../../../lib/api/users/users";
+import { Result } from "../../../lib/result";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 async function handler({
   req,

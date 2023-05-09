@@ -45,7 +45,7 @@ SELECT
   sum(r.prompt_tokens) as total_prompt_token,
   sum(r.prompt_tokens) + sum(r.completion_tokens) as total_tokens,
   (${CLICKHOUSE_PRICE_CALC}) as cost
-from response_copy_v1 r
+from response_copy_v2 r
 WHERE (${builtFilter.filter})
 GROUP BY r.model
 HAVING (${havingFilter.filter})
