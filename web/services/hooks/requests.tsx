@@ -3,6 +3,7 @@ import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetRequests = (
   currentPage: number,
@@ -11,6 +12,7 @@ const useGetRequests = (
   sortLeaf: SortLeafRequest,
   options?: QueryObserverOptions
 ) => {
+  const org = useOrg();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "requests",

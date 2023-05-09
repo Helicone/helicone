@@ -8,20 +8,25 @@ import {
   getTimeDataHandler,
 } from "../../../lib/api/metrics/timeDataHandlerWrapper";
 import { Result } from "../../../lib/result";
+import {
+  HandlerWrapperOptions,
+  withAuth,
+} from "../../../lib/api/handlerWrappers";
 
 export interface CostOverTime {
   cost: number;
   time: Date;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<CostOverTime[], string>>
+async function handler(
+  options: HandlerWrapperOptions<Result<CostOverTime[], string>>
 ) {
-  await getTimeDataHandler(req, res, (d) =>
+  await getTimeDataHandler(options, (d) =>
     getSomeDataOverTime(d, getModelUsageOverTime, {
       reducer: (acc, d) => ({ cost: acc.cost + modelCost(d) }),
       initial: { cost: 0 },
     })
   );
 }
+
+export default withAuth(handler);

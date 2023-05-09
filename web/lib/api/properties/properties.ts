@@ -1,29 +1,28 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../components/shared/getPagination";
-import { dbExecute } from "../db/dbExecute";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
-import { buildFilterWithAuthProperties } from "../../../services/lib/filters/filters";
+import { dbExecute } from "../db/dbExecute";
 
 export interface Property {
   property: string;
 }
 
 export async function getProperties(
-  user_id: string
+  org_id: string
 ): Promise<Result<Property[], string>> {
-  const builtFilter = await buildFilterWithAuthProperties({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id,
     argsAcc: [],
     filter: "all",
   });
   const query = `
   SELECT distinct key as property
   from properties
+  left join request on request.id = properties.request_id
   where (
     ${builtFilter.filter}
   )
 `;
+  console.log(query);
 
   const { data, error } = await dbExecute<Property>(query, builtFilter.argsAcc);
   if (error !== null) {

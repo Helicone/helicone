@@ -22,6 +22,7 @@ import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { Message } from "./requestsPage";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 export type RequestWrapper = {
   cacheCount: number;
@@ -225,22 +226,11 @@ const useRequestsPage = (
     propertyFilters,
     searchPropertyFilters,
   } = useGetProperties();
-  // const { values, isLoading: isValuesLoading } = useGetPromptValues();
-  // const { valueParams } = useGetValueParams();
 
   const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
     propertyFilters
   );
 
-  // .concat(
-  //   getValueFilters(
-  //     values,
-  //     valueParams.map((v) => ({
-  //       param: v.value_param,
-  //       key: v.value_key,
-  //     }))
-  //   )
-  // );
   const filter: FilterNode = {
     left: filterListToTree(
       filterUIToFilterLeafs(filterMap, iuFilterIdxs),

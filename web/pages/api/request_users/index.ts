@@ -6,17 +6,16 @@ import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
+import {
+  HandlerWrapperOptions,
+  withAuth,
+} from "../../../lib/api/handlerWrappers";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<UserMetric[], string>>
-) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
-  if (!user.data || !user.data.user) {
-    res.status(401).json({ error: "Unauthorized", data: null });
-    return;
-  }
+async function handler({
+  req,
+  res,
+  userData: { orgId },
+}: HandlerWrapperOptions<Result<UserMetric[], string>>) {
   const { filter, offset, limit, sort } = req.body as {
     filter: FilterNode;
     offset: number;
@@ -24,7 +23,7 @@ export default async function handler(
     sort: SortLeafUsers;
   };
   const { error: metricsError, data: metrics } = await userMetrics(
-    user.data.user.id,
+    orgId,
     filter,
     offset,
     limit,
@@ -37,3 +36,5 @@ export default async function handler(
 
   res.status(200).json({ error: null, data: metrics });
 }
+
+export default withAuth(handler);

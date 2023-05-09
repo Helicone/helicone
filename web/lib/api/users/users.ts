@@ -28,7 +28,7 @@ export interface UserMetric {
 }
 
 export async function userMetrics(
-  user_id: string,
+  org_id: string,
   filter: FilterNode,
   offset: number,
   limit: number,
@@ -39,7 +39,7 @@ export async function userMetrics(
   }
   const { argsAcc, orderByString } = buildUserSort(sort);
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id,
     argsAcc: argsAcc,
     filter,
   });
@@ -82,11 +82,11 @@ OFFSET ${offset}
 }
 
 export async function userMetricsCount(
-  user_id: string,
+  org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id,
     argsAcc: [],
     filter,
   });

@@ -32,6 +32,7 @@ const whereKeyMappings: KeyMappings = {
     created_at: "request.created_at",
     user_id: "request.user_id",
     auth_hash: "request.auth_hash",
+    org_id: "request.helicone_org_id",
   },
   response: {
     body_completion:
@@ -53,6 +54,15 @@ const whereKeyMappings: KeyMappings = {
     latency: "response_copy_v1.latency",
     user_id: "response_copy_v1.user_id",
     status: "response_copy_v1.status",
+  },
+  response_copy_v2: {
+    auth_hash: "response_copy_v2.auth_hash",
+    model: "response_copy_v2.model",
+    request_created_at: "response_copy_v2.request_created_at",
+    latency: "response_copy_v2.latency",
+    user_id: "response_copy_v2.user_id",
+    status: "response_copy_v2.status",
+    organization_id: "response_copy_v2.organization_id",
   },
   users_view: {},
   properties_copy_v1: {
@@ -78,6 +88,7 @@ const havingKeyMappings: KeyMappings = {
   users_view: {
     cost: "cost",
   },
+  response_copy_v2: {},
 };
 
 export function buildFilterLeaf(
@@ -93,6 +104,7 @@ export function buildFilterLeaf(
 
   for (const tableKey in filter) {
     const table = filter[tableKey as keyof FilterLeaf];
+    console.log(filter);
 
     for (const columnKey in table) {
       const column = table[columnKey as keyof typeof table] as Record<
@@ -139,7 +151,11 @@ export function buildFilterLeaf(
             } else {
               argsAcc.push(value);
             }
+          } else {
+            throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
           }
+        } else {
+          throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
         }
       }
     }
@@ -242,7 +258,7 @@ export function buildFilterClickHouse(
   });
 }
 
-export function buildFilterPostgres(
+function buildFilterPostgres(
   args: ExternalBuildFilterArgs
 ): ReturnType<typeof buildFilter> {
   return buildFilter({
@@ -285,21 +301,6 @@ export type ExternalBuildFilterArgs = Omit<
   "argPlaceHolder" | "user_id"
 >;
 
-export async function buildFilterWithAuthProperties(
-  args: ExternalBuildFilterArgs & { user_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth({
-    ...args,
-    hashToFilter: (hash) => ({
-      properties_table: {
-        auth_hash: {
-          equals: hash,
-        },
-      },
-    }),
-  });
-}
-
 export async function buildFilterWithAuthClickhouseProperties(
   args: ExternalBuildFilterArgs & { user_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
@@ -318,53 +319,28 @@ export async function buildFilterWithAuthClickhouseProperties(
   );
 }
 
-export async function buildFilterWithAuthRequest(
-  args: ExternalBuildFilterArgs & { user_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth({
-    ...args,
-    hashToFilter: (hash) => ({
-      request: {
-        auth_hash: {
-          equals: hash,
-        },
-      },
-    }),
-  });
-}
-
 export async function buildFilterWithAuthClickHouse(
-  args: ExternalBuildFilterArgs & { user_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(
-    {
-      ...args,
-      hashToFilter: (hash) => ({
-        response_copy_v1: {
-          auth_hash: {
-            equals: hash,
-          },
-        },
-      }),
-    },
-    "clickhouse"
-  );
+  return buildFilterWithAuth(args, "clickhouse");
 }
 
 export async function buildFilterWithAuth(
   args: ExternalBuildFilterArgs & {
-    hashToFilter: (hash: string) => FilterLeaf;
-    user_id: string;
+    org_id: string;
   },
   database: "postgres" | "clickhouse" = "postgres"
 ): Promise<{ filter: string; argsAcc: any[] }> {
-  const { user_id, filter, hashToFilter } = args;
-  const userIdHashesFilter = await buildUserIdHashesFilter(
-    user_id,
-    hashToFilter
-  );
+  const { org_id, filter } = args;
+
   const filterNode: FilterNode = {
-    left: userIdHashesFilter,
+    left: {
+      request: {
+        org_id: {
+          equals: org_id,
+        },
+      },
+    },
     operator: "and",
     right: filter,
   };

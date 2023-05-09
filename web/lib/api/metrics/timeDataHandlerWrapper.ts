@@ -1,13 +1,12 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import {
   FilterLeaf,
-  filterListToTree,
   FilterNode,
+  filterListToTree,
 } from "../../../services/lib/filters/filterDefs";
 import { Result } from "../../result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { timeBackfill } from "../../timeCalculations/time";
-import { SupabaseServerWrapper } from "../../wrappers/supabase";
+import { HandlerWrapperOptions } from "../handlerWrappers";
 
 export interface DataOverTimeRequest {
   timeFilter: {
@@ -15,7 +14,7 @@ export interface DataOverTimeRequest {
     end: string;
   };
   userFilter: FilterNode;
-  userId: string;
+  orgId: string;
   dbIncrement: TimeIncrement;
   timeZoneDifference: number;
 }
@@ -59,17 +58,15 @@ export async function getSomeDataOverTime<T, K>(
 }
 
 export async function getTimeDataHandler<T>(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<T[], string>>,
+  options: HandlerWrapperOptions<Result<T[], string>>,
   dataExtractor: (d: DataOverTimeRequest) => Promise<Result<T[], string>>
 ) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
+  const {
+    req,
+    res,
+    userData: { orgId },
+  } = options;
 
-  const user = await client.auth.getUser();
-  if (!user.data || !user.data.user) {
-    res.status(401).json({ error: "Unauthorized", data: null });
-    return;
-  }
   const { timeFilter, userFilters, dbIncrement, timeZoneDifference } =
     req.body as OverTimeRequestQueryParams;
   if (!timeFilter || !userFilters || !dbIncrement) {
@@ -100,7 +97,7 @@ export async function getTimeDataHandler<T>(
         },
       },
     },
-    userId: user.data.user.id,
+    orgId,
     dbIncrement,
     timeZoneDifference,
   });

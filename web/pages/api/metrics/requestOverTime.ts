@@ -1,6 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
 
+import {
+  HandlerWrapperOptions,
+  withAuth,
+} from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
 import {
   getSomeDataOverTime,
@@ -9,11 +12,10 @@ import {
 import { Result } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<RequestsOverTime[], string>>
+async function handler(
+  options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>
 ) {
-  await getTimeDataHandler(req, res, (d) =>
+  await getTimeDataHandler(options, (d) =>
     getSomeDataOverTime(d, getTotalRequestsOverTime, {
       reducer: (acc, d) => ({
         count: acc.count + d.count,
@@ -24,3 +26,5 @@ export default async function handler(
     })
   );
 }
+
+export default withAuth(handler);

@@ -2,6 +2,8 @@
 
 export const DEMO_EMAIL = "valyrdemo@gmail.com";
 
+export const ORG_ID_COOKIE_KEY = "currentOrgId";
+
 // export const REQUEST_LIMITS: Record<Tier, number> = {
 //   free: 100_000,
 //   starter: 500_000,

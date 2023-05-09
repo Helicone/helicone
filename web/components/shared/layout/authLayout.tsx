@@ -712,7 +712,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
               )}
               <OrgContext.Provider value={org}>
-                <div className="py-4 sm:py-8">{children}</div>
+                <div className="py-4 sm:py-8" key={org?.renderKey}>
+                  {children}
+                </div>
               </OrgContext.Provider>
               {/* /End replace */}
             </div>

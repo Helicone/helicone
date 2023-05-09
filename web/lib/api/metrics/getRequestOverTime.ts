@@ -1,11 +1,8 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilter,
-  buildFilterPostgres,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 
-import { Result, unwrap } from "../../result";
+import { Result } from "../../result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
@@ -33,7 +30,7 @@ export interface DateCountDBModel {
 export async function getTotalRequestsOverTime({
   timeFilter,
   userFilter,
-  userId,
+  orgId,
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<DateCountDBModel[], string>> {
@@ -44,7 +41,11 @@ export async function getTotalRequestsOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const builtFilter = buildFilterPostgres({ filter, argsAcc: [] });
+  const builtFilter = await buildFilterWithAuth({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT
@@ -54,8 +55,7 @@ FROM request
    LEFT JOIN response ON response.request = request.id
    LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
 WHERE (
-  user_api_keys.user_id = '${userId}'
-  AND (${builtFilter.filter})
+  (${builtFilter.filter})
 )
 GROUP BY ${dateTrunc}
 ORDER BY created_at_trunc

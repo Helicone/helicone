@@ -17,7 +17,7 @@ export interface ModelMetric {
 }
 
 export async function modelMetrics(
-  user_id: string,
+  orgId: string,
   filter: FilterNode,
   offset: number,
   limit: number
@@ -27,7 +27,7 @@ export async function modelMetrics(
   }
 
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id: orgId,
     argsAcc: [],
     filter,
   });

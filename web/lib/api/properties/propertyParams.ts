@@ -1,17 +1,10 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../components/shared/getPagination";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
-import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickhouseProperties,
-  buildFilterWithAuthProperties,
-} from "../../../services/lib/filters/filters";
 import {
   FilterLeaf,
   FilterNode,
 } from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickhouseProperties } from "../../../services/lib/filters/filters";
+import { Result } from "../../result";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface PropertyParam {
   property_param: string;

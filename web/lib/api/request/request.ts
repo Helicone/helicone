@@ -1,19 +1,15 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-import { Result } from "../../result";
-import { Database, Json } from "../../../supabase/database.types";
-import {
-  buildFilter,
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthRequest,
-} from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
-  buildRequestSort,
+  buildFilterWithAuth,
+  buildFilterWithAuthClickHouse,
+} from "../../../services/lib/filters/filters";
+import {
   SortLeafRequest,
+  buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
+import { Json } from "../../../supabase/database.types";
+import { Result } from "../../result";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 
 export interface HeliconeRequest {
   response_id: string;
@@ -45,7 +41,7 @@ export interface HeliconeRequest {
 }
 
 export async function getRequests(
-  user_id: string,
+  orgId: string,
   filter: FilterNode,
   offset: number,
   limit: number,
@@ -54,8 +50,8 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuthRequest({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id: orgId,
     filter,
     argsAcc: [],
   });
@@ -94,6 +90,7 @@ export async function getRequests(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+  console.log(query);
 
   const { data, error } = await dbExecute<HeliconeRequest>(
     query,
@@ -106,11 +103,11 @@ export async function getRequests(
 }
 
 export async function getRequestCount(
-  user_id: string,
+  org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthRequest({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id,
     argsAcc: [],
     filter,
   });
@@ -136,11 +133,11 @@ export async function getRequestCount(
 }
 
 export async function getRequestCountClickhouse(
-  user_id: string,
+  org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id,
     argsAcc: [],
     filter,
   });

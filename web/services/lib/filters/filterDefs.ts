@@ -31,6 +31,7 @@ export type RequestTableToOperators = {
   created_at: SingleKey<TimestampOperators>;
   user_id: SingleKey<TextOperators>;
   auth_hash: SingleKey<TextOperators>;
+  org_id: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
@@ -75,8 +76,12 @@ type ResponseCopyV1ToOperators = {
   model: SingleKey<TextOperators>;
   user_id: SingleKey<TextOperators>;
 };
-
 export type FilterLeafResponseCopyV1 = SingleKey<ResponseCopyV1ToOperators>;
+interface ResponseCopyV2ToOperators extends ResponseCopyV1ToOperators {
+  organization_id: SingleKey<TextOperators>;
+}
+
+export type FilterLeafResponseCopyV2 = SingleKey<ResponseCopyV2ToOperators>;
 
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
@@ -88,6 +93,12 @@ type UserViewToOperators = {
 };
 
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
+
+type PropertiesCopyV1ToOperators = {
+  auth_hash: SingleKey<TextOperators>;
+  key: SingleKey<TextOperators>;
+  value: SingleKey<TextOperators>;
+};
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -104,6 +115,7 @@ export type TablesAndViews = {
 
   // CLICKHOUSE TABLES
   response_copy_v1: FilterLeafResponseCopyV1;
+  response_copy_v2: FilterLeafResponseCopyV2;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
 };
