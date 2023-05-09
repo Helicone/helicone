@@ -408,6 +408,19 @@ async function logInClickhouse(
         id: p.id,
       }))
     ),
+    dbInsertClickhouse(
+      env,
+      "properties_copy_v2",
+      properties.map((p) => ({
+        id: p.id,
+        created_at: formatTimeString(p.created_at),
+        request_id: request.id,
+        key: p.key,
+        value: p.value,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      }))
+    ),
   ]);
 }
 
