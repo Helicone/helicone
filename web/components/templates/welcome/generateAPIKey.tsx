@@ -58,7 +58,7 @@ const GenerateApiKey = (props: GenerateApiKeyProps) => {
       api_key_hash: await hashAuth(apiKey),
       user_id: user.id,
       api_key_name: keyName,
-      organization_id: org?.currentOrg.id,
+      organization_id: org?.currentOrg.id!,
     });
 
     if (res.error) {
