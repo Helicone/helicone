@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { Result } from "../../../../lib/result";
 import { supabaseServer } from "../../../../lib/supabaseServer";
+import { Database } from "../../../../supabase/database.types";
 
 // export async function deleteUserIdFromOrg(userId: String) {
 //   const query = `
@@ -17,7 +18,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<null, string>>
 ) {
-  const client = createServerSupabaseClient({ req, res });
+  const client = createServerSupabaseClient<Database>({ req, res });
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });
@@ -31,6 +32,18 @@ export default async function handler(
   }
   if (id === undefined) {
     res.status(500).json({ error: "Invalid OrgId", data: null });
+    return;
+  }
+
+  const orgAccess = await client
+    .from("organization")
+    .select("*")
+    .eq("id", id as string)
+    .single();
+
+  if (orgAccess.error !== null || orgAccess.data === null) {
+    console.error("Error", orgAccess.error);
+    res.status(500).json({ error: orgAccess.error.message, data: null });
     return;
   }
   const { error: deleteError } = await supabaseServer

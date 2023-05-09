@@ -191,7 +191,6 @@ const KeyPage = (props: KeyPageProps) => {
           }}
         />
       )}
-      {org && org.currentOrg.name}
       {selectedTab === "OpenAI Keys" && (
         <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
           <div className="text-gray-900 space-y-4 text-sm">
@@ -246,7 +245,7 @@ const KeyPage = (props: KeyPageProps) => {
             <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
               <div className="sm:flex-auto items-center flex flex-row space-x-4 justify-between">
                 <h1 className="text-lg font-semibold text-gray-900">
-                  Helicone API
+                  Helicone API ({org?.currentOrg.name ?? "No Org Found"})
                 </h1>
                 {!props.hideTabs && (
                   <Link

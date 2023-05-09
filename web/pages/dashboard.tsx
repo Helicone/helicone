@@ -5,6 +5,10 @@ import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
 import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
+import AuthLayout from "../components/shared/layout/authLayout";
+import AuthHeader from "../components/shared/authHeader";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { clsx } from "../components/shared/clsx";
 
 interface DashboardProps {
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
@@ -15,7 +19,9 @@ const Dashboard = (props: DashboardProps) => {
   const user = useUser();
   return (
     <MetaData title="Dashboard">
-      <DashboardPage user={user!} keys={keys} />
+      <AuthLayout user={user!}>
+        <DashboardPage keys={keys} />
+      </AuthLayout>
     </MetaData>
   );
 };

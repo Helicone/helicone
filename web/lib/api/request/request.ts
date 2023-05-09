@@ -113,7 +113,7 @@ export async function getRequestCount(
   });
 
   const query = `
-  SELECT count(request.id) as count
+  SELECT count(request.id)::bigint as count
   FROM request
     left join response on request.id = response.request
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
@@ -129,7 +129,7 @@ export async function getRequestCount(
   if (error !== null) {
     return { data: null, error: error };
   }
-  return { data: data[0].count, error: null };
+  return { data: +data[0].count, error: null };
 }
 
 export async function getRequestCountClickhouse(

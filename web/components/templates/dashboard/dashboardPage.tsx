@@ -27,7 +27,6 @@ import TimeGraphWHeader from "./timeGraphWHeader";
 import { useDashboardPage } from "./useDashboardPage";
 
 interface DashboardPageProps {
-  user: User;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
@@ -44,7 +43,7 @@ type LiveLogType = {
 export type Loading<T> = T | "loading";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, keys } = props;
+  const { keys } = props;
   const [interval, setInterval] = useState<TimeInterval>("24h");
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
@@ -85,7 +84,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   return (
-    <AuthLayout user={user}>
+    <div>
       <AuthHeader
         title={"Dashboard"}
         headerActions={
@@ -193,7 +192,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           />
         </div>
       )}
-    </AuthLayout>
+    </div>
   );
 };
 
