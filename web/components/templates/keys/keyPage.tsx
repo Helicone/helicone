@@ -300,7 +300,7 @@ const KeyPage = (props: KeyPageProps) => {
                             api_key_hash: res,
                             user_id: user?.id!,
                             api_key_name: name,
-                            organization_id: org?.currentOrg?.id,
+                            organization_id: org?.currentOrg?.id!,
                           })
                           .then((res) => refetchHeliconeKeys());
                       });
