@@ -71,6 +71,7 @@ export async function forwardRequestToOpenAi(
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
+
   let response;
   if (requestSettings.ff_increase_timeout) {
     const controller = new AbortController();
@@ -469,6 +470,7 @@ async function forwardAndLog(
   retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
+  console.log("REQUEST AT")
   const auth = request.headers.get("Authorization");
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });

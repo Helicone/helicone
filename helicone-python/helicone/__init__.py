@@ -15,6 +15,9 @@ from openai.api_resources import (
 )
 
 api_key = os.environ.get("HELICONE_API_KEY", None)
+if (api_key is None):
+    warnings.warn("Helicone API key is not set as an environment variable.")
+
 base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
 
 def normalize_data_type(data_type):
@@ -35,15 +38,8 @@ def normalize_data_type(data_type):
 
 class Helicone:
     def __init__(self):
-        # self._check_env_var()
         self.openai = openai
         self.apply_helicone_auth()
-
-    def _check_env_var(self):
-        if "HELICONE_API_KEY" in os.environ:
-            self.api_key = os.environ["HELICONE_API_KEY"]
-        else:
-            warnings.warn("Helicone API key is not set as an environment variable.")
 
     @property
     def api_key(self):

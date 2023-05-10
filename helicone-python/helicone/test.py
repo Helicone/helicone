@@ -79,7 +79,6 @@ def hash(key: str) -> str:
 
 def fetch_feedback(helicone_id):
     api_key_hash = hash(f'Bearer {os.getenv("HELICONE_API_KEY_LOCAL")}')
-    print("API KEY HASH", api_key_hash)
 
     # Fetch the response with the corresponding helicone_id
     response_query = supabase.table("response").select("id, request").eq("request", helicone_id)
@@ -142,3 +141,4 @@ def test_log_feedback():
     assert feedback_data[0]["float_value"] is None
     assert feedback_data[0]["string_value"] is None
     assert feedback_data[0]["categorical_value"] is None
+    
