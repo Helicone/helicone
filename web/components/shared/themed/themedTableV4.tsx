@@ -13,7 +13,7 @@ import {
   Row,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ColumnType } from "../../../services/lib/filters/frontendFilterDefs";
 import {
   SortDirection,
@@ -81,6 +81,14 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
   const router = useRouter();
   const hasPrevious = page > 1;
   const hasNext = to <= count!;
+  // Gross temp fix
+  useEffect(() => {
+    if (!router.query.page_size) {
+      router.push({
+        query: { ...router.query, page_size: 25 },
+      });
+    }
+  }, [router]);
 
   return (
     <div className="space-y-2">
@@ -299,7 +307,9 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
               onPageSizeChangeHandler &&
                 onPageSizeChangeHandler(parseInt(e.target.value, 10));
             }}
+            value={router.query.page_size}
           >
+            <option>10</option>
             <option>25</option>
             <option>50</option>
             <option>100</option>
