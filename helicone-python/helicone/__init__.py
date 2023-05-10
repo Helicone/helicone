@@ -107,10 +107,12 @@ class Helicone:
             headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
             headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
 
+            original_api_base = openai.api_base
+            headers.update({"Helicone-OpenAI-Api-Base": original_api_base})
+
             kwargs["headers"] = headers
 
-            original_api_base = openai.api_base
-            openai.api_base = base_url
+            openai.api_base = self.base_url
             try:
                 result = func(*args, **kwargs)
             finally:
