@@ -107,6 +107,7 @@ export interface Database {
         Row: {
           color: string
           created_at: string | null
+          has_onboarded: boolean
           icon: string
           id: string
           is_personal: boolean
@@ -117,6 +118,7 @@ export interface Database {
         Insert: {
           color?: string
           created_at?: string | null
+          has_onboarded?: boolean
           icon?: string
           id?: string
           is_personal?: boolean
@@ -127,6 +129,7 @@ export interface Database {
         Update: {
           color?: string
           created_at?: string | null
+          has_onboarded?: boolean
           icon?: string
           id?: string
           is_personal?: boolean
