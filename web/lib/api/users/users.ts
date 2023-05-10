@@ -94,7 +94,7 @@ export async function userMetricsCount(
   const query = `
 SELECT
   count(DISTINCT r.user_id) as count
-from response_copy_v1 r
+from response_copy_v2 r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
