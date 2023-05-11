@@ -1,7 +1,9 @@
 import functools
+import uuid
 import inspect
 import os
 import openai
+import requests
 import warnings
 from openai.api_resources import (
     ChatCompletion,
@@ -12,33 +14,89 @@ from openai.api_resources import (
     Moderation,
 )
 
+api_key = os.environ.get("HELICONE_API_KEY", None)
+if (api_key is None):
+    warnings.warn("Helicone API key is not set as an environment variable.")
+
+base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
+
+def normalize_data_type(data_type):
+    if isinstance(data_type, str):
+        data_type = data_type.lower()
+
+    if data_type in (str, "str", "string"):
+        return "string"
+    elif data_type in (bool, "bool", "boolean"):
+        return "boolean"
+    elif data_type in (float, int, "float", "int", "numerical"):
+        return "numerical"
+    elif data_type in (object, "object", "categorical"):
+        return "categorical"
+    else:
+        raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+
+
 class Helicone:
     def __init__(self):
-        self._api_key = None
-        self._check_env_var()
+        self.openai = openai
         self.apply_helicone_auth()
-
-    def _check_env_var(self):
-        if "HELICONE_API_KEY" in os.environ:
-            self.api_key = os.environ["HELICONE_API_KEY"]
-        else:
-            warnings.warn("Helicone API key is not set as an environment variable.")
 
     @property
     def api_key(self):
-        return self._api_key
-    
+        global api_key
+        return api_key
+
     @api_key.setter
-    def api_key(self, key: str):
-        self._api_key = key
+    def api_key(self, value):
+        global api_key
+        api_key = value
+
+    @property
+    def base_url(self):
+        global base_url
+        return base_url
+
+    @base_url.setter
+    def base_url(self, value):
+        global base_url
+        base_url = value
+
+    def log_feedback(self, response, name, value, data_type=None):
+        helicone_id = response.get("helicone", {}).get("id")
+        if not helicone_id:
+            raise ValueError("The provided response does not have a valid Helicone ID.")
+
+        feedback_data = {
+            "helicone-id": helicone_id,
+            "name": name,
+            "value": value,
+        }
+        if data_type:
+            feedback_data["data-type"] = normalize_data_type(data_type)
+
+        url = f"{base_url}/feedback"
+
+        headers = {
+            "Content-Type": "application/json",
+            "Helicone-Auth": f"Bearer {api_key}",
+        }
+
+        response = requests.post(url, headers=headers, json=feedback_data)
+        response.raise_for_status()
+        return response.json()
+
 
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             headers = kwargs.get("headers", {})
 
-            if "Helicone-Auth" not in headers and self.api_key:
-                headers["Helicone-Auth"] = f"Bearer {self.api_key}"
+            if "Helicone-Auth" not in headers and api_key:
+                headers["Helicone-Auth"] = f"Bearer {api_key}"
+
+            # Generate a UUID and add it to the headers
+            helicone_request_id = str(uuid.uuid4())
+            headers["helicone-request-id"] = helicone_request_id
 
             headers.update(self._get_property_headers(kwargs.pop("properties", {})))
             headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
@@ -48,11 +106,14 @@ class Helicone:
             kwargs["headers"] = headers
 
             original_api_base = openai.api_base
-            openai.api_base = "https://oai.hconeai.com/v1"
+            openai.api_base = base_url
             try:
                 result = func(*args, **kwargs)
             finally:
                 openai.api_base = original_api_base
+
+            # Add the "helicone" field to the response object
+            result["helicone"] = {"id": helicone_request_id}
 
             return result
 
@@ -103,6 +164,7 @@ class Helicone:
                 openai.api_base = original_api_base
 
         return async_gen_wrapper if inspect.isasyncgenfunction(func) else async_func_wrapper
+
 
 
     def _get_property_headers(self, properties):
@@ -160,8 +222,5 @@ class Helicone:
 
     
 
-# Initialize Helicone and apply authentication to the specified classes
-helicone_instance = Helicone()
-
-# Expose the methods for easy user access
-api_key = helicone_instance.api_key
+helicone = Helicone()
+log_feedback = helicone.log_feedback
