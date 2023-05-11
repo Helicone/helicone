@@ -59,6 +59,7 @@ export async function forwardRequestToOpenAi(
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
+
   let response;
   if (requestSettings.ff_increase_timeout) {
     const controller = new AbortController();
@@ -511,6 +512,7 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+  console.log("request id", requestId);
   async function responseBodyTimeout(delay_ms: number) {
     await new Promise((resolve) => setTimeout(resolve, delay_ms));
     console.log("response body timeout");

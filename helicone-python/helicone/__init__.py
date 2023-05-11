@@ -39,6 +39,28 @@ def normalize_data_type(data_type):
         raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
 
 
+api_key = os.environ.get("HELICONE_API_KEY", None)
+if (api_key is None):
+    warnings.warn("Helicone API key is not set as an environment variable.")
+
+base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
+
+def normalize_data_type(data_type):
+    if isinstance(data_type, str):
+        data_type = data_type.lower()
+
+    if data_type in (str, "str", "string"):
+        return "string"
+    elif data_type in (bool, "bool", "boolean"):
+        return "boolean"
+    elif data_type in (float, int, "float", "int", "numerical"):
+        return "numerical"
+    elif data_type in (object, "object", "categorical"):
+        return "categorical"
+    else:
+        raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+
+
 class Helicone:
     def __init__(self):
         self.openai = openai
@@ -111,7 +133,8 @@ class Helicone:
 
             kwargs["headers"] = headers
 
-            openai.api_base = self.base_url
+            original_api_base = openai.api_base
+            openai.api_base = base_url
 
             if openai.api_type == "azure":
                 if base_url.endswith('/v1'):
