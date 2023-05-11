@@ -120,7 +120,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       const hasConverted: Result<boolean, string> = await fetch(
         "/api/has_unmigrated_requests"
       ).then((res) => res.json());
-      console.log("hasConverted", hasConverted);
       return hasConverted?.data === true;
     },
     refetchOnWindowFocus: false,

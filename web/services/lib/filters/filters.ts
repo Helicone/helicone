@@ -110,7 +110,6 @@ export function buildFilterLeaf(
 
   for (const tableKey in filter) {
     const table = filter[tableKey as keyof FilterLeaf];
-    console.log(filter);
 
     for (const columnKey in table) {
       const column = table[columnKey as keyof typeof table] as Record<

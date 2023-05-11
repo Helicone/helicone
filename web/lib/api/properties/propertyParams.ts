@@ -61,7 +61,6 @@ export async function getPropertyParams(
   )
   limit 100
 `;
-  console.log(query);
 
   const { data, error } = await dbQueryClickhouse<PropertyParam>(
     query,

@@ -19,7 +19,6 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     )
   )
 `;
-  console.log(query);
 
   res.status(200).json(
     resultMap(

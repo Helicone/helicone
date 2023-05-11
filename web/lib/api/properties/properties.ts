@@ -22,7 +22,6 @@ export async function getProperties(
     ${builtFilter.filter}
   )
 `;
-  console.log(query);
 
   const { data, error } = await dbExecute<Property>(query, builtFilter.argsAcc);
   if (error !== null) {

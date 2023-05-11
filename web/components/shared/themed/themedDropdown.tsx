@@ -72,7 +72,6 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
       transitionRef.current &&
       !(transitionRef.current as any).contains(event.target)
     ) {
-      console.log("clicked outside");
       setCategorySelected(false);
     }
   };
