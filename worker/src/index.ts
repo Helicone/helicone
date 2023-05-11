@@ -38,6 +38,7 @@ export interface RequestSettings {
   helicone_api_key?: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
+  api_base?: string;
 }
 
 export async function forwardRequestToOpenAi(
@@ -46,13 +47,19 @@ export async function forwardRequestToOpenAi(
   body?: string,
   retryOptions?: RetryOptions
 ): Promise<Response> {
-  const url = new URL(request.url);
-  const new_url = new URL(`https://api.openai.com${url.pathname}`);
+  const originalUrl = new URL(request.url);
+
+  const defaultBase = "https://api.openai.com/v1";
+  const apiBase = (requestSettings.api_base ?? defaultBase).replace(/\/$/, ""); // remove trailing slash if any
+  const apiBaseUrl = new URL(apiBase);
+
+  const new_url = new URL(
+    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+  );
   const headers = removeHeliconeHeaders(request.headers);
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
-
 
   let response;
   if (requestSettings.ff_increase_timeout) {
@@ -305,6 +312,22 @@ export async function hash(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
+function validateApiConfiguration(api_base: string | undefined): boolean {
+  const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
+  const azurePattern =
+    /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
+  const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
+  const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
+
+  return (
+    api_base === undefined ||
+    openAiPattern.test(api_base) ||
+    azurePattern.test(api_base) ||
+    localProxyPattern.test(api_base) ||
+    heliconeProxyPattern.test(api_base)
+  );
+}
+
 function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
   const propTag = "helicone-property-";
   const properties = Object.fromEntries(
@@ -312,6 +335,7 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       .filter(([key]) => key.startsWith(propTag) && key.length > propTag.length)
       .map(([key, value]) => [key.substring(propTag.length), value])
   );
+
   return {
     userId:
       headers.get("Helicone-User-Id")?.substring(0, 128) ??
@@ -435,8 +459,8 @@ async function forwardAndLog(
   retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
-  console.log("REQUEST AT")
-  const auth = request.headers.get("Authorization");
+  const auth =
+    request.headers.get("Authorization") ?? request.headers.get("api-key");
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
   }
@@ -495,6 +519,9 @@ async function forwardAndLog(
     console.log("response body timeout");
     return globalResponseBody;
   }
+
+  const headers = getHeliconeHeaders(request.headers);
+
   ctx.waitUntil(
     (async () => {
       const dbClient = createClient(
@@ -524,13 +551,14 @@ async function forwardAndLog(
         }
       }
       const requestBody = body === "" ? undefined : body;
+
       const requestResult = await logRequest({
         dbClient,
         request,
         auth,
         body: requestBody,
         prompt: prompt,
-        ...getHeliconeHeaders(request.headers),
+        ...headers,
         requestId,
         heliconeApiKey: requestSettings.helicone_api_key,
       });
@@ -748,7 +776,6 @@ export default {
       if (request.url.includes("audio")) {
         const url = new URL(request.url);
         const new_url = new URL(`https://api.openai.com${url.pathname}`);
-        console.log("new url", new_url.href);
         return await fetch(new_url.href, {
           method: request.method,
           headers: request.headers,
@@ -812,6 +839,12 @@ export default {
         }
       }
 
+      const api_base =
+        request.headers.get("Helicone-OpenAI-Api-Base") ?? undefined;
+      if (!validateApiConfiguration(api_base)) {
+        return new Response(`Invalid API base "${api_base}"`, { status: 400 });
+      }
+
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
         tokenizer_count_api: env.TOKENIZER_COUNT_API,
@@ -820,6 +853,7 @@ export default {
           request.headers.get("helicone-ff-stream-force-format") === "true",
         ff_increase_timeout:
           request.headers.get("helicone-ff-increase-timeout") === "true",
+        api_base,
       };
 
       const retryOptions = getRetryOptions(request);
