@@ -11,7 +11,7 @@ import { capitalizeWords } from "../utils/utils";
 interface ThemedTabsProps {
   options: {
     label: string;
-    icon: ForwardRefExoticComponent<
+    icon?: ForwardRefExoticComponent<
       SVGProps<SVGSVGElement> & {
         title?: string | undefined;
         titleId?: string | undefined;
@@ -44,12 +44,14 @@ export default function ThemedTabs(props: ThemedTabsProps) {
             >
               {({ selected }) => (
                 <div className="flex flex-row space-x-2 items-center w-fit">
-                  <option.icon
-                    className={clsx(
-                      selected ? "text-sky-500" : "text-gray-500",
-                      "w-5 h-5 inline-block"
-                    )}
-                  />
+                  {option.icon && (
+                    <option.icon
+                      className={clsx(
+                        selected ? "text-sky-500" : "text-gray-500",
+                        "w-5 h-5 inline-block"
+                      )}
+                    />
+                  )}
                   <p className={`w-max hidden ${breakpoint}:inline`}>
                     {option.label}
                   </p>

@@ -1,12 +1,16 @@
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
+  CurrencyDollarIcon,
+  ExclamationCircleIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useState } from "react";
 
 import { GraphDataState } from "../../../lib/dashboardGraphs";
+import { middleTruncString } from "../../../lib/stringHelpers";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeIntervalAgo,
@@ -20,6 +24,7 @@ import { clsx } from "../../shared/clsx";
 import AuthLayout from "../../shared/layout/authLayout";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import ThemedTabs from "../../shared/themed/themedTabs";
 import { Filters } from "./filters";
 
 import { MetricsPanel } from "./metricsPanel";
@@ -187,10 +192,41 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
           />
           <MetricsPanel metrics={metrics.data ?? "loading"} />
-          <TimeGraphWHeader
-            data={timeData}
-            timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
-          />
+          <div className="grid grid-cols-5 gap-4">
+            <div className="col-span-3">
+              <TimeGraphWHeader
+                data={timeData}
+                timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+              />
+            </div>
+            <div className="col-span-2 pt-[4.25rem] h-96">
+              <div className="p-6 bg-white border border-gray-300 rounded-lg space-y-2 h-96 overflow-hidden">
+                <div className="w-full flex flex-row items-center justify-between">
+                  <p className="text-md text-gray-700">Top Users</p>
+                </div>
+                <ul className="overflow-auto flex flex-col h-full pb-4">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <li
+                      key={i}
+                      className="flex flex-row items-center justify-between w-full py-3"
+                    >
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-gray-700 text-sm font-semibold">
+                          scottmktn@gmail.com
+                        </p>
+                        <div className="text-gray-500 text-xs">
+                          {middleTruncString(crypto.randomUUID(), 28)}
+                        </div>
+                      </div>
+                      <p className="text-gray-700 text-md font-semibold">
+                        12,432
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </AuthLayout>

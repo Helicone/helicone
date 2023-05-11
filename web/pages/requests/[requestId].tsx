@@ -3,6 +3,7 @@ import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../../components/shared/authHeader";
 import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
+import RequestIdPage from "../../components/templates/requestId/requestIdPage";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 
 interface RequestIdProps {
@@ -16,8 +17,14 @@ const RequestId = (props: RequestIdProps) => {
   return (
     <MetaData title="Request ID">
       <AuthLayout user={user}>
-        <AuthHeader title={`Request: ${requestId}`} />
-        <h1>hello id</h1>
+        <AuthHeader
+          title={`${requestId}`}
+          breadcrumb={{
+            title: "Requests",
+            href: "/requests",
+          }}
+        />
+        <RequestIdPage requestId={requestId} />
       </AuthLayout>
     </MetaData>
   );
