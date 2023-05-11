@@ -41,18 +41,6 @@ export interface RequestSettings {
   api_base?: string;
 }
 
-function removeOverlap(base: string, path: string): string {
-  const baseSegments = base.split("/").filter(segment => segment.length > 0); // filter out empty strings
-  const pathSegments = path.split("/").filter(segment => segment.length > 0); // filter out empty strings
-
-  while (baseSegments.length > 0 && pathSegments.length > 0 && baseSegments[baseSegments.length - 1] === pathSegments[0]) {
-    baseSegments.pop();
-    pathSegments.shift();
-  }
-
-  return baseSegments.join("/") + "/" + pathSegments.join("/");
-}
-
 export async function forwardRequestToOpenAi(
   request: Request,
   requestSettings: RequestSettings,
