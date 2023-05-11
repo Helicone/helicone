@@ -65,12 +65,11 @@ export async function forwardRequestToOpenAi(
   const apiBase = (requestSettings.api_base ?? defaultBase).replace(/\/$/, ""); // remove trailing slash if any
   const apiBaseUrl = new URL(apiBase);
 
-  const new_url = new URL(`${apiBaseUrl.origin}${originalUrl.pathname}`);
+  const new_url = new URL(`${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`);
   const headers = removeHeliconeHeaders(request.headers);
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
-
 
   let response;
   if (requestSettings.ff_increase_timeout) {
@@ -325,7 +324,7 @@ export async function hash(key: string): Promise<string> {
 
 function validateApiConfiguration(api_base: string | undefined): boolean {
   const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
-  const azurePattern = /^https:\/\/[^.]*\.azure-api\.net\/?$/;
+  const azurePattern = /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
   const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
   const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
 
@@ -337,6 +336,7 @@ function validateApiConfiguration(api_base: string | undefined): boolean {
     heliconeProxyPattern.test(api_base)
   );
 }
+
 
 
 function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
@@ -470,11 +470,11 @@ async function forwardAndLog(
   retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
-  console.log("REQUEST AT")
+  console.log("REQUEST AT", request)
   const auth = request.headers.get("Authorization");
-  if (auth === null) {
-    return new Response("No authorization header found!", { status: 401 });
-  }
+  // if (auth === null) {
+  //   return new Response("No authorization header found!", { status: 401 });
+  // }
   const startTime = new Date();
 
   const response = await (retryOptions
