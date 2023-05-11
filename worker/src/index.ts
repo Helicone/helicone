@@ -470,11 +470,10 @@ async function forwardAndLog(
   retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
-  console.log("REQUEST AT", request)
-  const auth = request.headers.get("Authorization");
-  // if (auth === null) {
-  //   return new Response("No authorization header found!", { status: 401 });
-  // }
+  const auth = request.headers.get("Authorization") ?? request.headers.get("api-key");
+  if (auth === null) {
+    return new Response("No authorization header found!", { status: 401 });
+  }
   const startTime = new Date();
 
   const response = await (retryOptions
@@ -524,7 +523,6 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
-  console.log("request id", requestId);
   async function responseBodyTimeout(delay_ms: number) {
     await new Promise((resolve) => setTimeout(resolve, delay_ms));
     console.log("response body timeout");
@@ -787,7 +785,6 @@ export default {
       if (request.url.includes("audio")) {
         const url = new URL(request.url);
         const new_url = new URL(`https://api.openai.com${url.pathname}`);
-        console.log("new url", new_url.href);
         return await fetch(new_url.href, {
           method: request.method,
           headers: request.headers,

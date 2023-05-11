@@ -13,6 +13,9 @@ from openai.api_resources import (
     Image,
     Moderation,
 )
+import logging
+
+logging.basicConfig(level=logging.WARNING)
 
 api_key = os.environ.get("HELICONE_API_KEY", None)
 if (api_key is None):
@@ -109,6 +112,13 @@ class Helicone:
             kwargs["headers"] = headers
 
             openai.api_base = self.base_url
+
+            if openai.api_type == "azure":
+                if base_url.endswith('/v1'):
+                    if base_url != "https://oai.hconeai.com/v1":
+                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {base_url}. Removing '/v1' from the end.")
+                    openai.api_base = base_url[:-3]
+
             try:
                 result = func(*args, **kwargs)
             finally:
