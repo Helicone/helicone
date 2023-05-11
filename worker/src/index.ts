@@ -20,6 +20,7 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
+import { handleFeedbackEndpoint, isFeedbackEndpoint } from "./feedback";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -51,6 +52,7 @@ export async function forwardRequestToOpenAi(
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+
 
   let response;
   if (requestSettings.ff_increase_timeout) {
@@ -288,7 +290,7 @@ async function logRequest({
   }
 }
 
-async function hash(key: string): Promise<string> {
+export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
     { name: "SHA-256" },
@@ -433,6 +435,7 @@ async function forwardAndLog(
   retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
+  console.log("REQUEST AT")
   const auth = request.headers.get("Authorization");
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
@@ -486,6 +489,7 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+  console.log("request id", requestId);
   async function responseBodyTimeout(delay_ms: number) {
     await new Promise((resolve) => setTimeout(resolve, delay_ms));
     console.log("response body timeout");
@@ -753,6 +757,10 @@ export default {
       }
       if (isLoggingEndpoint(request)) {
         const response = await handleLoggingEndpoint(request, env);
+        return response;
+      }
+      if (isFeedbackEndpoint(request)) {
+        const response = await handleFeedbackEndpoint(request, env);
         return response;
       }
 
