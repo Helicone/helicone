@@ -53,12 +53,13 @@ export async function forwardRequestToOpenAi(
   const apiBase = (requestSettings.api_base ?? defaultBase).replace(/\/$/, ""); // remove trailing slash if any
   const apiBaseUrl = new URL(apiBase);
 
-  const new_url = new URL(`${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`);
+  const new_url = new URL(
+    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+  );
   const headers = removeHeliconeHeaders(request.headers);
   const method = request.method;
   const baseInit = { method, headers };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
-
 
   let response;
   if (requestSettings.ff_increase_timeout) {
@@ -313,7 +314,8 @@ export async function hash(key: string): Promise<string> {
 
 function validateApiConfiguration(api_base: string | undefined): boolean {
   const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
-  const azurePattern = /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
+  const azurePattern =
+    /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
   const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
   const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
 
@@ -325,8 +327,6 @@ function validateApiConfiguration(api_base: string | undefined): boolean {
     heliconeProxyPattern.test(api_base)
   );
 }
-
-
 
 function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
   const propTag = "helicone-property-";
@@ -459,7 +459,8 @@ async function forwardAndLog(
   retryOptions?: RetryOptions,
   prompt?: Prompt
 ): Promise<Response> {
-  const auth = request.headers.get("Authorization") ?? request.headers.get("api-key");
+  const auth =
+    request.headers.get("Authorization") ?? request.headers.get("api-key");
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
   }
@@ -552,14 +553,14 @@ async function forwardAndLog(
       const requestBody = body === "" ? undefined : body;
 
       const requestResult = await logRequest({
-          dbClient,
-          request,
-          auth,
-          body: requestBody,
-          prompt: prompt,
-          ...headers,
-          requestId,
-          heliconeApiKey: requestSettings.helicone_api_key,
+        dbClient,
+        request,
+        auth,
+        body: requestBody,
+        prompt: prompt,
+        ...headers,
+        requestId,
+        heliconeApiKey: requestSettings.helicone_api_key,
       });
 
       const responseStatus = response.status;
@@ -838,7 +839,8 @@ export default {
         }
       }
 
-      const api_base = request.headers.get("Helicone-OpenAI-Api-Base") ?? undefined;
+      const api_base =
+        request.headers.get("Helicone-OpenAI-Api-Base") ?? undefined;
       if (!validateApiConfiguration(api_base)) {
         return new Response(`Invalid API base "${api_base}"`, { status: 400 });
       }
