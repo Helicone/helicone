@@ -1,11 +1,11 @@
 import functools
 import uuid
+import inspect
 import os
 import openai
 import requests
 import warnings
 from openai.api_resources import (
-    Audio,
     ChatCompletion,
     Completion,
     Edit,
@@ -118,6 +118,53 @@ class Helicone:
             return result
 
         return wrapper
+    
+    def _with_helicone_auth_async(self, func):
+        @functools.wraps(func)
+        async def async_func_wrapper(*args, **kwargs):
+            headers = kwargs.get("headers", {})
+
+            if "Helicone-Auth" not in headers and self.api_key:
+                headers["Helicone-Auth"] = f"Bearer {self.api_key}"
+
+            headers.update(self._get_property_headers(kwargs.pop("properties", {})))
+            headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
+            headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
+            headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
+
+            kwargs["headers"] = headers
+
+            original_api_base = openai.api_base
+            openai.api_base = "https://oai.hconeai.com/v1"
+            try:
+                return await func(*args, **kwargs)
+            finally:
+                openai.api_base = original_api_base
+
+        @functools.wraps(func)
+        async def async_gen_wrapper(*args, **kwargs):
+            headers = kwargs.get("headers", {})
+
+            if "Helicone-Auth" not in headers and self.api_key:
+                headers["Helicone-Auth"] = f"Bearer {self.api_key}"
+
+            headers.update(self._get_property_headers(kwargs.pop("properties", {})))
+            headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
+            headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
+            headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
+
+            kwargs["headers"] = headers
+
+            original_api_base = openai.api_base
+            openai.api_base = "https://oai.hconeai.com/v1"
+            try:
+                async for item in func(*args, **kwargs):
+                    yield item
+            finally:
+                openai.api_base = original_api_base
+
+        return async_gen_wrapper if inspect.isasyncgenfunction(func) else async_func_wrapper
+
 
 
     def _get_property_headers(self, properties):
@@ -158,18 +205,22 @@ class Helicone:
 
     def apply_helicone_auth(self):
         api_resources_classes = [
-            (Audio, "transcribe"),
-            (ChatCompletion, "create"),
-            (Completion, "create"),
-            (Edit, "create"),
-            (Embedding, "create"),
-            (Image, "create"),
-            (Moderation, "create"),
+            (ChatCompletion, "create", "acreate"),
+            (Completion, "create", "acreate"),
+            (Edit, "create", "acreate"),
+            (Embedding, "create", "acreate"),
+            (Image, "create", "acreate"),
+            (Moderation, "create", "acreate"),
         ]
 
-        for api_resource_class, method in api_resources_classes:
+        for api_resource_class, method, async_method in api_resources_classes:
             create_method = getattr(api_resource_class, method)
-            setattr(api_resource_class, "create", self._with_helicone_auth(create_method))
+            setattr(api_resource_class, method, self._with_helicone_auth(create_method))
+
+            async_create_method = getattr(api_resource_class, async_method)
+            setattr(api_resource_class, async_method, self._with_helicone_auth_async(async_create_method))
+
+    
 
 helicone = Helicone()
 log_feedback = helicone.log_feedback
