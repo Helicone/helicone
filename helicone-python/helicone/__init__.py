@@ -13,6 +13,31 @@ from openai.api_resources import (
     Image,
     Moderation,
 )
+import logging
+
+logging.basicConfig(level=logging.WARNING)
+
+api_key = os.environ.get("HELICONE_API_KEY", None)
+if (api_key is None):
+    warnings.warn("Helicone API key is not set as an environment variable.")
+
+base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
+
+def normalize_data_type(data_type):
+    if isinstance(data_type, str):
+        data_type = data_type.lower()
+
+    if data_type in (str, "str", "string"):
+        return "string"
+    elif data_type in (bool, "bool", "boolean"):
+        return "boolean"
+    elif data_type in (float, int, "float", "int", "numerical"):
+        return "numerical"
+    elif data_type in (object, "object", "categorical"):
+        return "categorical"
+    else:
+        raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+
 
 api_key = os.environ.get("HELICONE_API_KEY", None)
 if (api_key is None):
@@ -103,10 +128,20 @@ class Helicone:
             headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
             headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
 
+            original_api_base = openai.api_base
+            headers.update({"Helicone-OpenAI-Api-Base": original_api_base})
+
             kwargs["headers"] = headers
 
             original_api_base = openai.api_base
             openai.api_base = base_url
+
+            if openai.api_type == "azure":
+                if base_url.endswith('/v1'):
+                    if base_url != "https://oai.hconeai.com/v1":
+                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {base_url}. Removing '/v1' from the end.")
+                    openai.api_base = base_url[:-3]
+
             try:
                 result = func(*args, **kwargs)
             finally:

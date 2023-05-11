@@ -60,9 +60,9 @@ export async function handleFeedbackEndpoint(
 
   // If response not logged, retry up to two more times
   if (responseId === undefined) {
-    console.log("Response not logged, retrying up to two more times.")
+    console.log("Response not logged, retrying up to two more times.");
     for (let i = 0; i < 2; i++) {
-      console.log(`Retry ${i + 1}...`)
+      console.log(`Retry ${i + 1}...`);
       const sleepDuration = i === 0 ? 100 : 1000;
       await new Promise((resolve) => setTimeout(resolve, sleepDuration));
 
@@ -76,10 +76,21 @@ export async function handleFeedbackEndpoint(
 
   if (responseId !== undefined) {
     try {
-      await addFeedback(heliconeId, responseId, name, dataType, value, env, heliconeAuth);
-      return new Response(JSON.stringify({
-        message: "Feedback added successfully.",
-      }), { status: 200 });
+      await addFeedback(
+        heliconeId,
+        responseId,
+        name,
+        dataType,
+        value,
+        env,
+        heliconeAuth
+      );
+      return new Response(
+        JSON.stringify({
+          message: "Feedback added successfully.",
+        }),
+        { status: 200 }
+      );
     } catch (error) {
       console.error("Error adding feedback:", error);
       const errorMessage =
@@ -89,12 +100,14 @@ export async function handleFeedbackEndpoint(
       });
     }
   } else {
-    return new Response(`Error: Response not found for heliconeId "${heliconeId}".`, {
-      status: 500,
-    });
+    return new Response(
+      `Error: Response not found for heliconeId "${heliconeId}".`,
+      {
+        status: 500,
+      }
+    );
   }
 }
-
 
 interface ResponseData {
   id: number;
@@ -132,7 +145,6 @@ async function isResponseLogged(
   // Return the response.id if the response exists, otherwise return undefined
   return response ? response.id : undefined;
 }
-
 
 // Assumes that the request and response for the heliconeId exists!
 export async function addFeedback(
@@ -178,7 +190,6 @@ export async function addFeedback(
   } else {
     throw new Error("Internal error.");
   }
-
 
   // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
   if (!requestData || matchingApiKeyHash !== apiKeyHash) {
@@ -234,7 +245,6 @@ export async function addFeedback(
     feedback_metric_id: metricId,
     created_by: "API",
   };
-
 
   switch (dataType) {
     case "boolean":
