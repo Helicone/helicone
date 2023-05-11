@@ -12,7 +12,7 @@ postgres_url = os.environ.get('POSTGRES_URL')
 
 def get_payload(
     date_step: str,  # must be in the format '2023-04-08 00:00:00'
-    target_table='default.response_copy_v4',
+    target_table='default.response_copy_v2',
     source_table='request_response_clickhouse',
 ) -> str:
     payload = f'''
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     headers = {'Content-Type': 'application/octet-stream'}
     auth = ('default', clickhouse_password)
 
-    end_date = datetime.datetime(2023, 4, 6, 0, 0, 0)
+    end_date = datetime.datetime(2023, 4, 26, 0, 0, 0)
     start_date = datetime.datetime(2022, 10, 1, 0, 0, 0)
     next_date = end_date
     while next_date > start_date:
@@ -57,7 +57,6 @@ if __name__ == '__main__':
             target_table=target_table,
             source_table=source_table,
         )
-        print(f"payload: {payload}")
         response = requests.post(url, headers=headers, data=payload, auth=auth)
         if (response.status_code != 200):
             print(
