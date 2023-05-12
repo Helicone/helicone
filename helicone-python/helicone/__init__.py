@@ -21,7 +21,7 @@ api_key = os.environ.get("HELICONE_API_KEY", None)
 if (api_key is None):
     warnings.warn("Helicone API key is not set as an environment variable.")
 
-base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
+proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
 def normalize_data_type(data_type):
     if isinstance(data_type, str):
@@ -43,7 +43,7 @@ api_key = os.environ.get("HELICONE_API_KEY", None)
 if (api_key is None):
     warnings.warn("Helicone API key is not set as an environment variable.")
 
-base_url = os.environ.get("HELICONE_BASE_URL", "https://oai.hconeai.com/v1")
+proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
 def normalize_data_type(data_type):
     if isinstance(data_type, str):
@@ -77,14 +77,14 @@ class Helicone:
         api_key = value
 
     @property
-    def base_url(self):
-        global base_url
-        return base_url
+    def proxy_url(self):
+        global proxy_url
+        return proxy_url
 
-    @base_url.setter
-    def base_url(self, value):
-        global base_url
-        base_url = value
+    @proxy_url.setter
+    def proxy_url(self, value):
+        global proxy_url
+        proxy_url = value
 
     def log_feedback(self, response, name, value, data_type=None):
         helicone_id = response.get("helicone", {}).get("id")
@@ -99,7 +99,7 @@ class Helicone:
         if data_type:
             feedback_data["data-type"] = normalize_data_type(data_type)
 
-        url = f"{base_url}/feedback"
+        url = f"{proxy_url}/feedback"
 
         headers = {
             "Content-Type": "application/json",
@@ -134,13 +134,13 @@ class Helicone:
             kwargs["headers"] = headers
 
             original_api_base = openai.api_base
-            openai.api_base = base_url
+            openai.api_base = proxy_url
 
             if openai.api_type == "azure":
-                if base_url.endswith('/v1'):
-                    if base_url != "https://oai.hconeai.com/v1":
-                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {base_url}. Removing '/v1' from the end.")
-                    openai.api_base = base_url[:-3]
+                if proxy_url.endswith('/v1'):
+                    if proxy_url != "https://oai.hconeai.com/v1":
+                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {proxy_url}. Removing '/v1' from the end.")
+                    openai.api_base = proxy_url[:-3]
 
             try:
                 result = func(*args, **kwargs)

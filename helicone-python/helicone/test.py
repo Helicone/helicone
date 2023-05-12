@@ -7,7 +7,7 @@ import uuid
 from supabase_py import create_client
 import hashlib
 
-helicone.base_url = "http://127.0.0.1:8787/v1"
+helicone.proxy_url = "http://127.0.0.1:8787/v1"
 helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
 
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
@@ -121,7 +121,7 @@ def fetch_feedback(helicone_id):
 
 
 def test_log_feedback():
-    helicone.base_url = "http://127.0.0.1:8787/v1"
+    helicone.proxy_url = "http://127.0.0.1:8787/v1"
     helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
     prompt = "Integration test for logging feedback"
 
