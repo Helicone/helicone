@@ -17,8 +17,6 @@ export interface Metrics {
   first_request: Date;
   last_request: Date;
   total_cost: number;
-  total_cached_requests: number;
-  total_cached_savings: number;
 }
 
 export interface GetMetricsOptions {
@@ -89,11 +87,7 @@ export async function getMetrics(
       (acc, modelMetric) => acc + modelCost(modelMetric),
       0
     ),
-    total_cached_savings: cachedModelMetrics.reduce(
-      (acc, modelMetric) => acc + modelCost(modelMetric),
-      0
-    ),
-    total_cached_requests: totalCachedRequests,
+
     total_requests: count,
     first_request: startDate,
     last_request: endDate,
