@@ -189,7 +189,9 @@ export async function addFeedback(
     matchingApiKeyHash = requestData.helicone_api_keys.api_key_hash;
     matchingApiKeyId = requestData.helicone_api_keys.id;
   } else {
-    throw new Error("Internal error. Make sure you're providing a valid helicone API key to authenticate your requests.");
+    throw new Error(
+      "Internal error. Make sure you're providing a valid helicone API key to authenticate your requests."
+    );
   }
 
   // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
