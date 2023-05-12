@@ -655,32 +655,34 @@ const AuthLayout = (props: AuthLayoutProps) => {
           <main className="flex-1 bg">
             <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
               {/* Replace with your content */}
-              {hasUnMigratedRequest && displayMigrationModal && (
-                <div className="pointer-events-none flex sm:justify-center mt-4">
-                  <div className="text-sm text-white w-full pointer-events-auto flex flex-col items-left justify-between gap-x-6 bg-cyan-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
-                    <div className="text-sm leading-6 items-center font-bold">
-                      Sorry for the inconvenience
+              {hasUnMigratedRequest &&
+                displayMigrationModal &&
+                (user?.email ?? "") !== DEMO_EMAIL && (
+                  <div className="pointer-events-none flex sm:justify-center mt-4">
+                    <div className="text-sm text-white w-full pointer-events-auto flex flex-col items-left justify-between gap-x-6 bg-cyan-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
+                      <div className="text-sm leading-6 items-center font-bold">
+                        Sorry for the inconvenience
+                      </div>
+                      <div className=" leading-6items-center">
+                        <strong className="font-semibold">
+                          We recently migrated our systems to support orgs and
+                          are still migrating your data to the new system. This
+                          process is taking a few days to complete. Any reuqests
+                          before April 22nd are still being migrated. Please
+                          contact us on discord if you have any questions.
+                        </strong>
+                      </div>
+                      <button
+                        className="leading-6 text-left font-bold"
+                        onClick={() => {
+                          setDisplayMigrationModal(false);
+                        }}
+                      >
+                        Dismiss
+                      </button>
                     </div>
-                    <div className=" leading-6items-center">
-                      <strong className="font-semibold">
-                        We recently migrated our systems to support orgs and are
-                        still migrating your data to the new system. This
-                        process is taking a few days to complete. Any reuqests
-                        before April 22nd are still being migrated. Please
-                        contact us on discord if you have any questions.
-                      </strong>
-                    </div>
-                    <button
-                      className="leading-6 text-left font-bold"
-                      onClick={() => {
-                        setDisplayMigrationModal(false);
-                      }}
-                    >
-                      Dismiss
-                    </button>
                   </div>
-                </div>
-              )}
+                )}
               {user?.email !== DEMO_EMAIL &&
                 !hasConvertedLoading &&
                 !hasConverted && (
