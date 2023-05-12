@@ -110,36 +110,65 @@ class Helicone:
         response.raise_for_status()
         return response.json()
 
+    def _prepare_headers(self, **kwargs):
+        headers = kwargs.get("headers", {})
+
+        if "Helicone-Auth" not in headers and api_key:
+            headers["Helicone-Auth"] = f"Bearer {api_key}"
+
+        # Generate a UUID and add it to the headers
+        helicone_request_id = str(uuid.uuid4())
+        headers["helicone-request-id"] = helicone_request_id
+
+        headers.update(self._get_property_headers(kwargs.pop("properties", {})))
+        headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
+        headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
+        headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
+
+        kwargs["headers"] = headers
+
+        return helicone_request_id, kwargs
+    
+    def _modify_result(self, result, helicone_request_id):
+        def result_with_helicone():
+            for r in result:
+                r["helicone"] = {"id": helicone_request_id}
+                yield r
+
+        if inspect.isgenerator(result):
+            return result_with_helicone()
+        else:
+            result["helicone"] = {"id": helicone_request_id}
+            return result
+
+
+    async def _modify_result_async(self, result, helicone_request_id):
+        async def result_with_helicone_async():
+            async for r in result:
+                r["helicone"] = {"id": helicone_request_id}
+                yield r
+
+        if inspect.isasyncgen(result):
+            return result_with_helicone_async()
+        else:
+            result["helicone"] = {"id": helicone_request_id}
+            return result
+
 
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            headers = kwargs.get("headers", {})
-
-            if "Helicone-Auth" not in headers and api_key:
-                headers["Helicone-Auth"] = f"Bearer {api_key}"
-
-            # Generate a UUID and add it to the headers
-            helicone_request_id = str(uuid.uuid4())
-            headers["helicone-request-id"] = helicone_request_id
-
-            headers.update(self._get_property_headers(kwargs.pop("properties", {})))
-            headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
-            headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
-            headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
+            helicone_request_id, kwargs = self._prepare_headers(**kwargs)
 
             original_api_base = openai.api_base
-            headers.update({"Helicone-OpenAI-Api-Base": original_api_base})
+            kwargs["headers"].update({"Helicone-OpenAI-Api-Base": original_api_base})
 
-            kwargs["headers"] = headers
-
-            original_api_base = openai.api_base
             openai.api_base = proxy_url
 
             if openai.api_type == "azure":
                 if proxy_url.endswith('/v1'):
                     if proxy_url != "https://oai.hconeai.com/v1":
-                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {proxy_url}. Removing '/v1' from the end.")
+                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {base_url}. Removing '/v1' from the end.")
                     openai.api_base = proxy_url[:-3]
 
             try:
@@ -147,91 +176,25 @@ class Helicone:
             finally:
                 openai.api_base = original_api_base
 
-            # Create a new generator that yields dictionaries from the original
-            # generator, but with the "helicone" field added
-            def result_with_helicone():
-                for r in result:
-                    r["helicone"] = {"id": helicone_request_id}
-                    yield r
-        
-            if inspect.isgenerator(result):
-                return result_with_helicone()
-            else:
-                result["helicone"] = {"id": helicone_request_id}
-                return result
+            return self._modify_result(result, helicone_request_id)
 
         return wrapper
     
     def _with_helicone_auth_async(self, func):
         @functools.wraps(func)
-        async def async_func_wrapper(*args, **kwargs):
-            headers = kwargs.get("headers", {})
-
-            if "Helicone-Auth" not in headers and self.api_key:
-                headers["Helicone-Auth"] = f"Bearer {self.api_key}"
-
-            helicone_request_id = str(uuid.uuid4())
-            headers["helicone-request-id"] = helicone_request_id
-
-            headers.update(self._get_property_headers(kwargs.pop("properties", {})))
-            headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
-            headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
-            headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
-
-            kwargs["headers"] = headers
+        async def wrapper(*args, **kwargs):
+            helicone_request_id, kwargs = self._prepare_headers(**kwargs)
 
             original_api_base = openai.api_base
             openai.api_base = "https://oai.hconeai.com/v1"
             try:
                 result = await func(*args, **kwargs)
-
-                async def result_with_helicone_async():
-                    async for r in result:
-                        r["helicone"] = {"id": helicone_request_id}
-                        yield r
-            
-                if inspect.isasyncgen(result):
-                    return result_with_helicone_async()
-                else:
-                    result["helicone"] = {"id": helicone_request_id}
-                    return result
-
-
-                # result["helicone"] = {"id": helicone_request_id} 
-                # return result
             finally:
                 openai.api_base = original_api_base
 
-        @functools.wraps(func)
-        async def async_gen_wrapper(*args, **kwargs):
-            headers = kwargs.get("headers", {})
+            return await self._modify_result_async(result, helicone_request_id)
 
-            if "Helicone-Auth" not in headers and self.api_key:
-                headers["Helicone-Auth"] = f"Bearer {self.api_key}"
-
-            helicone_request_id = str(uuid.uuid4())
-            headers["helicone-request-id"] = helicone_request_id
-
-            headers.update(self._get_property_headers(kwargs.pop("properties", {})))
-            headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
-            headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
-            headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
-
-            kwargs["headers"] = headers
-
-            original_api_base = openai.api_base
-            openai.api_base = "https://oai.hconeai.com/v1"
-            try:
-                async for item in func(*args, **kwargs):
-                    if isinstance(item, dict):
-                        item["helicone"] = {"id": helicone_request_id}
-                    yield item
-            finally:
-                openai.api_base = original_api_base
-
-        return async_gen_wrapper if inspect.isasyncgenfunction(func) else async_func_wrapper
-
-
+        return wrapper
 
     def _get_property_headers(self, properties):
         return {f"Helicone-Property-{key}": str(value) for key, value in properties.items()}

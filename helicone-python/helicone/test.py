@@ -4,8 +4,9 @@ import helicone
 from helicone import openai, log_feedback
 import requests
 import uuid
-from supabase_py import create_client
+from supabase import create_client
 import hashlib
+import pytest
 
 helicone.proxy_url = "http://127.0.0.1:8787/v1"
 helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
@@ -13,7 +14,7 @@ helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 SUPABASE_URL = "http://localhost:54321"
 
-supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 load_dotenv()
 
@@ -81,12 +82,12 @@ def fetch_feedback(helicone_id):
     api_key_hash = hash(f'Bearer {os.getenv("HELICONE_API_KEY_LOCAL")}')
 
     # Fetch the response with the corresponding helicone_id
-    response_query = supabase.table("response").select("id, request").eq("request", helicone_id)
+    response_query = sb.table("response").select("id, request").eq("request", helicone_id)
     response_result = response_query.single().execute()
     response_data = response_result["data"]
 
     # Fetch the request with the corresponding response.request value
-    request_query = supabase.table("request").select("id, helicone_api_keys (id, api_key_hash)").eq("id", response_data["request"])
+    request_query = sb.table("request").select("id, helicone_api_keys (id, api_key_hash)").eq("id", response_data["request"])
     request_result = request_query.single().execute()
     request_data = request_result["data"]
 
@@ -98,7 +99,7 @@ def fetch_feedback(helicone_id):
         raise ValueError("Not authorized to fetch feedback.")
 
     # Fetch feedback_metrics for the given api_key_id
-    metric_query = supabase.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", str(matching_api_key_id))
+    metric_query = sb.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", str(matching_api_key_id))
     metric_result = metric_query.execute()
     metric_data = metric_result["data"]
 
@@ -106,10 +107,10 @@ def fetch_feedback(helicone_id):
     feedback_data = []
     for metric in metric_data:
         feedback_query = (
-            supabase.table("feedback")
-            .select("created_by, boolean_value, float_value, string_value, categorical_value")
-            .eq("response_id", str(response_data["id"]))
-            .eq("feedback_metric_id", str(metric["id"]))
+            sb.table("feedback")
+                .select("created_by, boolean_value, float_value, string_value, categorical_value")
+                .eq("response_id", str(response_data["id"]))
+                .eq("feedback_metric_id", str(metric["id"]))
         )
         feedback_result = feedback_query.execute()
         feedback = feedback_result["data"]
@@ -142,3 +143,43 @@ def test_log_feedback():
     assert feedback_data[0]["string_value"] is None
     assert feedback_data[0]["categorical_value"] is None
     
+
+def test_sync_nostream():
+    result = openai.ChatCompletion.create(
+        model = 'gpt-3.5-turbo',
+        messages = [{
+            'role': 'user',
+            'content': "Hello World!"
+        }],
+        properties={"mode": "Create and stream=False"},
+        stream=False
+    )["choices"][0]["message"]["content"]
+
+
+def test_sync_stream():
+    for chunk in openai.ChatCompletion.create(
+        model = 'gpt-3.5-turbo',
+        messages = [{
+            'role': 'user',
+            'content': "Hello World!"
+        }],
+        properties={"mode": "Create and stream=True"},
+        stream=True
+    ):
+    #     print(chunk["helicone"])
+        content = chunk["choices"][0].get("delta", {}).get("content")
+        if content is not None:
+            print(chunk)
+            print(content, end='')
+
+@pytest.mark.asyncio
+async def test_async_nostream():
+    (await openai.ChatCompletion.acreate(
+        model = 'gpt-3.5-turbo',
+        messages = [{
+            'role': 'user',
+            'content': "Hello World!"
+        }],
+        properties={"mode": "Acreate and stream=False"},
+        stream=False
+    ))
