@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 import helicone
 from helicone import openai, log_feedback
-import requests
 import uuid
 from supabase import create_client
 import hashlib
@@ -145,7 +144,7 @@ def test_log_feedback():
     
 
 def test_sync_nostream():
-    result = openai.ChatCompletion.create(
+    response = openai.ChatCompletion.create(
         model = 'gpt-3.5-turbo',
         messages = [{
             'role': 'user',
@@ -155,9 +154,22 @@ def test_sync_nostream():
         stream=False
     )["choices"][0]["message"]["content"]
 
+    log_feedback(response, "condition", "create_and_stream_false")
+
+    helicone_id = response['helicone']['id']
+    feedback_data = fetch_feedback(helicone_id)
+
+    assert len(feedback_data) == 1
+    assert feedback_data[0]["boolean_value"] is None
+    assert feedback_data[0]["float_value"] is None
+    assert feedback_data[0]["string_value"] == "create_and_stream_false"
+    assert feedback_data[0]["categorical_value"] is None
+
 
 def test_sync_stream():
-    for chunk in openai.ChatCompletion.create(
+    from collections import deque
+
+    iterator = openai.ChatCompletion.create(
         model = 'gpt-3.5-turbo',
         messages = [{
             'role': 'user',
@@ -165,16 +177,23 @@ def test_sync_stream():
         }],
         properties={"mode": "Create and stream=True"},
         stream=True
-    ):
-    #     print(chunk["helicone"])
-        content = chunk["choices"][0].get("delta", {}).get("content")
-        if content is not None:
-            print(chunk)
-            print(content, end='')
+    )
+    last_chunk = deque(iterator, maxlen=1).pop()
+
+    log_feedback(last_chunk, "condition", "create_and_stream_true")
+
+    helicone_id = last_chunk['helicone']['id']
+    feedback_data = fetch_feedback(helicone_id)
+
+    assert len(feedback_data) == 1
+    assert feedback_data[0]["boolean_value"] is None
+    assert feedback_data[0]["float_value"] is None
+    assert feedback_data[0]["string_value"] == "create_and_stream_true"
+    assert feedback_data[0]["categorical_value"] is None
 
 @pytest.mark.asyncio
 async def test_async_nostream():
-    (await openai.ChatCompletion.acreate(
+    response = (await openai.ChatCompletion.acreate(
         model = 'gpt-3.5-turbo',
         messages = [{
             'role': 'user',
@@ -183,3 +202,38 @@ async def test_async_nostream():
         properties={"mode": "Acreate and stream=False"},
         stream=False
     ))
+
+    log_feedback(response, "condition", "acreate_and_stream_false")
+
+    helicone_id = response['helicone']['id']
+    feedback_data = fetch_feedback(helicone_id)
+
+    assert len(feedback_data) == 1
+    assert feedback_data[0]["boolean_value"] is None
+    assert feedback_data[0]["float_value"] is None
+    assert feedback_data[0]["string_value"] == "acreate_and_stream_false"
+    assert feedback_data[0]["categorical_value"] is None
+
+@pytest.mark.asyncio
+async def test_async_stream():
+    async for chunk in await openai.ChatCompletion.acreate(
+        model = 'gpt-3.5-turbo',
+        messages = [{
+            'role': 'user',
+            'content': "Hello World!"
+        }],
+        properties={"mode": "Acreate and stream=True"},
+        stream=True
+    ):
+        continue
+
+    log_feedback(chunk, "condition", "acreate_and_stream_true")
+
+    helicone_id = chunk['helicone']['id']
+    feedback_data = fetch_feedback(helicone_id)
+
+    assert len(feedback_data) == 1
+    assert feedback_data[0]["boolean_value"] is None
+    assert feedback_data[0]["float_value"] is None
+    assert feedback_data[0]["string_value"] == "acreate_and_stream_true"
+    assert feedback_data[0]["categorical_value"] is None

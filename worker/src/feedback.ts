@@ -84,10 +84,11 @@ export async function handleFeedbackEndpoint(
         value,
         env,
         heliconeAuth
-      );
+      ); // TODO: return the feedback id as a uuid and return it in the response
       return new Response(
         JSON.stringify({
           message: "Feedback added successfully.",
+          helicone_id: heliconeId,
         }),
         { status: 200 }
       );
@@ -155,7 +156,7 @@ export async function addFeedback(
   value: any,
   env: Env,
   heliconeAuth?: string
-): Promise<void> {
+): Promise<string> {
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
@@ -188,7 +189,7 @@ export async function addFeedback(
     matchingApiKeyHash = requestData.helicone_api_keys.api_key_hash;
     matchingApiKeyId = requestData.helicone_api_keys.id;
   } else {
-    throw new Error("Internal error.");
+    throw new Error("Internal error. Make sure you're providing a valid helicone API key to authenticate your requests.");
   }
 
   // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
@@ -274,14 +275,17 @@ export async function addFeedback(
   }
 
   // Save the feedback data to the database
-  const { error: insertError } = await dbClient
+  const { data, error: insertError } = await dbClient
     .from("feedback")
-    .insert(feedbackData);
+    .insert(feedbackData)
+    .select("id")
+    .single();
 
   if (insertError) {
     console.error("Error inserting feedback:", insertError.message);
     throw insertError;
   } else {
     console.log("Feedback added successfully");
+    return data.id;
   }
 }

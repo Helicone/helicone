@@ -15,7 +15,7 @@ from openai.api_resources import (
 )
 import logging
 
-logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 api_key = os.environ.get("HELICONE_API_KEY", None)
 if (api_key is None):
@@ -59,6 +59,21 @@ def normalize_data_type(data_type):
         return "categorical"
     else:
         raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+
+
+def prepare_api_base(**kwargs):
+    original_api_base = openai.api_base
+    kwargs["headers"].update({"Helicone-OpenAI-Api-Base": original_api_base})
+
+    openai.api_base = proxy_url
+
+    if openai.api_type == "azure":
+        if proxy_url.endswith('/v1'):
+            if proxy_url != "https://oai.hconeai.com/v1":
+                logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {proxy_url}. Removing '/v1' from the end.")
+            openai.api_base = proxy_url[:-3]
+
+    return original_api_base, kwargs
 
 
 class Helicone:
@@ -107,7 +122,11 @@ class Helicone:
         }
 
         response = requests.post(url, headers=headers, json=feedback_data)
-        response.raise_for_status()
+        if response.status_code != 200:
+            logger.error(f"HTTP error occurred: {response.status_code}")
+            logger.error(f"Response content: {response.content.decode('utf-8', 'ignore')}")
+
+            response.raise_for_status()
         return response.json()
 
     def _prepare_headers(self, **kwargs):
@@ -159,17 +178,7 @@ class Helicone:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             helicone_request_id, kwargs = self._prepare_headers(**kwargs)
-
-            original_api_base = openai.api_base
-            kwargs["headers"].update({"Helicone-OpenAI-Api-Base": original_api_base})
-
-            openai.api_base = proxy_url
-
-            if openai.api_type == "azure":
-                if proxy_url.endswith('/v1'):
-                    if proxy_url != "https://oai.hconeai.com/v1":
-                        logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {base_url}. Removing '/v1' from the end.")
-                    openai.api_base = proxy_url[:-3]
+            original_api_base, kwargs = prepare_api_base(**kwargs)
 
             try:
                 result = func(*args, **kwargs)
@@ -184,9 +193,8 @@ class Helicone:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             helicone_request_id, kwargs = self._prepare_headers(**kwargs)
+            original_api_base, kwargs = prepare_api_base(**kwargs)
 
-            original_api_base = openai.api_base
-            openai.api_base = "https://oai.hconeai.com/v1"
             try:
                 result = await func(*args, **kwargs)
             finally:
