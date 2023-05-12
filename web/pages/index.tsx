@@ -6,7 +6,6 @@ import LoadingAnimation from "../components/shared/loadingAnimation";
 import MetaData from "../components/shared/metaData";
 import HomePage from "../components/templates/home/homePage";
 import { DEMO_EMAIL } from "../lib/constants";
-import { redirectIfLoggedIn } from "../lib/redirectIdLoggedIn";
 
 interface HomeProps {}
 

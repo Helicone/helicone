@@ -17,7 +17,7 @@ export interface ModelMetric {
 }
 
 export async function modelMetrics(
-  user_id: string,
+  orgId: string,
   filter: FilterNode,
   offset: number,
   limit: number
@@ -27,7 +27,7 @@ export async function modelMetrics(
   }
 
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id: orgId,
     argsAcc: [],
     filter,
   });
@@ -45,7 +45,7 @@ SELECT
   sum(r.prompt_tokens) as total_prompt_token,
   sum(r.prompt_tokens) + sum(r.completion_tokens) as total_tokens,
   (${CLICKHOUSE_PRICE_CALC}) as cost
-from response_copy_v1 r
+from response_copy_v2 r
 WHERE (${builtFilter.filter})
 GROUP BY r.model
 HAVING (${havingFilter.filter})

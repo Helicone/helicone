@@ -19,6 +19,7 @@ interface ThemedDropdownProps<T> {
   options: DropdownOption<T>[];
   selectedValue: T;
   onSelect: (option: T) => void;
+  verticalAlign?: "top" | "bottom";
   align?: "left" | "right";
   className?: string;
   label?: string;
@@ -31,6 +32,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
     onSelect,
     className,
     label,
+    verticalAlign = "bottom",
     align = "left",
     placeholder = "Select an option",
   } = props;
@@ -70,7 +72,6 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
       transitionRef.current &&
       !(transitionRef.current as any).contains(event.target)
     ) {
-      console.log("clicked outside");
       setCategorySelected(false);
     }
   };
@@ -118,7 +119,10 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   ref={transitionRef}
                   className={clsx(
                     align === "left" ? "left-0" : "right-0",
-                    "overflow-hidden absolute z-30 mt-1.5 max-h-80 w-full min-w-[200px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    verticalAlign === "top"
+                      ? "bottom-full mb-1.5"
+                      : "top-full mt-1.5",
+                    "overflow-hidden absolute z-30 max-h-80 w-full min-w-[200px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
                   {Object.keys(categories).length >= 2 && (

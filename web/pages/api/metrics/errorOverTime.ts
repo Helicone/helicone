@@ -1,8 +1,10 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
-import { modelCost } from "../../../lib/api/metrics/costCalc";
 import { getErrorOverTime } from "../../../lib/api/metrics/getErrorOverTime";
 
+import {
+  HandlerWrapperOptions,
+  withAuth,
+} from "../../../lib/api/handlerWrappers";
 import {
   getSomeDataOverTime,
   getTimeDataHandler,
@@ -14,14 +16,15 @@ export interface ErrorOverTime {
   time: Date;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<ErrorOverTime[], string>>
+async function handler(
+  options: HandlerWrapperOptions<Result<ErrorOverTime[], string>>
 ) {
-  await getTimeDataHandler(req, res, (d) =>
+  await getTimeDataHandler(options, (d) =>
     getSomeDataOverTime(d, getErrorOverTime, {
       reducer: (acc, d) => ({ count: acc.count + d.count }),
       initial: { count: 0 },
     })
   );
 }
+
+export default withAuth(handler);

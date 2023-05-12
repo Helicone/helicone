@@ -245,7 +245,7 @@ const KeyPage = (props: KeyPageProps) => {
             <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
               <div className="sm:flex-auto items-center flex flex-row space-x-4 justify-between">
                 <h1 className="text-lg font-semibold text-gray-900">
-                  Helicone API
+                  Helicone API ({org?.currentOrg.name ?? "No Org Found"})
                 </h1>
                 {!props.hideTabs && (
                   <Link
@@ -315,9 +315,7 @@ const KeyPage = (props: KeyPageProps) => {
           </div>
         </div>
       )}
-
       {addOpen && <AddKeyModal open={addOpen} setOpen={setAddOpen} />}
-
       {
         <AddHeliconeKeyModal
           open={addHeliconeOpen}
@@ -384,7 +382,6 @@ const KeyPage = (props: KeyPageProps) => {
           </div>
         </ThemedModal>
       )}
-
       {deleteHeliconeOpen && selectedHeliconeKey !== undefined && (
         <ThemedModal open={deleteHeliconeOpen} setOpen={setDeleteHeliconeOpen}>
           <div className="flex flex-col gap-4 w-full">
@@ -434,7 +431,6 @@ const KeyPage = (props: KeyPageProps) => {
           </div>
         </ThemedModal>
       )}
-
       {deleteOpen && selectedKey !== undefined && (
         <ThemedModal open={deleteOpen} setOpen={setDeleteOpen}>
           <div className="flex flex-col gap-4 w-full">

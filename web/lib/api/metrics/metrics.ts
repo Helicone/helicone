@@ -27,7 +27,7 @@ export interface GetMetricsOptions {
 
 export interface AuthClient {
   client: SupabaseClient;
-  user: User;
+  orgId: string;
 }
 
 function calculateAverageRequestsPerDay(
@@ -41,16 +41,16 @@ function calculateAverageRequestsPerDay(
 }
 
 async function getData(authClient: AuthClient, options: GetMetricsOptions) {
-  const { client, user } = authClient;
+  const { client, orgId } = authClient;
   try {
     const results = await Promise.all([
-      unwrapAsync(getModelMetrics(options.filter, user.id, false)),
-      unwrapAsync(getModelMetrics(options.filter, user.id, true)),
-      unwrapAsync(getXRequestDate(options.filter, user.id, true)),
-      unwrapAsync(getXRequestDate(options.filter, user.id, false)),
-      unwrapAsync(getRequestCount(options.filter, user.id, false)),
-      unwrapAsync(getRequestCount(options.filter, user.id, true)),
-      unwrapAsync(getAggregatedAvgMetrics(options.filter, user.id)),
+      unwrapAsync(getModelMetrics(options.filter, orgId, false)),
+      unwrapAsync(getModelMetrics(options.filter, orgId, true)),
+      unwrapAsync(getXRequestDate(options.filter, orgId, true)),
+      unwrapAsync(getXRequestDate(options.filter, orgId, false)),
+      unwrapAsync(getRequestCount(options.filter, orgId, false)),
+      unwrapAsync(getRequestCount(options.filter, orgId, true)),
+      unwrapAsync(getAggregatedAvgMetrics(options.filter, orgId)),
     ]);
     return { data: results, error: null };
   } catch (error) {

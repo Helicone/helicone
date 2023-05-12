@@ -3,6 +3,7 @@ import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetRequests = (
   currentPage: number,
@@ -11,21 +12,22 @@ const useGetRequests = (
   sortLeaf: SortLeafRequest,
   options?: QueryObserverOptions
 ) => {
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: [
-      "requests",
-      currentPage,
-      currentPageSize,
-      advancedFilter,
-      sortLeaf,
-    ],
-    queryFn: async (query) => {
-      const currentPage = query.queryKey[1] as number;
-      const currentPageSize = query.queryKey[2] as number;
-      const advancedFilter = query.queryKey[3];
-      const sortLeaf = query.queryKey[4];
-      return await Promise.all([
-        fetch("/api/request", {
+  return {
+    requests: useQuery({
+      queryKey: [
+        "requestsData",
+        currentPage,
+        currentPageSize,
+        advancedFilter,
+        sortLeaf,
+      ],
+      queryFn: async (query) => {
+        const currentPage = query.queryKey[1] as number;
+        const currentPageSize = query.queryKey[2] as number;
+        const advancedFilter = query.queryKey[3];
+        const sortLeaf = query.queryKey[4];
+
+        return await fetch("/api/request", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -38,8 +40,21 @@ const useGetRequests = (
           }),
         }).then(
           (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
-        ),
-        fetch("/api/request/count", {
+        );
+      },
+      refetchOnWindowFocus: false,
+    }),
+    count: useQuery({
+      queryKey: [
+        "requestsCount",
+        currentPage,
+        currentPageSize,
+        advancedFilter,
+        sortLeaf,
+      ],
+      queryFn: async (query) => {
+        const advancedFilter = query.queryKey[3];
+        return await fetch("/api/request/count", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -47,27 +62,10 @@ const useGetRequests = (
           body: JSON.stringify({
             filter: advancedFilter,
           }),
-        }).then((res) => res.json() as Promise<Result<number, string>>),
-      ]);
-    },
-    refetchOnWindowFocus: false,
-  });
-  const [response, count] = data || [null, null];
-
-  const requests = response?.data || [];
-  const from = (currentPage - 1) * currentPageSize;
-  const to = currentPage * currentPageSize;
-  const error = response?.error;
-
-  return {
-    requests,
-    count: count?.data ?? 0,
-    from,
-    to,
-    error,
-    isLoading,
-    refetch,
-    isRefetching,
+        }).then((res) => res.json() as Promise<Result<number, string>>);
+      },
+      refetchOnWindowFocus: false,
+    }),
   };
 };
 

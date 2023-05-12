@@ -1,35 +1,31 @@
 import { Dialog } from "@headlessui/react";
 import {
-  ArrowDownTrayIcon,
   ClipboardDocumentIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import { SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 
-import { truncString } from "../../../lib/stringHelpers";
+import { ColumnOrderState, ColumnSizingState } from "@tanstack/react-table";
+import Papa from "papaparse";
+import { UserMetric } from "../../../lib/api/users/users";
+import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
 import {
   filterListToTree,
-  FilterNode,
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
+import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 import { UserRow } from "../../../services/lib/users";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedModal from "../../shared/themed/themedModal";
-import ThemedTableV2, { Column } from "../../ThemedTableV2";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import ThemedModal from "../../shared/themed/themedModal";
+import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import { Column } from "../../ThemedTableV2";
 import UserTable from "./userTable";
-import { ColumnSizingState, ColumnOrderState } from "@tanstack/react-table";
-import { UserMetric } from "../../../lib/api/users/users";
-import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
-import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
-import Papa from "papaparse";
-import { useDebounce } from "../../../services/hooks/debounce";
 
 const monthNames = [
   "Jan",
