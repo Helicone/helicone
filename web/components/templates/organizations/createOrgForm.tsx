@@ -13,6 +13,7 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -218,6 +219,13 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
 
         <button
           onClick={async () => {
+            if ((user?.email ?? "") === DEMO_EMAIL) {
+              setNotification(
+                "Cannot create organization in demo mode",
+                "error"
+              );
+              return;
+            }
             if (!orgName || orgName === "") {
               setNotification("Please provide an organization name", "error");
               return;
