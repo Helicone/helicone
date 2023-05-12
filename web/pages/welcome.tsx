@@ -1,25 +1,24 @@
-import { User } from "@supabase/auth-helpers-react";
-import { GetServerSidePropsContext } from "next";
+import { User, useUser } from "@supabase/auth-helpers-react";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 import WelcomePage from "../components/templates/welcome/welcomePage";
+import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
 
 interface DashboardProps {
-  user: User;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user, keys } = props;
+  const { keys } = props;
+  const user = useUser();
 
   return (
     <MetaData title="Welcome">
       <BasePageV2>
-        <WelcomePage user={user} keys={keys} />
+        <WelcomePage user={user!} keys={keys} />
       </BasePageV2>
     </MetaData>
   );
@@ -27,25 +26,16 @@ const Dashboard = (props: DashboardProps) => {
 
 export default Dashboard;
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const supabase = new SupabaseServerWrapper(context).getClient();
+export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
+    userData: { orgId },
+    supabaseClient,
+  } = options;
+  const supabase = supabaseClient.getClient();
 
   const [{ data: keyData }, isRequestLimitOver] = await Promise.all([
     getKeys(supabase),
-    requestOverLimit(supabase),
+    requestOverLimit(supabase, orgId),
   ]);
 
   if (isRequestLimitOver) {
@@ -59,8 +49,7 @@ export const getServerSideProps = async (
 
   return {
     props: {
-      user: user,
       keys: keyData,
     },
   };
-};
+});

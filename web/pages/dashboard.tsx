@@ -1,50 +1,44 @@
-import { User } from "@supabase/auth-helpers-react";
-import { GetServerSidePropsContext } from "next";
+import { useUser } from "@supabase/auth-helpers-react";
+import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
+import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
+import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
 
 interface DashboardProps {
-  user: User;
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user, keys } = props;
-
+  const { keys } = props;
+  const user = useUser();
   return (
     <MetaData title="Dashboard">
-      <DashboardPage user={user} keys={keys} />
+      <AuthLayout user={user!}>
+        <DashboardPage keys={keys} />
+      </AuthLayout>
     </MetaData>
   );
 };
 
 export default Dashboard;
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const supabase = new SupabaseServerWrapper(context).getClient();
+export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-
-  const [{ data: keyData }, isRequestLimitOver] = await Promise.all([
-    getKeys(supabase),
-    requestOverLimit(supabase),
-  ]);
-  if (keyData?.length === 0) {
+    userData: { orgId },
+    supabaseClient,
+  } = options;
+  const client = supabaseClient.getClient();
+  const [{ data: keyData }, isRequestLimitOver, hasOnboarded] =
+    await Promise.all([
+      getKeys(client),
+      requestOverLimit(client, orgId),
+      checkOnboardedAndUpdate(client),
+    ]);
+  if (!hasOnboarded) {
     return {
       redirect: {
         destination: "/welcome",
@@ -64,8 +58,7 @@ export const getServerSideProps = async (
 
   return {
     props: {
-      user: user,
       keys: keyData,
     },
   };
-};
+});

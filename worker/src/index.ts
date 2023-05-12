@@ -5,7 +5,7 @@ import { getCacheSettings } from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
 import { readAndLogResponse } from "./logResponse";
-import { extractPrompt, Prompt } from "./prompt";
+import { ChatPrompt, extractPrompt, Prompt } from "./prompt";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import {
   checkRateLimit,
@@ -84,7 +84,7 @@ type HeliconeRequest = {
   auth: string;
   requestId: string;
   body?: string;
-  prompt?: Prompt;
+  prompt?: Prompt | ChatPrompt;
   heliconeApiKey?: string;
 } & HeliconeHeaders;
 
@@ -98,7 +98,7 @@ interface HeliconeHeaders {
 
 async function getPromptId(
   dbClient: SupabaseClient,
-  prompt: Prompt,
+  prompt: Prompt | ChatPrompt,
   name: string | null,
   auth: string
 ): Promise<Result<string, string>> {
@@ -457,7 +457,7 @@ async function forwardAndLog(
   env: Env,
   ctx: ExecutionContext,
   retryOptions?: RetryOptions,
-  prompt?: Prompt
+  prompt?: Prompt | ChatPrompt
 ): Promise<Response> {
   const auth =
     request.headers.get("Authorization") ?? request.headers.get("api-key");
@@ -516,7 +516,7 @@ async function forwardAndLog(
   console.log("request id", requestId);
   async function responseBodyTimeout(delay_ms: number) {
     await new Promise((resolve) => setTimeout(resolve, delay_ms));
-    console.log("response body timeout");
+    console.error("response body timeout");
     return globalResponseBody;
   }
 

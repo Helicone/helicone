@@ -5,7 +5,7 @@ import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export async function getMembers(orgId: String, userId: string) {
   const query = `
-  select email from organization_member om 
+  select email, member from organization_member om 
     left join auth.users u on u.id = om.member
     where om.organization = $1 AND (
       -- Auth check
@@ -21,6 +21,7 @@ export async function getMembers(orgId: String, userId: string) {
 
   return await dbExecute<{
     email: string;
+    member: string;
   }>(query, [orgId, userId]);
 }
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;

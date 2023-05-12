@@ -32,6 +32,7 @@ const whereKeyMappings: KeyMappings = {
     created_at: "request.created_at",
     user_id: "request.user_id",
     auth_hash: "request.auth_hash",
+    org_id: "request.helicone_org_id",
   },
   response: {
     body_completion:
@@ -54,11 +55,25 @@ const whereKeyMappings: KeyMappings = {
     user_id: "response_copy_v1.user_id",
     status: "response_copy_v1.status",
   },
+  response_copy_v2: {
+    auth_hash: "response_copy_v2.auth_hash",
+    model: "response_copy_v2.model",
+    request_created_at: "response_copy_v2.request_created_at",
+    latency: "response_copy_v2.latency",
+    user_id: "response_copy_v2.user_id",
+    status: "response_copy_v2.status",
+    organization_id: "response_copy_v2.organization_id",
+  },
   users_view: {},
   properties_copy_v1: {
     key: "properties_copy_v1.key",
     value: "properties_copy_v1.value",
     auth_hash: "properties_copy_v1.auth_hash",
+  },
+  properties_copy_v2: {
+    key: "properties_copy_v2.key",
+    value: "properties_copy_v2.value",
+    organization_id: "properties_copy_v2.organization_id",
   },
 };
 
@@ -78,6 +93,8 @@ const havingKeyMappings: KeyMappings = {
   users_view: {
     cost: "cost",
   },
+  response_copy_v2: {},
+  properties_copy_v2: {},
 };
 
 export function buildFilterLeaf(
@@ -139,7 +156,11 @@ export function buildFilterLeaf(
             } else {
               argsAcc.push(value);
             }
+          } else {
+            throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
           }
+        } else {
+          throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
         }
       }
     }
@@ -242,7 +263,7 @@ export function buildFilterClickHouse(
   });
 }
 
-export function buildFilterPostgres(
+function buildFilterPostgres(
   args: ExternalBuildFilterArgs
 ): ReturnType<typeof buildFilter> {
   return buildFilter({
@@ -285,86 +306,47 @@ export type ExternalBuildFilterArgs = Omit<
   "argPlaceHolder" | "user_id"
 >;
 
-export async function buildFilterWithAuthProperties(
-  args: ExternalBuildFilterArgs & { user_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth({
-    ...args,
-    hashToFilter: (hash) => ({
-      properties_table: {
-        auth_hash: {
-          equals: hash,
-        },
-      },
-    }),
-  });
-}
-
-export async function buildFilterWithAuthClickhouseProperties(
-  args: ExternalBuildFilterArgs & { user_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(
-    {
-      ...args,
-      hashToFilter: (hash) => ({
-        properties_copy_v1: {
-          auth_hash: {
-            equals: hash,
-          },
-        },
-      }),
-    },
-    "clickhouse"
-  );
-}
-
-export async function buildFilterWithAuthRequest(
-  args: ExternalBuildFilterArgs & { user_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth({
-    ...args,
-    hashToFilter: (hash) => ({
-      request: {
-        auth_hash: {
-          equals: hash,
-        },
-      },
-    }),
-  });
-}
-
 export async function buildFilterWithAuthClickHouse(
-  args: ExternalBuildFilterArgs & { user_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(
-    {
-      ...args,
-      hashToFilter: (hash) => ({
-        response_copy_v1: {
-          auth_hash: {
-            equals: hash,
-          },
-        },
-      }),
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    response_copy_v2: {
+      organization_id: {
+        equals: orgId,
+      },
     },
-    "clickhouse"
-  );
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseProperties(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    properties_copy_v2: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
 }
 
 export async function buildFilterWithAuth(
   args: ExternalBuildFilterArgs & {
-    hashToFilter: (hash: string) => FilterLeaf;
-    user_id: string;
+    org_id: string;
   },
-  database: "postgres" | "clickhouse" = "postgres"
+  database: "postgres" | "clickhouse" = "postgres",
+  getOrgIdFilter: (orgId: string) => FilterLeaf = (orgId) => ({
+    request: {
+      org_id: {
+        equals: orgId,
+      },
+    },
+  })
 ): Promise<{ filter: string; argsAcc: any[] }> {
-  const { user_id, filter, hashToFilter } = args;
-  const userIdHashesFilter = await buildUserIdHashesFilter(
-    user_id,
-    hashToFilter
-  );
+  const { org_id, filter } = args;
+
   const filterNode: FilterNode = {
-    left: userIdHashesFilter,
+    left: getOrgIdFilter(org_id),
     operator: "and",
     right: filter,
   };

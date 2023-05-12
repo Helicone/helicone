@@ -13,26 +13,23 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
   const router = useRouter();
 
   const { data } = useQuery({
-    queryKey: ["requestsCount"],
+    queryKey: ["hasOnboarded"],
     queryFn: async () => {
-      if (data?.data === 0 || (data?.data ?? null) == null) {
+      if (data?.data || (data?.data ?? null) == null) {
         setTimeElapsed((prev) => prev + 3);
-        return await fetch("/api/request/count", {
+        return await fetch("/api/user/checkOnboarded", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            filter: "all",
-          }),
-        }).then((res) => res.json() as Promise<Result<number, string>>);
+        }).then((res) => res.json() as Promise<Result<boolean, string>>);
       }
     },
     refetchOnWindowFocus: false,
     refetchInterval: 3000,
   });
 
-  if (data?.data === 0 || (data?.data ?? null) === null) {
+  if (data?.data || (data?.data ?? null) === null) {
     return (
       <div className="flex flex-col space-y-4 items-center py-16 text-gray-900">
         <div className="text-2xl">Listening for events</div>

@@ -2,17 +2,19 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { getUSDate } from "../../components/shared/utils/utils";
 import { Database } from "../../supabase/database.types";
+import { useOrg } from "../../components/shared/layout/organizationContext";
 
 export const useHeliconeKeys = () => {
   const client = useSupabaseClient<Database>();
-
+  const org = useOrg();
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
-    queryKey: ["helicone-keys"],
+    queryKey: ["helicone-keys", org?.currentOrg.id],
     queryFn: async () => {
       return await client
         .from("helicone_api_keys")
         .select("*")
-        .eq("soft_delete", false);
+        .eq("soft_delete", false)
+        .eq("organization_id", org?.currentOrg.id);
     },
     refetchOnWindowFocus: false,
   });
