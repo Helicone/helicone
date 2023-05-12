@@ -324,7 +324,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     count,
     values,
     from,
-    isLoading,
     isPropertiesLoading,
     isValuesLoading,
     properties,
@@ -580,7 +579,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           >
             <ArrowPathIcon
               className={clsx(
-                isLoading ? "animate-spin" : "",
+                requests.isLoading ? "animate-spin" : "",
                 "h-5 w-5 inline"
               )}
             />
@@ -622,7 +621,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 openExport,
                 setOpenExport,
               }}
-              isFetching={isLoading}
+              isFetching={requests.isLoading}
               advancedFilter={{
                 filterMap,
                 onAdvancedFilter: setAdvancedFilters,
@@ -637,7 +636,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 clearLayout,
               }}
             />
-            {isLoading || from === undefined || to === undefined ? (
+            {requests.isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <RequestTable
@@ -649,9 +648,10 @@ const RequestsPage = (props: RequestsPageProps) => {
                   columnSizing,
                   setColumnSizing,
                 }}
-                data={requests}
+                data={requests.data ?? []}
                 columns={columns}
-                count={count || 0}
+                count={count.data?.data ?? 0}
+                isCountLoading={count.isLoading}
                 page={page}
                 from={from}
                 to={to}

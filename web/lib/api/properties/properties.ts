@@ -1,6 +1,6 @@
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
-import { dbExecute } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface Property {
   property: string;
@@ -9,21 +9,23 @@ export interface Property {
 export async function getProperties(
   org_id: string
 ): Promise<Result<Property[], string>> {
-  const builtFilter = await buildFilterWithAuth({
+  const builtFilter = await buildFilterWithAuthClickHouseProperties({
     org_id,
     argsAcc: [],
     filter: "all",
   });
   const query = `
-  SELECT distinct key as property
-  from properties
-  left join request on request.id = properties.request_id
+  select distinct key as property
+  from properties_copy_v2
   where (
     ${builtFilter.filter}
   )
 `;
 
-  const { data, error } = await dbExecute<Property>(query, builtFilter.argsAcc);
+  const { data, error } = await dbQueryClickhouse<Property>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }

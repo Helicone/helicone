@@ -95,6 +95,7 @@ export async function getRequests(
     query,
     builtFilter.argsAcc
   );
+
   if (error !== null) {
     return { data: null, error: error };
   }

@@ -4,34 +4,14 @@ import {
   ColumnOrderState,
   ColumnSizingState,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   OnChangeFn,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { clsx } from "../../shared/clsx";
-import { RequestWrapper } from "./useRequestsPage";
-import { getUSDate } from "../../shared/utils/utils";
-import { truncString } from "../../../lib/stringHelpers";
-import { useRouter } from "next/router";
-import {
-  ArrowsPointingOutIcon,
-  ArrowUpIcon,
-  Bars3Icon,
-  Square3Stack3DIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import SaveLayoutButton from "../../shared/themed/themedSaveLayout";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import ThemedDropdown from "../../shared/themed/themedDropdown";
-import DeleteLayoutButton from "../../shared/themed/themedDeleteLayout";
-import { Json } from "../../../supabase/database.types";
-import ThemedTabs from "../../shared/themed/themedTabs";
+import { useState } from "react";
 import ThemedTableV4, { Column } from "../../shared/themed/themedTableV4";
+import { RequestWrapper } from "./useRequestsPage";
 
 export type ColumnFormatted = {
   name: string;
@@ -45,6 +25,7 @@ interface RequestProps {
   from: number;
   to: number;
   count: number | null;
+  isCountLoading: boolean;
   columnSizing: {
     columnSizing: ColumnSizingState;
     setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
@@ -66,6 +47,7 @@ const RequestTable = (props: RequestProps) => {
     from,
     to,
     count,
+    isCountLoading,
     page,
     columnSizing: { columnSizing, setColumnSizing },
     columnOrder: { columnOrder, setColumnOrder },
@@ -128,6 +110,7 @@ const RequestTable = (props: RequestProps) => {
       from={from}
       to={to}
       count={count || 0}
+      isCountLoading={isCountLoading}
       page={page}
       columns={columns}
       tableCenterTableSize={table.getCenterTotalSize()}

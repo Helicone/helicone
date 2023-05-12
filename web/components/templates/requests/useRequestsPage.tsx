@@ -240,33 +240,32 @@ const useRequestsPage = (
     operator: "and",
   };
 
-  const {
-    requests,
-    count,
-    from,
-    to,
-    isLoading: isRequestsLoading,
-    refetch,
-    isRefetching,
-  } = useGetRequests(currentPage, currentPageSize, filter, sortLeaf);
-
-  const isLoading =
-    isRequestsLoading || isPropertiesLoading || false || isRefetching;
-
-  const wrappedRequests: RequestWrapper[] = requests.map((request) =>
-    convertRequest(request, [])
+  const { requests, count } = useGetRequests(
+    currentPage,
+    currentPageSize,
+    filter,
+    sortLeaf
   );
 
+  const from = (currentPage - 1) * currentPageSize;
+  const to = currentPage * currentPageSize;
+
   return {
-    requests: wrappedRequests,
+    requests: {
+      ...requests,
+      data: requests.data?.data?.map((request) => convertRequest(request, [])),
+      isLoading: requests.isLoading || requests.isRefetching,
+    },
     count,
     from,
     to,
     isPropertiesLoading,
     isValuesLoading: false,
-    isLoading,
     filterMap,
-    refetch,
+    refetch: () => {
+      requests.refetch();
+      count.refetch();
+    },
     properties,
     values: [],
     searchPropertyFilters,
