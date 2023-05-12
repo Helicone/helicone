@@ -8,6 +8,7 @@ import {
 } from "next";
 import { Result } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
+import { User } from "@supabase/auth-helpers-nextjs";
 
 export interface HandlerWrapperOptions<RetVal> {
   req: NextApiRequest;
@@ -16,6 +17,7 @@ export interface HandlerWrapperOptions<RetVal> {
   userData: {
     userId: string;
     orgId: string;
+    user: User;
   };
 }
 
@@ -50,6 +52,7 @@ export interface HandlerWrapperOptionsSSR<RetVal> {
   userData: {
     userId: string;
     orgId: string;
+    user: User;
   };
 }
 
