@@ -1,4 +1,4 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, TvIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import {
   ColumnOrderState,
@@ -50,47 +50,92 @@ import RequestTable from "./requestTable";
 import { Col } from "../../shared/layout/col";
 import { Row } from "../../shared/layout/row";
 import { useQuery } from "@tanstack/react-query";
+import Metric from "../../shared/themed/themedMetric";
+import { useCachePage } from "../../../services/hooks/useCachePage";
+import { BsCashCoin, BsHourglass } from "react-icons/bs";
+import { BoltIcon } from "@heroicons/react/20/solid";
+import { Grid } from "../../shared/layout/grid";
+import { ThemedMiniTable } from "../../shared/themed/themedMiniTable";
 
 interface CachePropProps {}
 
-const CachePage = (props: CachePropProps) => {
-  const totalCached = useQuery({
-    queryKey: ["totalCached"],
-    queryFn: async () => {
-      const data = fetch("/api/cache/total").then(
-        (res) => res.json() as Promise<Result<number, string>>
-      );
-      return data;
-    },
-  });
+type useCachePageRet = ReturnType<typeof useCachePage>;
 
-  const totalSavings = useQuery({
-    queryKey: ["totalSavings"],
-    queryFn: async () => {
-      const data = fetch("/api/cache/total_savings").then(
-        (res) => res.json() as Promise<Result<number, string>>
-      );
-      return data;
-    },
-  });
-  console.log(totalCached.data);
+const baseUIData = {
+  isLoading: (x: useCachePageRet[keyof useCachePageRet]) => x.isLoading,
+  color: "bg-blue-500",
+  className: "text-white",
+  icon: <TvIcon className="w-8 h-8" />,
+};
+
+const metricsUIData: {
+  [key in keyof useCachePageRet]: {
+    title: string;
+    value: (x: useCachePageRet[key]) => any;
+    color: string;
+    className: string;
+    icon: React.ReactNode;
+    isLoading: (x: useCachePageRet[key]) => boolean;
+  };
+} = {
+  totalCached: {
+    ...baseUIData,
+    title: "Total Cached",
+    value: (x) => x.data?.data ?? 0,
+    icon: <BoltIcon className="w-8 h-8" />,
+  },
+  totalSavings: {
+    ...baseUIData,
+    title: "Total Savings",
+    value: (x) => x.data?.data ?? 0,
+    icon: <BsCashCoin className="w-8 h-8" />,
+  },
+  avgSecondsSaved: {
+    ...baseUIData,
+    title: "Seconds Saved / Request",
+    value: (x) => x.data?.data ?? 0,
+    icon: <BsHourglass className="w-8 h-8" />,
+  },
+};
+
+const CachePage = (props: CachePropProps) => {
+  const data = useCachePage();
   return (
     <Col className="w-full items-center">
-      <Row className="justify-between w-full max-w-3xl">
+      <Grid className="w-full max-w-3xl items-center grid-cols-3 gap-3">
+        {Object.entries(metricsUIData).map(([key, value]) => (
+          <Metric
+            key={key}
+            title={value.title}
+            value={value.value(data[key as keyof useCachePageRet])}
+            color={value.color}
+            className="bg-blue-200 col-span-1"
+            icon={value.icon}
+            isLoading={value.isLoading(data[key as keyof useCachePageRet])}
+          />
+        ))}
+      </Grid>
+      <Grid className="w-full max-w-3xl items-center grid-cols-2 gap-3">
         <Col>
-          <div>{totalCached.data?.data ?? "0"}</div>
-          <div>Total Hits</div>
+          <h1 className="text-2xl font-semibold">Top Cached models</h1>
+          <ThemedMiniTable
+            columns={[{ key: "hello", hidden: false, name: "Model" }]}
+            rows={[
+              {
+                hello: "hello",
+              },
+              {
+                hello: "hello",
+              },
+            ]}
+          />
         </Col>
-
-        <div>Cache hits per day</div>
-        <Col>
-          <div>{totalSavings.data?.data ?? "0"}</div>
-          <div>Total Savings</div>
-        </Col>
-      </Row>
+        <div>Top Cached models</div>
+      </Grid>
+      <div>Graph of caches over time</div>
+      <Row className="justify-between w-full"></Row>
       <div className="bg-white w-full max-w-2xl text-center">
         <h1 className="text-2xl font-semibold">Top Cached request</h1>
-
         <Col></Col>
       </div>
     </Col>

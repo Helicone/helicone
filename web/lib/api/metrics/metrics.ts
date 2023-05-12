@@ -1,12 +1,11 @@
-import { SupabaseClient, User, UserResponse } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { Database } from "../../../supabase/database.types";
-import { isError, Result, unwrap, unwrapAsync, unwrapList } from "../../result";
+import { Result, unwrapAsync } from "../../result";
 import { modelCost } from "./costCalc";
 
 import { getRequestCount } from "./getRequestCount";
 import { getXRequestDate } from "./getXRequestDate";
-import { getModelMetrics, ModelMetrics } from "./modelMetrics";
+import { getModelMetrics } from "./modelMetrics";
 import { getAggregatedAvgMetrics } from "./timeMetrics";
 
 export interface Metrics {
