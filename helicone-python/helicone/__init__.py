@@ -23,6 +23,7 @@ if (api_key is None):
 
 proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
+
 def normalize_data_type(data_type):
     if isinstance(data_type, str):
         data_type = data_type.lower()
@@ -36,7 +37,8 @@ def normalize_data_type(data_type):
     elif data_type in (object, "object", "categorical"):
         return "categorical"
     else:
-        raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+        raise ValueError(
+            "Invalid data_type provided. Please use a valid data type or string.")
 
 
 api_key = os.environ.get("HELICONE_API_KEY", None)
@@ -45,6 +47,7 @@ if (api_key is None):
 
 proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
+
 def normalize_data_type(data_type):
     if isinstance(data_type, str):
         data_type = data_type.lower()
@@ -58,7 +61,8 @@ def normalize_data_type(data_type):
     elif data_type in (object, "object", "categorical"):
         return "categorical"
     else:
-        raise ValueError("Invalid data_type provided. Please use a valid data type or string.")
+        raise ValueError(
+            "Invalid data_type provided. Please use a valid data type or string.")
 
 
 def prepare_api_base(**kwargs):
@@ -70,7 +74,8 @@ def prepare_api_base(**kwargs):
     if openai.api_type == "azure":
         if proxy_url.endswith('/v1'):
             if proxy_url != "https://oai.hconeai.com/v1":
-                logging.warning(f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {proxy_url}. Removing '/v1' from the end.")
+                logging.warning(
+                    f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {proxy_url}. Removing '/v1' from the end.")
             openai.api_base = proxy_url[:-3]
 
     return original_api_base, kwargs
@@ -104,7 +109,8 @@ class Helicone:
     def log_feedback(self, response, name, value, data_type=None):
         helicone_id = response.get("helicone", {}).get("id")
         if not helicone_id:
-            raise ValueError("The provided response does not have a valid Helicone ID.")
+            raise ValueError(
+                "The provided response does not have a valid Helicone ID.")
 
         feedback_data = {
             "helicone-id": helicone_id,
@@ -124,7 +130,8 @@ class Helicone:
         response = requests.post(url, headers=headers, json=feedback_data)
         if response.status_code != 200:
             logger.error(f"HTTP error occurred: {response.status_code}")
-            logger.error(f"Response content: {response.content.decode('utf-8', 'ignore')}")
+            logger.error(
+                f"Response content: {response.content.decode('utf-8', 'ignore')}")
 
             response.raise_for_status()
         return response.json()
@@ -139,15 +146,17 @@ class Helicone:
         helicone_request_id = str(uuid.uuid4())
         headers["helicone-request-id"] = helicone_request_id
 
-        headers.update(self._get_property_headers(kwargs.pop("properties", {})))
+        headers.update(self._get_property_headers(
+            kwargs.pop("properties", {})))
         headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
         headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
-        headers.update(self._get_rate_limit_policy_headers(kwargs.pop("rate_limit_policy", None)))
+        headers.update(self._get_rate_limit_policy_headers(
+            kwargs.pop("rate_limit_policy", None)))
 
         kwargs["headers"] = headers
 
         return helicone_request_id, kwargs
-    
+
     def _modify_result(self, result, helicone_request_id):
         def result_with_helicone():
             for r in result:
@@ -160,7 +169,6 @@ class Helicone:
             result["helicone"] = {"id": helicone_request_id}
             return result
 
-
     async def _modify_result_async(self, result, helicone_request_id):
         async def result_with_helicone_async():
             async for r in result:
@@ -172,7 +180,6 @@ class Helicone:
         else:
             result["helicone"] = {"id": helicone_request_id}
             return result
-
 
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
@@ -188,7 +195,7 @@ class Helicone:
             return self._modify_result(result, helicone_request_id)
 
         return wrapper
-    
+
     def _with_helicone_auth_async(self, func):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -220,9 +227,11 @@ class Helicone:
             if "factor" in retry:
                 headers["Helicone-Retry-Factor"] = str(retry["factor"])
             if "min_timeout" in retry:
-                headers["Helicone-Retry-Min-Timeout"] = str(retry["min_timeout"])
+                headers["Helicone-Retry-Min-Timeout"] = str(
+                    retry["min_timeout"])
             if "max_timeout" in retry:
-                headers["Helicone-Retry-Max-Timeout"] = str(retry["max_timeout"])
+                headers["Helicone-Retry-Max-Timeout"] = str(
+                    retry["max_timeout"])
             return headers
         return {}
 
@@ -235,10 +244,10 @@ class Helicone:
                 if "segment" in rate_limit_policy:
                     policy += f';s={rate_limit_policy["segment"]}'
             else:
-                raise TypeError("rate_limit_policy must be either a string or a dictionary")
+                raise TypeError(
+                    "rate_limit_policy must be either a string or a dictionary")
             return {"Helicone-RateLimit-Policy": policy}
         return {}
-
 
     def apply_helicone_auth(self):
         api_resources_classes = [
@@ -252,12 +261,13 @@ class Helicone:
 
         for api_resource_class, method, async_method in api_resources_classes:
             create_method = getattr(api_resource_class, method)
-            setattr(api_resource_class, method, self._with_helicone_auth(create_method))
+            setattr(api_resource_class, method,
+                    self._with_helicone_auth(create_method))
 
             async_create_method = getattr(api_resource_class, async_method)
-            setattr(api_resource_class, async_method, self._with_helicone_auth_async(async_create_method))
+            setattr(api_resource_class, async_method,
+                    self._with_helicone_auth_async(async_create_method))
 
-    
 
 helicone = Helicone()
 log_feedback = helicone.log_feedback

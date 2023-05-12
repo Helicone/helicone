@@ -18,6 +18,8 @@ sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 load_dotenv()
 
 # Test cache behavior
+
+
 def test_cache():
     unique_id = str(uuid.uuid4())
     prompt = f"Cache test with UUID: {unique_id}"
@@ -30,6 +32,8 @@ def test_cache():
     )
 
 # Test rate limit policy
+
+
 def test_rate_limit_policy():
     rate_limit_policy_dict = {"quota": 10, "time_window": 60}
     rate_limit_policy_str = "10;w=60"
@@ -47,6 +51,8 @@ def test_rate_limit_policy():
     )
 
 # Test custom properties
+
+
 def test_custom_properties():
     properties = {
         "Session": "24",
@@ -61,10 +67,11 @@ def test_custom_properties():
         properties=properties
     )
 
+
 def hash(key: str) -> str:
     # Encode the key as bytes
     key_bytes = key.encode('utf-8')
-    
+
     # Create a SHA-256 hash object
     sha256 = hashlib.sha256()
 
@@ -81,12 +88,14 @@ def fetch_feedback(helicone_id):
     api_key_hash = hash(f'Bearer {os.getenv("HELICONE_API_KEY_LOCAL")}')
 
     # Fetch the response with the corresponding helicone_id
-    response_query = sb.table("response").select("id, request").eq("request", helicone_id)
+    response_query = sb.table("response").select(
+        "id, request").eq("request", helicone_id)
     response_result = response_query.single().execute()
     response_data = response_result.data
 
     # Fetch the request with the corresponding response.request value
-    request_query = sb.table("request").select("id, helicone_api_keys (id, api_key_hash)").eq("id", response_data["request"])
+    request_query = sb.table("request").select(
+        "id, helicone_api_keys (id, api_key_hash)").eq("id", response_data["request"])
     request_result = request_query.single().execute()
     request_data = request_result.data
 
@@ -98,7 +107,8 @@ def fetch_feedback(helicone_id):
         raise ValueError("Not authorized to fetch feedback.")
 
     # Fetch feedback_metrics for the given api_key_id
-    metric_query = sb.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", str(matching_api_key_id))
+    metric_query = sb.table("feedback_metrics").select("id, name, data_type").eq(
+        "helicone_api_key_id", str(matching_api_key_id))
     metric_result = metric_query.execute()
     metric_data = metric_result.data
 
@@ -107,9 +117,9 @@ def fetch_feedback(helicone_id):
     for metric in metric_data:
         feedback_query = (
             sb.table("feedback")
-                .select("created_by, boolean_value, float_value, string_value, categorical_value")
-                .eq("response_id", str(response_data["id"]))
-                .eq("feedback_metric_id", str(metric["id"]))
+            .select("created_by, boolean_value, float_value, string_value, categorical_value")
+            .eq("response_id", str(response_data["id"]))
+            .eq("feedback_metric_id", str(metric["id"]))
         )
         feedback_result = feedback_query.execute()
         feedback = feedback_result.data
@@ -117,7 +127,6 @@ def fetch_feedback(helicone_id):
         feedback_data.extend(feedback)
 
     return feedback_data
-
 
 
 def test_log_feedback():
@@ -141,12 +150,12 @@ def test_log_feedback():
     assert feedback_data[0]["float_value"] is None
     assert feedback_data[0]["string_value"] is None
     assert feedback_data[0]["categorical_value"] is None
-    
+
 
 def test_sync_nostream():
     response = openai.ChatCompletion.create(
-        model = 'gpt-3.5-turbo',
-        messages = [{
+        model='gpt-3.5-turbo',
+        messages=[{
             'role': 'user',
             'content': "Hello World!"
         }],
@@ -170,8 +179,8 @@ def test_sync_stream():
     from collections import deque
 
     iterator = openai.ChatCompletion.create(
-        model = 'gpt-3.5-turbo',
-        messages = [{
+        model='gpt-3.5-turbo',
+        messages=[{
             'role': 'user',
             'content': "Hello World!"
         }],
@@ -191,11 +200,12 @@ def test_sync_stream():
     assert feedback_data[0]["string_value"] == "create_and_stream_true"
     assert feedback_data[0]["categorical_value"] is None
 
+
 @pytest.mark.asyncio
 async def test_async_nostream():
     response = (await openai.ChatCompletion.acreate(
-        model = 'gpt-3.5-turbo',
-        messages = [{
+        model='gpt-3.5-turbo',
+        messages=[{
             'role': 'user',
             'content': "Hello World!"
         }],
@@ -214,11 +224,12 @@ async def test_async_nostream():
     assert feedback_data[0]["string_value"] == "acreate_and_stream_false"
     assert feedback_data[0]["categorical_value"] is None
 
+
 @pytest.mark.asyncio
 async def test_async_stream():
     async for chunk in await openai.ChatCompletion.acreate(
-        model = 'gpt-3.5-turbo',
-        messages = [{
+        model='gpt-3.5-turbo',
+        messages=[{
             'role': 'user',
             'content': "Hello World!"
         }],
