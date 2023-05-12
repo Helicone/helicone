@@ -2,7 +2,7 @@ import { SupabaseClient, User } from "@supabase/auth-helpers-nextjs";
 import { DEMO_EMAIL } from "../../lib/constants";
 import { Database } from "../../supabase/database.types";
 
-const getKeys = async (client: SupabaseClient<any, "public", any>) => {
+const getKeys = async (client: SupabaseClient<Database>) => {
   const { data, error, count } = await client
     .from("user_api_keys")
     .select("*", { count: "exact" });
@@ -29,10 +29,7 @@ export type AddKeyObj = {
   keyName: string;
 };
 
-const addKey = async (
-  client: SupabaseClient<any, "public", any>,
-  key: AddKeyObj
-) => {
+const addKey = async (client: SupabaseClient<Database>, key: AddKeyObj) => {
   const { data, error } = await client.from("user_api_keys").insert([
     {
       user_id: key.userId,

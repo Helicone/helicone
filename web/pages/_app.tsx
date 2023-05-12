@@ -15,7 +15,8 @@ import { OrgContextProvider } from "../components/shared/layout/organizationCont
 if (
   typeof window !== "undefined" &&
   process.env.NEXT_PUBLIC_POSTHOG_API_KEY &&
-  process.env.NEXT_PUBLIC_ENDPOINT
+  process.env.NEXT_PUBLIC_ENDPOINT &&
+  !process.env.NEXT_PUBLIC_DISABLE_POSTHOG
 ) {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
     api_host: "https://www.helicone.ai/ingest",

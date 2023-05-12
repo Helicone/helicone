@@ -42,6 +42,7 @@ interface ThemedTableV4Props<T> {
   from: number;
   to: number;
   count: number;
+  isCountLoading: boolean;
   page: number;
   columns: Column[];
   tableCenterTableSize: number;
@@ -62,6 +63,7 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
     from,
     to,
     count,
+    isCountLoading,
     page,
     columns,
     tableCenterTableSize,
@@ -96,7 +98,12 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
         <p className="text-sm text-gray-700">
           Showing <span className="font-medium">{from + 1}</span> to{" "}
           <span className="font-medium">{Math.min(to, count)}</span> of{" "}
-          <span className="font-medium">{count}</span> results
+          {isCountLoading ? (
+            <span className="font-medium animate-pulse">...</span>
+          ) : (
+            <span className="font-medium">{count}</span>
+          )}{" "}
+          results
         </p>
         {setViewMode && (
           <div className="flex text-sm">

@@ -28,7 +28,7 @@ export interface UserMetric {
 }
 
 export async function userMetrics(
-  user_id: string,
+  org_id: string,
   filter: FilterNode,
   offset: number,
   limit: number,
@@ -39,7 +39,7 @@ export async function userMetrics(
   }
   const { argsAcc, orderByString } = buildUserSort(sort);
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id,
     argsAcc: argsAcc,
     filter,
   });
@@ -62,7 +62,7 @@ SELECT
   sum(r.completion_tokens) as total_completion_tokens,
   sum(r.prompt_tokens) as total_prompt_token,
   (${CLICKHOUSE_PRICE_CALC}) as cost
-from response_copy_v1 r
+from response_copy_v2 r
 WHERE (${builtFilter.filter})
 GROUP BY r.user_id
 HAVING (${havingFilter.filter})
@@ -82,11 +82,11 @@ OFFSET ${offset}
 }
 
 export async function userMetricsCount(
-  user_id: string,
+  org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id,
     argsAcc: [],
     filter,
   });
@@ -94,7 +94,7 @@ export async function userMetricsCount(
   const query = `
 SELECT
   count(DISTINCT r.user_id) as count
-from response_copy_v1 r
+from response_copy_v2 r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(

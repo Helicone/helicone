@@ -1,19 +1,15 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-import { Result } from "../../result";
-import { Database, Json } from "../../../supabase/database.types";
-import {
-  buildFilter,
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthRequest,
-} from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
-  buildRequestSort,
+  buildFilterWithAuth,
+  buildFilterWithAuthClickHouse,
+} from "../../../services/lib/filters/filters";
+import {
   SortLeafRequest,
+  buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
+import { Json } from "../../../supabase/database.types";
+import { Result } from "../../result";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 
 export interface HeliconeRequest {
   response_id: string;
@@ -45,7 +41,7 @@ export interface HeliconeRequest {
 }
 
 export async function getRequests(
-  user_id: string,
+  orgId: string,
   filter: FilterNode,
   offset: number,
   limit: number,
@@ -54,8 +50,8 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuthRequest({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id: orgId,
     filter,
     argsAcc: [],
   });
@@ -99,6 +95,7 @@ export async function getRequests(
     query,
     builtFilter.argsAcc
   );
+
   if (error !== null) {
     return { data: null, error: error };
   }
@@ -106,17 +103,17 @@ export async function getRequests(
 }
 
 export async function getRequestCount(
-  user_id: string,
+  org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthRequest({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id,
     argsAcc: [],
     filter,
   });
 
   const query = `
-  SELECT count(request.id) as count
+  SELECT count(request.id)::bigint as count
   FROM request
     left join response on request.id = response.request
     left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
@@ -132,15 +129,15 @@ export async function getRequestCount(
   if (error !== null) {
     return { data: null, error: error };
   }
-  return { data: data[0].count, error: null };
+  return { data: +data[0].count, error: null };
 }
 
 export async function getRequestCountClickhouse(
-  user_id: string,
+  org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
-    user_id,
+    org_id,
     argsAcc: [],
     filter,
   });
@@ -148,7 +145,7 @@ export async function getRequestCountClickhouse(
   const query = `
 SELECT
   count(DISTINCT r.request_id) as count
-from response_copy_v1 r
+from response_copy_v2 r
 WHERE (${builtFilter.filter})
   `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(

@@ -1,12 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { UserSettingsResponse } from "../pages/api/user_settings";
 import { Database } from "../supabase/database.types";
-import {
-  getRequestCount,
-  getRequestCountClickhouse,
-} from "./api/request/request";
+import { getRequestCountClickhouse } from "./api/request/request";
 
-export async function requestOverLimit(client: SupabaseClient<Database>) {
+export async function requestOverLimit(
+  client: SupabaseClient<Database>,
+  orgId: string
+) {
   try {
     const startOfThisMonth = new Date();
     startOfThisMonth.setDate(1);
@@ -14,17 +13,13 @@ export async function requestOverLimit(client: SupabaseClient<Database>) {
     startOfThisMonth.setMinutes(0);
     startOfThisMonth.setSeconds(0);
     startOfThisMonth.setMilliseconds(0);
-    const userId = (await client.auth.getUser()).data.user?.id;
-    if (!userId) {
-      return false;
-    }
 
     const [
       { data: count, error },
       { data: userSettings, error: userSettingsError },
     ] = await Promise.all([
-      await getRequestCountClickhouse(userId, {
-        response_copy_v1: {
+      await getRequestCountClickhouse(orgId, {
+        response_copy_v2: {
           request_created_at: {
             gte: startOfThisMonth.toISOString(),
           },

@@ -43,7 +43,6 @@ const useGetProperties = () => {
     const { property, search } = debouncedPropertySearch;
     async function doSearch() {
       const values = await getPropertyParams(property, search);
-      console.log("values", values);
       if (values.error !== null) {
         console.error(values.error);
         return;
@@ -55,9 +54,7 @@ const useGetProperties = () => {
           key: v.property_key,
         }))
       );
-      console.log("propertyFilters", propertyFilters);
       setPropertyFilters(propertyFilters);
-      console.log("searchPropertyFilters", property, search);
     }
 
     if (property !== "") {

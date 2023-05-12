@@ -97,6 +97,7 @@ const UserTable = (props: UserTableProps) => {
       from={from}
       to={to}
       count={count || 0}
+      isCountLoading={false}
       page={page}
       columns={columns}
       tableCenterTableSize={table.getCenterTotalSize()}
