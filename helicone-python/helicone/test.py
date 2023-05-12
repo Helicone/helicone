@@ -83,12 +83,12 @@ def fetch_feedback(helicone_id):
     # Fetch the response with the corresponding helicone_id
     response_query = sb.table("response").select("id, request").eq("request", helicone_id)
     response_result = response_query.single().execute()
-    response_data = response_result["data"]
+    response_data = response_result.data
 
     # Fetch the request with the corresponding response.request value
     request_query = sb.table("request").select("id, helicone_api_keys (id, api_key_hash)").eq("id", response_data["request"])
     request_result = request_query.single().execute()
-    request_data = request_result["data"]
+    request_data = request_result.data
 
     matching_api_key_hash = request_data["helicone_api_keys"]["api_key_hash"]
     matching_api_key_id = request_data["helicone_api_keys"]["id"]
@@ -100,7 +100,7 @@ def fetch_feedback(helicone_id):
     # Fetch feedback_metrics for the given api_key_id
     metric_query = sb.table("feedback_metrics").select("id, name, data_type").eq("helicone_api_key_id", str(matching_api_key_id))
     metric_result = metric_query.execute()
-    metric_data = metric_result["data"]
+    metric_data = metric_result.data
 
     # Fetch feedback for each feedback_metric and the response
     feedback_data = []
@@ -112,7 +112,7 @@ def fetch_feedback(helicone_id):
                 .eq("feedback_metric_id", str(metric["id"]))
         )
         feedback_result = feedback_query.execute()
-        feedback = feedback_result["data"]
+        feedback = feedback_result.data
 
         feedback_data.extend(feedback)
 
@@ -152,7 +152,7 @@ def test_sync_nostream():
         }],
         properties={"mode": "Create and stream=False"},
         stream=False
-    )["choices"][0]["message"]["content"]
+    )
 
     log_feedback(response, "condition", "create_and_stream_false")
 
