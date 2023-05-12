@@ -34,7 +34,7 @@ const items = [
       "View your Stripe subscription and update your payment method.",
     icon: CreditCardIcon,
     background: "bg-green-500",
-    href: process.env.NEXT_PUBLIC_STRIPE_BILLING_PORTAL,
+    href: process.env.NEXT_PUBLIC_STRIPE_BILLING_PORTAL ?? "",
   },
   {
     title: "Enterprise",
