@@ -40,6 +40,7 @@ export class SupabaseServerWrapper<T> {
       {
         userId: string;
         orgId: string;
+        user: User;
       },
       "Unauthorized"
     >
@@ -65,6 +66,7 @@ export class SupabaseServerWrapper<T> {
       data: {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
+        user: user.data.user,
       },
       error: null,
     };
