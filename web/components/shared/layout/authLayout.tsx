@@ -38,6 +38,7 @@ import { SpeedDialIcon } from "@mui/material";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useGetOrgs } from "../../../services/hooks/organizations";
 import OrgContext, { useOrg } from "./organizationContext";
+import { BsCashCoin, BsCashStack } from "react-icons/bs";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -66,6 +67,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/requests",
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
+    },
+    {
+      name: "Cache",
+      href: "/cache",
+      icon: BsCashStack,
+      current: pathname.includes("/cache"),
     },
     {
       name: "Users",

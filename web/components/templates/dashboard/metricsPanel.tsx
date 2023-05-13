@@ -44,7 +44,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
       label: "Total cost (USD)",
     },
     {
-      value: +(data?.total_requests ?? 0) + +(data?.total_cached_requests ?? 0),
+      value: +(data?.total_requests ?? 0),
       label: "Total requests",
     },
   ];
