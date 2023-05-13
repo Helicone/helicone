@@ -76,11 +76,12 @@ export function timeBackfill<T, K>(
     new Date(date.getTime() + getIncrement(totalTime));
   while (current < end) {
     const nextTime = increment(current);
+    const initialClone = { ...initial };
     const val = data
       .filter(
         (d) => d.created_at_trunc >= current && d.created_at_trunc < nextTime
       )
-      .reduce((acc, d) => reducer(acc, d), initial);
+      .reduce((acc, d) => reducer(acc, d), initialClone);
 
     result.push({ time: current, ...val });
     current = nextTime;
