@@ -21,13 +21,15 @@ export default function Metric({
   return (
     <div
       className={clsx(
-        "flex flex-col items-center justify-center p-4 rounded-md shadow-md",
+        "flex flex-col items-center justify-center p-4 rounded-md ",
         className
       )}
       style={{ backgroundColor: color }}
     >
       {isLoading ? (
-        <Spinner />
+        <div className="h-24">
+          <Spinner />
+        </div>
       ) : (
         <div className="flex flex-row items-center justify-center">
           <div className="flex flex-col items-center justify-center">

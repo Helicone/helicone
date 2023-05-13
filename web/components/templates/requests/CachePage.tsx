@@ -11,7 +11,7 @@ import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import { Result } from "../../../lib/result";
-import { truncString } from "../../../lib/stringHelpers";
+import { middleTruncString, truncString } from "../../../lib/stringHelpers";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -51,17 +51,26 @@ import { Col } from "../../shared/layout/col";
 import { Row } from "../../shared/layout/row";
 import { useQuery } from "@tanstack/react-query";
 import Metric from "../../shared/themed/themedMetric";
-import { useCachePage } from "../../../services/hooks/useCachePage";
+import {
+  useCachePageMetrics,
+  useCachePageOverTime,
+  useCachePageTopMetrics,
+  useCachePageTopRequests,
+} from "../../../services/hooks/useCachePage";
 import { BsCashCoin, BsHourglass } from "react-icons/bs";
 import { BoltIcon } from "@heroicons/react/20/solid";
 import { Grid } from "../../shared/layout/grid";
 import { ThemedMiniTable } from "../../shared/themed/themedMiniTable";
+import { RenderLineChart } from "../dashboard/timeGraph";
+import { ThemedMetricList } from "../../shared/themed/themedMetricList";
+import ThemedPieChart from "../cache/modelPIeChart";
+import { MultilineRenderLineChart } from "../cache/timeGraph";
 
 interface CachePropProps {}
 
-type useCachePageRet = ReturnType<typeof useCachePage>;
+type useCachePageRet = ReturnType<typeof useCachePageMetrics>;
 
-const baseUIData = {
+const baseMetricUIData = {
   isLoading: (x: useCachePageRet[keyof useCachePageRet]) => x.isLoading,
   color: "bg-blue-500",
   className: "text-white",
@@ -79,65 +88,131 @@ const metricsUIData: {
   };
 } = {
   totalCached: {
-    ...baseUIData,
+    ...baseMetricUIData,
     title: "Total Cached",
     value: (x) => x.data?.data ?? 0,
     icon: <BoltIcon className="w-8 h-8" />,
   },
   totalSavings: {
-    ...baseUIData,
+    ...baseMetricUIData,
     title: "Total Savings",
-    value: (x) => x.data?.data ?? 0,
+    value: (x) => (x.data?.data ? Math.ceil(x.data.data * 100) / 100 : 0),
     icon: <BsCashCoin className="w-8 h-8" />,
   },
   avgSecondsSaved: {
-    ...baseUIData,
-    title: "Seconds Saved / Request",
+    ...baseMetricUIData,
+    title: "Time Saved(s)",
     value: (x) => x.data?.data ?? 0,
     icon: <BsHourglass className="w-8 h-8" />,
   },
 };
 
 const CachePage = (props: CachePropProps) => {
-  const data = useCachePage();
+  const data = useCachePageMetrics();
+  const topMetrics = useCachePageTopMetrics();
+  const topRequests = useCachePageTopRequests();
+  const modelCacheOverTime = useCachePageOverTime();
+  const router = useRouter();
+
   return (
-    <Col className="w-full items-center">
-      <Grid className="w-full max-w-3xl items-center grid-cols-3 gap-3">
-        {Object.entries(metricsUIData).map(([key, value]) => (
-          <Metric
-            key={key}
-            title={value.title}
-            value={value.value(data[key as keyof useCachePageRet])}
-            color={value.color}
-            className="bg-blue-200 col-span-1"
-            icon={value.icon}
-            isLoading={value.isLoading(data[key as keyof useCachePageRet])}
+    <Col className="w-full items-center ">
+      <Col className="max-w-3xl gap-10 w-full">
+        <div className="w-full bg-white rounded-md p-5">
+          <p>Learn how to use caching</p>
+          <p>
+            {"->"}
+            <a
+              className="text-blue-500"
+              href="https://docs.helicone.ai/advanced-usage/caching"
+            >
+              Docs
+            </a>
+          </p>
+        </div>
+        <Grid className="w-full items-center grid-cols-3 gap-3">
+          {Object.entries(metricsUIData).map(([key, value]) => (
+            <Metric
+              key={key}
+              title={value.title}
+              value={value.value(data[key as keyof useCachePageRet])}
+              color={value.color}
+              className="bg-white col-span-1"
+              icon={value.icon}
+              isLoading={value.isLoading(data[key as keyof useCachePageRet])}
+            />
+          ))}
+        </Grid>
+        <Grid className="w-full items-center grid-cols-2 gap-3">
+          <div className="h-full bg-white rounded-md">
+            <ThemedPieChart
+              data={
+                topMetrics.topModels.data?.data?.map((x) => ({
+                  name: x.model,
+                  value: +x.count,
+                })) ?? []
+              }
+              isLoading={topMetrics.topModels.isLoading}
+            />
+          </div>
+          <ThemedMetricList
+            header="Top Users"
+            values={
+              topMetrics.topUsers.data?.data?.map((x) => ({
+                title: x.user_id,
+                value: "" + x.count,
+              })) ?? []
+            }
+            isLoading={topMetrics.topModels.isLoading}
           />
-        ))}
-      </Grid>
-      <Grid className="w-full max-w-3xl items-center grid-cols-2 gap-3">
-        <Col>
-          <h1 className="text-2xl font-semibold">Top Cached models</h1>
-          <ThemedMiniTable
-            columns={[{ key: "hello", hidden: false, name: "Model" }]}
-            rows={[
-              {
-                hello: "hello",
+        </Grid>
+
+        <MultilineRenderLineChart
+          data={modelCacheOverTime.overTime.data?.data ?? []}
+          timeMap={(x) => new Date(x).toISOString()}
+          valueFormatter={(x) => `${x}`}
+          className="h-64 w-full bg-white p-5 pb-2 rounded-md"
+        />
+
+        <ThemedMiniTable
+          className={{
+            header: "items-center text-center font-semibold text-md h-12",
+            td: clsx(
+              "text-xs h-10 text-left pl-10 w-10 ",
+              topRequests.topRequests.isLoading ? "animate-pulse" : ""
+            ),
+            tr: "hover:bg-slate-100 cursor-pointer",
+          }}
+          columns={[
+            { key: "count", hidden: false, name: "Count" },
+            { key: "prompt", hidden: false, name: "Request" },
+            { key: "first", hidden: false, name: "First Request" },
+            { key: "last", hidden: false, name: "Last Used" },
+          ]}
+          rows={
+            topRequests.topRequests?.data?.data?.map((value) => ({
+              count: {
+                data: `${value.count}`,
               },
-              {
-                hello: "hello",
+              prompt: {
+                data: `${middleTruncString(value.prompt, 50)}`,
               },
-            ]}
-          />
-        </Col>
-        <div>Top Cached models</div>
-      </Grid>
-      <div>Graph of caches over time</div>
-      <Row className="justify-between w-full"></Row>
-      <div className="bg-white w-full max-w-2xl text-center">
-        <h1 className="text-2xl font-semibold">Top Cached request</h1>
-        <Col></Col>
-      </div>
+              first: {
+                data: `${new Date(value.first_used).toLocaleString()}`,
+              },
+              last: {
+                data: `${value.last_used}`,
+              },
+            })) ?? []
+          }
+          onRowClick={(x, i) => {
+            router.push(
+              `/requests?requestId=${topRequests.topRequests?.data?.data?.[i].request_id}`
+            );
+          }}
+          isLoading={topRequests.topRequests.isLoading}
+          header="Top Requests"
+        />
+      </Col>
     </Col>
   );
 };

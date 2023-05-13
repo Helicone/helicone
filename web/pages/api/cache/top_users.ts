@@ -1,4 +1,4 @@
-import { getTopRequests } from "../../../lib/api/cache/stats";
+import { getTopUserUsage } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -9,8 +9,8 @@ async function handler({
   req,
   res,
   userData: { orgId },
-}: HandlerWrapperOptions<UnPromise<ReturnType<typeof getTopRequests>>>) {
-  res.status(200).json(await getTopRequests(orgId, "all"));
+}: HandlerWrapperOptions<UnPromise<ReturnType<typeof getTopUserUsage>>>) {
+  res.status(200).json(await getTopUserUsage(orgId, "all"));
 }
 
 export default withAuth(handler);
