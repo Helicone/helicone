@@ -84,7 +84,6 @@ WHERE (
     }>(query, builtFilter.argsAcc),
     (x) => +x[0].total_latency_ms / 1000
   );
-  console.log("Timesaved", res);
   return res;
 }
 

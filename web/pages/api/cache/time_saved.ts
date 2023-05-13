@@ -10,7 +10,6 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  console.log("time_saved.ts");
   res.status(200).json(await getTimeSaved(orgId, "all"));
 }
 
