@@ -34,7 +34,7 @@ function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
 
 const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
   const {
-    data: { requestsOverTime, costOverTime, errorOverTime },
+    data: { requestsOverTime, costOverTime },
     timeMap,
   } = props;
 
@@ -88,21 +88,6 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
                 "cost",
               ];
             }}
-          />
-        </div>
-
-        {/* Errors */}
-        <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1">
-          <h3 className="text-md font-semibold text-gray-900 text-center">
-            Errors
-          </h3>
-          <RenderLineChart
-            data={unwrapDefaultEmpty(errorOverTime).map((r) => ({
-              ...r,
-              value: r.count,
-            }))}
-            timeMap={timeMap}
-            valueFormatter={(v) => [v.toString(), "errors"]}
           />
         </div>
       </div>

@@ -69,6 +69,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/requests"),
     },
     {
+      name: "Errors",
+      href: "/errors",
+      icon: ExclamationCircleIcon,
+      current: pathname.includes("/errors"),
+    },
+    {
       name: "Cache",
       href: "/cache",
       icon: BsCashStack,
