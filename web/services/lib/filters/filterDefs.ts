@@ -32,6 +32,7 @@ export type RequestTableToOperators = {
   user_id: SingleKey<TextOperators>;
   auth_hash: SingleKey<TextOperators>;
   org_id: SingleKey<TextOperators>;
+  id: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;

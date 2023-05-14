@@ -33,6 +33,7 @@ const whereKeyMappings: KeyMappings = {
     user_id: "request.user_id",
     auth_hash: "request.auth_hash",
     org_id: "request.helicone_org_id",
+    id: "request.id",
   },
   response: {
     body_completion:
