@@ -72,11 +72,11 @@ export function useCachePageTopMetrics() {
   };
 }
 
-export function useCachePageOverTime() {
+export function useErrorPageOvertime() {
   const overTime = useQuery({
     queryKey: ["overTime"],
     queryFn: async () => {
-      const data = fetch("/api/cache/over_time").then(
+      const data = fetch("/api/error/over_time").then(
         (res) => res.json() as ReturnType<typeof getModelUsageOverTimeBackFill>
       );
       return data;

@@ -21,13 +21,11 @@ import { getTimeInterval } from "./timeCalculations/time";
 export const initialGraphDataState: GraphDataState = {
   requestsOverTime: "loading",
   costOverTime: "loading",
-  errorOverTime: "loading",
 };
 
 export interface GraphDataState {
   requestsOverTime: Loading<Result<RequestsOverTime[], string>>;
   costOverTime: Loading<Result<CostOverTime[], string>>;
-  errorOverTime: Loading<Result<ErrorOverTime[], string>>;
 }
 async function fetchDataOverTime<T>(
   timeFilter: {
