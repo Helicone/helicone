@@ -72,8 +72,6 @@ const ErrorPage = (props: ErrorPropProps) => {
   const errorCodesOverTime = useErrorPageOvertime();
   const router = useRouter();
 
-  console.log("ERRORS", errorCodesOverTime);
-
   return (
     <Col className="w-full items-center gap-10">
       <Col className="max-w-3xl gap-10 w-full">

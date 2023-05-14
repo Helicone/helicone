@@ -91,7 +91,7 @@ export function useErrorPageLatest() {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("latestErrors", latestErrors);
+
   return {
     latestErrors,
   };

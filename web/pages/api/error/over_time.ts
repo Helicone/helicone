@@ -25,7 +25,6 @@ export function getErrorOverTimeBackFill(orgId: string) {
     {
       initial: {} as { [key: string]: number },
       reducer: (acc, d) => {
-        console.log("acc", acc, "d", d);
         if (d.error_code === 200 || d.error_code === 0) {
           return acc;
         }
@@ -45,7 +44,6 @@ async function handler(
   >
 ) {
   const res = await getErrorOverTimeBackFill(options.userData.orgId);
-  console.log(res);
 
   options.res.status(200).json(res);
 }

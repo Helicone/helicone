@@ -79,8 +79,6 @@ WHERE (
 )
 GROUP BY response_copy_v2.status, ${dateTrunc}
 `;
-  console.log(query);
-  console.log(builtFilter.argsAcc);
   return resultMap(
     await dbQueryClickhouse<{
       error_code: number;
