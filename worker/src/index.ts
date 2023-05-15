@@ -551,7 +551,6 @@ async function forwardAndLog(
         }
       }
       const requestBody = body === "" ? undefined : body;
-
       const requestResult = await logRequest({
         dbClient,
         request,

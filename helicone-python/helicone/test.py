@@ -17,38 +17,43 @@ sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 load_dotenv()
 
-# Test cache behavior
-
-
 def test_cache():
     unique_id = str(uuid.uuid4())
     prompt = f"Cache test with UUID: {unique_id}"
 
-    openai.Completion.create(
+    response = openai.Completion.create(
         model="text-ada-001",
         prompt=prompt,
         max_tokens=10,
         cache=True
     )
-
-# Test rate limit policy
-
+    assert response.helicone.cache == "MISS"
+    response = openai.Completion.create(
+        model="text-ada-001",
+        prompt=prompt,
+        max_tokens=10,
+        cache=True
+    )
+    assert response.helicone.cache == "HIT"
 
 def test_rate_limit_policy():
     rate_limit_policy_dict = {"quota": 10, "time_window": 60}
     rate_limit_policy_str = "10;w=60"
 
-    openai.ChatCompletion.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": "Rate limit policy test"}],
         rate_limit_policy=rate_limit_policy_dict
     )
+    assert response.helicone.rate_limit.policy.startswith(rate_limit_policy_str)
 
     openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": "Rate limit policy test"}],
         rate_limit_policy=rate_limit_policy_str
     )
+    # Assert the prefix of the policy is equal to the str
+    assert response.helicone.rate_limit.policy.startswith(rate_limit_policy_str)
 
 # Test custom properties
 
