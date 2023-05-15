@@ -141,7 +141,10 @@ async function buildCachedRequest(
 ): Promise<string> {
   const headers = new Headers();
   for (const [key, value] of request.headers.entries()) {
-    if (key.toLowerCase().startsWith("helicone-")) {
+    if (key.toLowerCase().startsWith("helicone-auth")) {
+      headers.set(key, value);
+    }
+    if (key.toLowerCase().startsWith("helicone-cache")) {
       headers.set(key, value);
     }
     if (key.toLowerCase() === "authorization") {
