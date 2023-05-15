@@ -1,4 +1,6 @@
-import { Env } from ".";
+import { createClient } from "@supabase/supabase-js";
+import { Env, getHeliconeHeaders, hash, logRequest } from ".";
+import { extractPrompt } from "./prompt";
 
 export interface RateLimitOptions {
   time_window: number;
@@ -179,4 +181,119 @@ export async function updateRateLimitCounter(
   await env.RATE_LIMIT_KV.put(kvKey, JSON.stringify(prunedTimestamps), {
     expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl
   });
+}
+
+function generateRateLimitHeaders(
+  rateLimitCheckResult: RateLimitResponse,
+  rateLimitOptions: RateLimitOptions
+): { [key: string]: string } {
+  const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
+  const headers: { [key: string]: string } = {
+    "Helicone-RateLimit-Limit": rateLimitCheckResult.limit.toString(),
+    "Helicone-RateLimit-Remaining": rateLimitCheckResult.remaining.toString(),
+    "Helicone-RateLimit-Policy": policy,
+  };
+
+  if (rateLimitCheckResult.reset !== undefined) {
+    headers["Helicone-RateLimit-Reset"] = rateLimitCheckResult.reset.toString();
+  }
+
+  return headers;
+}
+
+interface RateLimitingResult {
+  response: Response | null;
+  additionalHeaders: { [key: string]: string };
+}
+
+export async function handleRateLimiting(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  rateLimitOptions: RateLimitOptions,
+  requestBody: any
+): Promise<RateLimitingResult> {
+  const auth = request.headers.get("Authorization");
+
+  if (auth === null) {
+    return {
+      response: new Response("No authorization header found!", {
+        status: 401,
+      }),
+      additionalHeaders: {},
+    };
+  }
+
+  const hashedKey = await hash(auth);
+  const rateLimitCheckResult = await checkRateLimit(
+    request,
+    env,
+    rateLimitOptions,
+    hashedKey,
+    requestBody.user
+  );
+
+  const additionalHeaders = generateRateLimitHeaders(
+    rateLimitCheckResult,
+    rateLimitOptions
+  );
+
+  if (rateLimitCheckResult.status === "rate_limited") {
+    const rateLimitedResponse = new Response(
+      JSON.stringify({
+        message: "Rate limit reached. Please wait before making more requests.",
+      }),
+      {
+        status: 429,
+        headers: {
+          "content-type": "application/json;charset=UTF-8",
+          ...additionalHeaders,
+        },
+      }
+    );
+
+    ctx.waitUntil(
+      (async () => {
+        const dbClient = createClient(
+          env.SUPABASE_URL,
+          env.SUPABASE_SERVICE_ROLE_KEY
+        );
+
+        const headers = getHeliconeHeaders(request.headers);
+
+        const requestId =
+          request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+
+        const result = await extractPrompt(request);
+        if (result.data !== null) {
+          const { body: body } = result.data;
+
+          const requestBody = body === "" ? undefined : body;
+
+          const heliconeApiKey =
+            request.headers.get("helicone-auth") ?? undefined;
+
+          await logRequest({
+            dbClient,
+            request,
+            auth,
+            body: requestBody,
+            ...headers,
+            requestId,
+            heliconeApiKey,
+          });
+        }
+      })()
+    );
+
+    return {
+      response: rateLimitedResponse,
+      additionalHeaders,
+    };
+  }
+
+  return {
+    response: null,
+    additionalHeaders,
+  };
 }
