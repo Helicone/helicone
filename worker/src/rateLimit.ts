@@ -14,6 +14,7 @@ export interface RateLimitOptions {
   segment: string | undefined;
   quota: number;
   unit: "token" | "request" | "dollar";
+  policy: string;
 }
 
 export interface RateLimitResponse {
@@ -41,6 +42,7 @@ function parsePolicy(input: string): RateLimitOptions {
     time_window,
     unit: unit || "request",
     segment,
+    policy: input,
   };
 }
 
@@ -249,12 +251,12 @@ export async function handleRateLimiting(
     rateLimitCheckResult,
     rateLimitOptions
   );
-  const message =
-    "Rate limit reached. Please wait before making more requests.";
+  const message = `Rate limit reached with Helicone under policy ${rateLimitOptions.policy}. Please wait before making more requests.`;
 
   if (rateLimitCheckResult.status === "rate_limited") {
     const responseMessage = JSON.stringify({
       message,
+      usage: { prompt_tokens: 100 },
     });
     const rateLimitedResponse = new Response(responseMessage, {
       status: 429,
@@ -265,12 +267,7 @@ export async function handleRateLimiting(
     });
 
     const generateResponseHandler = async (): Promise<[boolean, string]> => {
-      return [
-        false,
-        JSON.stringify({
-          message,
-        }),
-      ];
+      return [false, responseMessage];
     };
 
     const result = await extractPrompt(request);
