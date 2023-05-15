@@ -327,82 +327,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           })}
                         </nav>
                       </div>
-                      <ul className="p-4 font-medium text-md text-gray-500 space-y-4">
-                        <li>
-                          <Link
-                            href="https://docs.helicone.ai/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-gray-900"
-                          >
-                            Docs
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            href="https://discord.gg/zsSTcH2qhG"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-gray-900"
-                          >
-                            Discord
-                          </Link>
-                        </li>
-                      </ul>
-                      <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
-                        <div className="group block w-full flex-shrink-0">
-                          <Disclosure>
-                            <div className="flex items-center">
-                              <div>
-                                <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                                  <span className="sr-only">
-                                    Open user menu
-                                  </span>
-                                  {user?.email?.charAt(0).toUpperCase() || (
-                                    <UserCircleIcon className="h-8 w-8 text-black" />
-                                  )}
-                                </div>
-                              </div>
-                              <div className="ml-3 flex flex-col items-start">
-                                <p className="text-sm font-medium text-gray-700">
-                                  {user?.email}
-                                </p>
-                                <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                                  Sign Out
-                                </Disclosure.Button>
-                              </div>
-                            </div>
-                            <Disclosure.Panel className="text-gray-500">
-                              {({ close }) => (
-                                <div className="w-full flex justify-between gap-4 mt-4">
-                                  <button
-                                    onClick={() => {
-                                      close();
-                                    }}
-                                    className={clsx(
-                                      "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                                    )}
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      supabaseClient.auth.signOut().then(() => {
-                                        router.push("/");
-                                      })
-                                    }
-                                    className={clsx(
-                                      "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                                    )}
-                                  >
-                                    Sign Out
-                                  </button>
-                                </div>
-                              )}
-                            </Disclosure.Panel>
-                          </Disclosure>
-                        </div>
-                      </div>
                     </Dialog.Panel>
                   </Transition.Child>
                   <div className="w-14 flex-shrink-0" aria-hidden="true">
@@ -554,30 +478,45 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
-
-                <ul className="p-4 font-medium text-sm text-gray-500 space-y-4">
-                  <li>
-                    <Link
-                      href="https://docs.helicone.ai/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-gray-900"
-                    >
-                      Docs
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="https://discord.gg/zsSTcH2qhG"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-gray-900"
-                    >
-                      Discord
-                    </Link>
-                  </li>
-                </ul>
-                <div className="flex flex-col border-t border-gray-200 p-4 space-y-4">
+              </div>
+            </div>
+          </>
+        )}
+        <div
+          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
+        >
+          <div className="sticky top-0 z-20 flex h-16 flex-shrink-0 bg-white border-b border-gray-300">
+            <button
+              type="button"
+              className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="sr-only">Open sidebar</span>
+              <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
+            </button>
+            <div className="flex flex-1 justify-end px-4">
+              <div className="ml-4 flex items-center md:ml-6">
+                <div className="hidden sm:flex text-gray-500">
+                  <Link
+                    href="https://docs.helicone.ai/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-6"
+                    )}
+                  >
+                    Docs
+                  </Link>
+                  <Link
+                    href="https://discord.gg/zsSTcH2qhG"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-6"
+                    )}
+                  >
+                    Discord
+                  </Link>
                   {org && (
                     <ThemedDropdown
                       selectedValue={org.currentOrg.id}
@@ -591,78 +530,74 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         }
                       }}
                       align="right"
-                      verticalAlign="top"
                     />
                   )}
-                  <div className="flex flex-shrink-0">
-                    <div className="group block w-full flex-shrink-0">
-                      <Disclosure>
-                        <div className="flex items-center">
-                          <div>
-                            <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                              <span className="sr-only">Open user menu</span>
-                              {user?.email?.charAt(0).toUpperCase() || (
-                                <UserCircleIcon className="h-8 w-8 text-black" />
-                              )}
-                            </div>
-                          </div>
-                          <div className="ml-3 flex flex-col items-start">
-                            <p className="text-sm font-medium text-gray-700">
-                              {user?.email}
-                            </p>
-                            <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                              Sign Out
-                            </Disclosure.Button>
-                          </div>
-                        </div>
-                        <Disclosure.Panel className="text-gray-500">
-                          {({ close }) => (
-                            <div className="w-full flex justify-between gap-4 mt-4">
-                              <button
-                                onClick={() => {
-                                  close();
-                                }}
-                                className={clsx(
-                                  "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                                )}
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() =>
-                                  supabaseClient.auth.signOut().then(() => {
-                                    router.push("/");
-                                  })
-                                }
-                                className={clsx(
-                                  "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                                )}
-                              >
-                                Sign Out
-                              </button>
-                            </div>
-                          )}
-                        </Disclosure.Panel>
-                      </Disclosure>
-                    </div>
-                  </div>
                 </div>
+
+                {/* Profile dropdown */}
+                <Menu as="div" className="relative ml-6">
+                  <div>
+                    <Menu.Button className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                      <span className="sr-only">Open user menu</span>
+                      {user?.email?.charAt(0).toUpperCase() || (
+                        <UserCircleIcon className="h-8 w-8 text-black" />
+                      )}
+                    </Menu.Button>
+                  </div>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 z-50 mt-2 w-max min-w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <Menu.Item key="user-email">
+                        {({ active }) => (
+                          <p className="block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">
+                            {user?.email}
+                          </p>
+                        )}
+                      </Menu.Item>
+                      {accountNav.map((item) => (
+                        <Menu.Item key={item.name}>
+                          {({ active }) => (
+                            <a
+                              href={item.href}
+                              className={clsx(
+                                active ? "bg-gray-100" : "",
+                                "block px-4 py-2 text-sm text-gray-600"
+                              )}
+                            >
+                              {item.name}
+                            </a>
+                          )}
+                        </Menu.Item>
+                      ))}
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            className={clsx(
+                              active ? "bg-gray-100" : "",
+                              "flex w-full px-4 py-2 text-sm text-gray-500 border-t border-gray-300"
+                            )}
+                            onClick={() => {
+                              supabaseClient.auth
+                                .signOut()
+                                .then(() => router.push("/"));
+                            }}
+                          >
+                            Sign out
+                          </button>
+                        )}
+                      </Menu.Item>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
               </div>
             </div>
-          </>
-        )}
-        <div
-          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
-        >
-          <div className="sticky md:hidden top-0 z-20 flex h-14 flex-shrink-0 bg-white border-b border-gray-300">
-            <button
-              type="button"
-              className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="sr-only">Open sidebar</span>
-              <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
           </div>
 
           <main className="flex-1 bg">
@@ -768,7 +703,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
               )}
               <OrgContext.Provider value={org}>
-                <div className="py-4 sm:py-8" key={org?.renderKey}>
+                <div className="py-4 sm:py-6" key={org?.renderKey}>
                   {children}
                 </div>
               </OrgContext.Provider>
