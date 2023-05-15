@@ -1,17 +1,20 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import { Database } from "../supabase/database.types";
-import { getCacheSettings } from "./cache";
+import {
+  getCachedResponse,
+  getCacheSettings,
+  recordCacheHit,
+  saveToCache,
+} from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
 import { readAndLogResponse } from "./logResponse";
 import { ChatPrompt, extractPrompt, Prompt } from "./prompt";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import {
-  checkRateLimit,
   getRateLimitOptions,
-  RateLimitOptions,
-  RateLimitResponse,
+  handleRateLimiting,
   updateRateLimitCounter,
 } from "./rateLimit";
 import { Result } from "./results";
@@ -27,6 +30,7 @@ export interface Env {
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
   RATE_LIMIT_KV: KVNamespace;
+  CACHE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
@@ -191,7 +195,7 @@ async function getHeliconeApiKeyRow(
   return { data: data, error: null };
 }
 
-async function logRequest({
+export async function logRequest({
   dbClient,
   request,
   userId,
@@ -328,7 +332,7 @@ function validateApiConfiguration(api_base: string | undefined): boolean {
   );
 }
 
-function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
+export function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
   const propTag = "helicone-property-";
   const properties = Object.fromEntries(
     [...headers.entries()]
@@ -511,14 +515,49 @@ async function forwardAndLog(
     readable = readable?.pipeThrough(transformer);
   }
 
+  const generateResponseHandler = async (): Promise<[boolean, string]> => {
+    async function responseBodyTimeout(delay_ms: number) {
+      await new Promise((resolve) => setTimeout(resolve, delay_ms));
+      console.error("response body timeout");
+      return globalResponseBody;
+    }
+    return await Promise.race([
+      Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
+      Promise.all([false, responseBodySubscriber]),
+    ]);
+  };
+
+  return processAndLogRequestResponse(
+    readable,
+    generateResponseHandler,
+    auth,
+    request,
+    response,
+    requestSettings,
+    body,
+    env,
+    ctx,
+    startTime,
+    prompt
+  );
+}
+
+export async function processAndLogRequestResponse(
+  readable: ReadableStream<any> | undefined,
+  handleResponseTimeout: () => Promise<[boolean, string]>,
+  auth: string,
+  request: Request,
+  response: Response,
+  requestSettings: RequestSettings,
+  body: string,
+  env: Env,
+  ctx: ExecutionContext,
+  startTime: Date,
+  prompt?: Prompt | ChatPrompt
+): Promise<Response> {
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
   console.log("request id", requestId);
-  async function responseBodyTimeout(delay_ms: number) {
-    await new Promise((resolve) => setTimeout(resolve, delay_ms));
-    console.error("response body timeout");
-    return globalResponseBody;
-  }
 
   const headers = getHeliconeHeaders(request.headers);
 
@@ -563,10 +602,7 @@ async function forwardAndLog(
       });
 
       const responseStatus = response.status;
-      const [wasTimeout, responseText] = await Promise.race([
-        Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
-        Promise.all([false, responseBodySubscriber]),
-      ]);
+      const [wasTimeout, responseText] = await handleResponseTimeout();
 
       if (requestResult.data !== null) {
         const responseResult = await readAndLogResponse({
@@ -595,174 +631,10 @@ async function forwardAndLog(
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", requestId);
-
   return new Response(readable, {
     ...response,
     headers: responseHeaders,
   });
-}
-
-async function uncachedRequest(
-  request: Request,
-  env: Env,
-  ctx: ExecutionContext,
-  requestSettings: RequestSettings,
-  retryOptions?: RetryOptions
-): Promise<Response> {
-  const result = await extractPrompt(request);
-  if (result.data !== null) {
-    const { request: formattedRequest, body: body, prompt } = result.data;
-    return await forwardAndLog(
-      requestSettings,
-      body,
-      formattedRequest,
-      env,
-      ctx,
-      retryOptions,
-      prompt
-    );
-  } else {
-    return new Response(result.error, { status: 400 });
-  }
-}
-
-async function buildCachedRequest(
-  request: Request,
-  idx: number
-): Promise<Request> {
-  const headers = new Headers();
-  for (const [key, value] of request.headers.entries()) {
-    if (key.toLowerCase().startsWith("helicone-")) {
-      headers.set(key, value);
-    }
-    if (key.toLowerCase() === "authorization") {
-      headers.set(key, value);
-    }
-  }
-
-  const cacheKey = await hash(
-    request.url +
-      (await request.text()) +
-      JSON.stringify([...headers.entries()]) +
-      (idx >= 1 ? idx.toString() : "")
-  );
-  const cacheUrl = new URL(request.url);
-
-  const pathName = cacheUrl.pathname.replaceAll("/", "_");
-  cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
-
-  return new Request(cacheUrl, {
-    method: "GET",
-    headers: headers,
-  });
-}
-async function saveToCache(
-  request: Request,
-  response: Response,
-  cacheControl: string,
-  settings: { maxSize: number }
-): Promise<void> {
-  console.log("Saving to cache");
-  const cache = caches.default;
-  const responseClone = response.clone();
-  const responseHeaders = new Headers(responseClone.headers);
-  responseHeaders.set("Cache-Control", cacheControl);
-  const cacheResponse = new Response(responseClone.body, {
-    ...responseClone,
-    headers: responseHeaders,
-  });
-  console.log("cache response", response.headers);
-  const { freeIndexes } = await getMaxCachedResponses(
-    request.clone(),
-    settings
-  );
-  if (freeIndexes.length > 0) {
-    cache.put(await buildCachedRequest(request, freeIndexes[0]), cacheResponse);
-  } else {
-    throw new Error("No free indexes");
-  }
-}
-
-async function getMaxCachedResponses(
-  request: Request,
-  { maxSize }: { maxSize: number }
-): Promise<{ requests: Response[]; freeIndexes: number[] }> {
-  const cache = caches.default;
-  const requests = await Promise.all(
-    Array.from(Array(maxSize).keys()).map(async (idx) => {
-      const requestCache = await buildCachedRequest(request.clone(), idx);
-      return cache.match(requestCache);
-    })
-  );
-  return {
-    requests: requests.filter((r) => r !== undefined) as Response[],
-    freeIndexes: requests
-      .map((r, idx) => idx)
-      .filter((idx) => requests[idx] === undefined),
-  };
-}
-
-async function getCachedResponse(
-  request: Request,
-  settings: { maxSize: number }
-): Promise<Response | null> {
-  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
-    request.clone(),
-    settings
-  );
-  if (freeIndexes.length > 0) {
-    console.log("Max cache size reached, not caching");
-    return null;
-  } else {
-    const cacheIdx = Math.floor(Math.random() * requestCaches.length);
-    const randomCache = requestCaches[cacheIdx];
-    const cachedResponseHeaders = new Headers(randomCache.headers);
-    cachedResponseHeaders.append("Helicone-Cache", "HIT");
-    cachedResponseHeaders.append(
-      "Helicone-Cache-Bucket-Idx",
-      cacheIdx.toString()
-    );
-    return new Response(randomCache.body, {
-      ...randomCache,
-      headers: cachedResponseHeaders,
-    });
-  }
-}
-
-async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
-  const requestId = headers.get("helicone-id");
-  if (!requestId) {
-    console.error("No request id found in cache hit");
-    return;
-  }
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-  const { error } = await dbClient
-    .from("cache_hits")
-    .insert({ request_id: requestId });
-  if (error) {
-    console.error(error);
-  }
-}
-
-function generateRateLimitHeaders(
-  rateLimitCheckResult: RateLimitResponse,
-  rateLimitOptions: RateLimitOptions
-): { [key: string]: string } {
-  const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
-  const headers: { [key: string]: string } = {
-    "Helicone-RateLimit-Limit": rateLimitCheckResult.limit.toString(),
-    "Helicone-RateLimit-Remaining": rateLimitCheckResult.remaining.toString(),
-    "Helicone-RateLimit-Policy": policy,
-  };
-
-  if (rateLimitCheckResult.reset !== undefined) {
-    headers["Helicone-RateLimit-Reset"] = rateLimitCheckResult.reset.toString();
-  }
-
-  return headers;
 }
 
 export default {
@@ -797,47 +669,6 @@ export default {
           ? await request.clone().json<{ stream?: boolean; user?: string }>()
           : {};
 
-      let additionalHeaders: { [key: string]: string } = {};
-      if (rateLimitOptions !== undefined) {
-        const auth = request.headers.get("Authorization");
-
-        if (auth === null) {
-          return new Response("No authorization header found!", {
-            status: 401,
-          });
-        }
-
-        const hashedKey = await hash(auth);
-        const rateLimitCheckResult = await checkRateLimit(
-          request,
-          env,
-          rateLimitOptions,
-          hashedKey,
-          requestBody.user
-        );
-
-        additionalHeaders = generateRateLimitHeaders(
-          rateLimitCheckResult,
-          rateLimitOptions
-        );
-
-        if (rateLimitCheckResult.status === "rate_limited") {
-          return new Response(
-            JSON.stringify({
-              message:
-                "Rate limit reached. Please wait before making more requests.",
-            }),
-            {
-              status: 429,
-              headers: {
-                "content-type": "application/json;charset=UTF-8",
-                ...additionalHeaders,
-              },
-            }
-          );
-        }
-      }
-
       const api_base =
         request.headers.get("Helicone-OpenAI-Api-Base") ?? undefined;
       if (!validateApiConfiguration(api_base)) {
@@ -855,6 +686,25 @@ export default {
         api_base,
       };
 
+      let additionalHeaders: { [key: string]: string } = {};
+      if (rateLimitOptions !== undefined) {
+        const rateLimitingResult = await handleRateLimiting(
+          requestSettings,
+          request,
+          requestBody,
+          env,
+          ctx,
+          rateLimitOptions,
+          new Date()
+        );
+
+        if (rateLimitingResult.response !== null) {
+          return rateLimitingResult.response;
+        }
+
+        additionalHeaders = rateLimitingResult.additionalHeaders;
+      }
+
       const retryOptions = getRetryOptions(request);
 
       const { data: cacheSettings, error: cacheError } = getCacheSettings(
@@ -869,7 +719,8 @@ export default {
       if (cacheSettings.shouldReadFromCache) {
         const cachedResponse = await getCachedResponse(
           request.clone(),
-          cacheSettings.bucketSettings
+          cacheSettings.bucketSettings,
+          env
         );
         if (cachedResponse) {
           ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
@@ -895,7 +746,9 @@ export default {
             requestClone,
             response,
             cacheSettings.cacheControl,
-            cacheSettings.bucketSettings
+            cacheSettings.bucketSettings,
+            env,
+            cacheSettings.ttl
           )
         );
       }
@@ -951,3 +804,27 @@ export default {
     }
   },
 };
+
+export async function uncachedRequest(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  requestSettings: RequestSettings,
+  retryOptions?: RetryOptions
+): Promise<Response> {
+  const result = await extractPrompt(request);
+  if (result.data !== null) {
+    const { request: formattedRequest, body: body, prompt } = result.data;
+    return await forwardAndLog(
+      requestSettings,
+      body,
+      formattedRequest,
+      env,
+      ctx,
+      retryOptions,
+      prompt
+    );
+  } else {
+    return new Response(result.error, { status: 400 });
+  }
+}
