@@ -50,33 +50,33 @@ export interface Database {
       };
       helicone_api_keys: {
         Row: {
-          api_key_hash: string
-          api_key_name: string
-          created_at: string
-          id: number
-          organization_id: string
-          soft_delete: boolean
-          user_id: string
-        }
+          api_key_hash: string;
+          api_key_name: string;
+          created_at: string;
+          id: number;
+          organization_id: string;
+          soft_delete: boolean;
+          user_id: string;
+        };
         Insert: {
-          api_key_hash: string
-          api_key_name: string
-          created_at?: string
-          id?: number
-          organization_id: string
-          soft_delete?: boolean
-          user_id: string
-        }
+          api_key_hash: string;
+          api_key_name: string;
+          created_at?: string;
+          id?: number;
+          organization_id: string;
+          soft_delete?: boolean;
+          user_id: string;
+        };
         Update: {
-          api_key_hash?: string
-          api_key_name?: string
-          created_at?: string
-          id?: number
-          organization_id?: string
-          soft_delete?: boolean
-          user_id?: string
-        }
-      }
+          api_key_hash?: string;
+          api_key_name?: string;
+          created_at?: string;
+          id?: number;
+          organization_id?: string;
+          soft_delete?: boolean;
+          user_id?: string;
+        };
+      };
       layout: {
         Row: {
           columns: Json | null;
@@ -95,63 +95,63 @@ export interface Database {
           user_id: string;
         };
         Update: {
-          columns?: Json | null
-          created_at?: string | null
-          filters?: Json | null
-          id?: number
-          name?: string
-          user_id?: string
-        }
-      }
+          columns?: Json | null;
+          created_at?: string | null;
+          filters?: Json | null;
+          id?: number;
+          name?: string;
+          user_id?: string;
+        };
+      };
       organization: {
         Row: {
-          color: string
-          created_at: string | null
-          icon: string
-          id: string
-          is_personal: boolean
-          name: string
-          owner: string
-          soft_delete: boolean
-        }
+          color: string;
+          created_at: string | null;
+          icon: string;
+          id: string;
+          is_personal: boolean;
+          name: string;
+          owner: string;
+          soft_delete: boolean;
+        };
         Insert: {
-          color?: string
-          created_at?: string | null
-          icon?: string
-          id?: string
-          is_personal?: boolean
-          name: string
-          owner: string
-          soft_delete?: boolean
-        }
+          color?: string;
+          created_at?: string | null;
+          icon?: string;
+          id?: string;
+          is_personal?: boolean;
+          name: string;
+          owner: string;
+          soft_delete?: boolean;
+        };
         Update: {
-          color?: string
-          created_at?: string | null
-          icon?: string
-          id?: string
-          is_personal?: boolean
-          name?: string
-          owner?: string
-          soft_delete?: boolean
-        }
-      }
+          color?: string;
+          created_at?: string | null;
+          icon?: string;
+          id?: string;
+          is_personal?: boolean;
+          name?: string;
+          owner?: string;
+          soft_delete?: boolean;
+        };
+      };
       organization_member: {
         Row: {
-          created_at: string | null
-          member: string
-          organization: string
-        }
+          created_at: string | null;
+          member: string;
+          organization: string;
+        };
         Insert: {
-          created_at?: string | null
-          member: string
-          organization: string
-        }
+          created_at?: string | null;
+          member: string;
+          organization: string;
+        };
         Update: {
-          created_at?: string | null
-          member?: string
-          organization?: string
-        }
-      }
+          created_at?: string | null;
+          member?: string;
+          organization?: string;
+        };
+      };
       prompt: {
         Row: {
           auth_hash: string;
@@ -177,80 +177,80 @@ export interface Database {
       };
       properties: {
         Row: {
-          auth_hash: string | null
-          created_at: string
-          id: number
-          key: string
-          request_id: string | null
-          user_id: string | null
-          value: string
-        }
+          auth_hash: string | null;
+          created_at: string;
+          id: number;
+          key: string;
+          request_id: string | null;
+          user_id: string | null;
+          value: string;
+        };
         Insert: {
-          auth_hash?: string | null
-          created_at?: string
-          id?: number
-          key: string
-          request_id?: string | null
-          user_id?: string | null
-          value: string
-        }
+          auth_hash?: string | null;
+          created_at?: string;
+          id?: number;
+          key: string;
+          request_id?: string | null;
+          user_id?: string | null;
+          value: string;
+        };
         Update: {
-          auth_hash?: string | null
-          created_at?: string
-          id?: number
-          key?: string
-          request_id?: string | null
-          user_id?: string | null
-          value?: string
-        }
-      }
+          auth_hash?: string | null;
+          created_at?: string;
+          id?: number;
+          key?: string;
+          request_id?: string | null;
+          user_id?: string | null;
+          value?: string;
+        };
+      };
       request: {
         Row: {
-          auth_hash: string
-          body: Json
-          created_at: string
-          formatted_prompt_id: string | null
-          helicone_api_key_id: number | null
-          helicone_org_id: string | null
-          helicone_user: string | null
-          id: string
-          path: string
-          prompt_id: string | null
-          prompt_values: Json | null
-          properties: Json | null
-          user_id: string | null
-        }
+          auth_hash: string;
+          body: Json;
+          created_at: string;
+          formatted_prompt_id: string | null;
+          helicone_api_key_id: number | null;
+          helicone_org_id: string | null;
+          helicone_user: string | null;
+          id: string;
+          path: string;
+          prompt_id: string | null;
+          prompt_values: Json | null;
+          properties: Json | null;
+          user_id: string | null;
+        };
         Insert: {
-          auth_hash: string
-          body: Json
-          created_at?: string
-          formatted_prompt_id?: string | null
-          helicone_api_key_id?: number | null
-          helicone_org_id?: string | null
-          helicone_user?: string | null
-          id?: string
-          path: string
-          prompt_id?: string | null
-          prompt_values?: Json | null
-          properties?: Json | null
-          user_id?: string | null
-        }
+          auth_hash: string;
+          body: Json;
+          created_at?: string;
+          formatted_prompt_id?: string | null;
+          helicone_api_key_id?: number | null;
+          helicone_org_id?: string | null;
+          helicone_user?: string | null;
+          id?: string;
+          path: string;
+          prompt_id?: string | null;
+          prompt_values?: Json | null;
+          properties?: Json | null;
+          user_id?: string | null;
+        };
         Update: {
-          auth_hash?: string
-          body?: Json
-          created_at?: string
-          formatted_prompt_id?: string | null
-          helicone_api_key_id?: number | null
-          helicone_org_id?: string | null
-          helicone_user?: string | null
-          id?: string
-          path?: string
-          prompt_id?: string | null
-          prompt_values?: Json | null
-          properties?: Json | null
-          user_id?: string | null
-        }
-      }
+          auth_hash?: string;
+          body?: Json;
+          created_at?: string;
+          formatted_prompt_id?: string | null;
+          helicone_api_key_id?: number | null;
+          helicone_org_id?: string | null;
+          helicone_user?: string | null;
+          id?: string;
+          path?: string;
+          prompt_id?: string | null;
+          prompt_values?: Json | null;
+          properties?: Json | null;
+          user_id?: string | null;
+        };
+      };
       response: {
         Row: {
           body: Json;
@@ -440,21 +440,21 @@ export interface Database {
           }
         | {
             Args: {
-              time_increment: string
-            }
-            Returns: Record<string, unknown>[]
-          }
+              time_increment: string;
+            };
+            Returns: Record<string, unknown>[];
+          };
       ensure_personal: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       get_org_id: {
         Args: {
-          request_id: string
-        }
-        Returns: string
-      }
-    }
+          request_id: string;
+        };
+        Returns: string;
+      };
+    };
     Enums: {
       [_ in never]: never;
     };
