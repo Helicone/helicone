@@ -8,7 +8,6 @@ import {
   YAxis,
 } from "recharts";
 import { ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
 import { clsx } from "../../shared/clsx";
 
 export function MultilineRenderLineChart<T>({
@@ -26,14 +25,18 @@ export function MultilineRenderLineChart<T>({
   valueFormatter?: (value: ValueType) => string | string[];
   className?: string;
 }) {
+  const chartData = data.map((d) => ({
+    ...d,
+    time: timeMap(d.time),
+  }));
   return (
     <div className={clsx("w-full h-full", className)}>
       <ResponsiveContainer className={"w-full h-full"}>
-        <LineChart data={data}>
+        <LineChart data={chartData}>
           <CartesianGrid vertical={false} opacity={50} strokeOpacity={0.5} />
-          {data &&
-            data.length > 0 &&
-            Object.keys(data[0])
+          {chartData &&
+            chartData.length > 0 &&
+            Object.keys(chartData[0])
               .filter((key) => key !== "time")
               .map((key, i) => (
                 <Line
@@ -41,7 +44,7 @@ export function MultilineRenderLineChart<T>({
                   dot={false}
                   dataKey={key}
                   stroke={`hsl(${
-                    (i * 360) / (Object.keys(data[0]).length - 1)
+                    (i * 360) / (Object.keys(chartData[0]).length - 1)
                   }, 100%, 50%)`}
                   strokeWidth={1.5}
                   animationDuration={0}

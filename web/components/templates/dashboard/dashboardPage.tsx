@@ -67,7 +67,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const {
     metrics,
     filterMap,
-    errorsOverTime,
     requestsOverTime,
     costOverTime,
     searchPropertyFilters,
@@ -79,7 +78,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const timeData: GraphDataState = {
     costOverTime: costOverTime.data ?? "loading",
-    errorOverTime: errorsOverTime.data ?? "loading",
     requestsOverTime: requestsOverTime.data ?? "loading",
   };
 

@@ -15,6 +15,7 @@ export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
   response_body?: any;
+  response_status: number;
   request_id: string;
   request_created_at: string;
   request_body: any;
@@ -60,6 +61,7 @@ export async function getRequests(
   SELECT response.id AS response_id,
     response.created_at as response_created_at,
     response.body AS response_body,
+    response.status AS response_status,
     request.id AS request_id,
     request.created_at as request_created_at,
     request.body AS request_body,
