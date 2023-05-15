@@ -632,7 +632,8 @@ export async function processAndLogRequestResponse(
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", requestId);
-
+  console.log("RESPONSE", response);
+  console.log("READABLE", readable);
   return new Response(readable, {
     ...response,
     headers: responseHeaders,

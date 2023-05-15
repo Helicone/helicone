@@ -253,18 +253,16 @@ export async function handleRateLimiting(
     "Rate limit reached. Please wait before making more requests.";
 
   if (rateLimitCheckResult.status === "rate_limited") {
-    const rateLimitedResponse = new Response(
-      JSON.stringify({
-        message,
-      }),
-      {
-        status: 429,
-        headers: {
-          "content-type": "application/json;charset=UTF-8",
-          ...additionalHeaders,
-        },
-      }
-    );
+    const responseMessage = JSON.stringify({
+      message,
+    });
+    const rateLimitedResponse = new Response(responseMessage, {
+      status: 429,
+      headers: {
+        "content-type": "application/json;charset=UTF-8",
+        ...additionalHeaders,
+      },
+    });
 
     const generateResponseHandler = async (): Promise<[boolean, string]> => {
       return [
@@ -279,9 +277,22 @@ export async function handleRateLimiting(
     if (result.data !== null) {
       const { body, prompt } = result.data;
 
-      // Call processAndLogRequestResponse
+      const stringToStream = (str: string) => {
+        const encoder = new TextEncoder();
+        const readableStream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(encoder.encode(str));
+            controller.close();
+          },
+        });
+
+        return readableStream;
+      };
+
+      const myStream = stringToStream(responseMessage);
+
       const processedResponse = await processAndLogRequestResponse(
-        undefined,
+        myStream,
         generateResponseHandler,
         auth,
         request,
