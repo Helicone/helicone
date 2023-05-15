@@ -18,11 +18,9 @@ import {
   XMarkIcon,
   TableCellsIcon,
   BuildingOfficeIcon,
-} from "@heroicons/react/24/outline";
-import {
   ExclamationCircleIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/20/solid";
+  CircleStackIcon,
+} from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -77,7 +75,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Cache",
       href: "/cache",
-      icon: BsCashStack,
+      icon: CircleStackIcon,
       current: pathname.includes("/cache"),
     },
     {
@@ -553,10 +551,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-50 mt-2 w-max min-w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item key="user-email">
                         {({ active }) => (
-                          <p className="block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">
+                          <p className="truncate block px-4 py-2 text-sm text-black font-bold border-b border-gray-300">
                             {user?.email}
                           </p>
                         )}
