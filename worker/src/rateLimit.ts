@@ -255,8 +255,12 @@ export async function handleRateLimiting(
 
   if (rateLimitCheckResult.status === "rate_limited") {
     const responseMessage = JSON.stringify({
-      message,
-      usage: { prompt_tokens: 100 },
+      error: {
+        message,
+        type: "rate_limit_error",
+        param: null,
+        code: null,
+      },
     });
     const rateLimitedResponse = new Response(responseMessage, {
       status: 429,
