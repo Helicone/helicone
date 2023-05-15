@@ -1,5 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env, getHeliconeHeaders, hash, logRequest } from ".";
+import {
+  Env,
+  RequestSettings,
+  getHeliconeHeaders,
+  hash,
+  logRequest,
+  processAndLogRequestResponse,
+} from ".";
 import { extractPrompt } from "./prompt";
 
 export interface RateLimitOptions {
@@ -207,11 +214,16 @@ interface RateLimitingResult {
 }
 
 export async function handleRateLimiting(
+  requestSettings: RequestSettings,
   request: Request,
+  requestBody: {
+    stream?: boolean | undefined;
+    user?: string | undefined;
+  },
   env: Env,
   ctx: ExecutionContext,
   rateLimitOptions: RateLimitOptions,
-  requestBody: any
+  startTime: Date
 ): Promise<RateLimitingResult> {
   const auth = request.headers.get("Authorization");
 
@@ -237,11 +249,13 @@ export async function handleRateLimiting(
     rateLimitCheckResult,
     rateLimitOptions
   );
+  const message =
+    "Rate limit reached. Please wait before making more requests.";
 
   if (rateLimitCheckResult.status === "rate_limited") {
     const rateLimitedResponse = new Response(
       JSON.stringify({
-        message: "Rate limit reached. Please wait before making more requests.",
+        message,
       }),
       {
         status: 429,
@@ -252,44 +266,44 @@ export async function handleRateLimiting(
       }
     );
 
-    ctx.waitUntil(
-      (async () => {
-        const dbClient = createClient(
-          env.SUPABASE_URL,
-          env.SUPABASE_SERVICE_ROLE_KEY
-        );
-
-        const headers = getHeliconeHeaders(request.headers);
-
-        const requestId =
-          request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
-
-        const result = await extractPrompt(request);
-        if (result.data !== null) {
-          const { body: body } = result.data;
-
-          const requestBody = body === "" ? undefined : body;
-
-          const heliconeApiKey =
-            request.headers.get("helicone-auth") ?? undefined;
-
-          await logRequest({
-            dbClient,
-            request,
-            auth,
-            body: requestBody,
-            ...headers,
-            requestId,
-            heliconeApiKey,
-          });
-        }
-      })()
-    );
-
-    return {
-      response: rateLimitedResponse,
-      additionalHeaders,
+    const generateResponseHandler = async (): Promise<[boolean, string]> => {
+      return [
+        false,
+        JSON.stringify({
+          message,
+        }),
+      ];
     };
+
+    const result = await extractPrompt(request);
+    if (result.data !== null) {
+      const { body, prompt } = result.data;
+
+      // Call processAndLogRequestResponse
+      const processedResponse = await processAndLogRequestResponse(
+        undefined,
+        generateResponseHandler,
+        auth,
+        request,
+        rateLimitedResponse,
+        requestSettings,
+        body,
+        env,
+        ctx,
+        startTime,
+        prompt
+      );
+
+      return {
+        response: processedResponse,
+        additionalHeaders,
+      };
+    } else {
+      return {
+        response: new Response(result.error, { status: 400 }),
+        additionalHeaders,
+      };
+    }
   }
 
   return {

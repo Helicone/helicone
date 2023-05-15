@@ -6,7 +6,6 @@ import {
   getCacheSettings,
   recordCacheHit,
   saveToCache,
-  uncachedRequest,
 } from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
@@ -14,11 +13,8 @@ import { readAndLogResponse } from "./logResponse";
 import { ChatPrompt, extractPrompt, Prompt } from "./prompt";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import {
-  checkRateLimit,
   getRateLimitOptions,
   handleRateLimiting,
-  RateLimitOptions,
-  RateLimitResponse,
   updateRateLimitCounter,
 } from "./rateLimit";
 import { Result } from "./results";
@@ -519,14 +515,49 @@ async function forwardAndLog(
     readable = readable?.pipeThrough(transformer);
   }
 
+  const generateResponseHandler = async (): Promise<[boolean, string]> => {
+    async function responseBodyTimeout(delay_ms: number) {
+      await new Promise((resolve) => setTimeout(resolve, delay_ms));
+      console.error("response body timeout");
+      return globalResponseBody;
+    }
+    return await Promise.race([
+      Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
+      Promise.all([false, responseBodySubscriber]),
+    ]);
+  };
+
+  return processAndLogRequestResponse(
+    readable,
+    generateResponseHandler,
+    auth,
+    request,
+    response,
+    requestSettings,
+    body,
+    env,
+    ctx,
+    startTime,
+    prompt
+  );
+}
+
+export async function processAndLogRequestResponse(
+  readable: ReadableStream<any> | undefined,
+  handleResponseTimeout: () => Promise<[boolean, string]>,
+  auth: string,
+  request: Request,
+  response: Response,
+  requestSettings: RequestSettings,
+  body: string,
+  env: Env,
+  ctx: ExecutionContext,
+  startTime: Date,
+  prompt?: Prompt | ChatPrompt
+): Promise<Response> {
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
   console.log("request id", requestId);
-  async function responseBodyTimeout(delay_ms: number) {
-    await new Promise((resolve) => setTimeout(resolve, delay_ms));
-    console.error("response body timeout");
-    return globalResponseBody;
-  }
 
   const headers = getHeliconeHeaders(request.headers);
 
@@ -572,10 +603,7 @@ async function forwardAndLog(
       });
 
       const responseStatus = response.status;
-      const [wasTimeout, responseText] = await Promise.race([
-        Promise.all([true, responseBodyTimeout(15 * 60 * 1000)]), //15 minutes
-        Promise.all([false, responseBodySubscriber]),
-      ]);
+      const [wasTimeout, responseText] = await handleResponseTimeout();
 
       if (requestResult.data !== null) {
         const responseResult = await readAndLogResponse({
@@ -643,22 +671,6 @@ export default {
           ? await request.clone().json<{ stream?: boolean; user?: string }>()
           : {};
 
-      let additionalHeaders: { [key: string]: string } = {};
-      if (rateLimitOptions !== undefined) {
-        const rateLimitingResult = await handleRateLimiting(
-          request,
-          env,
-          ctx,
-          rateLimitOptions,
-          requestBody
-        );
-        if (rateLimitingResult.response !== null) {
-          return rateLimitingResult.response;
-        }
-
-        additionalHeaders = rateLimitingResult.additionalHeaders;
-      }
-
       const api_base =
         request.headers.get("Helicone-OpenAI-Api-Base") ?? undefined;
       if (!validateApiConfiguration(api_base)) {
@@ -675,6 +687,25 @@ export default {
           request.headers.get("helicone-ff-increase-timeout") === "true",
         api_base,
       };
+
+      let additionalHeaders: { [key: string]: string } = {};
+      if (rateLimitOptions !== undefined) {
+        const rateLimitingResult = await handleRateLimiting(
+          requestSettings,
+          request,
+          requestBody,
+          env,
+          ctx,
+          rateLimitOptions,
+          new Date()
+        );
+
+        if (rateLimitingResult.response !== null) {
+          return rateLimitingResult.response;
+        }
+
+        additionalHeaders = rateLimitingResult.additionalHeaders;
+      }
 
       const retryOptions = getRetryOptions(request);
 
