@@ -1,7 +1,13 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import { Database } from "../supabase/database.types";
-import { getCachedResponse, getCacheSettings, recordCacheHit, saveToCache, uncachedRequest } from "./cache";
+import {
+  getCachedResponse,
+  getCacheSettings,
+  recordCacheHit,
+  saveToCache,
+  uncachedRequest,
+} from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
 import { readAndLogResponse } from "./logResponse";
@@ -604,7 +610,6 @@ async function forwardAndLog(
   });
 }
 
-
 function generateRateLimitHeaders(
   rateLimitCheckResult: RateLimitResponse,
   rateLimitOptions: RateLimitOptions
@@ -756,7 +761,7 @@ export default {
             cacheSettings.cacheControl,
             cacheSettings.bucketSettings,
             env,
-            cacheSettings.ttl,
+            cacheSettings.ttl
           )
         );
       }
@@ -812,7 +817,6 @@ export default {
     }
   },
 };
-
 
 export async function uncachedRequest(
   request: Request,

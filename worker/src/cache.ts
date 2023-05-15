@@ -86,7 +86,9 @@ export function getCacheSettings(
     const shouldReadFromCache =
       cacheHeaders.cacheEnabled || cacheHeaders.cacheRead;
 
-    const [cacheControl, ttl] = buildCacheControl(headers.get("Cache-Control") ?? "");
+    const [cacheControl, ttl] = buildCacheControl(
+      headers.get("Cache-Control") ?? ""
+    );
     if (cacheHeaders.cacheBucketMaxSize > MAX_BUCKET_SIZE) {
       return {
         error: `Cache bucket size cannot be greater than ${MAX_BUCKET_SIZE}`,
@@ -123,7 +125,6 @@ async function serializeResponse(response: Response): Promise<string> {
 
   return JSON.stringify(serializableResponse);
 }
-
 
 function deserializeResponse(serializedResponse: string): Response {
   const responseObj = JSON.parse(serializedResponse);
@@ -166,7 +167,7 @@ export async function saveToCache(
   cacheControl: string,
   settings: { maxSize: number },
   env: Env,
-  ttl: number,
+  ttl: number
 ): Promise<void> {
   console.log("Saving to cache");
   const responseClone = response.clone();
@@ -174,8 +175,8 @@ export async function saveToCache(
   responseHeaders.set("Cache-Control", cacheControl);
 
   const { freeIndexes } = await getMaxCachedResponses(
-    request.clone(), 
-    settings, 
+    request.clone(),
+    settings,
     env
   );
   if (freeIndexes.length > 0) {
@@ -192,7 +193,6 @@ export async function saveToCache(
   }
 }
 
-
 async function getMaxCachedResponses(
   request: Request,
   { maxSize }: { maxSize: number },
@@ -202,7 +202,9 @@ async function getMaxCachedResponses(
     Array.from(Array(maxSize).keys()).map(async (idx) => {
       const cacheKey = await buildCachedRequest(request.clone(), idx);
       const cacheResponse = await env.CACHE_KV.get(cacheKey);
-      return cacheResponse !== null ? deserializeResponse(cacheResponse) : undefined
+      return cacheResponse !== null
+        ? deserializeResponse(cacheResponse)
+        : undefined;
     })
   );
   return {
@@ -212,7 +214,6 @@ async function getMaxCachedResponses(
       .filter((idx) => requests[idx] === undefined),
   };
 }
-
 
 export async function getCachedResponse(
   request: Request,
@@ -243,8 +244,10 @@ export async function getCachedResponse(
   }
 }
 
-
-export async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
+export async function recordCacheHit(
+  headers: Headers,
+  env: Env
+): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
     console.error("No request id found in cache hit");
