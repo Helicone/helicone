@@ -6,10 +6,6 @@ import {
   getCacheSettings,
   recordCacheHit,
   saveToCache,
-<<<<<<< HEAD
-=======
-  uncachedRequest,
->>>>>>> 849cdd5edcdec64430d0818866cc461d709d8bec
 } from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
