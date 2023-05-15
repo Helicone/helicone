@@ -1,4 +1,5 @@
-import { Result } from "./index";
+import { createClient } from "@supabase/supabase-js";
+import { Env, Result, hash } from "./index";
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
 const MAX_BUCKET_SIZE = 20;
@@ -10,9 +11,10 @@ export interface CacheSettings {
   bucketSettings: {
     maxSize: number;
   };
+  ttl: number;
 }
 
-function buildCacheControl(cacheControl: string): string {
+function buildCacheControl(cacheControl: string): [string, number] {
   const sMaxAge = cacheControl.match(/s-maxage=(\d+)/)?.[1];
   const maxAge = cacheControl.match(/max-age=(\d+)/)?.[1];
 
@@ -28,11 +30,11 @@ function buildCacheControl(cacheControl: string): string {
       console.error("Error parsing s-maxage or max-age", e);
     }
     if (sMaxAgeInSeconds > MAX_CACHE_AGE) {
-      return `public, max-age=${MAX_CACHE_AGE}`;
+      return [`public, max-age=${MAX_CACHE_AGE}`, MAX_CACHE_AGE];
     }
-    return `public, max-age=${sMaxAgeInSeconds}`;
+    return [`public, max-age=${sMaxAgeInSeconds}`, sMaxAgeInSeconds];
   } else {
-    return `public, max-age=${DEFAULT_CACHE_AGE}`;
+    return [`public, max-age=${DEFAULT_CACHE_AGE}`, DEFAULT_CACHE_AGE];
   }
 }
 
@@ -84,7 +86,9 @@ export function getCacheSettings(
     const shouldReadFromCache =
       cacheHeaders.cacheEnabled || cacheHeaders.cacheRead;
 
-    const cacheControl = buildCacheControl(headers.get("Cache-Control") ?? "");
+    const [cacheControl, ttl] = buildCacheControl(
+      headers.get("Cache-Control") ?? ""
+    );
     if (cacheHeaders.cacheBucketMaxSize > MAX_BUCKET_SIZE) {
       return {
         error: `Cache bucket size cannot be greater than ${MAX_BUCKET_SIZE}`,
@@ -101,6 +105,7 @@ export function getCacheSettings(
         bucketSettings: {
           maxSize: cacheHeaders.cacheBucketMaxSize,
         },
+        ttl,
       },
     };
   } catch (e) {
@@ -108,5 +113,157 @@ export function getCacheSettings(
       error: JSON.stringify(e),
       data: null,
     };
+  }
+}
+
+async function serializeResponse(response: Response): Promise<string> {
+  const serializableResponse = {
+    body: await response.text(), // or .arrayBuffer() if you expect binary content
+    status: response.status,
+    headers: Object.fromEntries(response.headers.entries()),
+  };
+
+  return JSON.stringify(serializableResponse);
+}
+
+function deserializeResponse(serializedResponse: string): Response {
+  const responseObj = JSON.parse(serializedResponse);
+
+  return new Response(responseObj.body, {
+    status: responseObj.status,
+    headers: responseObj.headers,
+  });
+}
+
+async function buildCachedRequest(
+  request: Request,
+  idx: number
+): Promise<string> {
+  const headers = new Headers();
+  for (const [key, value] of request.headers.entries()) {
+    if (key.toLowerCase().startsWith("helicone-auth")) {
+      headers.set(key, value);
+    }
+    if (key.toLowerCase().startsWith("helicone-cache")) {
+      headers.set(key, value);
+    }
+    if (key.toLowerCase() === "authorization") {
+      headers.set(key, value);
+    }
+  }
+
+  const cacheKey = await hash(
+    request.url +
+      (await request.text()) +
+      JSON.stringify([...headers.entries()]) +
+      (idx >= 1 ? idx.toString() : "")
+  );
+  const cacheUrl = new URL(request.url);
+
+  const pathName = cacheUrl.pathname.replaceAll("/", "_");
+  return `${pathName}_${cacheKey}`;
+}
+
+export async function saveToCache(
+  request: Request,
+  response: Response,
+  cacheControl: string,
+  settings: { maxSize: number },
+  env: Env,
+  ttl: number
+): Promise<void> {
+  console.log("Saving to cache");
+  const responseClone = response.clone();
+  const responseHeaders = new Headers(responseClone.headers);
+  responseHeaders.set("Cache-Control", cacheControl);
+
+  const { freeIndexes } = await getMaxCachedResponses(
+    request.clone(),
+    settings,
+    env
+  );
+  if (freeIndexes.length > 0) {
+    const cacheKey = await buildCachedRequest(request, freeIndexes[0]);
+    const cacheResponse = new Response(responseClone.body, {
+      ...responseClone,
+      headers: responseHeaders,
+    });
+    await env.CACHE_KV.put(cacheKey, await serializeResponse(cacheResponse), {
+      expirationTtl: Math.ceil(ttl),
+    });
+  } else {
+    throw new Error("No free indexes");
+  }
+}
+
+async function getMaxCachedResponses(
+  request: Request,
+  { maxSize }: { maxSize: number },
+  env: Env
+): Promise<{ requests: Response[]; freeIndexes: number[] }> {
+  const requests = await Promise.all(
+    Array.from(Array(maxSize).keys()).map(async (idx) => {
+      const cacheKey = await buildCachedRequest(request.clone(), idx);
+      const cacheResponse = await env.CACHE_KV.get(cacheKey);
+      return cacheResponse !== null
+        ? deserializeResponse(cacheResponse)
+        : undefined;
+    })
+  );
+  return {
+    requests: requests.filter((r) => r !== undefined) as Response[],
+    freeIndexes: requests
+      .map((r, idx) => idx)
+      .filter((idx) => requests[idx] === undefined),
+  };
+}
+
+export async function getCachedResponse(
+  request: Request,
+  settings: { maxSize: number },
+  env: Env
+): Promise<Response | null> {
+  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
+    request.clone(),
+    settings,
+    env
+  );
+  if (freeIndexes.length === 0) {
+    console.log("Returning cache hit");
+    const cacheIdx = Math.floor(Math.random() * requestCaches.length);
+    const randomCache = requestCaches[cacheIdx];
+    const cachedResponseHeaders = new Headers(randomCache.headers);
+    cachedResponseHeaders.append("Helicone-Cache", "HIT");
+    cachedResponseHeaders.append(
+      "Helicone-Cache-Bucket-Idx",
+      cacheIdx.toString()
+    );
+    return new Response(randomCache.body, {
+      ...randomCache,
+      headers: cachedResponseHeaders,
+    });
+  } else {
+    return null;
+  }
+}
+
+export async function recordCacheHit(
+  headers: Headers,
+  env: Env
+): Promise<void> {
+  const requestId = headers.get("helicone-id");
+  if (!requestId) {
+    console.error("No request id found in cache hit");
+    return;
+  }
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const { error } = await dbClient
+    .from("cache_hits")
+    .insert({ request_id: requestId });
+  if (error) {
+    console.error(error);
   }
 }

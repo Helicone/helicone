@@ -1,7 +1,13 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import { Database } from "../supabase/database.types";
-import { getCacheSettings } from "./cache";
+import {
+  getCachedResponse,
+  getCacheSettings,
+  recordCacheHit,
+  saveToCache,
+  uncachedRequest,
+} from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
 import { readAndLogResponse } from "./logResponse";
@@ -27,6 +33,7 @@ export interface Env {
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
   RATE_LIMIT_KV: KVNamespace;
+  CACHE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
@@ -603,151 +610,6 @@ async function forwardAndLog(
   });
 }
 
-async function uncachedRequest(
-  request: Request,
-  env: Env,
-  ctx: ExecutionContext,
-  requestSettings: RequestSettings,
-  retryOptions?: RetryOptions
-): Promise<Response> {
-  const result = await extractPrompt(request);
-  if (result.data !== null) {
-    const { request: formattedRequest, body: body, prompt } = result.data;
-    return await forwardAndLog(
-      requestSettings,
-      body,
-      formattedRequest,
-      env,
-      ctx,
-      retryOptions,
-      prompt
-    );
-  } else {
-    return new Response(result.error, { status: 400 });
-  }
-}
-
-async function buildCachedRequest(
-  request: Request,
-  idx: number
-): Promise<Request> {
-  const headers = new Headers();
-  for (const [key, value] of request.headers.entries()) {
-    if (key.toLowerCase().startsWith("helicone-")) {
-      headers.set(key, value);
-    }
-    if (key.toLowerCase() === "authorization") {
-      headers.set(key, value);
-    }
-  }
-
-  const cacheKey = await hash(
-    request.url +
-      (await request.text()) +
-      JSON.stringify([...headers.entries()]) +
-      (idx >= 1 ? idx.toString() : "")
-  );
-  const cacheUrl = new URL(request.url);
-
-  const pathName = cacheUrl.pathname.replaceAll("/", "_");
-  cacheUrl.pathname = `/posts/${pathName}/${cacheKey}`;
-
-  return new Request(cacheUrl, {
-    method: "GET",
-    headers: headers,
-  });
-}
-async function saveToCache(
-  request: Request,
-  response: Response,
-  cacheControl: string,
-  settings: { maxSize: number }
-): Promise<void> {
-  console.log("Saving to cache");
-  const cache = caches.default;
-  const responseClone = response.clone();
-  const responseHeaders = new Headers(responseClone.headers);
-  responseHeaders.set("Cache-Control", cacheControl);
-  const cacheResponse = new Response(responseClone.body, {
-    ...responseClone,
-    headers: responseHeaders,
-  });
-  console.log("cache response", response.headers);
-  const { freeIndexes } = await getMaxCachedResponses(
-    request.clone(),
-    settings
-  );
-  if (freeIndexes.length > 0) {
-    cache.put(await buildCachedRequest(request, freeIndexes[0]), cacheResponse);
-  } else {
-    throw new Error("No free indexes");
-  }
-}
-
-async function getMaxCachedResponses(
-  request: Request,
-  { maxSize }: { maxSize: number }
-): Promise<{ requests: Response[]; freeIndexes: number[] }> {
-  const cache = caches.default;
-  const requests = await Promise.all(
-    Array.from(Array(maxSize).keys()).map(async (idx) => {
-      const requestCache = await buildCachedRequest(request.clone(), idx);
-      return cache.match(requestCache);
-    })
-  );
-  return {
-    requests: requests.filter((r) => r !== undefined) as Response[],
-    freeIndexes: requests
-      .map((r, idx) => idx)
-      .filter((idx) => requests[idx] === undefined),
-  };
-}
-
-async function getCachedResponse(
-  request: Request,
-  settings: { maxSize: number }
-): Promise<Response | null> {
-  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
-    request.clone(),
-    settings
-  );
-  if (freeIndexes.length > 0) {
-    console.log("Max cache size reached, not caching");
-    return null;
-  } else {
-    const cacheIdx = Math.floor(Math.random() * requestCaches.length);
-    const randomCache = requestCaches[cacheIdx];
-    const cachedResponseHeaders = new Headers(randomCache.headers);
-    cachedResponseHeaders.append("Helicone-Cache", "HIT");
-    cachedResponseHeaders.append(
-      "Helicone-Cache-Bucket-Idx",
-      cacheIdx.toString()
-    );
-    return new Response(randomCache.body, {
-      ...randomCache,
-      headers: cachedResponseHeaders,
-    });
-  }
-}
-
-async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
-  const requestId = headers.get("helicone-id");
-  if (!requestId) {
-    console.error("No request id found in cache hit");
-    return;
-  }
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-  const { error } = await dbClient
-    .from("cache_hits")
-    .insert({ request_id: requestId });
-  if (error) {
-    console.error(error);
-  }
-}
-
 function generateRateLimitHeaders(
   rateLimitCheckResult: RateLimitResponse,
   rateLimitOptions: RateLimitOptions
@@ -870,7 +732,8 @@ export default {
       if (cacheSettings.shouldReadFromCache) {
         const cachedResponse = await getCachedResponse(
           request.clone(),
-          cacheSettings.bucketSettings
+          cacheSettings.bucketSettings,
+          env
         );
         if (cachedResponse) {
           ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
@@ -896,7 +759,9 @@ export default {
             requestClone,
             response,
             cacheSettings.cacheControl,
-            cacheSettings.bucketSettings
+            cacheSettings.bucketSettings,
+            env,
+            cacheSettings.ttl
           )
         );
       }
@@ -952,3 +817,27 @@ export default {
     }
   },
 };
+
+export async function uncachedRequest(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  requestSettings: RequestSettings,
+  retryOptions?: RetryOptions
+): Promise<Response> {
+  const result = await extractPrompt(request);
+  if (result.data !== null) {
+    const { request: formattedRequest, body: body, prompt } = result.data;
+    return await forwardAndLog(
+      requestSettings,
+      body,
+      formattedRequest,
+      env,
+      ctx,
+      retryOptions,
+      prompt
+    );
+  } else {
+    return new Response(result.error, { status: 400 });
+  }
+}
