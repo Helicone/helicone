@@ -38,7 +38,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       requestOverLimit(client, orgId),
       checkOnboardedAndUpdate(client),
     ]);
-  if (!hasOnboarded) {
+  if (!hasOnboarded?.data) {
     return {
       redirect: {
         destination: "/welcome",
