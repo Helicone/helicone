@@ -1,4 +1,9 @@
-import { Dispatch, SetStateAction } from "react";
+import {
+  CurrencyDollarIcon,
+  ExclamationCircleIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { GraphDataState } from "../../../lib/dashboardGraphs";
 import { Result } from "../../../lib/result";
@@ -9,6 +14,7 @@ import {
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { clsx } from "../../shared/clsx";
+import ThemedTabs from "../../shared/themed/themedTabs";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Loading } from "./dashboardPage";
 import LogPanel from "./logPanel";
@@ -38,58 +44,62 @@ const TimeGraphWHeader = (props: TimeGraphWHeaderProps) => {
     timeMap,
   } = props;
 
+  const [mode, setMode] = useState<"requests" | "costs">("requests");
+
   return (
-    <div className="h-full w-full">
+    <div className="flex flex-col space-y-4 pt-4">
+      <ThemedTabs
+        options={[
+          {
+            icon: TableCellsIcon,
+            label: "Requests",
+          },
+          {
+            icon: CurrencyDollarIcon,
+            label: "Costs",
+          },
+        ]}
+        onOptionSelect={(option) => {
+          setMode(option.toLowerCase() as "requests" | "costs");
+        }}
+      />
       <div
-        className={clsx(
-          "grid grid-cols-1 lg:grid-cols-2 w-full h-full mt-8 gap-8",
-          requestsOverTime === "loading" ? "animate-pulse" : ""
-        )}
+        className={clsx(requestsOverTime === "loading" ? "animate-pulse" : "")}
       >
-        {/* <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md py-4 pb-8 space-y-1 bg-white">
-          <h3 className="text-md font-semibold text-gray-900 text-center">
-            Live Logs
-          </h3>
-          <LogPanel />
-        </div> */}
-
-        {/* Requests over time */}
-        <div className="col-span-1 h-80 border border-gray-300 shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1 bg-white">
-          <h3 className="text-md font-semibold text-gray-900 text-center">
-            Requests
-          </h3>
-          <RenderLineChart
-            data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
-              ...r,
-              value: r.count,
-            }))}
-            timeMap={timeMap}
-            valueFormatter={(v) => [v.toString(), "requests"]}
-          />
-        </div>
-
-        {/* Costs over time */}
-        <div className="col-span-1 h-80 border border-gray-300 bg-white shadow-sm rounded-md pl-0 pr-8 pt-4 pb-8 space-y-1">
-          <h3 className="text-md font-semibold text-gray-900 text-center">
-            Costs (USD)
-          </h3>
-          <RenderLineChart
-            data={unwrapDefaultEmpty(costOverTime).map((r) => ({
-              ...r,
-              value: r.cost,
-            }))}
-            timeMap={timeMap}
-            valueFormatter={(v) => {
-              return [
-                `$${(typeof v === "number"
-                  ? v.toFixed(v % 1 !== 0 ? 1 : 0)
-                  : v
-                ).toString()}`,
-                "cost",
-              ];
-            }}
-          />
-        </div>
+        {mode === "requests" && (
+          <div className="flex flex-col space-y-4 bg-white border border-gray-300 rounded-lg py-6">
+            <h3 className="text-lg font-semibold text-gray-900 text-center">
+              Requests
+            </h3>
+            <div className="h-72">
+              <RenderLineChart
+                data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
+                  ...r,
+                  value: r.count,
+                }))}
+                timeMap={timeMap}
+                valueLabel="requests"
+              />
+            </div>
+          </div>
+        )}
+        {mode === "costs" && (
+          <div className="flex flex-col space-y-4 bg-white border border-gray-300 rounded-lg py-6">
+            <h3 className="text-lg font-semibold text-gray-900 text-center">
+              Costs
+            </h3>
+            <div className="h-72">
+              <RenderLineChart
+                data={unwrapDefaultEmpty(costOverTime).map((r) => ({
+                  ...r,
+                  value: r.cost,
+                }))}
+                timeMap={timeMap}
+                valueLabel="costs"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
