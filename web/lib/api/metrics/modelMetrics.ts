@@ -1,9 +1,5 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthRequest,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 import { dbExecute } from "../db/dbExecute";
 
 export interface ModelMetrics {
@@ -14,7 +10,7 @@ export interface ModelMetrics {
 }
 export async function getModelMetrics(
   filter: FilterNode,
-  user_id: string,
+  org_id: string,
   cached: boolean
 ) {
   if (cached) {
@@ -24,8 +20,8 @@ export async function getModelMetrics(
       error: null,
     };
   }
-  const builtFilter = await buildFilterWithAuthRequest({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id,
     argsAcc: [],
     filter,
   });
@@ -54,14 +50,14 @@ export interface ModelMetricsUsers {
 }
 export async function getModelMetricsForUsers(
   filter: FilterNode,
-  user_id: string,
+  org_id: string,
   users: (string | null)[]
 ) {
   console.log("getModelMetricsForUsers", users);
   const containsNullUser = users.includes(null);
 
-  const builtFilter = await buildFilterWithAuthRequest({
-    user_id,
+  const builtFilter = await buildFilterWithAuth({
+    org_id,
     filter,
     argsAcc: [],
   });

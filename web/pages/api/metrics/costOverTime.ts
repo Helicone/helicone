@@ -1,5 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
+
+import {
+  HandlerWrapperOptions,
+  withAuth,
+} from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
 
 import { getModelUsageOverTime } from "../../../lib/api/metrics/getModelUsageOverTime";
@@ -14,14 +18,15 @@ export interface CostOverTime {
   time: Date;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<CostOverTime[], string>>
+async function handler(
+  options: HandlerWrapperOptions<Result<CostOverTime[], string>>
 ) {
-  await getTimeDataHandler(req, res, (d) =>
+  await getTimeDataHandler(options, (d) =>
     getSomeDataOverTime(d, getModelUsageOverTime, {
       reducer: (acc, d) => ({ cost: acc.cost + modelCost(d) }),
       initial: { cost: 0 },
     })
   );
 }
+
+export default withAuth(handler);

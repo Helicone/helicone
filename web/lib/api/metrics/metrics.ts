@@ -1,12 +1,11 @@
-import { SupabaseClient, User, UserResponse } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { Database } from "../../../supabase/database.types";
-import { isError, Result, unwrap, unwrapAsync, unwrapList } from "../../result";
+import { Result, unwrapAsync } from "../../result";
 import { modelCost } from "./costCalc";
 
 import { getRequestCount } from "./getRequestCount";
 import { getXRequestDate } from "./getXRequestDate";
-import { getModelMetrics, ModelMetrics } from "./modelMetrics";
+import { getModelMetrics } from "./modelMetrics";
 import { getAggregatedAvgMetrics } from "./timeMetrics";
 
 export interface Metrics {
@@ -17,8 +16,6 @@ export interface Metrics {
   first_request: Date;
   last_request: Date;
   total_cost: number;
-  total_cached_requests: number;
-  total_cached_savings: number;
 }
 
 export interface GetMetricsOptions {
@@ -27,7 +24,7 @@ export interface GetMetricsOptions {
 
 export interface AuthClient {
   client: SupabaseClient;
-  user: User;
+  orgId: string;
 }
 
 function calculateAverageRequestsPerDay(
@@ -41,16 +38,16 @@ function calculateAverageRequestsPerDay(
 }
 
 async function getData(authClient: AuthClient, options: GetMetricsOptions) {
-  const { client, user } = authClient;
+  const { client, orgId } = authClient;
   try {
     const results = await Promise.all([
-      unwrapAsync(getModelMetrics(options.filter, user.id, false)),
-      unwrapAsync(getModelMetrics(options.filter, user.id, true)),
-      unwrapAsync(getXRequestDate(options.filter, user.id, true)),
-      unwrapAsync(getXRequestDate(options.filter, user.id, false)),
-      unwrapAsync(getRequestCount(options.filter, user.id, false)),
-      unwrapAsync(getRequestCount(options.filter, user.id, true)),
-      unwrapAsync(getAggregatedAvgMetrics(options.filter, user.id)),
+      unwrapAsync(getModelMetrics(options.filter, orgId, false)),
+      unwrapAsync(getModelMetrics(options.filter, orgId, true)),
+      unwrapAsync(getXRequestDate(options.filter, orgId, true)),
+      unwrapAsync(getXRequestDate(options.filter, orgId, false)),
+      unwrapAsync(getRequestCount(options.filter, orgId, false)),
+      unwrapAsync(getRequestCount(options.filter, orgId, true)),
+      unwrapAsync(getAggregatedAvgMetrics(options.filter, orgId)),
     ]);
     return { data: results, error: null };
   } catch (error) {
@@ -89,11 +86,7 @@ export async function getMetrics(
       (acc, modelMetric) => acc + modelCost(modelMetric),
       0
     ),
-    total_cached_savings: cachedModelMetrics.reduce(
-      (acc, modelMetric) => acc + modelCost(modelMetric),
-      0
-    ),
-    total_cached_requests: totalCachedRequests,
+
     total_requests: count,
     first_request: startDate,
     last_request: endDate,

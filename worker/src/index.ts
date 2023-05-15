@@ -5,7 +5,7 @@ import { getCacheSettings } from "./cache";
 import { ClickhouseEnv, dbInsertClickhouse } from "./clickhouse";
 import { once } from "./helpers";
 import { readAndLogResponse } from "./logResponse";
-import { extractPrompt, Prompt } from "./prompt";
+import { ChatPrompt, extractPrompt, Prompt } from "./prompt";
 import { handleLoggingEndpoint, isLoggingEndpoint } from "./properties";
 import {
   checkRateLimit,
@@ -20,6 +20,7 @@ import {
   getRetryOptions,
   RetryOptions,
 } from "./retry";
+import { handleFeedbackEndpoint, isFeedbackEndpoint } from "./feedback";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -37,6 +38,7 @@ export interface RequestSettings {
   helicone_api_key?: string;
   ff_stream_force_format?: boolean;
   ff_increase_timeout?: boolean;
+  api_base?: string;
 }
 
 export async function forwardRequestToOpenAi(
@@ -45,8 +47,15 @@ export async function forwardRequestToOpenAi(
   body?: string,
   retryOptions?: RetryOptions
 ): Promise<Response> {
-  const url = new URL(request.url);
-  const new_url = new URL(`https://api.openai.com${url.pathname}`);
+  const originalUrl = new URL(request.url);
+
+  const defaultBase = "https://api.openai.com/v1";
+  const apiBase = (requestSettings.api_base ?? defaultBase).replace(/\/$/, ""); // remove trailing slash if any
+  const apiBaseUrl = new URL(apiBase);
+
+  const new_url = new URL(
+    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+  );
   const headers = removeHeliconeHeaders(request.headers);
   const method = request.method;
   const baseInit = { method, headers };
@@ -75,7 +84,7 @@ type HeliconeRequest = {
   auth: string;
   requestId: string;
   body?: string;
-  prompt?: Prompt;
+  prompt?: Prompt | ChatPrompt;
   heliconeApiKey?: string;
 } & HeliconeHeaders;
 
@@ -89,7 +98,7 @@ interface HeliconeHeaders {
 
 async function getPromptId(
   dbClient: SupabaseClient,
-  prompt: Prompt,
+  prompt: Prompt | ChatPrompt,
   name: string | null,
   auth: string
 ): Promise<Result<string, string>> {
@@ -288,7 +297,7 @@ async function logRequest({
   }
 }
 
-async function hash(key: string): Promise<string> {
+export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
     { name: "SHA-256" },
@@ -303,6 +312,22 @@ async function hash(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
+function validateApiConfiguration(api_base: string | undefined): boolean {
+  const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
+  const azurePattern =
+    /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
+  const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
+  const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
+
+  return (
+    api_base === undefined ||
+    openAiPattern.test(api_base) ||
+    azurePattern.test(api_base) ||
+    localProxyPattern.test(api_base) ||
+    heliconeProxyPattern.test(api_base)
+  );
+}
+
 function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
   const propTag = "helicone-property-";
   const properties = Object.fromEntries(
@@ -310,6 +335,7 @@ function getHeliconeHeaders(headers: Headers): HeliconeHeaders {
       .filter(([key]) => key.startsWith(propTag) && key.length > propTag.length)
       .map(([key, value]) => [key.substring(propTag.length), value])
   );
+
   return {
     userId:
       headers.get("Helicone-User-Id")?.substring(0, 128) ??
@@ -408,6 +434,19 @@ async function logInClickhouse(
         id: p.id,
       }))
     ),
+    dbInsertClickhouse(
+      env,
+      "properties_copy_v2",
+      properties.map((p) => ({
+        id: p.id,
+        created_at: formatTimeString(p.created_at),
+        request_id: request.id,
+        key: p.key,
+        value: p.value,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      }))
+    ),
   ]);
 }
 
@@ -418,9 +457,10 @@ async function forwardAndLog(
   env: Env,
   ctx: ExecutionContext,
   retryOptions?: RetryOptions,
-  prompt?: Prompt
+  prompt?: Prompt | ChatPrompt
 ): Promise<Response> {
-  const auth = request.headers.get("Authorization");
+  const auth =
+    request.headers.get("Authorization") ?? request.headers.get("api-key");
   if (auth === null) {
     return new Response("No authorization header found!", { status: 401 });
   }
@@ -473,11 +513,15 @@ async function forwardAndLog(
 
   const requestId =
     request.headers.get("Helicone-Request-Id") ?? crypto.randomUUID();
+  console.log("request id", requestId);
   async function responseBodyTimeout(delay_ms: number) {
     await new Promise((resolve) => setTimeout(resolve, delay_ms));
-    console.log("response body timeout");
+    console.error("response body timeout");
     return globalResponseBody;
   }
+
+  const headers = getHeliconeHeaders(request.headers);
+
   ctx.waitUntil(
     (async () => {
       const dbClient = createClient(
@@ -507,13 +551,14 @@ async function forwardAndLog(
         }
       }
       const requestBody = body === "" ? undefined : body;
+
       const requestResult = await logRequest({
         dbClient,
         request,
         auth,
         body: requestBody,
         prompt: prompt,
-        ...getHeliconeHeaders(request.headers),
+        ...headers,
         requestId,
         heliconeApiKey: requestSettings.helicone_api_key,
       });
@@ -731,7 +776,6 @@ export default {
       if (request.url.includes("audio")) {
         const url = new URL(request.url);
         const new_url = new URL(`https://api.openai.com${url.pathname}`);
-        console.log("new url", new_url.href);
         return await fetch(new_url.href, {
           method: request.method,
           headers: request.headers,
@@ -740,6 +784,10 @@ export default {
       }
       if (isLoggingEndpoint(request)) {
         const response = await handleLoggingEndpoint(request, env);
+        return response;
+      }
+      if (isFeedbackEndpoint(request)) {
+        const response = await handleFeedbackEndpoint(request, env);
         return response;
       }
 
@@ -791,6 +839,12 @@ export default {
         }
       }
 
+      const api_base =
+        request.headers.get("Helicone-OpenAI-Api-Base") ?? undefined;
+      if (!validateApiConfiguration(api_base)) {
+        return new Response(`Invalid API base "${api_base}"`, { status: 400 });
+      }
+
       const requestSettings: RequestSettings = {
         stream: requestBody.stream ?? false,
         tokenizer_count_api: env.TOKENIZER_COUNT_API,
@@ -799,6 +853,7 @@ export default {
           request.headers.get("helicone-ff-stream-force-format") === "true",
         ff_increase_timeout:
           request.headers.get("helicone-ff-increase-timeout") === "true",
+        api_base,
       };
 
       const retryOptions = getRetryOptions(request);

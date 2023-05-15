@@ -1,2 +1,6 @@
 .vercel
 .env
+Localhost.session.sql
+tmp/
+.vscode
+main.py

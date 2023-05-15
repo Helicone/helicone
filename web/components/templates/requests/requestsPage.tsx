@@ -5,7 +5,7 @@ import {
   ColumnSizingState,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { useRouter } from "next/router";
+import { NextRouter, Router, useRouter } from "next/router";
 import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
@@ -85,6 +85,21 @@ interface RequestsPageProps {
   page: number;
   pageSize: number;
   sortBy: string | null;
+}
+
+function buildQueryFilter(router: NextRouter): FilterNode {
+  const { requestId } = router.query;
+  if (requestId) {
+    return {
+      request: {
+        id: {
+          equals: requestId as string,
+        },
+      },
+    };
+  } else {
+    return "all";
+  }
 }
 
 const RequestsPage = (props: RequestsPageProps) => {
@@ -319,12 +334,12 @@ const RequestsPage = (props: RequestsPageProps) => {
   );
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
+  const router = useRouter();
 
   const {
     count,
     values,
     from,
-    isLoading,
     isPropertiesLoading,
     isValuesLoading,
     properties,
@@ -338,7 +353,12 @@ const RequestsPage = (props: RequestsPageProps) => {
     currentPageSize,
     debouncedAdvancedFilter,
     {
-      left: timeFilter,
+      left: {
+        left: timeFilter,
+        operator: "and",
+        //temporary fix until requests are their own page
+        right: buildQueryFilter(router),
+      },
       operator: "and",
       right: apiKeyFilter ? parseKey(apiKeyFilter) : "all",
     },
@@ -580,7 +600,7 @@ const RequestsPage = (props: RequestsPageProps) => {
           >
             <ArrowPathIcon
               className={clsx(
-                isLoading ? "animate-spin" : "",
+                requests.isLoading ? "animate-spin" : "",
                 "h-5 w-5 inline"
               )}
             />
@@ -622,7 +642,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 openExport,
                 setOpenExport,
               }}
-              isFetching={isLoading}
+              isFetching={requests.isLoading}
               advancedFilter={{
                 filterMap,
                 onAdvancedFilter: setAdvancedFilters,
@@ -637,7 +657,7 @@ const RequestsPage = (props: RequestsPageProps) => {
                 clearLayout,
               }}
             />
-            {isLoading || from === undefined || to === undefined ? (
+            {requests.isLoading || from === undefined || to === undefined ? (
               <LoadingAnimation title="Getting your requests" />
             ) : (
               <RequestTable
@@ -649,9 +669,10 @@ const RequestsPage = (props: RequestsPageProps) => {
                   columnSizing,
                   setColumnSizing,
                 }}
-                data={requests}
+                data={requests.data ?? []}
                 columns={columns}
-                count={count || 0}
+                count={count.data?.data ?? 0}
+                isCountLoading={count.isLoading}
                 page={page}
                 from={from}
                 to={to}

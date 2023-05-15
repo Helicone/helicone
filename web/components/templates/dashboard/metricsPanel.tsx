@@ -36,7 +36,8 @@ export function MetricsPanel(props: MetricsPanelProps) {
       icon: CurrencyDollarIcon,
     },
     {
-      value: +(data?.total_requests ?? 0) + +(data?.total_cached_requests ?? 0),
+      value: +(data?.total_requests ?? 0),
+      // value: +(data?.total_requests ?? 0) + +(data?.total_cached_requests ?? 0),
       label: "Total requests",
       icon: TableCellsIcon,
     },

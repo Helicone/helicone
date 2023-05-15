@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Result } from "../../../lib/result";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 
 const monthMap = [
   "January",
@@ -34,14 +35,23 @@ const items = [
       "View your Stripe subscription and update your payment method.",
     icon: CreditCardIcon,
     background: "bg-green-500",
-    href: "https://billing.stripe.com/p/login/test_8wMcQm0acgy585W5kk",
+    getHref: async () => {
+      const x = await fetch("/api/subscription/get_portal_link").then((res) =>
+        res.json()
+      );
+      console.log(x);
+      return x.data;
+    },
   },
   {
     title: "Enterprise",
     description: "Need a custom plan? Contact us to learn more.",
     icon: BuildingOffice2Icon,
     background: "bg-sky-500",
-    href: "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call",
+    getHref: async () => {
+      const x = await fetch("/api/subscriptions/get_portal_link");
+      return "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call";
+    },
   },
 ];
 
@@ -99,6 +109,7 @@ const useUsagePage = () => {
 
 const UsagePage = (props: UsagePageProps) => {
   const { user } = props;
+  const { setNotification } = useNotification();
 
   const month = new Date().getMonth();
 
@@ -262,16 +273,23 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
-                  <Link
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
                     className="focus:outline-none"
+                    onClick={() => {
+                      item.getHref().then((href) => {
+                        if (!href) {
+                          setNotification("Error getting link", "error");
+                          return;
+                        }
+
+                        window.open(href, "_blank");
+                      });
+                    }}
                   >
                     <span className="absolute inset-0" aria-hidden="true" />
                     <span>{item.title}</span>
                     <span aria-hidden="true"> &rarr;</span>
-                  </Link>
+                  </button>
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">{item.description}</p>
               </div>

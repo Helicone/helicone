@@ -1,31 +1,31 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../components/shared/getPagination";
-import { dbExecute } from "../db/dbExecute";
+import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
-import { buildFilterWithAuthProperties } from "../../../services/lib/filters/filters";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface Property {
   property: string;
 }
 
 export async function getProperties(
-  user_id: string
+  org_id: string
 ): Promise<Result<Property[], string>> {
-  const builtFilter = await buildFilterWithAuthProperties({
-    user_id,
+  const builtFilter = await buildFilterWithAuthClickHouseProperties({
+    org_id,
     argsAcc: [],
     filter: "all",
   });
   const query = `
-  SELECT distinct key as property
-  from properties
+  select distinct key as property
+  from properties_copy_v2
   where (
     ${builtFilter.filter}
   )
 `;
 
-  const { data, error } = await dbExecute<Property>(query, builtFilter.argsAcc);
+  const { data, error } = await dbQueryClickhouse<Property>(
+    query,
+    builtFilter.argsAcc
+  );
   if (error !== null) {
     return { data: null, error: error };
   }

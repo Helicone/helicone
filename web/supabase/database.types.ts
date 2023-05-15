@@ -54,7 +54,7 @@ export interface Database {
           api_key_name: string
           created_at: string
           id: number
-          organization_id: string | null
+          organization_id: string
           soft_delete: boolean
           user_id: string
         }
@@ -63,7 +63,7 @@ export interface Database {
           api_key_name: string
           created_at?: string
           id?: number
-          organization_id?: string | null
+          organization_id: string
           soft_delete?: boolean
           user_id: string
         }
@@ -72,7 +72,7 @@ export interface Database {
           api_key_name?: string
           created_at?: string
           id?: number
-          organization_id?: string | null
+          organization_id?: string
           soft_delete?: boolean
           user_id?: string
         }
@@ -105,25 +105,37 @@ export interface Database {
       }
       organization: {
         Row: {
+          color: string
           created_at: string | null
+          has_onboarded: boolean
+          icon: string
           id: string
           is_personal: boolean
           name: string
           owner: string
+          soft_delete: boolean
         }
         Insert: {
+          color?: string
           created_at?: string | null
+          has_onboarded?: boolean
+          icon?: string
           id?: string
           is_personal?: boolean
           name: string
           owner: string
+          soft_delete?: boolean
         }
         Update: {
+          color?: string
           created_at?: string | null
+          has_onboarded?: boolean
+          icon?: string
           id?: string
           is_personal?: boolean
           name?: string
           owner?: string
+          soft_delete?: boolean
         }
       }
       organization_member: {
@@ -169,30 +181,30 @@ export interface Database {
       properties: {
         Row: {
           auth_hash: string | null
-          created_at: string | null
+          created_at: string
           id: number
-          key: string | null
+          key: string
           request_id: string | null
           user_id: string | null
-          value: string | null
+          value: string
         }
         Insert: {
           auth_hash?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
-          key?: string | null
+          key: string
           request_id?: string | null
           user_id?: string | null
-          value?: string | null
+          value: string
         }
         Update: {
           auth_hash?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
-          key?: string | null
+          key?: string
           request_id?: string | null
           user_id?: string | null
-          value?: string | null
+          value?: string
         }
       }
       request: {
@@ -205,7 +217,6 @@ export interface Database {
           helicone_org_id: string | null
           helicone_user: string | null
           id: string
-          organization_id: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
@@ -221,7 +232,6 @@ export interface Database {
           helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
-          organization_id?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -237,7 +247,6 @@ export interface Database {
           helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
-          organization_id?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
@@ -441,6 +450,12 @@ export interface Database {
       ensure_personal: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_org_id: {
+        Args: {
+          request_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

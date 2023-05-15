@@ -17,9 +17,7 @@ import {
   WrenchScrewdriverIcon,
   XMarkIcon,
   TableCellsIcon,
-  CloudIcon,
-  WalletIcon,
-  CalculatorIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import {
   ExclamationCircleIcon,
@@ -40,6 +38,7 @@ import { SpeedDialIcon } from "@mui/material";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useGetOrgs } from "../../../services/hooks/organizations";
 import OrgContext, { useOrg } from "./organizationContext";
+import { BsCashCoin, BsCashStack } from "react-icons/bs";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -61,25 +60,37 @@ const AuthLayout = (props: AuthLayoutProps) => {
       name: "Dashboard",
       href: "/dashboard",
       icon: HomeIcon,
-      current: pathname === "/dashboard",
+      current: pathname.includes("/dashboard"),
     },
     {
       name: "Requests",
       href: "/requests",
       icon: TableCellsIcon,
-      current: pathname === "/requests",
+      current: pathname.includes("/requests"),
+    },
+    {
+      name: "Errors",
+      href: "/errors",
+      icon: ExclamationCircleIcon,
+      current: pathname.includes("/errors"),
+    },
+    {
+      name: "Cache",
+      href: "/cache",
+      icon: BsCashStack,
+      current: pathname.includes("/cache"),
     },
     {
       name: "Users",
       href: "/users",
       icon: UsersIcon,
-      current: pathname === "/users",
+      current: pathname.includes("/users"),
     },
     {
       name: "Models",
       href: "/models",
       icon: CubeTransparentIcon,
-      current: pathname === "/models",
+      current: pathname.includes("/models"),
     },
     {
       name: "Playground",
@@ -93,14 +104,20 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Usage",
       href: "/usage",
-      icon: CalculatorIcon,
-      current: pathname === "/usage",
+      icon: BeakerIcon,
+      current: pathname.includes("/usage"),
+    },
+    {
+      name: "Organizations",
+      href: "/organizations",
+      icon: BuildingOfficeIcon,
+      current: pathname.includes("/organizations"),
     },
     {
       name: "Keys",
       href: "/keys",
       icon: KeyIcon,
-      current: pathname === "/keys",
+      current: pathname.includes("/keys"),
     },
   ];
 
@@ -115,6 +132,18 @@ const AuthLayout = (props: AuthLayoutProps) => {
     },
     refetchOnWindowFocus: false,
   });
+
+  const { data: hasUnMigratedRequest } = useQuery({
+    queryKey: ["hasUnMigratedRequest"],
+    queryFn: async (query) => {
+      const hasConverted: Result<boolean, string> = await fetch(
+        "/api/has_unmigrated_requests"
+      ).then((res) => res.json());
+      return hasConverted?.data === true;
+    },
+    refetchOnWindowFocus: false,
+  });
+  const [displayMigrationModal, setDisplayMigrationModal] = useState(true);
 
   return (
     <>
@@ -553,6 +582,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Discord
                     </Link>
                   </li>
+                </ul>
+                <div className="flex flex-col border-t border-gray-200 p-4 space-y-4">
                   {org && (
                     <ThemedDropdown
                       selectedValue={org.currentOrg.id}
@@ -566,59 +597,60 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         }
                       }}
                       align="right"
+                      verticalAlign="top"
                     />
                   )}
-                </ul>
-                <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
-                  <div className="group block w-full flex-shrink-0">
-                    <Disclosure>
-                      <div className="flex items-center">
-                        <div>
-                          <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                            <span className="sr-only">Open user menu</span>
-                            {user?.email?.charAt(0).toUpperCase() || (
-                              <UserCircleIcon className="h-8 w-8 text-black" />
-                            )}
+                  <div className="flex flex-shrink-0">
+                    <div className="group block w-full flex-shrink-0">
+                      <Disclosure>
+                        <div className="flex items-center">
+                          <div>
+                            <div className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                              <span className="sr-only">Open user menu</span>
+                              {user?.email?.charAt(0).toUpperCase() || (
+                                <UserCircleIcon className="h-8 w-8 text-black" />
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="ml-3 flex flex-col items-start">
-                          <p className="text-sm font-medium text-gray-700">
-                            {user?.email}
-                          </p>
-                          <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                            Sign Out
-                          </Disclosure.Button>
-                        </div>
-                      </div>
-                      <Disclosure.Panel className="text-gray-500">
-                        {({ close }) => (
-                          <div className="w-full flex justify-between gap-4 mt-4">
-                            <button
-                              onClick={() => {
-                                close();
-                              }}
-                              className={clsx(
-                                "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-                              )}
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() =>
-                                supabaseClient.auth.signOut().then(() => {
-                                  router.push("/");
-                                })
-                              }
-                              className={clsx(
-                                "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                              )}
-                            >
+                          <div className="ml-3 flex flex-col items-start">
+                            <p className="text-sm font-medium text-gray-700">
+                              {user?.email}
+                            </p>
+                            <Disclosure.Button className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
                               Sign Out
-                            </button>
+                            </Disclosure.Button>
                           </div>
-                        )}
-                      </Disclosure.Panel>
-                    </Disclosure>
+                        </div>
+                        <Disclosure.Panel className="text-gray-500">
+                          {({ close }) => (
+                            <div className="w-full flex justify-between gap-4 mt-4">
+                              <button
+                                onClick={() => {
+                                  close();
+                                }}
+                                className={clsx(
+                                  "relative inline-flex w-full justify-center border border-gray-300 items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+                                )}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() =>
+                                  supabaseClient.auth.signOut().then(() => {
+                                    router.push("/");
+                                  })
+                                }
+                                className={clsx(
+                                  "relative inline-flex w-full justify-center text-center items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
+                                )}
+                              >
+                                Sign Out
+                              </button>
+                            </div>
+                          )}
+                        </Disclosure.Panel>
+                      </Disclosure>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -642,6 +674,34 @@ const AuthLayout = (props: AuthLayoutProps) => {
           <main className="flex-1 bg">
             <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
               {/* Replace with your content */}
+              {hasUnMigratedRequest &&
+                displayMigrationModal &&
+                (user?.email ?? "") !== DEMO_EMAIL && (
+                  <div className="pointer-events-none flex sm:justify-center mt-4">
+                    <div className="text-sm text-white w-full pointer-events-auto flex flex-col items-left justify-between gap-x-6 bg-cyan-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">
+                      <div className="text-sm leading-6 items-center font-bold">
+                        Sorry for the inconvenience
+                      </div>
+                      <div className=" leading-6items-center">
+                        <strong className="font-semibold">
+                          We recently migrated our systems to support orgs and
+                          are still migrating your data to the new system. This
+                          process is taking a few days to complete. Any reuqests
+                          before April 22nd are still being migrated. Please
+                          contact us on discord if you have any questions.
+                        </strong>
+                      </div>
+                      <button
+                        className="leading-6 text-left font-bold"
+                        onClick={() => {
+                          setDisplayMigrationModal(false);
+                        }}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                )}
               {user?.email !== DEMO_EMAIL &&
                 !hasConvertedLoading &&
                 !hasConverted && (
@@ -713,7 +773,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </div>
                 </div>
               )}
-              <div className="py-4 sm:py-8">{children}</div>
+              <OrgContext.Provider value={org}>
+                <div className="py-4 sm:py-8" key={org?.renderKey}>
+                  {children}
+                </div>
+              </OrgContext.Provider>
               {/* /End replace */}
             </div>
           </main>

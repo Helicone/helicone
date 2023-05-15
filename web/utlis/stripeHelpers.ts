@@ -16,7 +16,7 @@ export async function getStripeCustomer(
     if (customers.data.length === 0) {
       customer = await stripeServer.customers.create({
         email,
-        name: "Justin Torre",
+        name: email,
         expand: ["subscriptions"],
       });
     } else {

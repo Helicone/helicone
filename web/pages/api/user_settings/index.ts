@@ -92,9 +92,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<UserSettingsResponse | string>
 ) {
-  console.log("HERE");
   if (req.method === "GET") {
-    console.log("herewwrwerewrewrewrw");
     const client = new SupabaseServerWrapper({ req, res }).getClient();
 
     const {
@@ -102,7 +100,6 @@ export default async function handler(
       error: userError,
     } = await client.auth.getUser();
 
-    console.log(1);
     if (userError !== null) {
       console.error(userError);
       res.status(500).json(userError.message);
@@ -113,8 +110,6 @@ export default async function handler(
       res.status(404).json("User not found");
       return;
     }
-
-    console.log(2);
 
     const { data: userSettings, error: userSettingsError } =
       await getOrCreateUserSettings(user);

@@ -85,7 +85,6 @@ export const useDashboardPage = ({
     metrics: useQuery({
       queryKey: ["dashboardDataMetrics", memoizedTimeFilter, userFilters],
       queryFn: async (query) => {
-        console.log("fetching metrics");
         const timeFilter = query.queryKey[1] as {
           start: Date;
           end: Date;

@@ -31,10 +31,10 @@ export const getServerSideProps = async (
   const supabase = new SupabaseServerWrapper(context).getClient();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session)
+  if (!user)
     return {
       redirect: {
         destination: "/",
@@ -50,8 +50,7 @@ export const getServerSideProps = async (
 
   return {
     props: {
-      initialSession: session,
-      user: session.user,
+      user: user,
       page: currentPage,
       pageSize: pageSize,
       sortBy: sortBy,

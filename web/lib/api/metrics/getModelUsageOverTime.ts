@@ -1,18 +1,15 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+
 import { Result } from "../../result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
 import { dbExecute } from "../db/dbExecute";
-import {
-  buildFilter,
-  buildFilterWithAuth,
-  buildFilterWithAuthRequest,
-} from "../../../services/lib/filters/filters";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 
 export interface AuthClient {
   client: SupabaseClient;
@@ -30,7 +27,7 @@ export interface ModelUsageOverTime {
 export async function getModelUsageOverTime({
   timeFilter,
   userFilter,
-  userId,
+  orgId,
   dbIncrement,
   timeZoneDifference,
 }: DataOverTimeRequest): Promise<Result<ModelUsageOverTime[], string>> {
@@ -41,10 +38,10 @@ export async function getModelUsageOverTime({
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const builtFilter = await buildFilterWithAuthRequest({
+  const builtFilter = await buildFilterWithAuth({
     filter,
     argsAcc: [],
-    user_id: userId,
+    org_id: orgId,
   });
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
