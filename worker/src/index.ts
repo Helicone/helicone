@@ -741,7 +741,7 @@ export default {
         retryOptions
       );
 
-      if (cacheSettings.shouldSaveToCache && requestClone) {
+      if (cacheSettings.shouldSaveToCache && requestClone && response.status == 200) {
         ctx.waitUntil(
           saveToCache(
             requestClone,
