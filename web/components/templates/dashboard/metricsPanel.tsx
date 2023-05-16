@@ -32,7 +32,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
 
   const metrics = [
     {
-      value: `$${data?.total_cost?.toFixed(2)}` ?? "n/a",
+      value: data?.total_cost ? `$${data?.total_cost?.toFixed(2)}` : "$0.00",
       label: "Total Cost",
       icon: CurrencyDollarIcon,
     },
