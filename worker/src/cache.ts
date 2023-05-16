@@ -116,10 +116,9 @@ export function getCacheSettings(
   }
 }
 
-
 async function serializeResponse(response: Response): Promise<string> {
   const serializableResponse = {
-    body: await response.text(), // or .arrayBuffer() if you expect binary content
+    body: await response.json(), // Parse the body as JSON
     status: response.status,
     headers: Object.fromEntries(response.headers.entries()),
   };
@@ -129,7 +128,8 @@ async function serializeResponse(response: Response): Promise<string> {
 
 function deserializeResponse(serializedResponse: string): Response {
   const responseObj = JSON.parse(serializedResponse);
-  const body = new Blob([responseObj.body]).stream();
+
+  const body = JSON.stringify(responseObj.body);
 
   return new Response(body, {
     status: responseObj.status,
@@ -165,6 +165,7 @@ async function buildCachedRequest(
   const pathName = cacheUrl.pathname.replaceAll("/", "_");
   return `${pathName}_${cacheKey}`;
 }
+
 
 export async function saveToCache(
   request: Request,
