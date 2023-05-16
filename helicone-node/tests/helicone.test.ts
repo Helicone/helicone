@@ -28,6 +28,26 @@ test("cache", async () => {
   });
 }, 60000);
 
+// Test cache behavior
+test("cache", async () => {
+  const uniqueId = uuidv4();
+  const prompt = `Cache test with UUID: ${uniqueId}`;
+
+  const configuration = new Configuration({
+    apiKey,
+    heliconeApiKey,
+    cache: true,
+  });
+
+  const openai = new OpenAIApi(configuration);
+
+  await openai.createCompletion({
+    model: "text-ada-001",
+    prompt,
+    max_tokens: 10,
+  });
+}, 60000);
+
 // Test rate limit policy
 test("rate limit policy", async () => {
   const rateLimitPolicyDict = { quota: 10, time_window: 60 };
