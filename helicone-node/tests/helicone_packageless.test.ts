@@ -12,16 +12,6 @@ if (!apiKey || !heliconeApiKey) {
   throw new Error("API keys must be set as environment variables.");
 }
 
-function isJson(str: any): boolean {
-  console.log("TYPEOF", str);
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
 async function compareResponses(response1: AxiosResponse, response2: AxiosResponse) {
   // Compare status
   if (response1.status !== response2.status) {
@@ -60,38 +50,38 @@ async function compareResponses(response1: AxiosResponse, response2: AxiosRespon
 }
 
 
-// // Test cache behavior
-// test("cache", async () => {
-//   const configuration = new Configuration({
-//     apiKey: process.env.OPENAI_API_KEY,
-//     basePath: "http://127.0.0.1:8787/v1",
-//     baseOptions: {
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${apiKey}`,
-//         "Helicone-Auth": `Bearer ${heliconeApiKey}`,
-//         "Helicone-Cache-Enabled": "true",
-//       },
-//     },
-//   });
+// Test cache behavior
+test("cache", async () => {
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+    basePath: "http://127.0.0.1:8787/v1",
+    baseOptions: {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+        "Helicone-Cache-Enabled": "true",
+      },
+    },
+  });
 
-//   const uniqueId = uuidv4();
-//   const prompt = `Cache test with UUID: ${uniqueId}`;
+  const uniqueId = uuidv4();
+  const prompt = `Cache test with UUID: ${uniqueId}`;
 
-//   const openai = new OpenAIApi(configuration);
-//   const response1 = await openai.createEmbedding({
-//     model: "text-embedding-ada-002",
-//     input: prompt,
-//   });
-//   const response2 = await openai.createEmbedding({
-//     model: "text-embedding-ada-002",
-//     input: prompt,
-//   });
+  const openai = new OpenAIApi(configuration);
+  const response1 = await openai.createEmbedding({
+    model: "text-embedding-ada-002",
+    input: prompt,
+  });
+  const response2 = await openai.createEmbedding({
+    model: "text-embedding-ada-002",
+    input: prompt,
+  });
 
-//   // Compare responses
-//   const areEqual = await compareResponses(response1, response2);
-//   expect(areEqual).toBeTruthy();
-// }, 60000);
+  // Compare responses
+  const areEqual = await compareResponses(response1, response2);
+  expect(areEqual).toBeTruthy();
+}, 60000);
 
 test("cache test using fetch", async () => {
   const requestInit = {
