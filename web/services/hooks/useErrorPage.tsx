@@ -15,6 +15,7 @@ export function useErrorPageCodes() {
       );
       return data;
     },
+    refetchOnWindowFocus: false,
   });
 
   return {
