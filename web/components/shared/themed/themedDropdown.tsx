@@ -163,7 +163,9 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                         key={i}
                         className={({ active }) =>
                           clsx(
-                            active ? "text-white bg-sky-600" : "text-gray-900",
+                            active
+                              ? "text-sky-900 bg-sky-200"
+                              : "text-gray-900",
                             "relative cursor-default select-none py-2 pl-3 pr-9 hover:cursor-pointer"
                           )
                         }
@@ -186,7 +188,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                             {selected ? (
                               <span
                                 className={clsx(
-                                  active ? "text-white" : "text-sky-600",
+                                  "text-sky-800",
                                   "absolute inset-y-0 right-0 flex items-center pr-4"
                                 )}
                               >
