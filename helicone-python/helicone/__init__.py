@@ -167,7 +167,7 @@ class Helicone:
     def update_response_headers(self, result, helicone_request_id):
         headers = self.headers_store.get(helicone_request_id, {})
         result["helicone"] = AttributeDict(
-            id=helicone_request_id,
+            id=headers.get("Helicone-Id"),
             status=headers.get("Helicone-Status"),
             cache=headers.get("Helicone-Cache"),
             rate_limit=AttributeDict(
@@ -272,8 +272,8 @@ class Helicone:
 
     def apply_helicone_auth(self_parent):
         def request_raw_patched(self, *args, **kwargs):
+            helicone_id = kwargs["supplied_headers"]["helicone-request-id"]
             response = original_request_raw(self, *args, **kwargs)
-            helicone_id = response.headers.get("Helicone-Id")
             if helicone_id:
                 with threading.Lock():
                     self_parent.headers_store[helicone_id] = response.headers

@@ -21,20 +21,30 @@ def test_cache():
     unique_id = str(uuid.uuid4())
     prompt = f"Cache test with UUID: {unique_id}"
 
-    response = openai.Completion.create(
+    response1 = openai.Completion.create(
         model="text-ada-001",
         prompt=prompt,
         max_tokens=10,
         cache=True
     )
-    assert response.helicone.cache == "MISS"
-    response = openai.Completion.create(
+    assert response1.helicone.cache == "MISS"
+
+    response2 = openai.Completion.create(
         model="text-ada-001",
         prompt=prompt,
         max_tokens=10,
         cache=True
     )
-    assert response.helicone.cache == "HIT"
+    assert response2.helicone.cache == "HIT"
+
+    response1_copy = response1.copy()
+    response2_copy = response2.copy()
+
+    del response1_copy['helicone']['cache']
+    del response2_copy['helicone']['cache']
+
+    assert response1_copy == response2_copy
+
 
 def test_rate_limit_policy():
     rate_limit_policy_dict = {"quota": 10, "time_window": 60}
@@ -55,7 +65,6 @@ def test_rate_limit_policy():
     # Assert the prefix of the policy is equal to the str
     assert response.helicone.rate_limit.policy.startswith(rate_limit_policy_str)
 
-# Test custom properties
 
 
 def test_custom_properties():
