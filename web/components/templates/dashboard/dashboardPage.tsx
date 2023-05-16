@@ -4,6 +4,7 @@ import {
   CurrencyDollarIcon,
   ExclamationCircleIcon,
   TableCellsIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -155,7 +156,6 @@ const DashboardPage = (props: DashboardPageProps) => {
             timeFilter={{
               customTimeFilter: true,
               timeFilterOptions: [
-                // { key: "1h", value: "Last Hour" },
                 { key: "24h", value: "Today" },
                 { key: "7d", value: "7D" },
                 { key: "1m", value: "1M" },
@@ -198,7 +198,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             </div>
             <div className="col-span-2 pt-[4.25rem] h-96">
               <div className="p-6 bg-white border border-gray-300 rounded-lg space-y-4 h-96 overflow-hidden">
-                <div className="w-full flex flex-row items-center justify-between">
+                {/* <div className="w-full flex flex-row items-center justify-between">
                   <p className="text-md text-gray-700">
                     Top Users (coming soon)
                   </p>
@@ -210,7 +210,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                       key={i}
                     />
                   ))}
-                </ul>
+                </ul> */}
+                <div className="w-full h-full items-center justify-center align-middle flex flex-col">
+                  <UserGroupIcon className="h-12 w-12 text-gray-500" />
+                  <p className="text-md text-gray-700">
+                    Top Users (coming soon)
+                  </p>
+                </div>
               </div>
             </div>
           </div>

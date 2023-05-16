@@ -390,7 +390,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   };
 
   const [selectedData, setSelectedData] = useState<RequestWrapper>();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const selectRowHandler = (row: RequestWrapper, idx: number) => {
     setSelectedData(row);
@@ -704,15 +704,13 @@ const RequestsPage = (props: RequestsPageProps) => {
           </div>
         </div>
       </div>
-      {open && selectedData !== undefined && (
-        <RequestDrawer
-          open={open}
-          wrappedRequest={selectedData}
-          setOpen={setOpen}
-          values={values}
-          properties={properties}
-        />
-      )}
+      <RequestDrawer
+        open={open}
+        wrappedRequest={selectedData}
+        setOpen={setOpen}
+        values={values}
+        properties={properties}
+      />
     </>
   );
 };
