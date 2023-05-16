@@ -47,7 +47,7 @@ const Home = (props: HomeProps) => {
                     })) ?? []
                 }
                 timeMap={(v) => v.toLocaleDateString()}
-                valueFormatter={(v) => [v.toString(), "Active Users"]}
+                valueLabel="Active Users"
               />
             </div>
             <h1 className="text-3xl font-bold text-center">Total Users</h1>
@@ -68,7 +68,7 @@ const Home = (props: HomeProps) => {
                     })) ?? []
                 }
                 timeMap={(v) => v.toLocaleDateString()}
-                valueFormatter={(v) => [v.toString(), "requests"]}
+                valueLabel="Requests"
               />
             </div>
 
@@ -92,7 +92,7 @@ const Home = (props: HomeProps) => {
                     })) ?? []
                 }
                 timeMap={(v) => v.toLocaleDateString()}
-                valueFormatter={(v) => [v.toString(), "requests"]}
+                valueLabel="Requests"
               />
             </div>
           </div>
