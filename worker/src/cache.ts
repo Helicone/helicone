@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Result, hash } from "./index";
-import { deepStrictEqual } from 'assert';
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
 const MAX_BUCKET_SIZE = 20;
@@ -116,6 +115,7 @@ export function getCacheSettings(
     };
   }
 }
+
 
 async function serializeResponse(response: Response): Promise<string> {
   const serializableResponse = {

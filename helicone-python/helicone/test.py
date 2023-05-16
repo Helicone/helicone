@@ -17,7 +17,7 @@ sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 load_dotenv()
 
-def test_cache():
+def test_cache_completion():
     unique_id = str(uuid.uuid4())
     prompt = f"Cache test with UUID: {unique_id}"
 
@@ -33,6 +33,32 @@ def test_cache():
         model="text-ada-001",
         prompt=prompt,
         max_tokens=10,
+        cache=True
+    )
+    assert response2.helicone.cache == "HIT"
+
+    response1_copy = response1.copy()
+    response2_copy = response2.copy()
+
+    del response1_copy['helicone']['cache']
+    del response2_copy['helicone']['cache']
+
+    assert response1_copy == response2_copy
+
+def test_cache_embedding():
+    unique_id = str(uuid.uuid4())
+    prompt = f"Cache test with UUID: {unique_id}"
+
+    response1 = openai.Embedding.create(
+        model="text-embedding-ada-002",
+        input=prompt,
+        cache=True
+    )
+    assert response1.helicone.cache == "MISS"
+
+    response2 = openai.Embedding.create(
+        model="text-embedding-ada-002",
+        input=prompt,
         cache=True
     )
     assert response2.helicone.cache == "HIT"
