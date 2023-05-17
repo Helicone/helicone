@@ -27,6 +27,21 @@ WHERE (
     return payload
 
 
+def deduplicate():
+    print("deduplicating")
+    payload = '''
+OPTIMIZE TABLE response_copy_v2 FINAL DEDUPLICATE BY request_id,organization_id,request_created_at;
+    '''
+    response = requests.post(url, headers=headers, data=payload, auth=auth)
+    print(response.status_code)  # 200
+    if (response.status_code != 200):
+        print(
+            f"Error: {response.status_code} {response.reason} {response.text}"
+        )
+        print(response.text)
+        exit(1)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -46,9 +61,10 @@ if __name__ == '__main__':
 
     headers = {'Content-Type': 'application/octet-stream'}
     auth = ('default', clickhouse_password)
-
-    end_date = datetime.datetime(2023, 4, 26, 0, 0, 0)
-    start_date = datetime.datetime(2022, 10, 1, 0, 0, 0)
+    deduplicate()
+    print("backfilling")
+    end_date = datetime.datetime(2023, 5, 14, 0, 0, 0)
+    start_date = datetime.datetime(2022, 4, 8, 0, 0, 0)
     next_date = end_date
     while next_date > start_date:
         print("backfilling date", next_date.strftime('%Y-%m-%d %H:%M:%S'))
@@ -69,3 +85,6 @@ if __name__ == '__main__':
             next_date = next_date - datetime.timedelta(hours=1)
         else:
             next_date = next_date - datetime.timedelta(days=1)
+        deduplicate()
+
+    print("done backfilling")
