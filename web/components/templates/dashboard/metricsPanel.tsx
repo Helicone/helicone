@@ -1,19 +1,21 @@
 import {
   AdjustmentsVerticalIcon,
   ChartBarIcon,
+  CloudArrowDownIcon,
   CurrencyDollarIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { Metrics } from "../../../lib/api/metrics/metrics";
 import { Result } from "../../../lib/result";
-import { Loading } from "./dashboardPage";
+import { DashboardMode, Loading } from "./dashboardPage";
 
 interface MetricsPanelProps {
   metrics: Loading<Result<Metrics, string>>;
+  mode: DashboardMode;
 }
 
 export function MetricsPanel(props: MetricsPanelProps) {
-  const { metrics: metricsData } = props;
+  const { metrics: metricsData, mode } = props;
 
   const isLoading = metricsData === "loading";
 
@@ -21,14 +23,6 @@ export function MetricsPanel(props: MetricsPanelProps) {
     metricsData === "loading" || metricsData.error !== null
       ? null
       : metricsData.data;
-
-  const numberOfDaysActive = !data?.first_request
-    ? null
-    : Math.floor(
-        (new Date().getTime() - (data.first_request!.getTime() ?? 0)) /
-          (86400 * 1000) +
-          1
-      );
 
   const metrics = [
     {
@@ -39,21 +33,18 @@ export function MetricsPanel(props: MetricsPanelProps) {
     {
       value: +(data?.total_requests ?? 0),
 
-      label: "Total requests",
+      label: "Total Requests",
       icon: TableCellsIcon,
     },
     {
-      value:
-        numberOfDaysActive && data?.total_requests
-          ? (data?.total_requests / numberOfDaysActive).toFixed(2)
-          : "n/a",
-      label: "Avg Requests / day",
+      value: +(data?.total_tokens ?? 0),
+      label: "Total Tokens",
       icon: ChartBarIcon,
     },
     {
-      value: data?.average_tokens_per_response?.toFixed(2) ?? "n/a",
-      label: "Avg Token / Response",
-      icon: AdjustmentsVerticalIcon,
+      value: data?.average_response_time?.toFixed(2) ?? "n/a",
+      label: "Avg Latency",
+      icon: CloudArrowDownIcon,
     },
   ];
 

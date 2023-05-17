@@ -1,5 +1,8 @@
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -9,6 +12,17 @@ import {
 } from "recharts";
 import { ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { clsx } from "../../shared/clsx";
+
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#FF0000",
+  "#00FF00",
+  "#0000FF",
+  "#FFFF00",
+];
 
 export function MultilineRenderLineChart<T>({
   data,
@@ -29,9 +43,71 @@ export function MultilineRenderLineChart<T>({
     ...d,
     time: timeMap(d.time),
   }));
+
+  const getErrorCodes = () => {
+    const errorCodes = new Set<string>();
+    chartData.forEach((d) => {
+      Object.keys(d).forEach((key) => {
+        if (key !== "time") {
+          errorCodes.add(key);
+        }
+      });
+    });
+    return Array.from(errorCodes);
+  };
+
+  const errorCodes = getErrorCodes();
+
   return (
     <div className={clsx("w-full h-full", className)}>
-      <ResponsiveContainer className={"w-full h-full"}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          width={500}
+          height={300}
+          data={chartData}
+          margin={{
+            right: 30,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="time" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          {errorCodes.map((code, i) => (
+            <Bar
+              key={i}
+              dataKey={code}
+              stackId="a"
+              fill={COLORS[i % COLORS.length]}
+            />
+          ))}
+          {/* <Bar dataKey="400" fill="#0ea4e9" stackId="a" />
+          <Bar dataKey="429" fill="#0ea4e9" stackId="a" /> */}
+        </BarChart>
+      </ResponsiveContainer>
+      {/* <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          width={500}
+          height={300}
+          data={data}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="time" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="pv" stackId="a" fill="#8884d8" />
+          <Bar dataKey="uv" stackId="a" fill="#82ca9d" />
+        </BarChart>
+      </ResponsiveContainer> */}
+      {/* <ResponsiveContainer className={"w-full h-full"}>
         <LineChart data={chartData}>
           <CartesianGrid vertical={false} opacity={50} strokeOpacity={0.5} />
           {chartData &&
@@ -69,7 +145,7 @@ export function MultilineRenderLineChart<T>({
             }
           />
         </LineChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer> */}
     </div>
   );
 }

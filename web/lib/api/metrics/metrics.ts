@@ -16,6 +16,7 @@ export interface Metrics {
   first_request: Date;
   last_request: Date;
   total_cost: number;
+  total_tokens: number;
 }
 
 export interface GetMetricsOptions {
@@ -75,6 +76,8 @@ export async function getMetrics(
     aggregatedAvgMetrics,
   ] = data;
 
+  console.log(modelMetrics);
+
   // calculate and format metrics
   const metrics: Metrics = {
     average_requests_per_day: calculateAverageRequestsPerDay(
@@ -86,8 +89,11 @@ export async function getMetrics(
       (acc, modelMetric) => acc + modelCost(modelMetric),
       0
     ),
-
-    total_requests: count,
+    total_tokens: modelMetrics.reduce(
+      (acc, modelMetric) => acc + +modelMetric.sum_tokens,
+      0
+    ),
+    total_requests: +count,
     first_request: startDate,
     last_request: endDate,
     ...aggregatedAvgMetrics,

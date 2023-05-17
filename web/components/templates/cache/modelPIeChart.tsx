@@ -1,5 +1,12 @@
 import { PureComponent } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { clsx } from "../../shared/clsx";
 
 const COLORS = [
@@ -35,11 +42,39 @@ export default class ThemedPieChart extends PureComponent<Props> {
         ]
       : data;
 
+    const RADIAN = Math.PI / 180;
+
+    const renderCustomizedLabel = ({
+      cx,
+      cy,
+      midAngle,
+      innerRadius,
+      outerRadius,
+      percent,
+      index,
+    }: any) => {
+      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+      return (
+        <text
+          x={x}
+          y={y}
+          fill="white"
+          textAnchor={x > cx ? "start" : "end"}
+          dominantBaseline="central"
+        >
+          {`${(percent * 100).toFixed(0)}%`}
+        </text>
+      );
+    };
+
     return (
       <ResponsiveContainer width="100%" height="100%">
         <PieChart
-          width={400}
-          height={400}
+          width={500}
+          height={500}
           className={clsx(isLoading ? "animate-pulse" : "")}
         >
           <Pie
@@ -48,10 +83,11 @@ export default class ThemedPieChart extends PureComponent<Props> {
             data={dataToRender}
             cx="50%"
             cy="50%"
-            outerRadius={50}
+            outerRadius={100}
+            labelLine={false}
             fill="#8884d8"
-            label={(entry) => entry.name}
-            className="text-xs"
+            label={renderCustomizedLabel}
+            className="text-md"
           >
             {dataToRender.map((entry, index) => (
               <Cell
@@ -60,6 +96,7 @@ export default class ThemedPieChart extends PureComponent<Props> {
               />
             ))}
           </Pie>
+          <Legend />
           <Tooltip />
         </PieChart>
       </ResponsiveContainer>
