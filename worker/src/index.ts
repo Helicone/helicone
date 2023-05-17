@@ -740,7 +740,6 @@ export default {
         requestSettings,
         retryOptions
       );
-      console.log("CACHE SETTINGS", cacheSettings)
 
       if (cacheSettings.shouldSaveToCache && requestClone && response.status == 200) {
         ctx.waitUntil(
