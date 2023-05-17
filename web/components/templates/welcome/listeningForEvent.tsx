@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Lottie from "react-lottie";
 import { Result } from "../../../lib/result";
 import * as PartyParrot from "../../../public/lottie/PartyParrot.json";
@@ -11,24 +11,40 @@ interface ListeningForEventProps {}
 const ListeningForEvent = (props: ListeningForEventProps) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const router = useRouter();
+  const [shouldFetch, setShouldFetch] = useState(true);
 
-  const { data } = useQuery({
-    queryKey: ["hasOnboarded"],
-    queryFn: async () => {
-      if (data?.data || (data?.data ?? null) == null) {
-        setTimeElapsed((prev) => prev + 3);
-        return await fetch("/api/user/checkOnboarded", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).then((res) => res.json() as Promise<Result<boolean, string>>);
+  const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
+    ["hasOnboarded"],
+    async () => {
+      const response = await fetch("/api/user/checkOnboarded", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const jsonData = await response.json();
+  
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
+  
+      return jsonData;
     },
-    refetchOnWindowFocus: false,
-    refetchInterval: 3000,
-  });
-  if (data?.data === false) {
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: 3000,
+      enabled: shouldFetch,
+    }
+  );
+
+  useEffect(() => {
+    if (isSuccess && data?.data === true) {
+      setShouldFetch(false);
+    }
+  }, [isSuccess, data]);
+  
+  if ((data === undefined) || data?.data === false) {
     return (
       <div className="flex flex-col space-y-4 items-center py-16 text-gray-900">
         <div className="text-2xl">Listening for events</div>
