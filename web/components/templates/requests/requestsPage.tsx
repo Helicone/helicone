@@ -251,6 +251,28 @@ const RequestsPage = (props: RequestsPageProps) => {
       filter: true,
     },
     {
+      key: "completionTokens",
+      active: false,
+      label: "Completion Tokens",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        completion_tokens: direction,
+      }),
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "promptTokens",
+      active: false,
+      label: "Prompt Tokens",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        prompt_tokens: direction,
+      }),
+      type: "number",
+      filter: true,
+    },
+    {
       key: "userId",
       active: true,
       label: "User",

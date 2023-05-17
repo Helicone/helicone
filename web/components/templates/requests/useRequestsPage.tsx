@@ -65,6 +65,8 @@ export type RequestWrapper = {
   };
   latency: number;
   totalTokens: number;
+  completionTokens: number;
+  promptTokens: number;
   model: string;
   requestText: string; // either the GPT3 prompt or the last message from the ChatGPT API
   responseText: string; // either the GPT3 response or the last message from the ChatGPT API
@@ -159,7 +161,9 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     api: getRequestAndResponse(request),
     error: request.response_body?.error || undefined,
     latency,
-    totalTokens: request.response_body?.usage?.total_tokens || 0,
+    totalTokens: request.total_tokens ?? 0,
+    completionTokens: request.completion_tokens ?? 0,
+    promptTokens: request.prompt_tokens ?? 0,
     model: request.request_body.model || request.response_body?.model || "",
     requestText:
       (request.request_body?.messages &&
