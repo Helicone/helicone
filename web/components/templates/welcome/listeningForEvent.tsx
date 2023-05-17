@@ -28,8 +28,7 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
     refetchOnWindowFocus: false,
     refetchInterval: 3000,
   });
-
-  if (data?.data || (data?.data ?? null) === null) {
+  if (data?.data === false) {
     return (
       <div className="flex flex-col space-y-4 items-center py-16 text-gray-900">
         <div className="text-2xl">Listening for events</div>
