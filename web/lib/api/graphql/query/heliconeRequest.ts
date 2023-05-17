@@ -113,7 +113,6 @@ export async function heliconeRequest(
           id: r.request_user_id,
         }
       : null,
-    cacheHits: r.cache_count,
     properties: r.request_properties
       ? Object.entries(r.request_properties).map(([k, v]) => ({
           name: k,
