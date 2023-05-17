@@ -278,9 +278,20 @@ class Helicone:
                 with threading.Lock():
                     self_parent.headers_store[helicone_id] = response.headers
             return response
+        
+        async def arequest_raw_patched(self, *args, **kwargs):
+            helicone_id = kwargs["supplied_headers"]["helicone-request-id"]
+            response = await original_arequest_raw(self, *args, **kwargs)
+            if helicone_id:
+                with threading.Lock():
+                    self_parent.headers_store[helicone_id] = response.headers
+            return response
 
         original_request_raw = openai.api_requestor.APIRequestor.request_raw
         openai.api_requestor.APIRequestor.request_raw = request_raw_patched
+
+        original_arequest_raw = openai.api_requestor.APIRequestor.arequest_raw
+        openai.api_requestor.APIRequestor.arequest_raw = arequest_raw_patched
 
         api_resources_classes = [
             (ChatCompletion, "create", "acreate"),
