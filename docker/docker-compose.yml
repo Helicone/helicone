@@ -331,9 +331,9 @@ services:
 
   clickhouse-db:
     container_name: clickhouse-db
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:23.4.2.11
     healthcheck:
-      test: echo 'SELECT 1' | curl 'http://localhost:8123/' --data-binary @-
+      test: apt update -y && apt install curl -y && echo 'SELECT 1' | curl 'http://localhost:8123/' --data-binary @-
       interval: 5s
       timeout: 5s
       retries: 10
