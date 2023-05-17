@@ -9,6 +9,8 @@ export interface SortLeafRequest {
   latency?: SortDirection;
   last_active?: SortDirection;
   total_tokens?: SortDirection;
+  completion_tokens?: SortDirection;
+  prompt_tokens?: SortDirection;
   user_id?: SortDirection;
   body_model?: SortDirection;
   is_cached?: SortDirection;
@@ -39,8 +41,19 @@ export function buildRequestSort(sort: SortLeafRequest) {
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);
-    return `(coalesce((response.body ->'usage'->>'total_tokens')::int, 0))::int ${sort.total_tokens}`;
+    return `(response.prompt_tokens + response.completion_tokens) ${sort.total_tokens}`;
   }
+
+  if (sort.completion_tokens) {
+    assertValidSortDirection(sort.completion_tokens);
+    return `response.completion_tokens ${sort.completion_tokens}`;
+  }
+
+  if (sort.prompt_tokens) {
+    assertValidSortDirection(sort.prompt_tokens);
+    return `response.prompt_tokens ${sort.prompt_tokens}`;
+  }
+
   if (sort.user_id) {
     assertValidSortDirection(sort.user_id);
     return `request.user_id ${sort.user_id}`;

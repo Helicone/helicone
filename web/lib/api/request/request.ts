@@ -35,6 +35,9 @@ export interface HeliconeRequest {
   request_prompt: string | null;
   response_prompt: string | null;
   delay_ms: number | null;
+  total_tokens: number | null;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
 }
 
 export async function getRequests(
@@ -68,6 +71,9 @@ export async function getRequests(
     request.prompt_values as request_prompt_values,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
+    (response.prompt_tokens + response.completion_tokens) as total_tokens,
+    response.completion_tokens as completion_tokens,
+    response.prompt_tokens as prompt_tokens,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
