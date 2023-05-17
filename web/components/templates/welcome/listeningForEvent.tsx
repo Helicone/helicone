@@ -22,13 +22,13 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
           "Content-Type": "application/json",
         },
       });
-  
+
       const jsonData = await response.json();
-  
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-  
+
       return jsonData;
     },
     {
@@ -43,8 +43,8 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
       setShouldFetch(false);
     }
   }, [isSuccess, data]);
-  
-  if ((data === undefined) || data?.data === false) {
+
+  if (data === undefined || data?.data === false) {
     return (
       <div className="flex flex-col space-y-4 items-center py-16 text-gray-900">
         <div className="text-2xl">Listening for events</div>
