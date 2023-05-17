@@ -105,7 +105,6 @@ export const requestTableFilters: [
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
-  SingleFilterDef<"user_api_keys">,
   SingleFilterDef<"response">
 ] = [
   {
@@ -141,13 +140,6 @@ export const requestTableFilters: [
     operators: textOperators,
     table: "response",
     column: "body_model",
-    category: "request",
-  },
-  {
-    label: "Key Name",
-    operators: textOperators,
-    table: "user_api_keys",
-    column: "api_key_name",
     category: "request",
   },
   {

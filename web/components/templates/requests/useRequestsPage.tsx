@@ -25,7 +25,6 @@ import { Message } from "./requestsPage";
 import { useOrg } from "../../shared/layout/organizationContext";
 
 export type RequestWrapper = {
-  cacheCount: number;
   promptName: string;
   promptRegex: string;
   requestCreatedAt: string;
@@ -41,11 +40,7 @@ export type RequestWrapper = {
   userId: string;
   responseCreatedAt: string;
   responseId: string;
-  userApiKeyHash: string;
   keyName: string;
-  userApiKeyPreview: string;
-  userApiKeyUserId: string;
-
   // these next columns need to be double-defined because of the way the table is built
   error:
     | {
@@ -148,7 +143,6 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
   const obj: RequestWrapper = {
     requestBody: request.request_body,
     responseBody: request.response_body,
-    cacheCount: +request.cache_count,
     promptName: request.prompt_name || "",
     promptRegex: request.prompt_regex || "",
     requestCreatedAt: request.request_created_at,
@@ -161,10 +155,6 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     responseCreatedAt: request.response_created_at,
     responseId: request.response_id,
     keyName: request.key_name,
-    userApiKeyHash: request.user_api_key_hash,
-    userApiKeyPreview: request.user_api_key_preview,
-    userApiKeyUserId: request.user_api_key_user_id,
-
     // More information about the request
     api: getRequestAndResponse(request),
     error: request.response_body?.error || undefined,
