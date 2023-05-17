@@ -300,6 +300,14 @@ const RequestsPage = (props: RequestsPageProps) => {
       filter: true,
       format: (value: number) => (value ? (value * 100).toFixed(0) + "%" : ""),
     },
+    {
+      key: "latency",
+      active: true,
+      label: "Latency (s)",
+      type: "number",
+      filter: true,
+      format: (value: number) => value.toFixed(2),
+    },
   ];
 
   const sessionStorageKey =
