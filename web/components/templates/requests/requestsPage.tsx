@@ -307,6 +307,11 @@ const RequestsPage = (props: RequestsPageProps) => {
       type: "number",
       filter: true,
       format: (value: number) => value.toFixed(2),
+      toSortLeaf(direction) {
+        return {
+          latency: direction,
+        };
+      },
     },
   ];
 
