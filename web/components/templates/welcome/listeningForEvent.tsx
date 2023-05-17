@@ -12,6 +12,7 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const router = useRouter();
   const [shouldFetch, setShouldFetch] = useState(true);
+  const [notification, setNotification] = useState("");
 
   const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
     ["hasOnboarded"],
@@ -26,7 +27,10 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
       const jsonData = await response.json();
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        setNotification(
+          "An error occurred while fetching data and we couldn't complete your onboarding. Please contact help@helicone.ai and we'll get you onboarded right away!"
+        );
+        return null;
       }
 
       return jsonData;
@@ -74,6 +78,11 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
             you can email us at help@helicone.ai.
           </p>
         )}
+        {notification && (
+          <div className="alert alert-danger" role="alert">
+            {notification}
+          </div>
+        )}
       </div>
     );
   } else {
@@ -106,6 +115,11 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
             View Dashboard
           </button>
         </div>
+        {notification && (
+          <div className="alert alert-danger" role="alert">
+            {notification}
+          </div>
+        )}
       </div>
     );
   }
