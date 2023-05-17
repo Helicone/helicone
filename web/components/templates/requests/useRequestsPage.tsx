@@ -37,6 +37,9 @@ export type RequestWrapper = {
   customProperties: {
     [key: string]: Json;
   } | null;
+  feedback: {
+    [key: string]: Json;
+  } | null;
   userId: string;
   responseCreatedAt: string;
   responseId: string;
@@ -153,6 +156,7 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     path: request.request_path,
     promptValues: request.request_prompt_values,
     customProperties: request.request_properties,
+    feedback: request.feedback,
     userId: request.request_user_id || "",
     responseCreatedAt: request.response_created_at,
     responseId: request.response_id,
