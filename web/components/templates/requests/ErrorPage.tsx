@@ -90,7 +90,6 @@ const ErrorPage = (props: ErrorPropProps) => {
                       value: +x.count,
                     })) ?? []
                 }
-                isLoading={pageCodes.errorCodes.isLoading}
               />
             </div>
           </Col>

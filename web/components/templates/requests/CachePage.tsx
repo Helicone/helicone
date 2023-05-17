@@ -115,7 +115,6 @@ const CachePage = (props: CachePropProps) => {
                     value: +x.count,
                   })) ?? []
                 }
-                isLoading={topMetrics.topModels.isLoading}
               />
             </div>
             <ThemedMetricList
