@@ -285,17 +285,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => value,
     },
     {
-      key: "cacheCount",
-      active: false,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        is_cached: direction,
-      }),
-      label: "Cache hits",
-      minWidth: 170,
-      format: (value: number) => value.toFixed(0),
-    },
-    {
       key: "logProbs",
       active: false,
       label: "Log Prob",
