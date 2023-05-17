@@ -10,8 +10,6 @@ import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useState } from "react";
 
-import { GraphDataState } from "../../../lib/dashboardGraphs";
-import { middleTruncString } from "../../../lib/stringHelpers";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeIntervalAgo,
@@ -22,7 +20,6 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import AuthLayout from "../../shared/layout/authLayout";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import ThemedTabs from "../../shared/themed/themedTabs";
@@ -32,7 +29,6 @@ import { MetricsPanel } from "./metricsPanel";
 import CostPanel from "./panels/costsPanel";
 import ErrorsPanel from "./panels/errorsPanel";
 import RequestsPanel from "./panels/requestsPanel";
-import TimeGraphWHeader from "./timeGraphWHeader";
 import { useDashboardPage } from "./useDashboardPage";
 
 interface DashboardPageProps {

@@ -16,9 +16,9 @@ import { Grid } from "../../shared/layout/grid";
 import Metric from "../../shared/themed/themedMetric";
 import { ThemedMetricList } from "../../shared/themed/themedMetricList";
 import { ThemedMiniTable } from "../../shared/themed/themedMiniTable";
-import ThemedPieChart from "../cache/modelPIeChart";
-import { MultilineRenderLineChart } from "../cache/timeGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { StackedBarChart } from "../../shared/metrics/stackedBarChart";
+import { RenderPieChart } from "../../shared/metrics/pieChart";
 
 interface CachePropProps {}
 
@@ -108,7 +108,7 @@ const CachePage = (props: CachePropProps) => {
           </Grid>
           <Grid className="w-full items-center grid-cols-2 gap-3">
             <div className="h-full bg-white rounded-md">
-              <ThemedPieChart
+              <RenderPieChart
                 data={
                   topMetrics.topModels.data?.data?.map((x) => ({
                     name: x.model,
@@ -130,12 +130,12 @@ const CachePage = (props: CachePropProps) => {
             />
           </Grid>
 
-          <MultilineRenderLineChart
+          {/* <StackedBarChart
             data={modelCacheOverTime.overTime.data?.data ?? []}
             timeMap={(x) => new Date(x).toISOString()}
             valueFormatter={(x) => `${x}`}
             className="h-64 w-full bg-white p-5 pb-2 rounded-md"
-          />
+          /> */}
 
           <ThemedMiniTable
             className={{

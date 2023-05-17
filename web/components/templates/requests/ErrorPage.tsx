@@ -16,14 +16,14 @@ import { Grid } from "../../shared/layout/grid";
 import Metric from "../../shared/themed/themedMetric";
 import { ThemedMetricList } from "../../shared/themed/themedMetricList";
 import { ThemedMiniTable } from "../../shared/themed/themedMiniTable";
-import ThemedPieChart from "../cache/modelPIeChart";
-import { MultilineRenderLineChart } from "../cache/timeGraph";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 import {
   useErrorPageCodes,
   useErrorPageLatest,
 } from "../../../services/hooks/useErrorPage";
+import { StackedBarChart } from "../../shared/metrics/stackedBarChart";
+import { RenderPieChart } from "../../shared/metrics/pieChart";
 
 interface ErrorPropProps {}
 
@@ -81,7 +81,7 @@ const ErrorPage = (props: ErrorPropProps) => {
               Error Codes
             </h1>
             <div className="h-full">
-              <ThemedPieChart
+              <RenderPieChart
                 data={
                   pageCodes.errorCodes.data?.data
                     ?.filter((x) => x.error_code !== 200)
@@ -111,12 +111,12 @@ const ErrorPage = (props: ErrorPropProps) => {
             Error Codes Over Time
           </h1>
 
-          <MultilineRenderLineChart
+          {/* <StackedBarChart
             data={errorCodesOverTime.overTime.data?.data ?? []}
             timeMap={(x) => new Date(x).toDateString()}
             valueFormatter={(x) => `${x}`}
             className="h-64"
-          />
+          /> */}
         </Col>
 
         <ThemedMiniTable

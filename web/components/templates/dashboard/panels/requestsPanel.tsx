@@ -2,7 +2,7 @@ import { UserGroupIcon } from "@heroicons/react/24/outline";
 import { Result } from "../../../../lib/result";
 import { RequestsOverTime } from "../../../../lib/timeCalculations/fetchTimeData";
 import LoadingAnimation from "../../../shared/loadingAnimation";
-import { RenderBarChart } from "../barChart";
+import { RenderBarChart } from "../../../shared/metrics/barChart";
 import { Loading } from "../dashboardPage";
 
 interface RequestsPanelProps {
