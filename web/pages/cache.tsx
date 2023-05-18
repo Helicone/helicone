@@ -1,12 +1,11 @@
-import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import RequestsPage from "../components/templates/requests/requestsPage";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { useOrg } from "../components/shared/layout/organizationContext";
+
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { User } from "@supabase/auth-helpers-react";
-import CachePage from "../components/templates/requests/CachePage";
+import AuthHeader from "../components/shared/authHeader";
+// import CachePage from "../components/templates/requests/CachePage";
+import CachePage from "../components/templates/cache/cachePage";
 
 interface CacheProps {
   user: User;
@@ -15,6 +14,7 @@ const Cache = (props: CacheProps) => {
   return (
     <MetaData title="Requests">
       <AuthLayout user={props.user}>
+        <AuthHeader title={"Cache"} />
         <CachePage />
       </AuthLayout>
     </MetaData>
