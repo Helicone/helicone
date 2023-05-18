@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
-import { RenderLineChart } from "../components/templates/dashboard/timeGraph";
+import { RenderBarChart } from "../components/shared/metrics/barChart";
 import { BaseUrlInstructions } from "../components/templates/welcome/welcomePage";
 import { Result } from "../lib/result";
 import { HeliconeStats } from "./api/stats";
@@ -31,7 +31,7 @@ const Home = (props: HomeProps) => {
               Active Users/week
             </h1>
             <div className="h-96">
-              <RenderLineChart
+              <RenderBarChart
                 data={
                   data?.data?.weeklyActiveUsers
                     .map((v) => ({
@@ -52,7 +52,7 @@ const Home = (props: HomeProps) => {
             </div>
             <h1 className="text-3xl font-bold text-center">Total Users</h1>
             <div className="h-96">
-              <RenderLineChart
+              <RenderBarChart
                 data={
                   data?.data?.integratedUsers
                     .map((v) => ({
@@ -76,7 +76,7 @@ const Home = (props: HomeProps) => {
               Requests week over week
             </h1>
             <div className="h-96">
-              <RenderLineChart
+              <RenderBarChart
                 data={
                   data?.data?.weeklyActiveUsers
                     .map((v) => ({
