@@ -78,7 +78,7 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
     orderHandler,
     setViewMode,
   } = props;
-  console.log("THEMED TABLE V4 ROWS", rows)
+  console.log("THEMED TABLE V4 ROWS", rows);
 
   let columnBeingDragged: number;
   const router = useRouter();

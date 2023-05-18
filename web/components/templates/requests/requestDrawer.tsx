@@ -74,14 +74,8 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       ) : (
         <div className="flex flex-col space-y-2">
           <dl className="mt-2 grid grid-cols-2">
-            <div className="col-span-2 flex flex-row justify-between py-2 items-center text-sm font-medium border-b border-gray-200">
-              <div className="flex flex-col">
-                <dt className="text-gray-500">Request ID</dt>
-                <dd className="text-gray-900">{wrappedRequest.id}</dd>
-              </div>
-            </div>
             <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
-              <dt className="text-gray-500">Time</dt>
+              <dt className="text-gray-500">Timestamp</dt>
               <dd className="text-gray-900">
                 {new Date(wrappedRequest.requestCreatedAt).toLocaleString()}
               </dd>

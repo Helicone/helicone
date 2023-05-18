@@ -38,6 +38,7 @@ import {
   capitalizeWords,
   getUSDate,
   removeLeadingWhitespace,
+  timeAgo,
 } from "../../shared/utils/utils";
 import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
@@ -203,7 +204,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         created_at: direction,
       }),
       type: "timestamp",
-      format: (value: string) => getUSDate(value),
+      format: (value: string) => timeAgo(value),
     },
     {
       key: "requestText",
@@ -309,7 +310,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "logProbs",
       active: false,
-      label: "Log Prob",
+      label: "Log Probability",
       type: "number",
       filter: true,
       format: (value: number) => (value ? value.toFixed(2) : ""),
@@ -325,7 +326,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "latency",
       active: true,
-      label: "Latency (s)",
+      label: "Duration (s)",
       type: "number",
       filter: true,
       format: (value: number) => value.toFixed(2),
@@ -464,7 +465,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       };
     });
 
-    console.log("FEEDBACK BEFORE ERROR", feedback)
+    console.log("FEEDBACK BEFORE ERROR", feedback);
     const feedbackColumns: Column[] = feedback.map((f) => {
       return {
         key: f.name,
@@ -484,12 +485,12 @@ const RequestsPage = (props: RequestsPageProps) => {
         minWidth: 170,
       };
     });
-    console.log("IS FEEDBACK LOADING?", isFeedbackLoading)
+    console.log("IS FEEDBACK LOADING?", isFeedbackLoading);
     const newColumns = [
       ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
-      ...feedbackColumns
+      ...feedbackColumns,
     ];
 
     setColumns((prev) => {
@@ -570,9 +571,9 @@ const RequestsPage = (props: RequestsPageProps) => {
       ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
-      ...feedbackColumns
+      ...feedbackColumns,
     ];
-    console.log("NEW COLUMNS", newColumns)
+    console.log("NEW COLUMNS", newColumns);
 
     setColumns((prev) => {
       return newColumns.map((c) => {

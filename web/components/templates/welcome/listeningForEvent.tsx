@@ -15,9 +15,9 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
   const { data } = useQuery({
     queryKey: ["hasOnboarded"],
     queryFn: async () => {
-      console.log("Inside the queryFn")
+      console.log("Inside the queryFn");
       if (data?.data || (data?.data ?? null) == null) {
-        console.log("Inside the if statement")
+        console.log("Inside the if statement");
         setTimeElapsed((prev) => prev + 3);
         return await fetch("/api/user/checkOnboarded", {
           method: "POST",
