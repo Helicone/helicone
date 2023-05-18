@@ -13,6 +13,7 @@ interface RenderPieChartProps {
     name: string;
     value: number;
   }[];
+  size?: "sm" | "md";
 }
 
 const COLORS = [
@@ -27,7 +28,7 @@ const COLORS = [
 ];
 
 export const RenderPieChart = (props: RenderPieChartProps) => {
-  const { data } = props;
+  const { data, size = "md" } = props;
 
   const renderCustomizedLabel = ({
     cx,
@@ -56,6 +57,9 @@ export const RenderPieChart = (props: RenderPieChartProps) => {
     );
   };
 
+  const pieRadius = size === "sm" ? 80 : 100;
+  const textSize = size === "sm" ? "text-sm" : "text-md";
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart width={500} height={500}>
@@ -65,11 +69,11 @@ export const RenderPieChart = (props: RenderPieChartProps) => {
           data={data}
           cx="50%"
           cy="50%"
-          outerRadius={100}
+          outerRadius={pieRadius}
           labelLine={false}
           fill="#8884d8"
           label={renderCustomizedLabel}
-          className="text-md"
+          className={textSize}
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -1,6 +1,8 @@
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
+  ChartBarIcon,
+  CloudArrowDownIcon,
   CurrencyDollarIcon,
   ExclamationCircleIcon,
   TableCellsIcon,
@@ -25,7 +27,7 @@ import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import { Filters } from "./filters";
 
-import { MetricsPanel } from "./metricsPanel";
+import { MetricsPanel } from "../../shared/metrics/metricsPanel";
 import CostPanel from "./panels/costsPanel";
 import ErrorsPanel from "./panels/errorsPanel";
 import RequestsPanel from "./panels/requestsPanel";
@@ -104,6 +106,36 @@ const DashboardPage = (props: DashboardPageProps) => {
       return <ErrorsPanel />;
     }
   };
+
+  const metricsData = [
+    {
+      value: metrics?.data?.data?.total_cost
+        ? `$${metrics?.data?.data?.total_cost.toFixed(2)}`
+        : "$0.00",
+      label: "Total Cost",
+      icon: CurrencyDollarIcon,
+      isLoading: metrics.isLoading,
+    },
+    {
+      value: +(metrics?.data?.data?.total_requests ?? 0),
+
+      label: "Total Requests",
+      icon: TableCellsIcon,
+      isLoading: metrics.isLoading,
+    },
+    {
+      value: +(metrics.data?.data?.total_tokens ?? 0),
+      label: "Total Tokens",
+      icon: ChartBarIcon,
+      isLoading: metrics.isLoading,
+    },
+    {
+      value: metrics.data?.data?.average_response_time?.toFixed(2) ?? "n/a",
+      label: "Avg Latency",
+      icon: CloudArrowDownIcon,
+      isLoading: metrics.isLoading,
+    },
+  ];
 
   return (
     <>
@@ -206,7 +238,12 @@ const DashboardPage = (props: DashboardPageProps) => {
               searchPropertyFilters,
             }}
           />
-          <MetricsPanel metrics={metrics.data ?? "loading"} mode={mode} />
+          <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
+            {metricsData.map((m, i) => (
+              <MetricsPanel key={i} metric={m} />
+            ))}
+          </div>
+
           <ThemedTabs
             options={[
               {

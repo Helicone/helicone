@@ -1,6 +1,8 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
-import { useErrorPageOvertime } from "../../../../services/hooks/useCachePage";
-import { useErrorPageCodes } from "../../../../services/hooks/useErrorPage";
+import {
+  useErrorPageCodes,
+  useErrorPageOverTime,
+} from "../../../../services/hooks/useErrorPage";
 import { StackedBarChart } from "../../../shared/metrics/stackedBarChart";
 import { RenderPieChart } from "../../../shared/metrics/pieChart";
 
@@ -11,7 +13,7 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
 
   const pageCodes = useErrorPageCodes();
 
-  const errorCodesOverTime = useErrorPageOvertime();
+  const errorCodesOverTime = useErrorPageOverTime();
 
   const data = errorCodesOverTime.overTime.data?.data ?? [];
 

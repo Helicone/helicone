@@ -6,7 +6,6 @@ import { BsCashCoin, BsHourglass } from "react-icons/bs";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import {
   useCachePageMetrics,
-  useErrorPageOvertime,
   useCachePageTopMetrics,
   useCachePageTopRequests,
 } from "../../../services/hooks/useCachePage";
@@ -53,7 +52,7 @@ const metricsUIData: {
     value: (x) => (x.data?.data ? Math.ceil(x.data.data * 100) / 100 : 0),
     icon: <BsCashCoin className="w-8 h-8" />,
   },
-  avgSecondsSaved: {
+  totalTimeSaved: {
     ...baseMetricUIData,
     title: "Time Saved(s)",
     value: (x) => x.data?.data ?? 0,
@@ -65,7 +64,7 @@ const CachePage = (props: CachePropProps) => {
   const data = useCachePageMetrics();
   const topMetrics = useCachePageTopMetrics();
   const topRequests = useCachePageTopRequests();
-  const modelCacheOverTime = useErrorPageOvertime();
+  // const modelCacheOverTime = useErrorPageOvertime();
   const router = useRouter();
 
   const hasZeroData = data.totalCached.data?.data
