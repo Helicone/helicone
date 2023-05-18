@@ -20,27 +20,25 @@ const getUSDateShort = (value: string) => {
   return `${month} ${day}`;
 };
 
-// const getUSDate = (value: string) => {
-//   const date = new Date(value);
-//   const month = monthNames[date.getMonth()];
-//   const day = date.getDate();
-//   return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
-//     .toLocaleTimeString()
-//     .slice(-2)}`;
-// };
-
 const getUSDate = (value: string) => {
+  console.log("value", value);
   const date = new Date(value);
   const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    hour12: false 
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   };
-  
-  return date.toLocaleString('en-US', options);
+
+  let formattedDate = date.toLocaleString("en-US", options);
+  // Remove the year and 'at' from the string
+  formattedDate = formattedDate
+    .replace(", " + date.getFullYear(), "")
+    .replace(" at", "");
+
+  return formattedDate;
 };
 
 const getUSDateMin = (value: string) => {
