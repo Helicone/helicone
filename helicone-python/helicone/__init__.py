@@ -14,6 +14,7 @@ from openai.api_resources import (
     Moderation,
 )
 import logging
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,12 @@ if (api_key is None):
 
 proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
+global_headers = {}
+
+class AttributeDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttributeDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 def normalize_data_type(data_type):
     if isinstance(data_type, str):
@@ -80,11 +87,11 @@ def prepare_api_base(**kwargs):
 
     return original_api_base, kwargs
 
-
 class Helicone:
     def __init__(self):
         self.openai = openai
         self.apply_helicone_auth()
+        self.headers_store = {}
 
     @property
     def api_key(self):
@@ -156,29 +163,43 @@ class Helicone:
         kwargs["headers"] = headers
 
         return helicone_request_id, kwargs
+    
+    def update_response_headers(self, result, helicone_request_id):
+        headers = self.headers_store.get(helicone_request_id, {})
+        result["helicone"] = AttributeDict(
+            id=headers.get("Helicone-Id"),
+            status=headers.get("Helicone-Status"),
+            cache=headers.get("Helicone-Cache"),
+            rate_limit=AttributeDict(
+                limit=headers.get("Helicone-RateLimit-Limit"),
+                remaining=headers.get("Helicone-RateLimit-Remaining"),
+                reset=headers.get("Helicone-RateLimit-Reset"),
+                policy=headers.get("Helicone-RateLimit-Policy"),
+            ) if headers.get("Helicone-RateLimit-Policy") else None,
+        )
 
     def _modify_result(self, result, helicone_request_id):
         def result_with_helicone():
             for r in result:
-                r["helicone"] = {"id": helicone_request_id}
+                self.update_response_headers(r, helicone_request_id)
                 yield r
 
         if inspect.isgenerator(result):
             return result_with_helicone()
         else:
-            result["helicone"] = {"id": helicone_request_id}
+            self.update_response_headers(result, helicone_request_id)
             return result
 
     async def _modify_result_async(self, result, helicone_request_id):
         async def result_with_helicone_async():
             async for r in result:
-                r["helicone"] = {"id": helicone_request_id}
+                self.update_response_headers(r, helicone_request_id)
                 yield r
 
         if inspect.isasyncgen(result):
             return result_with_helicone_async()
         else:
-            result["helicone"] = {"id": helicone_request_id}
+            self.update_response_headers(result, helicone_request_id)
             return result
 
     def _with_helicone_auth(self, func):
@@ -249,7 +270,29 @@ class Helicone:
             return {"Helicone-RateLimit-Policy": policy}
         return {}
 
-    def apply_helicone_auth(self):
+    def apply_helicone_auth(self_parent):
+        def request_raw_patched(self, *args, **kwargs):
+            helicone_id = kwargs["supplied_headers"]["helicone-request-id"]
+            response = original_request_raw(self, *args, **kwargs)
+            if helicone_id:
+                with threading.Lock():
+                    self_parent.headers_store[helicone_id] = response.headers
+            return response
+        
+        async def arequest_raw_patched(self, *args, **kwargs):
+            helicone_id = kwargs["supplied_headers"]["helicone-request-id"]
+            response = await original_arequest_raw(self, *args, **kwargs)
+            if helicone_id:
+                with threading.Lock():
+                    self_parent.headers_store[helicone_id] = response.headers
+            return response
+
+        original_request_raw = openai.api_requestor.APIRequestor.request_raw
+        openai.api_requestor.APIRequestor.request_raw = request_raw_patched
+
+        original_arequest_raw = openai.api_requestor.APIRequestor.arequest_raw
+        openai.api_requestor.APIRequestor.arequest_raw = arequest_raw_patched
+
         api_resources_classes = [
             (ChatCompletion, "create", "acreate"),
             (Completion, "create", "acreate"),
@@ -262,11 +305,11 @@ class Helicone:
         for api_resource_class, method, async_method in api_resources_classes:
             create_method = getattr(api_resource_class, method)
             setattr(api_resource_class, method,
-                    self._with_helicone_auth(create_method))
+                    self_parent._with_helicone_auth(create_method))
 
             async_create_method = getattr(api_resource_class, async_method)
             setattr(api_resource_class, async_method,
-                    self._with_helicone_auth_async(async_create_method))
+                    self_parent._with_helicone_auth_async(async_create_method))
 
 
 helicone = Helicone()

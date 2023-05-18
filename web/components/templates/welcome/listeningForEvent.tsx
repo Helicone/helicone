@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Lottie from "react-lottie";
 import { Result } from "../../../lib/result";
 import * as PartyParrot from "../../../public/lottie/PartyParrot.json";
@@ -11,25 +11,44 @@ interface ListeningForEventProps {}
 const ListeningForEvent = (props: ListeningForEventProps) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const router = useRouter();
+  const [shouldFetch, setShouldFetch] = useState(true);
+  const [notification, setNotification] = useState("");
 
-  const { data } = useQuery({
-    queryKey: ["hasOnboarded"],
-    queryFn: async () => {
-      if (data?.data || (data?.data ?? null) == null) {
-        setTimeElapsed((prev) => prev + 3);
-        return await fetch("/api/user/checkOnboarded", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).then((res) => res.json() as Promise<Result<boolean, string>>);
+  const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
+    ["hasOnboarded"],
+    async () => {
+      const response = await fetch("/api/user/checkOnboarded", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const jsonData = await response.json();
+
+      if (!response.ok) {
+        setNotification(
+          "An error occurred while fetching data and we couldn't complete your onboarding. Please contact help@helicone.ai and we'll get you onboarded right away!"
+        );
+        return null;
       }
-    },
-    refetchOnWindowFocus: false,
-    refetchInterval: 3000,
-  });
 
-  if (data?.data || (data?.data ?? null) === null) {
+      return jsonData;
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: 3000,
+      enabled: shouldFetch,
+    }
+  );
+
+  useEffect(() => {
+    if (isSuccess && data?.data === true) {
+      setShouldFetch(false);
+    }
+  }, [isSuccess, data]);
+
+  if (data === undefined || data?.data === false) {
     return (
       <div className="flex flex-col space-y-4 items-center py-16 text-gray-900">
         <div className="text-2xl">Listening for events</div>
@@ -58,6 +77,11 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
             30 seconds, please join our discord and we&apos;ll help you out. Or
             you can email us at help@helicone.ai.
           </p>
+        )}
+        {notification && (
+          <div className="alert alert-danger" role="alert">
+            {notification}
+          </div>
         )}
       </div>
     );
@@ -91,6 +115,11 @@ const ListeningForEvent = (props: ListeningForEventProps) => {
             View Dashboard
           </button>
         </div>
+        {notification && (
+          <div className="alert alert-danger" role="alert">
+            {notification}
+          </div>
+        )}
       </div>
     );
   }

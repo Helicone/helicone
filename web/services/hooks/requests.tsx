@@ -26,7 +26,6 @@ const useGetRequests = (
         const currentPageSize = query.queryKey[2] as number;
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
-
         return await fetch("/api/request", {
           method: "POST",
           headers: {

@@ -29,16 +29,15 @@ export interface HeliconeRequest {
     [key: string]: Json;
   } | null;
   helicone_user: string | null;
-  user_api_key_preview: string;
-  user_api_key_user_id: string;
-  user_api_key_hash: string;
   prompt_name: string | null;
   prompt_regex: string | null;
   key_name: string;
-  cache_count: number;
   request_prompt: string | null;
   response_prompt: string | null;
   delay_ms: number | null;
+  total_tokens: number | null;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
 }
 
 export async function getRequests(
@@ -72,18 +71,15 @@ export async function getRequests(
     request.prompt_values as request_prompt_values,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
-    user_api_keys.api_key_preview as user_api_key_preview,
-    user_api_keys.user_id as user_api_key_user_id,
-    user_api_keys.api_key_hash as user_api_key_hash,
-    user_api_keys.key_name as key_name,
+    (response.prompt_tokens + response.completion_tokens) as total_tokens,
+    response.completion_tokens as completion_tokens,
+    response.prompt_tokens as prompt_tokens,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
-    (select count(*) from cache_hits ch where ch.request_id = request.id) as cache_count,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM request
     left join response on request.id = response.request
-    left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})

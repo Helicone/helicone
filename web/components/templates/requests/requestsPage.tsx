@@ -251,6 +251,28 @@ const RequestsPage = (props: RequestsPageProps) => {
       filter: true,
     },
     {
+      key: "completionTokens",
+      active: false,
+      label: "Completion Tokens",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        completion_tokens: direction,
+      }),
+      type: "number",
+      filter: true,
+    },
+    {
+      key: "promptTokens",
+      active: false,
+      label: "Prompt Tokens",
+      sortBy: "desc",
+      toSortLeaf: (direction) => ({
+        prompt_tokens: direction,
+      }),
+      type: "number",
+      filter: true,
+    },
+    {
       key: "userId",
       active: true,
       label: "User",
@@ -285,17 +307,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       format: (value: string) => value,
     },
     {
-      key: "cacheCount",
-      active: false,
-      sortBy: "desc",
-      toSortLeaf: (direction) => ({
-        is_cached: direction,
-      }),
-      label: "Cache hits",
-      minWidth: 170,
-      format: (value: number) => value.toFixed(0),
-    },
-    {
       key: "logProbs",
       active: false,
       label: "Log Prob",
@@ -310,6 +321,19 @@ const RequestsPage = (props: RequestsPageProps) => {
       type: "number",
       filter: true,
       format: (value: number) => (value ? (value * 100).toFixed(0) + "%" : ""),
+    },
+    {
+      key: "latency",
+      active: true,
+      label: "Latency (s)",
+      type: "number",
+      filter: true,
+      format: (value: number) => value.toFixed(2),
+      toSortLeaf(direction) {
+        return {
+          latency: direction,
+        };
+      },
     },
   ];
 
