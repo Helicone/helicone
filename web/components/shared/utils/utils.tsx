@@ -21,7 +21,6 @@ const getUSDateShort = (value: string) => {
 };
 
 const getUSDate = (value: string) => {
-  console.log("value", value);
   const date = new Date(value);
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
