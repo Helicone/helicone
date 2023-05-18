@@ -38,7 +38,6 @@ import {
   capitalizeWords,
   getUSDate,
   removeLeadingWhitespace,
-  timeAgo,
 } from "../../shared/utils/utils";
 import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
@@ -204,7 +203,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         created_at: direction,
       }),
       type: "timestamp",
-      format: (value: string) => timeAgo(value),
+      format: (value: string) => getUSDate(value),
     },
     {
       key: "requestText",

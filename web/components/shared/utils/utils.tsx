@@ -13,35 +13,6 @@ const monthNames = [
   "Dec",
 ];
 
-const timeAgo = (value: string) => {
-  const date = new Date(value);
-  const now = new Date();
-  const secondsPast = (now.getTime() - date.getTime()) / 1000;
-
-  if (secondsPast < 60) {
-    return "seconds ago";
-  }
-  if (secondsPast < 3600) {
-    let minutes = Math.round(secondsPast / 60);
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  }
-  if (secondsPast <= 86400) {
-    let hours = Math.round(secondsPast / 3600);
-    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  }
-  if (secondsPast <= 2592000) {
-    let days = Math.round(secondsPast / 86400);
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  }
-  if (secondsPast > 2592000 && secondsPast <= 31536000) {
-    let months = Math.round(secondsPast / 2592000);
-    return `${months} month${months > 1 ? "s" : ""} ago`;
-  }
-
-  const years = Math.round(secondsPast / 31536000);
-  return `${years} year${years > 1 ? "s" : ""} ago`;
-};
-
 const getUSDateShort = (value: string) => {
   const date = new Date(value);
   const month = monthNames[date.getMonth()];
@@ -49,13 +20,27 @@ const getUSDateShort = (value: string) => {
   return `${month} ${day}`;
 };
 
+// const getUSDate = (value: string) => {
+//   const date = new Date(value);
+//   const month = monthNames[date.getMonth()];
+//   const day = date.getDate();
+//   return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
+//     .toLocaleTimeString()
+//     .slice(-2)}`;
+// };
+
 const getUSDate = (value: string) => {
   const date = new Date(value);
-  const month = monthNames[date.getMonth()];
-  const day = date.getDate();
-  return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
-    .toLocaleTimeString()
-    .slice(-2)}`;
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hour12: false 
+  };
+  
+  return date.toLocaleString('en-US', options);
 };
 
 const getUSDateMin = (value: string) => {
@@ -95,5 +80,4 @@ export {
   capitalizeWords,
   removeLeadingWhitespace,
   getUSDateMin,
-  timeAgo,
 };
