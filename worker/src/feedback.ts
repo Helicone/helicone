@@ -294,7 +294,6 @@ export async function addFeedback(
     console.error("Error inserting feedback:", insertError.message);
     throw insertError;
   } else {
-    console.log(data);
     return data.id;
   }
 

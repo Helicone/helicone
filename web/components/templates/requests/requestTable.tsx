@@ -56,7 +56,6 @@ const RequestTable = (props: RequestProps) => {
     onSelectHandler,
     onSortHandler,
   } = props;
-  console.log("REQUEST TABLE DATA", data);
 
   const resizeHandler: OnChangeFn<ColumnSizingState> = (newState) => {
     setColumnSizing(newState);
@@ -90,8 +89,6 @@ const RequestTable = (props: RequestProps) => {
         size: c.minWidth,
       })
     );
-
-  console.log("DATA DATA DATA HI HI HI", data);
 
   const table = useReactTable({
     data,

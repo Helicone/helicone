@@ -465,7 +465,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       };
     });
 
-    console.log("FEEDBACK BEFORE ERROR", feedback);
     const feedbackColumns: Column[] = feedback.map((f) => {
       return {
         key: f.name,
@@ -573,7 +572,6 @@ const RequestsPage = (props: RequestsPageProps) => {
       ...propertiesColumns,
       ...feedbackColumns,
     ];
-    console.log("NEW COLUMNS", newColumns);
 
     setColumns((prev) => {
       return newColumns.map((c) => {

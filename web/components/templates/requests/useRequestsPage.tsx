@@ -208,8 +208,6 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     }
   }
 
-  console.log("FEEDBACK VALUES BEFORE", obj.feedback);
-  // add the feedback values to the object
   if (obj.feedback) {
     for (const key in obj.feedback) {
       if (obj.feedback.hasOwnProperty(key)) {
@@ -260,7 +258,6 @@ const useRequestsPage = (
 
   const from = (currentPage - 1) * currentPageSize;
   const to = currentPage * currentPageSize;
-  console.log("FROM TO", from, to, count);
 
   return {
     requests: {
