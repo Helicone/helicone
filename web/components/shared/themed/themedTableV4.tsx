@@ -31,7 +31,7 @@ export interface Column {
   type?: ColumnType;
   filter?: boolean;
   sortBy?: SortDirection;
-  columnOrigin?: "property" | "value";
+  columnOrigin?: "property" | "value" | "feedback";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
   toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;
@@ -78,6 +78,7 @@ export default function ThemedTableV4<T>(props: ThemedTableV4Props<T>) {
     orderHandler,
     setViewMode,
   } = props;
+  console.log("THEMED TABLE V4 ROWS", rows)
 
   let columnBeingDragged: number;
   const router = useRouter();

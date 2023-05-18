@@ -26,10 +26,11 @@ interface RequestDrawerProps {
   values: string[];
   wrappedRequest?: RequestWrapper;
   properties?: string[];
+  feedback?: string[];
 }
 
 const RequestDrawer = (props: RequestDrawerProps) => {
-  const { open, setOpen, wrappedRequest, values, properties } = props;
+  const { open, setOpen, wrappedRequest, values, properties, feedback } = props;
   const { metaData: requestMetaData, isLoading } = useGetRequestMetaData(
     wrappedRequest?.id || ""
   );
@@ -116,6 +117,13 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                 return makePropertyRow(
                   property,
                   (wrappedRequest[property] as string) || undefined
+                );
+              })}
+            {feedback !== undefined &&
+              feedback.map((f) => {
+                return makePropertyRow(
+                  f,
+                  (wrappedRequest[f] as string) || undefined
                 );
               })}
           </dl>

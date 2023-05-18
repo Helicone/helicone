@@ -4,6 +4,7 @@ import { ok, Result } from "../../../lib/result";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetPromptValues } from "../../../services/hooks/promptValues";
 import { useGetProperties } from "../../../services/hooks/properties";
+import { useGetFeedback } from "../../../services/hooks/feedback";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { useGetValueParams } from "../../../services/hooks/valueParams";
 import {
@@ -156,7 +157,7 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     path: request.request_path,
     promptValues: request.request_prompt_values,
     customProperties: request.request_properties,
-    feedback: request.feedback,
+    feedback: request.request_feedback,
     userId: request.request_user_id || "",
     responseCreatedAt: request.response_created_at,
     responseId: request.response_id,
@@ -207,6 +208,17 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     }
   }
 
+  console.log("FEEDBACK VALUES BEFORE", obj.feedback)
+  // add the feedback values to the object
+  if (obj.feedback) {
+    for (const key in obj.feedback) {
+      if (obj.feedback.hasOwnProperty(key)) {
+        const value = obj.feedback[key];
+        obj[key] = value;
+      }
+    }
+  }
+
   return obj;
 };
 
@@ -220,10 +232,14 @@ const useRequestsPage = (
   const {
     properties,
     isLoading: isPropertiesLoading,
-
     propertyFilters,
     searchPropertyFilters,
   } = useGetProperties();
+
+  const {
+    feedback,
+    isLoading: isFeedbackLoading,
+  } = useGetFeedback();
 
   const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
     propertyFilters
@@ -247,6 +263,7 @@ const useRequestsPage = (
 
   const from = (currentPage - 1) * currentPageSize;
   const to = currentPage * currentPageSize;
+  console.log("FROM TO", from, to, count)
 
   return {
     requests: {
@@ -266,6 +283,8 @@ const useRequestsPage = (
     },
     properties,
     values: [],
+    feedback,
+    isFeedbackLoading,
     searchPropertyFilters,
   };
 };

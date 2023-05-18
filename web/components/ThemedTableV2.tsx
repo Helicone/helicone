@@ -27,7 +27,7 @@ export interface Column {
   type?: ColumnType;
   filter?: boolean;
   sortBy?: SortDirection;
-  columnOrigin?: "property" | "value";
+  columnOrigin?: "property" | "value" | "feedback";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
   toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;

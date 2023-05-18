@@ -261,6 +261,7 @@ export interface Database {
           prompt_tokens: number | null;
           request: string;
           status: number | null;
+          feedback: Json | null;
         };
         Insert: {
           body: Json;
@@ -271,6 +272,7 @@ export interface Database {
           prompt_tokens?: number | null;
           request: string;
           status?: number | null;
+          feedback?: Json | null;
         };
         Update: {
           body?: Json;
@@ -281,6 +283,7 @@ export interface Database {
           prompt_tokens?: number | null;
           request?: string;
           status?: number | null;
+          feedback?: Json | null;
         };
       };
       user_api_keys: {
@@ -454,6 +457,18 @@ export interface Database {
         };
         Returns: string;
       };
+      insert_feedback_and_update_response: {
+        Args: {
+          response_id: string;
+          feedback_metric_id: number;
+          boolean_value: boolean;
+          numerical_value: number;
+          string_value: string;
+          categorical_value: string;
+          created_by: string;
+          name: string;
+        };
+        Returns: number;
     };
     Enums: {
       [_ in never]: never;

@@ -367,6 +367,8 @@ const RequestsPage = (props: RequestsPageProps) => {
     isPropertiesLoading,
     isValuesLoading,
     properties,
+    feedback,
+    isFeedbackLoading,
     refetch,
     filterMap,
     requests,
@@ -422,7 +424,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   };
 
   useEffect(() => {
-    if (isPropertiesLoading || isValuesLoading) return;
+    if (isPropertiesLoading || isValuesLoading || isFeedbackLoading) return;
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
@@ -462,10 +464,32 @@ const RequestsPage = (props: RequestsPageProps) => {
       };
     });
 
+    console.log("FEEDBACK BEFORE ERROR", feedback)
+    const feedbackColumns: Column[] = feedback.map((f) => {
+      return {
+        key: f.name,
+        label: capitalizeWords(f.name),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [f.name]: direction,
+          },
+        }),
+        columnOrigin: "feedback",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
+    console.log("IS FEEDBACK LOADING?", isFeedbackLoading)
     const newColumns = [
       ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
+      ...feedbackColumns
     ];
 
     setColumns((prev) => {
@@ -522,12 +546,33 @@ const RequestsPage = (props: RequestsPageProps) => {
             : value,
       };
     });
+    const feedbackColumns: Column[] = feedback.map((f) => {
+      return {
+        key: f.name,
+        label: capitalizeWords(f.name),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [f.name]: direction,
+          },
+        }),
+        columnOrigin: "feedback",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
 
     const newColumns = [
       ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
+      ...feedbackColumns
     ];
+    console.log("NEW COLUMNS", newColumns)
 
     setColumns((prev) => {
       return newColumns.map((c) => {
@@ -734,6 +779,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         setOpen={setOpen}
         values={values}
         properties={properties}
+        feedback={feedback.map((f) => f.name)}
       />
     </>
   );

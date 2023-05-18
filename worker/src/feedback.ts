@@ -276,28 +276,16 @@ export async function addFeedback(
       break;
   }
 
-  // Prepare your SQL statement
-  const sql = `
-  BEGIN;
-  INSERT INTO feedback (response_id, feedback_metric_id, boolean_value, numerical_value, string_value, categorical_value) VALUES (?, ?, ?, ?, ?) RETURNING id INTO feedback_id;
-  UPDATE response SET feedback = feedback || jsonb_build_object(?, ?::jsonb) WHERE id = ?;
-  COMMIT;
-  SELECT feedback_id;
-  `;
-
-  // Replace placeholders with actual values
-  // Assuming you have defined variables responseId, feedbackMetricId, booleanValue, stringValue, categoricalValue, name, value
-  const placeholders = [responseId, metricId, feedbackData.boolean_value, feedbackData.numerical_value, feedbackData.string_value, feedbackData.categorical_value, name, JSON.stringify(value), responseId];
-
   // Execute the transaction
   const { data, error: insertError } = await dbClient.rpc('insert_feedback_and_update_response', {
-    boolean_value: feedbackData.boolean_value, 
-    categorical_value: feedbackData.categorical_value, 
-    created_by: feedbackData.created_by, 
-    feedback_metric_id: feedbackData.feedback_metric_id, 
-    numerical_value: feedbackData.numerical_value, 
     response_id: feedbackData.response_id, 
-    string_value: feedbackData.string_value
+    feedback_metric_id: feedbackData.feedback_metric_id, 
+    boolean_value: feedbackData.boolean_value || null, 
+    numerical_value: feedbackData.float_value || null, 
+    categorical_value: feedbackData.categorical_value || null, 
+    string_value: feedbackData.string_value || null,
+    created_by: feedbackData.created_by,
+    name: name
   })
 
 
