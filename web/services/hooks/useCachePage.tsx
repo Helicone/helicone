@@ -29,7 +29,7 @@ export function useCachePageMetrics() {
     },
   });
 
-  const avgSecondsSaved = useQuery({
+  const totalTimeSaved = useQuery({
     queryKey: ["totalTimeSaved"],
     queryFn: async () => {
       const data = fetch("/api/cache/time_saved").then(
@@ -41,7 +41,7 @@ export function useCachePageMetrics() {
   return {
     totalCached,
     totalSavings,
-    avgSecondsSaved,
+    totalTimeSaved,
   };
 }
 
@@ -72,11 +72,11 @@ export function useCachePageTopMetrics() {
   };
 }
 
-export function useErrorPageOvertime() {
+export function useCacheOvertime() {
   const overTime = useQuery({
     queryKey: ["overTime"],
     queryFn: async () => {
-      const data = fetch("/api/error/over_time").then(
+      const data = fetch("/api/cache/over_time").then(
         (res) => res.json() as ReturnType<typeof getModelUsageOverTimeBackFill>
       );
       return data;
