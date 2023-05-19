@@ -228,7 +228,7 @@ export async function addFeedback(
     metricId = data.id;
   } else {
     // Validate the data type before inserting the feedback
-    if (metricData.data_type !== dataType) {
+    if (!(metricData.data_type == "categorical" && dataType == "string") && metricData.data_type !== dataType) {
       throw new Error(
         `Data type of this feedback request "${dataType}" does not match the data type of the created feedback metric "${metricData.data_type}".}`
       );
