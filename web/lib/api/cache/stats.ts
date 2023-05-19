@@ -154,7 +154,10 @@ SELECT
     from request r
     where r.id = request.id
     limit 1
-  ) as prompt
+  ) as prompt,
+  (
+    select (coalesce(request.body ->>'model'))::text as model
+  ) as model
 FROM cache_hits
   left join request on cache_hits.request_id = request.id
 WHERE (
@@ -170,6 +173,7 @@ LIMIT 10;
     last_used: Date;
     first_used: Date;
     prompt: string;
+    model: string;
   }>(query, builtFilter.argsAcc);
 }
 

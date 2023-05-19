@@ -164,7 +164,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col lg:flex-row items-start gap-4 justify-between lg:items-center pb-3">
+        <div className="flex flex-col lg:flex-row items-start gap-4 justify-between lg:items-center">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
             {timeFilter && (
               <ThemedTimeFilter
