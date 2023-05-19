@@ -32,6 +32,11 @@ import CostPanel from "./panels/costsPanel";
 import ErrorsPanel from "./panels/errorsPanel";
 import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
+import {
+  filterListToTree,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
+import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 
 interface DashboardPageProps {
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
@@ -93,6 +98,10 @@ const DashboardPage = (props: DashboardPageProps) => {
         <RequestsPanel
           requestsOverTime={requestsOverTime.data ?? "loading"}
           timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+          advancedFilters={filterListToTree(
+            filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
+            "and"
+          )}
         />
       );
     } else if (mode === "costs") {
