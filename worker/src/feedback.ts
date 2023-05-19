@@ -232,7 +232,7 @@ export async function addFeedback(
     metricId = data.id;
   } else {
     // Validate the data type before inserting the feedback
-    if (metricData.data_type !== dataType) {
+    if (!(metricData.data_type == "categorical" && dataType == "string") && metricData.data_type !== dataType) {
       throw new Error(
         `Data type of this feedback request "${dataType}" does not match the data type of the created feedback metric "${metricData.data_type}".}`
       );
@@ -280,18 +280,25 @@ export async function addFeedback(
       break;
   }
 
-  // Save the feedback data to the database
-  const { data, error: insertError } = await dbClient
-    .from("feedback")
-    .insert(feedbackData)
-    .select("id")
-    .single();
+  // Execute the transaction
+  const { data, error: insertError } = await dbClient.rpc('insert_feedback_and_update_response', {
+    response_id: feedbackData.response_id, 
+    feedback_metric_id: feedbackData.feedback_metric_id, 
+    boolean_value: feedbackData.boolean_value || null, 
+    numerical_value: feedbackData.float_value || null, 
+    categorical_value: feedbackData.categorical_value || null, 
+    string_value: feedbackData.string_value || null,
+    created_by: feedbackData.created_by,
+    name: name
+  })
 
+
+  // Handle error
   if (insertError) {
     console.error("Error inserting feedback:", insertError.message);
     throw insertError;
   } else {
-    console.log("Feedback added successfully");
     return data.id;
   }
+
 }

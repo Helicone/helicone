@@ -1,6 +1,7 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 import { dbExecute } from "../db/dbExecute";
+import { resultMap } from "../../result";
 
 export interface ModelMetrics {
   model: string;
@@ -38,7 +39,19 @@ WHERE (
 )
 GROUP BY response.body ->> 'model'::text;
     `;
-  return dbExecute<ModelMetrics>(query, builtFilter.argsAcc);
+  return resultMap(
+    await dbExecute<ModelMetrics>(query, builtFilter.argsAcc),
+    (data) => {
+      return data.map((d) => {
+        return {
+          ...d,
+          sum_tokens: +d.sum_tokens,
+          sum_prompt_tokens: +d.sum_prompt_tokens,
+          sum_completion_tokens: +d.sum_completion_tokens,
+        };
+      });
+    }
+  );
 }
 
 export interface ModelMetricsUsers {

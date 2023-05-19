@@ -196,7 +196,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "requestCreatedAt",
       active: true,
-      label: "Time",
+      label: "Timestamp",
       minWidth: 170,
       sortBy: "desc",
       toSortLeaf: (direction) => ({
@@ -309,7 +309,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "logProbs",
       active: false,
-      label: "Log Prob",
+      label: "Log Probability",
       type: "number",
       filter: true,
       format: (value: number) => (value ? value.toFixed(2) : ""),
@@ -325,7 +325,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "latency",
       active: true,
-      label: "Latency (s)",
+      label: "Duration (s)",
       type: "number",
       filter: true,
       format: (value: number) => value.toFixed(2),
@@ -367,6 +367,8 @@ const RequestsPage = (props: RequestsPageProps) => {
     isPropertiesLoading,
     isValuesLoading,
     properties,
+    feedback,
+    isFeedbackLoading,
     refetch,
     filterMap,
     requests,
@@ -422,7 +424,7 @@ const RequestsPage = (props: RequestsPageProps) => {
   };
 
   useEffect(() => {
-    if (isPropertiesLoading || isValuesLoading) return;
+    if (isPropertiesLoading || isValuesLoading || isFeedbackLoading) return;
     const propertiesColumns: Column[] = properties.map((p) => {
       return {
         key: p,
@@ -462,10 +464,31 @@ const RequestsPage = (props: RequestsPageProps) => {
       };
     });
 
+    const feedbackColumns: Column[] = feedback.map((f) => {
+      return {
+        key: f.name,
+        label: capitalizeWords(f.name),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [f.name]: direction,
+          },
+        }),
+        columnOrigin: "feedback",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
+
     const newColumns = [
       ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
+      ...feedbackColumns,
     ];
 
     setColumns((prev) => {
@@ -481,7 +504,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPropertiesLoading, isValuesLoading]);
+  }, [isPropertiesLoading, isValuesLoading, isFeedbackLoading]);
 
   const clearLayout = () => {
     const propertiesColumns: Column[] = properties.map((p) => {
@@ -522,11 +545,31 @@ const RequestsPage = (props: RequestsPageProps) => {
             : value,
       };
     });
+    const feedbackColumns: Column[] = feedback.map((f) => {
+      return {
+        key: f.name,
+        label: capitalizeWords(f.name),
+        active: true,
+        sortBy: "desc",
+        toSortLeaf: (direction) => ({
+          properties: {
+            [f.name]: direction,
+          },
+        }),
+        columnOrigin: "feedback",
+        format: (value: string, mode) =>
+          value && mode === "Condensed"
+            ? truncString(value, truncLength)
+            : value,
+        minWidth: 170,
+      };
+    });
 
     const newColumns = [
       ...initialColumns,
       ...valuesColumns,
       ...propertiesColumns,
+      ...feedbackColumns,
     ];
 
     setColumns((prev) => {
@@ -734,6 +777,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         setOpen={setOpen}
         values={values}
         properties={properties}
+        feedback={feedback.map((f) => f.name)}
       />
     </>
   );
