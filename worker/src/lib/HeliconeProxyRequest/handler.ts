@@ -31,8 +31,6 @@ export async function handleProxyRequest(
     : null;
   let body = interceptor ? interceptor.stream : null;
 
-  console.log("Built interceptor", interceptor);
-
   if (
     proxyRequest.requestWrapper.heliconeHeaders.featureFlags.streamForceFormat
   ) {
