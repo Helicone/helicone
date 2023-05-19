@@ -1,5 +1,5 @@
 import { InsertParams as ConnectionInsertParams } from "@clickhouse/client/dist/connection";
-import { Result } from "./results";
+import { Result } from "../../results";
 import { InsertResult, TLSParams } from "@clickhouse/client/dist/connection";
 import * as http_search_params from "@clickhouse/client/dist/connection/adapter/http_search_params";
 
@@ -215,39 +215,42 @@ class ClickhouseClient {
   }
 }
 
-export async function dbInsertClickhouse<
-  T extends keyof ClickhouseDB["Tables"]
->(
-  env: ClickhouseEnv,
-  table: T,
-  values: ClickhouseDB["Tables"][T][]
-): Promise<Result<string, string>> {
-  try {
-    const client = new ClickhouseClient({
+export class ClickhouseClientWrapper {
+  private client: ClickhouseClient;
+  constructor(env: ClickhouseEnv) {
+    this.client = new ClickhouseClient({
       host: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
-    const queryResult = await client.insert({
-      table: table,
-      values: values,
-      format: "JSONEachRow",
-      // Recommended for cluster usage to avoid situations
-      // where a query processing error occurred after the response code
-      // and HTTP headers were sent to the client.
-      // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
-      clickhouse_settings: {
-        async_insert: 1,
-        wait_end_of_query: 1,
-      },
-    });
-    return { data: queryResult.query_id, error: null };
-  } catch (err) {
-    console.error("dbInsertClickhouseError", err);
-    return {
-      data: null,
-      error: JSON.stringify(err),
-    };
+  }
+
+  async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
+    table: T,
+    values: ClickhouseDB["Tables"][T][]
+  ): Promise<Result<string, string>> {
+    try {
+      const queryResult = await this.client.insert({
+        table: table,
+        values: values,
+        format: "JSONEachRow",
+        // Recommended for cluster usage to avoid situations
+        // where a query processing error occurred after the response code
+        // and HTTP headers were sent to the client.
+        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
+        clickhouse_settings: {
+          async_insert: 1,
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: queryResult.query_id, error: null };
+    } catch (err) {
+      console.error("dbInsertClickhouseError", err);
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
   }
 }
 

@@ -21,3 +21,7 @@ export function mapPostgrestErr<T>(
   }
   return { data: null, error: result.error.message };
 }
+
+export function isErr<T, K>(result: Result<T, K>) {
+  return result.error !== null;
+}

@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from ".";
+import { RequestWrapper } from "./lib/RequestWrapper";
 
 export function isFeedbackEndpoint(request: Request): boolean {
   const url = new URL(request.url);
@@ -30,10 +31,10 @@ function isNumber(value: any): value is number {
 }
 
 export async function handleFeedbackEndpoint(
-  request: Request,
+  request: RequestWrapper,
   env: Env
 ): Promise<Response> {
-  const body = (await request.json()) as FeedbackRequestBody;
+  const body = await request.getJson<FeedbackRequestBody>();
   const heliconeId = body["helicone-id"];
   const value = body["value"];
   const name = body["name"];
@@ -54,7 +55,10 @@ export async function handleFeedbackEndpoint(
     }
   }
 
-  const heliconeAuth = request.headers.get("helicone-auth") ?? undefined;
+  const heliconeAuth = request.heliconeHeaders.heliconeAuth;
+  if (!heliconeAuth) {
+    return new Response("Authentication required.", { status: 401 });
+  }
 
   let responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
 
