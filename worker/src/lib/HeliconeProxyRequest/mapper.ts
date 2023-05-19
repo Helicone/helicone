@@ -1,6 +1,6 @@
 // This will store all of the information coming from the client.
 
-import { hash } from "../..";
+import { Env, hash } from "../..";
 import { GenericResult, Result } from "../../results";
 import { HeliconeHeaders, RequestWrapper } from "../RequestWrapper";
 import {
@@ -18,13 +18,12 @@ export type RetryOptions = {
   maxTimeout: number; // maximum amount of time to wait before retrying (in milliseconds)
 };
 
-export type Provider = "OPENAI" | "ANTHROPIC";
 export type HeliconeProperties = Record<string, string>;
 type Nullable<T> = T | null;
 
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
-  provider: Provider;
+  provider: Env["PROVIDER"];
   rateLimitOptions: Nullable<RateLimitOptions>;
   retryOptions: HeliconeHeaders["retryHeaders"];
 
@@ -34,7 +33,7 @@ export interface HeliconeProxyRequest {
   heliconeErrors: string[];
   providerAuthHash?: string;
   heliconeAuthHash?: string;
-  api_base: Nullable<string>;
+  api_base: string;
   heliconeProperties: HeliconeProperties;
   userId?: string;
   isStream: boolean;
@@ -48,11 +47,19 @@ export interface HeliconeProxyRequest {
   requestId: string;
 }
 
+const providerBaseUrlMappings: Record<Env["PROVIDER"], string> = {
+  OPENAI: "https://api.openai.com",
+  ANTHROPIC: "https://api.anthropic.com",
+};
+
 // Helps map a RequestWrapper -> HeliconProxyRequest
 export class HeliconeProxyRequestMapper {
   heliconeErrors: string[] = [];
 
-  constructor(private request: RequestWrapper) {}
+  constructor(
+    private request: RequestWrapper,
+    private provider: Env["PROVIDER"]
+  ) {}
   // WARNING
   // This function is really weird and mutates the request object.
   // Please be careful when using this function.
@@ -114,10 +121,7 @@ export class HeliconeProxyRequestMapper {
         requestJson: await this.requestJson(),
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: "OPENAI",
-
-        providerAuthHash: this.request.authorization
-          ? await hash(this.request.authorization)
-          : undefined,
+        providerAuthHash: await this.getProviderAuthHeader(),
         heliconeAuthHash: heliconeAuthHash ?? undefined,
         heliconeProperties: this.request.heliconeProperties,
         userId: await this.request.getUserId(),
@@ -139,6 +143,19 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
+  }
+
+  private async getProviderAuthHeader(): Promise<string | undefined> {
+    if (this.provider === "OPENAI") {
+      return this.request.authorization
+        ? await hash(this.request.authorization)
+        : undefined;
+    } else if (this.provider === "ANTHROPIC") {
+      return this.request.authorization
+        ? await hash(this.request.authorization)
+        : undefined;
+    }
+    return undefined;
   }
 
   private async getHeliconeAuthHeader(): Promise<
@@ -183,6 +200,7 @@ export class HeliconeProxyRequestMapper {
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
     const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
+    const anthropicPattern = /^https:\/\/api\.anthropic\.com\/v\d+\/?$/;
     const azurePattern =
       /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
     const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
@@ -191,13 +209,14 @@ export class HeliconeProxyRequestMapper {
     return (
       api_base === undefined ||
       openAiPattern.test(api_base) ||
+      anthropicPattern.test(api_base) ||
       azurePattern.test(api_base) ||
       localProxyPattern.test(api_base) ||
       heliconeProxyPattern.test(api_base)
     );
   }
 
-  private getOpenAiApiBase(): Result<string | null, string> {
+  private getOpenAiApiBase(): Result<string, string> {
     const api_base = this.request.heliconeHeaders.openaiBaseUrl;
     if (api_base && !this.validateApiConfiguration(api_base)) {
       // return new Response(`Invalid API base "${api_base}"`, {
@@ -206,7 +225,15 @@ export class HeliconeProxyRequestMapper {
         error: `Invalid API base "${api_base}"`,
       };
     }
-    return { data: api_base, error: null };
+
+    if (api_base) {
+      return { data: api_base, error: null };
+    } else {
+      return {
+        data: providerBaseUrlMappings[this.provider],
+        error: null,
+      };
+    }
   }
 
   rateLimitOptions(): HeliconeProxyRequest["rateLimitOptions"] {

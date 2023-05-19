@@ -19,7 +19,10 @@ export async function proxyForwarder(
   ctx: ExecutionContext
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
-    await new HeliconeProxyRequestMapper(request).tryToProxyRequest();
+    await new HeliconeProxyRequestMapper(
+      request,
+      env.PROVIDER
+    ).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
     return new Response(proxyRequestError, {
