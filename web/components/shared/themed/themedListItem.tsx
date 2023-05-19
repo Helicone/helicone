@@ -26,13 +26,16 @@ const ThemedListItem = (props: ThemedListItemProps) => {
     >
       <div className="flex flex-col space-y-0.5">
         <div className="flex flex-row space-x-2.5 items-center">
-          <p className="text-sm text-gray-900 leading-6 font-semibold">
+          <p className="hidden md:block text-sm text-gray-900 leading-6 font-semibold">
             {truncString(title, 36)}
+          </p>
+          <p className="block md:hidden text-sm text-gray-900 leading-6 font-semibold">
+            {truncString(title, 16)}
           </p>
           {pill && pill}
         </div>
 
-        <div className="flex flex-row space-x-2 items-center">
+        <div className="hidden md:flex flex-row space-x-2 items-center">
           <p className="text-xs text-gray-500 leading-5">{subtitle}</p>
           {secondarySubtitle && (
             <>
