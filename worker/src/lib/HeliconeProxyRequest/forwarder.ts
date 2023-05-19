@@ -3,7 +3,7 @@ import { Env } from "../..";
 import { getCacheSettings } from "../cache/cacheSettings";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
-import { ResponseBuilder } from "../ResponseWrapper";
+import { ResponseBuilder } from "../ResponseBuilder";
 import {
   getCachedResponse,
   recordCacheHit,

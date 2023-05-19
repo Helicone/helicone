@@ -56,6 +56,9 @@ async function buildCachedRequest(
     if (key.toLowerCase().startsWith("helicone-cache")) {
       headers.set(key, value);
     }
+    if (key.toLowerCase() === "helicone-auth") {
+      headers.set(key, value);
+    }
     if (key.toLowerCase() === "authorization") {
       headers.set(key, value);
     }
