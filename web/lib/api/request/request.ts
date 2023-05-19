@@ -28,6 +28,9 @@ export interface HeliconeRequest {
   request_prompt_values: {
     [key: string]: Json;
   } | null;
+  request_feedback: {
+    [key: string]: Json;
+  } | null;
   helicone_user: string | null;
   prompt_name: string | null;
   prompt_regex: string | null;
@@ -69,6 +72,7 @@ export async function getRequests(
     request.properties AS request_properties,
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
+    response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
