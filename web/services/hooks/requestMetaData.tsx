@@ -6,6 +6,13 @@ const useGetRequestMetaData = (requestId: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["requestsMetaData"],
     queryFn: async () => {
+      if (!requestId) {
+        return {
+          data: null,
+          error: "No request id provided",
+        };
+      }
+      console.log(`fetching request metadata, ${requestId}`);
       return fetch(`/api/request/${requestId}/metaData`).then(
         (res) => res.json() as Promise<Result<RequestMetaData[], string>>
       );
