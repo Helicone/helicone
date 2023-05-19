@@ -264,6 +264,7 @@ export interface Database {
           prompt_tokens: number | null
           request: string
           status: number | null
+          feedback: Json | null
         }
         Insert: {
           body: Json
@@ -274,6 +275,7 @@ export interface Database {
           prompt_tokens?: number | null
           request: string
           status?: number | null
+          feedback?: Json | null
         }
         Update: {
           body?: Json
@@ -284,6 +286,7 @@ export interface Database {
           prompt_tokens?: number | null
           request?: string
           status?: number | null
+          feedback?: Json | null
         }
       }
       user_api_keys: {
