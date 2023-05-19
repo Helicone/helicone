@@ -1,21 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { HeliconeRequest, RequestSettings, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
-import { mapPostgrestErr, Result } from "../../results";
+import { Result, mapPostgrestErr } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
-export interface ResponseLog {
-  requestSettings: RequestSettings;
-  responseText: string;
-  requestId: string;
-  dbClient: SupabaseClient<Database>;
-  requestBody: any;
-  responseStatus: number;
-  startTime: Date;
-  wasTimeout: boolean;
-}
 
 async function getTokenCount(inputText: string): Promise<number> {
   const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'

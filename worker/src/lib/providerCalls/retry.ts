@@ -1,5 +1,5 @@
 import retry from "async-retry";
-import { RetryOptions } from "../ProxyRequest/mapper";
+import { RetryOptions } from "../HeliconeProxyRequest/mapper";
 import { CallProps, callProvider } from "./call";
 
 export async function callProviderWithRetry(

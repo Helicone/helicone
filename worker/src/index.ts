@@ -1,8 +1,5 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "../supabase/database.types";
 import { handleFeedbackEndpoint } from "./feedback";
-import { ChatPrompt, Prompt } from "./lib/promptFormater/prompt";
-import { proxyForwarder } from "./lib/ProxyRequest/forwarder";
+import { proxyForwarder } from "./lib/HeliconeProxyRequest/forwarder";
 
 import { RequestHandlerType, RequestWrapper } from "./lib/RequestWrapper";
 import { handleLoggingEndpoint } from "./properties";
@@ -16,33 +13,6 @@ export interface Env {
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   PROVIDER: "OPENAI" | "ANTHROPIC";
-}
-
-export interface RequestSettings {
-  stream: boolean;
-  tokenizer_count_api: string;
-  helicone_api_key?: string;
-  ff_stream_force_format?: boolean;
-  ff_increase_timeout?: boolean;
-  api_base?: string;
-}
-
-export type HeliconeRequest = {
-  dbClient: SupabaseClient<Database>;
-  path: string;
-  auth: string;
-  requestId: string;
-  body?: string;
-  prompt?: Prompt | ChatPrompt;
-  heliconeApiKey?: string;
-} & HeliconeHeaders;
-
-interface HeliconeHeaders {
-  userId: string | null;
-  promptId: string | null;
-  properties?: Record<string, string>;
-  isPromptRegexOn: boolean;
-  promptName: string | null;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -60,14 +30,14 @@ export async function hash(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
-type FetchWrapper = (
+type Dispatcher = (
   request: RequestWrapper,
   env: Env,
   ctx: ExecutionContext
 ) => Promise<Response>;
 
-const handlerMap: {
-  [key in RequestHandlerType]: FetchWrapper;
+const dispatcherMap: {
+  [key in RequestHandlerType]: Dispatcher;
 } = {
   feedback: handleFeedbackEndpoint,
   logging: handleLoggingEndpoint,
@@ -91,7 +61,7 @@ export default {
     try {
       const wrappedRequest = new RequestWrapper(request);
       const requestHandlerType = wrappedRequest.getRequestHandlerType();
-      const handler = handlerMap[requestHandlerType];
+      const handler = dispatcherMap[requestHandlerType];
       return await handler(wrappedRequest, env, ctx);
     } catch (e) {
       console.error(e);

@@ -1,10 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import EventEmitter from "events";
-import { ProxyRequest } from "../ProxyRequest/mapper";
+import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
-import { logRequest, readAndLogResponse } from "./logResponse";
 import { logInClickhouse } from "./clickhouseLog";
+import { logRequest, readAndLogResponse } from "./logResponse";
 
 export interface DBLoggableProps {
   response: {
@@ -31,7 +30,7 @@ export interface DBLoggableProps {
 }
 
 export function dbLoggableRequestFromProxyRequest(
-  proxyRequest: ProxyRequest
+  proxyRequest: HeliconeProxyRequest
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
@@ -54,6 +53,7 @@ export function dbLoggableRequestFromProxyRequest(
   };
 }
 
+// Represents an object that can be logged to the database
 export class DBLoggable {
   private response: DBLoggableProps["response"];
   private request: DBLoggableProps["request"];

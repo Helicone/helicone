@@ -1,4 +1,4 @@
-import { ProxyRequest } from "../ProxyRequest/mapper";
+import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 
 export interface CallProps {
   headers: Headers;
@@ -10,7 +10,7 @@ export interface CallProps {
 }
 
 export function callPropsFromProxyRequest(
-  proxyRequest: ProxyRequest
+  proxyRequest: HeliconeProxyRequest
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base ?? "https://api.openai.com",

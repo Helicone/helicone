@@ -3,7 +3,7 @@ import { callProviderWithRetry } from "../providerCalls/retry";
 import { ReadableInterceptor } from "../ReadableInterceptor";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { callPropsFromProxyRequest, callProvider } from "../providerCalls/call";
-import { ProxyRequest } from "./mapper";
+import { HeliconeProxyRequest } from "./mapper";
 import { dbLoggableRequestFromProxyRequest } from "../dbLogger/DBLoggable";
 
 export type ProxyResult = {
@@ -12,7 +12,7 @@ export type ProxyResult = {
 };
 
 export async function handleProxyRequest(
-  proxyRequest: ProxyRequest
+  proxyRequest: HeliconeProxyRequest
 ): Promise<Result<ProxyResult, string>> {
   const { providerAuthHash, retryOptions } = proxyRequest;
   if (!providerAuthHash) {

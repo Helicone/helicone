@@ -1,4 +1,4 @@
-import { ProxyRequestMapper } from "./mapper";
+import { HeliconeProxyRequestMapper } from "./mapper";
 import { Env } from "../..";
 import { getCacheSettings } from "../cache/cacheSettings";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
@@ -19,7 +19,7 @@ export async function proxyForwarder(
   ctx: ExecutionContext
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
-    await new ProxyRequestMapper(request).tryToProxyRequest();
+    await new HeliconeProxyRequestMapper(request).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
     return new Response(proxyRequestError, {

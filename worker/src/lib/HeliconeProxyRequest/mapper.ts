@@ -21,7 +21,9 @@ export type RetryOptions = {
 export type Provider = "OPENAI" | "ANTHROPIC";
 export type HeliconeProperties = Record<string, string>;
 type Nullable<T> = T | null;
-export interface ProxyRequest {
+
+// This neatly formats and holds all of the state that a request can come into Helicone
+export interface HeliconeProxyRequest {
   provider: Provider;
   rateLimitOptions: Nullable<RateLimitOptions>;
   retryOptions: HeliconeHeaders["retryHeaders"];
@@ -46,8 +48,8 @@ export interface ProxyRequest {
   requestId: string;
 }
 
-// DATA Mapper
-export class ProxyRequestMapper {
+// Helps map a RequestWrapper -> HeliconProxyRequest
+export class HeliconeProxyRequestMapper {
   heliconeErrors: string[] = [];
 
   constructor(private request: RequestWrapper) {}
@@ -87,7 +89,7 @@ export class ProxyRequestMapper {
     return { data: null, error: null };
   }
 
-  async tryToProxyRequest(): Promise<Result<ProxyRequest, string>> {
+  async tryToProxyRequest(): Promise<Result<HeliconeProxyRequest, string>> {
     const startTime = new Date();
 
     const { error: promptFormatterError, data: promptFormatter } =
@@ -207,7 +209,7 @@ export class ProxyRequestMapper {
     return { data: api_base, error: null };
   }
 
-  rateLimitOptions(): ProxyRequest["rateLimitOptions"] {
+  rateLimitOptions(): HeliconeProxyRequest["rateLimitOptions"] {
     const rateLimitOptions = new RateLimitOptionsBuilder(
       this.request.heliconeHeaders.rateLimitPolicy
     ).build();
@@ -218,7 +220,7 @@ export class ProxyRequestMapper {
     return rateLimitOptions.data ?? null;
   }
 
-  async requestJson(): Promise<ProxyRequest["requestJson"]> {
+  async requestJson(): Promise<HeliconeProxyRequest["requestJson"]> {
     return this.request.getMethod() === "POST"
       ? await this.request.getJson()
       : {};

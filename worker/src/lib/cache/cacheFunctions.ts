@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
-import { ProxyRequest } from "../ProxyRequest/mapper";
+import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 
 export async function saveToCache(
-  request: ProxyRequest,
+  request: HeliconeProxyRequest,
   response: Response,
   cacheControl: string,
   settings: { maxSize: number }
@@ -48,7 +48,7 @@ export async function recordCacheHit(
 }
 
 async function buildCachedRequest(
-  request: ProxyRequest,
+  request: HeliconeProxyRequest,
   idx: number
 ): Promise<Request> {
   const headers = new Headers();
@@ -79,7 +79,7 @@ async function buildCachedRequest(
 }
 
 async function getMaxCachedResponses(
-  request: ProxyRequest,
+  request: HeliconeProxyRequest,
   { maxSize }: { maxSize: number }
 ): Promise<{ requests: Response[]; freeIndexes: number[] }> {
   const cache = caches.default;
@@ -98,7 +98,7 @@ async function getMaxCachedResponses(
 }
 
 export async function getCachedResponse(
-  request: ProxyRequest,
+  request: HeliconeProxyRequest,
   settings: { maxSize: number }
 ): Promise<Response | null> {
   const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
