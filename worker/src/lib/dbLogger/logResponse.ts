@@ -402,13 +402,22 @@ export async function logRequest(
     //   return { data: null, error: userIdError };
     // }
 
+    let requestBody = {
+      error: `error parsing request body: ${request.bodyText}`,
+    };
+    try {
+      requestBody = JSON.parse(request.bodyText);
+    } catch (e) {
+      console.error("Error parsing request body", e);
+    }
+
     const { data, error } = await dbClient
       .from("request")
       .insert([
         {
           id: request.requestId,
           path: request.path,
-          body: request.bodyText ?? "",
+          body: requestBody,
           auth_hash: request.providerApiKeyAuthHash,
           user_id: request.userId,
           prompt_id: request.promptId,
