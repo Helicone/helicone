@@ -483,7 +483,7 @@ const RequestsPage = (props: RequestsPageProps) => {
         minWidth: 170,
       };
     });
-    console.log("IS FEEDBACK LOADING?", isFeedbackLoading);
+
     const newColumns = [
       ...initialColumns,
       ...valuesColumns,
@@ -504,7 +504,7 @@ const RequestsPage = (props: RequestsPageProps) => {
       });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPropertiesLoading, isValuesLoading]);
+  }, [isPropertiesLoading, isValuesLoading, isFeedbackLoading]);
 
   const clearLayout = () => {
     const propertiesColumns: Column[] = properties.map((p) => {
