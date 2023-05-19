@@ -26,6 +26,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import { Column } from "../../ThemedTableV2";
 import UserTable from "./userTable";
+import { getUSDate } from "../../shared/utils/utils";
 
 const monthNames = [
   "Jan",
@@ -99,15 +100,6 @@ const UsersPage = (props: UsersPageProps) => {
     setIndex(idx);
     setSelectedUser(row);
     setOpen(true);
-  };
-
-  const getUSDate = (value: string) => {
-    const date = new Date(value);
-    const month = monthNames[date.getMonth()];
-    const day = date.getDate();
-    return `${month} ${day}, ${date.toLocaleTimeString().slice(0, -6)} ${date
-      .toLocaleTimeString()
-      .slice(-2)}`;
   };
 
   const initialColumns: Column[] = [
