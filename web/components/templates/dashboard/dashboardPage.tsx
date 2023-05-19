@@ -1,6 +1,8 @@
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
+  ChartBarIcon,
+  CloudArrowDownIcon,
   CurrencyDollarIcon,
   ExclamationCircleIcon,
   TableCellsIcon,
@@ -10,8 +12,6 @@ import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useState } from "react";
 
-import { GraphDataState } from "../../../lib/dashboardGraphs";
-import { middleTruncString } from "../../../lib/stringHelpers";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeIntervalAgo,
@@ -22,14 +22,15 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
-import AuthLayout from "../../shared/layout/authLayout";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import { Filters } from "./filters";
 
-import { MetricsPanel } from "./metricsPanel";
-import TimeGraphWHeader from "./timeGraphWHeader";
+import { MetricsPanel } from "../../shared/metrics/metricsPanel";
+import CostPanel from "./panels/costsPanel";
+import ErrorsPanel from "./panels/errorsPanel";
+import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
 
 interface DashboardPageProps {
@@ -47,6 +48,8 @@ type LiveLogType = {
 };
 
 export type Loading<T> = T | "loading";
+
+export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { keys } = props;
@@ -70,6 +73,8 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
+  const [mode, setMode] = useState<DashboardMode>("requests");
+
   const {
     metrics,
     filterMap,
@@ -82,10 +87,55 @@ const DashboardPage = (props: DashboardPageProps) => {
     apiKeyFilter,
   });
 
-  const timeData: GraphDataState = {
-    costOverTime: costOverTime.data ?? "loading",
-    requestsOverTime: requestsOverTime.data ?? "loading",
+  const renderPanel = () => {
+    if (mode === "requests") {
+      return (
+        <RequestsPanel
+          requestsOverTime={requestsOverTime.data ?? "loading"}
+          timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+        />
+      );
+    } else if (mode === "costs") {
+      return (
+        <CostPanel
+          costOverTime={costOverTime.data ?? "loading"}
+          timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+        />
+      );
+    } else if (mode === "errors") {
+      return <ErrorsPanel />;
+    }
   };
+
+  const metricsData = [
+    {
+      value: metrics?.data?.data?.total_cost
+        ? `$${metrics?.data?.data?.total_cost.toFixed(2)}`
+        : "$0.00",
+      label: "Total Cost",
+      icon: CurrencyDollarIcon,
+      isLoading: metrics.isLoading,
+    },
+    {
+      value: +(metrics?.data?.data?.total_requests ?? 0),
+
+      label: "Total Requests",
+      icon: TableCellsIcon,
+      isLoading: metrics.isLoading,
+    },
+    {
+      value: +(metrics.data?.data?.total_tokens ?? 0),
+      label: "Total Tokens",
+      icon: ChartBarIcon,
+      isLoading: metrics.isLoading,
+    },
+    {
+      value: metrics.data?.data?.average_response_time?.toFixed(2) ?? "n/a",
+      label: "Avg Latency",
+      icon: CloudArrowDownIcon,
+      isLoading: metrics.isLoading,
+    },
+  ];
 
   return (
     <>
@@ -188,38 +238,32 @@ const DashboardPage = (props: DashboardPageProps) => {
               searchPropertyFilters,
             }}
           />
-          <MetricsPanel metrics={metrics.data ?? "loading"} />
-          <div className="grid grid-cols-5 gap-4">
-            <div className="col-span-3">
-              <TimeGraphWHeader
-                data={timeData}
-                timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
-              />
-            </div>
-            <div className="col-span-2 pt-[4.25rem] h-96">
-              <div className="p-6 bg-white border border-gray-300 rounded-lg space-y-4 h-96 overflow-hidden">
-                {/* <div className="w-full flex flex-row items-center justify-between">
-                  <p className="text-md text-gray-700">
-                    Top Users (coming soon)
-                  </p>
-                </div>
-                <ul className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div
-                      className="h-8 w-full bg-gray-300 rounded-lg"
-                      key={i}
-                    />
-                  ))}
-                </ul> */}
-                <div className="w-full h-full items-center justify-center align-middle flex flex-col">
-                  <UserGroupIcon className="h-12 w-12 text-gray-500" />
-                  <p className="text-md text-gray-700">
-                    Top Users (coming soon)
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
+            {metricsData.map((m, i) => (
+              <MetricsPanel key={i} metric={m} />
+            ))}
           </div>
+
+          <ThemedTabs
+            options={[
+              {
+                icon: TableCellsIcon,
+                label: "Requests",
+              },
+              {
+                icon: CurrencyDollarIcon,
+                label: "Costs",
+              },
+              {
+                icon: ExclamationCircleIcon,
+                label: "Errors",
+              },
+            ]}
+            onOptionSelect={(option) =>
+              setMode(option.toLowerCase() as DashboardMode)
+            }
+          />
+          {renderPanel()}
         </div>
       )}
     </>

@@ -31,7 +31,7 @@ export function AdvancedFilters({
   ) => Promise<Result<void, string>>;
 }) {
   return (
-    <div className="flex flex-col bg-white p-4 rounded-md border border-gray-300 border-dashed">
+    <div className="flex flex-col bg-white p-4 rounded-md border border-gray-300 border-dashed mt-8">
       <p className="text-md text-gray-500">Filters</p>
       <div className="flex flex-col gap-2 bg-white space-y-2 mt-4">
         {filters.map((_filter, index) => {

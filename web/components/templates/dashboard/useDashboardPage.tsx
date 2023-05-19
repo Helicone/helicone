@@ -27,7 +27,7 @@ import {
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { useMemo } from "react";
 
-async function fetchDataOverTime<T>(
+export async function fetchDataOverTime<T>(
   timeFilter: {
     start: Date;
     end: Date;
