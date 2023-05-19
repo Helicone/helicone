@@ -6,7 +6,6 @@ import {
   ChevronUpDownIcon,
 } from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
-import { Column } from "../../ThemedTableV2";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface DropdownOption<T> {
