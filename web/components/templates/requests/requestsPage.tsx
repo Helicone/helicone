@@ -196,7 +196,7 @@ const RequestsPage = (props: RequestsPageProps) => {
     {
       key: "requestCreatedAt",
       active: true,
-      label: "Time",
+      label: "Timestamp",
       minWidth: 170,
       sortBy: "desc",
       toSortLeaf: (direction) => ({
