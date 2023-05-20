@@ -2,7 +2,10 @@ import mainTypeDefs from "../../../lib/api/graphql/schema/main.graphql";
 
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { ApolloServer } from "apollo-server-micro";
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import {
+  ApolloServerPluginLandingPageGraphQLPlayground,
+  ApolloServerPluginLandingPageProductionDefault,
+} from "apollo-server-core";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GraphQLJSON } from "graphql-type-json";
 
@@ -34,23 +37,44 @@ function contextFunction(ctx: any): Context {
   };
 }
 
-const apolloServer = new ApolloServer({
-  typeDefs: makeExecutableSchema({
-    typeDefs: [mainTypeDefs],
-    resolvers,
-  }),
-  resolvers,
-  introspection: true,
-  csrfPrevention: true,
-  plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
-  context: contextFunction,
-});
-const startServer = apolloServer.start();
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{}>
 ): Promise<void> {
+  if (req.url === "/api/graphql") {
+    console.log("redirecting to playground");
+  }
+  const apolloServer = new ApolloServer({
+    typeDefs: makeExecutableSchema({
+      typeDefs: [mainTypeDefs],
+      resolvers,
+    }),
+    resolvers,
+    introspection: true,
+    csrfPrevention: true,
+    plugins: [
+      // self hosting playground is deprecated :(
+      // https://www.apollographql.com/docs/apollo-server/api/plugin/landing-pages/#graphql-playground-landing-page
+      // so now we have to use this hosted crappy version
+      ApolloServerPluginLandingPageProductionDefault({
+        footer: false,
+        document: "HELLO",
+        includeCookies: true,
+        graphRef: "helicone@main",
+        embed: {
+          persistExplorerState: true,
+          displayOptions: {
+            theme: "light",
+            showHeadersAndEnvVars: false,
+            docsPanelState: "closed",
+          },
+        },
+      }),
+    ],
+    context: contextFunction,
+  });
+  const startServer = apolloServer.start();
+
   await NextCors(req, res, {
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
     origin: "*",
