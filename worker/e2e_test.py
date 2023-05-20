@@ -219,3 +219,11 @@ assert_stream_and_not_stream_same_tokens(model='gpt-3.5-turbo',
                                          ],
                                          max_tokens=100,
                                          temperature=0)
+
+
+# should add tests for
+# curl -v --request POST \  --url http://127.0.0.1:8787/v1/audio/transcriptions \
+#   --header 'Authorization: Bearer sk-' \
+#   --header 'Content-Type: multipart/form-data' \
+#   --form file=@/Users/justin/Desktop/voiceover1.mp3 \
+#   --form model=whisper-1

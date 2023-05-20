@@ -1,4 +1,5 @@
-import { Result } from "./index";
+import { Result } from "../../results";
+
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days
 const MAX_BUCKET_SIZE = 20;
