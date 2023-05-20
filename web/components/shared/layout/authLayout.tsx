@@ -200,39 +200,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       <div className="mt-5 h-0 flex-1 overflow-y-auto">
                         <nav className="space-y-1 px-2">
                           {navigation.map((item) => {
-                            if (
-                              item.name === "Keys" &&
-                              !isLoading &&
-                              count < 1
-                            ) {
-                              return (
-                                <Link
-                                  key={item.name}
-                                  href={item.href}
-                                  className={clsx(
-                                    item.current
-                                      ? "bg-gray-200 text-black"
-                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full justify-between"
-                                  )}
-                                >
-                                  <div className="flex flex-row items-center">
-                                    <item.icon
-                                      className={clsx(
-                                        item.current
-                                          ? "text-black"
-                                          : "text-gray-600 group-hover:text-gray-900",
-                                        "mr-3 flex-shrink-0 h-5 w-5"
-                                      )}
-                                    />
-                                    {item.name}
-                                  </div>
-                                  <div>
-                                    <ExclamationCircleIcon className="h-6 w-6 mr-1 text-red-500" />
-                                  </div>
-                                </Link>
-                              );
-                            }
                             return (
                               <Link
                                 key={item.name}
@@ -260,39 +227,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             Account
                           </p>
                           {accountNav.map((item) => {
-                            if (
-                              item.name === "Keys" &&
-                              !isLoading &&
-                              count < 1
-                            ) {
-                              return (
-                                <Link
-                                  key={item.name}
-                                  href={item.href}
-                                  className={clsx(
-                                    item.current
-                                      ? "bg-gray-200 text-black"
-                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full justify-between"
-                                  )}
-                                >
-                                  <div className="flex flex-row items-center">
-                                    <item.icon
-                                      className={clsx(
-                                        item.current
-                                          ? "text-black"
-                                          : "text-gray-600 group-hover:text-gray-900",
-                                        "mr-3 flex-shrink-0 h-5 w-5"
-                                      )}
-                                    />
-                                    {item.name}
-                                  </div>
-                                  <div>
-                                    <ExclamationCircleIcon className="h-5 w-5 mr-1 text-red-500" />
-                                  </div>
-                                </Link>
-                              );
-                            }
                             return (
                               <Link
                                 key={item.name}
@@ -358,35 +292,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 <div className="mt-5 flex flex-grow flex-col">
                   <nav className="flex-1 space-y-1 px-2 pb-4 pt-2">
                     {navigation.map((item) => {
-                      if (item.name === "Keys" && !isLoading && count < 1) {
-                        return (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            className={clsx(
-                              item.current
-                                ? "bg-gray-200 text-black"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                              "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full justify-between"
-                            )}
-                          >
-                            <div className="flex flex-row items-center">
-                              <item.icon
-                                className={clsx(
-                                  item.current
-                                    ? "text-black"
-                                    : "text-gray-600 group-hover:text-gray-900",
-                                  "mr-3 flex-shrink-0 h-5 w-5"
-                                )}
-                              />
-                              {item.name}
-                            </div>
-                            <div>
-                              <ExclamationCircleIcon className="h-5 w-5 mr-1 text-red-500" />
-                            </div>
-                          </Link>
-                        );
-                      }
                       return (
                         <Link
                           key={item.name}
@@ -415,35 +320,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Account
                     </p>
                     {accountNav.map((item) => {
-                      if (item.name === "Keys" && !isLoading && count < 1) {
-                        return (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            className={clsx(
-                              item.current
-                                ? "bg-gray-200 text-black"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                              "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full justify-between"
-                            )}
-                          >
-                            <div className="flex flex-row items-center">
-                              <item.icon
-                                className={clsx(
-                                  item.current
-                                    ? "text-black"
-                                    : "text-gray-600 group-hover:text-gray-900",
-                                  "mr-3 flex-shrink-0 h-5 w-5"
-                                )}
-                              />
-                              {item.name}
-                            </div>
-                            <div>
-                              <ExclamationCircleIcon className="h-5 w-5 mr-1 text-red-500" />
-                            </div>
-                          </Link>
-                        );
-                      }
                       return (
                         <Link
                           key={item.name}

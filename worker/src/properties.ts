@@ -1,27 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env } from ".";
+import { RequestWrapper } from "./lib/RequestWrapper";
 
 interface LoggingRequestBody {
   "helicone-id": string;
   [key: string]: unknown;
 }
 
-export function isLoggingEndpoint(request: Request): boolean {
-  const url = new URL(request.url);
-  const method = request.method;
-  const endpoint = url.pathname;
-  return method === "POST" && endpoint === "/v1/log";
-}
-
 export async function handleLoggingEndpoint(
-  request: Request,
+  request: RequestWrapper,
   env: Env
 ): Promise<Response> {
-  const body = (await request.json()) as LoggingRequestBody;
+  const body = await request.getJson<LoggingRequestBody>();
   const heliconeId = body["helicone-id"];
   const propTag = "helicone-property-";
   const heliconeHeaders = Object.fromEntries(
-    [...request.headers.entries()]
+    [...request.getHeaders().entries()]
       .filter(
         ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
       )

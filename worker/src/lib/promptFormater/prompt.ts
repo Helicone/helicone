@@ -1,4 +1,4 @@
-import { GenericResult } from "./results";
+import { GenericResult } from "../../results";
 
 export interface Prompt {
   prompt: string;
@@ -15,10 +15,9 @@ export interface ChatPrompt {
   values: { [key: string]: string };
 }
 
-interface PromptResult {
-  request: Request;
+export interface FormattedPrompt {
   body: string;
-  prompt?: Prompt | ChatPrompt;
+  prompt: Prompt | ChatPrompt;
 }
 
 function formatPrompt(prompt: Prompt): GenericResult<string> {
@@ -42,6 +41,7 @@ function formatPrompt(prompt: Prompt): GenericResult<string> {
   const missingPlaceholders = [];
 
   while (match) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!prompt.values.hasOwnProperty(match[1])) {
       missingPlaceholders.push(match[1]);
     }
@@ -54,76 +54,41 @@ function formatPrompt(prompt: Prompt): GenericResult<string> {
   };
 }
 
-function updateContentLength(clone: Request, text: string): Request {
-  const body = new TextEncoder().encode(text);
-  const headers = new Headers(clone.headers);
-  headers.set("Content-Length", `${body.byteLength}`);
+export function extractPrompt(json: any): GenericResult<FormattedPrompt> {
+  try {
+    if ("messages" in json) {
+      return extractPromptMessages(json);
+    }
 
-  return new Request(clone.url, {
-    method: clone.method,
-    headers,
-    body,
-  });
-}
-
-export async function extractPrompt(
-  request: Request
-): Promise<GenericResult<PromptResult>> {
-  const isPromptRegexOn =
-    request.headers.get("Helicone-Prompt-Format") !== null;
-
-  if (isPromptRegexOn) {
-    try {
-      const cloneRequest = request.clone();
-      const cloneBody = await cloneRequest.text();
-      const json = cloneBody ? JSON.parse(cloneBody) : {};
-      if ("messages" in json) {
-        return extractPromptMessages(cloneRequest, json);
-      }
-
-      const prompt = JSON.parse(json["prompt"]);
-      const stringPromptResult = formatPrompt(prompt);
-      if (stringPromptResult.error !== null) {
-        return {
-          data: null,
-          error: stringPromptResult.error,
-        };
-      }
-      const stringPrompt = stringPromptResult.data;
-      json["prompt"] = stringPrompt;
-      const body = JSON.stringify(json);
-      const formattedRequest = updateContentLength(cloneRequest, body);
-
-      return {
-        data: {
-          request: formattedRequest,
-          body: body,
-          prompt: prompt,
-        },
-        error: null,
-      };
-    } catch (error) {
-      console.error(error);
+    const prompt = JSON.parse(json["prompt"]);
+    const stringPromptResult = formatPrompt(prompt);
+    if (stringPromptResult.error !== null) {
       return {
         data: null,
-        error: `Error parsing prompt: ${error}`,
+        error: stringPromptResult.error,
       };
     }
-  } else {
+    const stringPrompt = stringPromptResult.data;
+    json["prompt"] = stringPrompt;
+    const body = JSON.stringify(json);
+
     return {
       data: {
-        request: request,
-        body: await request.text(),
+        body: body,
+        prompt: prompt,
       },
       error: null,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      data: null,
+      error: `Error parsing prompt: ${error}`,
     };
   }
 }
 
-async function extractPromptMessages(
-  cloneRequest: Request,
-  json: any
-): Promise<GenericResult<PromptResult>> {
+function extractPromptMessages(json: any): GenericResult<FormattedPrompt> {
   const regexPrompt = json["messages"];
   const regexMessages = regexPrompt;
   const regexValues = json["values"];
@@ -164,17 +129,9 @@ async function extractPromptMessages(
   delete json["values"];
 
   const body = JSON.stringify(json);
-  const formattedRequest = updateContentLength(cloneRequest, body);
-
-  const data = {
-    request: formattedRequest,
-    prompt: regexPrompt,
-    body,
-  };
 
   return {
     data: {
-      request: formattedRequest,
       prompt: {
         prompt: regexPrompt,
         values: regexValues,
