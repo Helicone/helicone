@@ -303,11 +303,30 @@ interface PropertiesCopyV2 {
   value: string;
   organization_id: string;
 }
+
+interface Feedback {
+  id: number;
+  created_at: Nullable<string>;
+  response_id: Nullable<string>;
+  boolean_value: Nullable<boolean>;
+  float_value: Nullable<number>;
+  string_value: Nullable<string>;
+  categorical_value: Nullable<string>;
+  created_by: string;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  model: Nullable<string>;
+  organization_id: string;
+  metric_name: string;
+  metric_data_type: string;
+}
+
 export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
     properties_copy_v1: PropertiesCopyV1;
     response_copy_v2: ResponseCopyV2;
     properties_copy_v2: PropertiesCopyV2;
+    feedback: Feedback;
   };
 }

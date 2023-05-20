@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
+import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 
 export function isFeedbackEndpoint(request: Request): boolean {
   const url = new URL(request.url);
@@ -60,33 +61,34 @@ export async function handleFeedbackEndpoint(
     return new Response("Authentication required.", { status: 401 });
   }
 
-  let responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
+  let response = await isResponseLogged(heliconeId, env, heliconeAuth);
 
   // If response not logged, retry up to two more times
-  if (responseId === undefined) {
+  if (response === undefined) {
     console.log("Response not logged, retrying up to two more times.");
     for (let i = 0; i < 2; i++) {
       console.log(`Retry ${i + 1}...`);
       const sleepDuration = i === 0 ? 100 : 1000;
       await new Promise((resolve) => setTimeout(resolve, sleepDuration));
 
-      responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
+      response = await isResponseLogged(heliconeId, env, heliconeAuth);
 
-      if (responseId !== undefined) {
+      if (response !== undefined) {
         break;
       }
     }
   }
 
-  if (responseId !== undefined) {
+  if (response !== undefined) {
     try {
       await addFeedback(
         heliconeId,
-        responseId,
+        response.id,
         name,
         dataType,
         value,
         env,
+        response,
         heliconeAuth
       ); // TODO: return the feedback id as a uuid and return it in the response
       return new Response(
@@ -125,7 +127,16 @@ async function isResponseLogged(
   heliconeId: string,
   env: Env,
   heliconeAuth?: string
-): Promise<string | undefined> {
+): Promise<
+  | {
+      id: string;
+      request: string;
+      body: JSON;
+      prompt_tokens: number;
+      completion_tokens: number;
+    }
+  | undefined
+> {
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
@@ -138,7 +149,7 @@ async function isResponseLogged(
   // Fetch the response with the matching heliconeId
   const { data: response, error: responseError } = await dbClient
     .from("response")
-    .select("id, request")
+    .select("id, request, body, prompt_tokens, completion_tokens")
     .eq("request", heliconeId)
     .single();
 
@@ -148,7 +159,82 @@ async function isResponseLogged(
   }
 
   // Return the response.id if the response exists, otherwise return undefined
-  return response ? response.id : undefined;
+  return response ? response : undefined;
+}
+
+interface FeedbackData {
+  response_id: any;
+  feedback_metric_id: any;
+  created_by: string;
+  boolean_value: boolean | null;
+  float_value: number | null;
+  categorical_value: string | null;
+  string_value: string | null;
+}
+
+interface FullFeedbackData {
+  id: number;
+  feedbackData: FeedbackData;
+  metricName: string;
+  metricDataType: string;
+  organizationId: string;
+  model: string | null;
+  promptTokens: number | null;
+  completionTokens: number | null;
+}
+
+async function getFeedbackCreatedTime(
+  feedbackId: string,
+  env: Env
+): Promise<string | undefined> {
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  const { data, error } = await dbClient
+    .from("feedback")
+    .select("created_at")
+    .eq("id", feedbackId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching feedback created at time:", error.message);
+    return undefined;
+  }
+
+  return data.created_at;
+}
+
+async function logClickhouse(
+  env: Env,
+  fullFeedbackData: FullFeedbackData
+): Promise<void> {
+  const clickhouseDb = new ClickhouseClientWrapper(env);
+
+  const feedbackCreatedTime = await getFeedbackCreatedTime(
+    fullFeedbackData.id.toString(),
+    env
+  );
+
+  clickhouseDb.dbInsertClickhouse("feedback", [
+    {
+      id: fullFeedbackData.id,
+      created_at: feedbackCreatedTime || null,
+      response_id: fullFeedbackData.feedbackData.response_id,
+      boolean_value: fullFeedbackData.feedbackData.boolean_value,
+      float_value: fullFeedbackData.feedbackData.float_value,
+      categorical_value: fullFeedbackData.feedbackData.categorical_value,
+      string_value: fullFeedbackData.feedbackData.string_value,
+      created_by: fullFeedbackData.feedbackData.created_by,
+      metric_name: fullFeedbackData.metricName,
+      metric_data_type: fullFeedbackData.metricDataType,
+      organization_id: fullFeedbackData.organizationId, // Include organizationId
+      model: fullFeedbackData.model, // Include model
+      prompt_tokens: fullFeedbackData.promptTokens, // Include promptTokens
+      completion_tokens: fullFeedbackData.completionTokens, // Include completionTokens
+    },
+  ]);
 }
 
 // Assumes that the request and response for the heliconeId exists!
@@ -159,6 +245,14 @@ export async function addFeedback(
   dataType: DataType,
   value: any,
   env: Env,
+  ctx: ExecutionContext,
+  response: {
+    id: string;
+    request: string;
+    prompt_tokens: number;
+    completion_tokens: number;
+    body: JSON;
+  },
   heliconeAuth?: string
 ): Promise<string> {
   const dbClient = createClient(
@@ -176,7 +270,9 @@ export async function addFeedback(
   // Fetch the request with the corresponding response.request value
   const { data: requestData, error: requestError } = await dbClient
     .from("request")
-    .select("id, helicone_api_keys (id, api_key_hash)")
+    .select(
+      "id, helicone_api_keys, helicone_org_id (id, api_key_hash, helicone_org_id)"
+    )
     .eq("id", heliconeId)
     .single();
 
@@ -187,11 +283,13 @@ export async function addFeedback(
 
   let matchingApiKeyHash;
   let matchingApiKeyId;
+  let organizationId;
   if (requestData.helicone_api_keys instanceof Array) {
     throw new Error("Internal error.");
   } else if (requestData.helicone_api_keys instanceof Object) {
     matchingApiKeyHash = requestData.helicone_api_keys.api_key_hash;
     matchingApiKeyId = requestData.helicone_api_keys.id;
+    organizationId = requestData.helicone_api_keys.helicone_org_id;
   } else {
     throw new Error(
       "Internal error. Make sure you're providing a valid helicone API key to authenticate your requests."
@@ -245,15 +343,14 @@ export async function addFeedback(
   }
 
   // Prepare feedback data
-  const feedbackData: {
-    response_id: any;
-    feedback_metric_id: any;
-    created_by: string;
-    [key: string]: boolean | number | string;
-  } = {
+  const feedbackData: FeedbackData = {
     response_id: responseId,
     feedback_metric_id: metricId,
     created_by: "API",
+    boolean_value: null,
+    categorical_value: null,
+    string_value: null,
+    float_value: null,
   };
 
   switch (dataType) {
@@ -289,10 +386,10 @@ export async function addFeedback(
     {
       response_id: feedbackData.response_id,
       feedback_metric_id: feedbackData.feedback_metric_id,
-      boolean_value: feedbackData.boolean_value || null,
-      numerical_value: feedbackData.float_value || null,
-      categorical_value: feedbackData.categorical_value || null,
-      string_value: feedbackData.string_value || null,
+      boolean_value: feedbackData.boolean_value,
+      numerical_value: feedbackData.float_value,
+      categorical_value: feedbackData.categorical_value,
+      string_value: feedbackData.string_value,
       created_by: feedbackData.created_by,
       name: name,
     }
@@ -303,6 +400,17 @@ export async function addFeedback(
     console.error("Error inserting feedback:", insertError.message);
     throw insertError;
   } else {
+    const fullFeedbackData: FullFeedbackData = {
+      id: data.id,
+      feedbackData: feedbackData,
+      metricName: name,
+      metricDataType: dataType,
+      organizationId: organizationId, // Pass organizationId
+      model: ((response.body as any)?.model as string) || null, // Pass model
+      promptTokens: response.prompt_tokens, // Pass promptTokens
+      completionTokens: response.completion_tokens, // Pass completionTokens
+    };
+    ctx.waitUntil(logClickhouse(env, fullFeedbackData));
     return data.id;
   }
 }
