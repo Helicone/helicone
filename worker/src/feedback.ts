@@ -405,10 +405,10 @@ export async function addFeedback(
       feedbackData: feedbackData,
       metricName: name,
       metricDataType: dataType,
-      organizationId: organizationId, // Pass organizationId
-      model: ((response.body as any)?.model as string) || null, // Pass model
-      promptTokens: response.prompt_tokens, // Pass promptTokens
-      completionTokens: response.completion_tokens, // Pass completionTokens
+      organizationId: organizationId,
+      model: ((response.body as any)?.model as string) || null,
+      promptTokens: response.prompt_tokens,
+      completionTokens: response.completion_tokens,
     };
     ctx.waitUntil(logClickhouse(env, fullFeedbackData));
     return data.id;
