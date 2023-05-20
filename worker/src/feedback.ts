@@ -33,7 +33,8 @@ function isNumber(value: any): value is number {
 
 export async function handleFeedbackEndpoint(
   request: RequestWrapper,
-  env: Env
+  env: Env,
+  ctx: ExecutionContext
 ): Promise<Response> {
   const body = await request.getJson<FeedbackRequestBody>();
   const heliconeId = body["helicone-id"];
@@ -88,6 +89,7 @@ export async function handleFeedbackEndpoint(
         dataType,
         value,
         env,
+        ctx,
         response,
         heliconeAuth
       ); // TODO: return the feedback id as a uuid and return it in the response
@@ -217,7 +219,7 @@ async function logClickhouse(
     env
   );
 
-  clickhouseDb.dbInsertClickhouse("feedback", [
+  clickhouseDb.dbInsertClickhouse("feedback_copy", [
     {
       id: fullFeedbackData.id,
       created_at: feedbackCreatedTime || null,
@@ -271,7 +273,7 @@ export async function addFeedback(
   const { data: requestData, error: requestError } = await dbClient
     .from("request")
     .select(
-      "id, helicone_api_keys, helicone_org_id (id, api_key_hash, helicone_org_id)"
+      "id, helicone_api_keys (id, api_key_hash, organization_id)"
     )
     .eq("id", heliconeId)
     .single();
@@ -289,7 +291,7 @@ export async function addFeedback(
   } else if (requestData.helicone_api_keys instanceof Object) {
     matchingApiKeyHash = requestData.helicone_api_keys.api_key_hash;
     matchingApiKeyId = requestData.helicone_api_keys.id;
-    organizationId = requestData.helicone_api_keys.helicone_org_id;
+    organizationId = requestData.helicone_api_keys.organization_id;
   } else {
     throw new Error(
       "Internal error. Make sure you're providing a valid helicone API key to authenticate your requests."
@@ -401,7 +403,7 @@ export async function addFeedback(
     throw insertError;
   } else {
     const fullFeedbackData: FullFeedbackData = {
-      id: data.id,
+      id: data,
       feedbackData: feedbackData,
       metricName: name,
       metricDataType: dataType,
@@ -411,6 +413,6 @@ export async function addFeedback(
       completionTokens: response.completion_tokens,
     };
     ctx.waitUntil(logClickhouse(env, fullFeedbackData));
-    return data.id;
+    return data;
   }
 }

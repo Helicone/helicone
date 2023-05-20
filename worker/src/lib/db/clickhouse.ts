@@ -304,7 +304,7 @@ interface PropertiesCopyV2 {
   organization_id: string;
 }
 
-interface Feedback {
+interface FeedbackCopy {
   id: number;
   created_at: Nullable<string>;
   response_id: Nullable<string>;
@@ -327,6 +327,6 @@ export interface ClickhouseDB {
     properties_copy_v1: PropertiesCopyV1;
     response_copy_v2: ResponseCopyV2;
     properties_copy_v2: PropertiesCopyV2;
-    feedback: Feedback;
+    feedback_copy: FeedbackCopy;
   };
 }
