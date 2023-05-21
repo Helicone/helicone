@@ -53,7 +53,6 @@ SELECT
   COUNT(*)::bigint as count
 FROM request
    LEFT JOIN response ON response.request = request.id
-   LEFT JOIN user_api_keys ON user_api_keys.api_key_hash = request.auth_hash
 WHERE (
   (${builtFilter.filter})
 )
