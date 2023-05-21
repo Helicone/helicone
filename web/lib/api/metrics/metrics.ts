@@ -76,8 +76,6 @@ export async function getMetrics(
     aggregatedAvgMetrics,
   ] = data;
 
-  console.log(modelMetrics);
-
   // calculate and format metrics
   const metrics: Metrics = {
     average_requests_per_day: calculateAverageRequestsPerDay(
