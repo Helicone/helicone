@@ -23,6 +23,7 @@ export async function getRequestMetaData(
     cache_hits.request_id as request_id
   FROM request
     left join cache_hits on request.id = cache_hits.request_id
+    left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
   WHERE (
     user_api_keys.user_id = '${user_id}'
     AND request.id = '${request_id}'
