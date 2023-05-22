@@ -13,20 +13,27 @@ async function getTokenCount(inputText: string): Promise<number> {
   return encoded.bpe.length;
 }
 
-function getRequestString(requestBody: any): [string, number] {
+async function getRequestTokenCount(requestBody: any): Promise<number> {
   if (requestBody.prompt !== undefined) {
     const prompt = requestBody.prompt;
     if (typeof prompt === "string") {
-      return [requestBody.prompt, 0];
+      return getTokenCount(requestBody.prompt);
     } else if ("length" in prompt) {
-      return [(prompt as string[]).join(""), 0];
+      return getTokenCount((prompt as string[]).join(""));
     } else {
       throw new Error("Invalid prompt type");
     }
   } else if (requestBody.messages !== undefined) {
     const messages = requestBody.messages as { content: string }[];
 
-    return [messages.map((m) => m.content).join(""), 3 + messages.length * 5];
+    let totalTokenCount = 0;
+
+    for (const message of messages) {
+      const tokenCount = await getTokenCount(message.content);
+      totalTokenCount += tokenCount;
+    }
+    
+    return totalTokenCount + 3 + messages.length * 5;
   } else {
     throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
   }
@@ -138,11 +145,9 @@ async function getUsage(
         .map((d) => getResponseText(d))
         .join("")
     );
-    const [requestString, paddingTokenCount] = getRequestString(
+    const requestTokenCount = await getRequestTokenCount(
       JSON.parse(requestBody)
     );
-    const requestTokenCount =
-      (await getTokenCount(requestString)) + paddingTokenCount;
     const totalTokens = requestTokenCount + responseTokenCount;
     return {
       total_tokens: totalTokens,
