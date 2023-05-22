@@ -11,6 +11,7 @@ import { userTableFilters } from "../../../../services/lib/filters/frontendFilte
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { RenderBarChart } from "../../../shared/metrics/barChart";
 import ThemedListItem from "../../../shared/themed/themedListItem";
+import { getUSDate } from "../../../shared/utils/utils";
 import { Loading } from "../dashboardPage";
 
 interface RequestsPanelProps {
@@ -73,14 +74,23 @@ const RequestsPanel = (props: RequestsPanelProps) => {
           </h3>
           <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300">
             {isLoading ? (
-              <p>Loading...</p>
+              <div className="flex flex-col space-y-6">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <li
+                    key={index}
+                    className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                  ></li>
+                ))}
+              </div>
             ) : (
               data?.data?.map((user, i) => (
                 <ThemedListItem
-                  key={1}
+                  key={i}
                   onClickHandler={() => {}}
                   title={user.user_id || "n/a"}
-                  subtitle={`Active For: ${user.active_for} days`}
+                  subtitle={`Last Active: ${getUSDate(
+                    user.last_active.toLocaleString()
+                  )}`}
                   value={user.total_requests}
                 />
               ))

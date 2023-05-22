@@ -109,6 +109,10 @@ const DashboardPage = (props: DashboardPageProps) => {
         <CostPanel
           costOverTime={costOverTime.data ?? "loading"}
           timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+          advancedFilters={filterListToTree(
+            filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
+            "and"
+          )}
         />
       );
     } else if (mode === "errors") {
