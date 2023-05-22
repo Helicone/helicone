@@ -25,9 +25,12 @@ const ThemedListItem = (props: ThemedListItemProps) => {
       onClick={onClickHandler}
     >
       <div className="flex flex-col space-y-0.5">
-        <div className="flex flex-row space-x-2.5 items-center">
-          <p className="hidden md:block text-sm text-gray-900 leading-6 font-semibold">
+        <div className="flex flex-row space-x-2.5 items-center text-left">
+          <p className="hidden xl:block text-sm text-gray-900 leading-6 font-semibold">
             {truncString(title, 36)}
+          </p>
+          <p className="hidden md:block xl:hidden text-sm text-gray-900 leading-6 font-semibold">
+            {truncString(title, 24)}
           </p>
           <p className="block md:hidden text-sm text-gray-900 leading-6 font-semibold">
             {truncString(title, 16)}

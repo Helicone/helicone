@@ -89,6 +89,10 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
               <div className="h-full w-full flex-col flex p-8">
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
               </div>
+            ) : pageCodes.errorCodes.data?.data?.length === 0 ? (
+              <div className="h-full w-full flex-col flex p-8 items-center justify-center align-middle">
+                No Errors!
+              </div>
             ) : (
               <RenderPieChart
                 data={
