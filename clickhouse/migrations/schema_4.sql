@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS default.feedback_copy
 (
    `id` Int64,
-   `uuid` UUID,
    `created_at` DateTime64,
    `response_id` UUID,
    `boolean_value` Nullable(Boolean),
