@@ -5,11 +5,26 @@ import {
 } from "../../../../services/hooks/useErrorPage";
 import { StackedBarChart } from "../../../shared/metrics/stackedBarChart";
 import { RenderPieChart } from "../../../shared/metrics/pieChart";
+import { Loading } from "../dashboardPage";
+import { Result } from "../../../../lib/result";
+import { RenderBarChart } from "../../../shared/metrics/barChart";
 
-interface ErrorsPanelProps {}
+interface ErrorsPanelProps {
+  errorsOverTime: Loading<Result<any[], string>>;
+}
+
+function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
+  if (data === "loading") {
+    return [];
+  }
+  if (data.error !== null) {
+    return [];
+  }
+  return data.data;
+}
 
 const ErrorsPanel = (props: ErrorsPanelProps) => {
-  const {} = props;
+  const { errorsOverTime } = props;
 
   const pageCodes = useErrorPageCodes();
 
@@ -51,7 +66,15 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
               </div>
             ) : (
-              <StackedBarChart data={chartData} keys={errorCodes} />
+              <RenderBarChart
+                data={unwrapDefaultEmpty(errorsOverTime).map((r) => ({
+                  ...r,
+                  value: r.count,
+                }))}
+                timeMap={timeMap}
+                valueLabel="errors"
+              />
+              // <StackedBarChart data={chartData} keys={errorCodes} />
             )}
           </div>
         </div>
