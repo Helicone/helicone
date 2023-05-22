@@ -64,7 +64,11 @@ const CachePage = (props: CachePageProps) => {
     {
       label: "All Time Savings",
       value: data.totalSavings.data?.data
-        ? `$${data.totalSavings.data?.data}`
+        ? `$${
+            data.totalSavings.data?.data < 1
+              ? data.totalSavings.data?.data.toFixed(5)
+              : data.totalSavings.data?.data.toFixed(2)
+          }`
         : "$0.00",
       isLoading: data.totalSavings.isLoading,
       icon: BanknotesIcon,

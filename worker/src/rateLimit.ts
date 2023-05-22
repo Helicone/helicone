@@ -1,4 +1,7 @@
-import { Env } from ".";
+import {
+  HeliconeProperties,
+  HeliconeProxyRequest,
+} from "./lib/HeliconeProxyRequest/mapper";
 
 export interface RateLimitOptions {
   time_window: number;
@@ -35,44 +38,20 @@ function parsePolicy(input: string): RateLimitOptions {
   };
 }
 
-export const getRateLimitOptions = (
-  request: Request
-): RateLimitOptions | undefined => {
-  const policy = request.headers.get("Helicone-RateLimit-Policy");
-  if (policy) {
-    return parsePolicy(policy);
-  }
-  return undefined;
-};
-
 async function getSegmentKeyValue(
-  request: Request,
-  segment: string | undefined,
-  user: string | undefined
+  properties: HeliconeProperties,
+  userId: string | undefined,
+  segment: string | undefined
 ): Promise<string> {
   if (segment === undefined) {
     return "global";
   } else if (segment === "user") {
-    const heliconeUserIdHeader = "helicone-user-id";
-    const userId =
-      request.headers.get(heliconeUserIdHeader) ||
-      (request.body ? user : undefined);
     if (userId === undefined) {
       throw new Error("Missing user ID");
     }
     return `user=${userId}`;
   } else {
-    const propTag = "helicone-property-";
-    const heliconeHeaders = Object.fromEntries(
-      [...request.headers.entries()]
-        .filter(
-          ([key]) =>
-            key.toLowerCase().startsWith(propTag.toLowerCase()) &&
-            key.length > propTag.length
-        )
-        .map(([key, value]) => [key.substring(propTag.length), value])
-    );
-    const headerValue = heliconeHeaders[segment.toLowerCase()];
+    const headerValue = properties[segment.toLowerCase()];
     if (headerValue === undefined) {
       throw new Error(`Missing "${segment}" header`);
     }
@@ -102,20 +81,33 @@ function binarySearchFirstRelevantIndex(
   return result;
 }
 
-export async function checkRateLimit(
-  request: Request,
-  env: Env,
-  rateLimitOptions: RateLimitOptions,
-  hashedKey: string,
-  user: string | undefined
-): Promise<RateLimitResponse> {
-  const segment = rateLimitOptions.segment;
-  const quota = rateLimitOptions.quota;
-  const time_window = rateLimitOptions.time_window;
+interface RateLimitProps {
+  heliconeProperties: HeliconeProperties;
+  userId: string | undefined;
+  rateLimitOptions: RateLimitOptions;
+  providerAuthHash: string | undefined;
+  rateLimitKV: KVNamespace;
+}
 
-  const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
-  const kvKey = `rl_${segmentKeyValue}_${hashedKey}`;
-  const kv = await env.RATE_LIMIT_KV.get(kvKey, "text");
+export async function checkRateLimit(
+  props: RateLimitProps
+): Promise<RateLimitResponse> {
+  const {
+    heliconeProperties,
+    userId,
+    rateLimitOptions,
+    providerAuthHash,
+    rateLimitKV,
+  } = props;
+  const { time_window, segment, quota } = rateLimitOptions;
+
+  const segmentKeyValue = await getSegmentKeyValue(
+    heliconeProperties,
+    userId,
+    segment
+  );
+  const kvKey = `rl_${segmentKeyValue}_${providerAuthHash}`;
+  const kv = await rateLimitKV.get(kvKey, "text");
   const timestamps = kv !== null ? JSON.parse(kv) : [];
 
   const now = Date.now();
@@ -154,18 +146,25 @@ export async function checkRateLimit(
 }
 
 export async function updateRateLimitCounter(
-  request: Request,
-  env: Env,
-  rateLimitOptions: RateLimitOptions,
-  hashedKey: string,
-  user: string | undefined
+  props: RateLimitProps
 ): Promise<void> {
-  const segment = rateLimitOptions.segment;
-  const time_window = rateLimitOptions.time_window;
+  const {
+    heliconeProperties,
+    userId,
+    rateLimitOptions,
+    providerAuthHash: heliconeAuthHash,
+    rateLimitKV,
+  } = props;
+  const { time_window, segment } = rateLimitOptions;
 
-  const segmentKeyValue = await getSegmentKeyValue(request, segment, user);
-  const kvKey = `rl_${segmentKeyValue}_${hashedKey}`;
-  const kv = await env.RATE_LIMIT_KV.get(kvKey, "text");
+  const segmentKeyValue = await getSegmentKeyValue(
+    heliconeProperties,
+    userId,
+    segment
+  );
+
+  const kvKey = `rl_${segmentKeyValue}_${heliconeAuthHash}`;
+  const kv = await rateLimitKV.get(kvKey, "text");
   const timestamps = kv !== null ? JSON.parse(kv) : [];
 
   const now = Date.now();
@@ -176,7 +175,7 @@ export async function updateRateLimitCounter(
 
   prunedTimestamps.push(now);
 
-  await env.RATE_LIMIT_KV.put(kvKey, JSON.stringify(prunedTimestamps), {
+  await rateLimitKV.put(kvKey, JSON.stringify(prunedTimestamps), {
     expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl
   });
 }
