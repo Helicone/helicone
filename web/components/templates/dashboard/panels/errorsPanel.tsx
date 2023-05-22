@@ -66,15 +66,7 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
               </div>
             ) : (
-              <RenderBarChart
-                data={unwrapDefaultEmpty(errorsOverTime).map((r) => ({
-                  ...r,
-                  value: r.count,
-                }))}
-                timeMap={timeMap}
-                valueLabel="errors"
-              />
-              // <StackedBarChart data={chartData} keys={errorCodes} />
+              <StackedBarChart data={chartData} keys={errorCodes} />
             )}
           </div>
         </div>
