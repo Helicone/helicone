@@ -27,10 +27,7 @@ const ThemedListItem = (props: ThemedListItemProps) => {
       <div className="flex flex-col space-y-0.5">
         <div className="flex flex-row gap-2.5 items-center">
           <p className="hidden xl:block text-sm text-gray-900 leading-6 font-semibold text-left">
-            {truncString(
-              "fdjalghljfdakghfdlkagdklsFGKLDSFGGDLKGHDSLKFdhslkfsdk",
-              56
-            )}
+            {truncString(title, 56)}
           </p>
           <p className="hidden md:block xl:hidden text-sm text-gray-900 leading-6 font-semibold text-left">
             {truncString(title, 36)}
