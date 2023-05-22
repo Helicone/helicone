@@ -53,7 +53,7 @@ export async function fetchDataOverTime<T>(
     body: JSON.stringify(body),
   }).then((res) => res.json() as Promise<Result<T[], string>>);
 }
-interface DashboardPageData {
+export interface DashboardPageData {
   timeFilter: {
     start: Date;
     end: Date;
