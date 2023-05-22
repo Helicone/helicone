@@ -1,13 +1,23 @@
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import { Result } from "../../../../lib/result";
 import { RequestsOverTime } from "../../../../lib/timeCalculations/fetchTimeData";
+import { useGetTopUsers } from "../../../../services/hooks/dashboard";
+import {
+  filterListToTree,
+  FilterNode,
+  filterUIToFilterLeafs,
+} from "../../../../services/lib/filters/filterDefs";
+import { userTableFilters } from "../../../../services/lib/filters/frontendFilterDefs";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { RenderBarChart } from "../../../shared/metrics/barChart";
+import ThemedListItem from "../../../shared/themed/themedListItem";
+import { getUSDate } from "../../../shared/utils/utils";
 import { Loading } from "../dashboardPage";
 
 interface RequestsPanelProps {
   requestsOverTime: Loading<Result<RequestsOverTime[], string>>;
   timeMap: (date: Date) => string;
+  advancedFilters: FilterNode;
 }
 
 function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
@@ -21,11 +31,20 @@ function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
 }
 
 const RequestsPanel = (props: RequestsPanelProps) => {
-  const { requestsOverTime, timeMap } = props;
+  const { requestsOverTime, timeMap, advancedFilters } = props;
+
+  const { data, isLoading } = useGetTopUsers(
+    1,
+    10,
+    {
+      total_requests: "desc",
+    },
+    advancedFilters
+  );
 
   return (
     <div className="grid grid-cols-5 gap-4 h-96">
-      <div className="col-span-3 bg-white border border-gray-300 rounded-lg">
+      <div className="col-span-5 md:col-span-3 bg-white border border-gray-300 rounded-lg">
         <div className="flex flex-col space-y-4 py-6">
           <h3 className="text-lg font-semibold text-gray-900 text-center">
             Requests
@@ -48,10 +67,35 @@ const RequestsPanel = (props: RequestsPanelProps) => {
           </div>
         </div>
       </div>
-      <div className="col-span-2 bg-white border border-gray-300 rounded-lg">
-        <div className="w-full h-full items-center justify-center align-middle flex flex-col">
-          <UserGroupIcon className="h-12 w-12 text-gray-500" />
-          <p className="text-md text-gray-700">Top Users (coming soon)</p>
+      <div className="col-span-5 md:col-span-2 bg-white border border-gray-300 rounded-lg">
+        <div className="flex flex-col space-y-4 py-6">
+          <h3 className="text-lg font-semibold text-gray-900 text-center">
+            Top Users by Request
+          </h3>
+          <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300">
+            {isLoading ? (
+              <div className="flex flex-col space-y-6">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <li
+                    key={index}
+                    className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                  ></li>
+                ))}
+              </div>
+            ) : (
+              data?.data?.map((user, i) => (
+                <ThemedListItem
+                  key={i}
+                  onClickHandler={() => {}}
+                  title={user.user_id || "n/a"}
+                  subtitle={`Last Active: ${getUSDate(
+                    user.last_active.toLocaleString()
+                  )}`}
+                  value={user.total_requests}
+                />
+              ))
+            )}
+          </ul>
         </div>
       </div>
     </div>
