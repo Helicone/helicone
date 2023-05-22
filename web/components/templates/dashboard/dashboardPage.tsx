@@ -85,6 +85,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     filterMap,
     requestsOverTime,
     costOverTime,
+    errorsOverTime,
     searchPropertyFilters,
   } = useDashboardPage({
     timeFilter,
@@ -116,7 +117,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
       );
     } else if (mode === "errors") {
-      return <ErrorsPanel />;
+      return <ErrorsPanel errorsOverTime={errorsOverTime.data ?? "loading"} />;
     }
   };
 
