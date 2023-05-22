@@ -66,15 +66,7 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
               </div>
             ) : (
-              <RenderBarChart
-                data={unwrapDefaultEmpty(errorsOverTime).map((r) => ({
-                  ...r,
-                  value: r.count,
-                }))}
-                timeMap={timeMap}
-                valueLabel="errors"
-              />
-              // <StackedBarChart data={chartData} keys={errorCodes} />
+              <StackedBarChart data={chartData} keys={errorCodes} />
             )}
           </div>
         </div>
@@ -88,6 +80,10 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
             {pageCodes.errorCodes.isLoading ? (
               <div className="h-full w-full flex-col flex p-8">
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
+              </div>
+            ) : pageCodes.errorCodes.data?.data?.length === 0 ? (
+              <div className="h-full w-full flex-col flex p-8 items-center justify-center align-middle">
+                No Errors!
               </div>
             ) : (
               <RenderPieChart
