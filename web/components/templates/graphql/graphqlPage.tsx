@@ -8,6 +8,8 @@ import { clsx } from "../../shared/clsx";
 import GraphQLLogo from "./logo";
 import Link from "next/link";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import mainTypeDefs from "../../../lib/api/graphql/schema/main.graphql";
+import { print } from "graphql/language/printer";
 
 interface GraphQLPageProps {}
 
@@ -30,16 +32,6 @@ const GraphQLPage = (props: GraphQLPageProps) => {
   const router = useRouter();
 
   const [showGraphqlHeader, setShowGraphqlHeader] = useState<boolean>(false);
-
-  const explorerProps =
-    typeof window !== "undefined" && window.location.href.includes("localhost")
-      ? {
-          endpointUrl: "/api/graphql",
-          schema: "",
-        }
-      : {
-          graphRef: "helicone@main",
-        };
 
   return (
     <div className="flex flex-col gap-5">
@@ -102,7 +94,8 @@ const GraphQLPage = (props: GraphQLPageProps) => {
       </div>
       <div className="overflow-hidden h-[calc(60vh)] w-full">
         <ApolloExplorer
-          {...explorerProps}
+          endpointUrl="/api/graphql"
+          schema={print(mainTypeDefs)}
           initialState={{
             document: DEFAULT_EXAMPLE_QUERY,
             variables: {
