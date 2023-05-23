@@ -129,9 +129,6 @@ export async function heliconeRequest(
   const convertedFilters: FilterNode[] = filters.map((f) =>
     convertFilterInputToFilterLeaf(f)
   );
-  console.log("filters", filters);
-  console.log("convertedFilters", convertedFilters);
-
   const filter = filterListToTree(convertedFilters, "and");
 
   const { data, error } = await getRequests(orgId, filter, offset, limit, {
