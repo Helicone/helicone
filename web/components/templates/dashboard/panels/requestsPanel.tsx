@@ -44,7 +44,7 @@ const RequestsPanel = (props: RequestsPanelProps) => {
 
   return (
     <div className="grid grid-cols-5 gap-4 h-96">
-      <div className="col-span-5 md:col-span-3 bg-white border border-gray-300 rounded-lg">
+      <div className="col-span-5 md:col-span-5 bg-white border border-gray-300 rounded-lg">
         <div className="flex flex-col space-y-4 py-6">
           <h3 className="text-lg font-semibold text-gray-900 text-center">
             Requests
@@ -67,7 +67,7 @@ const RequestsPanel = (props: RequestsPanelProps) => {
           </div>
         </div>
       </div>
-      <div className="col-span-5 md:col-span-2 bg-white border border-gray-300 rounded-lg">
+      {/* <div className="col-span-5 md:col-span-2 bg-white border border-gray-300 rounded-lg">
         <div className="flex flex-col space-y-4 py-6">
           <h3 className="text-lg font-semibold text-gray-900 text-center">
             Top Users by Request
@@ -97,7 +97,7 @@ const RequestsPanel = (props: RequestsPanelProps) => {
             )}
           </ul>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
