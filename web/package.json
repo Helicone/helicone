@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.10",
+    "@apollo/explorer": "^3.4.0",
+    "@apollo/sandbox": "^2.4.0",
     "@clickhouse/client": "^0.0.14",
     "@dqbd/tiktoken": "^1.0.2",
     "@emotion/react": "^11.10.5",
@@ -59,7 +61,8 @@
     "react-syntax-highlighter": "^15.5.0",
     "recharts": "^2.1.16",
     "stripe": "^11.8.0",
-    "typescript": "4.9.3"
+    "typescript": "4.9.3",
+    "use-deep-compare-effect": "^1.8.1"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.2.2",
