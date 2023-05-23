@@ -102,8 +102,7 @@ yarn dev
 # in another terminal
 cd worker
 yarn
-wrangler dev
-# wait for it to load (like 10 seconds), press `L` to start in local mode
+wrangler dev --local
 
 # Make your request to local host
 curl --request POST \
