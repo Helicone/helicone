@@ -1,43 +1,36 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Fragment, useEffect, useState } from "react";
-import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
-  CogIcon,
+  BuildingOfficeIcon,
+  CircleStackIcon,
   CubeTransparentIcon,
+  ExclamationCircleIcon,
   HomeIcon,
-  InboxArrowDownIcon,
   KeyIcon,
+  TableCellsIcon,
   UserCircleIcon,
   UsersIcon,
-  WrenchScrewdriverIcon,
   XMarkIcon,
-  TableCellsIcon,
-  BuildingOfficeIcon,
-  ExclamationCircleIcon,
-  CircleStackIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../clsx";
+import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { Fragment, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { useGetKeys } from "../../../services/hooks/keys";
-import ThemedModal from "../themed/themedModal";
-import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../supabase/database.types";
 import { Result } from "../../../lib/result";
+import { useGetKeys } from "../../../services/hooks/keys";
+import { Database } from "../../../supabase/database.types";
+import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
-import { SpeedDialIcon } from "@mui/material";
-import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
-import { useGetOrgs } from "../../../services/hooks/organizations";
 import OrgContext, { useOrg } from "./organizationContext";
-import { BsCashCoin, BsCashStack } from "react-icons/bs";
 
+import { GrGraphQl } from "react-icons/gr";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -104,6 +97,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/keys",
       icon: KeyIcon,
       current: pathname.includes("/keys"),
+    },
+    {
+      name: "GraphQL",
+      href: "/graphql",
+      icon: GrGraphQl,
+      current: pathname.includes("/graphql"),
     },
   ];
 
