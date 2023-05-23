@@ -74,7 +74,7 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
                   value: e.count,
                 }))}
                 timeMap={timeMap}
-                valueLabel="costs"
+                valueLabel="errors"
               />
             )}
           </div>
