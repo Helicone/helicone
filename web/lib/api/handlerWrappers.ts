@@ -10,15 +10,24 @@ import { Result } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 
-export interface HandlerWrapperOptions<RetVal> {
+export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
   res: NextApiResponse<RetVal>;
+}
+
+export interface HandlerWrapperOptions<RetVal>
+  extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
   userData: {
     userId: string;
     orgId: string;
     user: User;
   };
+}
+
+export interface HandlerWrapperOptionsAPI<RetVal>
+  extends HandlerWrapperNext<RetVal> {
+  userData?: HandlerWrapperOptions<RetVal>["userData"];
 }
 
 export function withAuth<T>(

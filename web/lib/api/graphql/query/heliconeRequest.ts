@@ -9,7 +9,7 @@ import {
   TextOperators,
 } from "../../../../services/lib/filters/filterDefs";
 import { getRequests } from "../../request/request";
-import { getUserOrThrow } from "../helpers/auth";
+import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
   HeliconeRequest,
   QueryHeliconeRequestArgs,
@@ -85,7 +85,7 @@ export async function heliconeRequest(
   context: Context,
   info: any
 ): Promise<HeliconeRequest[]> {
-  const userId = await getUserOrThrow(context.auth);
+  const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {
     limit: args.limit ?? 100,
     offset: args.offset ?? 0,
@@ -98,7 +98,9 @@ export async function heliconeRequest(
   );
   const filter = filterListToTree(convertedFilters, "and");
 
-  const { data, error } = await getRequests(userId, filter, offset, limit, {});
+  const { data, error } = await getRequests(orgId, filter, offset, limit, {
+    created_at: "desc",
+  });
   if (error !== null) {
     throw new ApolloError(error, "UNAUTHENTICATED");
   }
