@@ -16,6 +16,7 @@ import { getOrgIdOrThrow } from "../../../lib/api/graphql/helpers/auth";
 import { heliconeRequest } from "../../../lib/api/graphql/query/heliconeRequest";
 import { queryUser } from "../../../lib/api/graphql/query/user";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
+import { DEFAULT_EXAMPLE_QUERY } from "../../../components/templates/graphql/graphqlPage";
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -54,16 +55,15 @@ export default async function handler(
       // so now we have to use this hosted crappy version
       ApolloServerPluginLandingPageProductionDefault({
         footer: false,
-        document: "HELLO",
+        document: DEFAULT_EXAMPLE_QUERY,
+        variables: {
+          limit: 10,
+          offset: 0,
+        },
         includeCookies: true,
         graphRef: "helicone@main",
         embed: {
           persistExplorerState: true,
-          displayOptions: {
-            theme: "light",
-            showHeadersAndEnvVars: true,
-            docsPanelState: "open",
-          },
         },
       }),
     ],
