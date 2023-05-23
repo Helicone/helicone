@@ -38,6 +38,7 @@ export async function getErrorOverTime({
     filter,
     argsAcc: [],
   });
+  console.log(builtFilter);
   const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
   const query = `
 SELECT

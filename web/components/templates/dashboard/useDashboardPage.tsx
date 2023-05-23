@@ -149,6 +149,13 @@ export const useDashboardPage = ({
           end: Date;
         };
         const userFilters = query.queryKey[2] as FilterLeaf[];
+        userFilters.push({
+          response: {
+            status: {
+              "not-equals": 200,
+            },
+          },
+        });
         const timeInterval = getTimeInterval(timeFilter);
 
         return fetchDataOverTime<ErrorOverTime>(

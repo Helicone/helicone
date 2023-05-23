@@ -51,8 +51,6 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
     return Array.from(errorCodes);
   };
 
-  const errorCodes = getErrorCodes();
-
   console.log(errorsOverTime);
 
   return (
