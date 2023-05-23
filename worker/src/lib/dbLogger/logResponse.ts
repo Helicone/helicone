@@ -262,7 +262,11 @@ export async function readAndLogResponse(
         .from("response")
         .update({
           request: request.requestId,
-          body: parsedResponse.data,
+          body: response.omitLog
+            ? {
+                usage: parsedResponse.data?.usage,
+              }
+            : parsedResponse.data,
           status: response.status,
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
@@ -430,7 +434,7 @@ export async function logRequest(
         {
           id: request.requestId,
           path: request.path,
-          body: requestBody,
+          body: request.omitLog ? {} : requestBody,
           auth_hash: request.providerApiKeyAuthHash,
           user_id: request.userId,
           prompt_id: request.promptId,
