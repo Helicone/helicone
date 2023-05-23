@@ -55,45 +55,6 @@ export function withAuth<T>(
   };
 }
 
-export type HandlerWrapperOptionalSupabase<T> = Omit<
-  HandlerWrapperOptions<T>,
-  "supabaseClient"
-> & {
-  supabaseClient?: HandlerWrapperOptions<T>["supabaseClient"];
-};
-
-export function withGraphQLAuth<T>(
-  handler: (
-    supabaseServer: HandlerWrapperOptionsOptionalUser<T>
-  ) => Promise<void>
-) {
-  return async (
-    req: NextApiRequest,
-    res: NextApiResponse<T | { error: string }>
-  ) => {
-    const supabaseClient = new SupabaseServerWrapper({
-      req,
-      res,
-    });
-    const { data, error } = await supabaseClient.getUserAndOrg();
-    if (error !== null || !data.orgId || !data.userId) {
-      await handler({
-        req,
-        res,
-        supabaseClient,
-        userData: undefined,
-      });
-      return;
-    }
-    await handler({
-      req,
-      res,
-      supabaseClient,
-      userData: data,
-    });
-  };
-}
-
 export interface HandlerWrapperOptionsSSR<RetVal> {
   context: GetServerSidePropsContext;
   supabaseClient: SupabaseServerWrapper<RetVal>;
