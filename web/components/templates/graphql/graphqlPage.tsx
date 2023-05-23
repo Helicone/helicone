@@ -13,7 +13,7 @@ import { print } from "graphql/language/printer";
 
 interface GraphQLPageProps {}
 
-const DEFAULT_EXAMPLE_QUERY = `query ExampleQuery($limit: Int, $offset: Int){
+export const DEFAULT_EXAMPLE_QUERY = `query ExampleQuery($limit: Int, $offset: Int){
   heliconeRequest(
       limit: $limit
       offset: $offset
