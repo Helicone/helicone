@@ -15,7 +15,6 @@ type HeliconeRequest {
   createdAt: String!
   prompt: String
   response: String
-
   user: User
   cacheHits: Int
   properties: [Property]
@@ -30,9 +29,7 @@ input HeliconeRequestFilter {
   response: TextOperators
   user: TextOperators
   property: PropertyFilter
-  value: ValueFilter
-  responseBody: TextOperators
-  requestBody: TextOperators
+  createdAt: DateOperators
 }
 
 input PropertyFilter {
@@ -72,4 +69,9 @@ input NumberOperators {
   gte: Float
   lte: Float
   not_equals: Float
+}
+
+input DateOperators {
+  gte: String
+  lte: String
 }

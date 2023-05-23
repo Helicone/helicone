@@ -92,6 +92,8 @@ export async function getRequests(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
+  console.log("query", query);
+  console.log("filters", builtFilter.argsAcc);
 
   const { data, error } = await dbExecute<HeliconeRequest>(
     query,
