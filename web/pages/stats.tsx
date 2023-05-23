@@ -14,7 +14,9 @@ const Home = (props: HomeProps) => {
   const { isLoading, data } = useQuery({
     queryKey: ["issues"],
     queryFn: async () => {
-      const response = await fetch("/api/stats");
+      const response = await fetch("/api/stats", {
+        next: { revalidate: 1000 },
+      });
       return (await response.json()) as Result<HeliconeStats, string>;
     },
   });
@@ -26,7 +28,7 @@ const Home = (props: HomeProps) => {
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          <div>
+          <div className="max-w-3xl mx-auto w-full">
             <h1 className="text-3xl font-bold text-center">
               Active Users/week
             </h1>
@@ -34,6 +36,27 @@ const Home = (props: HomeProps) => {
               <RenderBarChart
                 data={
                   data?.data?.weeklyActiveUsers
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      user_count_step: +v.user_count_step,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.user_count_step,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Active Users"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-center">Active Users/day</h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.dailyActiveUsers
                     .map((v) => ({
                       time_step: new Date(v.time_step),
                       user_count_step: +v.user_count_step,
@@ -68,10 +91,30 @@ const Home = (props: HomeProps) => {
                     })) ?? []
                 }
                 timeMap={(v) => v.toLocaleDateString()}
-                valueLabel="Requests"
+                valueLabel="Total Users"
               />
             </div>
-
+            <h1 className="text-3xl font-bold text-center">User Growth</h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.growthOverTime
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      count_step: +v.count_step,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.count_step,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="User Count"
+              />
+            </div>
             <h1 className="text-3xl font-bold text-center">
               Requests week over week
             </h1>
@@ -79,6 +122,29 @@ const Home = (props: HomeProps) => {
               <RenderBarChart
                 data={
                   data?.data?.weeklyActiveUsers
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      request_count_step: +v.request_count_step,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.request_count_step,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Requests"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-center">
+              Requests day by day
+            </h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.dailyActiveUsers
                     .map((v) => ({
                       time_step: new Date(v.time_step),
                       request_count_step: +v.request_count_step,
