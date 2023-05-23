@@ -1,36 +1,43 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Dialog, Menu, Transition } from "@headlessui/react";
+import { Fragment, useEffect, useState } from "react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
-  BuildingOfficeIcon,
-  CircleStackIcon,
+  CogIcon,
   CubeTransparentIcon,
-  ExclamationCircleIcon,
   HomeIcon,
+  InboxArrowDownIcon,
   KeyIcon,
-  TableCellsIcon,
   UserCircleIcon,
   UsersIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
+  TableCellsIcon,
+  BuildingOfficeIcon,
+  ExclamationCircleIcon,
+  CircleStackIcon,
 } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { clsx } from "../clsx";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
+import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { Result } from "../../../lib/result";
 import { useGetKeys } from "../../../services/hooks/keys";
+import ThemedModal from "../themed/themedModal";
+import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../../supabase/database.types";
-import { clsx } from "../clsx";
+import { Result } from "../../../lib/result";
 import ThemedDropdown from "../themed/themedDropdown";
+import { SpeedDialIcon } from "@mui/material";
+import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
+import { useGetOrgs } from "../../../services/hooks/organizations";
 import OrgContext, { useOrg } from "./organizationContext";
+import { BsCashCoin, BsCashStack } from "react-icons/bs";
 
-import { GrGraphQl } from "react-icons/gr";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -97,12 +104,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/keys",
       icon: KeyIcon,
       current: pathname.includes("/keys"),
-    },
-    {
-      name: "GraphQL",
-      href: "/graphql",
-      icon: GrGraphQl,
-      current: pathname.includes("/graphql"),
     },
   ];
 
