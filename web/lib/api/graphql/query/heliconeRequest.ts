@@ -7,6 +7,7 @@ import {
   SingleKey,
   TablesAndViews,
   TextOperators,
+  TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
 import { getRequests } from "../../request/request";
 import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
@@ -16,6 +17,7 @@ import {
   HeliconeRequestFilter,
   TextOperators as GQLTextOperators,
   PropertyFilter,
+  DateOperators,
 } from "../schema/types/graphql";
 
 function convertTextOperators(op: GQLTextOperators): SingleKey<TextOperators> {
@@ -24,6 +26,17 @@ function convertTextOperators(op: GQLTextOperators): SingleKey<TextOperators> {
   } else {
     return { ...op } as SingleKey<TextOperators>;
   }
+}
+
+function convertTimeOperators(
+  op: DateOperators
+): SingleKey<TimestampOperators> {
+  if (op.gte) {
+    return { gte: op.gte };
+  } else if (op.lte) {
+    return { lte: op.lte };
+  }
+  throw new Error("Invalid date operator");
 }
 
 const filterInputToFilterLeaf: {
@@ -58,6 +71,26 @@ const filterInputToFilterLeaf: {
     return {
       response: {
         body_completion: convertTextOperators(response),
+      },
+    };
+  },
+  user: (user) => {
+    if (user === undefined || user === null) {
+      return undefined;
+    }
+    return {
+      request: {
+        user_id: convertTextOperators(user),
+      },
+    };
+  },
+  createdAt: (createdAt) => {
+    if (createdAt === undefined || createdAt === null) {
+      return undefined;
+    }
+    return {
+      request: {
+        created_at: convertTimeOperators(createdAt),
       },
     };
   },

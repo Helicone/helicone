@@ -22,6 +22,11 @@ export type Scalars = {
   JSON: any;
 };
 
+export type DateOperators = {
+  gte?: InputMaybe<Scalars["String"]>;
+  lte?: InputMaybe<Scalars["String"]>;
+};
+
 export type HeliconeRequest = {
   __typename?: "HeliconeRequest";
   cacheHits?: Maybe<Scalars["Int"]>;
@@ -37,15 +42,12 @@ export type HeliconeRequest = {
 };
 
 export type HeliconeRequestFilter = {
-  createdAt?: InputMaybe<TextOperators>;
+  createdAt?: InputMaybe<DateOperators>;
   id?: InputMaybe<NumberOperators>;
   prompt?: InputMaybe<TextOperators>;
   property?: InputMaybe<PropertyFilter>;
-  requestBody?: InputMaybe<TextOperators>;
   response?: InputMaybe<TextOperators>;
-  responseBody?: InputMaybe<TextOperators>;
   user?: InputMaybe<TextOperators>;
-  value?: InputMaybe<ValueFilter>;
 };
 
 export type NumberOperators = {
