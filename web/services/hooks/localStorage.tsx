@@ -1,21 +1,37 @@
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-export function useLocalStorageState<T>(
+export function useLocalStorage<T>(
   key: string,
-  defaultValue: T
-): [T, Dispatch<SetStateAction<T>>] {
-  const [value, setValue] = useState(defaultValue);
+  initialValue: T,
+  onNothingStored?: (setStored: (t: T) => void) => void
+): [T, (t: T) => void] {
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+  const setValue = useCallback(
+    (value: T) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        typeof window !== "undefined" &&
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [key, storedValue]
+  );
   useEffect(() => {
-    const storedValue =
-      typeof window !== "undefined" ? localStorage.getItem(key) : null;
-    if (storedValue !== null) {
-      setValue(JSON.parse(storedValue));
+    try {
+      const item =
+        typeof window !== "undefined" && window.localStorage.getItem(key);
+      if (!item) {
+        throw new Error("No item stored");
+      }
+      setStoredValue(item ? JSON.parse(item) : initialValue);
+    } catch (error) {
+      onNothingStored && onNothingStored(setValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
+  }, [key, initialValue, onNothingStored, setValue]);
 
-  return [value, setValue];
+  return [storedValue, setValue];
 }
