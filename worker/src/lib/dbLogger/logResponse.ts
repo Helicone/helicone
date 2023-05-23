@@ -6,6 +6,8 @@ import { Result, mapPostgrestErr } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
 
+const MAX_USER_ID_LENGTH = 7000;
+
 async function getTokenCount(inputText: string): Promise<number> {
   const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
   const encoded: { bpe: number[]; text: string[] } =
@@ -32,7 +34,7 @@ async function getRequestTokenCount(requestBody: any): Promise<number> {
       const tokenCount = await getTokenCount(message.content);
       totalTokenCount += tokenCount;
     }
-    
+
     return totalTokenCount + 3 + messages.length * 5;
   } else {
     throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
@@ -411,11 +413,17 @@ export async function logRequest(
       error: `error parsing request body: ${request.bodyText}`,
     };
     try {
-      requestBody = JSON.parse(request.bodyText);
+      requestBody = JSON.parse(request.bodyText ?? "{}");
     } catch (e) {
       console.error("Error parsing request body", e);
     }
 
+    let truncatedUserId = request.userId ?? "";
+
+    if (truncatedUserId.length > MAX_USER_ID_LENGTH) {
+      truncatedUserId =
+        truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
+    }
     const { data, error } = await dbClient
       .from("request")
       .insert([
