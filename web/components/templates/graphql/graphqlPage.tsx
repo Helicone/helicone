@@ -1,21 +1,27 @@
 import { ApolloExplorer } from "@apollo/explorer/react";
 
-import { ApolloSandbox } from "@apollo/sandbox/react";
+import { ChevronDownIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { clsx } from "../../shared/clsx";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { BsGearFill } from "react-icons/bs";
-import GraphQLLogo from "./logo";
 import { BsBoxArrowUpRight } from "react-icons/bs";
+import { clsx } from "../../shared/clsx";
+import GraphQLLogo from "./logo";
+import Link from "next/link";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 interface GraphQLPageProps {}
 
-const DEFAULT_EXAMPLE_QUERY = `query {
-  user(id: "1") {
-    id
-    name
-    email
+const DEFAULT_EXAMPLE_QUERY = `query ExampleQuery($limit: Int, $offset: Int){
+  heliconeRequest(
+      limit: $limit
+      offset: $offset
+  ) {
+      prompt
+      properties{
+        name
+      }
+      responseBody
+      response
   }
 }`;
 
@@ -24,16 +30,57 @@ const GraphQLPage = (props: GraphQLPageProps) => {
   const router = useRouter();
 
   const [showGraphqlHeader, setShowGraphqlHeader] = useState<boolean>(false);
+
+  const explorerProps =
+    typeof window !== "undefined" && window.location.href.includes("localhost")
+      ? {
+          endpointUrl: "/api/graphql",
+          schema: "",
+        }
+      : {
+          graphRef: "helicone@main",
+        };
+
   return (
     <div className="flex flex-col gap-5">
-      <div className="bg-white w-full rounded-md p-10 flex flex-row gap-5">
-        <GraphQLLogo className="h-10" />
-        <div className="flex flex-col"></div>
+      <div className="bg-white rounded-lg p-8 flex space-x-10 w-full items-center ">
+        <GraphQLLogo className="h-24 w-24" />
+        <div className="flex flex-col space-y-4">
+          <p>
+            Helicone leverages GraphQL, a powerful query language, to expose its
+            data.
+          </p>
+          <p>
+            Begin your journey with GraphQL by clicking the
+            &quot;ExampleQuery&quot; button below.
+          </p>
+          <p className="flex space-x-2 items-center gap-1">
+            For an immersive playground experience, visit our sandbox at
+            <Link
+              href="/api/graphql"
+              className="text-blue-500 hover:text-blue-700 underline"
+            >
+              www.helicone.ai/api/graphql
+            </Link>
+            .
+          </p>
+          <p className="flex space-x-2 items-center gap-1">
+            For a deeper understanding of our GraphQL offering explore our
+            documentation
+            <Link
+              href="https://docs.helicone.ai/graphql-api/getting-started"
+              className="text-blue-500 hover:text-blue-700 underline"
+            >
+              here
+            </Link>
+            .
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-row justify-between">
         <h1 className="text-2xl font-semibold flex flex-row gap-2 items-center">
-          GraphQL Playground
+          GraphQL Sandbox
           <button
             onClick={() => {
               router.push("/api/graphql");
@@ -46,14 +93,26 @@ const GraphQLPage = (props: GraphQLPageProps) => {
           onClick={() => setShowGraphqlHeader(!showGraphqlHeader)}
           className="pb-3"
         >
-          <BsGearFill className="h-5 w-5" />
+          {!showGraphqlHeader ? (
+            <ChevronDownIcon className="h-5 w-5" />
+          ) : (
+            <ChevronDownIcon className="h-5 w-5 transform rotate-180" />
+          )}
         </button>
       </div>
       <div className="overflow-hidden h-[calc(60vh)] w-full">
         <ApolloExplorer
-          graphRef={"helicone@main"}
+          {...explorerProps}
           initialState={{
             document: DEFAULT_EXAMPLE_QUERY,
+            variables: {
+              limit: 10,
+              offset: 0,
+            },
+            headers: {
+              "use-cookies": "true",
+              cookie: "hello",
+            },
             displayOptions: {
               theme: "light",
               docsPanelState: "closed",
@@ -62,6 +121,7 @@ const GraphQLPage = (props: GraphQLPageProps) => {
           }}
           className={clsx(showGraphqlHeader || "-mt-14", "h-full")}
           runTelemetry={false}
+          includeCookies={true}
         />
       </div>
     </div>

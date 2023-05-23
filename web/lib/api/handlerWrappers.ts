@@ -10,15 +10,24 @@ import { Result } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 
-export interface HandlerWrapperOptions<RetVal> {
+export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
   res: NextApiResponse<RetVal>;
+}
+
+export interface HandlerWrapperOptions<RetVal>
+  extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
   userData: {
     userId: string;
     orgId: string;
     user: User;
   };
+}
+
+export interface HandlerWrapperOptionsAPI<RetVal>
+  extends HandlerWrapperNext<RetVal> {
+  userData?: HandlerWrapperOptions<RetVal>["userData"];
 }
 
 export function withAuth<T>(
@@ -35,6 +44,45 @@ export function withAuth<T>(
     const { data, error } = await supabaseClient.getUserAndOrg();
     if (error !== null || !data.orgId || !data.userId) {
       res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    await handler({
+      req,
+      res,
+      supabaseClient,
+      userData: data,
+    });
+  };
+}
+
+export type HandlerWrapperOptionalSupabase<T> = Omit<
+  HandlerWrapperOptions<T>,
+  "supabaseClient"
+> & {
+  supabaseClient?: HandlerWrapperOptions<T>["supabaseClient"];
+};
+
+export function withGraphQLAuth<T>(
+  handler: (
+    supabaseServer: HandlerWrapperOptionsOptionalUser<T>
+  ) => Promise<void>
+) {
+  return async (
+    req: NextApiRequest,
+    res: NextApiResponse<T | { error: string }>
+  ) => {
+    const supabaseClient = new SupabaseServerWrapper({
+      req,
+      res,
+    });
+    const { data, error } = await supabaseClient.getUserAndOrg();
+    if (error !== null || !data.orgId || !data.userId) {
+      await handler({
+        req,
+        res,
+        supabaseClient,
+        userData: undefined,
+      });
       return;
     }
     await handler({

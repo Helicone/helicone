@@ -1,19 +1,21 @@
 import mainTypeDefs from "../../../lib/api/graphql/schema/main.graphql";
 
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { ApolloServer } from "apollo-server-micro";
 import {
-  ApolloServerPluginLandingPageGraphQLPlayground,
+  ApolloError,
   ApolloServerPluginLandingPageProductionDefault,
 } from "apollo-server-core";
-import { NextApiRequest, NextApiResponse } from "next";
+import { ApolloServer } from "apollo-server-micro";
 import { GraphQLJSON } from "graphql-type-json";
+import { NextApiRequest, NextApiResponse } from "next";
 
 // import "ts-tiny-invariant";
 
 import NextCors from "nextjs-cors";
-import { queryUser } from "../../../lib/api/graphql/query/user";
+import { getOrgIdOrThrow } from "../../../lib/api/graphql/helpers/auth";
 import { heliconeRequest } from "../../../lib/api/graphql/query/heliconeRequest";
+import { queryUser } from "../../../lib/api/graphql/query/user";
+import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -28,13 +30,7 @@ const resolvers = {
 };
 
 export interface Context {
-  auth: string;
-}
-
-function contextFunction(ctx: any): Context {
-  return {
-    auth: ctx.req.headers.authorization ?? "",
-  };
+  getOrgIdOrThrow: () => Promise<string>;
 }
 
 export default async function handler(
@@ -65,13 +61,36 @@ export default async function handler(
           persistExplorerState: true,
           displayOptions: {
             theme: "light",
-            showHeadersAndEnvVars: false,
-            docsPanelState: "closed",
+            showHeadersAndEnvVars: true,
+            docsPanelState: "open",
           },
         },
       }),
     ],
-    context: contextFunction,
+    context: () => {
+      if (req.headers["use-cookies"] === "true") {
+        return {
+          getOrgIdOrThrow: async () => {
+            const supabaseClient = new SupabaseServerWrapper({
+              req,
+              res,
+            });
+            const { data, error } = await supabaseClient.getUserAndOrg();
+
+            if (error !== null || !data.orgId || !data.userId) {
+              throw new ApolloError("Unauthorized", "401");
+            }
+            return data.orgId;
+          },
+        };
+      } else {
+        return {
+          getOrgIdOrThrow: async () => {
+            return await getOrgIdOrThrow(req.headers.authorization ?? "");
+          },
+        };
+      }
+    },
   });
   const startServer = apolloServer.start();
 
