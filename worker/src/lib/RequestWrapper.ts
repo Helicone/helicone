@@ -29,6 +29,10 @@ export interface HeliconeHeaders {
   requestId: Nullable<string>;
   promptId: Nullable<string>;
   promptName: Nullable<string>;
+  omitHeaders: {
+    omitResponse: boolean;
+    omitRequest: boolean;
+  };
 }
 
 export class RequestWrapper {
@@ -120,6 +124,11 @@ export class RequestWrapper {
       requestId: this.getHeaders().get("Helicone-Request-Id") ?? null,
       promptId: this.getHeaders().get("Helicone-Prompt-Id") ?? null,
       promptName: this.getHeaders().get("Helicone-Prompt-Name") ?? null,
+      omitHeaders: {
+        omitResponse:
+          this.getHeaders().get("Helicone-Omit-Response") === "true",
+        omitRequest: this.getHeaders().get("Helicone-Omit-Request") === "true",
+      },
     };
   }
 
