@@ -51,10 +51,6 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
     return Array.from(errorCodes);
   };
 
-  const errorCodes = getErrorCodes();
-
-  console.log(errorsOverTime);
-
   return (
     <div className="grid grid-cols-5 gap-4 h-96">
       <div className="col-span-5 bg-white border border-gray-300 rounded-lg">
