@@ -13,6 +13,7 @@ export interface Env {
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   PROVIDER: "OPENAI" | "ANTHROPIC";
+  TOKEN_CALC_URL: string;
 }
 
 export async function hash(key: string): Promise<string> {
