@@ -71,6 +71,7 @@ export async function handleProxyRequest(
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
               .omitResponse,
         },
+        tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
       response: new Response(body, {
         ...response,

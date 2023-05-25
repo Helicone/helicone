@@ -109,7 +109,11 @@ export class RequestWrapper {
   }
 
   private getAuthorization(): string | undefined {
-    return this.getHeaders().get("Authorization") ?? undefined;
+    return (
+      this.getHeaders().get("Authorization") ?? // Openai
+      this.getHeaders().get("x-api-key") ?? // Anthropic
+      undefined
+    );
   }
 
   private getHeliconeHeaders(): HeliconeHeaders {
