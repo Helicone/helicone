@@ -11,10 +11,6 @@ export class ReadableInterceptor {
   stream: ReadableStream;
 
   constructor(stream: ReadableStream) {
-<<<<<<< HEAD
-    console.log("Bulding ReadableInterceptor");
-=======
->>>>>>> main
     this.chunkEmitter = new EventEmitter();
     this.once(CHUNK_EVENT).then((value) => {
       this.cachedChunk = value;
@@ -23,10 +19,6 @@ export class ReadableInterceptor {
   }
 
   private interceptStream(stream: ReadableStream): ReadableStream {
-<<<<<<< HEAD
-    console.log("Building transform stream");
-=======
->>>>>>> main
     const transform = (
       chunk: any,
       controller: TransformStreamDefaultController<any>

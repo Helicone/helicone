@@ -24,6 +24,7 @@ type Nullable<T> = T | null;
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
   provider: Env["PROVIDER"];
+  tokenCalcUrl: Env["TOKEN_COUNT_URL"];
   rateLimitOptions: Nullable<RateLimitOptions>;
   retryOptions: HeliconeHeaders["retryHeaders"];
   omitOptions: HeliconeHeaders["omitHeaders"];
@@ -59,7 +60,8 @@ export class HeliconeProxyRequestMapper {
 
   constructor(
     private request: RequestWrapper,
-    private provider: Env["PROVIDER"]
+    private provider: Env["PROVIDER"],
+    private tokenCalcUrl: Env["TOKEN_COUNT_URL"]
   ) {}
   // WARNING
   // This function is really weird and mutates the request object.
@@ -121,7 +123,8 @@ export class HeliconeProxyRequestMapper {
         rateLimitOptions: this.rateLimitOptions(),
         requestJson: await this.requestJson(),
         retryOptions: this.request.heliconeHeaders.retryHeaders,
-        provider: "OPENAI",
+        provider: this.provider,
+        tokenCalcUrl: this.tokenCalcUrl,
         providerAuthHash: await this.getProviderAuthHeader(),
         omitOptions: this.request.heliconeHeaders.omitHeaders,
         heliconeAuthHash: heliconeAuthHash ?? undefined,

@@ -1,12 +1,15 @@
 name = "helicone-worker-dev"
 main = "src/index.ts"
 compatibility_date = "2022-11-29"
-compatibility_flags = [ "transformstream_enable_standard_constructor" , "streams_enable_constructors"]
+compatibility_flags = [
+	"transformstream_enable_standard_constructor",
+	"streams_enable_constructors",
+]
 logpush = true
 node_compat = true
 
 kv_namespaces = [
-  { binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
+	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 ]
 
 [vars]
@@ -15,14 +18,17 @@ SUPABASE_URL = "http://localhost:54321"
 CLICKHOUSE_HOST = "http://localhost:18123"
 CLICKHOUSE_USER = "default"
 CLICKHOUSE_PASSWORD = ""
+PROVIDER = "OPENAI"
+TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
+
 
 [env.production]
 name = "helicone-worker-prod"
 routes = [
-	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" }
+	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 kv_namespaces = [
-  { binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
+	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 ]
 
 [env.production.vars]
@@ -31,10 +37,26 @@ CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 
 
+[env.production_anthropic]
+name = "helicone-worker-prod-anthropic"
+routes = [
+	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+]
+kv_namespaces = [
+	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
+]
+
+[env.production_anthropic.vars]
+SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
+CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
+CLICKHOUSE_USER = "default"
+PROVIDER = "ANTHROPIC"
+
+
 [env.production_staging]
 name = "helicone-worker-prod-staging"
 routes = [
-	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" }
+	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 [env.production_staging.vars]
@@ -45,7 +67,7 @@ CLICKHOUSE_USER = "default"
 [env.preview]
 name = "helicone-worker-preview"
 routes = [
-	{ pattern = "preview-oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" }
+	{ pattern = "preview-oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 [env.preview.vars]
