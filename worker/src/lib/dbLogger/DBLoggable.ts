@@ -87,7 +87,6 @@ export class DBLoggable {
     const responseStatus = this.response.status;
     const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
-    console.log("Parsing response");
     if (isStream && this.provider === "ANTHROPIC") {
       return {
         error: null,
