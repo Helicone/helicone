@@ -24,7 +24,27 @@ import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { Message } from "./requestsPage";
 import { useOrg } from "../../shared/layout/organizationContext";
-
+export type PromptResponsePair =
+  | {
+      chat: {
+        request: Message[] | null;
+        response: Message | null;
+      };
+    }
+  | {
+      completion: {
+        request: string | undefined;
+        response: string | undefined;
+      };
+    }
+  | {
+      moderation: {
+        request: string | undefined;
+        results: {
+          [key: string]: Json;
+        }[];
+      };
+    };
 export type RequestWrapper = {
   promptName: string;
   promptRegex: string;
@@ -51,22 +71,7 @@ export type RequestWrapper = {
         [key: string]: Json;
       }
     | undefined;
-  api: {
-    chat?: {
-      request: Message[] | null;
-      response: Message | null;
-    };
-    gpt3?: {
-      request: string | undefined;
-      response: string | undefined;
-    };
-    moderation?: {
-      request: string | undefined;
-      results: {
-        [key: string]: Json;
-      }[];
-    };
-  };
+  api: PromptResponsePair;
   latency: number;
   totalTokens: number;
   completionTokens: number;
@@ -85,23 +90,72 @@ export type RequestWrapper = {
     | null
     | string
     | boolean
-    | {
-        chat?: {
-          request: Message[] | null;
-          response: Message | null;
-        };
-        gpt3?: {
-          request: string | undefined;
-          response: string | undefined;
-        };
-        moderation?: {
-          request: string | undefined;
-          results: {
-            [key: string]: Json;
-          }[];
-        };
-      };
+    | PromptResponsePair;
 };
+
+const getRequestAndResponse = (
+  request: HeliconeRequest
+): RequestWrapper["api"] => {
+  if (request.provider === "ANTHROPIC") {
+    return {
+      completion: {
+        request: request.request_body.prompt,
+        response: request.response_body?.completion,
+      },
+    };
+  } else if (
+    request.request_path?.includes("/chat/") ||
+    request.request_body.model === "gpt-3.5-turbo" ||
+    request.request_body?.messages
+  ) {
+    return {
+      chat: {
+        request: request.request_body.messages,
+        response: request.response_body?.choices?.[0]?.message,
+      },
+    };
+  } else if (request.request_path?.includes("/moderations")) {
+    return {
+      moderation: {
+        request: request.request_body.input,
+        results: request.response_body?.results,
+      },
+    };
+  } else {
+    return {
+      completion: {
+        request: request.request_body.prompt,
+        response: request.response_body?.choices?.[0]?.text,
+      },
+    };
+  }
+};
+
+// God this is a mess
+function getRequestText(api: RequestWrapper["api"]): string {
+  if ("chat" in api) {
+    if (!api.chat.request) {
+      return "";
+    }
+    return api.chat.request.at(-1)?.content ?? "";
+  } else if ("completion" in api) {
+    return api.completion.request ?? "";
+  } else if ("moderation" in api) {
+    return api.moderation.request ?? "";
+  }
+  return "";
+}
+
+function getResponseText(api: RequestWrapper["api"]): string {
+  if ("chat" in api) {
+    return api.chat.response?.content ?? "";
+  } else if ("completion" in api) {
+    return api.completion.response ?? "";
+  } else if ("moderation" in api) {
+    return JSON.stringify(api.moderation, null, 2) ?? "";
+  }
+  return "";
+}
 
 export const convertRequest = (request: HeliconeRequest, values: string[]) => {
   const getLogProbs = (logProbs: number[]) => {
@@ -110,34 +164,6 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
       return sum;
     } else {
       return 0;
-    }
-  };
-
-  const getRequestAndResponse = (request: HeliconeRequest) => {
-    if (
-      request.request_path?.includes("/chat/") ||
-      request.request_body.model === "gpt-3.5-turbo"
-    ) {
-      return {
-        chat: {
-          request: request.request_body.messages,
-          response: request.response_body?.choices?.[0]?.message,
-        },
-      };
-    } else if (request.request_path?.includes("/moderations")) {
-      return {
-        moderation: {
-          request: request.request_body.input,
-          results: request.response_body?.results,
-        },
-      };
-    } else {
-      return {
-        gpt3: {
-          request: request.request_body.prompt,
-          response: request.response_body?.choices?.[0]?.text,
-        },
-      };
     }
   };
 
@@ -150,6 +176,7 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     ? getLogProbs(request.response_body?.choices?.[0]?.logprobs?.token_logprobs)
     : null;
 
+  const api: RequestWrapper["api"] = getRequestAndResponse(request);
   const obj: RequestWrapper = {
     requestBody: request.request_body,
     responseBody: request.response_body,
@@ -174,20 +201,8 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     completionTokens: request.completion_tokens ?? 0,
     promptTokens: request.prompt_tokens ?? 0,
     model: request.request_body.model || request.response_body?.model || "",
-    requestText:
-      (request.request_body?.messages &&
-        request.request_body?.messages?.length > 0 &&
-        request.request_body.messages?.at(-1)) ||
-      request.request_body.input ||
-      request.request_body.prompt ||
-      "",
-    responseText:
-      (request.response_body?.error?.message &&
-        `error: ${request.response_body?.error?.message}`) ||
-      request.response_body?.choices?.[0]?.text ||
-      request.response_body?.choices?.[0]?.message?.content ||
-      JSON.stringify(request.response_body?.results?.[0], null, 2) ||
-      "",
+    requestText: getRequestText(api),
+    responseText: getResponseText(api),
     logProbs: logProbs,
     probability: logProbs ? Math.exp(logProbs) : null,
   };

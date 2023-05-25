@@ -10,7 +10,7 @@ import {
 import { Json } from "../../../supabase/database.types";
 import { Result } from "../../result";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-
+export type Provider = "OPENAI" | "ANTHROPIC";
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
@@ -41,6 +41,7 @@ export interface HeliconeRequest {
   total_tokens: number | null;
   prompt_tokens: number | null;
   completion_tokens: number | null;
+  provider: Provider;
 }
 
 export async function getRequests(
@@ -72,6 +73,7 @@ export async function getRequests(
     request.properties AS request_properties,
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
+    request.provider as provider,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
