@@ -105,8 +105,12 @@ export type RequestWrapper = {
 
 export const convertRequest = (request: HeliconeRequest, values: string[]) => {
   const getLogProbs = (logProbs: number[]) => {
-    const sum = logProbs.reduce((total: any, num: any) => total + num);
-    return sum;
+    if (logProbs && logProbs.length > 0) {
+      const sum = logProbs.reduce((total: any, num: any) => total + num);
+      return sum;
+    } else {
+      return 0;
+    }
   };
 
   const getRequestAndResponse = (request: HeliconeRequest) => {
