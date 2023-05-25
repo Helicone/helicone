@@ -17,6 +17,8 @@ sum(
         WHEN (r.model LIKE '%davinci%') THEN 0.02 * r.prompt_tokens + 0.02 * r.completion_tokens
         WHEN (r.model LIKE '%gpt-3.5-turbo%') THEN 0.002 * r.prompt_tokens + 0.002 * r.completion_tokens
         WHEN (r.model LIKE '%gpt-4%') THEN 0.03 * r.prompt_tokens + 0.06 * r.completion_tokens
+        WHEN (r.model LIKE '%claude-v1%') THEN 0.00163 * r.prompt_tokens + 0.00551 * r.completion_tokens
+        WHEN (r.model LIKE '%claude-instant-v1%') THEN 0.01102 * r.prompt_tokens + 0.03268 * r.completion_tokens
         ELSE 0
       END
   END
