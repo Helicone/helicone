@@ -1,22 +1,24 @@
 import { Database } from "../../../supabase/database.types";
 import { ModelMetrics } from "./modelMetrics";
 
-const OPENAI_COSTS_PROMPT = {
+const COSTS_PROMPT = {
   ada: 0.0004,
   babbage: 0.0005,
   curie: 0.002,
   davinci: 0.02,
   "gpt-3.5-turbo": 0.002,
   "gpt-4": 0.03,
+  //TODO add clauden https://console.anthropic.com/account/pricing
 };
 
-const OPENAI_COSTS_COMPLETIONS = {
+const COSTS_COMPLETIONS = {
   ada: 0.0004,
   babbage: 0.0005,
   curie: 0.002,
   davinci: 0.02,
   "gpt-3.5-turbo": 0.002,
   "gpt-4": 0.06,
+  //TODO add claude https://console.anthropic.com/account/pricing
 };
 
 const OPENAI_FINETUNE_COSTS_PROMPT = {
@@ -52,10 +54,10 @@ export function modelCost(modelRow: ModelMetrics): number {
 
   const promptCosts = is_finetuned_model
     ? OPENAI_FINETUNE_COSTS_PROMPT
-    : OPENAI_COSTS_PROMPT;
+    : COSTS_PROMPT;
   const completionCosts = is_finetuned_model
     ? OPENAI_FINETUNE_COSTS_COMPLETIONS
-    : OPENAI_COSTS_COMPLETIONS;
+    : COSTS_COMPLETIONS;
 
   const promptCost = Object.entries(promptCosts).find(([key]) =>
     model_prefix.includes(key)

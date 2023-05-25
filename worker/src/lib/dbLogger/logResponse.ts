@@ -1,221 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
-import GPT3Tokenizer from "gpt3-tokenizer";
 import { Database } from "../../../supabase/database.types";
-import { Result, mapPostgrestErr } from "../../results";
+import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
 
 const MAX_USER_ID_LENGTH = 7000;
 
-async function getTokenCount(inputText: string): Promise<number> {
-  const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
-  const encoded: { bpe: number[]; text: string[] } =
-    tokenizer.encode(inputText);
-  return encoded.bpe.length;
-}
-
-async function getRequestTokenCount(requestBody: any): Promise<number> {
-  if (requestBody.prompt !== undefined) {
-    const prompt = requestBody.prompt;
-    if (typeof prompt === "string") {
-      return getTokenCount(requestBody.prompt);
-    } else if ("length" in prompt) {
-      return getTokenCount((prompt as string[]).join(""));
-    } else {
-      throw new Error("Invalid prompt type");
-    }
-  } else if (requestBody.messages !== undefined) {
-    const messages = requestBody.messages as { content: string }[];
-
-    let totalTokenCount = 0;
-
-    for (const message of messages) {
-      const tokenCount = await getTokenCount(message.content);
-      totalTokenCount += tokenCount;
-    }
-
-    return totalTokenCount + 3 + messages.length * 5;
-  } else {
-    throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
-  }
-}
-
-function getResponseText(responseBody: any): string {
-  type Choice =
-    | {
-        delta: {
-          content: string;
-        };
-      }
-    | {
-        text: string;
-      };
-  if (responseBody.choices !== undefined) {
-    const choices = responseBody.choices;
-    return (choices as Choice[])
-      .map((c) => {
-        if ("delta" in c) {
-          return c.delta.content;
-        } else if ("text" in c) {
-          return c.text;
-        } else {
-          throw new Error("Invalid choice type");
-        }
-      })
-      .join("");
-  } else {
-    throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
-  }
-}
-
-function consolidateTextFields(responseBody: any[]): any {
-  try {
-    const consolidated = responseBody.reduce((acc, cur) => {
-      if (!cur) {
-        return acc;
-      } else if (acc.choices === undefined) {
-        return cur;
-      } else {
-        return {
-          ...acc,
-          choices: acc.choices.map((c: any, i: number) => {
-            if (!cur.choices) {
-              return c;
-            } else if (
-              c.delta !== undefined &&
-              cur.choices[i]?.delta !== undefined
-            ) {
-              return {
-                delta: {
-                  ...c.delta,
-                  content: c.delta.content
-                    ? c.delta.content + (cur.choices[i].delta.content ?? "")
-                    : cur.choices[i].delta.content,
-                },
-              };
-            } else if (
-              c.text !== undefined &&
-              cur.choices[i]?.text !== undefined
-            ) {
-              return {
-                ...c,
-                text: c.text + (cur.choices[i].text ?? ""),
-              };
-            } else {
-              return c;
-            }
-          }),
-        };
-      }
-    }, {});
-
-    consolidated.choices = consolidated.choices.map((c: any) => {
-      if (c.delta !== undefined) {
-        return {
-          ...c,
-          // delta: undefined,
-          message: {
-            ...c.delta,
-            content: c.delta.content,
-          },
-        };
-      } else {
-        return c;
-      }
-    });
-    return consolidated;
-  } catch (e) {
-    console.error("Error consolidating text fields", e);
-    return responseBody[0];
-  }
-}
-
-async function getUsage(
-  streamedData: any[],
-  requestBody: any
-): Promise<{
-  total_tokens: number;
-  completion_tokens: number;
-  prompt_tokens: number;
-  helicone_calculated: boolean;
-}> {
-  try {
-    const responseTokenCount = await getTokenCount(
-      streamedData
-        .filter((d) => "id" in d)
-        .map((d) => getResponseText(d))
-        .join("")
-    );
-    const requestTokenCount = await getRequestTokenCount(
-      JSON.parse(requestBody)
-    );
-    const totalTokens = requestTokenCount + responseTokenCount;
-    return {
-      total_tokens: totalTokens,
-      completion_tokens: responseTokenCount,
-      prompt_tokens: requestTokenCount,
-      helicone_calculated: true,
-    };
-  } catch (e) {
-    console.error("Error getting usage", e);
-    return {
-      total_tokens: -1,
-      completion_tokens: -1,
-      prompt_tokens: -1,
-      helicone_calculated: false,
-    };
-  }
-}
-
-async function parseResponse(
-  isStream: boolean,
-  responseBody: string,
-  responseStatus: number,
-  requestBody: any
-): Promise<Result<any, string>> {
-  const result = responseBody;
-  try {
-    if (!isStream || responseStatus !== 200) {
-      return {
-        data: JSON.parse(result),
-        error: null,
-      };
-    } else {
-      const lines = result.split("\n").filter((line) => line !== "");
-      const data = lines.map((line, i) => {
-        if (i === lines.length - 1) return {};
-        return JSON.parse(line.replace("data:", ""));
-      });
-
-      try {
-        return {
-          data: {
-            ...consolidateTextFields(data),
-            streamed_data: data,
-            usage: await getUsage(data, requestBody),
-          },
-          error: null,
-        };
-      } catch (e) {
-        console.error("Error parsing response", e);
-        return {
-          data: {
-            streamed_data: data,
-          },
-          error: null,
-        };
-      }
-    }
-  } catch (e) {
-    return {
-      data: null,
-      error: "error parsing response, " + e + ", " + result,
-    };
-  }
-}
-
-async function initialResponseLog(
+export async function initialResponseLog(
   { requestId, startTime }: DBLoggableProps["request"],
   dbClient: SupabaseClient<Database>
 ) {
@@ -231,53 +23,6 @@ async function initialResponseLog(
     ])
     .select("*")
     .single();
-}
-
-export async function readAndLogResponse(
-  response: DBLoggableProps["response"],
-  request: DBLoggableProps["request"],
-  dbClient: SupabaseClient<Database>
-): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
-  const responseBody = await response.getResponseBody();
-
-  // Log delay
-  const initialResponse = mapPostgrestErr(
-    await initialResponseLog(request, dbClient)
-  );
-
-  if (initialResponse.error !== null) {
-    return initialResponse;
-  }
-
-  const parsedResponse = await parseResponse(
-    request.isStream,
-    responseBody,
-    response.status,
-    request.bodyText
-  );
-
-  if (parsedResponse.error === null) {
-    return mapPostgrestErr(
-      await dbClient
-        .from("response")
-        .update({
-          request: request.requestId,
-          body: response.omitLog
-            ? {
-                usage: parsedResponse.data?.usage,
-              }
-            : parsedResponse.data,
-          status: response.status,
-          completion_tokens: parsedResponse.data.usage?.completion_tokens,
-          prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
-        })
-        .eq("id", initialResponse.data.id)
-        .select("*")
-        .single()
-    );
-  } else {
-    return parsedResponse;
-  }
 }
 
 async function getPromptId(
@@ -428,6 +173,7 @@ export async function logRequest(
       truncatedUserId =
         truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
+
     const { data, error } = await dbClient
       .from("request")
       .insert([
@@ -444,6 +190,7 @@ export async function logRequest(
           helicone_user: heliconeApiKeyRow?.user_id,
           helicone_api_key_id: heliconeApiKeyRow?.id,
           helicone_org_id: heliconeApiKeyRow?.organization_id,
+          provider: request.provider,
         },
       ])
       .select("*")

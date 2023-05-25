@@ -13,7 +13,7 @@ export function callPropsFromProxyRequest(
   proxyRequest: HeliconeProxyRequest
 ): CallProps {
   return {
-    apiBase: proxyRequest.api_base ?? "https://api.openai.com",
+    apiBase: proxyRequest.api_base,
     body: proxyRequest.bodyText,
     headers: proxyRequest.requestWrapper.getHeaders(),
     method: proxyRequest.requestWrapper.getMethod(),

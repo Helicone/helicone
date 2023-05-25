@@ -12,6 +12,7 @@ import {
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
+import { getTokenCount } from "../dbLogger/tokenCounter";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -19,7 +20,11 @@ export async function proxyForwarder(
   ctx: ExecutionContext
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
-    await new HeliconeProxyRequestMapper(request).tryToProxyRequest();
+    await new HeliconeProxyRequestMapper(
+      request,
+      env.PROVIDER,
+      env.TOKEN_COUNT_URL
+    ).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
     return new Response(proxyRequestError, {
