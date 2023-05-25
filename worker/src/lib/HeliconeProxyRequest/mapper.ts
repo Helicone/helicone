@@ -26,6 +26,7 @@ export interface HeliconeProxyRequest {
   provider: Env["PROVIDER"];
   rateLimitOptions: Nullable<RateLimitOptions>;
   retryOptions: HeliconeHeaders["retryHeaders"];
+  omitOptions: HeliconeHeaders["omitHeaders"];
 
   requestJson: { stream?: boolean; user?: string } | Record<string, never>;
   bodyText: string | null;
@@ -122,6 +123,7 @@ export class HeliconeProxyRequestMapper {
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: "OPENAI",
         providerAuthHash: await this.getProviderAuthHeader(),
+        omitOptions: this.request.heliconeHeaders.omitHeaders,
         heliconeAuthHash: heliconeAuthHash ?? undefined,
         heliconeProperties: this.request.heliconeProperties,
         userId: await this.request.getUserId(),

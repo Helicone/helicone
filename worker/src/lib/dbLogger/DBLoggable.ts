@@ -10,6 +10,7 @@ export interface DBLoggableProps {
     getResponseBody: () => Promise<string>;
     status: number;
     responseHeaders: Headers;
+    omitLog: boolean;
   };
   request: {
     requestId: string;
@@ -26,6 +27,7 @@ export interface DBLoggableProps {
     path: string;
     properties: Record<string, string>;
     isStream: boolean;
+    omitLog: boolean;
   };
 }
 
@@ -50,6 +52,7 @@ export function dbLoggableRequestFromProxyRequest(
     path: proxyRequest.requestWrapper.url.href,
     properties: proxyRequest.requestWrapper.heliconeProperties,
     isStream: proxyRequest.isStream,
+    omitLog: proxyRequest.omitOptions.omitRequest,
   };
 }
 

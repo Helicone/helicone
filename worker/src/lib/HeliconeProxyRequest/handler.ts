@@ -31,8 +31,6 @@ export async function handleProxyRequest(
     : null;
   let body = interceptor ? interceptor.stream : null;
 
-  console.log("Built interceptor", interceptor);
-
   if (
     proxyRequest.requestWrapper.heliconeHeaders.featureFlags.streamForceFormat
   ) {
@@ -69,6 +67,9 @@ export async function handleProxyRequest(
           getResponseBody: async () => interceptor?.waitForChunk() ?? "",
           responseHeaders: new Headers(response.headers),
           status: response.status,
+          omitLog:
+            proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
+              .omitResponse,
         },
       }),
       response: new Response(body, {

@@ -118,7 +118,6 @@ export async function getRequestCount(
   SELECT count(request.id)::bigint as count
   FROM request
     left join response on request.id = response.request
-    left join user_api_keys on user_api_keys.api_key_hash = request.auth_hash
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})

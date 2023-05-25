@@ -7,15 +7,17 @@ import {
   SingleKey,
   TablesAndViews,
   TextOperators,
+  TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
 import { getRequests } from "../../request/request";
-import { getUserOrThrow } from "../helpers/auth";
+import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
   HeliconeRequest,
   QueryHeliconeRequestArgs,
   HeliconeRequestFilter,
   TextOperators as GQLTextOperators,
   PropertyFilter,
+  DateOperators,
 } from "../schema/types/graphql";
 
 function convertTextOperators(op: GQLTextOperators): SingleKey<TextOperators> {
@@ -24,6 +26,17 @@ function convertTextOperators(op: GQLTextOperators): SingleKey<TextOperators> {
   } else {
     return { ...op } as SingleKey<TextOperators>;
   }
+}
+
+function convertTimeOperators(
+  op: DateOperators
+): SingleKey<TimestampOperators> {
+  if (op.gte) {
+    return { gte: op.gte };
+  } else if (op.lte) {
+    return { lte: op.lte };
+  }
+  throw new Error("Invalid date operator");
 }
 
 const filterInputToFilterLeaf: {
@@ -61,6 +74,26 @@ const filterInputToFilterLeaf: {
       },
     };
   },
+  user: (user) => {
+    if (user === undefined || user === null) {
+      return undefined;
+    }
+    return {
+      request: {
+        user_id: convertTextOperators(user),
+      },
+    };
+  },
+  createdAt: (createdAt) => {
+    if (createdAt === undefined || createdAt === null) {
+      return undefined;
+    }
+    return {
+      request: {
+        created_at: convertTimeOperators(createdAt),
+      },
+    };
+  },
 };
 
 function convertFilterInputToFilterLeaf(
@@ -85,7 +118,7 @@ export async function heliconeRequest(
   context: Context,
   info: any
 ): Promise<HeliconeRequest[]> {
-  const userId = await getUserOrThrow(context.auth);
+  const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {
     limit: args.limit ?? 100,
     offset: args.offset ?? 0,
@@ -98,7 +131,9 @@ export async function heliconeRequest(
   );
   const filter = filterListToTree(convertedFilters, "and");
 
-  const { data, error } = await getRequests(userId, filter, offset, limit, {});
+  const { data, error } = await getRequests(orgId, filter, offset, limit, {
+    created_at: "desc",
+  });
   if (error !== null) {
     throw new ApolloError(error, "UNAUTHENTICATED");
   }

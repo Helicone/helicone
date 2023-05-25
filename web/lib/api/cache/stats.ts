@@ -107,9 +107,16 @@ GROUP BY response.body ->> 'model'::text
 ORDER BY count DESC
 LIMIT 10;
     `;
-  return dbExecute<{ model: string; count: number }>(
-    query,
-    builtFilter.argsAcc
+  return resultMap(
+    await dbExecute<{ model: string | null; count: number }>(
+      query,
+      builtFilter.argsAcc
+    ),
+    (x) =>
+      x.map((y) => ({
+        model: y.model ?? "Unknown",
+        count: +y.count,
+      }))
   );
 }
 

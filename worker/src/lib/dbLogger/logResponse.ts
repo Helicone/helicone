@@ -6,6 +6,8 @@ import { Result, mapPostgrestErr } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
 
+const MAX_USER_ID_LENGTH = 7000;
+
 async function getTokenCount(inputText: string): Promise<number> {
   const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
   const encoded: { bpe: number[]; text: string[] } =
@@ -13,20 +15,27 @@ async function getTokenCount(inputText: string): Promise<number> {
   return encoded.bpe.length;
 }
 
-function getRequestString(requestBody: any): [string, number] {
+async function getRequestTokenCount(requestBody: any): Promise<number> {
   if (requestBody.prompt !== undefined) {
     const prompt = requestBody.prompt;
     if (typeof prompt === "string") {
-      return [requestBody.prompt, 0];
+      return getTokenCount(requestBody.prompt);
     } else if ("length" in prompt) {
-      return [(prompt as string[]).join(""), 0];
+      return getTokenCount((prompt as string[]).join(""));
     } else {
       throw new Error("Invalid prompt type");
     }
   } else if (requestBody.messages !== undefined) {
     const messages = requestBody.messages as { content: string }[];
 
-    return [messages.map((m) => m.content).join(""), 3 + messages.length * 5];
+    let totalTokenCount = 0;
+
+    for (const message of messages) {
+      const tokenCount = await getTokenCount(message.content);
+      totalTokenCount += tokenCount;
+    }
+
+    return totalTokenCount + 3 + messages.length * 5;
   } else {
     throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
   }
@@ -138,11 +147,9 @@ async function getUsage(
         .map((d) => getResponseText(d))
         .join("")
     );
-    const [requestString, paddingTokenCount] = getRequestString(
+    const requestTokenCount = await getRequestTokenCount(
       JSON.parse(requestBody)
     );
-    const requestTokenCount =
-      (await getTokenCount(requestString)) + paddingTokenCount;
     const totalTokens = requestTokenCount + responseTokenCount;
     return {
       total_tokens: totalTokens,
@@ -255,7 +262,11 @@ export async function readAndLogResponse(
         .from("response")
         .update({
           request: request.requestId,
-          body: parsedResponse.data,
+          body: response.omitLog
+            ? {
+                usage: parsedResponse.data?.usage,
+              }
+            : parsedResponse.data,
           status: response.status,
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
@@ -406,18 +417,24 @@ export async function logRequest(
       error: `error parsing request body: ${request.bodyText}`,
     };
     try {
-      requestBody = JSON.parse(request.bodyText);
+      requestBody = JSON.parse(request.bodyText ?? "{}");
     } catch (e) {
       console.error("Error parsing request body", e);
     }
 
+    let truncatedUserId = request.userId ?? "";
+
+    if (truncatedUserId.length > MAX_USER_ID_LENGTH) {
+      truncatedUserId =
+        truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
+    }
     const { data, error } = await dbClient
       .from("request")
       .insert([
         {
           id: request.requestId,
           path: request.path,
-          body: requestBody,
+          body: request.omitLog ? {} : requestBody,
           auth_hash: request.providerApiKeyAuthHash,
           user_id: request.userId,
           prompt_id: request.promptId,
