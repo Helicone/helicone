@@ -157,7 +157,7 @@ SELECT
   count(*) as count,
   MAX(request.created_at) as last_used,
   MIN(request.created_at) as first_used,
-  (select (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as prompt
+  (select (coalesce(request.body ->>'prompt', request.body ->'messages'->-1->>'content'))::text as prompt
     from request r
     where r.id = request.id
     limit 1
