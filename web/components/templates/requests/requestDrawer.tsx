@@ -160,7 +160,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             </div>
             {viewMode === "Pretty" ? (
               <>
-                {wrappedRequest.api.chat ? (
+                {"chat" in wrappedRequest.api ? (
                   <Chat
                     chatProperties={{
                       request: wrappedRequest.api.chat.request,
@@ -177,15 +177,15 @@ const RequestDrawer = (props: RequestDrawerProps) => {
                       return acc;
                     }, {})}
                   />
-                ) : wrappedRequest.api.moderation ? (
+                ) : "moderation" in wrappedRequest.api ? (
                   <Moderation
                     request={wrappedRequest.api.moderation.request}
                     response={wrappedRequest.api.moderation.results}
                   />
                 ) : wrappedRequest.promptRegex === "" ? (
                   <Completion
-                    request={wrappedRequest.api.gpt3?.request}
-                    response={wrappedRequest.api.gpt3?.response}
+                    request={wrappedRequest.api.completion?.request}
+                    response={wrappedRequest.api.completion?.response}
                   />
                 ) : (
                   <CompletionRegex

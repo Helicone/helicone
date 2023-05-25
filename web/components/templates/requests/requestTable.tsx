@@ -71,7 +71,9 @@ const RequestTable = (props: RequestProps) => {
     "Condensed"
   );
 
-  const columnHelper = createColumnHelper<RequestWrapper>();
+  // Had to force to any until I can figure out how to type this properly
+  // I think we need to pull out the generic JSON type of RequestWrapper
+  const columnHelper = createColumnHelper<any>();
 
   const filteredColumns = columns
     .filter((c) => c.active)
