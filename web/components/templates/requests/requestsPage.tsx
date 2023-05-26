@@ -1,20 +1,15 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import {
-  ColumnOrderState,
-  ColumnSizingState,
-  createColumnHelper,
-} from "@tanstack/react-table";
-import { NextRouter, Router, useRouter } from "next/router";
+import { ColumnOrderState, ColumnSizingState } from "@tanstack/react-table";
+import { NextRouter, useRouter } from "next/router";
 import Papa from "papaparse";
 
 import { useEffect, useState } from "react";
 import { HeliconeRequest } from "../../../lib/api/request/request";
-import { Result } from "../../../lib/result";
 import { truncString } from "../../../lib/stringHelpers";
 import {
-  getTimeIntervalAgo,
   TimeInterval,
+  getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useGetKeys } from "../../../services/hooks/keys";
@@ -25,28 +20,25 @@ import {
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
 import { Database, Json } from "../../../supabase/database.types";
+import { Column } from "../../ThemedTableV2";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedTableHeader, {
-  escapeCSVString,
-} from "../../shared/themed/themedTableHeader";
-import ThemedTableV3 from "./requestTable";
+import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import {
   capitalizeWords,
   getUSDate,
   removeLeadingWhitespace,
 } from "../../shared/utils/utils";
-import { Column } from "../../ThemedTableV2";
 import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
-import useRequestsPage, {
-  convertRequest,
-  RequestWrapper,
-} from "./useRequestsPage";
 import RequestTable from "./requestTable";
+import useRequestsPage, {
+  RequestWrapper,
+  convertRequest,
+} from "./useRequestsPage";
 
 export type Message = {
   role: string;
