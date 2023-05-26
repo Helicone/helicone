@@ -3,10 +3,10 @@ import { Configuration, OpenAIApi } from "openai";
 import { v4 as uuidv4 } from "uuid";
 import fetch from 'node-fetch';
 
-
-
 const apiKey = process.env.OPENAI_API_KEY;
 const heliconeApiKey = process.env.HELICONE_API_KEY_LOCAL;
+const azureOpenAIApiKey = process.env.AZURE_OPENAI_API_KEY || "";
+const azureOpenAIEndpoint = process.env.AZURE_OPENAI_ENDPOINT || "";
 
 if (!apiKey || !heliconeApiKey) {
   throw new Error("API keys must be set as environment variables.");
@@ -118,3 +118,33 @@ test("cache test using fetch", async () => {
   expect(secondResponseBody).toEqual(firstResponseBody);
 });
 
+// Test azure
+test("azure", async () => {
+  const configuration = new Configuration({
+    basePath: "http://127.0.0.1:8787/v1/",
+    baseOptions: {
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": azureOpenAIApiKey,
+        "Helicone-OpenAI-Api-Base": `https://${azureOpenAIEndpoint}/openai/deployments/gpt-4/`,
+        "Helicone-Property-Session": "24",
+      },
+      params: {
+        "api-version": "2023-03-15-preview",
+      },
+    },
+  });
+
+  const openai = new OpenAIApi(configuration);
+
+  await openai.createChatCompletion({
+    model: "gpt-4",
+    messages: [
+      {
+        "role": "user",
+        "content": "Say hi",
+      }
+    ],
+    max_tokens: 10,
+  });
+}, 60000);

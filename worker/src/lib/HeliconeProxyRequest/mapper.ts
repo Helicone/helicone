@@ -152,8 +152,11 @@ export class HeliconeProxyRequestMapper {
 
   private async getProviderAuthHeader(): Promise<string | undefined> {
     if (this.provider === "OPENAI") {
+      const azureApiKey = this.request.getHeaders().get("api-key");
       return this.request.authorization
         ? await hash(this.request.authorization)
+        : azureApiKey !== null
+        ? await hash(azureApiKey)
         : undefined;
     } else if (this.provider === "ANTHROPIC") {
       return this.request.authorization
@@ -206,8 +209,7 @@ export class HeliconeProxyRequestMapper {
   private validateApiConfiguration(api_base: string | undefined): boolean {
     const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
     const anthropicPattern = /^https:\/\/api\.anthropic\.com\/v\d+\/?$/;
-    const azurePattern =
-      /^https:\/\/([^.]*\.azure-api\.net|[^.]*\.openai\.azure\.com)\/?$/;
+    const azurePattern = /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net)(\/.*)?$/;
     const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
     const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
 
