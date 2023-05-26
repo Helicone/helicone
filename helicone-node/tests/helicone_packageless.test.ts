@@ -119,7 +119,7 @@ test("cache test using fetch", async () => {
 });
 
 // Test azure
-test.only("azure", async () => {
+test("azure", async () => {
   const configuration = new Configuration({
     basePath: "http://127.0.0.1:8787/v1/",
     baseOptions: {
