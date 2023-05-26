@@ -357,3 +357,21 @@ async def test_async_nostream_cache():
     del response2_copy['helicone']['cache']
 
     assert response1_copy == response2_copy
+
+def test_azure():
+    openai.api_type = "azure"
+    openai.api_base = f"https://{os.environ['AZURE_OPENAI_ENDPOINT']}"
+    openai.api_version = "2023-03-15-preview"
+    openai.api_key = os.environ["AZURE_OPENAI_API_KEY"]
+
+    openai.ChatCompletion.create(
+        engine="gpt-4",
+        messages=[
+            {
+                "role": "user",
+                "content":"Say hi!",
+            },
+        ],
+        temperature=1,
+        max_tokens=10,
+    )
