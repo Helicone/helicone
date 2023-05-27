@@ -147,16 +147,16 @@ export async function getDashboardData(
   const filter: FilterNode = {
     right: {
       left: {
-        request: {
-          created_at: {
+        response_copy_v2: {
+          request_created_at: {
             gte: timeFilter.start.toISOString(),
           },
         },
       },
       operator: "and",
       right: {
-        request: {
-          created_at: {
+        response_copy_v2: {
+          request_created_at: {
             lte: timeFilter.end.toISOString(),
           },
         },

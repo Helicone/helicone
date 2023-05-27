@@ -5,6 +5,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
+import { getCostOverTime } from "../../../lib/api/metrics/getCostOverTime";
 
 import { getModelUsageOverTime } from "../../../lib/api/metrics/getModelUsageOverTime";
 import {
@@ -22,11 +23,14 @@ async function handler(
   options: HandlerWrapperOptions<Result<CostOverTime[], string>>
 ) {
   await getTimeDataHandler(options, (d) =>
-    getSomeDataOverTime(d, getModelUsageOverTime, {
-      reducer: (acc, d) => ({ cost: acc.cost + modelCost(d) }),
-      initial: { cost: 0 },
+    getSomeDataOverTime(d, getCostOverTime, {
+      reducer: (acc, d) => ({
+        cost: acc.cost + d.cost,
+      }),
+      initial: {
+        cost: 0,
+      },
     })
   );
 }
-
 export default withAuth(handler);

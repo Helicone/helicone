@@ -76,27 +76,7 @@ export async function getTimeDataHandler<T>(
 
   const metrics = await dataExtractor({
     timeFilter,
-    userFilter: {
-      left: filterListToTree(userFilters, "and"),
-      operator: "and",
-      right: {
-        left: {
-          request: {
-            created_at: {
-              gte: timeFilter.start,
-            },
-          },
-        },
-        operator: "and",
-        right: {
-          request: {
-            created_at: {
-              lte: timeFilter.end,
-            },
-          },
-        },
-      },
-    },
+    userFilter: filterListToTree(userFilters, "and"),
     orgId,
     dbIncrement,
     timeZoneDifference,

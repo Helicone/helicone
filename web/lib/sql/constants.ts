@@ -1,26 +1,21 @@
-export const CLICKHOUSE_PRICE_CALC = `
+export const CLICKHOUSE_PRICE_CALC = (table: string) => `
 sum(
   CASE
-    WHEN r.model LIKE '%:%' THEN
-      CASE
-        WHEN (r.model LIKE '%ada%') THEN 0.0016 * r.prompt_tokens + 0.0016 * r.completion_tokens
-        WHEN (r.model LIKE '%babbage%') THEN 0.0024 * r.prompt_tokens + 0.0024 * r.completion_tokens
-        WHEN (r.model LIKE '%curie%') THEN 0.012 * r.prompt_tokens + 0.012 * r.completion_tokens
-        WHEN (r.model LIKE '%davinci%') THEN 0.12 * r.prompt_tokens + 0.12 * r.completion_tokens
-        ELSE 0
-      END
-    ELSE
-      CASE
-        WHEN (r.model LIKE '%ada%') THEN 0.0004 * r.prompt_tokens + 0.0004 * r.completion_tokens
-        WHEN (r.model LIKE '%babbage%') THEN 0.0005 * r.prompt_tokens + 0.0005 * r.completion_tokens
-        WHEN (r.model LIKE '%curie%') THEN 0.002 * r.prompt_tokens + 0.002 * r.completion_tokens
-        WHEN (r.model LIKE '%davinci%') THEN 0.02 * r.prompt_tokens + 0.02 * r.completion_tokens
-        WHEN (r.model LIKE '%gpt-3.5-turbo%') THEN 0.002 * r.prompt_tokens + 0.002 * r.completion_tokens
-        WHEN (r.model LIKE '%gpt-4%') THEN 0.03 * r.prompt_tokens + 0.06 * r.completion_tokens
-        WHEN (r.model LIKE '%claude-v1%') THEN 0.00163 * r.prompt_tokens + 0.00551 * r.completion_tokens
-        WHEN (r.model LIKE '%claude-instant-v1%') THEN 0.01102 * r.prompt_tokens + 0.03268 * r.completion_tokens
-        ELSE 0
-      END
+    -- Finetuned
+    WHEN (${table}.model LIKE '%ada:%') THEN 0.0016 * ${table}.prompt_tokens + 0.0016 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%babbage:%') THEN 0.0024 * ${table}.prompt_tokens + 0.0024 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%curie:%') THEN 0.012 * ${table}.prompt_tokens + 0.012 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%davinci:%') THEN 0.12 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
+    -- Non-finetuned
+    WHEN (${table}.model LIKE '%ada%') THEN 0.0004 * ${table}.prompt_tokens + 0.0004 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%babbage%') THEN 0.0005 * ${table}.prompt_tokens + 0.0005 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%curie%') THEN 0.002 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%davinci%') THEN 0.02 * ${table}.prompt_tokens + 0.02 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-3.5-turbo%') THEN 0.002 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-4%') THEN 0.03 * ${table}.prompt_tokens + 0.06 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%claude-v1%') THEN 0.00163 * ${table}.prompt_tokens + 0.00551 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%claude-instant-v1%') THEN 0.01102 * ${table}.prompt_tokens + 0.03268 * ${table}.completion_tokens
+    ELSE 0
   END
   ) / 1000
 `;

@@ -93,17 +93,17 @@ export const useDashboardPage = ({
         const filter: FilterNode = {
           right: {
             left: {
-              request: {
-                created_at: {
-                  gte: timeFilter.start.toISOString(),
+              response_copy_v2: {
+                request_created_at: {
+                  gte: timeFilter.start,
                 },
               },
             },
             operator: "and",
             right: {
-              request: {
-                created_at: {
-                  lte: timeFilter.end.toISOString(),
+              response_copy_v2: {
+                request_created_at: {
+                  lte: timeFilter.end,
                 },
               },
             },
@@ -149,13 +149,6 @@ export const useDashboardPage = ({
           end: Date;
         };
         const userFilters = query.queryKey[2] as FilterLeaf[];
-        userFilters.push({
-          response: {
-            status: {
-              "not-equals": 200,
-            },
-          },
-        });
         const timeInterval = getTimeInterval(timeFilter);
 
         return fetchDataOverTime<ErrorOverTime>(

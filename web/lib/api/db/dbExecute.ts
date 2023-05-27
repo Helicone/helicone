@@ -2,18 +2,28 @@ import { Client, Pool } from "pg";
 import { Result } from "../../result";
 
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
+import dateFormat from "dateformat";
 
 export async function dbQueryClickhouse<T>(
   query: string,
   parameters: (number | string | boolean | Date)[]
 ): Promise<Result<T[], string>> {
   try {
-    const query_params = parameters.reduce((acc, parameter, index) => {
-      return {
-        ...acc,
-        [`val_${index}`]: parameter,
-      };
-    }, {});
+    const query_params = parameters
+      .map((p) => {
+        if (p instanceof Date) {
+          //ex: 2023-05-27T08:21:26
+          return dateFormat(p, "yyyy-mm-dd HH:MM:ss");
+        } else {
+          return p;
+        }
+      })
+      .reduce((acc, parameter, index) => {
+        return {
+          ...acc,
+          [`val_${index}`]: parameter,
+        };
+      }, {});
 
     const client = clickhouseCreateClient({
       host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",

@@ -1,37 +1,23 @@
-import { SupabaseClient, User } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 
 import { Result } from "../../result";
+import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import {
   isValidTimeFilter,
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
-export interface GetTimeDataOptions {
-  filter: FilterNode;
-  dbIncrement: TimeIncrement;
-}
-
-export interface AuthClient {
-  client: SupabaseClient;
-  user: User;
-}
-
 export interface DateCountDBModel {
   created_at_trunc: Date;
-  count: number;
+  cost: number;
 }
 
-export async function getTotalRequestsOverTime({
+export async function getCostOverTime({
   timeFilter,
   userFilter,
   orgId,
@@ -78,7 +64,7 @@ export async function getTotalRequestsOverTime({
   const query = `
 SELECT
   ${dateTrunc} as created_at_trunc,
-  count(*) as count
+  ${CLICKHOUSE_PRICE_CALC("response_copy_v2")} AS cost
 FROM response_copy_v2
 WHERE (
   ${builtFilter.filter}
@@ -99,7 +85,7 @@ GROUP BY ${dateTrunc}
       created_at_trunc: new Date(
         new Date(d.created_at_trunc).getTime() - timeZoneDifference * 60 * 1000
       ),
-      count: Number(d.count),
+      cost: Number(d.cost),
     })),
     error: null,
   };

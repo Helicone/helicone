@@ -20,6 +20,8 @@ export type NumberOperators = Record<
 
 export type TimestampOperators = Record<"gte" | "lte", string>;
 
+export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
+
 export type SingleKey<T> = {
   [K in keyof T]: Partial<{
     [P in keyof T]: P extends K ? T[P] : never;
@@ -72,7 +74,7 @@ export type FilterLeafUserMetrics = SingleKey<UserMetricsToOperators>;
 type ResponseCopyV1ToOperators = {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
-  request_created_at: SingleKey<TimestampOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
   auth_hash: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   user_id: SingleKey<TextOperators>;
