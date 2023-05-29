@@ -185,7 +185,7 @@ export default function HomePage() {
               {/* <p className="bg-sky-300 p-2 rounded-lg w-fit">Generative AI</p> */}
             </div>
             <p className="text-lg leading-8 text-gray-600">
-              We're committed to helping{" "}
+              We&apos;re committed to helping{" "}
               <span className="underline underline-offset-2 decoration-dashed">
                 LLM-developers
               </span>{" "}
@@ -301,10 +301,10 @@ export default function HomePage() {
             </p>
             <p className="text-xl text-gray-500 leading-9">
               Navigating the vast landscape of AI and large language models can
-              be complex. That’s why we've built an observability tool that
+              be complex. That’s why we&apos;ve built an observability tool that
               simplifies the process and amplifies understanding. We provide you
               with comprehensive insights, allowing you to deeply understand
-              your AI's behavior, performance, and potential bottlenecks.
+              your AI&apos;s behavior, performance, and potential bottlenecks.
             </p>
           </div>
           <div className="flex flex-col col-span-2 h-full sticky top-[5%] 2xl:top-[10%]">
@@ -321,9 +321,9 @@ export default function HomePage() {
               In the fast-paced world of AI, resource management is key. With
               our robust User Rate Limiting feature, you can ensure your Large
               Language Model (LLM) endpoints are safeguarded against excessive
-              requests. We've made it simple and seamless to limit the frequency
-              of user access, all without hampering your service quality or user
-              experience.
+              requests. We&apos;ve made it simple and seamless to limit the
+              frequency of user access, all without hampering your service
+              quality or user experience.
             </p>
           </div>
           <div className="flex flex-col col-span-2 col-start-1 space-y-8 py-32">
@@ -334,11 +334,12 @@ export default function HomePage() {
               Optimize Your Resources, Enhance Your Efficiency
             </p>
             <p className="text-xl text-gray-500 leading-9">
-              In today's dynamic AI landscape, efficient resource utilization is
-              paramount. That's why we've innovated with our new Bucket Cache
-              feature, allowing you to cache any number of responses for a given
-              request. No longer will you need to expend valuable resources
-              hitting the LLM-endpoint repeatedly with identical requests.
+              In today&apos;s dynamic AI landscape, efficient resource
+              utilization is paramount. That&apos;s why we&apos;ve innovated
+              with our new Bucket Cache feature, allowing you to cache any
+              number of responses for a given request. No longer will you need
+              to expend valuable resources hitting the LLM-endpoint repeatedly
+              with identical requests.
             </p>
           </div>
         </div>
@@ -354,10 +355,10 @@ export default function HomePage() {
             </p>
             <p className="text-xl text-gray-400 leading-9">
               Your AI tools should adapt to your unique workflow, not the other
-              way around. That's why we've incorporated extensive support for a
-              range of integrations, along with comprehensive GraphQL support
-              and flexible deployment options. Now, you can work the way you
-              want, with the tools you prefer.
+              way around. That&apos;s why we&apos;ve incorporated extensive
+              support for a range of integrations, along with comprehensive
+              GraphQL support and flexible deployment options. Now, you can work
+              the way you want, with the tools you prefer.
             </p>
             <div>
               <button className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-lg">
@@ -377,7 +378,7 @@ export default function HomePage() {
               Open Source
             </p>
             <p className="text-2xl text-gray-900 font-semibold">
-              Open-source is more than a choice—it's a commitment to
+              Open-source is more than a choice—it&apos;s a commitment to
               user-centric development, community collaboration, and absolute
               transparency.
             </p>
