@@ -1,5 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
+import { MetricsBackendBody } from "../../../components/templates/dashboard/useDashboardPage";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -15,14 +16,25 @@ import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 async function handler(
   options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>
 ) {
-  await getTimeDataHandler(options, (d) =>
-    getSomeDataOverTime(d, getTotalRequestsOverTime, {
-      reducer: (acc, d) => ({
-        count: acc.count + d.count,
-      }),
-      initial: {
-        count: 0,
-      },
+  const {
+    req,
+    res,
+    userData: { orgId },
+  } = options;
+  const {
+    timeFilter,
+    filter: userFilters,
+    dbIncrement,
+    timeZoneDifference,
+  } = options.req.body as MetricsBackendBody;
+
+  res.status(200).json(
+    await getTotalRequestsOverTime({
+      timeFilter,
+      userFilter: userFilters,
+      orgId,
+      dbIncrement: dbIncrement ?? "hour",
+      timeZoneDifference,
     })
   );
 }

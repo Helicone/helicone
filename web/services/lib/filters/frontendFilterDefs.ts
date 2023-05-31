@@ -99,7 +99,42 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
   category: string;
 };
 
-export const requestTableFilters: [
+export const DASHBOARD_PAGE_TABLE_FILTERS: [
+  SingleFilterDef<"response_copy_v2">,
+  SingleFilterDef<"response_copy_v2">,
+  SingleFilterDef<"response_copy_v2">,
+  SingleFilterDef<"response_copy_v2">
+] = [
+  {
+    label: "Model",
+    operators: textOperators,
+    category: "request",
+    table: "response_copy_v2",
+    column: "model",
+  },
+  {
+    label: "Status",
+    operators: numberOperators,
+    category: "request",
+    table: "response_copy_v2",
+    column: "status",
+  },
+  {
+    label: "Latency",
+    operators: numberOperators,
+    category: "request",
+    table: "response_copy_v2",
+    column: "latency",
+  },
+  {
+    label: "User",
+    operators: textOperators,
+    category: "request",
+    table: "response_copy_v2",
+    column: "user_id",
+  },
+];
+export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
   SingleFilterDef<"response">,

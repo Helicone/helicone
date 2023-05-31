@@ -15,7 +15,8 @@ import { getUSDate } from "../../../shared/utils/utils";
 import { Loading } from "../dashboardPage";
 
 interface RequestsPanelProps {
-  requestsOverTime: Loading<Result<RequestsOverTime[], string>>;
+  requestsOverTime: RequestsOverTime[];
+  isLoading: boolean;
   timeMap: (date: Date) => string;
   advancedFilters: FilterNode;
 }
@@ -31,16 +32,16 @@ function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
 }
 
 const RequestsPanel = (props: RequestsPanelProps) => {
-  const { requestsOverTime, timeMap, advancedFilters } = props;
+  const { requestsOverTime, timeMap, advancedFilters, isLoading } = props;
 
-  const { data, isLoading } = useGetTopUsers(
-    1,
-    10,
-    {
-      total_requests: "desc",
-    },
-    advancedFilters
-  );
+  // const { data, isLoading } = useGetTopUsers(
+  //   1,
+  //   10,
+  //   {
+  //     total_requests: "desc",
+  //   },
+  //   advancedFilters
+  // );
 
   return (
     <div className="grid grid-cols-5 gap-4 h-96">
@@ -50,13 +51,13 @@ const RequestsPanel = (props: RequestsPanelProps) => {
             Requests
           </h3>
           <div className="h-72 px-4">
-            {requestsOverTime === "loading" ? (
+            {isLoading ? (
               <div className="h-full w-full flex-col flex p-8">
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
               </div>
             ) : (
               <RenderBarChart
-                data={unwrapDefaultEmpty(requestsOverTime).map((r) => ({
+                data={requestsOverTime.map((r) => ({
                   ...r,
                   value: r.count,
                 }))}

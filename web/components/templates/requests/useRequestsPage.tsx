@@ -15,7 +15,7 @@ import {
 import {
   getPropertyFilters,
   getValueFilters,
-  requestTableFilters,
+  REQUEST_TABLE_FILTERS,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { getPropertyParams } from "../../../services/lib/propertyParams";
@@ -255,7 +255,7 @@ const useRequestsPage = (
 
   const { feedback, isLoading: isFeedbackLoading } = useGetFeedback();
 
-  const filterMap = (requestTableFilters as SingleFilterDef<any>[]).concat(
+  const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     propertyFilters
   );
 

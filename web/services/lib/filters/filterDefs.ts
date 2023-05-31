@@ -1,4 +1,5 @@
 import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
+import { TimeFilter } from "../../../lib/api/handlerWrappers";
 import { SingleFilterDef } from "./frontendFilterDefs";
 export type AllOperators =
   | "equals"
@@ -19,6 +20,8 @@ export type NumberOperators = Record<
 >;
 
 export type TimestampOperators = Record<"gte" | "lte", string>;
+
+export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
 
 export type SingleKey<T> = {
   [K in keyof T]: Partial<{
@@ -72,7 +75,7 @@ export type FilterLeafUserMetrics = SingleKey<UserMetricsToOperators>;
 type ResponseCopyV1ToOperators = {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
-  request_created_at: SingleKey<TimestampOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
   auth_hash: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   user_id: SingleKey<TextOperators>;
@@ -139,6 +142,32 @@ export interface FilterBranch {
 }
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
+
+export function timeFilterToFilterNode(
+  filter: TimeFilter,
+  table: keyof TablesAndViews
+): FilterNode {
+  if (table === "response_copy_v2") {
+    return {
+      left: {
+        response_copy_v2: {
+          request_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        response_copy_v2: {
+          request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  }
+  throw new Error("Table not supported");
+}
 
 export function filterListToTree(
   list: FilterNode[],

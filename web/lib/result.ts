@@ -50,3 +50,30 @@ export function resultMap<T, K, Z>(
 export function ok<T, K>(data: T): Result<T, K> {
   return { data: data, error: null };
 }
+
+export function err<T, K>(error: K): Result<T, K> {
+  return { data: null, error: error };
+}
+
+type NonNull<T> = T extends null ? never : T;
+type Unwrap<T> = T extends Result<infer U, infer K> ? NonNull<U> : never;
+type UnwrapError<T> = T extends Result<infer U, infer K> ? NonNull<K> : never;
+type AllSuccessTuple<T extends Result<any, any>[]> = {
+  [I in keyof T]: Unwrap<T[I]>;
+};
+
+export function resultsAll<T extends Result<any, any>[]>(
+  results: [...T]
+): Result<AllSuccessTuple<T>, UnwrapError<T[number]>> {
+  const data: any[] = [];
+
+  for (let i = 0; i < results.length; i++) {
+    if (isError(results[i])) {
+      return err(results[i].error);
+    } else {
+      data.push(results[i].data);
+    }
+  }
+
+  return ok(data as AllSuccessTuple<T>);
+}

@@ -1,7 +1,7 @@
+import { MetricsBackendBody } from "../../../components/templates/dashboard/useDashboardPage";
 import {
   FilterLeaf,
   FilterNode,
-  filterListToTree,
 } from "../../../services/lib/filters/filterDefs";
 import { Result } from "../../result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
@@ -67,36 +67,23 @@ export async function getTimeDataHandler<T>(
     userData: { orgId },
   } = options;
 
-  const { timeFilter, userFilters, dbIncrement, timeZoneDifference } =
-    req.body as OverTimeRequestQueryParams;
+  const {
+    timeFilter,
+    filter: userFilters,
+    dbIncrement,
+    timeZoneDifference,
+  } = req.body as MetricsBackendBody;
   if (!timeFilter || !userFilters || !dbIncrement) {
-    res.status(400).json({ error: "Bad request", data: null });
+    res.status(400).json({
+      error: "Bad request, filters or inc not there" + JSON.stringify(req.body),
+      data: null,
+    });
     return;
   }
 
   const metrics = await dataExtractor({
     timeFilter,
-    userFilter: {
-      left: filterListToTree(userFilters, "and"),
-      operator: "and",
-      right: {
-        left: {
-          request: {
-            created_at: {
-              gte: timeFilter.start,
-            },
-          },
-        },
-        operator: "and",
-        right: {
-          request: {
-            created_at: {
-              lte: timeFilter.end,
-            },
-          },
-        },
-      },
-    },
+    userFilter: userFilters,
     orgId,
     dbIncrement,
     timeZoneDifference,
