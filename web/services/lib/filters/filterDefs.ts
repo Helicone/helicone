@@ -1,4 +1,5 @@
 import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
+import { TimeFilter } from "../../../lib/api/handlerWrappers";
 import { SingleFilterDef } from "./frontendFilterDefs";
 export type AllOperators =
   | "equals"
@@ -141,6 +142,32 @@ export interface FilterBranch {
 }
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
+
+export function timeFilterToFilterNode(
+  filter: TimeFilter,
+  table: keyof TablesAndViews
+): FilterNode {
+  if (table === "response_copy_v2") {
+    return {
+      left: {
+        response_copy_v2: {
+          request_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        response_copy_v2: {
+          request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  }
+  throw new Error("Table not supported");
+}
 
 export function filterListToTree(
   list: FilterNode[],

@@ -1,16 +1,17 @@
-import { UserGroupIcon } from "@heroicons/react/24/outline";
-import {
-  useErrorPageCodes,
-  useErrorPageOverTime,
-} from "../../../../services/hooks/useErrorPage";
-import { StackedBarChart } from "../../../shared/metrics/stackedBarChart";
+import { UseQueryResult } from "@tanstack/react-query";
+import { getErrorCodes } from "../../../../lib/api/metrics/errorCodes";
+import { Result } from "../../../../lib/result";
+import { UnPromise } from "../../../../lib/tsxHelpers";
+import { RenderBarChart } from "../../../shared/metrics/barChart";
 import { RenderPieChart } from "../../../shared/metrics/pieChart";
 import { Loading } from "../dashboardPage";
-import { Result } from "../../../../lib/result";
-import { RenderBarChart } from "../../../shared/metrics/barChart";
 
 interface ErrorsPanelProps {
   errorsOverTime: Loading<Result<any[], string>>;
+  errorMetrics: UseQueryResult<
+    UnPromise<ReturnType<typeof getErrorCodes>>,
+    unknown
+  >;
 }
 
 function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
@@ -24,32 +25,9 @@ function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
 }
 
 const ErrorsPanel = (props: ErrorsPanelProps) => {
-  const { errorsOverTime } = props;
-
-  const pageCodes = useErrorPageCodes();
-
-  const errorCodesOverTime = useErrorPageOverTime();
-
-  const data = errorCodesOverTime.overTime.data?.data ?? [];
+  const { errorsOverTime, errorMetrics } = props;
 
   const timeMap = (x: Date) => new Date(x).toDateString();
-
-  const chartData = data.map((d) => ({
-    ...d,
-    time: timeMap(d.time),
-  }));
-
-  const getErrorCodes = () => {
-    const errorCodes = new Set<string>();
-    chartData.forEach((d) => {
-      Object.keys(d).forEach((key) => {
-        if (key !== "time") {
-          errorCodes.add(key);
-        }
-      });
-    });
-    return Array.from(errorCodes);
-  };
 
   return (
     <div className="grid grid-cols-5 gap-4 h-96">
@@ -82,18 +60,18 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
             Distribution
           </h3>
           <div className="h-72">
-            {pageCodes.errorCodes.isLoading ? (
+            {errorMetrics.isLoading ? (
               <div className="h-full w-full flex-col flex p-8">
                 <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
               </div>
-            ) : pageCodes.errorCodes.data?.data?.length === 0 ? (
+            ) : errorMetrics.data?.data?.length === 0 ? (
               <div className="h-full w-full flex-col flex p-8 items-center justify-center align-middle">
                 No Errors!
               </div>
             ) : (
               <RenderPieChart
                 data={
-                  pageCodes.errorCodes.data?.data
+                  errorMetrics.data?.data
                     ?.filter((x) => x.error_code !== 200)
                     .map((x) => ({
                       name: "" + x.error_code,

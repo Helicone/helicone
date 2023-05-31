@@ -1,19 +1,16 @@
 import {
   ArrowPathIcon,
-  ArrowTopRightOnSquareIcon,
   ChartBarIcon,
   CloudArrowDownIcon,
   CurrencyDollarIcon,
   ExclamationCircleIcon,
   TableCellsIcon,
-  UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { User } from "@supabase/supabase-js";
-import Link from "next/link";
 import { useState } from "react";
 
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
+  getTimeInterval,
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
@@ -27,16 +24,20 @@ import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import { Filters } from "./filters";
 
-import { MetricsPanel } from "../../shared/metrics/metricsPanel";
-import CostPanel from "./panels/costsPanel";
-import ErrorsPanel from "./panels/errorsPanel";
-import RequestsPanel from "./panels/requestsPanel";
-import { useDashboardPage } from "./useDashboardPage";
 import {
   filterListToTree,
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
+import {
+  MetricsPanel,
+  MetricsPanelProps,
+} from "../../shared/metrics/metricsPanel";
+import { Toggle } from "../../shared/themed/themedToggle";
+import CostPanel from "./panels/costsPanel";
+import ErrorsPanel from "./panels/errorsPanel";
+import RequestsPanel from "./panels/requestsPanel";
+import { useDashboardPage } from "./useDashboardPage";
 
 interface DashboardPageProps {
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
@@ -79,26 +80,29 @@ const DashboardPage = (props: DashboardPageProps) => {
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
   const [mode, setMode] = useState<DashboardMode>("requests");
+  const [timeZoneDifference, setTimeZoneDifference] = useState<number>(
+    new Date().getTimezoneOffset()
+  );
+  const timeIncrement = getTimeInterval(timeFilter);
 
-  const {
-    metrics,
-    filterMap,
-    requestsOverTime,
-    costOverTime,
-    errorsOverTime,
-    searchPropertyFilters,
-  } = useDashboardPage({
-    timeFilter,
-    uiFilters: debouncedAdvancedFilters,
-    apiKeyFilter,
-  });
+  const { metrics, filterMap, overTimeData, errorMetrics, isAnyLoading } =
+    useDashboardPage({
+      timeFilter,
+      uiFilters: debouncedAdvancedFilters,
+      apiKeyFilter,
+      timeZoneDifference,
+      dbIncrement: timeIncrement,
+    });
 
   const renderPanel = () => {
     if (mode === "requests") {
       return (
         <RequestsPanel
-          requestsOverTime={requestsOverTime.data ?? "loading"}
-          timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+          requestsOverTime={overTimeData.requests.data?.data ?? []}
+          isLoading={
+            overTimeData.requests.isLoading || overTimeData.requests.isLoading
+          }
+          timeMap={getTimeMap(timeIncrement)}
           advancedFilters={filterListToTree(
             filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
             "and"
@@ -108,8 +112,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     } else if (mode === "costs") {
       return (
         <CostPanel
-          costOverTime={costOverTime.data ?? "loading"}
-          timeMap={getTimeMap(timeFilter.start, timeFilter.end)}
+          costOverTime={overTimeData.costs.data ?? "loading"}
+          timeMap={getTimeMap(timeIncrement)}
           advancedFilters={filterListToTree(
             filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
             "and"
@@ -117,37 +121,48 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
       );
     } else if (mode === "errors") {
-      return <ErrorsPanel errorsOverTime={errorsOverTime.data ?? "loading"} />;
+      return (
+        <ErrorsPanel
+          errorsOverTime={overTimeData.errors.data ?? "loading"}
+          errorMetrics={errorMetrics.errorCodes}
+        />
+      );
     }
   };
 
-  const metricsData = [
+  const metricsData: MetricsPanelProps["metric"][] = [
     {
-      value: metrics?.data?.data?.total_cost
-        ? `$${metrics?.data?.data?.total_cost.toFixed(2)}`
+      value: metrics.totalCost.data?.data
+        ? `$${metrics.totalCost.data?.data.toFixed(2)}`
         : "$0.00",
       label: "Total Cost",
       icon: CurrencyDollarIcon,
-      isLoading: metrics.isLoading,
+      isLoading: metrics.totalCost.isLoading,
+      onInformationHref: "docs.helicone.ai/docs/usage/costs",
     },
     {
-      value: +(metrics?.data?.data?.total_requests ?? 0),
-
+      value: +(metrics.totalRequests?.data?.data?.toFixed(2) ?? 0),
       label: "Total Requests",
       icon: TableCellsIcon,
-      isLoading: metrics.isLoading,
+      isLoading: metrics.totalRequests.isLoading,
     },
     {
-      value: +(metrics.data?.data?.total_tokens ?? 0),
-      label: "Total Tokens",
+      value:
+        metrics.totalCost.data?.data && metrics.totalRequests?.data?.data
+          ? `$${(
+              metrics.totalCost.data.data / metrics.totalRequests?.data?.data
+            ).toFixed(5)}`
+          : "$0.00",
+      label: "Avg Cost/Req",
       icon: ChartBarIcon,
-      isLoading: metrics.isLoading,
+      isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
     },
     {
-      value: metrics.data?.data?.average_response_time?.toFixed(2) ?? "n/a",
-      label: "Avg Latency",
+      value: metrics.averageLatency.data?.data?.toFixed(2) ?? "n/a",
+      label: "Avg Latency/Req",
+      labelUnits: "ms",
       icon: CloudArrowDownIcon,
-      isLoading: metrics.isLoading,
+      isLoading: metrics.averageLatency.isLoading,
     },
   ];
 
@@ -167,18 +182,34 @@ const DashboardPage = (props: DashboardPageProps) => {
           >
             <ArrowPathIcon
               className={clsx(
-                metrics.isLoading ? "animate-spin" : "",
+                isAnyLoading ? "animate-spin" : "",
                 "h-5 w-5 inline"
               )}
             />
           </button>
         }
-        actions={<Filters keys={keys} setFilter={setApiKeyFilter} />}
+        actions={
+          <div className="flex flex-row items-center gap-5">
+            <Filters keys={keys} setFilter={setApiKeyFilter} />
+            <div className="flex flex-row gap-1 items-center">
+              UTC
+              <Toggle
+                onChange={(checked) => {
+                  if (checked) {
+                    setTimeZoneDifference(0);
+                  } else {
+                    setTimeZoneDifference(new Date().getTimezoneOffset());
+                  }
+                }}
+              />
+            </div>
+          </div>
+        }
       />
 
       <div className="space-y-8">
         <ThemedTableHeader
-          isFetching={metrics.isLoading}
+          isFetching={isAnyLoading}
           timeFilter={{
             customTimeFilter: true,
             timeFilterOptions: [
@@ -211,7 +242,9 @@ const DashboardPage = (props: DashboardPageProps) => {
             filterMap,
             onAdvancedFilter: setAdvancedFilters,
             filters: advancedFilters,
-            searchPropertyFilters,
+            searchPropertyFilters: () => {
+              throw new Error("not implemented");
+            },
           }}
         />
         <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">

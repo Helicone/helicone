@@ -16,21 +16,21 @@ async function handler(
   const { req, res, userData, supabaseClient } = options;
   const filter = req.body as FilterNode;
 
-  if (!filter) {
-    res.status(400).json({ error: "Bad request", data: null });
-    return;
-  }
+  // if (!filter) {
+  //   res.status(400).json({ error: "Bad request", data: null });
+  //   return;
+  // }
 
-  const metrics = await getMetrics(
-    {
-      client: supabaseClient.getClient(),
-      orgId: userData.orgId,
-    },
-    {
-      filter,
-    }
-  );
-  res.status(200).json(metrics);
+  // const metrics = await getMetrics(
+  //   {
+  //     client: supabaseClient.getClient(),
+  //     orgId: userData.orgId,
+  //   },
+  //   {
+  //     filter,
+  //   }
+  // );
+  // res.status(200).json(metrics);
 }
 
 export default withAuth(handler);

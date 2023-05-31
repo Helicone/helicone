@@ -243,7 +243,7 @@ export function buildFilter(args: BuildFilterArgs): {
   };
 }
 
-function clickhouseParam(index: number, parameter: any) {
+export function clickhouseParam(index: number, parameter: any) {
   if (typeof parameter === "number") {
     return `{val_${index} : Int32}`;
   } else if (typeof parameter === "boolean") {

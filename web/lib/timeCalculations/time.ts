@@ -1,7 +1,4 @@
-import { FilterLeaf, FilterNode } from "../../services/lib/filters/filterDefs";
-import { ModelUsageOverTime } from "../api/metrics/getModelUsageOverTime";
-import { DateCountDBModel } from "../api/metrics/getRequestOverTime";
-import { RequestsOverTime, TimeIncrement } from "./fetchTimeData";
+import { TimeIncrement } from "./fetchTimeData";
 
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h" | "all";
 
@@ -24,7 +21,6 @@ export function getTimeIntervalAgo(interval: TimeInterval): Date {
 }
 
 export interface TimeGraphConfig {
-  timeMap: (date: Date) => string;
   dbIncrement: TimeIncrement;
   start: Date;
   end: Date;
