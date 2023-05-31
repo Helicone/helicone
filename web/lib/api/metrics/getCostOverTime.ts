@@ -1,19 +1,24 @@
 import { Result, resultMap } from "../../result";
-
-import { RequestsOverTime } from "../../timeCalculations/fetchTimeData";
+import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { getXOverTime } from "./getXOverTime";
+
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
-export async function getTotalRequestsOverTime(
+export interface DateCountDBModel {
+  time: Date;
+  cost: number;
+}
+
+export async function getCostOverTime(
   data: DataOverTimeRequest
-): Promise<Result<RequestsOverTime[], string>> {
+): Promise<Result<DateCountDBModel[], string>> {
   const res = await getXOverTime<{
-    count: number;
-  }>(data, "count(*) as count");
+    cost: number;
+  }>(data, `${CLICKHOUSE_PRICE_CALC("response_copy_v2")} AS cost`);
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),
-      count: Number(d.count),
+      cost: Number(d.cost),
     }))
   );
 }

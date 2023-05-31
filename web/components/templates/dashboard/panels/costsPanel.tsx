@@ -41,7 +41,7 @@ const CostPanel = (props: CostPanelProps) => {
       <div className="col-span-5 bg-white border border-gray-300 rounded-lg">
         <div className="flex flex-col space-y-4 py-6">
           <h3 className="text-lg font-semibold text-gray-900 text-center">
-            Costs
+            Costs (USD)
           </h3>
           <div className="h-72 px-4">
             {costOverTime === "loading" ? (

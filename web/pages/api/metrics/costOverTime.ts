@@ -1,16 +1,10 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
+import { MetricsBackendBody } from "../../../components/templates/dashboard/useDashboardPage";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { modelCost } from "../../../lib/api/metrics/costCalc";
+import { getCostOverTime } from "../../../lib/api/metrics/getCostOverTime";
 
-import { getModelUsageOverTime } from "../../../lib/api/metrics/getModelUsageOverTime";
-import {
-  getSomeDataOverTime,
-  getTimeDataHandler,
-} from "../../../lib/api/metrics/timeDataHandlerWrapper";
 import { Result } from "../../../lib/result";
 
 export interface CostOverTime {
@@ -21,12 +15,25 @@ export interface CostOverTime {
 async function handler(
   options: HandlerWrapperOptions<Result<CostOverTime[], string>>
 ) {
-  await getTimeDataHandler(options, (d) =>
-    getSomeDataOverTime(d, getModelUsageOverTime, {
-      reducer: (acc, d) => ({ cost: acc.cost + modelCost(d) }),
-      initial: { cost: 0 },
+  const {
+    res,
+    userData: { orgId },
+  } = options;
+  const {
+    timeFilter,
+    filter: userFilters,
+    dbIncrement,
+    timeZoneDifference,
+  } = options.req.body as MetricsBackendBody;
+
+  res.status(200).json(
+    await getCostOverTime({
+      timeFilter,
+      userFilter: userFilters,
+      orgId,
+      dbIncrement: dbIncrement ?? "hour",
+      timeZoneDifference,
     })
   );
 }
-
 export default withAuth(handler);

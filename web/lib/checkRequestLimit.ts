@@ -21,7 +21,7 @@ export async function requestOverLimit(
       await getRequestCountClickhouse(orgId, {
         response_copy_v2: {
           request_created_at: {
-            gte: startOfThisMonth.toISOString(),
+            gte: startOfThisMonth,
           },
         },
       }),

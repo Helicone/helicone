@@ -4,10 +4,9 @@ import { CostOverTime } from "../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../pages/api/metrics/errorOverTime";
 import {
   FilterLeaf,
-  filterListToTree,
   FilterNode,
+  filterListToTree,
 } from "../services/lib/filters/filterDefs";
-import { ErrorCountOverTime } from "./api/metrics/getErrorOverTime";
 import { Metrics } from "./api/metrics/metrics";
 import { OverTimeRequestQueryParams } from "./api/metrics/timeDataHandlerWrapper";
 import { Result } from "./result";
@@ -147,17 +146,17 @@ export async function getDashboardData(
   const filter: FilterNode = {
     right: {
       left: {
-        request: {
-          created_at: {
-            gte: timeFilter.start.toISOString(),
+        response_copy_v2: {
+          request_created_at: {
+            gte: timeFilter.start,
           },
         },
       },
       operator: "and",
       right: {
-        request: {
-          created_at: {
-            lte: timeFilter.end.toISOString(),
+        response_copy_v2: {
+          request_created_at: {
+            lte: timeFilter.end,
           },
         },
       },

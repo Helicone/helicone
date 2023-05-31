@@ -61,7 +61,7 @@ SELECT
   (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
   sum(r.completion_tokens) as total_completion_tokens,
   sum(r.prompt_tokens) as total_prompt_token,
-  (${CLICKHOUSE_PRICE_CALC}) as cost
+  (${CLICKHOUSE_PRICE_CALC("r")}) as cost
 from response_copy_v2 r
 WHERE (${builtFilter.filter})
 GROUP BY r.user_id
