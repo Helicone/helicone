@@ -24,10 +24,15 @@ export interface TimeFilter {
 export class RequestBodyParser {
   private body: any;
   constructor(private req: NextApiRequest) {
-    if (typeof req.body === "string") {
-      this.body = JSON.parse(req.body);
-    } else {
-      this.body = req.body;
+    try {
+      if (typeof req.body === "string" && req.body.length > 0) {
+        this.body = JSON.parse(req.body);
+      } else {
+        this.body = req.body;
+      }
+    } catch (e) {
+      console.error("RequestBodyParser", e, req.body);
+      this.body = {};
     }
   }
   getFilter(): Result<FilterNode, string> {
