@@ -6,15 +6,55 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { Result } from "../result";
+import { Result, err, ok } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
+import { FilterNode } from "../../services/lib/filters/filterDefs";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
   res: NextApiResponse<RetVal>;
 }
 
+export interface TimeFilter {
+  start: Date;
+  end: Date;
+}
+
+export class RequestBodyParser {
+  private body: any;
+  constructor(private req: NextApiRequest) {
+    if (typeof req.body === "string") {
+      this.body = JSON.parse(req.body);
+    } else {
+      this.body = req.body;
+    }
+  }
+  getFilter(): Result<FilterNode, string> {
+    if (this.body.filter) {
+      return ok(this.body.filter);
+    } else {
+      return err("No filter provided");
+    }
+  }
+
+  getTimeFilter(): Result<TimeFilter, string> {
+    try {
+      if (this.body.timeFilter) {
+        return ok({
+          start: new Date(this.body.timeFilter.start),
+          end: new Date(this.body.timeFilter.end),
+        });
+      } else {
+        return err("No time filter provided");
+      }
+    } catch (e) {
+      return err(
+        "Invalid time filter" + JSON.stringify(this.body.timeFilter) + e
+      );
+    }
+  }
+}
 export interface HandlerWrapperOptions<RetVal>
   extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
@@ -23,6 +63,7 @@ export interface HandlerWrapperOptions<RetVal>
     orgId: string;
     user: User;
   };
+  body: RequestBodyParser;
 }
 
 export interface HandlerWrapperOptionsAPI<RetVal>
@@ -51,6 +92,7 @@ export function withAuth<T>(
       res,
       supabaseClient,
       userData: data,
+      body: new RequestBodyParser(req),
     });
   };
 }

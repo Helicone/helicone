@@ -106,30 +106,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
     },
   ];
 
-  const { count, isLoading, keys, refetch } = useGetKeys();
-  const { data: hasConverted, isLoading: hasConvertedLoading } = useQuery({
-    queryKey: ["HasConvertedToHeliconeKeys"],
-    queryFn: async (query) => {
-      const hasConverted: Result<boolean, string> = await fetch(
-        "/api/has_converted"
-      ).then((res) => res.json());
-      return hasConverted?.data === true;
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: hasUnMigratedRequest } = useQuery({
-    queryKey: ["hasUnMigratedRequest"],
-    queryFn: async (query) => {
-      const hasConverted: Result<boolean, string> = await fetch(
-        "/api/has_unmigrated_requests"
-      ).then((res) => res.json());
-      return hasConverted?.data === true;
-    },
-    refetchOnWindowFocus: false,
-  });
-  const [displayMigrationModal, setDisplayMigrationModal] = useState(true);
-
   return (
     <>
       <div>
