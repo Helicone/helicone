@@ -3,7 +3,7 @@ import axios from "axios";
 
 const getProperties = async () => {
   console.log("getProperties");
-  const resp = await fetch("/api/properties");
+  const resp = await axios.get("/api/properties");
   return resp.data;
 };
 
