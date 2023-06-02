@@ -1,3 +1,4 @@
+import moment from "moment";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
@@ -37,6 +38,7 @@ function buildFill(
     clickhouseParam(i + 1, endDate)
   );
   const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${dbIncrement}`;
+  console.log("fill", fill);
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 
@@ -69,12 +71,8 @@ export async function getXOverTime<T>(
     string
   >
 > {
-  const startDate = new Date(
-    new Date(timeFilter.start).getTime() + timeZoneDifference * 60
-  );
-  const endDate = new Date(
-    new Date(timeFilter.end).getTime() + timeZoneDifference * 60
-  );
+  const startDate = new Date(timeFilter.start);
+  const endDate = new Date(timeFilter.end);
   const timeFilterNode: FilterNode = {
     left: {
       response_copy_v2: {
@@ -140,6 +138,15 @@ ORDER BY ${dateTrunc} ASC ${fill}
     created_at_trunc: Date;
   };
   return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
-    d.map((r) => ({ ...r, created_at_trunc: new Date(r.created_at_trunc) }))
+    d.map((r) => ({
+      ...r,
+      created_at_trunc: new Date(
+        moment
+          .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
+          .toDate()
+          .getTime() +
+          timeZoneDifference * 60 * 1000
+      ),
+    }))
   );
 }
