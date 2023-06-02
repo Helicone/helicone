@@ -98,7 +98,7 @@ export function useBackendMetricCall<T>({
           filter: filterListToTree(userFilters, "and"),
           // You cannot properly serialize Date on the wire. so we need to do this gross stuff
           timeFilter: {
-            start: timeFilter.start.toUTCString(),
+            start: timeFilter.start.toISOString(),
             end: timeFilter.end.toISOString(),
           },
           dbIncrement,
