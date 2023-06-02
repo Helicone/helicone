@@ -136,9 +136,11 @@ const DashboardPage = (props: DashboardPageProps) => {
         ? `$${metrics.totalCost.data?.data.toFixed(2)}`
         : "$0.00",
       label: "Total Cost",
+      labelUnits: "(estimated)",
       icon: CurrencyDollarIcon,
       isLoading: metrics.totalCost.isLoading,
-      onInformationHref: "docs.helicone.ai/docs/usage/costs",
+      onInformationHref:
+        "https://docs.helicone.ai/how-it-works/how-we-calculate-costs",
     },
     {
       value: +(metrics.totalRequests?.data?.data?.toFixed(2) ?? 0),
