@@ -166,6 +166,48 @@ const DashboardPage = (props: DashboardPageProps) => {
       icon: CloudArrowDownIcon,
       isLoading: metrics.averageLatency.isLoading,
     },
+    {
+      value:
+        metrics.averageTokensPerRequest?.data?.data &&
+        metrics.totalRequests?.data?.data
+          ? `${metrics.averageTokensPerRequest.data.data.average_prompt_tokens_per_response.toFixed(
+              5
+            )}`
+          : "$0.00",
+      label: "Avg Prompt Tokens/Req",
+      icon: ChartBarIcon,
+      isLoading:
+        metrics.averageTokensPerRequest.isLoading ||
+        metrics.totalRequests.isLoading,
+    },
+    {
+      value:
+        metrics.averageTokensPerRequest?.data?.data &&
+        metrics.totalRequests?.data?.data
+          ? `${metrics.averageTokensPerRequest.data.data.average_completion_tokens_per_response.toFixed(
+              5
+            )}`
+          : "$0.00",
+      label: "Avg Completion Tokens/Req",
+      icon: ChartBarIcon,
+      isLoading:
+        metrics.averageTokensPerRequest.isLoading ||
+        metrics.totalRequests.isLoading,
+    },
+    {
+      value:
+        metrics.averageTokensPerRequest?.data?.data &&
+        metrics.totalRequests?.data?.data
+          ? `${metrics.averageTokensPerRequest.data.data.average_total_tokens_per_response.toFixed(
+              5
+            )}`
+          : "$0.00",
+      label: "Avg Total Tokens/Req",
+      icon: ChartBarIcon,
+      isLoading:
+        metrics.averageTokensPerRequest.isLoading ||
+        metrics.totalRequests.isLoading,
+    },
   ];
 
   return (
