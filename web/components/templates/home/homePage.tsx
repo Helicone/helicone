@@ -167,7 +167,7 @@ export default function HomePage() {
   return (
     <div className="flex-col w-full">
       <NavBarV2 />
-      <div className="bg-gray-50">
+      <div className="bg-gray-50 overflow-hidden">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-start-1 col-span-4 md:col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
             <span className="rounded-full w-fit bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
