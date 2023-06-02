@@ -14,13 +14,8 @@ export type ProxyResult = {
 export async function handleProxyRequest(
   proxyRequest: HeliconeProxyRequest
 ): Promise<Result<ProxyResult, string>> {
-  const { providerAuthHash, retryOptions } = proxyRequest;
-  if (!providerAuthHash) {
-    return {
-      data: null,
-      error: "No provider auth hash",
-    };
-  }
+  const { retryOptions } = proxyRequest;
+
   const callProps = callPropsFromProxyRequest(proxyRequest);
   const response = await (retryOptions
     ? callProviderWithRetry(callProps, retryOptions)
