@@ -43,7 +43,7 @@ const Footer = (props: FooterProps) => {
 
   return (
     <footer className="bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-8  border-r border-l border-gray-300 border-dashed">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-8 ">
         <div className="flex space-x-6 md:order-2">
           {meta.social.map((item) => (
             <Link
