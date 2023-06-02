@@ -73,7 +73,20 @@ const NavBarV2 = (props: NavBarV2Props) => {
           </Link>
         </div>
         <div className="flex-1 hidden lg:flex items-center justify-end gap-x-4">
-          <LoginButton />
+          {user ? (
+            <button
+              onClick={() => {
+                supabaseClient.auth.signOut().then(() => {
+                  router.push("/");
+                });
+              }}
+              className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <LoginButton />
+          )}
         </div>
         <div className="flex flex-1 justify-end lg:hidden">
           <button
@@ -149,7 +162,20 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       Github
                     </Link>
                   </div>
-                  <LoginButton />
+                  {user ? (
+                    <button
+                      onClick={() => {
+                        supabaseClient.auth.signOut().then(() => {
+                          router.push("/");
+                        });
+                      }}
+                      className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
+                    >
+                      Sign Out
+                    </button>
+                  ) : (
+                    <LoginButton />
+                  )}
                 </div>
               </div>
             </div>
