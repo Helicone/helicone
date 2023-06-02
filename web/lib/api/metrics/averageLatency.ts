@@ -30,7 +30,7 @@ export async function getAverageLatency(
   WITH total_count AS (
     SELECT 
       count(*) as count,
-      sum(response_copy_v2.completion_tokens + response_copy_v2.prompt_tokens) as total_tokens
+      sum(response_copy_v2.latency) as total_latency
     FROM response_copy_v2
     WHERE (
       (${filterString})
@@ -38,14 +38,14 @@ export async function getAverageLatency(
   )
   SELECT CASE
     WHEN count = 0 THEN 0
-    ELSE total_tokens / count
-  END as average_tokens_per_response
+    ELSE total_latency / count
+  END as average_latency
   FROM total_count
 `;
 
   const res = await dbQueryClickhouse<{
-    average_tokens_per_response: number;
+    average_latency: number;
   }>(query, argsAcc);
 
-  return resultMap(res, (d) => +d[0].average_tokens_per_response);
+  return resultMap(res, (d) => +d[0].average_latency);
 }
