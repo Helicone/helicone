@@ -27,6 +27,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
 import { UnPromise } from "../../../lib/tsxHelpers";
 import { getErrorCodes } from "../../../lib/api/metrics/errorCodes";
+import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -197,6 +198,12 @@ export const useDashboardPage = ({
     averageLatency: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/averageLatency",
+    }),
+    averageTokensPerRequest: useBackendMetricCall<
+      UnPromise<ReturnType<typeof getTokensPerRequest>>
+    >({
+      params,
+      endpoint: "/api/metrics/averageTokensPerRequest",
     }),
   };
 
