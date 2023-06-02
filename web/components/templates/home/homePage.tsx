@@ -213,13 +213,16 @@ export default function HomePage() {
           }
         >
           <div className="flex flex-row gap-12 items-center">
-            <img
-              className="rounded-xl"
-              alt="Helicone-logo"
-              src="/assets/landing/helicone.webp"
-              width={150}
-              height={150 / (1876 / 528)}
-            />
+            <a href="/">
+              <img
+                className="rounded-xl"
+                alt="Helicone-logo"
+                src="/assets/landing/helicone.webp"
+                width={150}
+                height={150 / (1876 / 528)}
+              />
+            </a>
+
             <a href="/pricing" className="text-md font-semibold text-gray-900">
               Pricing
             </a>
@@ -231,7 +234,7 @@ export default function HomePage() {
             >
               Documentation
             </a>
-            <a href="#" className="text-md font-semibold text-gray-900">
+            <a href="/roadmap" className="text-md font-semibold text-gray-900">
               Roadmap
             </a>
             <a href="#" className="text-md font-semibold text-gray-900">
@@ -244,7 +247,9 @@ export default function HomePage() {
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-start-1 col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
-            <p className="text-gray-900 text-lg font-semibold">Backed By:</p>
+            <span className="rounded-full w-fit bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
+              Backed by Y Combinator
+            </span>
             <div className="text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
@@ -806,6 +811,23 @@ export default function HomePage() {
             <div>
               <button className="underline underline-offset-2 font-semibold text-gray-900">
                 View Docs
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-violet-200 h-full">
+        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full text-center items-center justify-center">
+          <div className="col-span-4 flex flex-col space-y-8 py-32">
+            <p className="text-4xl text-violet-900 tracking-wide font-semibold">
+              Join Our Community
+            </p>
+            <p className="text-2xl text-gray-700 font-medium">
+              We&apos;re always looking for new contributors to help us improve
+            </p>
+            <div className="flex flex-row gap-8 w-full justify-center">
+              <button className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl">
+                Join Discord
               </button>
             </div>
           </div>
