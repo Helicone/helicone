@@ -38,7 +38,6 @@ function buildFill(
     clickhouseParam(i + 1, endDate)
   );
   const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${dbIncrement}`;
-  console.log("fill", fill);
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 

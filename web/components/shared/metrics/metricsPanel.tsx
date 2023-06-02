@@ -30,7 +30,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
         <div className="text-sm  text-gray-700 flex flex-row gap-1 items-center">
           {metric.label}
           {onInformationHref && (
-            <Link href={onInformationHref}>
+            <Link href={onInformationHref} target="_blank">
               <InformationCircleIcon
                 className="h-5 w-5 text-gray-500"
                 aria-hidden="true"
@@ -47,7 +47,9 @@ export function MetricsPanel(props: MetricsPanelProps) {
         ) : (
           metric.value
         )}
-        <div className="text-gray-400 text-xs pb-1">{metric.labelUnits}</div>
+        <div className="text-gray-400 text-xs pb-1">
+          {metric.isLoading || metric.labelUnits}
+        </div>
       </div>
     </div>
   );
