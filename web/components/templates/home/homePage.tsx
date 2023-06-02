@@ -48,6 +48,8 @@ import {
 import CodeSnippet from "./codeSnippet";
 import LoginButton from "../../shared/auth/loginButton";
 import { BsDiscord } from "react-icons/bs";
+import NavBar from "../../shared/layout/navbar";
+import Footer from "../../shared/layout/footer";
 
 const timeline = [
   {
@@ -126,40 +128,6 @@ const testimonials = [
   // More testimonials...
 ];
 
-const meta = {
-  social: [
-    {
-      name: "Twitter",
-      href: "https://twitter.com/helicone_ai",
-      icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-          <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-        </svg>
-      ),
-    },
-    {
-      name: "GitHub",
-      href: "https://github.com/Helicone/helicone",
-      icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-          <path
-            fillRule="evenodd"
-            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Discord",
-      href: "https://discord.gg/2TkeWdXNPQ",
-      icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <BsDiscord {...props} />
-      ),
-    },
-  ],
-};
-
 export default function HomePage() {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
@@ -228,49 +196,7 @@ export default function HomePage() {
 
   return (
     <div className="flex-col w-full">
-      <div className="bg-gray-50 sticky top-0 z-50 shadow-sm">
-        <div
-          className={
-            "border-dashed flex flex-row px-8 py-4 mx-auto max-w-7xl justify-between"
-          }
-        >
-          <div className="flex flex-row gap-12 items-center">
-            <a href="/">
-              <img
-                className="rounded-xl"
-                alt="Helicone-logo"
-                src="/assets/landing/helicone.webp"
-                width={150}
-                height={150 / (1876 / 528)}
-              />
-            </a>
-
-            <a href="/pricing" className="text-md font-semibold text-gray-900">
-              Pricing
-            </a>
-            <a
-              href="https://docs.helicone.ai/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-md font-semibold text-gray-900"
-            >
-              Documentation
-            </a>
-            <a href="/roadmap" className="text-md font-semibold text-gray-900">
-              Roadmap
-            </a>
-            <a
-              href="https://github.com/Helicone/helicone"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-md font-semibold text-gray-900"
-            >
-              Github
-            </a>
-          </div>
-          <LoginButton />
-        </div>
-      </div>
+      <NavBar />
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-start-1 col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
@@ -779,9 +705,14 @@ export default function HomePage() {
               </li>
             </ul>
             <div>
-              <button className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-xl">
+              <Link
+                href="https://docs.helicone.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-xl"
+              >
                 Read Our Docs
-              </button>
+              </Link>
             </div>
           </div>
           <div className="flex flex-col col-span-2 h-full py-16 space-y-4">
@@ -800,13 +731,21 @@ export default function HomePage() {
               user-centric development, community collaboration, and absolute
               transparency.
             </p>
-            <div className="flex flex-row gap-8">
-              <button className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl">
+            <div className="flex flex-row gap-8 items-center">
+              <Link
+                href="https://github.com/Helicone/helicone"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+              >
                 Star us on GitHub
-              </button>
-              <button className="underline underline-offset-2 font-semibold text-gray-900">
+              </Link>
+              <Link
+                href="/roadmap"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
                 View Roadmap
-              </button>
+              </Link>
             </div>
           </div>
           <div className="flex flex-col col-span-1 h-full py-32 space-y-4">
@@ -821,9 +760,12 @@ export default function HomePage() {
               what matters most.
             </p>
             <div>
-              <button className="underline underline-offset-2 font-semibold text-gray-900">
+              <Link
+                href="/pricing"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
                 View Pricing
-              </button>
+              </Link>
             </div>
           </div>
           <div className="flex flex-col col-span-1 h-full py-32 space-y-4">
@@ -836,9 +778,14 @@ export default function HomePage() {
               clicks.
             </p>
             <div>
-              <button className="underline underline-offset-2 font-semibold text-gray-900">
+              <Link
+                href="https://docs.helicone.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
                 View Docs
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -853,14 +800,14 @@ export default function HomePage() {
               We&apos;re always looking for new contributors to help us improve
             </p>
             <div className="flex flex-row gap-8 w-full justify-center">
-              <a
+              <Link
                 href="https://discord.gg/zsSTcH2qhG"
                 target="_blank"
                 rel="noreferrer noopener"
                 className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
               >
                 Join Discord
-              </a>
+              </Link>
             </div>
           </div>
           <section className="col-span-4">
@@ -894,41 +841,7 @@ export default function HomePage() {
           </section>
         </div>
       </div>
-      <footer className="bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-8  border-r border-l border-gray-300 border-dashed">
-          <div className="flex space-x-6 md:order-2">
-            {meta.social.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <span className="sr-only">{item.name}</span>
-                <item.icon className="h-6 w-6" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
-          <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
-            <p className="text-center text-xs leading-5 text-gray-500">
-              &copy; 2023 Helicone, Inc. All rights reserved.
-            </p>
-            <a
-              href="/privacy"
-              className="text-center text-xs leading-5 text-gray-500"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="/terms"
-              className="text-center text-xs leading-5 text-gray-500"
-            >
-              Terms of Use
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

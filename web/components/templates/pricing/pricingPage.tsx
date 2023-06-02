@@ -18,8 +18,8 @@ const PricingPage = (props: PricingPageProps) => {
 
   return (
     <BasePageV2>
-      <div className="bg-gray-50 py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="bg-gray-50">
+        <div className="mx-auto max-w-7xl py-16 sm:py-24 px-6 lg:px-8  border-r border-l border-gray-300 border-dashed">
           <div className="mx-auto max-w-2xl sm:text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               Free to start, easy to scale

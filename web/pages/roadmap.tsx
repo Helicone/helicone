@@ -76,7 +76,7 @@ const Home = (props: HomeProps) => {
   return (
     <MetaData title="Home">
       <BasePageV2>
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8">
+        <div className="mx-auto border-r border-l border-gray-300 border-dashed flex w-full max-w-7xl items-center justify-between p-6 md:justify-start md:space-x-10 lg:px-8">
           <div className="py-16 max-w-3xl space-y-16">
             <div className="flex flex-col space-y-4">
               <p className="text-5xl font-sans">Roadmap</p>
