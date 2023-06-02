@@ -1,3 +1,4 @@
+import moment from "moment";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
@@ -132,7 +133,6 @@ WHERE (
 GROUP BY ${dateTrunc}
 ORDER BY ${dateTrunc} ASC ${fill}
 `;
-  printRunnableQuery(query, argsAcc);
 
   type ResultType = T & {
     created_at_trunc: Date;
@@ -140,7 +140,13 @@ ORDER BY ${dateTrunc} ASC ${fill}
   return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
     d.map((r) => ({
       ...r,
-      created_at_trunc: new Date(new Date(r.created_at_trunc).getTime()),
+      created_at_trunc: new Date(
+        moment
+          .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
+          .toDate()
+          .getTime() +
+          timeZoneDifference * 60 * 1000
+      ),
     }))
   );
 }

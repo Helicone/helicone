@@ -11,13 +11,9 @@ export async function getTotalRequestsOverTime(
     count: number;
   }>(data, "count(*) as count");
   return resultMap(res, (resData) =>
-    resData.map((d) => {
-      const new_time = new Date(new Date(d.created_at_trunc).getTime());
-      console.log("new_time", new_time);
-      return {
-        time: new_time,
-        count: Number(d.count),
-      };
-    })
+    resData.map((d) => ({
+      time: new Date(new Date(d.created_at_trunc).getTime()),
+      count: Number(d.count),
+    }))
   );
 }
