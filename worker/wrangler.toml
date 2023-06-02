@@ -35,7 +35,7 @@ kv_namespaces = [
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
-
+PROVIDER = "OPENAI"
 
 [env.production_anthropic]
 name = "helicone-worker-prod-anthropic"
@@ -63,6 +63,7 @@ routes = [
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
+PROVIDER = "OPENAI"
 
 [env.preview]
 name = "helicone-worker-preview"
