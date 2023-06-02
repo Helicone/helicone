@@ -37,6 +37,7 @@ function buildFill(
     clickhouseParam(i + 1, endDate)
   );
   const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + 1 STEP INTERVAL 1 ${dbIncrement}`;
+  console.log("fill", fill);
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 
@@ -131,6 +132,7 @@ WHERE (
 GROUP BY ${dateTrunc}
 ORDER BY ${dateTrunc} ASC ${fill}
 `;
+  printRunnableQuery(query, argsAcc);
 
   type ResultType = T & {
     created_at_trunc: Date;
@@ -138,9 +140,7 @@ ORDER BY ${dateTrunc} ASC ${fill}
   return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
     d.map((r) => ({
       ...r,
-      created_at_trunc: new Date(
-        new Date(r.created_at_trunc).getTime() + timeZoneDifference * 60 * 1000
-      ),
+      created_at_trunc: new Date(new Date(r.created_at_trunc).getTime()),
     }))
   );
 }
