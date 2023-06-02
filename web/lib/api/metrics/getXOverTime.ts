@@ -136,6 +136,11 @@ ORDER BY ${dateTrunc} ASC ${fill}
     created_at_trunc: Date;
   };
   return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
-    d.map((r) => ({ ...r, created_at_trunc: new Date(r.created_at_trunc) }))
+    d.map((r) => ({
+      ...r,
+      created_at_trunc: new Date(
+        new Date(r.created_at_trunc).getTime() + timeZoneDifference * 60 * 1000
+      ),
+    }))
   );
 }

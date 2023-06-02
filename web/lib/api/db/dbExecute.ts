@@ -9,7 +9,7 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
     .map((p) => {
       if (p instanceof Date) {
         //ex: 2023-05-27T08:21:26
-        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
+        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", false);
       } else {
         return p;
       }
