@@ -30,7 +30,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const supabaseClient = useSupabaseClient();
 
   return (
-    <header className="bg-gray-50 border-b border-gray-200">
+    <header className="bg-gray-50 top-0 sticky z-50 border-b border-gray-200">
       <nav
         className="mx-auto flex max-w-7xl items-center gap-x-16 p-4 lg:px-8"
         aria-label="Global"
