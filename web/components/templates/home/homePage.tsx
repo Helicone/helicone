@@ -220,10 +220,15 @@ export default function HomePage() {
               width={150}
               height={150 / (1876 / 528)}
             />
-            <a href="#" className="text-md font-semibold text-gray-900">
+            <a href="/pricing" className="text-md font-semibold text-gray-900">
               Pricing
             </a>
-            <a href="#" className="text-md font-semibold text-gray-900">
+            <a
+              href="https://docs.helicone.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-md font-semibold text-gray-900"
+            >
               Documentation
             </a>
             <a href="#" className="text-md font-semibold text-gray-900">
@@ -239,6 +244,7 @@ export default function HomePage() {
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-start-1 col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
+            <p className="text-gray-900 text-lg font-semibold">Backed By:</p>
             <div className="text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
@@ -251,9 +257,33 @@ export default function HomePage() {
             </p>
             <div className="flex flex-row gap-8">
               <OnboardingButton title={"Get Started"} />
-              <button className="underline underline-offset-2 font-semibold text-gray-900">
-                View Demo
-              </button>
+              {demoLoading ? (
+                <button className="flex flex-row underline underline-offset-2 font-semibold text-gray-900 items-center">
+                  <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                  Logging In...
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setDemoLoading(true);
+                    supabaseClient.auth.signOut().then(() => {
+                      supabaseClient.auth
+                        .signInWithPassword({
+                          email: DEMO_EMAIL,
+                          password: "valyrdemo",
+                        })
+                        .then((res) => {
+                          router.push("/demo").then(() => {
+                            setDemoLoading(false);
+                          });
+                        });
+                    });
+                  }}
+                  className="underline underline-offset-2 font-semibold text-gray-900"
+                >
+                  View Demo
+                </button>
+              )}
             </div>
           </div>
           <div className="col-span-2 h-[80vh] flex flex-col items-center justify-center align-middle relative">
@@ -281,7 +311,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="col-span-4 grid grid-cols-4 gap-8 pb-32">
-            <img
+            {/* <img
               className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
@@ -337,7 +367,7 @@ export default function HomePage() {
               alt="Transistor"
               width={158}
               height={48}
-            />
+            /> */}
           </div>
         </div>
       </div>
