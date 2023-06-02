@@ -170,9 +170,14 @@ export default function HomePage() {
       <div className="bg-gray-50 overflow-hidden">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-start-1 col-span-4 md:col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
-            <span className="rounded-full w-fit bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
+            <Link
+              href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full w-fit bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10"
+            >
               Backed by Y Combinator
-            </span>
+            </Link>
             <div className="text-5xl md:text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
