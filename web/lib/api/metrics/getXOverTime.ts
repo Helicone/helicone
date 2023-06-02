@@ -69,12 +69,8 @@ export async function getXOverTime<T>(
     string
   >
 > {
-  const startDate = new Date(
-    new Date(timeFilter.start).getTime() + timeZoneDifference * 60
-  );
-  const endDate = new Date(
-    new Date(timeFilter.end).getTime() + timeZoneDifference * 60
-  );
+  const startDate = new Date(timeFilter.start);
+  const endDate = new Date(timeFilter.end);
   const timeFilterNode: FilterNode = {
     left: {
       response_copy_v2: {
