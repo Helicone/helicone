@@ -21,12 +21,15 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 import Details from "./detailsV2";
 import BasePageV2 from "../../shared/layout/basePageV2";
 
-import { useState } from "react";
+import { createRef, useEffect, useRef, useState } from "react";
 import OnboardingButton from "../../shared/auth/onboardingButton";
 import {
   ArrowPathIcon,
+  BanknotesIcon,
   ChevronRightIcon,
+  CloudArrowDownIcon,
   CloudArrowUpIcon,
+  CurrencyDollarIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { BaseUrlInstructions } from "../welcome/welcomePage";
@@ -35,7 +38,15 @@ import Link from "next/link";
 import { Dialog } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
 import Logos from "./logos";
-import { CloudIcon } from "@heroicons/react/24/solid";
+import {
+  ChartPieIcon,
+  CircleStackIcon,
+  CloudIcon,
+  CodeBracketIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/solid";
+import CodeSnippet from "./codeSnippet";
+import LoginButton from "../../shared/auth/loginButton";
 
 const timeline = [
   {
@@ -135,21 +146,75 @@ export default function HomePage() {
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }
-  const { data: globalMetrics } = useQuery({
-    queryKey: ["global_metrics"],
-    queryFn: async () => {
-      const data = fetch("/api/global_metrics").then((res) => res.json());
-      return data;
-    },
-  });
+  // const { data: globalMetrics } = useQuery({
+  //   queryKey: ["global_metrics"],
+  //   queryFn: async () => {
+  //     const data = fetch("/api/global_metrics").then((res) => res.json());
+  //     return data;
+  //   },
+  // });
+
+  const observabilityDiv = useRef(null);
+  const rateDiv = useRef(null);
+  const bucketDiv = useRef(null);
+
+  const [currentPanel, setCurrentPanel] = useState("observability");
+
+  useEffect(() => {
+    const observability = observabilityDiv.current;
+    const rate = rateDiv.current;
+    const bucket = bucketDiv.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setCurrentPanel(entry.target.id);
+          }
+        });
+      },
+      {
+        threshold: 0,
+      }
+    );
+
+    if (observability) {
+      observer.observe(observability);
+    }
+
+    if (rate) {
+      observer.observe(rate);
+    }
+
+    if (bucket) {
+      observer.observe(bucket);
+    }
+
+    return () => {
+      if (observability) {
+        observer.unobserve(observability);
+      }
+
+      if (rate) {
+        observer.unobserve(rate);
+      }
+
+      if (bucket) {
+        observer.unobserve(bucket);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex-col w-full">
-      <div className="bg-gray-50">
-        <div className="flex flex-row px-8 py-4 mx-auto max-w-7xl border-r-2 border-l-2 border-gray-300 border-dashed justify-between">
+      <div className="bg-gray-50 sticky top-0 z-50 shadow-sm">
+        <div
+          className={
+            "border-dashed flex flex-row px-8 py-4 mx-auto max-w-7xl justify-between"
+          }
+        >
           <div className="flex flex-row gap-12 items-center">
             <img
-              className="rounded-lg"
+              className="rounded-xl"
               alt="Helicone-logo"
               src="/assets/landing/helicone.webp"
               width={150}
@@ -168,46 +233,31 @@ export default function HomePage() {
               Github
             </a>
           </div>
-          <button className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-lg">
-            Sign In
-          </button>
+          <LoginButton />
         </div>
       </div>
       <div className="bg-gray-50">
-        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r-2 border-l-2 border-gray-300 border-dashed w-full items-center justify-center">
+        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-start-1 col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
-            <div className="text-7xl font-bold text-gray-900 text-left space-y-2">
-              <p>Build the future</p>
-              <p className="bg-clip-text text-transparent pb-1 bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500">
-                Effortlessly
-              </p>
-
-              {/* <p className="bg-sky-300 p-2 rounded-lg w-fit">Generative AI</p> */}
+            <div className="text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
+              <p>Tooling for</p>
+              <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
+                Generative AI
+              </span>
             </div>
-            <p className="text-lg leading-8 text-gray-600">
-              We&apos;re committed to helping{" "}
-              <span className="underline underline-offset-2 decoration-dashed">
-                LLM-developers
-              </span>{" "}
-              like you spend less time on complex AI management tasks and more
-              time innovating. Let our{" "}
-              <span className="underline underline-offset-2 decoration-dashed">
-                open-source
-              </span>{" "}
-              tools streamline your workflow and unlock your full creative and
-              development potential.
+            <p className="text-xl leading-9 text-gray-700">
+              Hundreds of organizations leverage Helicone to make their
+              Large-Language Model operations more efficient.
             </p>
             <div className="flex flex-row gap-8">
-              <button className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg">
-                Get Started
-              </button>
+              <OnboardingButton title={"Get Started"} />
               <button className="underline underline-offset-2 font-semibold text-gray-900">
                 View Demo
               </button>
             </div>
           </div>
           <div className="col-span-2 h-[80vh] flex flex-col items-center justify-center align-middle relative">
-            <div className="bg-sky-300 rounded-lg h-1/4 w-[45%] p-4 flex flex-col justify-between z-30 shadow-md">
+            <div className="bg-sky-300 rounded-xl h-1/4 w-[45%] p-4 flex flex-col justify-between z-20 shadow-md">
               <p className="font-semibold text-sky-900 text-lg">
                 Tokens per Request
               </p>
@@ -215,13 +265,13 @@ export default function HomePage() {
                 124
               </p>
             </div>
-            <div className="bg-pink-300 rounded-lg h-1/4 w-2/5 p-4 flex flex-col justify-between absolute left-[15%] top-[27.5%] z-20 shadow-md">
+            <div className="bg-pink-300 rounded-xl h-1/4 w-2/5 p-4 flex flex-col justify-between absolute left-[15%] top-[27.5%] z-10 shadow-md">
               <p className="font-semibold text-pink-900 text-lg">User Growth</p>
               <p className="font-semibold text-pink-900 text-5xl text-right">
                 1,534
               </p>
             </div>
-            <div className="bg-violet-300 rounded-lg h-[30%] w-[45%] p-4 flex flex-col justify-between absolute right-[12.5%] top-[20%] z-10 shadow-md">
+            <div className="bg-violet-300 rounded-xl h-[30%] w-[45%] p-4 flex flex-col justify-between absolute right-[12.5%] top-[20%] shadow-md">
               <p className="font-semibold text-violet-900 text-lg">
                 Cache Hits
               </p>
@@ -266,6 +316,7 @@ export default function HomePage() {
               width={158}
               height={48}
             />
+
             <img
               className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
@@ -291,88 +342,393 @@ export default function HomePage() {
         </div>
       </div>
       <div className="bg-gray-100">
-        <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r-2 border-l-2 border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="flex flex-col col-span-2 space-y-8 py-32">
+        <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
+          <div className="flex flex-col col-span-2 space-y-8 py-32 pr-32">
             <p className="text-lg text-sky-500 tracking-wide font-semibold">
-              Unparalleled Observability
+              Real Time Metrics
             </p>
             <p className="text-5xl text-gray-900 font-semibold">
-              Understand your large-language model usage like never before
+              Insights into your Usage and Performance
             </p>
-            <p className="text-xl text-gray-500 leading-9">
-              Navigating the vast landscape of AI and large language models can
-              be complex. That’s why we&apos;ve built an observability tool that
-              simplifies the process and amplifies understanding. We provide you
-              with comprehensive insights, allowing you to deeply understand
-              your AI&apos;s behavior, performance, and potential bottlenecks.
+            <div
+              ref={observabilityDiv}
+              id="observability"
+              className="sr-only"
+            />
+            <p className="text-xl text-gray-700 font-normal leading-8">
+              Building a Large-Language Model monitoring tool is time consuming
+              and hard to scale. So we did it for you:
             </p>
+            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Monitor Spending:
+                  </span>{" "}
+                  Keep a close eye on your AI expenditure to control costs
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Analyze Traffic Peaks:
+                  </span>{" "}
+                  Identify high-traffic periods to allocate resources more
+                  efficiently
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Track Latency Patterns:
+                  </span>{" "}
+                  Detect patterns in application speed and rectify slowdowns
+                  proactively
+                </p>
+              </li>
+            </ul>
           </div>
-          <div className="flex flex-col col-span-2 h-full sticky top-[5%] 2xl:top-[10%]">
-            <div className="m-16 border border-gray-300 bg-white h-full rounded-lg shadow-md"></div>
+          <div className="flex flex-col col-span-2 h-full flex-1 sticky top-[5%] 2xl:top-[15%] py-28">
+            <div className="h-full relative">
+              <div
+                className={clsx(
+                  currentPanel === "observability"
+                    ? "bg-sky-50 border-sky-500 text-sky-500"
+                    : "bg-gray-50 border-gray-300 text-gray-500",
+                  "h-[10%] w-[10%] z-10 shadow-sm border rounded-xl absolute top-0 flex items-center justify-center"
+                )}
+              >
+                <ChartPieIcon className="h-8 w-8" />
+              </div>
+              <div
+                className={clsx(
+                  currentPanel === "rate"
+                    ? "bg-pink-50 border-pink-500 text-pink-500"
+                    : "bg-gray-50 border-gray-300 text-gray-500",
+                  "h-[10%] w-[10%] z-10 shadow-sm border rounded-xl absolute top-1/3 right-0 flex items-center justify-center"
+                )}
+              >
+                <UserGroupIcon className="h-8 w-8" />
+              </div>
+              <div
+                className={clsx(
+                  currentPanel === "bucket"
+                    ? "bg-purple-50 border-purple-500 text-purple-500"
+                    : "bg-gray-50 border-gray-300 text-gray-500",
+                  "h-[10%] w-[10%] z-10 shadow-sm border rounded-xl absolute left-[10%] bottom-0 flex items-center justify-center"
+                )}
+              >
+                <CodeBracketIcon className="h-8 w-8" />
+              </div>
+              <svg className="h-full w-full">
+                {currentPanel === "observability" && (
+                  <>
+                    <line
+                      x1="10%"
+                      y1="5.5%"
+                      x2="50%"
+                      y2="5.5%"
+                      stroke={"#0ea4e9"}
+                      strokeWidth={1.25}
+                    />
+                    <line
+                      x1="50%"
+                      y1="5.5%"
+                      x2="50%"
+                      y2="20%"
+                      stroke={"#0ea4e9"}
+                      strokeWidth={1.25}
+                    />
+                  </>
+                )}
+                {currentPanel === "rate" && (
+                  <>
+                    <line
+                      x1="95%"
+                      y1="40%"
+                      x2="95%"
+                      y2="50%"
+                      stroke="#ec489a"
+                      strokeWidth={1.25}
+                    />
+                    <line
+                      x1="95%"
+                      y1="50%"
+                      x2="85%"
+                      y2="50%"
+                      stroke="#ec489a"
+                      strokeWidth={1.25}
+                    />
+                  </>
+                )}
+                {currentPanel === "bucket" && (
+                  <>
+                    <line
+                      x1="15%"
+                      y1="95%"
+                      x2="50%"
+                      y2="95%"
+                      stroke="#a955f7"
+                      strokeWidth={1.25}
+                    />
+                    <line
+                      x1="50%"
+                      y1="95%"
+                      x2="50%"
+                      y2="80%"
+                      stroke="#a955f7"
+                      strokeWidth={1.25}
+                    />
+                  </>
+                )}
+              </svg>
+              <div
+                className={clsx(
+                  currentPanel === "observability" && "border-sky-500",
+                  currentPanel === "rate" && "border-pink-500",
+                  currentPanel === "bucket" && "border-purple-500",
+                  "h-[70%] w-[70%] shadow-md border rounded-xl bg-white absolute top-0 bottom-0 left-0 right-0 m-auto p-4"
+                )}
+              >
+                {currentPanel === "observability" && (
+                  <div className="relative h-full">
+                    <div className="p-6 w-56 bg-white border border-gray-300 rounded-lg space-y-2 absolute">
+                      <div className="w-full flex flex-row items-center justify-between">
+                        <div className="text-sm  text-gray-700">
+                          Total Costs
+                        </div>
+                        {
+                          <CurrencyDollarIcon
+                            className="h-5 w-5"
+                            aria-hidden="true"
+                          />
+                        }
+                      </div>
+                      <div className="text-2xl font-semibold">$432.24</div>
+                    </div>
+                    <div className="p-6 w-56 bg-white border border-gray-300 rounded-lg space-y-2 absolute top-[20%] right-0 z-10">
+                      <div className="w-full flex flex-row items-center justify-between">
+                        <div className="text-sm  text-gray-700">
+                          Avg Latency / Req
+                        </div>
+                        {
+                          <CloudArrowDownIcon
+                            className="h-5 w-5"
+                            aria-hidden="true"
+                          />
+                        }
+                      </div>
+                      <div className="text-2xl font-semibold">437.27 ms</div>
+                    </div>
+                    <div className="p-2 bottom-2 absolute rounded-lg border border-gray-300 mr-8">
+                      <img
+                        src="/assets/landing/requests.png"
+                        alt="requests-graph"
+                      />
+                    </div>
+                  </div>
+                )}
+                {currentPanel === "rate" && (
+                  <div className="h-full flex flex-col space-y-4">
+                    <div className="w-full font-semibold text-gray-900 grid grid-cols-8 divide-x divide-gray-300 px-2 border-b border-gray-300 pb-1">
+                      <p className="col-span-2">User</p>
+                      <p className="col-span-3 pl-4">Total Cost</p>
+                      <p className="col-span-3 pl-4">Avg Req / Day</p>
+                    </div>
+                    <ul className="space-y-4">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <li key={i}>
+                          <ul className="w-full grid grid-cols-8 px-1">
+                            <li className="bg-gray-400 rounded-lg h-6 w-12 col-span-2" />
+                            <li className="bg-gray-400 rounded-lg h-6 w-16 col-span-3 ml-2" />
+                            <li className="bg-gray-400 rounded-lg h-6 w-16 col-span-3 ml-2" />
+                          </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {currentPanel === "bucket" && (
+                  <div className="relative h-full">
+                    <div className="p-6 w-56 z-10 bg-white border border-gray-300 rounded-lg right-0 space-y-2 absolute">
+                      <div className="w-full flex flex-row items-center justify-between">
+                        <div className="text-sm  text-gray-700">
+                          Total Saved
+                        </div>
+                        {
+                          <BanknotesIcon
+                            className="h-5 w-5"
+                            aria-hidden="true"
+                          />
+                        }
+                      </div>
+                      <div className="text-2xl font-semibold">$146.21</div>
+                    </div>
+                    <div className="p-2 left-0 top-[15%] absolute rounded-lg border border-gray-300">
+                      <img
+                        src="/assets/landing/piechart.png"
+                        alt="pie-chart"
+                        className="h-56 w-56"
+                      />
+                    </div>
+                    <div className="p-4 h-40 w-56 bg-white border border-gray-300 rounded-lg flex flex-col space-y-4 absolute bottom-0 right-0">
+                      <div className="flex flex-row space-x-2">
+                        <div className="bg-gray-400 rounded-md h-4 w-12" />
+                        <div className="bg-gray-400 rounded-md h-4 w-12" />
+                        <div className="bg-gray-400 rounded-md h-4 w-8" />
+                      </div>
+                      <div className="flex flex-row space-x-2">
+                        <div className="bg-gray-400 rounded-md h-4 w-8" />
+                        <div className="bg-gray-400 rounded-md h-4 w-20" />
+                      </div>
+                      <div className="flex flex-row space-x-2">
+                        <div className="bg-gray-400 rounded-md h-4 w-12" />
+                        <div className="bg-gray-400 rounded-md h-4 w-20" />
+                        <div className="bg-gray-400 rounded-md h-4 w-8" />
+                      </div>
+                      <div className="flex flex-row space-x-2">
+                        <div className="bg-gray-400 rounded-md h-4 w-16" />
+                        <div className="bg-gray-400 rounded-md h-4 w-24" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col col-span-2 space-y-8 py-32">
+          <div className="flex flex-col col-span-2 space-y-8 py-32 pr-32">
             <p className="text-lg text-pink-500 tracking-wide font-semibold">
-              User-Rate Limiting
+              User Management Tools
             </p>
             <p className="text-5xl text-gray-900 font-semibold">
-              Protect Your Resources, Without Compromising Service
+              Easily manage your application&apos;s users
             </p>
-            <p className="text-xl text-gray-500 leading-9">
-              In the fast-paced world of AI, resource management is key. With
-              our robust User Rate Limiting feature, you can ensure your Large
-              Language Model (LLM) endpoints are safeguarded against excessive
-              requests. We&apos;ve made it simple and seamless to limit the
-              frequency of user access, all without hampering your service
-              quality or user experience.
+            <div ref={rateDiv} id="rate" className="sr-only" />
+            <p className="text-xl text-gray-700 font-normal leading-8">
+              Our intuitive user management tools offer a hassle-free way to
+              control access to your system.
             </p>
+            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    User Rate Limiting:
+                  </span>{" "}
+                  Limit the number of requests per user to prevent abuse
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    User Metrics:
+                  </span>{" "}
+                  Identify power users and optimize your application for them
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Request Retries:
+                  </span>{" "}
+                  Automatically retry failed requests to ensure users
+                  aren&apos;t left in the dark
+                </p>
+              </li>
+            </ul>
           </div>
-          <div className="flex flex-col col-span-2 col-start-1 space-y-8 py-32">
+          <div className="flex flex-col col-span-2 col-start-1 space-y-8 py-32 pr-32">
             <p className="text-lg text-purple-500 tracking-wide font-semibold">
-              Bucket Cache
+              Tooling for LLMs
             </p>
             <p className="text-5xl text-gray-900 font-semibold">
-              Optimize Your Resources, Enhance Your Efficiency
+              Tools to scale your LLM-powered application
             </p>
-            <p className="text-xl text-gray-500 leading-9">
-              In today&apos;s dynamic AI landscape, efficient resource
-              utilization is paramount. That&apos;s why we&apos;ve innovated
-              with our new Bucket Cache feature, allowing you to cache any
-              number of responses for a given request. No longer will you need
-              to expend valuable resources hitting the LLM-endpoint repeatedly
-              with identical requests.
+            <div ref={bucketDiv} id="bucket" className="sr-only" />
+            <p className="text-xl text-gray-700 font-normal leading-8">
+              Our toolkit provides an array of features to manage and control
+              your AI applications.
             </p>
+            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Bucket Cache:
+                  </span>{" "}
+                  Save money by caching and configuring responses
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Custom Properties:
+                  </span>{" "}
+                  Tag requests to easily segment and analyze your traffic
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-900 underline">
+                    Streaming Support:
+                  </span>{" "}
+                  Get analytics into streamed responses out of the box
+                </p>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
       <div className="bg-[#0a2540] h-full">
-        <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r-2 border-l-2 border-gray-400 border-dashed w-full items-center justify-center">
-          <div className="col-span-2 flex flex-col space-y-12 py-32">
+        <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-400 border-dashed w-full items-center justify-center">
+          <div className="col-span-2 flex flex-col space-y-12 py-32 pr-32">
             <p className="text-lg text-sky-400 tracking-wide font-semibold">
               Made By Developers, For Developers
             </p>
             <p className="text-5xl text-white font-semibold">
-              Tailored Solutions for Your Unique Needs
+              Simple and Flexible Integration
             </p>
-            <p className="text-xl text-gray-400 leading-9">
-              Your AI tools should adapt to your unique workflow, not the other
-              way around. That&apos;s why we&apos;ve incorporated extensive
-              support for a range of integrations, along with comprehensive
-              GraphQL support and flexible deployment options. Now, you can work
-              the way you want, with the tools you prefer.
+            <p className="text-xl text-gray-300 font-normal leading-8">
+              Our solution is designed to seamlessly integrate with your
+              existing setup:
             </p>
+            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-300">
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-100 underline">
+                    Effortless Setup:
+                  </span>{" "}
+                  Get started with only 2 lines of code
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-100 underline">
+                    Versatile Support:
+                  </span>{" "}
+                  Our platform smoothly integrates with your preferred tool
+                </p>
+              </li>
+              <li>
+                <p className="leading-7">
+                  <span className="font-semibold text-gray-100 underline">
+                    Package Variety:
+                  </span>{" "}
+                  Choose from a wide range of packages to import
+                </p>
+              </li>
+            </ul>
             <div>
-              <button className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-lg">
-                View Docs
+              <button className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-xl">
+                Read Our Docs
               </button>
             </div>
           </div>
-          <div className="flex flex-col col-span-2 h-full">
-            <div className="m-16 bg-sky-900 h-full rounded-lg shadow-md"></div>
+          <div className="flex flex-col col-span-2 h-full py-16 space-y-4">
+            <CodeSnippet />
           </div>
         </div>
       </div>
       <div className="bg-gray-50">
-        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r-2 border-l-2 border-gray-300 border-dashed w-full items-center justify-center">
+        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
           <div className="col-span-2 flex flex-col space-y-8 py-32">
             <p className="text-4xl text-sky-500 tracking-wide font-semibold">
               Open Source
@@ -383,7 +739,7 @@ export default function HomePage() {
               transparency.
             </p>
             <div className="flex flex-row gap-8">
-              <button className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg">
+              <button className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl">
                 Star us on GitHub
               </button>
               <button className="underline underline-offset-2 font-semibold text-gray-900">
@@ -393,7 +749,7 @@ export default function HomePage() {
           </div>
           <div className="flex flex-col col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
-              <CloudIcon className="h-8 w-8 inline" />
+              <CloudIcon className="h-8 w-8 inline text-sky-500" />
               <p className="text-gray-900 font-semibold text-lg">
                 Cloud Solution
               </p>
@@ -410,7 +766,7 @@ export default function HomePage() {
           </div>
           <div className="flex flex-col col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
-              <CloudArrowUpIcon className="h-8 w-8 inline" />
+              <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
               <p className="text-gray-900 font-semibold text-lg">AWS Deploy</p>
             </div>
             <p className="text-gray-500">
