@@ -813,9 +813,14 @@ export default function HomePage() {
               We&apos;re always looking for new contributors to help us improve
             </p>
             <div className="flex flex-row gap-8 w-full justify-center">
-              <button className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl">
+              <a
+                href="https://discord.gg/zsSTcH2qhG"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+              >
                 Join Discord
-              </button>
+              </a>
             </div>
           </div>
           <section className="col-span-4">
@@ -824,7 +829,7 @@ export default function HomePage() {
                 {testimonials.map((testimonial, i) => (
                   <div
                     key={i}
-                    className="bg-violet-100 flex flex-col p-8 rounded-xl space-y-4 h-full justify-between"
+                    className="bg-violet-100 shadow-sm flex flex-col p-8 rounded-xl space-y-4 h-full justify-between"
                   >
                     <blockquote className="text-sm leading-6">
                       <p>{`“${testimonial.body}”`}</p>
@@ -844,43 +849,44 @@ export default function HomePage() {
                     </figcaption>
                   </div>
                 ))}
-
-                {/* <div className="flex flex-col border-t border-gray-900/10 pt-10 sm:pt-16 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0 xl:pl-20">
-                  <img
-                    className="h-12 self-start"
-                    src="https://tailwindui.com/img/logos/reform-logo-gray-900.svg"
-                    alt=""
-                  />
-                  <figure className="mt-10 flex flex-auto flex-col justify-between">
-                    <blockquote className="text-lg leading-8 text-gray-900">
-                      <p>
-                        “Excepteur veniam labore ullamco eiusmod. Pariatur
-                        consequat proident duis dolore nulla veniam
-                        reprehenderit nisi officia voluptate incididunt
-                        exercitation exercitation elit. Nostrud veniam sint
-                        dolor nisi ullamco.”
-                      </p>
-                    </blockquote>
-                    <figcaption className="mt-10 flex items-center gap-x-6">
-                      <img
-                        className="h-14 w-14 rounded-full bg-gray-50"
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt=""
-                      />
-                      <div className="text-base">
-                        <div className="font-semibold text-gray-900">
-                          Joseph Rodriguez
-                        </div>
-                        <div className="mt-1 text-gray-500">CEO of Reform</div>
-                      </div>
-                    </figcaption>
-                  </figure>
-                </div> */}
               </div>
             </div>
           </section>
         </div>
       </div>
+      <footer className="bg-gray-50">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-8">
+          {/* <div className="flex justify-center space-x-6 md:order-2">
+            {navigation.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <span className="sr-only">{item.name}</span>
+                <item.icon className="h-6 w-6" aria-hidden="true" />
+              </a>
+            ))}
+          </div> */}
+          <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
+            <p className="text-center text-xs leading-5 text-gray-500">
+              &copy; 2023 Helicone, Inc. All rights reserved.
+            </p>
+            <a
+              href="/privacy"
+              className="text-center text-xs leading-5 text-gray-500"
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="/terms"
+              className="text-center text-xs leading-5 text-gray-500"
+            >
+              Terms of Use
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
