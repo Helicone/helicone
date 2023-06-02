@@ -173,7 +173,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           ? `${metrics.averageTokensPerRequest.data.data.average_prompt_tokens_per_response.toFixed(
               5
             )}`
-          : "$0.00",
+          : "N/A",
       label: "Avg Prompt Tokens/Req",
       icon: ChartBarIcon,
       isLoading:
@@ -187,7 +187,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           ? `${metrics.averageTokensPerRequest.data.data.average_completion_tokens_per_response.toFixed(
               5
             )}`
-          : "$0.00",
+          : "N/A",
       label: "Avg Completion Tokens/Req",
       icon: ChartBarIcon,
       isLoading:
@@ -201,7 +201,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           ? `${metrics.averageTokensPerRequest.data.data.average_total_tokens_per_response.toFixed(
               5
             )}`
-          : "$0.00",
+          : "N/A",
       label: "Avg Total Tokens/Req",
       icon: ChartBarIcon,
       isLoading:
