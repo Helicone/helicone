@@ -50,37 +50,7 @@ import LoginButton from "../../shared/auth/loginButton";
 import { BsDiscord } from "react-icons/bs";
 import NavBar from "../../shared/layout/navbar";
 import Footer from "../../shared/layout/footer";
-
-const timeline = [
-  {
-    name: "Founded company",
-    description:
-      "After years of working as software engineers, we quit our jobs looking to build within the generative AI space.",
-    date: "Jan 2023",
-    dateTime: "2023-01",
-  },
-  {
-    name: "Backed by Y Combinator",
-    description:
-      "We were accepted into YCombinator's Winter 2023 batch and have been working closely with the YC partners.",
-    date: "Jan 2023",
-    dateTime: "2023-01",
-  },
-  {
-    name: "Launched Helicone",
-    description:
-      "After building multiple LLM apps and struggling with the lack of good monitoring and observability tools, we decided to build Helicone.",
-    date: "Feb 2022",
-    dateTime: "2023-02",
-  },
-  {
-    name: "5 million requests",
-    description:
-      "We reached 5 million requests in just over a months time, and we're just getting started.",
-    date: "Mar 2023",
-    dateTime: "2023-03",
-  },
-];
+import NavBarV2 from "../../shared/layout/navBarV2";
 
 const testimonials = [
   {
@@ -196,14 +166,14 @@ export default function HomePage() {
 
   return (
     <div className="flex-col w-full">
-      <NavBar />
+      <NavBarV2 />
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="col-start-1 col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
+          <div className="col-start-1 col-span-4 md:col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
             <span className="rounded-full w-fit bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
               Backed by Y Combinator
             </span>
-            <div className="text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
+            <div className="text-5xl md:text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
                 Generative AI
@@ -244,45 +214,20 @@ export default function HomePage() {
               )}
             </div>
           </div>
-          <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-16 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-24">
+          <div className="hidden md:flex mx-auto mt-16 max-w-2xl sm:mt-24 lg:ml-16 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-24">
             <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
               <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <img
                   src="/assets/landing/preview.webp"
                   alt="App screenshot"
-                  // width={2432}
-                  // height={1442}
-                  width={1216}
-                  height={721}
+                  width={2432}
+                  height={1442}
                   className="w-[60rem] rounded-md shadow-2xl ring-1 ring-gray-900/10"
                 />
               </div>
             </div>
           </div>
-          {/* <div className="col-span-2 h-[80vh] flex flex-col items-center justify-center align-middle relative">
-            <div className="bg-sky-300 rounded-xl h-1/4 w-[45%] p-4 flex flex-col justify-between z-20 shadow-md">
-              <p className="font-semibold text-sky-900 text-lg">
-                Tokens per Request
-              </p>
-              <p className="font-semibold text-sky-900 text-5xl text-right">
-                124
-              </p>
-            </div>
-            <div className="bg-pink-300 rounded-xl h-1/4 w-2/5 p-4 flex flex-col justify-between absolute left-[15%] top-[27.5%] z-10 shadow-md">
-              <p className="font-semibold text-pink-900 text-lg">User Growth</p>
-              <p className="font-semibold text-pink-900 text-5xl text-right">
-                1,534
-              </p>
-            </div>
-            <div className="bg-violet-300 rounded-xl h-[30%] w-[45%] p-4 flex flex-col justify-between absolute right-[12.5%] top-[20%] shadow-md">
-              <p className="font-semibold text-violet-900 text-lg">
-                Cache Hits
-              </p>
-              <p className="font-semibold text-violet-900 text-5xl text-right">
-                5,421
-              </p>
-            </div>
-          </div> */}
+
           <div className="col-span-4 grid grid-cols-4 gap-8 pb-32">
             {/* <img
               className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
@@ -346,7 +291,7 @@ export default function HomePage() {
       </div>
       <div className="bg-gray-100">
         <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="flex flex-col col-span-2 space-y-8 py-32 pr-32">
+          <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
             <p className="text-lg text-sky-500 tracking-wide font-semibold">
               Real Time Metrics
             </p>
@@ -391,7 +336,7 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <div className="flex flex-col col-span-2 h-full flex-1 sticky top-[5%] 2xl:top-[15%] py-28">
+          <div className="flex-col hidden md:flex col-span-2 h-full flex-1 sticky top-[5%] 2xl:top-[15%] py-28">
             <div className="h-full relative">
               <div
                 className={clsx(
@@ -599,7 +544,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col col-span-2 space-y-8 py-32 pr-32">
+          <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
             <p className="text-lg text-pink-500 tracking-wide font-semibold">
               User Management Tools
             </p>
@@ -639,50 +584,52 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <div className="flex flex-col col-span-2 col-start-1 space-y-8 py-32 pr-32">
-            <p className="text-lg text-purple-500 tracking-wide font-semibold">
-              Tooling for LLMs
-            </p>
-            <p className="text-5xl text-gray-900 font-semibold">
-              Tools to scale your LLM-powered application
-            </p>
-            <div ref={bucketDiv} id="bucket" className="sr-only" />
-            <p className="text-xl text-gray-700 font-normal leading-8">
-              Our toolkit provides an array of features to manage and control
-              your AI applications.
-            </p>
-            <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Bucket Cache:
-                  </span>{" "}
-                  Save money by caching and configuring responses
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Custom Properties:
-                  </span>{" "}
-                  Tag requests to easily segment and analyze your traffic
-                </p>
-              </li>
-              <li>
-                <p className="leading-7">
-                  <span className="font-semibold text-gray-900 underline">
-                    Streaming Support:
-                  </span>{" "}
-                  Get analytics into streamed responses out of the box
-                </p>
-              </li>
-            </ul>
+          <div className="grid grid-cols-4 col-span-4 py-32 md:pr-32">
+            <div className="col-span-4 md:col-span-2 space-y-8">
+              <p className="text-lg text-purple-500 tracking-wide font-semibold">
+                Tooling for LLMs
+              </p>
+              <p className="text-5xl text-gray-900 font-semibold">
+                Tools to scale your LLM-powered application
+              </p>
+              <div ref={bucketDiv} id="bucket" className="sr-only" />
+              <p className="text-xl text-gray-700 font-normal leading-8">
+                Our toolkit provides an array of features to manage and control
+                your AI applications.
+              </p>
+              <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
+                <li>
+                  <p className="leading-7">
+                    <span className="font-semibold text-gray-900 underline">
+                      Bucket Cache:
+                    </span>{" "}
+                    Save money by caching and configuring responses
+                  </p>
+                </li>
+                <li>
+                  <p className="leading-7">
+                    <span className="font-semibold text-gray-900 underline">
+                      Custom Properties:
+                    </span>{" "}
+                    Tag requests to easily segment and analyze your traffic
+                  </p>
+                </li>
+                <li>
+                  <p className="leading-7">
+                    <span className="font-semibold text-gray-900 underline">
+                      Streaming Support:
+                    </span>{" "}
+                    Get analytics into streamed responses out of the box
+                  </p>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
       <div className="bg-[#0a2540] h-full">
         <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-400 border-dashed w-full items-center justify-center">
-          <div className="col-span-2 flex flex-col space-y-12 py-32 pr-32">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-12 py-32 md:pr-32">
             <p className="text-lg text-sky-400 tracking-wide font-semibold">
               Made By Developers, For Developers
             </p>
@@ -730,14 +677,14 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col col-span-2 h-full py-16 space-y-4">
+          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-16 space-y-4">
             <CodeSnippet />
           </div>
         </div>
       </div>
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="col-span-2 flex flex-col space-y-8 py-32">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
             <p className="text-4xl text-sky-500 tracking-wide font-semibold">
               Open Source
             </p>
@@ -763,7 +710,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col col-span-1 h-full py-32 space-y-4">
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
               <CloudIcon className="h-8 w-8 inline text-sky-500" />
               <p className="text-gray-900 font-semibold text-lg">
@@ -783,7 +730,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col col-span-1 h-full py-32 space-y-4">
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
               <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
               <p className="text-gray-900 font-semibold text-lg">AWS Deploy</p>

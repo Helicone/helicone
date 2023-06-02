@@ -3,6 +3,7 @@ import { SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
 import NavBar from "./navbar";
 import Footer from "./footer";
+import NavBarV2 from "./navBarV2";
 
 const meta = {
   social: [
@@ -50,7 +51,7 @@ const BasePageV2 = (props: BasePageV2Props) => {
   return (
     <>
       <div className="bg-white">
-        <NavBar />
+        <NavBarV2 />
 
         <main>{children}</main>
         <Footer />
