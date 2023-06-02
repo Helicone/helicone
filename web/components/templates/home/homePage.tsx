@@ -80,35 +80,27 @@ const timeline = [
 ];
 
 const testimonials = [
-  [
-    [
-      {
-        body: `Keeping costs under control was a huge issue 2-3 weeks ago but we are now profitable per user.
+  {
+    body: `Keeping costs under control was a huge issue 2-3 weeks ago but we are now profitable per user.
         We leveraged a mix of caching, model-swapping, fine-tuning, and product updates to get here
         @helicone_ai has been a godsend for LLM cost analytics, especially cost/user`,
-        author: {
-          name: "Daniel Habib",
-          handle: "DannyHabibs",
-          imageUrl: "/assets/daniel-habib.png",
-        },
-      },
-    ],
-    [
-      {
-        body: "My favourite of the new AI apps? @helicone_ai - Observability for @OpenAI is pretty bad. Hard to track bills and specific usage with native tools. I see Helicone as the next @datadoghq",
-        author: {
-          name: "John Ndege",
-          handle: "johnndege",
-          imageUrl: "/assets/john-ndege.png",
-        },
-      },
-      // More testimonials...
-    ],
-  ],
-  [
-    [
-      {
-        body: `I'm now using Helicone and it's a major QoL improvement while deving on LLMs
+    author: {
+      name: "Daniel Habib",
+      handle: "DannyHabibs",
+      imageUrl: "/assets/daniel-habib.png",
+    },
+  },
+
+  {
+    body: "My favourite of the new AI apps? @helicone_ai - Observability for @OpenAI is pretty bad. Hard to track bills and specific usage with native tools. I see Helicone as the next @datadoghq",
+    author: {
+      name: "John Ndege",
+      handle: "johnndege",
+      imageUrl: "/assets/john-ndege.png",
+    },
+  },
+  {
+    body: `I'm now using Helicone and it's a major QoL improvement while deving on LLMs
 
         Add one line to your python/JS OpenAI project and get
         - input/output logging
@@ -116,26 +108,21 @@ const testimonials = [
         - caching (soon)
         
         Also OSS 👏`,
-        author: {
-          name: "Jay Hack",
-          handle: "mathemagic1an",
-          imageUrl: "/assets/jay-hack.png",
-        },
-      },
-      // More testimonials...
-    ],
-    [
-      {
-        body: `As an early-stage startup, speed is everything at Trelent. Helicone helps us quickly understand user behaviour when we're iterating with OpenAI, shorten our testing cycles.`,
-        author: {
-          name: "Calum Bird",
-          handle: "calumbirdo",
-          imageUrl: "/assets/calum-bird.png",
-        },
-      },
-      // More testimonials...
-    ],
-  ],
+    author: {
+      name: "Jay Hack",
+      handle: "mathemagic1an",
+      imageUrl: "/assets/jay-hack.png",
+    },
+  },
+  {
+    body: `As an early-stage startup, speed is everything at Trelent. Helicone helps us quickly understand user behaviour when we're iterating with OpenAI, shorten our testing cycles.`,
+    author: {
+      name: "Calum Bird",
+      handle: "calumbirdo",
+      imageUrl: "/assets/calum-bird.png",
+    },
+  },
+  // More testimonials...
 ];
 
 export default function HomePage() {
@@ -817,7 +804,7 @@ export default function HomePage() {
         </div>
       </div>
       <div className="bg-violet-200 h-full">
-        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full text-center items-center justify-center">
+        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-400 border-dashed w-full text-center items-center justify-center">
           <div className="col-span-4 flex flex-col space-y-8 py-32">
             <p className="text-4xl text-violet-900 tracking-wide font-semibold">
               Join Our Community
@@ -831,6 +818,67 @@ export default function HomePage() {
               </button>
             </div>
           </div>
+          <section className="col-span-4">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-16">
+              <div className="mx-auto grid gap-4 max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none md:grid-cols-2 xl:grid-cols-4">
+                {testimonials.map((testimonial, i) => (
+                  <div
+                    key={i}
+                    className="bg-violet-100 flex flex-col p-8 rounded-xl space-y-4 h-full justify-between"
+                  >
+                    <blockquote className="text-sm leading-6">
+                      <p>{`“${testimonial.body}”`}</p>
+                    </blockquote>
+                    <figcaption className="flex items-center gap-x-4 w-fit">
+                      <img
+                        className="h-10 w-10 flex-none rounded-full bg-gray-50"
+                        src={testimonial.author.imageUrl}
+                        alt=""
+                      />
+                      <div className="flex-auto text-left">
+                        <div className="font-semibold">
+                          {testimonial.author.name}
+                        </div>
+                        <div className="text-gray-600">{`@${testimonial.author.handle}`}</div>
+                      </div>
+                    </figcaption>
+                  </div>
+                ))}
+
+                {/* <div className="flex flex-col border-t border-gray-900/10 pt-10 sm:pt-16 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0 xl:pl-20">
+                  <img
+                    className="h-12 self-start"
+                    src="https://tailwindui.com/img/logos/reform-logo-gray-900.svg"
+                    alt=""
+                  />
+                  <figure className="mt-10 flex flex-auto flex-col justify-between">
+                    <blockquote className="text-lg leading-8 text-gray-900">
+                      <p>
+                        “Excepteur veniam labore ullamco eiusmod. Pariatur
+                        consequat proident duis dolore nulla veniam
+                        reprehenderit nisi officia voluptate incididunt
+                        exercitation exercitation elit. Nostrud veniam sint
+                        dolor nisi ullamco.”
+                      </p>
+                    </blockquote>
+                    <figcaption className="mt-10 flex items-center gap-x-6">
+                      <img
+                        className="h-14 w-14 rounded-full bg-gray-50"
+                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        alt=""
+                      />
+                      <div className="text-base">
+                        <div className="font-semibold text-gray-900">
+                          Joseph Rodriguez
+                        </div>
+                        <div className="mt-1 text-gray-500">CEO of Reform</div>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </div> */}
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
