@@ -1,17 +1,20 @@
 import React from "react";
 import Prism, { defaultProps } from "prism-react-renderer";
-import theme from "prism-react-renderer/themes/vsDark";
+import theme from "prism-react-renderer/themes/nightOwl";
+import { clsx } from "../../shared/clsx";
 
 interface DiffHighlightProps {
   code: string;
   language: string;
   newLines: number[];
   oldLines: number[];
+  mode?: "simple" | "themed";
 }
 
 export function DiffHighlight(props: DiffHighlightProps) {
+  const { mode = "simple" } = props;
   return (
-    <div className="bg-black ph-no-capture w-full overflow-auto">
+    <div className={clsx("ph-no-capture w-full overflow-auto")}>
       <Prism
         {...defaultProps}
         code={props.code.trim()}
@@ -19,7 +22,15 @@ export function DiffHighlight(props: DiffHighlightProps) {
         theme={theme}
       >
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
-          <pre className={`${className} p-4 rounded bg-black`} style={style}>
+          <pre
+            className={clsx(
+              className,
+              mode === "simple"
+                ? "bg-black"
+                : "bg-sky-900 rounded-xl p-6 text-sm mt-3 min-h-[450px]"
+            )}
+            style={style}
+          >
             {tokens.map((line, i) => {
               const lineProps = getLineProps({ line, key: i });
               const newLine =
@@ -31,7 +42,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 props.oldLines.length > 0 &&
                 props.oldLines.find((n) => n === i) !== undefined;
               if (newLine) {
-                const className = " bg-green-800 bg-opacity-40";
+                const className = " bg-green-500 bg-opacity-40";
                 lineProps.className += className;
               }
               if (oldLine) {

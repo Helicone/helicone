@@ -19,11 +19,10 @@ const LoginButton = (props: LoginButtonProps) => {
     <>
       <button
         onClick={handleClick}
-        className="whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900 mr-8"
+        className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
       >
-        Sign in
+        Sign In
       </button>
-
       <ThemedModal open={openLogin} setOpen={setOpenLogin}>
         <Login formState="login" />
       </ThemedModal>
