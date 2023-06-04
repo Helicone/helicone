@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
-import NavBar from "./navbar";
-import Footer from "./footer";
-import NavBarV2 from "./navBarV2";
+
+interface FooterProps {}
 
 const meta = {
   social: [
@@ -39,25 +38,46 @@ const meta = {
   ],
 };
 
-export type SocialMeta = (typeof meta.social)[number];
-
-interface BasePageV2Props {
-  children: React.ReactNode;
-}
-
-const BasePageV2 = (props: BasePageV2Props) => {
-  const { children } = props;
+const Footer = (props: FooterProps) => {
+  const {} = props;
 
   return (
-    <>
-      <div className="bg-white">
-        <NavBarV2 />
-
-        <main>{children}</main>
-        <Footer />
+    <footer className="bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-8 ">
+        <div className="flex space-x-6 md:order-2">
+          {meta.social.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <span className="sr-only">{item.name}</span>
+              <item.icon className="h-6 w-6" aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+        <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
+          <p className="text-center text-xs leading-5 text-gray-500">
+            &copy; 2023 Helicone, Inc. All rights reserved.
+          </p>
+          <Link
+            href="/privacy"
+            className="text-center text-xs leading-5 text-gray-500"
+          >
+            Privacy Policy
+          </Link>
+          <Link
+            href="/terms"
+            className="text-center text-xs leading-5 text-gray-500"
+          >
+            Terms of Use
+          </Link>
+        </div>
       </div>
-    </>
+    </footer>
   );
 };
 
-export default BasePageV2;
+export default Footer;
