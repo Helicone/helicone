@@ -16,13 +16,11 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 
-import { Database } from "../../../supabase/database.types";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import ThemedTabs from "../../shared/themed/themedTabs";
-import { Filters } from "./filters";
 
 import {
   filterListToTree,
@@ -39,9 +37,7 @@ import ErrorsPanel from "./panels/errorsPanel";
 import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
 
-interface DashboardPageProps {
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
-}
+interface DashboardPageProps {}
 
 type LiveLogType = {
   id: string;
@@ -58,7 +54,6 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { keys } = props;
   const [interval, setInterval] = useState<TimeInterval>("24h");
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
@@ -234,7 +229,6 @@ const DashboardPage = (props: DashboardPageProps) => {
         }
         actions={
           <div className="flex flex-row items-center gap-5">
-            <Filters keys={keys} setFilter={setApiKeyFilter} />
             <div className="flex flex-row gap-1 items-center">
               UTC
               <Toggle
