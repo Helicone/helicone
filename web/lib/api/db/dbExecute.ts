@@ -61,6 +61,8 @@ export async function dbQueryClickhouse<T>(
     });
     return { data: await queryResult.json<T[]>(), error: null };
   } catch (err) {
+    console.error("Error executing query: ", query, parameters);
+    console.error(err);
     return {
       data: null,
       error: JSON.stringify(err),

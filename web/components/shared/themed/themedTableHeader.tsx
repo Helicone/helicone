@@ -45,6 +45,8 @@ import useNotification from "../notification/useNotification";
 import { useLayouts } from "../../../services/hooks/useLayouts";
 import Link from "next/link";
 import { Result } from "../../../lib/result";
+import { ThemedPill } from "./themedPill";
+import { ThemedMultiSelect } from "./themedMultiSelect";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -180,117 +182,40 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
           <div className="flex flex-wrap space-x-1 items-center">
             {editColumns && (
-              <Popover className="relative text-sm">
-                {({ open }) => (
-                  <>
-                    <Popover.Button
-                      className={clsx(
-                        open
-                          ? "bg-sky-100 text-sky-900"
-                          : "hover:bg-sky-100 hover:text-sky-900",
-                        "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-                      )}
-                    >
-                      <ViewColumnsIcon
-                        className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                        aria-hidden="true"
-                      />
+              <ThemedMultiSelect
+                columns={editColumns.columns.map((col) => ({
+                  active: col.active,
+                  label: col.label,
+                  value: col.label,
+                }))}
+                buttonLabel="Columns"
+                deselectAll={() => {
+                  const newColumns = [...editColumns.columns];
 
-                      <span className="sm:inline hidden lg:inline">
-                        {`Columns (${
-                          editColumns.columns.filter((col) => col.active).length
-                        } / ${editColumns.columns.length})`}
-                      </span>
-                    </Popover.Button>
+                  newColumns.forEach((col) => {
+                    col.active = false;
+                  });
 
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-200"
-                      enterFrom="opacity-0 translate-y-1"
-                      enterTo="opacity-100 translate-y-0"
-                      leave="transition ease-in duration-150"
-                      leaveFrom="opacity-100 translate-y-0"
-                      leaveTo="opacity-0 translate-y-1"
-                    >
-                      <Popover.Panel className="absolute left-0 z-10 mt-2.5 flex">
-                        {({ close }) => (
-                          <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-                            <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
-                              <button
-                                onClick={() => {
-                                  const newColumns = [...editColumns.columns];
+                  editColumns.onColumnCallback(newColumns);
+                }}
+                selectAll={() => {
+                  const newColumns = [...editColumns.columns];
 
-                                  newColumns.forEach((col) => {
-                                    col.active = false;
-                                  });
+                  newColumns.forEach((col) => {
+                    col.active = true;
+                  });
 
-                                  editColumns.onColumnCallback(newColumns);
-                                }}
-                                className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg border-b border-gray-900/5"
-                              >
-                                <MinusCircleIcon
-                                  className="h-4 w-4 flex-none text-gray-400"
-                                  aria-hidden="true"
-                                />
-                                Deselect All
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const newColumns = [...editColumns.columns];
+                  editColumns.onColumnCallback(newColumns);
+                }}
+                onSelect={(value) => {
+                  const newColumns = [...editColumns.columns];
+                  const col = newColumns.find((col) => col.label === value);
+                  if (!col) return;
+                  col.active = !col.active;
 
-                                  newColumns.forEach((col) => {
-                                    col.active = true;
-                                  });
-
-                                  editColumns.onColumnCallback(newColumns);
-                                }}
-                                className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
-                              >
-                                <PlusCircleIcon
-                                  className="h-4 w-4 flex-none text-gray-400"
-                                  aria-hidden="true"
-                                />
-                                Select All
-                              </button>
-                            </div>
-                            <fieldset className="w-[250px] h-[350px] overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
-                              <div className="divide-y divide-gray-200 border-gray-200">
-                                {editColumns.columns.map((col, idx) => (
-                                  <label
-                                    key={idx}
-                                    htmlFor={`person-${col.label}`}
-                                    className="relative p-4 select-none font-medium text-gray-900 w-full justify-between items-center flex hover:bg-gray-50 hover:cursor-pointer"
-                                  >
-                                    <span>{col.label}</span>
-                                    <input
-                                      id={`person-${col.label}`}
-                                      name={`person-${col.label}`}
-                                      type="checkbox"
-                                      checked={col.active}
-                                      onChange={(e) => {
-                                        const newColumns = [
-                                          ...editColumns.columns,
-                                        ];
-                                        const col = newColumns[idx];
-                                        col.active = e.target.checked;
-
-                                        editColumns.onColumnCallback(
-                                          newColumns
-                                        );
-                                      }}
-                                      className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600"
-                                    />
-                                  </label>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </div>
-                        )}
-                      </Popover.Panel>
-                    </Transition>
-                  </>
-                )}
-              </Popover>
+                  editColumns.onColumnCallback(newColumns);
+                }}
+              />
             )}
             {advancedFilter && (
               <div className="mx-auto flex text-sm">
@@ -448,45 +373,23 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
                     {advancedFilter.filters.map((_filter, index) => {
                       return (
-                        <span
+                        <ThemedPill
                           key={index}
-                          className="inline-flex items-center rounded-2xl bg-sky-100 py-1.5 pl-4 pr-2 text-sm font-medium text-sky-700 border border-sky-300"
-                        >
-                          {
+                          label={`${
                             advancedFilter.filterMap[_filter.filterMapIdx]
                               ?.label
-                          }{" "}
-                          {
+                          } ${
                             advancedFilter.filterMap[_filter.filterMapIdx]
                               ?.operators[_filter.operatorIdx].label
-                          }{" "}
-                          {_filter.value}
-                          <button
-                            onClick={() => {
-                              advancedFilter.onAdvancedFilter((prev) => {
-                                const newFilters = [...prev];
-                                newFilters.splice(index, 1);
-                                return newFilters;
-                              });
-                            }}
-                            type="button"
-                            className="ml-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-sky-400 hover:bg-indigo-200 hover:text-sky-500 focus:bg-sky-500 focus:text-white focus:outline-none"
-                          >
-                            <span className="sr-only">Remove large option</span>
-                            <svg
-                              className="h-2.5 w-2.5"
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 8 8"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeWidth="1.5"
-                                d="M1 1l6 6m0-6L1 7"
-                              />
-                            </svg>
-                          </button>
-                        </span>
+                          } ${_filter.value}`}
+                          onDelete={() => {
+                            advancedFilter.onAdvancedFilter((prev) => {
+                              const newFilters = [...prev];
+                              newFilters.splice(index, 1);
+                              return newFilters;
+                            });
+                          }}
+                        />
                       );
                     })}
                   </div>

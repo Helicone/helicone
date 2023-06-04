@@ -9,28 +9,26 @@ import {
   BuildingOfficeIcon,
   CircleStackIcon,
   CubeTransparentIcon,
-  ExclamationCircleIcon,
   HomeIcon,
   KeyIcon,
   TableCellsIcon,
+  TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { Result } from "../../../lib/result";
-import { useGetKeys } from "../../../services/hooks/keys";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
 import { GrGraphQl } from "react-icons/gr";
+import { BsTags, BsTagsFill } from "react-icons/bs";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -58,6 +56,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/requests",
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
+    },
+    {
+      name: "Properties",
+      href: "/properties",
+      icon: BsTags,
+      current: pathname.includes("/properties"),
     },
     {
       name: "Cache",

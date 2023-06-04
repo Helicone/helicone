@@ -27,11 +27,21 @@ export function useLocalStorage<T>(
       if (!item) {
         throw new Error("No item stored");
       }
-      setStoredValue(item ? JSON.parse(item) : initialValue);
+
+      const val = item ? JSON.parse(item) : initialValue;
+
+      if (
+        val === storedValue ||
+        JSON.stringify(val) === JSON.stringify(storedValue)
+      ) {
+        return;
+      }
+      setStoredValue(val);
     } catch (error) {
+      console.error(error);
       onNothingStored && onNothingStored(setValue);
     }
-  }, [key, initialValue, onNothingStored, setValue]);
+  }, [key, initialValue, onNothingStored, setValue, storedValue]);
 
   return [storedValue, setValue];
 }
