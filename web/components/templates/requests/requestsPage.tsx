@@ -12,7 +12,6 @@ import {
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
-import { useGetKeys } from "../../../services/hooks/keys";
 import { useLayouts } from "../../../services/hooks/useLayouts";
 import { FilterNode, parseKey } from "../../../services/lib/filters/filterDefs";
 import {
@@ -32,7 +31,6 @@ import {
   getUSDate,
   removeLeadingWhitespace,
 } from "../../shared/utils/utils";
-import { Filters } from "../dashboard/filters";
 import RequestDrawer from "./requestDrawer";
 import RequestTable from "./requestTable";
 import useRequestsPage, {
@@ -383,8 +381,6 @@ const RequestsPage = (props: RequestsPageProps) => {
     sortLeaf
   );
 
-  const { keys, isLoading: isKeysLoading } = useGetKeys();
-
   const onTimeSelectHandler = async (key: TimeInterval, value: string) => {
     setTimeFilter({
       request: {
@@ -665,15 +661,7 @@ const RequestsPage = (props: RequestsPageProps) => {
             />
           </button>
         }
-        actions={
-          <div className="flex flex-row space-x-8 items-center">
-            {!isKeysLoading ? (
-              <Filters keys={keys} setFilter={setApiKeyFilter} />
-            ) : (
-              <div className="h-10"></div>
-            )}
-          </div>
-        }
+        actions={<div className="flex flex-row space-x-8 items-center"></div>}
       />
       <div className="">
         <div className="mt-4 space-y-2">
