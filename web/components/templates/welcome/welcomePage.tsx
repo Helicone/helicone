@@ -13,12 +13,7 @@ import WelcomeSteps from "./welcomeSteps";
 import ListeningForEvent from "./listeningForEvent";
 import GenerateApiKey from "./generateAPIKey";
 
-interface DashboardPageProps {
-  user: User;
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
-}
-
-export type Loading<T> = T | "loading";
+interface DashboardPageProps {}
 
 interface BaseUrlInstructionsProps {
   apiKey: string;
@@ -176,7 +171,6 @@ export const BaseUrlInstructions = (props: BaseUrlInstructionsProps) => {
 };
 
 const WelcomePage = (props: DashboardPageProps) => {
-  const { user, keys } = props;
   const [step, setStep] = useState(1);
   const [apiKey, setApiKey] = useState("");
   const steps = [

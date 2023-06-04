@@ -1,25 +1,15 @@
-import { Tab } from "@headlessui/react";
-import { PlusIcon } from "@heroicons/react/20/solid";
-import {
-  BuildingOfficeIcon,
-  CreditCardIcon,
-  KeyIcon,
-  UserIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
+import { BuildingOfficeIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import generateApiKey from "generate-api-key";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { hashAuth } from "../../../lib/hashClient";
-import { middleTruncString } from "../../../lib/stringHelpers";
 
-import { useGetKeys } from "../../../services/hooks/keys";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
+import { useOrg } from "../../shared/layout/organizationContext";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -28,7 +18,6 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import AddHeliconeKeyModal from "./addHeliconeKeyModal";
 import AddKeyModal from "./addKeyModal";
 import { useKeysPage } from "./useKeysPage";
-import { useOrg } from "../../shared/layout/organizationContext";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -77,67 +66,60 @@ const KeyPage = (props: KeyPageProps) => {
     setDeleteHeliconeOpen(true);
   };
 
-  const {
-    count,
-    heliconeKeys,
-    isLoading,
-    keys,
-    refetchHeliconeKeys,
-    refetchKeys,
-  } = useKeysPage();
+  const { heliconeKeys, isLoading, refetchHeliconeKeys } = useKeysPage();
 
   const { setNotification } = useNotification();
 
-  const renderKeyTable = () => {
-    if (count < 1) {
-      return (
-        <div className="mt-10 relative block w-full rounded-lg border-2 border-red-300 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-          <div className="w-full justify-center align-middle items-center">
-            <KeyIcon className="h-10 w-10 mx-auto text-red-500" />
-          </div>
+  // const renderKeyTable = () => {
+  //   if (count < 1) {
+  //     return (
+  //       <div className="mt-10 relative block w-full rounded-lg border-2 border-red-300 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+  //         <div className="w-full justify-center align-middle items-center">
+  //           <KeyIcon className="h-10 w-10 mx-auto text-red-500" />
+  //         </div>
 
-          <span className="mt-2 block text-sm font-medium text-red-500">
-            Add a key to get started using Helicone
-          </span>
-        </div>
-      );
-    } else {
-      return (
-        <ThemedTable
-          columns={[
-            { name: "Name", key: "key_name", hidden: false },
-            { name: "Hash", key: "api_key_hash", hidden: true },
-            { name: "Preview", key: "api_key_preview", hidden: true },
-            { name: "Created", key: "created_at", hidden: false },
-          ]}
-          rows={keys.map((key) => {
-            return {
-              ...key,
-              key_name: (
-                <input
-                  type="string"
-                  defaultValue={key.key_name ?? "No Name"}
-                  className="max-w-sm border-none outline-none"
-                  onChange={(e) => {
-                    supabaseClient
-                      .from("user_api_keys")
-                      .update({
-                        key_name: e.target.value,
-                      })
-                      .eq("api_key_hash", key.api_key_hash)
-                      .then((res) => {
-                        console.log(res);
-                      });
-                  }}
-                />
-              ),
-            };
-          })}
-          deleteHandler={onDeleteHandler}
-        />
-      );
-    }
-  };
+  //         <span className="mt-2 block text-sm font-medium text-red-500">
+  //           Add a key to get started using Helicone
+  //         </span>
+  //       </div>
+  //     );
+  //   } else {
+  //     return (
+  //       <ThemedTable
+  //         columns={[
+  //           { name: "Name", key: "key_name", hidden: false },
+  //           { name: "Hash", key: "api_key_hash", hidden: true },
+  //           { name: "Preview", key: "api_key_preview", hidden: true },
+  //           { name: "Created", key: "created_at", hidden: false },
+  //         ]}
+  //         rows={keys.map((key) => {
+  //           return {
+  //             ...key,
+  //             key_name: (
+  //               <input
+  //                 type="string"
+  //                 defaultValue={key.key_name ?? "No Name"}
+  //                 className="max-w-sm border-none outline-none"
+  //                 onChange={(e) => {
+  //                   supabaseClient
+  //                     .from("user_api_keys")
+  //                     .update({
+  //                       key_name: e.target.value,
+  //                     })
+  //                     .eq("api_key_hash", key.api_key_hash)
+  //                     .then((res) => {
+  //                       console.log(res);
+  //                     });
+  //                 }}
+  //               />
+  //             ),
+  //           };
+  //         })}
+  //         deleteHandler={onDeleteHandler}
+  //       />
+  //     );
+  //   }
+  // };
 
   const renderHeliconeKeyTable = () => {
     if ((heliconeKeys?.data?.length ?? 0) < 1) {
@@ -181,64 +163,13 @@ const KeyPage = (props: KeyPageProps) => {
               icon: BuildingOfficeIcon,
               label: "Helicone Keys",
             },
-            {
-              icon: KeyIcon,
-              label: "OpenAI Keys",
-            },
           ]}
           onOptionSelect={(option) => {
             setSelectedTab(option as any);
           }}
         />
       )}
-      {selectedTab === "OpenAI Keys" && (
-        <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
-          <div className="text-gray-900 space-y-4 text-sm">
-            <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
-              <div className="sm:flex-auto items-center flex flex-row space-x-4">
-                <h1 className="text-lg font-semibold text-gray-900">
-                  Open AI Keys
-                </h1>
-              </div>
-            </div>
-            <p>
-              Your API keys are used to authenticate your requests to the OpenAI
-              API. Please note that we do{" "}
-              <span className="font-semibold">not</span> store your API key on
-              our servers.
-            </p>
-            <p>
-              How do we do this? We log each request to our API using a hashed
-              version of your API key. This allows us to identify your account
-              without storing your API key.{" "}
-              <Link
-                href="https://docs.helicone.ai/getting-started/how-encryption-works"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline inline-flex flex-row w-fit"
-              >
-                Learn More
-              </Link>
-            </p>
-            {isLoading ? (
-              <LoadingAnimation title={"Loading your keys..."} />
-            ) : (
-              <div className="space-y-6 pt-2">
-                {renderKeyTable()}
-                <div className="w-full flex justify-start">
-                  <button
-                    onClick={() => setAddOpen(true)}
-                    className="items-center rounded-md bg-black px-3 py-1.5 text-md flex font-normal text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  >
-                    <PlusIcon className="h-5 w-5 inline" />
-                    Add Key
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+
       {selectedTab === "Helicone Keys" && (
         <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
           <div className="text-gray-900 space-y-4 text-sm">
@@ -469,7 +400,6 @@ const KeyPage = (props: KeyPageProps) => {
                         console.log(res);
                         setDeleteOpen(false);
                         setNotification("Key successfully deleted", "success");
-                        refetchKeys();
                       }
                     });
                 }}
