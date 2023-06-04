@@ -9,7 +9,6 @@ import {
   BuildingOfficeIcon,
   CircleStackIcon,
   CubeTransparentIcon,
-  ExclamationCircleIcon,
   HomeIcon,
   KeyIcon,
   TableCellsIcon,
@@ -18,13 +17,10 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { Result } from "../../../lib/result";
-import { useGetKeys } from "../../../services/hooks/keys";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";

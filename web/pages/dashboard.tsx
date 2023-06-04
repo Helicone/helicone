@@ -4,7 +4,6 @@ import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
-import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
 import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
 
@@ -18,7 +17,7 @@ const Dashboard = (props: DashboardProps) => {
   return (
     <MetaData title="Dashboard">
       <AuthLayout user={user!}>
-        <DashboardPage keys={keys} />
+        <DashboardPage />
       </AuthLayout>
     </MetaData>
   );
@@ -32,12 +31,10 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     supabaseClient,
   } = options;
   const client = supabaseClient.getClient();
-  const [{ data: keyData }, isRequestLimitOver, hasOnboarded] =
-    await Promise.all([
-      getKeys(client),
-      requestOverLimit(client, orgId),
-      checkOnboardedAndUpdate(client),
-    ]);
+  const [isRequestLimitOver, hasOnboarded] = await Promise.all([
+    requestOverLimit(client, orgId),
+    checkOnboardedAndUpdate(client),
+  ]);
   if (!hasOnboarded?.data) {
     return {
       redirect: {
@@ -57,8 +54,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   }
 
   return {
-    props: {
-      keys: keyData,
-    },
+    props: {},
   };
 });
