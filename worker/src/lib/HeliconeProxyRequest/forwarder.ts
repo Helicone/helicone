@@ -12,6 +12,7 @@ import {
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
+import { getTokenCount } from "../dbLogger/tokenCounter";
 
 export async function proxyForwarder(
   request: RequestWrapper,

@@ -2,7 +2,6 @@ import { handleFeedbackEndpoint } from "./feedback";
 import { proxyForwarder } from "./lib/HeliconeProxyRequest/forwarder";
 
 import { RequestHandlerType, RequestWrapper } from "./lib/RequestWrapper";
-import { DBLoggable } from "./lib/dbLogger/DBLoggable";
 import { handleLoggingEndpoint } from "./properties";
 
 export interface Env {
@@ -14,7 +13,7 @@ export interface Env {
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   PROVIDER: "OPENAI" | "ANTHROPIC";
-  TOKEN_COUNT_URL: string;
+  TOKEN_CALC_URL: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -38,27 +37,6 @@ type Dispatcher = (
   ctx: ExecutionContext
 ) => Promise<Response>;
 
-
-
-interface AsyncLoggingBody {
-  response: {
-    body: string;
-    status: number;
-  },
-  request: {
-    requestId?: string;
-    userId?: string;
-    heliconeAuthHash?: string;
-    providerAuthHash?: string;
-    promptId?: string;
-    startTime: Date;
-    endTime: Date;
-    bodyText?: string;
-    path: string;
-    properties: Record<string, string>;
-    isStream: boolean;
-  } 
-}
 const dispatcherMap: {
   [key in RequestHandlerType]: Dispatcher;
 } = {
@@ -73,20 +51,6 @@ const dispatcherMap: {
     });
   },
   proxy_log: proxyForwarder,
-  async_logging: async (request: RequestWrapper) => {
-    const isStream = request.getHeaders().get("helicone-is-stream");
-    request.getJson<{
-
-    }>();
-
-    const z = new DBLoggable({
-      request: {
-        isStream,
-        omitLog: false,
-        path: 
-      }
-    });
-  },
 };
 
 export default {

@@ -36,6 +36,7 @@ const PropertiesPage = (props: {}) => {
       return () => [];
     }
   );
+  console.log("Oh no");
 
   return (
     <>

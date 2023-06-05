@@ -60,6 +60,7 @@ export async function handleProxyRequest(
         request: dbLoggableRequestFromProxyRequest(proxyRequest),
         response: {
           getResponseBody: async () => interceptor?.waitForChunk() ?? "",
+          responseHeaders: new Headers(response.headers),
           status: response.status,
           omitLog:
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
