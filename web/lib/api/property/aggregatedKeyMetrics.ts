@@ -2,17 +2,10 @@ import {
   FilterNode,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHousePropResponse,
-} from "../../../services/lib/filters/filters";
-import { Result, resultMap } from "../../result";
+import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
+import { resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../db/dbExecute";
+import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 
 export async function getTotalRequests(
   filter: FilterNode,
@@ -21,7 +14,7 @@ export async function getTotalRequests(
     end: Date;
   },
   org_id: string
-): Promise<Result<number, string>> {
+) {
   const { filter: filterString, argsAcc } =
     await buildFilterWithAuthClickHousePropResponse({
       org_id,
@@ -33,22 +26,39 @@ export async function getTotalRequests(
       argsAcc: [],
     });
   const query = `
-
-  WITH total_count AS (
-    SELECT count(*) as count
-    FROM property_with_response_v1
-    WHERE (
-      (${filterString})
-    )
-  )
-  SELECT coalesce(sum(count), 0) as count
-  FROM total_count
+  select 
+  property_with_response_v1.property_value,
+  count(*) as total_requests,
+  sum(property_with_response_v1.completion_tokens) / count(*) as avg_completion_tokens_per_request,
+  sum(property_with_response_v1.latency) / count(*) as avg_latency_per_request,
+  ${CLICKHOUSE_PRICE_CALC("property_with_response_v1")} as total_cost
+from property_with_response_v1
+where (
+${filterString}
+)
+group by property_value
+ORDER BY count(*) DESC
+LIMIT 10
 `;
   printRunnableQuery(query, argsAcc);
 
   const res = await dbQueryClickhouse<{
-    count: number;
+    property_value: string;
+    total_requests: number;
+    avg_completion_tokens_per_request: number;
+    avg_latency_per_request: number;
+    total_cost: number;
   }>(query, argsAcc);
 
-  return resultMap(res, (d) => +d[0].count);
+  return resultMap(res, (d) => {
+    return d.map((r) => {
+      return {
+        property_value: r.property_value,
+        total_requests: +r.total_requests,
+        avg_completion_tokens_per_request: +r.avg_completion_tokens_per_request,
+        avg_latency_per_request: +r.avg_latency_per_request,
+        total_cost: +r.total_cost,
+      };
+    });
+  });
 }

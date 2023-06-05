@@ -95,7 +95,7 @@ export const usePropertyCard = (props: PropertyPageData) => {
   const valueMetrics = {
     aggregatedKeyMetrics: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/properties/aggregatedKeyMetrics",
+      endpoint: "/api/property/aggregatedKeyMetrics",
     }),
   };
 

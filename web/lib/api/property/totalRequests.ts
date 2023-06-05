@@ -44,7 +44,6 @@ export async function getTotalRequests(
   SELECT coalesce(sum(count), 0) as count
   FROM total_count
 `;
-  printRunnableQuery(query, argsAcc);
 
   const res = await dbQueryClickhouse<{
     count: number;

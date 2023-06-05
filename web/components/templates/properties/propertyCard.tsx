@@ -8,6 +8,8 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import { usePropertyCard } from "./useProperty";
+import { MdLaunch } from "react-icons/md";
+import ThemedTable from "../../shared/themed/themedTable";
 
 interface PropertyCardPageProps {
   property: string;
@@ -19,7 +21,7 @@ interface PropertyCardPageProps {
 
 const PropertyCard = (props: PropertyCardPageProps) => {
   const { property, timeFilter } = props;
-  const { keyMetrics } = usePropertyCard({
+  const { keyMetrics, valueMetrics } = usePropertyCard({
     timeFilter,
     property,
   });
@@ -49,6 +51,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
       isLoading: keyMetrics.averageLatency.isLoading,
     },
   ];
+  console.log("valueMetrics", valueMetrics);
 
   return (
     <>
@@ -58,6 +61,43 @@ const PropertyCard = (props: PropertyCardPageProps) => {
           {metricsData.map((m, i) => (
             <MetricsPanel metric={m} key={i} />
           ))}
+        </div>
+        <div>
+          <div className="flex flex-row justify-between items-end">
+            <div>Top 10 by Requests</div>
+            <button className="border p-2 my-2 shadow-sm hover:shadow-md rounded-md flex flex-row items-center gap-2">
+              Open request page
+              <MdLaunch className="inline-block ml-2" />
+            </button>
+          </div>
+          <ThemedTable
+            columns={[
+              { name: "Value", key: "property_value", hidden: false },
+              { name: "Active Since", key: "active_for", hidden: false },
+              { name: "Requests", key: "total_requests", hidden: false },
+              {
+                name: "Avg Completion Tokens/Req",
+                key: "avg_completion_tokens_per_request",
+                hidden: true,
+              },
+              {
+                name: "Avg Latency (ms)/Req",
+                key: "avg_latency_per_request",
+                hidden: true,
+              },
+              {
+                name: "Avg Cost (USD)/Req",
+                key: "avg_latency_per_request",
+                hidden: true,
+              },
+              {
+                name: "Total Cost (USD)",
+                key: "total_cost",
+                hidden: true,
+              },
+            ]}
+            rows={valueMetrics.aggregatedKeyMetrics.data?.data ?? []}
+          />
         </div>
       </div>
     </>
