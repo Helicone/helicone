@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
-import { BaseUrlInstructions } from "../components/templates/welcome/welcomePage";
 
 interface HomeProps {}
 
@@ -72,7 +71,7 @@ const Home = (props: HomeProps) => {
                   . Find the instructions for your package below.
                 </li>
               </ol>
-              <BaseUrlInstructions apiKey="HELICONE_API_KEY" />
+              {/* <BaseUrlInstructions apiKey="HELICONE_API_KEY" /> */}
             </div>
             <div className="flex flex-col space-y-4">
               <h3 className="text-2xl font-sans font-semibold">

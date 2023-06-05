@@ -32,7 +32,6 @@ import {
   CurrencyDollarIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { BaseUrlInstructions } from "../welcome/welcomePage";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
@@ -106,13 +105,6 @@ export default function HomePage() {
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }
-  // const { data: globalMetrics } = useQuery({
-  //   queryKey: ["global_metrics"],
-  //   queryFn: async () => {
-  //     const data = fetch("/api/global_metrics").then((res) => res.json());
-  //     return data;
-  //   },
-  // });
 
   const observabilityDiv = useRef(null);
   const rateDiv = useRef(null);
@@ -682,8 +674,8 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-16 space-y-4">
-            <CodeSnippet />
+          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-32 space-y-4">
+            <CodeSnippet variant={"themed"} />
           </div>
         </div>
       </div>
