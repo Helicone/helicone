@@ -14,7 +14,7 @@ import {
   printRunnableQuery,
 } from "../db/dbExecute";
 
-export async function getTotalRequests(
+export async function getAggregatedKeyMetrics(
   filter: FilterNode,
   timeFilter: {
     start: Date;
@@ -33,7 +33,6 @@ export async function getTotalRequests(
       argsAcc: [],
     });
   const query = `
-
   WITH total_count AS (
     SELECT count(*) as count
     FROM property_with_response_v1

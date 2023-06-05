@@ -14,7 +14,6 @@ export interface DBLoggableProps {
   response: {
     getResponseBody: () => Promise<string>;
     status: number;
-    responseHeaders: Headers;
     omitLog: boolean;
   };
   request: {

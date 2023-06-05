@@ -7,7 +7,8 @@ export type RequestHandlerType =
   | "proxy_only"
   | "proxy_log"
   | "logging"
-  | "feedback";
+  | "feedback"
+  | "async_logging";
 
 type Nullable<T> = T | null;
 export interface HeliconeHeaders {
@@ -95,6 +96,12 @@ export class RequestWrapper {
 
     if (method === "POST" && this.url.pathname === "/v1/feedback") {
       return "feedback";
+    }
+    if (
+      method === "POST" &&
+      this.url.pathname === "/v1/helicone/async_logging"
+    ) {
+      return "async_logging";
     }
 
     return "proxy_log";

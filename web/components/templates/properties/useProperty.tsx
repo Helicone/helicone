@@ -24,6 +24,7 @@ import {
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -93,7 +94,9 @@ export const usePropertyCard = (props: PropertyPageData) => {
   };
 
   const valueMetrics = {
-    aggregatedKeyMetrics: useBackendMetricCall<Result<number, string>>({
+    aggregatedKeyMetrics: useBackendMetricCall<
+      UnPromise<ReturnType<typeof getAggregatedKeyMetrics>>
+    >({
       params,
       endpoint: "/api/properties/aggregatedKeyMetrics",
     }),
