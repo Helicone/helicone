@@ -341,8 +341,8 @@ services:
     volumes:
       - ./volumes/clickhouse:/var/lib/clickhouse:z
     environment:
-      CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
-      CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
 
   supabase-migration-runner:
     container_name: supabase-migration-runner

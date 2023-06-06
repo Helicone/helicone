@@ -1,4 +1,3 @@
-import { MetricsBackendBody } from "../../../components/templates/dashboard/useDashboardPage";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -6,6 +5,7 @@ import {
 import { getCostOverTime } from "../../../lib/api/metrics/getCostOverTime";
 
 import { Result } from "../../../lib/result";
+import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 export interface CostOverTime {
   cost: number;
