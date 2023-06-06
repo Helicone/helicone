@@ -8,11 +8,9 @@ interface DiffHighlightProps {
   language: string;
   newLines: number[];
   oldLines: number[];
-  mode?: "simple" | "themed";
 }
 
 export function DiffHighlight(props: DiffHighlightProps) {
-  const { mode = "simple" } = props;
   return (
     <div className={clsx("ph-no-capture w-full overflow-auto")}>
       <Prism
@@ -25,9 +23,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
           <pre
             className={clsx(
               className,
-              mode === "simple"
-                ? "bg-black"
-                : "bg-sky-900 rounded-xl p-6 text-sm mt-3 min-h-[450px]"
+              "p-6 text-xs min-h-[300px] md:text-sm rounded-xl md:min-h-[420px] mt-3 overflow-auto"
             )}
             style={style}
           >
