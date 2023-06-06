@@ -97,23 +97,41 @@ const NAMES: {
   langchain_typescript: "LangChainJS",
 };
 
-export default function CodeSnippet() {
+interface CodeSnippetProps {
+  variant: "themed" | "simple";
+  apiKey?: string;
+}
+
+export default function CodeSnippet(props: CodeSnippetProps) {
+  const { variant, apiKey = "<YOUR_API_KEY>" } = props;
   const [lang, setLang] = useState<SupportedLanguages>("typescript");
 
   return (
-    <div className="w-full py-16">
+    <div className="w-full flex flex-col">
       <Tab.Group defaultIndex={1}>
-        <Tab.List className="flex space-x-1 rounded-xl bg-sky-900 p-1">
+        <Tab.List
+          className={clsx(
+            variant === "themed" ? "bg-sky-900" : "bg-gray-500",
+            "flex space-x-1 rounded-xl p-1"
+          )}
+        >
           {Object.entries(NAMES).map(([key, name]) => (
             <Tab
               key={key}
               className={({ selected }) =>
                 clsx(
                   "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
-                  "ring-white ring-opacity-60 ring-offset-2 ring-offset-sky-300 focus:outline-none focus:ring-2",
+                  "ring-white ring-opacity-60 ring-offset-2 focus:outline-none focus:ring-2",
+                  variant === "themed"
+                    ? "ring-offset-sky-300"
+                    : "ring-offset-gray-700",
                   selected
-                    ? "bg-sky-500 shadow text-white"
-                    : "text-sky-100 hover:bg-sky-700 hover:text-white"
+                    ? variant === "themed"
+                      ? "bg-sky-500 shadow text-white"
+                      : "bg-gray-900 text-white"
+                    : variant === "themed"
+                    ? "text-sky-100 hover:bg-sky-700 hover:text-white"
+                    : "text-gray-100 hover:bg-gray-700 hover:text-white"
                 )
               }
               onClick={() => setLang(key as SupportedLanguages)}
@@ -123,11 +141,10 @@ export default function CodeSnippet() {
           ))}
         </Tab.List>
         <DiffHighlight
-          code={CODE_CONVERTS[lang]("<YOUR_API_KEY>")}
+          code={CODE_CONVERTS[lang](apiKey)}
           language="bash"
           newLines={DIFF_LINES[lang]}
           oldLines={[]}
-          mode="themed"
         />
       </Tab.Group>
     </div>
