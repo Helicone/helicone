@@ -98,25 +98,40 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
         Please generate an API key and store it somewhere safe
       </p>
       <div className="flex flex-col w-full md:w-[450px] mt-16">
+        <label
+          htmlFor="key-name"
+          className="block text-md font-semibold leading-6 text-gray-900"
+        >
+          API Key Name
+        </label>
+        <div className="mt-2">
+          <input
+            disabled={apiKey !== ""}
+            type="text"
+            name="key-name"
+            id="key-name"
+            onChange={(e) => setName(e.target.value)}
+            className={clsx(
+              apiKey !== "" && "bg-gray-300 hover:cursor-not-allowed",
+              "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+            )}
+            placeholder="Your Shiny API Key Name"
+            value={name}
+          />
+        </div>
         {apiKey === "" ? (
           <>
-            <label
-              htmlFor="key-name"
-              className="block text-md font-semibold leading-6 text-gray-900"
-            >
-              API Key Name
-            </label>
-            <div className="mt-2">
-              <input
-                type="text"
-                name="key-name"
-                id="key-name"
-                className="block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
-                placeholder="Your Shiny API Key Name"
-              />
-            </div>
             <button
-              onClick={onGenerateKeyHandler}
+              onClick={() => {
+                if (name === "") {
+                  setNotification(
+                    "Please enter a name for your API key",
+                    "error"
+                  );
+                  return;
+                }
+                onGenerateKeyHandler();
+              }}
               className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
             >
               Generate API Key
@@ -126,7 +141,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
           <>
             <label
               htmlFor="generated-key"
-              className="block text-md font-semibold leading-6 text-gray-900"
+              className="block text-md font-semibold leading-6 text-gray-900 mt-8"
             >
               Your Generated Helicone API Key
             </label>

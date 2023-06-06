@@ -125,12 +125,12 @@ const Features = (props: FeaturesProps) => {
             </Link>
           </span>
         </p>
-        <ul className="flex flex-wrap gap-4 w-full md:w-[62.5%] mt-8 overflow-auto max-h-[420px]">
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full justify-center md:w-[62.5%] mt-8 overflow-auto max-h-[420px]">
           {featureSet.map((feature, i) => (
             <li
               key={i}
               className={clsx(
-                "border border-gray-500 shadow-sm rounded-xl p-4 space-y-1 w-full md:w-fit hover:cursor-pointer hover:bg-gray-100"
+                "col-span-1 border border-gray-500 shadow-sm rounded-xl p-4 space-y-1 h-fit w-full hover:cursor-pointer hover:bg-gray-100"
               )}
               onClick={() => {
                 setCurrentFeature(i);
@@ -140,7 +140,7 @@ const Features = (props: FeaturesProps) => {
               <p className="font-semibold  text-gray-900 text-sm">
                 {feature.title}
               </p>
-              <p className="text-gray-700 text-xs font-light max-w-[200px]">
+              <p className="text-gray-700 text-xs font-light">
                 {feature.subtitle}
               </p>
             </li>

@@ -1,3 +1,5 @@
+import { ArrowLeftIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -14,17 +16,13 @@ const WelcomePage = (props: WelcomePageProps) => {
   const {} = props;
 
   const router = useRouter();
+  const supabaseClient = useSupabaseClient();
 
   const [step, setStep] = useState<number>(0);
   const [apiKey, setApiKey] = useState<string>("");
 
   const nextStep = () => {
     setStep(step + 1);
-  };
-
-  const prevStep = () => {
-    if (step === 0) return;
-    setStep(step - 1);
   };
 
   const stepArray = [
@@ -47,6 +45,17 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   return (
     <div className="bg-gray-200 h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 relative">
+      <button
+        onClick={() => {
+          supabaseClient.auth.signOut().then(() => {
+            router.push("/");
+          });
+        }}
+        className="absolute p-8 left-0 top-0 flex flex-row w-full gap-1 text-sm items-center underline underline-offset-2 font-semibold text-gray-900"
+      >
+        <ArrowLeftIcon className="h-4 w-4 inline" />
+        Sign Out
+      </button>
       {stepArray[step]}
       <div className="h-4 w-full mx-auto bottom-0 mb-8 absolute flex">
         <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
