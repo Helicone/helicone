@@ -11,7 +11,6 @@ async function handler(
     UnPromise<ReturnType<typeof getAggregatedKeyMetrics>>
   >
 ) {
-  console.log("Getting Aggregated Key Metrics");
   const { req, res, userData } = options;
   const { data: filterData, error: filterError } = resultsAll([
     options.body.getFilter(),
@@ -28,7 +27,6 @@ async function handler(
     timeFilter,
     userData.orgId
   );
-  console.log("Aggregated Key Metrics: ", metrics);
   res.status(200).json(metrics);
 }
 

@@ -51,7 +51,6 @@ const PropertyCard = (props: PropertyCardPageProps) => {
       isLoading: keyMetrics.averageLatency.isLoading,
     },
   ];
-  console.log("valueMetrics", valueMetrics);
 
   return (
     <>
