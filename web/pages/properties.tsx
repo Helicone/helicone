@@ -1,13 +1,11 @@
 import { useUser } from "@supabase/auth-helpers-react";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import DashboardPage from "../components/templates/dashboard/dashboardPage";
+import PropertiesPage from "../components/templates/properties/propertiesPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
-import { getKeys } from "../services/lib/keys";
 import { Database } from "../supabase/database.types";
 import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
-import PropertiesPage from "../components/templates/properties/propertiesPage";
 
 interface DashboardProps {
   keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];

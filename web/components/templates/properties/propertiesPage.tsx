@@ -42,7 +42,7 @@ const PropertiesPage = (props: {}) => {
     <>
       <AuthHeader
         title={"Properties"}
-        subtitle="15 minutes behind"
+        subtitle="< 06/05 still migrating"
         headerActions={
           <button
             onClick={() => {

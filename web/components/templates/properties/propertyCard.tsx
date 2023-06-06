@@ -28,7 +28,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       value: keyMetrics.totalCost.data?.data
-        ? `$${keyMetrics.totalCost.data?.data.toFixed(2)}`
+        ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
         : "$0.00",
       label: "Total Cost",
       labelUnits: "(est.)",
@@ -56,24 +56,26 @@ const PropertyCard = (props: PropertyCardPageProps) => {
   return (
     <>
       <div className="bg-white p-5 rounded-md">
-        <h1 className="text-2xl font-semibold mb-5">{property}</h1>
+        <div className="flex flex-row justify-between items-center py-3">
+          <h1 className="text-2xl font-semibold">{property}</h1>
+          {/* 
+          <button className="border p-2 my-2 shadow-sm hover:shadow-md rounded-md flex flex-row items-center gap-2">
+            Open request page
+            <MdLaunch className="inline-block ml-2" />
+          </button> */}
+        </div>
         <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-3 text-gray-900 gap-4">
           {metricsData.map((m, i) => (
             <MetricsPanel metric={m} key={i} />
           ))}
         </div>
-        <div>
-          <div className="flex flex-row justify-between items-end">
-            <div>Top 10 by Requests</div>
-            <button className="border p-2 my-2 shadow-sm hover:shadow-md rounded-md flex flex-row items-center gap-2">
-              Open request page
-              <MdLaunch className="inline-block ml-2" />
-            </button>
-          </div>
+        <div className="flex flex-col gap-2 mt-6">
+          <div>Showing top 10 results</div>
+
           <ThemedTable
             columns={[
               { name: "Value", key: "property_value", hidden: false },
-              { name: "Active Since", key: "active_for", hidden: false },
+              { name: "First see", key: "active_since", hidden: false },
               { name: "Requests", key: "total_requests", hidden: false },
               {
                 name: "Avg Completion Tokens/Req",
@@ -81,22 +83,31 @@ const PropertyCard = (props: PropertyCardPageProps) => {
                 hidden: true,
               },
               {
-                name: "Avg Latency (ms)/Req",
+                name: "Avg Latency/Req",
                 key: "avg_latency_per_request",
+                subName: "s",
                 hidden: true,
               },
               {
-                name: "Avg Cost (USD)/Req",
-                key: "avg_latency_per_request",
+                name: "Avg Cost/Req",
+                key: "average_cost_per_request",
                 hidden: true,
+                subName: "USD",
               },
               {
-                name: "Total Cost (USD)",
+                name: "Total Cost",
                 key: "total_cost",
                 hidden: true,
+                subName: "USD",
               },
             ]}
-            rows={valueMetrics.aggregatedKeyMetrics.data?.data ?? []}
+            rows={
+              valueMetrics.aggregatedKeyMetrics?.data?.data?.map((d) => ({
+                ...d,
+                average_cost_per_request: d.total_cost / d.total_requests,
+                avg_latency_per_request: d.avg_latency_per_request / 1000,
+              })) ?? []
+            }
           />
         </div>
       </div>
