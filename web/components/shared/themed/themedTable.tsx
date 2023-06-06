@@ -3,7 +3,7 @@ import { middleTruncString } from "../../../lib/stringHelpers";
 import { clsx } from "../clsx";
 
 interface ThemedTableProps {
-  columns: { name: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
+  columns: { name: string; subName?: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
   rows?: any[];
   editHandler?: (row: any) => void;
   deleteHandler?: (row: any) => void;
@@ -86,6 +86,10 @@ const ThemedTable = (props: ThemedTableProps) => {
                         {col.key === "cost"
                           ? Number(row[col.key]).toFixed(2)
                           : row[col.key] || "n/a"}
+
+                        <span className="text-xs text-gray-400 pl-1">
+                          {col.subName}
+                        </span>
                       </td>
                     );
                   }

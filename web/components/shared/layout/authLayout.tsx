@@ -12,6 +12,7 @@ import {
   HomeIcon,
   KeyIcon,
   TableCellsIcon,
+  TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
@@ -27,6 +28,7 @@ import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
 import { GrGraphQl } from "react-icons/gr";
+import { BsTags, BsTagsFill } from "react-icons/bs";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -54,6 +56,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/requests",
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
+    },
+    {
+      name: "Properties",
+      href: "/properties",
+      icon: BsTags,
+      current: pathname.includes("/properties"),
     },
     {
       name: "Cache",

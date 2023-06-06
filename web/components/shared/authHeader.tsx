@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 
 interface AuthHeaderProps {
   title: string;
+  subtitle?: string;
   breadcrumb?: {
     title: string;
     href: string;
@@ -30,6 +31,11 @@ const AuthHeader = (props: AuthHeaderProps) => {
             </div>
           )}
           <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          {props.subtitle && (
+            <h2 className="text-md font-normal text-gray-500">
+              {props.subtitle}
+            </h2>
+          )}
         </div>
 
         {headerActions}
