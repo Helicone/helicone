@@ -41,7 +41,6 @@ group by property_value
 ORDER BY count(*) DESC
 LIMIT 10
 `;
-  printRunnableQuery(query, argsAcc);
 
   const res = await dbQueryClickhouse<{
     property_value: string;
