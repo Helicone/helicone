@@ -76,6 +76,11 @@ const whereKeyMappings: KeyMappings = {
     value: "properties_copy_v2.value",
     organization_id: "properties_copy_v2.organization_id",
   },
+  property_with_response_v1: {
+    property_key: "property_with_response_v1.property_key",
+    request_created_at: "property_with_response_v1.request_created_at",
+    organization_id: "property_with_response_v1.organization_id",
+  },
 };
 
 const havingKeyMappings: KeyMappings = {
@@ -96,6 +101,7 @@ const havingKeyMappings: KeyMappings = {
   },
   response_copy_v2: {},
   properties_copy_v2: {},
+  property_with_response_v1: {},
 };
 
 export function buildFilterLeaf(
@@ -161,7 +167,9 @@ export function buildFilterLeaf(
             throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
           }
         } else {
-          throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
+          throw new Error(
+            `Invalid filter, whereKey undefined: ${tableKey}.${columnKey}`
+          );
         }
       }
     }
@@ -312,6 +320,18 @@ export async function buildFilterWithAuthClickHouse(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     response_copy_v2: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHousePropResponse(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    property_with_response_v1: {
       organization_id: {
         equals: orgId,
       },
