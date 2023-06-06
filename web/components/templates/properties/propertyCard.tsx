@@ -44,9 +44,11 @@ const PropertyCard = (props: PropertyCardPageProps) => {
       isLoading: keyMetrics.totalRequests.isLoading,
     },
     {
-      value: keyMetrics.averageLatency.data?.data?.toFixed(2) ?? "n/a",
+      value: keyMetrics.averageLatency.data?.data
+        ? (keyMetrics.averageLatency.data.data / 1000).toFixed(2)
+        : "n/a",
       label: "Avg Latency/Req",
-      labelUnits: "ms",
+      labelUnits: "s",
       icon: CloudArrowDownIcon,
       isLoading: keyMetrics.averageLatency.isLoading,
     },
