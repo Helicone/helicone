@@ -21,6 +21,7 @@ type HeliconeRequest {
   values: [Value]
   responseBody: JSON
   requestBody: JSON
+  latency: Float
 }
 
 input HeliconeRequestFilter {
