@@ -16,6 +16,7 @@ const Dashboard = (props: DashboardProps) => {
   const { user } = props;
 
   useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
     if (typeof window !== "undefined") {
       init(process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0 ?? "");
       window.CommandBar.boot(user.id);
