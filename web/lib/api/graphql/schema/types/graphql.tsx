@@ -32,6 +32,7 @@ export type HeliconeRequest = {
   cacheHits?: Maybe<Scalars["Int"]>;
   createdAt: Scalars["String"];
   id: Scalars["ID"];
+  latency?: Maybe<Scalars["Float"]>;
   prompt?: Maybe<Scalars["String"]>;
   properties?: Maybe<Array<Maybe<Property>>>;
   requestBody?: Maybe<Scalars["JSON"]>;

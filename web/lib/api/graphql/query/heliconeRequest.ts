@@ -162,5 +162,6 @@ export async function heliconeRequest(
       : [],
     requestBody: r.request_body,
     responseBody: r.response_body,
+    latency: r.delay_ms,
   }));
 }
