@@ -137,7 +137,7 @@ function getRequestText(api: RequestWrapper["api"]): string {
     if (!api.chat.request) {
       return "";
     }
-    return api.chat.request.at(-1)?.content ?? "";
+    return api.chat?.request?.at(-1)?.content ?? "";
   } else if ("completion" in api) {
     return api.completion.request ?? "";
   } else if ("moderation" in api) {
