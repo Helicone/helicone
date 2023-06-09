@@ -23,6 +23,7 @@ interface ThemedDropdownProps<T> {
   className?: string;
   label?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
@@ -34,6 +35,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
     verticalAlign = "bottom",
     align = "left",
     placeholder = "Select an option",
+    disabled = false,
   } = props;
   let { options } = props;
   const selected = options.find((option) => option.value === selectedValue);
@@ -83,11 +85,18 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
 
   return (
     <div className={className}>
-      <Listbox value={selected?.value} onChange={onSelect}>
+      <Listbox value={selected?.value} onChange={onSelect} disabled={disabled}>
         {({ open }) => (
           <>
             <div className="relative">
-              <Listbox.Button className="hover:cursor-pointer relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
+              <Listbox.Button
+                className={clsx(
+                  disabled
+                    ? "cursor-not-allowed bg-gray-100"
+                    : "hover:cursor-pointer bg-white",
+                  "relative w-full cursor-default rounded-md border border-gray-300 py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"
+                )}
+              >
                 {label && (
                   <label
                     htmlFor="name"
