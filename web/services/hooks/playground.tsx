@@ -23,31 +23,45 @@ export const usePlaygroundPage = (requestId: string) => {
   const dataWithLabels = [
     {
       label: "Created At",
-      value: request.requests.data
-        ? getUSDate(request.requests.data[0].requestCreatedAt)
-        : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? getUSDate(request.requests.data[0].requestCreatedAt)
+          : "",
     },
     {
       label: "User ID",
-      value: request.requests.data ? request.requests.data[0].userId : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? request.requests.data[0].userId
+          : "",
     },
     {
       label: "Duration",
-      value: request.requests.data
-        ? `${request.requests.data[0].latency}s`
-        : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? `${request.requests.data[0].latency}s`
+          : "",
     },
     {
       label: "Model",
-      value: request.requests.data ? request.requests.data[0].model : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? request.requests.data[0].model
+          : "",
     },
     {
       label: "Tokens",
-      value: request.requests.data ? request.requests.data[0].totalTokens : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? request.requests.data[0].totalTokens
+          : "",
     },
     {
       label: "Log Probability",
-      value: request.requests.data ? request.requests.data[0].logProbs : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? request.requests.data[0].logProbs
+          : "",
     },
   ];
 
@@ -56,15 +70,17 @@ export const usePlaygroundPage = (requestId: string) => {
   properties.forEach((property) => {
     dataWithLabels.push({
       label: property,
-      value: request.requests.data
-        ? (request.requests.data[0][property] as string)
-        : "",
+      value:
+        request.requests.data && request.requests.data.length > 0
+          ? (request.requests.data[0][property] as string)
+          : "",
     });
   });
 
   // Get the chat from the request
   const sourceChat =
     request.requests.data &&
+    request.requests.data.length > 0 &&
     request.requests.data[0].api &&
     "chat" in request.requests.data[0].api
       ? request.requests.data[0].api.chat.request
@@ -72,6 +88,7 @@ export const usePlaygroundPage = (requestId: string) => {
 
   const sourceResponse =
     request.requests.data &&
+    request.requests.data.length > 0 &&
     request.requests.data[0].api &&
     "chat" in request.requests.data[0].api
       ? request.requests.data[0].api.chat.response

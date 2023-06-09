@@ -45,6 +45,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     });
     setCurrentChat(newChat);
     setIsLoading(true);
+    setText("");
     const resp = await fetchOpenAI(
       newChat as ChatCompletionRequestMessage[],
       requestId,
@@ -59,7 +60,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         role: resp.choices[0].message?.role || "system",
       });
       setCurrentChat(newChat);
-      setText("");
     }
     setIsLoading(false);
   };
