@@ -46,6 +46,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     setCurrentChat(newChat);
     setIsLoading(true);
     setText("");
+
     const resp = await fetchOpenAI(
       newChat as ChatCompletionRequestMessage[],
       requestId,
@@ -81,8 +82,15 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             key={i}
             index={i}
             messages={slice}
-            callback={(userText: string, history: Message[]) => {
-              handleSubmit(userText, history);
+            callback={(userText: string, history: Message[] | null) => {
+              if (history) {
+                handleSubmit(userText, history);
+              } else {
+                // change the system message
+                const newChat = [...currentChat];
+                newChat[i].content = userText;
+                setCurrentChat(newChat);
+              }
             }}
           />
         );
