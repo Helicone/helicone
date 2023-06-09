@@ -1,5 +1,6 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
+import { useRouter } from "next/router";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
@@ -12,10 +13,14 @@ interface PlaygroundProps {
 const Playground = (props: PlaygroundProps) => {
   const { user } = props;
 
+  const router = useRouter();
+
+  const { request } = router.query;
+
   return (
     <MetaData title="Playground">
       <AuthLayout user={user}>
-        <PlaygroundPage />
+        <PlaygroundPage request={request as string | undefined} />
       </AuthLayout>
     </MetaData>
   );

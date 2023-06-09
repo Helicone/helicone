@@ -1,5 +1,6 @@
 import { ArrowsPointingOutIcon } from "@heroicons/react/20/solid";
 import {
+  BeakerIcon,
   ClipboardDocumentListIcon,
   CodeBracketIcon,
   EyeIcon,
@@ -54,7 +55,15 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       setOpen={setOpen}
       title="Request"
       actions={
-        <div className="flex flex-row flex-1 w-full items-center justify-end space-x-2 text-gray-500">
+        <div className="flex flex-row flex-1 pl-1 w-full items-center justify-between space-x-2 text-gray-500">
+          <button
+            onClick={() => {
+              router.push(`/playground?request=${wrappedRequest?.id}`);
+            }}
+            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+          >
+            <BeakerIcon className="h-5 w-5" />
+          </button>
           <button
             onClick={() => {
               navigator.clipboard.writeText(

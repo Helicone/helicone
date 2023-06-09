@@ -46,7 +46,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         </div>
       ) : hasData ? (
         <>
-          <div className="col-span-8 lg:col-span-2 h-max bg-white w-full border border-gray-300 rounded-lg p-4 pb-8 space-y-8 sticky top-20">
+          <div className="col-span-8 lg:col-span-2 order-1 h-max bg-white w-full border border-gray-300 rounded-lg p-4 pb-8 space-y-8 lg:sticky lg:top-20">
             <ul className="text-sm divide-y divide-gray-300">
               {data.map((d, i) => (
                 <li
@@ -59,7 +59,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               ))}
             </ul>
           </div>
-          <div className="col-span-8 lg:col-span-4 relative">
+          <div className="col-span-8 lg:col-span-4 order-3 lg:order-2 relative">
             {isLoading ? (
               <div className="w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
             ) : (
@@ -71,7 +71,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               />
             )}
           </div>
-          <div className="col-span-8 lg:col-span-2 h-max bg-white w-full border border-gray-300 rounded-lg p-4 pb-8 space-y-8 sticky top-20">
+          <div className="col-span-8 lg:col-span-2 order-2 lg:order-3 h-max bg-white w-full border border-gray-300 rounded-lg p-4 pb-8 space-y-8 lg:sticky lg:top-20">
             <div className="flex flex-col space-y-1.5">
               <p className="font-semibold text-sm text-gray-900">Model</p>
               <ThemedDropdown
