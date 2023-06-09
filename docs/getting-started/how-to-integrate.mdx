@@ -1,0 +1,75 @@
+---
+title: "How to integrate"
+description: "Integrate Helicone today with one line of code"
+---
+
+<Tabs>
+
+<Tab title="Curl" >
+
+Replace the OpenAI base url
+
+```bash
+POST https://api.openai.com/v1
+```
+
+with Helicone's
+
+```
+POST https://oai.hconeai.com/v1
+```
+
+</Tab>
+
+<Tab title="Python" >
+
+Change the default base API url to Helicone's
+
+```py
+import openai
+
+openai.api_base = "https://oai.hconeai.com/v1"
+```
+
+</Tab>
+
+<Tab title="Node.js" >
+
+Add a `basePath` to the `Configuration:`
+
+Before:
+
+```js
+import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const openai = new OpenAIApi(configuration);
+```
+
+After:
+
+```js
+import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.hconeai.com/v1",
+});
+
+const openai = new OpenAIApi(configuration);
+```
+
+</Tab>
+
+</Tabs>
+
+By using our API, you agree to our
+[Privacy Policy](https://www.helicone.ai/privacy) and
+[Terms of Services](https://www.helicone.ai/terms) agreements.
+
+Once you've integrated,
+[**head on to onboarding**](https://www.helicone.ai/onboarding) to get into your
+dashboard 🏡
