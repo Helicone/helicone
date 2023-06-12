@@ -1,27 +1,32 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
+import { useRouter } from "next/router";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import ModelPage from "../components/templates/models/modelPage";
+import PlaygroundPage from "../components/templates/playground/playgroundPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
-interface ModelProps {
+interface PlaygroundProps {
   user: User;
 }
 
-const Dashboard = (props: ModelProps) => {
+const Playground = (props: PlaygroundProps) => {
   const { user } = props;
 
+  const router = useRouter();
+
+  const { request } = router.query;
+
   return (
-    <MetaData title="Models">
+    <MetaData title="Playground">
       <AuthLayout user={user}>
-        <ModelPage />
+        <PlaygroundPage request={request as string | undefined} />
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Dashboard;
+export default Playground;
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
