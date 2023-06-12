@@ -13,20 +13,39 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<CreateChatCompletionResponse, string>>
 ) {
+  const client = new SupabaseServerWrapper({ req, res }).getClient();
+  const user = await client.auth.getUser();
+  const { messages, requestId, temperature, model } = req.body as {
+    messages: ChatCompletionRequestMessage[];
+    requestId: string;
+    temperature: number;
+    model: string;
+  };
+
+  if (!requestId || !temperature || !model) {
+    res.status(400).json({
+      error: "Bad request - missing required body parameters",
+      data: null,
+    });
+    return;
+  }
+
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
     basePath: "https://oai.hconeai.com/v1",
     baseOptions: {
       header: {
         "OpenAI-Organization": "",
-        "Helicone-Property-Tag": "prompt_edit",
+        "Helicone-Property-Tag": "experiment",
+        "Helicone-Auth": process.env.TEST_HELICONE_API_KEY,
+        user: user.data.user?.id || "",
+        "Helicone-Property-RequestId": requestId,
       },
     },
   });
+
   const openai = new OpenAIApi(configuration);
 
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
@@ -36,11 +55,11 @@ export default async function handler(
     return;
   }
 
-  const { messages } = req.body as { messages: ChatCompletionRequestMessage[] };
   const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
+    model: model,
     messages: messages,
     user: user.data.user.email,
+    temperature: temperature,
   });
 
   if (completion.status !== 200) {
