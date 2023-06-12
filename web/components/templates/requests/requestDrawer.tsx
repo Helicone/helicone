@@ -56,7 +56,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       title="Request"
       actions={
         <div className="flex flex-row flex-1 pl-1 w-full items-center justify-between space-x-2 text-gray-500">
-          {wrappedRequest && "chat" in wrappedRequest.api && (
+          {wrappedRequest && "chat" in wrappedRequest.api ? (
             <button
               onClick={() => {
                 router.push(`/playground?request=${wrappedRequest?.id}`);
@@ -65,6 +65,8 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             >
               <BeakerIcon className="h-5 w-5" />
             </button>
+          ) : (
+            <div />
           )}
 
           <button
