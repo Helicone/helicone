@@ -15,7 +15,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [model, setModel] = useState<string>("gpt-3.5-turbo");
   const [temperature, setTemperature] = useState<number>(0.7);
 
-  const { data, isLoading, chat, hasData } = usePlaygroundPage(requestId || "");
+  const { data, isLoading, chat, hasData, isChat } = usePlaygroundPage(
+    requestId || ""
+  );
 
   return (
     <div className="grid grid-cols-8 gap-8 h-full w-full">
@@ -43,6 +45,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       {requestId === undefined ? (
         <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
           Please load in a request to the playground
+        </div>
+      ) : !isChat ? (
+        <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
+          This request is not a chat completion request. We do not currently
+          support non-chat completion requests in playground
         </div>
       ) : hasData ? (
         <>
