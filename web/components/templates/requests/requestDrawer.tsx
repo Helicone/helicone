@@ -96,7 +96,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             </div>
             <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
               <dt className="text-gray-500">User ID</dt>
-              <dd className="text-gray-900">
+              <dd className="text-gray-900 truncate">
                 {wrappedRequest.userId || "n/a"}
               </dd>
             </div>
