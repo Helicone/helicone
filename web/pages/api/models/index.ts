@@ -16,16 +16,21 @@ async function handler(
     res,
     userData: { orgId },
   } = options;
-  const { filter, offset, limit } = req.body as {
+  const { filter, offset, limit, timeFilter } = req.body as {
     filter: FilterNode;
     offset: number;
     limit: number;
+    timeFilter: {
+      start: Date;
+      end: Date;
+    };
   };
   const { error: metricsError, data: metrics } = await modelMetrics(
     orgId,
     filter,
     offset,
-    limit
+    limit,
+    timeFilter
   );
   if (metricsError !== null) {
     res.status(500).json({ error: metricsError, data: null });
