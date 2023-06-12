@@ -7,6 +7,7 @@ import {
   Bars3BottomLeftIcon,
   BeakerIcon,
   BuildingOfficeIcon,
+  ChartBarIcon,
   CircleStackIcon,
   CubeTransparentIcon,
   HomeIcon,
@@ -81,13 +82,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: CubeTransparentIcon,
       current: pathname.includes("/models"),
     },
+    {
+      name: "Playground",
+      href: "/playground",
+      icon: BeakerIcon,
+      current: pathname.includes("/playground"),
+    },
   ];
 
   const accountNav = [
     {
       name: "Usage",
       href: "/usage",
-      icon: BeakerIcon,
+      icon: ChartBarIcon,
       current: pathname.includes("/usage"),
     },
     {

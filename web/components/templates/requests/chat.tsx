@@ -151,9 +151,6 @@ export const Chat = (props: ChatProps) => {
 
   const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
 
-  // Add state for edit mode and run button visibility
-  const [isEditMode, setIsEditMode] = useState(false);
-
   const [userMessage, setUserMessage] = useState<string>("");
 
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
@@ -185,11 +182,6 @@ export const Chat = (props: ChatProps) => {
 
   const cancelEdit = () => {
     setEditableIndex(null);
-  };
-
-  // Function to handle edit mode toggle
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
   };
 
   // Add state for messages
@@ -259,45 +251,6 @@ export const Chat = (props: ChatProps) => {
     }
   };
 
-  const renderEditableUserCell = () => {
-    if (isEditMode) {
-      return (
-        <div
-          className={clsx(
-            "bg-white",
-            "items-start p-4 text-left grid grid-cols-12",
-            "rounded-b-md"
-          )}
-        >
-          <div className="col-span-1">
-            <UserCircleIcon className="h-6 w-6 bg-white rounded-full" />
-          </div>
-          <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
-            <div className="relative">
-              <AutoSizeTextarea
-                message={userMessage}
-                handleContentChange={handleContentChange}
-                index={editableMessages.length}
-                placeholder={"Type your message here"}
-                background="bg-white"
-              />
-              {/* Add Submit and Cancel buttons when editing */}
-              <div className="flex w-full justify-end mt-2 space-x-2">
-                <button
-                  className="hover:bg-gray-300 text-white px-2 py-1 rounded"
-                  onClick={() => submitEdit(editableMessages.length)}
-                >
-                  <PaperAirplaneIcon className="h-5 w-5 mr-1 font-bold text-black" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
   // Function to handle message content changes
   const handleContentChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
@@ -321,67 +274,8 @@ export const Chat = (props: ChatProps) => {
     setEditableMessages(updatedMessages);
   };
 
-  const renderMessage = (
-    messageContent: string | JSX.Element,
-    isLastMessage: boolean,
-    index: number,
-    isUser: boolean
-  ) => {
-    if (isEditMode) {
-      const originalMessageContent = editableMessages[index].content;
-      const formattedPrompt = formatPrompt2({
-        prompt: originalMessageContent,
-        values: props.keys,
-      });
-      const filledInMessageContent = formattedPrompt.data;
-
-      return (
-        <div className="relative">
-          {editableIndex === index ? (
-            <AutoSizeTextarea
-              message={filledInMessageContent}
-              handleContentChange={handleContentChange}
-              index={index}
-              background={isUser ? "bg-white" : "bg-gray-100"}
-            />
-          ) : (
-            <p className="text-sm">{messageContent}</p>
-          )}
-
-          {/* Add edit button to each cell */}
-          {hoveredRowIndex === index && (
-            <button
-              className="absolute top-0 right-0 text-gray-700 bg-gray-300 p-1 rounded-md"
-              onClick={() =>
-                editableIndex === index ? cancelEdit() : editMessage(index)
-              }
-            >
-              {editableIndex === index ? (
-                <XMarkIcon className="h-4 w-4" />
-              ) : (
-                <PencilIcon className="h-4 w-4" />
-              )}
-            </button>
-          )}
-
-          {/* Add Submit and Save buttons when editing */}
-          {editableIndex === index && (
-            <div className="flex w-full justify-end mt-2 space-x-2">
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded"
-                onClick={() => (isUser ? submitEdit(index) : submitSave(index))}
-              >
-                {/* <PaperAirplaneIcon className="h-5 w-5 mr-1" /> */}
-                {isUser ? "Submit" : "Save"}
-                {/* {isUser ? <PaperAirplaneIcon className="h-5 w-5 mr-1 font-bold text-black" /> : <CheckCircleIcon className="h-5 w-5 mr-1 font-bold text-black" />} */}
-              </button>
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      return <p className="text-sm">{messageContent}</p>;
-    }
+  const renderMessage = (messageContent: string | JSX.Element) => {
+    return <p className="text-sm">{messageContent}</p>;
   };
 
   return (
@@ -389,16 +283,6 @@ export const Chat = (props: ChatProps) => {
       <div className="flex items-center space-x-2">
         <p className="text-gray-500 font-medium">Messages</p>
         {/* Add an onClick event handler to toggle edit mode */}
-        <button
-          className="text-gray-700 bg-gray-300 p-1 rounded-md"
-          onClick={toggleEditMode}
-        >
-          {isEditMode ? (
-            <XMarkIcon className="h-4 w-4" />
-          ) : (
-            <PencilSquareIcon className="h-4 w-4" />
-          )}
-        </button>
       </div>
       <div className="w-full border border-gray-300 bg-gray-100 rounded-md divide-y divide-gray-200 h-full">
         {editableMessages.length > 0 ? (
@@ -446,12 +330,7 @@ export const Chat = (props: ChatProps) => {
                   )}
                 </div>
                 <div className="whitespace-pre-wrap col-span-11 leading-6 items-center">
-                  {renderMessage(
-                    formattedMessageContent,
-                    isLastMessage,
-                    index,
-                    !(isAssistant || isSystem)
-                  )}
+                  {renderMessage(formattedMessageContent)}
                 </div>
               </div>
             );
@@ -467,7 +346,6 @@ export const Chat = (props: ChatProps) => {
             </div>
           </div>
         )}
-        {!isRunning && renderEditableUserCell()}
       </div>
     </div>
   );

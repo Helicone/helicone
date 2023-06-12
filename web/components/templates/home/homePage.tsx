@@ -161,7 +161,7 @@ export default function HomePage() {
       <NavBarV2 />
       <div className="bg-gray-50 overflow-hidden">
         <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="col-start-1 col-span-4 lg:col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
+          <div className="col-start-1 col-span-4 md:col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
             <Link
               href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
               target="_blank"
@@ -170,13 +170,13 @@ export default function HomePage() {
             >
               Backed by Y Combinator
             </Link>
-            <div className="text-5xl lg:text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
+            <div className="text-5xl sm:text-7xl lg:text-8xl leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
                 Generative AI
               </span>
             </div>
-            <p className="text-xl leading-9 text-gray-700">
+            <p className="text-xl sm:text-2xl leading-loose text-gray-700">
               Hundreds of organizations leverage Helicone to make their
               Large-Language Model operations more efficient.
             </p>
@@ -211,9 +211,9 @@ export default function HomePage() {
               )}
             </div>
           </div>
-          <div className="hidden lg:flex mx-auto mt-16 max-w-2xl sm:mt-24 lg:ml-16 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-24">
-            <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
+          <div className="hidden md:flex mx-auto mt-16 max-w-2xl sm:mt-24 md:ml-16 md:mt-0 md:mr-0 md:max-w-none md:flex-none xl:ml-24">
+            <div className="max-w-3xl flex-none sm:max-w-5xl md:max-w-none">
+              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 md:-m-4 md:rounded-2xl md:p-4">
                 <img
                   src="/assets/landing/preview.webp"
                   alt="App screenshot"
@@ -227,35 +227,35 @@ export default function HomePage() {
 
           <div className="col-span-4 grid grid-cols-4 gap-8 pb-32">
             {/* <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
@@ -263,21 +263,21 @@ export default function HomePage() {
             />
 
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
@@ -288,7 +288,7 @@ export default function HomePage() {
       </div>
       <div className="bg-gray-100">
         <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="flex flex-col col-span-4 lg:col-span-2 space-y-8 py-32 lg:pr-32">
+          <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
             <p className="text-lg text-sky-500 tracking-wide font-semibold">
               Real Time Metrics
             </p>
@@ -333,7 +333,7 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <div className="flex-col hidden lg:flex col-span-2 h-full flex-1 sticky top-[5%] 2xl:top-[15%] py-28">
+          <div className="flex-col hidden md:flex col-span-2 h-full flex-1 sticky top-[5%] 2xl:top-[15%] py-28">
             <div className="h-full relative">
               <div
                 className={clsx(
@@ -541,7 +541,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col col-span-4 lg:col-span-2 space-y-8 py-32 lg:pr-32">
+          <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
             <p className="text-lg text-pink-500 tracking-wide font-semibold">
               User Management Tools
             </p>
@@ -581,8 +581,8 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <div className="grid grid-cols-4 col-span-4 py-32 lg:pr-32">
-            <div className="col-span-4 lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-4 col-span-4 py-32 md:pr-32">
+            <div className="col-span-4 md:col-span-2 space-y-8">
               <p className="text-lg text-purple-500 tracking-wide font-semibold">
                 Tooling for LLMs
               </p>
@@ -626,7 +626,7 @@ export default function HomePage() {
       </div>
       <div className="bg-[#0a2540] h-full">
         <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-400 border-dashed w-full items-center justify-center">
-          <div className="col-span-4 lg:col-span-2 flex flex-col space-y-12 py-32 lg:pr-32">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-12 py-32 md:pr-32">
             <p className="text-lg text-sky-400 tracking-wide font-semibold">
               Made By Developers, For Developers
             </p>
@@ -674,14 +674,14 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="hidden lg:flex flex-col col-span-4 lg:col-span-2 h-full py-32 space-y-4">
+          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-32 space-y-4">
             <CodeSnippet variant={"themed"} />
           </div>
         </div>
       </div>
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="col-span-4 lg:col-span-2 flex flex-col space-y-8 py-32">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
             <p className="text-4xl text-sky-500 tracking-wide font-semibold">
               Open Source
             </p>
@@ -707,7 +707,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col col-span-2 lg:col-span-1 h-full py-32 space-y-4">
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
               <CloudIcon className="h-8 w-8 inline text-sky-500" />
               <p className="text-gray-900 font-semibold text-lg">
@@ -727,7 +727,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col col-span-2 lg:col-span-1 h-full py-32 space-y-4">
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
               <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
               <p className="text-gray-900 font-semibold text-lg">AWS Deploy</p>
@@ -770,8 +770,8 @@ export default function HomePage() {
             </div>
           </div>
           <section className="col-span-4">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-16">
-              <div className="mx-auto grid gap-4 max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none lg:grid-cols-2 xl:grid-cols-4">
+            <div className="mx-auto max-w-7xl px-6 md:px-8 pb-16">
+              <div className="mx-auto grid gap-4 max-w-2xl grid-cols-1 md:mx-0 md:max-w-none md:grid-cols-2 xl:grid-cols-4">
                 {testimonials.map((testimonial, i) => (
                   <div
                     key={i}
