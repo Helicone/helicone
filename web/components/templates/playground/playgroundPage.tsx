@@ -4,6 +4,7 @@ import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ChatPlayground from "./chatPlayground";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface PlaygroundPageProps {
   request?: string;
@@ -46,22 +47,25 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
           Please load in a request to the playground
         </div>
-      ) : !isChat ? (
+      ) : isLoading ? (
         <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
-          This request is not a chat completion request. We do not currently
-          support non-chat completion requests in playground
+          Loading in request...
         </div>
-      ) : hasData ? (
+      ) : hasData && isChat ? (
         <>
           <div className="col-span-8 lg:col-span-2 order-1 h-max bg-white w-full border border-gray-300 rounded-lg p-4 pb-8 space-y-8 lg:sticky lg:top-20">
             <ul className="text-sm divide-y divide-gray-300">
               {data.map((d, i) => (
                 <li
                   key={i}
-                  className="flex flex-row justify-between py-2 text-sm"
+                  className="flex flex-row justify-between py-2 text-sm space-x-2"
                 >
-                  <span className="font-semibold text-gray-900">{d.label}</span>
-                  <span className="text-gray-900">{d.value?.toString()}</span>
+                  <span className="font-semibold text-gray-900 flex-1 w-full whitespace-nowrap">
+                    {d.label}
+                  </span>
+                  <span className="text-gray-900 truncate">
+                    {d.value?.toString()}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -149,6 +153,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             </div>
           </div>
         </>
+      ) : !isChat ? (
+        <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
+          This request is not a chat completion request. We do not currently
+          support non-chat completion requests in playground
+        </div>
       ) : (
         <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
           No data found for this request. Please make sure the request is
