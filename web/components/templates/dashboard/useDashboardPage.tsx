@@ -75,7 +75,7 @@ export const useDashboardPage = ({
     apiKeyFilter !== null
       ? filterUIToFilterLeafs(filterMap, uiFilters).concat([
           {
-            response_copy_v2: {
+            response_copy_v3: {
               auth_hash: {
                 equals: apiKeyFilter,
               },

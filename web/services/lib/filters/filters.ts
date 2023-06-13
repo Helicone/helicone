@@ -65,6 +65,16 @@ const whereKeyMappings: KeyMappings = {
     status: "response_copy_v2.status",
     organization_id: "response_copy_v2.organization_id",
   },
+
+  response_copy_v3: {
+    auth_hash: "response_copy_v3.auth_hash",
+    model: "response_copy_v3.model",
+    request_created_at: "response_copy_v3.request_created_at",
+    latency: "response_copy_v3.latency",
+    user_id: "response_copy_v3.user_id",
+    status: "response_copy_v3.status",
+    organization_id: "response_copy_v3.organization_id",
+  },
   users_view: {},
   properties_copy_v1: {
     key: "properties_copy_v1.key",
@@ -319,7 +329,7 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    response_copy_v2: {
+    response_copy_v3: {
       organization_id: {
         equals: orgId,
       },

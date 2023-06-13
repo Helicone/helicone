@@ -32,7 +32,7 @@ async function handler(
         left: userFilters,
         operator: "and",
         right: {
-          response_copy_v2: {
+          response_copy_v3: {
             status: {
               "not-equals": 200,
             },
