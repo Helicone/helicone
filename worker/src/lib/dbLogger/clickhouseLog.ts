@@ -68,6 +68,23 @@ export async function logInClickhouse(
           request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
       },
     ]),
+    clickhouseDb.dbInsertClickhouse("response_copy_v3", [
+      {
+        auth_hash: request.auth_hash,
+        user_id: request.user_id,
+        request_id: request.id,
+        completion_tokens: response.completion_tokens,
+        latency: response.delay_ms,
+        model: ((response.body as any)?.model as string) || null,
+        prompt_tokens: response.prompt_tokens,
+        request_created_at: formatTimeString(request.created_at),
+        response_created_at: formatTimeString(response.created_at),
+        response_id: response.id,
+        status: response.status,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      },
+    ]),
     clickhouseDb.dbInsertClickhouse(
       "properties_copy_v1",
       properties.map((p) => ({
