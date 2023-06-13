@@ -501,45 +501,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
               )}
               <OrgContext.Provider value={org}>
                 <div className="py-4 sm:py-6" key={org?.renderKey}>
-                  <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-30">
-                    <div className="mx-auto max-w-xl px-2 sm:px-6 lg:px-8">
-                      <Transition
-                        show={true}
-                        as={Fragment}
-                        enter="transform ease-out duration-500 transition"
-                        enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-                        enterTo="translate-y-0 opacity-100 sm:translate-x-0"
-                        leave="transition ease-in duration-500"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <div
-                          className={clsx(
-                            "bg-yellow-500",
-                            "rounded-lg px-4 py-2 shadow-lg"
-                          )}
-                        >
-                          <div className="flex flex-wrap items-center justify-between">
-                            <div className="flex w-0 flex-1 items-center">
-                              <span className="flex rounded-lg p-2">
-                                <InformationCircleIcon
-                                  className="h-5 w-5 text-white"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                              <p className="ml-3 font-medium text-white text-sm">
-                                <span>
-                                  We are aware that pages are loading slowly/not
-                                  loading at all. We are working with Clickhouse
-                                  to resolve this issue immediately.
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </Transition>
-                    </div>
-                  </div>
                   {children}
                 </div>
               </OrgContext.Provider>
