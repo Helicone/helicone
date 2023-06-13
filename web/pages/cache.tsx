@@ -6,6 +6,8 @@ import { User } from "@supabase/auth-helpers-react";
 import AuthHeader from "../components/shared/authHeader";
 // import CachePage from "../components/templates/requests/CachePage";
 import CachePage from "../components/templates/cache/cachePage";
+import { GetServerSidePropsContext } from "next";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 interface CacheProps {
   user: User;
@@ -23,10 +25,26 @@ const Cache = (props: CacheProps) => {
 
 export default Cache;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const supabase = new SupabaseServerWrapper(context).getClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+
   return {
     props: {
-      user: options.userData.user,
+      initialSession: session,
+      user: session.user,
     },
   };
-});
+};

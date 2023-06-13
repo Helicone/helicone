@@ -4,9 +4,9 @@ import WelcomePage from "../components/templates/welcome/welcomePage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
 
-interface DashboardProps {}
+interface WelcomeProps {}
 
-const Dashboard = (props: DashboardProps) => {
+const Welcome = (props: WelcomeProps) => {
   return (
     <MetaData title="Welcome">
       <WelcomePage />
@@ -14,4 +14,4 @@ const Dashboard = (props: DashboardProps) => {
   );
 };
 
-export default Dashboard;
+export default Welcome;

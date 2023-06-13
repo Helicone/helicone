@@ -1,59 +1,52 @@
-import { useUser } from "@supabase/auth-helpers-react";
+import { User, useUser } from "@supabase/auth-helpers-react";
+import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import PropertiesPage from "../components/templates/properties/propertiesPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { requestOverLimit } from "../lib/checkRequestLimit";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { Database } from "../supabase/database.types";
 import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
 
-interface DashboardProps {
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
+interface PropertiesProps {
+  user: User;
 }
 
-const Dashboard = (props: DashboardProps) => {
-  const { keys } = props;
-  const user = useUser();
+const Properties = (props: PropertiesProps) => {
+  const { user } = props;
   return (
     <MetaData title="Properties">
-      <AuthLayout user={user!}>
+      <AuthLayout user={user}>
         <PropertiesPage />
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Dashboard;
+export default Properties;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const supabase = new SupabaseServerWrapper(context).getClient();
+
   const {
-    userData: { orgId },
-    supabaseClient,
-  } = options;
-  const client = supabaseClient.getClient();
-  const [isRequestLimitOver, hasOnboarded] = await Promise.all([
-    requestOverLimit(client, orgId),
-    checkOnboardedAndUpdate(client),
-  ]);
-  if (!hasOnboarded?.data) {
-    return {
-      redirect: {
-        destination: "/welcome",
-        permanent: false,
-      },
-    };
-  }
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (isRequestLimitOver) {
+  if (!session)
     return {
       redirect: {
-        destination: "/usage",
+        destination: "/",
         permanent: false,
       },
     };
-  }
 
   return {
-    props: {},
+    props: {
+      initialSession: session,
+      user: session.user,
+    },
   };
-});
+};

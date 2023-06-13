@@ -7,6 +7,8 @@ import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
 import { init } from "commandbar";
 
 import { useEffect } from "react";
+import { GetServerSidePropsContext } from "next";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
 interface DashboardProps {
   user: User;
@@ -38,14 +40,26 @@ const Dashboard = (props: DashboardProps) => {
 
 export default Dashboard;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const supabase = new SupabaseServerWrapper(context).getClient();
   const {
-    userData: { user },
-  } = options;
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
 
   return {
     props: {
-      user,
+      initialSession: session,
+      user: session.user,
     },
   };
-});
+};
