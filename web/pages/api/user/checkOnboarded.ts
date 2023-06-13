@@ -1,4 +1,7 @@
-import { getRequestCount } from "../../../lib/api/request/request";
+import {
+  getRequestCount,
+  getRequestCountClickhouse,
+} from "../../../lib/api/request/request";
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import {
@@ -13,7 +16,7 @@ async function checkAndUpdateOrgs(
   supabaseClient: SupabaseClient<Database>
 ): Promise<boolean> {
   for (const org of orgs) {
-    const count = (await getRequestCount(org.id, "all")).data ?? 0;
+    const count = (await getRequestCountClickhouse(org.id, "all")).data ?? 0;
     if (count > 0) {
       await supabaseClient
         .from("organization")
