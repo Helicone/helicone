@@ -36,6 +36,7 @@ import CostPanel from "./panels/costsPanel";
 import ErrorsPanel from "./panels/errorsPanel";
 import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
+import { useRouter } from "next/router";
 
 interface DashboardPageProps {}
 
@@ -54,6 +55,7 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
+  const router = useRouter();
   const [interval, setInterval] = useState<TimeInterval>("24h");
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
@@ -285,32 +287,52 @@ const DashboardPage = (props: DashboardPageProps) => {
             },
           }}
         />
-        <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
-          {metricsData.map((m, i) => (
-            <MetricsPanel key={i} metric={m} />
-          ))}
-        </div>
 
-        <ThemedTabs
-          options={[
-            {
-              icon: TableCellsIcon,
-              label: "Requests",
-            },
-            {
-              icon: CurrencyDollarIcon,
-              label: "Costs",
-            },
-            {
-              icon: ExclamationCircleIcon,
-              label: "Errors",
-            },
-          ]}
-          onOptionSelect={(option) =>
-            setMode(option.toLowerCase() as DashboardMode)
-          }
-        />
-        {renderPanel()}
+        {metrics.totalRequests?.data?.data === 0 ? (
+          <div className="flex flex-col justify-center items-center w-full h-96 my-10 border-gray-300 border bg-white space-y-8">
+            <p className="text-2xl font-semibold">No requests found!</p>
+
+            <p>If you have data, please try changing your filters, otherwise</p>
+            <p>if this is your first time using Helicone, click below.</p>
+            <button
+              className="bg-sky-700 text-white px-4 py-2 rounded-md mt-4"
+              onClick={() => {
+                router.push("/welcome");
+              }}
+            >
+              Get Started
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
+              {metricsData.map((m, i) => (
+                <MetricsPanel key={i} metric={m} />
+              ))}
+            </div>
+            <ThemedTabs
+              options={[
+                {
+                  icon: TableCellsIcon,
+                  label: "Requests",
+                },
+                {
+                  icon: CurrencyDollarIcon,
+                  label: "Costs",
+                },
+                {
+                  icon: ExclamationCircleIcon,
+                  label: "Errors",
+                },
+              ]}
+              onOptionSelect={(option) =>
+                setMode(option.toLowerCase() as DashboardMode)
+              }
+            />
+
+            {renderPanel()}
+          </>
+        )}
       </div>
     </>
   );
