@@ -137,6 +137,7 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   response_copy_v1: FilterLeafResponseCopyV1;
   response_copy_v2: FilterLeafResponseCopyV2;
+  response_copy_v3: FilterLeafResponseCopyV2;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
@@ -168,6 +169,24 @@ export function timeFilterToFilterNode(
       },
       right: {
         response_copy_v2: {
+          request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  } else if (table === "response_copy_v3") {
+    return {
+      left: {
+        response_copy_v3: {
+          request_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        response_copy_v3: {
           request_created_at: {
             lte: filter.end,
           },
