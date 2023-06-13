@@ -110,6 +110,7 @@ const havingKeyMappings: KeyMappings = {
     cost: "cost",
   },
   response_copy_v2: {},
+  response_copy_v3: {},
   properties_copy_v2: {},
   property_with_response_v1: {},
 };
