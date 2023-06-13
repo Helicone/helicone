@@ -276,14 +276,14 @@ const DashboardPage = (props: DashboardPageProps) => {
               }
             },
           }}
-          // advancedFilter={{
-          //   filterMap,
-          //   onAdvancedFilter: setAdvancedFilters,
-          //   filters: advancedFilters,
-          //   searchPropertyFilters: () => {
-          //     throw new Error("not implemented");
-          //   },
-          // }}
+          advancedFilter={{
+            filterMap,
+            onAdvancedFilter: setAdvancedFilters,
+            filters: advancedFilters,
+            searchPropertyFilters: () => {
+              throw new Error("not implemented");
+            },
+          }}
         />
         <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
           {metricsData.map((m, i) => (
