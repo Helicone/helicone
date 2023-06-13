@@ -14,7 +14,7 @@ export async function getCostOverTime(
 ): Promise<Result<DateCountDBModel[], string>> {
   const res = await getXOverTime<{
     cost: number;
-  }>(data, `${CLICKHOUSE_PRICE_CALC("response_copy_v2")} AS cost`);
+  }>(data, `${CLICKHOUSE_PRICE_CALC("response_copy_v3")} AS cost`);
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),

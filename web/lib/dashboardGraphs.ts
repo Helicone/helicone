@@ -146,7 +146,7 @@ export async function getDashboardData(
   const filter: FilterNode = {
     right: {
       left: {
-        response_copy_v2: {
+        response_copy_v3: {
           request_created_at: {
             gte: timeFilter.start,
           },
@@ -154,7 +154,7 @@ export async function getDashboardData(
       },
       operator: "and",
       right: {
-        response_copy_v2: {
+        response_copy_v3: {
           request_created_at: {
             lte: timeFilter.end,
           },
