@@ -100,37 +100,37 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
 };
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
-  SingleFilterDef<"response_copy_v2">,
-  SingleFilterDef<"response_copy_v2">,
-  SingleFilterDef<"response_copy_v2">,
-  SingleFilterDef<"response_copy_v2">
+  SingleFilterDef<"response_copy_v3">,
+  SingleFilterDef<"response_copy_v3">,
+  SingleFilterDef<"response_copy_v3">,
+  SingleFilterDef<"response_copy_v3">
 ] = [
   {
     label: "Model",
     operators: textOperators,
     category: "request",
-    table: "response_copy_v2",
+    table: "response_copy_v3",
     column: "model",
   },
   {
     label: "Status",
     operators: numberOperators,
     category: "request",
-    table: "response_copy_v2",
+    table: "response_copy_v3",
     column: "status",
   },
   {
     label: "Latency",
     operators: numberOperators,
     category: "request",
-    table: "response_copy_v2",
+    table: "response_copy_v3",
     column: "latency",
   },
   {
     label: "User",
     operators: textOperators,
     category: "request",
-    table: "response_copy_v2",
+    table: "response_copy_v3",
     column: "user_id",
   },
 ];
