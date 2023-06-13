@@ -41,7 +41,18 @@ export default Dashboard;
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
     userData: { user },
+    supabaseClient,
   } = options;
+  const client = supabaseClient.getClient();
+  const [hasOnboarded] = await Promise.all([checkOnboardedAndUpdate(client)]);
+  if (!hasOnboarded?.data) {
+    return {
+      redirect: {
+        destination: "/welcome",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {

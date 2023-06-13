@@ -113,7 +113,7 @@ const Features = (props: FeaturesProps) => {
           Helicone provides the tools needed for your LLM-powered application.
         </p>
         <p className="text-md md:text-lg text-gray-700 font-light text-center">
-          Click on any feature to learn more or view our{" "}
+          View our{" "}
           <span>
             <Link
               href={"https://docs.helicone.ai/"}
@@ -121,31 +121,59 @@ const Features = (props: FeaturesProps) => {
               rel="noopener noreferrer"
               className="underline"
             >
-              docs.
+              docs
             </Link>
-          </span>
+          </span>{" "}
+          to learn more.
         </p>
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full justify-center md:w-[62.5%] mt-8 overflow-auto max-h-[420px]">
-          {featureSet.map((feature, i) => (
-            <li
-              key={i}
-              className={clsx(
-                "col-span-1 border border-gray-500 shadow-sm rounded-xl p-4 space-y-1 h-fit w-full hover:cursor-pointer hover:bg-gray-100"
-              )}
-              onClick={() => {
-                setCurrentFeature(i);
-                setShowFeature(true);
-              }}
-            >
-              <p className="font-semibold  text-gray-900 text-sm">
-                {feature.title}
-              </p>
-              <p className="text-gray-700 text-xs font-light">
-                {feature.subtitle}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <div className="grid grid-cols-3 w-full md:w-[62.5%] h-full gap-8 py-16 max-h-[400px] overflow-auto">
+          <div className="col-span-3 md:col-span-1 flex-col w-full justify-center items-center text-center rounded-xl border border-gray-500 p-4 md:rounded-none md:border-none md:p-0">
+            <p className="text-lg font-semibold text-gray-900 underline underline-offset-2">
+              Monitoring & Analytics
+            </p>
+            <ol>
+              <li className="text-md text-gray-700 font-light mt-5">
+                API usage and costs
+              </li>
+              <li className="text-md text-gray-700 font-light mt-5">
+                Errors and Distributions
+              </li>
+              <li className="text-md text-gray-700 font-light mt-5">
+                Custom Properties
+              </li>
+            </ol>
+          </div>
+          <div className="col-span-3 md:col-span-1 flex-col w-full justify-center items-center text-center rounded-xl border border-gray-500 p-4 md:rounded-none md:border-none md:p-0">
+            <p className="text-lg font-semibold text-gray-900 underline underline-offset-2">
+              User Management
+            </p>
+            <ol>
+              <li className="text-md text-gray-700 font-light mt-5">
+                User Metrics
+              </li>
+              <li className="text-md text-gray-700 font-light mt-5">
+                User Rate Limiting
+              </li>
+              <li className="text-md text-gray-700 font-light mt-5">
+                Intelligent Retries
+              </li>
+            </ol>
+          </div>
+          <div className="col-span-3 md:col-span-1 flex-col w-full justify-center items-center text-center rounded-xl border border-gray-500 p-4 md:rounded-none md:border-none md:p-0">
+            <p className="text-lg font-semibold text-gray-900 underline underline-offset-2">
+              Dev Tools
+            </p>
+            <ol>
+              <li className="text-md text-gray-700 font-light mt-5">
+                Custom Properties
+              </li>
+              <li className="text-md text-gray-700 font-light mt-5">
+                Bucket Caching
+              </li>
+              <li className="text-md text-gray-700 font-light mt-5">GraphQL</li>
+            </ol>
+          </div>
+        </div>
 
         <button
           onClick={nextStep}
