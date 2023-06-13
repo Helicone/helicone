@@ -100,23 +100,6 @@ const Notification = () => {
                     <span>{title}</span>
                   </p>
                 </div>
-                {/* <div className="order-2 flex-shrink-0 sm:order-3 sm:ml-2">
-                  <button
-                    tabIndex={-1}
-                    onClick={() => setShow(false)}
-                    type="button"
-                    className={clsx(
-                      `hover:${variantIconBgColor()}`,
-                      "-mr-1 flex rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-white"
-                    )}
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    <XMarkIcon
-                      className="h-5 w-5 text-white"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div> */}
               </div>
             </div>
           </Transition>
