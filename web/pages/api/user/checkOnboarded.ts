@@ -16,7 +16,6 @@ async function checkAndUpdateOrgs(
   supabaseClient: SupabaseClient<Database>
 ): Promise<boolean> {
   for (const org of orgs) {
-    // TODO: change this api call to use clickhouse
     const count = (await getRequestCountClickhouse(org.id, "all")).data ?? 0;
     if (count > 0) {
       await supabaseClient
