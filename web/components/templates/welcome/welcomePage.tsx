@@ -51,9 +51,9 @@ const WelcomePage = (props: WelcomePageProps) => {
             router.push("/");
           });
         }}
-        className="absolute p-8 left-0 top-0 flex flex-row w-full gap-1 text-sm items-center underline underline-offset-2 font-semibold text-gray-900"
+        className="absolute p-8 left-0 top-0 flex flex-row w-full gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
       >
-        <ArrowLeftIcon className="h-4 w-4 inline" />
+        <ArrowLeftIcon className="h-3 w-3 inline" />
         Sign Out
       </button>
       {stepArray[step]}
