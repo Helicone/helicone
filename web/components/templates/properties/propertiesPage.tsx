@@ -60,39 +60,39 @@ const PropertiesPage = (props: {}) => {
       />
 
       <div className="flex flex-col gap-5">
-        <ThemedTableHeader
-          isFetching={false}
-          timeFilter={{
-            customTimeFilter: true,
-            timeFilterOptions: [
-              { key: "24h", value: "Today" },
-              { key: "7d", value: "7D" },
-              { key: "1m", value: "1M" },
-              { key: "3m", value: "3M" },
-              { key: "all", value: "All" },
-            ],
-            defaultTimeFilter: interval,
-            onTimeSelectHandler: (key: TimeInterval, value: string) => {
-              if ((key as string) === "custom") {
-                value = value.replace("custom:", "");
-                const start = new Date(value.split("_")[0]);
-                const end = new Date(value.split("_")[1]);
-                setInterval(key);
-                setTimeFilter({
-                  start,
-                  end,
-                });
-              } else {
-                setInterval(key);
-                setTimeFilter({
-                  start: getTimeIntervalAgo(key),
-                  end: new Date(),
-                });
-              }
-            },
-          }}
-        />
-        <div className="flex flex-row gap-2 items-center">
+        <div className="flex flex-row justify-between">
+          <ThemedTableHeader
+            isFetching={false}
+            timeFilter={{
+              customTimeFilter: true,
+              timeFilterOptions: [
+                { key: "24h", value: "Today" },
+                { key: "7d", value: "7D" },
+                { key: "1m", value: "1M" },
+                { key: "3m", value: "3M" },
+                { key: "all", value: "All" },
+              ],
+              defaultTimeFilter: interval,
+              onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                if ((key as string) === "custom") {
+                  value = value.replace("custom:", "");
+                  const start = new Date(value.split("_")[0]);
+                  const end = new Date(value.split("_")[1]);
+                  setInterval(key);
+                  setTimeFilter({
+                    start,
+                    end,
+                  });
+                } else {
+                  setInterval(key);
+                  setTimeFilter({
+                    start: getTimeIntervalAgo(key),
+                    end: new Date(),
+                  });
+                }
+              },
+            }}
+          />
           <ThemedMultiSelect
             columns={properties.map((property) => ({
               label: property,
@@ -115,7 +115,11 @@ const PropertiesPage = (props: {}) => {
             selectAll={() => {
               setSelectedProperties(properties);
             }}
+            align="right"
           />
+        </div>
+
+        <div className="flex flex-row gap-2 items-center">
           {selectedProperties.map((property, i) => (
             <div key={i}>
               <ThemedPill
@@ -130,9 +134,24 @@ const PropertiesPage = (props: {}) => {
           ))}
         </div>
         <div className="flex flex-col gap-5">
-          {selectedProperties.map((property, i) => (
-            <PropertyCard property={property} key={i} timeFilter={timeFilter} />
-          ))}
+          {selectedProperties.length < 1 ? (
+            <div className="h-96 p-8 flex flex-col space-y-4 w-full border border-dashed border-gray-300 rounded-xl justify-center items-center text-center">
+              <p className="text-2xl font-semibold text-gray-700">
+                No Properties Selected
+              </p>
+              <p className="text-gray-500">
+                Please select a custom property to view data
+              </p>
+            </div>
+          ) : (
+            selectedProperties.map((property, i) => (
+              <PropertyCard
+                property={property}
+                key={i}
+                timeFilter={timeFilter}
+              />
+            ))
+          )}
         </div>
       </div>
     </>

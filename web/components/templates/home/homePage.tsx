@@ -170,16 +170,16 @@ export default function HomePage() {
             >
               Backed by Y Combinator
             </Link>
-            <div className="text-5xl sm:text-7xl lg:text-8xl leading-none font-bold text-gray-900 text-left space-y-2">
+            <div className="text-5xl sm:text-6xl lg:text-7xl leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
                 Generative AI
               </span>
             </div>
-            <p className="text-xl sm:text-2xl leading-loose text-gray-700">
+            <div className="text-lg sm:text-xl sm:leading-relaxed text-gray-700">
               Hundreds of organizations leverage Helicone to make their
               Large-Language Model operations more efficient.
-            </p>
+            </div>
             <div className="flex flex-row gap-8">
               <OnboardingButton title={"Get Started"} />
               {demoLoading ? (
