@@ -44,8 +44,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         </div>
       </div>
       {requestId === undefined ? (
-        <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
-          Please load in a request to the playground
+        <div className="col-span-8 h-96 p-8 flex flex-col space-y-4 w-full border border-dashed border-gray-300 rounded-xl justify-center items-center text-center">
+          <p className="text-2xl font-semibold text-gray-700">
+            No Request Selected
+          </p>
+          <p className="text-gray-500">
+            Please enter in a request ID to load it into the playground
+          </p>
         </div>
       ) : isLoading ? (
         <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
