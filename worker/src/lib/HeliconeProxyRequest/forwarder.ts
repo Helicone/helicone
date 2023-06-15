@@ -134,5 +134,6 @@ export async function proxyForwarder(
   return responseBuilder.build({
     body: response.body,
     inheritFrom: response,
+    status: response.status,
   });
 }

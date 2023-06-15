@@ -2,7 +2,7 @@ import { RateLimitOptions, RateLimitResponse } from "../rateLimit";
 
 export interface BuildParams {
   body: BodyInit | null;
-  status?: number;
+  status: number;
   inheritFrom?: Response;
 }
 
@@ -36,8 +36,7 @@ export class ResponseBuilder {
   }
 
   build(params: BuildParams): Response {
-    const { body, inheritFrom: _inheritFrom, status: _status } = params;
-    const status = _status ?? 200;
+    const { body, inheritFrom: _inheritFrom, status } = params;
     const inheritFrom = _inheritFrom ?? new Response();
 
     const headers = new Headers(inheritFrom.headers);
