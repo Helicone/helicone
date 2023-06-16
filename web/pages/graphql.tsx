@@ -1,14 +1,13 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 
+import { LightBulbIcon } from "@heroicons/react/24/outline";
 import { GetServerSidePropsContext } from "next";
+import Link from "next/link";
 import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import KeyPage from "../components/templates/keys/keyPage";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import GraphQLPage from "../components/templates/graphql/graphqlPage";
-import { LightBulbIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { useLocalStorage } from "../services/hooks/localStorage";
 
 interface KeysProps {
