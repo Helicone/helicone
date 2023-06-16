@@ -1,10 +1,9 @@
 scalar JSON
 
 type Query {
-  user: User
+  user(id: String, limit: Int, after: Int, offset: Int): [User]
   heliconeRequest(
     limit: Int
-    after: Int
     offset: Int
     filters: [HeliconeRequestFilter!]
   ): [HeliconeRequest]
@@ -55,6 +54,20 @@ type Value {
 
 type User {
   id: String!
+  # models: [Model!]
+  total_requests: Int
+  total_completion_tokens: Float
+  total_prompt_tokens: Float
+  total_tokens: Float
+}
+
+type Model {
+  id: String!
+  name: String
+  total_requests: Int
+  total_completion_tokens: Int
+  total_prompt_tokens: Int
+  total_tokens: Int
 }
 
 input TextOperators {
