@@ -51,6 +51,16 @@ export type HeliconeRequestFilter = {
   user?: InputMaybe<TextOperators>;
 };
 
+export type Model = {
+  __typename?: "Model";
+  id: Scalars["String"];
+  name?: Maybe<Scalars["String"]>;
+  total_completion_tokens?: Maybe<Scalars["Int"]>;
+  total_prompt_tokens?: Maybe<Scalars["Int"]>;
+  total_requests?: Maybe<Scalars["Int"]>;
+  total_tokens?: Maybe<Scalars["Int"]>;
+};
+
 export type NumberOperators = {
   equals?: InputMaybe<Scalars["Float"]>;
   gte?: InputMaybe<Scalars["Float"]>;
@@ -72,12 +82,18 @@ export type PropertyFilter = {
 export type Query = {
   __typename?: "Query";
   heliconeRequest?: Maybe<Array<Maybe<HeliconeRequest>>>;
-  user?: Maybe<User>;
+  user?: Maybe<Array<Maybe<User>>>;
 };
 
 export type QueryHeliconeRequestArgs = {
-  after?: InputMaybe<Scalars["Int"]>;
   filters?: InputMaybe<Array<HeliconeRequestFilter>>;
+  limit?: InputMaybe<Scalars["Int"]>;
+  offset?: InputMaybe<Scalars["Int"]>;
+};
+
+export type QueryUserArgs = {
+  after?: InputMaybe<Scalars["Int"]>;
+  id?: InputMaybe<Scalars["String"]>;
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
 };
@@ -93,6 +109,10 @@ export type TextOperators = {
 export type User = {
   __typename?: "User";
   id: Scalars["String"];
+  total_completion_tokens?: Maybe<Scalars["Int"]>;
+  total_prompt_tokens?: Maybe<Scalars["Int"]>;
+  total_requests?: Maybe<Scalars["Int"]>;
+  total_tokens?: Maybe<Scalars["Int"]>;
 };
 
 export type Value = {
@@ -110,7 +130,7 @@ export type GetUserQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetUserQuery = {
   __typename?: "Query";
-  user?: { __typename?: "User"; id: string } | null;
+  user?: Array<{ __typename?: "User"; id: string } | null> | null;
 };
 
 export const GetUserDocument = gql`
