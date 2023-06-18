@@ -15,14 +15,11 @@ interface ThemedDrawerProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   children: React.ReactNode;
-  title: string;
   actions?: React.ReactNode;
 }
 
 const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const { open, setOpen, children, title, actions } = props;
-
-  const { setNotification } = useNotification();
+  const { open, setOpen, children, actions } = props;
 
   return (
     <Transition.Root show={open} as={Fragment}>

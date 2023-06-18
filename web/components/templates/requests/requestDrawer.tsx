@@ -53,7 +53,6 @@ const RequestDrawer = (props: RequestDrawerProps) => {
     <ThemedDrawer
       open={open}
       setOpen={setOpen}
-      title="Request"
       actions={
         <div className="flex flex-row flex-1 pl-1 w-full items-center justify-between space-x-2 text-gray-500">
           {wrappedRequest && "chat" in wrappedRequest.api ? (
