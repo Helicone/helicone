@@ -42,7 +42,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         />
       )}
 
-      <div className="bg-white rounded-md border border-gray-300 py-2 px-4">
+      <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
         <div className="overflow-x-auto text-sm">
           <table
             {...{

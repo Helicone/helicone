@@ -38,17 +38,17 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 right-0 mt-2 w-[200px] origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
+        <Menu.Items className="absolute z-10 right-0 mt-2 w-[200px] origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="grid grid-cols-2 divide-x divide-gray-300 bg-gray-50 rounded-t-lg border-b border-gray-300">
             <button
               onClick={() => onSelectAll(false)}
-              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg border-b border-gray-900/5"
+              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg"
             >
               Deselect All
             </button>
             <button
               onClick={() => onSelectAll(true)}
-              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
+              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 hover:bg-gray-100"
             >
               Select All
             </button>
@@ -61,7 +61,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                 <div key={idx} className="flex flex-row my-[3px]">
                   <label
                     key={idx}
-                    className="relative mx-1 my-[1px] px-3 py-2 rounded-lg select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 hover:cursor-pointer"
+                    className="relative mx-1 my-[1px] px-3 py-2 rounded-md select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 hover:cursor-pointer"
                   >
                     {column.getIsVisible() ? (
                       <CheckIcon className="h-4 w-4 text-gray-900" />

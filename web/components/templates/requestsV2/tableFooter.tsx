@@ -30,10 +30,7 @@ const TableFooter = (props: TableFooterProps) => {
 
   return (
     <div className="flex flex-row justify-between text-sm items-center">
-      <p className="text-gray-500">{`Showing ${
-        requestLength === 0 ? 0 : (currentPage - 1) * pageSize + 1
-      } to ${requestLength} of ${count}`}</p>
-      <div className="flex flex-row gap-16 items-center">
+      <div className="flex flex-row gap-16 items-center justify-between w-full">
         <div className="flex flex-row gap-2 items-center">
           <p className="text-gray-700 font-medium">Rows per page</p>
           <select
