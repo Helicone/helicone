@@ -1,6 +1,5 @@
 import { ViewColumnsIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
-import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import DatePicker from "./datePicker";
 import ViewColumns from "./viewColumns";
 

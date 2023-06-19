@@ -77,9 +77,10 @@ export default function DatePicker() {
               head_cell:
                 "text-gray-500 rounded-md w-9 font-normal text-[0.8rem]",
               row: "flex w-full mt-2",
-              cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-gray-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+              cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-gray-200 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
 
               // THIS
+              day_today: "border border-gray-300",
               day: "hover:bg-gray-200 rounded-lg h-9 w-9 p-0 font-normal aria-selected:opacity-100",
               day_range_start: "bg-black text-white",
               day_range_end: "bg-black text-white",
@@ -88,7 +89,7 @@ export default function DatePicker() {
               day_outside: "text-gray-500 opacity-50",
               day_disabled: "text-gray-500 opacity-50",
               day_range_middle:
-                "aria-selected:bg-gray-100 aria-selected:text-black",
+                "aria-selected:bg-gray-200 aria-selected:text-black",
               day_hidden: "invisible",
             }}
           />
