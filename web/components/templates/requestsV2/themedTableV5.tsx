@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { DateRange } from "react-day-picker";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../shared/clsx";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
@@ -17,6 +18,8 @@ interface ThemedTableV5Props<T> {
   defaultColumns: ColumnDef<T>[];
   // TODO: change this to a more generic type???
   header?: {
+    currentRange: DateRange | undefined;
+    onTimeFilter: (range: DateRange | undefined) => void;
     onFilter?: () => void;
     flattenedExportData: any[];
   };
@@ -43,10 +46,12 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     <div className="flex flex-col space-y-4">
       {header && (
         <ThemedTableHeader
+          currentRange={header.currentRange}
           columns={table.getAllColumns()}
           onSelectAll={table.toggleAllColumnsVisible}
           visibleColumns={table.getVisibleLeafColumns().length}
           rows={header.flattenedExportData}
+          onTimeFilter={header.onTimeFilter}
         />
       )}
 

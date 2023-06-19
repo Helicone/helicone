@@ -16,8 +16,6 @@ interface RequestsV2Props {
 const RequestsV2 = (props: RequestsV2Props) => {
   const { user, currentPage, pageSize, sort } = props;
 
-  console.log("query sort", sort);
-
   return (
     <MetaData title={"Requests"}>
       <AuthLayout user={user}>

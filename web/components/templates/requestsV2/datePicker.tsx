@@ -8,13 +8,15 @@ import { addDays, format } from "date-fns";
 import { Fragment, useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
 
-export default function DatePicker() {
-  const defaultSelected: DateRange = {
-    // 7 days ago
-    from: addDays(new Date(), -7),
-    to: new Date(),
-  };
-  const [range, setRange] = useState<DateRange | undefined>(defaultSelected);
+interface DatePickerProps {
+  currentRange: DateRange | undefined;
+  onTimeFilter: (range: DateRange | undefined) => void;
+}
+
+export default function DatePicker(props: DatePickerProps) {
+  const { currentRange, onTimeFilter } = props;
+
+  const [range, setRange] = useState<DateRange | undefined>(currentRange);
 
   return (
     <Popover className="relative">
@@ -93,6 +95,24 @@ export default function DatePicker() {
               day_hidden: "invisible",
             }}
           />
+          <div className="p-3 w-full flex flex-row gap-3 items-center justify-end">
+            <button
+              onClick={() => {
+                setRange(currentRange);
+              }}
+              className="items-center rounded-md bg-white border border-gray-300 px-3 py-1.5 text-sm flex font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Reset
+            </button>
+            <button
+              onClick={() => {
+                onTimeFilter(range);
+              }}
+              className="items-center rounded-md bg-black px-3 py-1.5 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Save
+            </button>
+          </div>
         </Popover.Panel>
       </Transition>
     </Popover>
