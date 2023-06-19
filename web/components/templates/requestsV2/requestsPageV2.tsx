@@ -148,6 +148,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               }}
               header={{
                 onFilter: () => console.log(1),
+                flattenedExportData: requests.map((request) => {
+                  const flattenedRequest: any = {};
+                  Object.entries(request).forEach(([key, value]) => {
+                    if (key === "customProperties") {
+                      Object.entries(value).forEach(([key, value]) => {
+                        flattenedRequest[key] = value;
+                      });
+                    } else {
+                      flattenedRequest[key] = value;
+                    }
+                  });
+                  return flattenedRequest;
+                }),
               }}
               onRowSelect={(row) => {
                 setSelectedData(row);

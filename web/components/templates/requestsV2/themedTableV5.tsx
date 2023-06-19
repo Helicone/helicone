@@ -18,6 +18,7 @@ interface ThemedTableV5Props<T> {
   // TODO: change this to a more generic type???
   header?: {
     onFilter?: () => void;
+    flattenedExportData: any[];
   };
   sortable?: {
     currentSortLeaf: SortLeafRequest;
@@ -45,6 +46,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
           columns={table.getAllColumns()}
           onSelectAll={table.toggleAllColumnsVisible}
           visibleColumns={table.getVisibleLeafColumns().length}
+          rows={header.flattenedExportData}
         />
       )}
 
