@@ -46,7 +46,16 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     searchPropertyFilters,
   } = props;
 
-  const [showFilters, setShowFilters] = useState(false);
+  // get show filters from session storage
+  const [showFilters, setShowFilters] = useState(
+    JSON.parse(window.sessionStorage.getItem("showFilters") || "false")
+  );
+
+  const showFilterHandler = () => {
+    // set show filters in sessions storage
+    setShowFilters(!showFilters);
+    window.sessionStorage.setItem("showFilters", JSON.stringify(!showFilters));
+  };
 
   return (
     <div className="flex flex-col space-y-4">
@@ -54,7 +63,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
         <DatePicker currentRange={currentRange} onTimeFilter={onTimeFilter} />
         <div className="flex flex-row gap-2">
           <button
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={showFilterHandler}
             className={clsx(
               "bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
             )}
