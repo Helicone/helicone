@@ -4,7 +4,7 @@ import ChatGPTBuilder from "./ChatGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 
 type requestBuilderModels =
-  | "text-davinci-002"
+  | "default-openai"
   | "text-davinci-003"
   | "gpt-3.5-turbo"
   | "gpt-4";
@@ -14,18 +14,18 @@ let requestBuilders: {
     request: HeliconeRequest
   ) => AbstractRequestBuilder;
 } = {
-  "text-davinci-002": GPT3Builder,
+  // default case is a GPT-3 completion
+  "default-openai": GPT3Builder,
   "text-davinci-003": GPT3Builder,
   "gpt-3.5-turbo": ChatGPTBuilder,
   "gpt-4": ChatGPTBuilder,
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
-  const requestModel =
-    request.request_body.model || request.response_body.model;
+  let requestModel = request.request_body.model || request.response_body.model;
 
   if (Object.keys(requestBuilders).indexOf(requestModel) === -1) {
-    throw new Error("Request model is not defined");
+    requestModel = "default-openai";
   }
   let Builder = requestBuilders[requestModel as requestBuilderModels];
   let builder = new Builder(request);
