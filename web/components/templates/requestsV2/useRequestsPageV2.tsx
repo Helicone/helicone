@@ -21,7 +21,7 @@ import getRequestBuilder from "./builder/requestBuilder";
 const useRequestsPageV2 = (
   currentPage: number,
   currentPageSize: number,
-  // uiFilterIdxs: UIFilterRow[],
+  uiFilterIdxs: UIFilterRow[],
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest
 ) => {
@@ -29,6 +29,7 @@ const useRequestsPageV2 = (
     properties,
     isLoading: isPropertiesLoading,
     propertyFilters,
+    searchPropertyFilters,
   } = useGetProperties();
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
@@ -36,11 +37,10 @@ const useRequestsPageV2 = (
   );
 
   const filter: FilterNode = {
-    // left: filterListToTree(
-    //   filterUIToFilterLeafs(filterMap, uiFilterIdxs),
-    //   "and"
-    // ),
-    left: "all",
+    left: filterListToTree(
+      filterUIToFilterLeafs(filterMap, uiFilterIdxs),
+      "and"
+    ),
     right: advancedFilter,
     operator: "and",
   };
@@ -71,6 +71,8 @@ const useRequestsPageV2 = (
     isLoading,
     properties,
     refetch: requests.refetch,
+    searchPropertyFilters,
+    filterMap,
   };
 };
 

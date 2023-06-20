@@ -12,6 +12,7 @@ import { INITIAL_COLUMNS } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { DateRange } from "react-day-picker";
 import { addDays } from "date-fns";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -27,24 +28,25 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<NormalizedRequest>();
   const [range, setRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), -7),
+    from: addDays(new Date(), -30),
     to: new Date(),
   });
-  // const [timeFilter, setTimeFilter] = useState<FilterNode>({
-  //   request: {
-  //     created_at: {
-  //       gte: getTimeIntervalAgo("7d").toISOString(),
-  //     },
-  //   },
-  // });
-  // TODO: change empty array to `advancedFilter`
-  // const debouncedAdvancedFilter = useDebounce([], 500);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
-  console.log(range?.from?.toISOString());
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
-  const { count, isLoading, requests, properties, refetch } = useRequestsPageV2(
+  const {
+    count,
+    isLoading,
+    requests,
+    properties,
+    refetch,
+    filterMap,
+    searchPropertyFilters,
+  } = useRequestsPageV2(
     page,
     currentPageSize,
+    debouncedAdvancedFilter,
     {
       left: {
         request: {
@@ -98,7 +100,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 onTimeFilter: (range) => {
                   setRange(range);
                 },
-                onFilter: () => console.log(1),
                 flattenedExportData: requests.map((request) => {
                   const flattenedRequest: any = {};
                   Object.entries(request).forEach(([key, value]) => {
@@ -112,6 +113,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   });
                   return flattenedRequest;
                 }),
+                filterMap: filterMap,
+                filters: advancedFilters,
+                setAdvancedFilters: setAdvancedFilters,
+                searchPropertyFilters: searchPropertyFilters,
               }}
               onRowSelect={(row) => {
                 setSelectedData(row);

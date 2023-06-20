@@ -6,10 +6,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
+import { Result } from "../../../lib/result";
+import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../shared/clsx";
+import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 
@@ -20,8 +23,16 @@ interface ThemedTableV5Props<T> {
   header?: {
     currentRange: DateRange | undefined;
     onTimeFilter: (range: DateRange | undefined) => void;
-    onFilter?: () => void;
     flattenedExportData: any[];
+
+    // TODO: rewrite these filters
+    filterMap: SingleFilterDef<any>[];
+    filters: UIFilterRow[];
+    setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+    searchPropertyFilters: (
+      property: string,
+      search: string
+    ) => Promise<Result<void, string>>;
   };
   sortable?: {
     currentSortLeaf: SortLeafRequest;
@@ -52,6 +63,10 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
           visibleColumns={table.getVisibleLeafColumns().length}
           rows={header.flattenedExportData}
           onTimeFilter={header.onTimeFilter}
+          filterMap={header.filterMap}
+          filters={header.filters}
+          searchPropertyFilters={header.searchPropertyFilters}
+          setAdvancedFilters={header.setAdvancedFilters}
         />
       )}
 

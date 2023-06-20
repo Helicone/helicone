@@ -1,8 +1,15 @@
 import { FunnelIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
+import { Result } from "../../../lib/result";
+import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../../shared/clsx";
+import {
+  AdvancedFilters,
+  UIFilterRow,
+} from "../../shared/themed/themedAdvancedFilters";
+import { ThemedPill } from "../../shared/themed/themedPill";
 import DatePicker from "./datePicker";
 import ExportButton from "./exportButton";
 import ViewColumns from "./viewColumns";
@@ -14,6 +21,15 @@ interface ThemedTableHeaderProps<T> {
   visibleColumns: number;
   onTimeFilter: (range: DateRange | undefined) => void;
   currentRange: DateRange | undefined;
+
+  // TODO: rewrite these filters
+  filterMap: SingleFilterDef<any>[];
+  filters: UIFilterRow[];
+  setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+  searchPropertyFilters: (
+    property: string,
+    search: string
+  ) => Promise<Result<void, string>>;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -24,6 +40,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     rows,
     onTimeFilter,
     currentRange,
+    filterMap,
+    filters,
+    setAdvancedFilters,
+    searchPropertyFilters,
   } = props;
 
   const [showFilters, setShowFilters] = useState(false);
@@ -53,7 +73,35 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
         </div>
       </div>
       {showFilters && (
-        <div className="flex w-full bg-white h-32 rounded-lg border border-dashed border-gray-300 shadow-sm"></div>
+        <AdvancedFilters
+          filterMap={filterMap}
+          filters={filters}
+          setAdvancedFilters={setAdvancedFilters}
+          searchPropertyFilters={searchPropertyFilters}
+        />
+      )}
+      {filters.length > 0 && !showFilters && (
+        <div className="flex-wrap w-full flex-row space-x-4 space-y-2 mt-4">
+          {filters.map((_filter, index) => {
+            return (
+              <ThemedPill
+                key={index}
+                label={`${filterMap[_filter.filterMapIdx]?.label} ${
+                  filterMap[_filter.filterMapIdx]?.operators[
+                    _filter.operatorIdx
+                  ].label
+                } ${_filter.value}`}
+                onDelete={() => {
+                  setAdvancedFilters((prev) => {
+                    const newFilters = [...prev];
+                    newFilters.splice(index, 1);
+                    return newFilters;
+                  });
+                }}
+              />
+            );
+          })}
+        </div>
       )}
     </div>
   );
