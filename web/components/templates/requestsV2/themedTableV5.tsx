@@ -1,4 +1,5 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
+import { TableCellsIcon } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
   flexRender,
@@ -88,6 +89,8 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     onColumnVisibilityChange: onVisibilityHandler,
   });
 
+  const rows = table.getRowModel().rows;
+
   return (
     <div className="flex flex-col space-y-4">
       {header && (
@@ -106,6 +109,13 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
       )}
       {dataLoading ? (
         <p>Loading...</p>
+      ) : rows.length === 0 ? (
+        <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+          <TableCellsIcon className="h-12 w-12 text-gray-400" />
+          <p className="text-xl font-semibold text-gray-500">
+            No Requests Found
+          </p>
+        </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
           <div className="overflow-x-auto text-sm">
@@ -227,7 +237,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                 ))}
               </thead>
               <tbody>
-                {table.getRowModel().rows.map((row) => (
+                {rows.map((row) => (
                   <tr
                     key={row.id}
                     className="hover:bg-gray-100 hover:cursor-pointer"

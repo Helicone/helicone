@@ -120,14 +120,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             setOpen(true);
           }}
         />
-        <TableFooter
-          requestLength={requests.length}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          count={count || 0}
-          onPageChange={onPageChangeHandler}
-          onPageSizeChange={onPageSizeChangeHandler}
-        />
+        {!isLoading && requests.length > 0 && (
+          <TableFooter
+            requestLength={requests.length}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            count={count || 0}
+            onPageChange={onPageChangeHandler}
+            onPageSizeChange={onPageSizeChangeHandler}
+          />
+        )}
       </div>
       <RequestDrawerV2
         open={open}
