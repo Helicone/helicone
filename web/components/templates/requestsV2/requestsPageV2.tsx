@@ -81,60 +81,67 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }))
   );
 
+  const [showFilters, setShowFilters] = useState(false);
+
   return (
     <div>
-      <AuthHeader title={"Requests"} />
-      <div className="flex flex-col space-y-4">
-        <ThemedTableV5
-          defaultData={requests || []}
-          defaultColumns={columnsWithProperties}
-          dataLoading={isLoading}
-          sortable={{
-            currentSortLeaf: sort,
-          }}
-          header={{
-            currentRange: range,
-            onTimeFilter: (range) => {
-              setRange(range);
-            },
-            flattenedExportData: requests.map((request) => {
-              const flattenedRequest: any = {};
-              Object.entries(request).forEach(([key, value]) => {
-                if (key === "customProperties") {
-                  Object.entries(value).forEach(([key, value]) => {
-                    flattenedRequest[key] = value;
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <AuthHeader title={"Requests"} />
+          <div className="flex flex-col space-y-4">
+            <ThemedTableV5
+              defaultData={requests || []}
+              defaultColumns={columnsWithProperties}
+              sortable={{
+                currentSortLeaf: sort,
+              }}
+              header={{
+                currentRange: range,
+                onTimeFilter: (range) => {
+                  setRange(range);
+                },
+                flattenedExportData: requests.map((request) => {
+                  const flattenedRequest: any = {};
+                  Object.entries(request).forEach(([key, value]) => {
+                    if (key === "customProperties") {
+                      Object.entries(value).forEach(([key, value]) => {
+                        flattenedRequest[key] = value;
+                      });
+                    } else {
+                      flattenedRequest[key] = value;
+                    }
                   });
-                } else {
-                  flattenedRequest[key] = value;
-                }
-              });
-              return flattenedRequest;
-            }),
-            filterMap: filterMap,
-            filters: advancedFilters,
-            setAdvancedFilters: setAdvancedFilters,
-            searchPropertyFilters: searchPropertyFilters,
-          }}
-          onRowSelect={(row) => {
-            setSelectedData(row);
-            setOpen(true);
-          }}
-        />
-        <TableFooter
-          requestLength={requests.length}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          count={count || 0}
-          onPageChange={onPageChangeHandler}
-          onPageSizeChange={onPageSizeChangeHandler}
-        />
-      </div>
-      <RequestDrawerV2
-        open={open}
-        setOpen={setOpen}
-        request={selectedData}
-        properties={properties}
-      />
+                  return flattenedRequest;
+                }),
+                filterMap: filterMap,
+                filters: advancedFilters,
+                setAdvancedFilters: setAdvancedFilters,
+                searchPropertyFilters: searchPropertyFilters,
+              }}
+              onRowSelect={(row) => {
+                setSelectedData(row);
+                setOpen(true);
+              }}
+            />
+            <TableFooter
+              requestLength={requests.length}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              count={count || 0}
+              onPageChange={onPageChangeHandler}
+              onPageSizeChange={onPageSizeChangeHandler}
+            />
+          </div>
+          <RequestDrawerV2
+            open={open}
+            setOpen={setOpen}
+            request={selectedData}
+            properties={properties}
+          />
+        </>
+      )}
     </div>
   );
 };

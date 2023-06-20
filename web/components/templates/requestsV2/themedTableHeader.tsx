@@ -46,17 +46,15 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     searchPropertyFilters,
   } = props;
 
-  const [showFilters, setShowFilters] = useState(false);
+  // get show filters from session storage
+  const [showFilters, setShowFilters] = useState(
+    JSON.parse(window.sessionStorage.getItem("showFilters") || "false")
+  );
 
-  useEffect(() => {
-    const displayFilters = window.localStorage.getItem("showFilters") || null;
-    setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
-  }, []);
-
-  // TODO: fix this. this is dank
   const showFilterHandler = () => {
+    // set show filters in sessions storage
     setShowFilters(!showFilters);
-    window.localStorage.setItem("showFilters", JSON.stringify(!showFilters));
+    window.sessionStorage.setItem("showFilters", JSON.stringify(!showFilters));
   };
 
   return (
