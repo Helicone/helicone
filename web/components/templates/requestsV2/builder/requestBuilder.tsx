@@ -22,6 +22,7 @@ let requestBuilders: {
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
+  console.log("raw request", request);
   let requestModel = request.request_body.model || request.response_body.model;
   console.log("requestModel", requestModel);
 
