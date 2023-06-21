@@ -42,7 +42,6 @@ export type RequestContext = {
 const router = Router<RequestContext>();
 
 router.post("/v1/log", async (requestContext) => {
-  console.log("/v1/log");
   return await handleLoggingEndpoint(
     requestContext.requestWrapper,
     requestContext.env
@@ -50,7 +49,6 @@ router.post("/v1/log", async (requestContext) => {
 });
 
 router.post("/v1/feedback", async (requestContext) => {
-  console.log("/v1/feedback");
   return await handleFeedbackEndpoint(
     requestContext.requestWrapper,
     requestContext.env
@@ -59,9 +57,7 @@ router.post("/v1/feedback", async (requestContext) => {
 
 // Proxy only + proxy forwarder
 router.all("*", async (requestContext) => {
-  console.log("Proxy Only");
   if (requestContext.requestWrapper.url.pathname.includes("audio")) {
-    console.log("Audio proxy");
     const requestWrapper = requestContext.requestWrapper;
     const new_url = new URL(
       `https://api.openai.com${requestWrapper.url.pathname}`
@@ -73,7 +69,6 @@ router.all("*", async (requestContext) => {
     });
   }
 
-  console.log("Proxy forwarder");
   return await proxyForwarder(
     requestContext.requestWrapper,
     requestContext.env,
