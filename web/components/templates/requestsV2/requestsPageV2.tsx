@@ -100,7 +100,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             flattenedExportData: requests.map((request) => {
               const flattenedRequest: any = {};
               Object.entries(request).forEach(([key, value]) => {
-                if (key === "customProperties") {
+                // key is properties and value is not null
+                if (key === "customProperties" && value) {
                   Object.entries(value).forEach(([key, value]) => {
                     flattenedRequest[key] = value;
                   });
