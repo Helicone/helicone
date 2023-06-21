@@ -31,7 +31,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 ? this.response.response_body.choices[0].message
                 : {
                     role: "system",
-                    content: this.response.response_body.error.message,
+                    content: `error: ${this.response.response_body.error.message}`,
                   },
           }}
         />

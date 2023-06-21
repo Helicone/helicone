@@ -158,7 +158,7 @@ export const Chat = (props: ChatProps) => {
             const isSystem = message.role === "system";
 
             let formattedMessageContent = removeLeadingWhitespace(
-              message.content
+              message.content.toString()
             );
 
             return (
