@@ -1,29 +1,29 @@
-import { RequestContext } from "./src";
+import { Env } from "./src";
 import { handleFeedbackEndpoint } from "./src/feedback";
 import { proxyForwarder } from "./src/lib/HeliconeProxyRequest/forwarder";
+import { RequestWrapper } from "./src/lib/RequestWrapper";
 import { handleLoggingEndpoint } from "./src/properties";
-import { Router } from "itty-router";
+import { Router, IRequest } from "itty-router";
 
-const router = Router<RequestContext>();
+const router = Router<IRequest, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>();
 
-router.post("/v1/log", async (requestContext) => {
+router.post("/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
   return await handleLoggingEndpoint(
-    requestContext.requestWrapper,
-    requestContext.env
+    requestWrapper,
+    env
   );
 });
 
-router.post("/v1/feedback", async (requestContext) => {
+router.post("/v1/feedback", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
   return await handleFeedbackEndpoint(
-    requestContext.requestWrapper,
-    requestContext.env
+    requestWrapper,
+    env
   );
 });
 
 // Proxy only + proxy forwarder
-router.all("*", async (requestContext) => {
-  if (requestContext.requestWrapper.url.pathname.includes("audio")) {
-    const requestWrapper = requestContext.requestWrapper;
+router.all("*", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
+  if (requestWrapper.url.pathname.includes("audio")) {
     const new_url = new URL(
       `https://api.openai.com${requestWrapper.url.pathname}`
     );
@@ -35,9 +35,9 @@ router.all("*", async (requestContext) => {
   }
 
   return await proxyForwarder(
-    requestContext.requestWrapper,
-    requestContext.env,
-    requestContext.ctx
+    requestWrapper,
+    env,
+    ctx
   );
 });
 

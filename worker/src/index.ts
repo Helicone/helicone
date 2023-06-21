@@ -1,6 +1,5 @@
 import router from "../router";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { IRequest } from "itty-router";
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -30,12 +29,6 @@ export interface Env {
   TOKEN_CALC_URL: string;
 }
 
-export type RequestContext = {
-  requestWrapper: RequestWrapper;
-  env: Env;
-  ctx: ExecutionContext;
-} & IRequest;
-
 export default {
   async fetch(
     request: Request,
@@ -45,12 +38,9 @@ export default {
     try {
       const requestWrapper = new RequestWrapper(request);
 
-      const requestContext = request as RequestContext;
-      requestContext.requestWrapper = requestWrapper;
-      requestContext.env = env;
-      requestContext.ctx = ctx;
-
-      return router.handle(requestContext).catch(handleError);
+      return router
+        .handle(request, requestWrapper, env, ctx)
+        .catch(handleError);
     } catch (e) {
       return handleError(e);
     }
