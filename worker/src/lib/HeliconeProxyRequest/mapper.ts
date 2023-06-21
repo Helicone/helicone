@@ -113,7 +113,7 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: api_base_error };
     }
     const { data: heliconeAuthHash, error: heliconeAuthHashError } =
-      await this.getHeliconeAuthHeader();
+      await this.request.getHeliconeAuthHeader();
     if (heliconeAuthHashError !== null) {
       return { data: null, error: heliconeAuthHashError };
     }
@@ -164,31 +164,6 @@ export class HeliconeProxyRequestMapper {
         : undefined;
     }
     return undefined;
-  }
-
-  private async getHeliconeAuthHeader(): Promise<
-    Result<string | null, string>
-  > {
-    const heliconeAuth = this.request.heliconeHeaders.heliconeAuth;
-    if (!heliconeAuth) {
-      return { data: null, error: null };
-    }
-    if (!heliconeAuth.includes("Bearer ")) {
-      return { data: null, error: "Must included Bearer in API Key" };
-    }
-
-    const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern =
-      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-
-    if (!apiKeyPattern.test(apiKey)) {
-      return {
-        data: null,
-        error: "API Key is not well formed",
-      };
-    }
-    const apiKeyHash = await hash(`Bearer ${apiKey}`);
-    return { data: apiKeyHash, error: null };
   }
 
   private async getBody(): Promise<string | null> {

@@ -3,6 +3,9 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
+import { hash } from "..";
+import { Result } from "../results";
+
 export type RequestHandlerType =
   | "proxy_only"
   | "proxy_log"
@@ -83,21 +86,29 @@ export class RequestWrapper {
     return this.request.url;
   }
 
-  getRequestHandlerType(): RequestHandlerType {
-    if (this.url.pathname.includes("audio")) {
-      return "proxy_only";
+  async getHeliconeAuthHeader(): Promise<
+    Result<string | null, string>
+  > {
+    const heliconeAuth = this.heliconeHeaders.heliconeAuth;
+    if (!heliconeAuth) {
+      return { data: null, error: null };
     }
-    const method = this.getMethod();
-
-    if (method === "POST" && this.url.pathname === "/v1/log") {
-      return "logging";
-    }
-
-    if (method === "POST" && this.url.pathname === "/v1/feedback") {
-      return "feedback";
+    if (!heliconeAuth.includes("Bearer ")) {
+      return { data: null, error: "Must included Bearer in API Key" };
     }
 
-    return "proxy_log";
+    const apiKey = heliconeAuth.replace("Bearer ", "").trim();
+    const apiKeyPattern =
+      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+
+    if (!apiKeyPattern.test(apiKey)) {
+      return {
+        data: null,
+        error: "API Key is not well formed",
+      };
+    }
+    const apiKeyHash = await hash(`Bearer ${apiKey}`);
+    return { data: apiKeyHash, error: null };
   }
 
   async getUserId(): Promise<string | undefined> {

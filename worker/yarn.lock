@@ -2763,6 +2763,11 @@ istanbul-reports@^3.1.3:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
 
+itty-router@^4.0.13:
+  version "4.0.13"
+  resolved "https://registry.yarnpkg.com/itty-router/-/itty-router-4.0.13.tgz#92347ebbc2366c6a6af2b42e31c324f47ca4c8e4"
+  integrity sha512-iiQ9k1nQgaal/MteVft5pwYkvzuZx3idPT9tYpKWl7rKH74tyz5VVSVUCXUO0iBh5HDXjHYsix90UrFKPfThHg==
+
 jest-changed-files@^29.5.0:
   version "29.5.0"
   resolved "https://registry.npmjs.org/jest-changed-files/-/jest-changed-files-29.5.0.tgz"
