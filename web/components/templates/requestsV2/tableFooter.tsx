@@ -28,6 +28,10 @@ const TableFooter = (props: TableFooterProps) => {
 
   const router = useRouter();
 
+  const totalPages = Math.ceil(count / pageSize);
+
+  console.log("totalPages", totalPages);
+
   return (
     <div className="flex flex-row justify-between text-sm items-center">
       <div className="flex flex-row gap-16 items-center justify-between w-full">
@@ -51,9 +55,9 @@ const TableFooter = (props: TableFooterProps) => {
             <option>100</option>
           </select>
         </div>
-        <p className="text-gray-700 font-medium">{`Page ${
-          currentPage || 1
-        } of ${Math.ceil((count as number) / Number(pageSize || 10))}`}</p>
+        <p className="text-gray-700 font-medium">{`Page ${currentPage} of ${Math.ceil(
+          (count as number) / Number(pageSize || 10)
+        )}`}</p>
         <div className="flex flex-row gap-2 items-center">
           <button
             disabled={currentPage === 1}
@@ -88,18 +92,14 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronLeftIcon className="h-5 w-5 " />
           </button>
           <button
-            disabled={
-              currentPage ===
-              Math.floor((count as number) / Number(pageSize || 10))
-            }
+            disabled={currentPage === totalPages}
             onClick={() => {
               router.query.page = (currentPage + 1).toString();
               router.push(router);
               onPageChange(currentPage + 1);
             }}
             className={clsx(
-              currentPage ===
-                Math.ceil((count as number) / Number(pageSize || 10))
+              currentPage === totalPages
                 ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
                 : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
@@ -108,10 +108,7 @@ const TableFooter = (props: TableFooterProps) => {
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            disabled={
-              currentPage ===
-              Math.ceil((count as number) / Number(pageSize || 10))
-            }
+            disabled={currentPage === totalPages}
             onClick={() => {
               router.query.page = Math.ceil(
                 (count as number) / Number(pageSize || 10)
@@ -122,8 +119,7 @@ const TableFooter = (props: TableFooterProps) => {
               );
             }}
             className={clsx(
-              currentPage ===
-                Math.ceil((count as number) / Number(pageSize || 10))
+              currentPage === totalPages
                 ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
                 : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
