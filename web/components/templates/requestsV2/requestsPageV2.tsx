@@ -81,6 +81,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }))
   );
 
+  console.log("requests", requests);
+
   return (
     <div>
       <AuthHeader title={"Requests"} />

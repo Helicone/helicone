@@ -29,7 +29,10 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             response:
               this.response.response_status === 200
                 ? this.response.response_body.choices[0].message
-                : this.response.response_body.error.message,
+                : {
+                    role: "system",
+                    content: this.response.response_body.error.message,
+                  },
           }}
         />
       ),
