@@ -23,15 +23,14 @@ class GPT3Builder extends AbstractRequestBuilder {
       requestBody: this.response.request_body,
       responseBody: this.response.response_body,
       render: (
-        <h1>hello world</h1>
-        // <Completion
-        //   request={this.response.request_body.prompt}
-        //   response={
-        //     this.response.response_status === 200
-        //       ? this.response.response_body.choices[0].text
-        //       : this.response.response_body.error.message
-        //   }
-        // />
+        <Completion
+          request={this.response.request_body.prompt}
+          response={
+            this.response.response_status === 200
+              ? this.response.response_body.choices[0].text
+              : this.response.response_body.error.message
+          }
+        />
       ),
     };
   }

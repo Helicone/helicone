@@ -23,6 +23,7 @@ let requestBuilders: {
 
 const getRequestBuilder = (request: HeliconeRequest) => {
   let requestModel = request.request_body.model || request.response_body.model;
+  console.log("requestModel", requestModel);
 
   if (Object.keys(requestBuilders).indexOf(requestModel) === -1) {
     requestModel = "default-openai";
