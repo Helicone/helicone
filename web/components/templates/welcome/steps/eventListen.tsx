@@ -65,12 +65,11 @@ const EventListen = (props: EventListenProps) => {
         "flex flex-col items-center w-full px-2"
       )}
     >
-      <p className="text-2xl md:text-5xl font-semibold text-center">
-        Listening for Events
-      </p>
-
       {data === undefined || data?.data === false ? (
         <>
+          <p className="text-2xl md:text-5xl font-semibold text-center">
+            Listening for Events
+          </p>
           <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
             Send your first event through Helicone to view your dashboard
           </p>
@@ -97,8 +96,11 @@ const EventListen = (props: EventListenProps) => {
         </>
       ) : (
         <>
+          <p className="text-2xl md:text-5xl font-semibold text-center">
+            Successfully received an event
+          </p>
           <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
-            Successfully received an event, you&apos;re all set to use Helicone!
+            You&apos;re all set to use Helicone! Click below to get started.
           </p>
           <button
             onClick={nextStep}

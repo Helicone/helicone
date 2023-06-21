@@ -21,7 +21,7 @@
 
 
 # Quick Use ⚡️
-Get your API key by signing up [here](www.helicone.ai).
+Get your API key by signing up [here](https://helicone.ai).
 ```bash
 export HELICONE_API_KEY=<your API key>
 ```
