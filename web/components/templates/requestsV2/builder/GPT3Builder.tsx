@@ -11,7 +11,7 @@ class GPT3Builder extends AbstractRequestBuilder {
       responseText:
         this.response.response_status === 200
           ? this.response.response_body.choices[0].text
-          : this.response.response_body.error.message,
+          : this.response.response_body?.error.message || "",
       completionTokens: this.response.completion_tokens,
       latency: this.response.delay_ms,
       promptTokens: this.response.prompt_tokens,
@@ -22,16 +22,24 @@ class GPT3Builder extends AbstractRequestBuilder {
       model: this.response.request_body.model,
       requestBody: this.response.request_body,
       responseBody: this.response.response_body,
-      render: (
-        <Completion
-          request={this.response.request_body.prompt}
-          response={
-            this.response.response_status === 200
-              ? this.response.response_body.choices[0].text
-              : this.response.response_body.error.message
-          }
-        />
-      ),
+      render:
+        this.response.response_status === 200 ? (
+          <Completion
+            request={this.response.request_body.prompt}
+            response={{
+              title: "Response",
+              text: this.response.response_body.choices[0].text,
+            }}
+          />
+        ) : (
+          <Completion
+            request={this.response.request_body.prompt}
+            response={{
+              title: "Error",
+              text: this.response.response_body?.error.message || "",
+            }}
+          />
+        ),
     };
   }
 }

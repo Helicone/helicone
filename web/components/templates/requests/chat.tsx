@@ -1,146 +1,46 @@
-import {
-  PencilIcon,
-  PencilSquareIcon,
-  UserCircleIcon,
-  UserIcon,
-  XMarkIcon,
-  PaperAirplaneIcon,
-  CheckCircleIcon,
-} from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import Hover from "./hover";
-import { ChatProperties, CsvData, Message } from "./requestsPage";
-import { useState } from "react";
-import {
-  ChatCompletionRequestMessage,
-  ChatCompletionRequestMessageRoleEnum,
-  CreateChatCompletionResponse,
-} from "openai"; // Use import instead of require
-import { Result } from "../../../lib/result";
+import { Message } from "./requestsPage";
 
-import React, { useRef, useEffect, TextareaHTMLAttributes } from "react";
-
-interface AutoSizeTextareaProps
-  extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  message: string;
-  handleContentChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-    index: number
-  ) => void;
-  index: number;
-  background: string;
-}
-
-const AutoSizeTextarea: React.FC<AutoSizeTextareaProps> = ({
-  message,
-  handleContentChange,
-  index,
-  background,
-  ...rest
-}) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height =
-        textareaRef.current.scrollHeight + "px";
-    }
-  }, [message]);
-
-  return (
-    <textarea
-      ref={textareaRef}
-      value={message}
-      onChange={(e) => {
-        handleContentChange(e, index);
-      }}
-      className={clsx(
-        "w-full resize-none border-none focus:ring-0 px-0 py-0 text-sm",
-        background
-      )}
-      style={{ overflow: "hidden", overflowWrap: "break-word" }}
-      {...rest}
-    />
-  );
-};
+import React from "react";
 
 interface ChatProps {
-  chatProperties: ChatProperties;
+  chatProperties: {
+    request:
+      | {
+          role: string;
+          content: string;
+        }[]
+      | null;
+    response: {
+      role: string;
+      content: string;
+    } | null;
+  };
+  status: number;
   prompt_regex?: string;
   [keys: string]: any;
 }
 
-export interface Prompt {
-  prompt: string;
-  values: { [key: string]: string };
-}
+// export interface Prompt {
+//   prompt: string;
+//   values: { [key: string]: string };
+// }
 
-export interface PromptResult {
-  data: JSX.Element;
-  error: string | null;
-}
-
-export function formatPrompt(prompt: Prompt): PromptResult {
-  const missingValues = [];
-  let formattedString = prompt.prompt;
-  const elements = formattedString.split(/({{[^}]+}})/g).map((part, index) => {
-    const match = part.match(/{{([^}]+)}}/);
-    if (match) {
-      const key = match[1];
-      const value = prompt.values[key];
-      if (value === undefined) {
-        missingValues.push(key);
-        return part;
-      }
-      return <Hover key={`${key}-${index}`} value={value} name={key} />;
-    }
-    return part;
-  });
-
-  const output = (
-    <div>
-      <p>{elements}</p>
-    </div>
-  );
-
-  return {
-    data: <div>{output}</div>,
-    error: null,
-  };
-}
-
-export function formatPrompt2(prompt: Prompt): any {
-  const missingValues = [];
-  let formattedString = prompt.prompt;
-  const elements = formattedString.split(/({{[^}]+}})/g).map((part, index) => {
-    const match = part.match(/{{([^}]+)}}/);
-    if (match) {
-      const key = match[1];
-      const value = prompt.values[key];
-      if (value === undefined) {
-        missingValues.push(key);
-        return part;
-      }
-      return value;
-    }
-    return part;
-  });
-
-  return {
-    data: elements.join(""),
-    error: null,
-  };
-}
+// export interface PromptResult {
+//   data: JSX.Element;
+//   error: string | null;
+// }
 
 export const Chat = (props: ChatProps) => {
   const { request, response } = props.chatProperties;
 
   let messages: Message[] = request || [];
 
-  if (response) {
+  // only display the response if the status is 200
+  if (props.status === 200 && response) {
     messages = messages.concat([response]);
   }
 
