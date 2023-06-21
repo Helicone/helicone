@@ -75,14 +75,11 @@ const dispatcherMap: {
   },
   proxy_log: proxyForwarder,
   async_logging: async (request: RequestWrapper) => {
-    const isStream = request.getHeaders().get("helicone-is-stream");
-    request.getJson<{
-
-    }>();
+    const body = await request.getJson<AsyncLoggingBody>();
 
     const z = new DBLoggable({
       request: {
-        isStream,
+        isStream: ,
         omitLog: false,
         path: 
       }

@@ -99,7 +99,7 @@ export class RequestWrapper {
     }
     if (
       method === "POST" &&
-      this.url.pathname === "/v1/helicone/async_logging"
+      this.url.pathname.startsWith("/v1/helicone/async_logging")
     ) {
       return "async_logging";
     }
