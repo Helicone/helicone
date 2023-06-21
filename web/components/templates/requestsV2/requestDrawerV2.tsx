@@ -68,35 +68,36 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
               <p className="text-gray-700 truncate">{request.user}</p>
             </li>
           </ul>
-          {properties.length > 0 && request.customProperties && (
-            <div className="flex flex-col space-y-2">
-              <p className="font-semibold text-gray-900 text-sm">
-                Custom Properties
-              </p>
-              <div className="flex flex-wrap gap-4 text-sm">
-                {properties.map((property, i) => {
-                  if (
-                    request.customProperties &&
-                    request.customProperties.hasOwnProperty(property)
-                  ) {
-                    return (
-                      <li
-                        className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 rounded-lg min-w-[5rem]"
-                        key={i}
-                      >
-                        <p className="font-semibold text-gray-900">
-                          {property}
-                        </p>
-                        <p className="text-gray-700">
-                          {request.customProperties[property] as string}
-                        </p>
-                      </li>
-                    );
-                  }
-                })}
+          {request.customProperties &&
+            Object.keys(request.customProperties).length > 0 && (
+              <div className="flex flex-col space-y-2">
+                <p className="font-semibold text-gray-900 text-sm">
+                  Custom Properties
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  {properties.map((property, i) => {
+                    if (
+                      request.customProperties &&
+                      request.customProperties.hasOwnProperty(property)
+                    ) {
+                      return (
+                        <li
+                          className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 rounded-lg min-w-[5rem]"
+                          key={i}
+                        >
+                          <p className="font-semibold text-gray-900">
+                            {property}
+                          </p>
+                          <p className="text-gray-700">
+                            {request.customProperties[property] as string}
+                          </p>
+                        </li>
+                      );
+                    }
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
           <div className="flex flex-col space-y-2">{request.render}</div>
         </div>
       ) : (
