@@ -1,6 +1,19 @@
 import router from "../router";
 import { RequestWrapper } from "./lib/RequestWrapper";
 
+export interface Env {
+  SUPABASE_SERVICE_ROLE_KEY: string;
+  SUPABASE_URL: string;
+  TOKENIZER_COUNT_API: string;
+  TOKEN_COUNT_URL: string;
+  RATE_LIMIT_KV: KVNamespace;
+  CLICKHOUSE_HOST: string;
+  CLICKHOUSE_USER: string;
+  CLICKHOUSE_PASSWORD: string;
+  PROVIDER: "OPENAI" | "ANTHROPIC";
+  TOKEN_CALC_URL: string;
+}
+
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
@@ -14,19 +27,6 @@ export async function hash(key: string): Promise<string> {
     return paddedHexCode;
   });
   return hexCodes.join("");
-}
-
-export interface Env {
-  SUPABASE_SERVICE_ROLE_KEY: string;
-  SUPABASE_URL: string;
-  TOKENIZER_COUNT_API: string;
-  TOKEN_COUNT_URL: string;
-  RATE_LIMIT_KV: KVNamespace;
-  CLICKHOUSE_HOST: string;
-  CLICKHOUSE_USER: string;
-  CLICKHOUSE_PASSWORD: string;
-  PROVIDER: "OPENAI" | "ANTHROPIC";
-  TOKEN_CALC_URL: string;
 }
 
 export default {
