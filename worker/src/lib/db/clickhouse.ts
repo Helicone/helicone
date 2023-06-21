@@ -285,6 +285,8 @@ interface ResponseCopyV2 {
   organization_id: string;
 }
 
+type ResponseCopyV3 = ResponseCopyV2;
+
 interface PropertiesCopyV1 {
   id: number;
   created_at: Nullable<string>;
@@ -303,11 +305,31 @@ interface PropertiesCopyV2 {
   value: string;
   organization_id: string;
 }
+
+interface PropertyWithResponseV1 {
+  response_id: Nullable<string>;
+  response_created_at: Nullable<string>;
+  latency: Nullable<number>;
+  status: number;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  model: string;
+  request_id: string;
+  request_created_at: string;
+  auth_hash: string;
+  user_id: string;
+  organization_id: string;
+  property_key: string;
+  property_value: string;
+}
+
 export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
     properties_copy_v1: PropertiesCopyV1;
     response_copy_v2: ResponseCopyV2;
     properties_copy_v2: PropertiesCopyV2;
+    response_copy_v3: ResponseCopyV3;
+    property_with_response_v1: PropertyWithResponseV1;
   };
 }

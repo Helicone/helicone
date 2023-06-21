@@ -70,6 +70,7 @@ export async function handleProxyRequest(
       response: new Response(body, {
         ...response,
         headers: responseHeaders,
+        status: response.status,
       }),
     },
     error: null,

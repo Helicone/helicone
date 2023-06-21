@@ -1,4 +1,4 @@
-import { MetricsBackendBody } from "../../../components/templates/dashboard/useDashboardPage";
+import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 import {
   FilterLeaf,
   FilterNode,

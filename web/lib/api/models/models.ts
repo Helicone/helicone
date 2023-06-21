@@ -20,7 +20,11 @@ export async function modelMetrics(
   orgId: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  timeFilter: {
+    start: Date;
+    end: Date;
+  }
 ): Promise<Result<ModelMetric[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -29,7 +33,27 @@ export async function modelMetrics(
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id: orgId,
     argsAcc: [],
-    filter,
+    filter: {
+      left: filter,
+      operator: "and",
+      right: {
+        left: {
+          response_copy_v3: {
+            request_created_at: {
+              gte: new Date(timeFilter.start),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          response_copy_v3: {
+            request_created_at: {
+              lte: new Date(timeFilter.end),
+            },
+          },
+        },
+      },
+    },
   });
 
   const havingFilter = buildFilterClickHouse({
@@ -39,15 +63,15 @@ export async function modelMetrics(
   });
   const query = `
 SELECT
-  r.model as model,
+response_copy_v3.model as model,
   count(DISTINCT request_id) as total_requests,
-  sum(r.completion_tokens) as total_completion_tokens,
-  sum(r.prompt_tokens) as total_prompt_token,
-  sum(r.prompt_tokens) + sum(r.completion_tokens) as total_tokens,
-  (${CLICKHOUSE_PRICE_CALC("r")}) as cost
-from response_copy_v2 r
+  sum(response_copy_v3.completion_tokens) as total_completion_tokens,
+  sum(response_copy_v3.prompt_tokens) as total_prompt_token,
+  sum(response_copy_v3.prompt_tokens) + sum(response_copy_v3.completion_tokens) as total_tokens,
+  (${CLICKHOUSE_PRICE_CALC("response_copy_v3")}) as cost
+from response_copy_v3
 WHERE (${builtFilter.filter})
-GROUP BY r.model
+GROUP BY response_copy_v3.model
 HAVING (${havingFilter.filter})
 LIMIT ${limit}
 OFFSET ${offset}

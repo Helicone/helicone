@@ -24,8 +24,6 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
 
   const { setNotification } = useNotification();
 
-  const [expanded, setExpanded] = useState(false);
-
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={setOpen}>
@@ -55,7 +53,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
               >
                 <Dialog.Panel
                   className={clsx(
-                    expanded ? "max-w-4xl" : "max-w-lg",
+                    "max-w-full md:max-w-[33vw]",
                     "pointer-events-auto w-screen"
                   )}
                 >

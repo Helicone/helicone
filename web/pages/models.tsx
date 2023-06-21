@@ -13,7 +13,7 @@ const Dashboard = (props: ModelProps) => {
   const { user } = props;
 
   return (
-    <MetaData title="Dashboard">
+    <MetaData title="Models">
       <AuthLayout user={user}>
         <ModelPage />
       </AuthLayout>

@@ -1,5 +1,6 @@
 import { ArrowsPointingOutIcon } from "@heroicons/react/20/solid";
 import {
+  BeakerIcon,
   ClipboardDocumentListIcon,
   CodeBracketIcon,
   EyeIcon,
@@ -54,7 +55,20 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       setOpen={setOpen}
       title="Request"
       actions={
-        <div className="flex flex-row flex-1 w-full items-center justify-end space-x-2 text-gray-500">
+        <div className="flex flex-row flex-1 pl-1 w-full items-center justify-between space-x-2 text-gray-500">
+          {wrappedRequest && "chat" in wrappedRequest.api ? (
+            <button
+              onClick={() => {
+                router.push(`/playground?request=${wrappedRequest?.id}`);
+              }}
+              className="hover:bg-gray-200 rounded-md -m-1 p-1"
+            >
+              <BeakerIcon className="h-5 w-5" />
+            </button>
+          ) : (
+            <div />
+          )}
+
           <button
             onClick={() => {
               navigator.clipboard.writeText(
@@ -74,6 +88,10 @@ const RequestDrawer = (props: RequestDrawerProps) => {
       ) : (
         <div className="flex flex-col space-y-2">
           <dl className="mt-2 grid grid-cols-2">
+            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-2 border-b border-gray-200">
+              <dt className="text-gray-500">Request ID</dt>
+              <dd className="text-gray-900">{wrappedRequest.id}</dd>
+            </div>
             <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
               <dt className="text-gray-500">Timestamp</dt>
               <dd className="text-gray-900">
@@ -82,7 +100,7 @@ const RequestDrawer = (props: RequestDrawerProps) => {
             </div>
             <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
               <dt className="text-gray-500">User ID</dt>
-              <dd className="text-gray-900">
+              <dd className="text-gray-900 truncate">
                 {wrappedRequest.userId || "n/a"}
               </dd>
             </div>

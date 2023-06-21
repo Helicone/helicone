@@ -95,6 +95,15 @@ type PropertiesCopyV2ToOperators = {
 
 export type FilterLeafPropertiesCopyV2 = SingleKey<PropertiesCopyV2ToOperators>;
 
+type PropertyWithResponseV1ToOperators = {
+  property_key: SingleKey<TextOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
+  organization_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafPropertyWithResponseV1 =
+  SingleKey<PropertyWithResponseV1ToOperators>;
+
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
   active_for: SingleKey<NumberOperators>;
@@ -128,9 +137,11 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   response_copy_v1: FilterLeafResponseCopyV1;
   response_copy_v2: FilterLeafResponseCopyV2;
+  response_copy_v3: FilterLeafResponseCopyV2;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
+  property_with_response_v1: FilterLeafPropertyWithResponseV1;
 };
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
@@ -165,7 +176,44 @@ export function timeFilterToFilterNode(
       },
       operator: "and",
     };
+  } else if (table === "response_copy_v3") {
+    return {
+      left: {
+        response_copy_v3: {
+          request_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        response_copy_v3: {
+          request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  } else if (table === "property_with_response_v1") {
+    return {
+      left: {
+        property_with_response_v1: {
+          request_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        property_with_response_v1: {
+          request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
   }
+
   throw new Error("Table not supported");
 }
 

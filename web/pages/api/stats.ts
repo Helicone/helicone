@@ -25,17 +25,17 @@ export async function getModelUsageOverTime(): Promise<
 > {
   const weeklyActiveUsersQuery = `
   SELECT date_trunc('week'::text, request_created_at) AS time_step,
-    count(DISTINCT response_copy_v2.organization_id) AS user_count_step,
-    count(response_copy_v2.request_id) AS request_count_step
-  FROM response_copy_v2
+    count(DISTINCT response_copy_v3.organization_id) AS user_count_step,
+    count(response_copy_v3.request_id) AS request_count_step
+  FROM response_copy_v3
   GROUP BY (date_trunc('week'::text, request_created_at))
   ORDER BY (date_trunc('week'::text, request_created_at)) DESC;
 `;
   const dailyActiveUsersQuery = `
 SELECT date_trunc('day'::text, request_created_at) AS time_step,
-  count(DISTINCT response_copy_v2.organization_id) AS user_count_step,
-  count(response_copy_v2.request_id) AS request_count_step
-FROM response_copy_v2
+  count(DISTINCT response_copy_v3.organization_id) AS user_count_step,
+  count(response_copy_v3.request_id) AS request_count_step
+FROM response_copy_v3
 GROUP BY (date_trunc('day'::text, request_created_at))
 ORDER BY (date_trunc('day'::text, request_created_at)) DESC;
 `;

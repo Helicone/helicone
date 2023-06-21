@@ -7,11 +7,14 @@ import {
   Bars3BottomLeftIcon,
   BeakerIcon,
   BuildingOfficeIcon,
+  ChartBarIcon,
   CircleStackIcon,
   CubeTransparentIcon,
   HomeIcon,
+  InformationCircleIcon,
   KeyIcon,
   TableCellsIcon,
+  TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
@@ -27,6 +30,8 @@ import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
 import { GrGraphQl } from "react-icons/gr";
+import { BsTags, BsTagsFill } from "react-icons/bs";
+import Notification from "../notification/Notification";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -56,6 +61,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/requests"),
     },
     {
+      name: "Properties",
+      href: "/properties",
+      icon: BsTags,
+      current: pathname.includes("/properties"),
+    },
+    {
       name: "Cache",
       href: "/cache",
       icon: CircleStackIcon,
@@ -73,13 +84,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: CubeTransparentIcon,
       current: pathname.includes("/models"),
     },
+    {
+      name: "Playground",
+      href: "/playground",
+      icon: BeakerIcon,
+      current: pathname.includes("/playground"),
+    },
   ];
 
   const accountNav = [
     {
       name: "Usage",
       href: "/usage",
-      icon: BeakerIcon,
+      icon: ChartBarIcon,
       current: pathname.includes("/usage"),
     },
     {

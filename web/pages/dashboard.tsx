@@ -1,19 +1,32 @@
-import { useUser } from "@supabase/auth-helpers-react";
+import { User, useUser } from "@supabase/auth-helpers-react";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { requestOverLimit } from "../lib/checkRequestLimit";
-import { Database } from "../supabase/database.types";
 import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
+import { init } from "commandbar";
+
+import { useEffect } from "react";
 
 interface DashboardProps {
-  keys: Database["public"]["Tables"]["user_api_keys"]["Row"][];
+  user: User;
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { keys } = props;
-  const user = useUser();
+  const { user } = props;
+
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
+    if (typeof window !== "undefined") {
+      init(process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0 ?? "");
+      window.CommandBar.boot(user.id);
+    }
+
+    return () => {
+      window.CommandBar.shutdown();
+    };
+  }, [user]);
+
   return (
     <MetaData title="Dashboard">
       <AuthLayout user={user!}>
@@ -27,14 +40,11 @@ export default Dashboard;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    userData: { orgId },
+    userData: { user },
     supabaseClient,
   } = options;
   const client = supabaseClient.getClient();
-  const [isRequestLimitOver, hasOnboarded] = await Promise.all([
-    requestOverLimit(client, orgId),
-    checkOnboardedAndUpdate(client),
-  ]);
+  const [hasOnboarded] = await Promise.all([checkOnboardedAndUpdate(client)]);
   if (!hasOnboarded?.data) {
     return {
       redirect: {
@@ -44,16 +54,9 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  if (isRequestLimitOver) {
-    return {
-      redirect: {
-        destination: "/usage",
-        permanent: false,
-      },
-    };
-  }
-
   return {
-    props: {},
+    props: {
+      user,
+    },
   };
 });

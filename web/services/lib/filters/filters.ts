@@ -65,6 +65,16 @@ const whereKeyMappings: KeyMappings = {
     status: "response_copy_v2.status",
     organization_id: "response_copy_v2.organization_id",
   },
+
+  response_copy_v3: {
+    auth_hash: "response_copy_v3.auth_hash",
+    model: "response_copy_v3.model",
+    request_created_at: "response_copy_v3.request_created_at",
+    latency: "response_copy_v3.latency",
+    user_id: "response_copy_v3.user_id",
+    status: "response_copy_v3.status",
+    organization_id: "response_copy_v3.organization_id",
+  },
   users_view: {},
   properties_copy_v1: {
     key: "properties_copy_v1.key",
@@ -75,6 +85,11 @@ const whereKeyMappings: KeyMappings = {
     key: "properties_copy_v2.key",
     value: "properties_copy_v2.value",
     organization_id: "properties_copy_v2.organization_id",
+  },
+  property_with_response_v1: {
+    property_key: "property_with_response_v1.property_key",
+    request_created_at: "property_with_response_v1.request_created_at",
+    organization_id: "property_with_response_v1.organization_id",
   },
 };
 
@@ -95,7 +110,9 @@ const havingKeyMappings: KeyMappings = {
     cost: "cost",
   },
   response_copy_v2: {},
+  response_copy_v3: {},
   properties_copy_v2: {},
+  property_with_response_v1: {},
 };
 
 export function buildFilterLeaf(
@@ -161,7 +178,9 @@ export function buildFilterLeaf(
             throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
           }
         } else {
-          throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
+          throw new Error(
+            `Invalid filter, whereKey undefined: ${tableKey}.${columnKey}`
+          );
         }
       }
     }
@@ -311,7 +330,19 @@ export async function buildFilterWithAuthClickHouse(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    response_copy_v2: {
+    response_copy_v3: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHousePropResponse(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    property_with_response_v1: {
       organization_id: {
         equals: orgId,
       },

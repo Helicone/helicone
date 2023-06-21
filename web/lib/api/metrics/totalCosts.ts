@@ -23,7 +23,7 @@ export async function getTotalCost(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "response_copy_v2"),
+        left: timeFilterToFilterNode(timeFilter, "response_copy_v3"),
         right: filter,
         operator: "and",
       },
@@ -33,8 +33,8 @@ export async function getTotalCost(
   const query = `
 
   WITH total_cost AS (
-    SELECT ${CLICKHOUSE_PRICE_CALC("response_copy_v2")} as cost
-    FROM response_copy_v2
+    SELECT ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as cost
+    FROM response_copy_v3
     WHERE (
       (${filterString})
     )

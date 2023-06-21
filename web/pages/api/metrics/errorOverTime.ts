@@ -1,12 +1,10 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
-import { MetricsBackendBody } from "../../../components/templates/dashboard/useDashboardPage";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
 import { Result } from "../../../lib/result";
+import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 export interface ErrorOverTime {
   count: number;
@@ -34,7 +32,7 @@ async function handler(
         left: userFilters,
         operator: "and",
         right: {
-          response_copy_v2: {
+          response_copy_v3: {
             status: {
               "not-equals": 200,
             },

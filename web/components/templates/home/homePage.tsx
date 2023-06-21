@@ -32,7 +32,6 @@ import {
   CurrencyDollarIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { BaseUrlInstructions } from "../welcome/welcomePage";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
@@ -106,13 +105,6 @@ export default function HomePage() {
   if (!demoLoading && user?.email === DEMO_EMAIL) {
     supabaseClient.auth.signOut();
   }
-  // const { data: globalMetrics } = useQuery({
-  //   queryKey: ["global_metrics"],
-  //   queryFn: async () => {
-  //     const data = fetch("/api/global_metrics").then((res) => res.json());
-  //     return data;
-  //   },
-  // });
 
   const observabilityDiv = useRef(null);
   const rateDiv = useRef(null);
@@ -178,16 +170,16 @@ export default function HomePage() {
             >
               Backed by Y Combinator
             </Link>
-            <div className="text-5xl md:text-[5rem] leading-none font-bold text-gray-900 text-left space-y-2">
+            <div className="text-5xl sm:text-6xl lg:text-7xl leading-none font-bold text-gray-900 text-left space-y-2">
               <p>Tooling for</p>
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
                 Generative AI
               </span>
             </div>
-            <p className="text-xl leading-9 text-gray-700">
+            <div className="text-lg sm:text-xl sm:leading-relaxed text-gray-700">
               Hundreds of organizations leverage Helicone to make their
               Large-Language Model operations more efficient.
-            </p>
+            </div>
             <div className="flex flex-row gap-8">
               <OnboardingButton title={"Get Started"} />
               {demoLoading ? (
@@ -219,9 +211,9 @@ export default function HomePage() {
               )}
             </div>
           </div>
-          <div className="hidden md:flex mx-auto mt-16 max-w-2xl sm:mt-24 lg:ml-16 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-24">
-            <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
+          <div className="hidden md:flex mx-auto mt-16 max-w-2xl sm:mt-24 md:ml-16 md:mt-0 md:mr-0 md:max-w-none md:flex-none xl:ml-24">
+            <div className="max-w-3xl flex-none sm:max-w-5xl md:max-w-none">
+              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 md:-m-4 md:rounded-2xl md:p-4">
                 <img
                   src="/assets/landing/preview.webp"
                   alt="App screenshot"
@@ -235,35 +227,35 @@ export default function HomePage() {
 
           <div className="col-span-4 grid grid-cols-4 gap-8 pb-32">
             {/* <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
@@ -271,21 +263,21 @@ export default function HomePage() {
             />
 
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
               height={48}
             />
             <img
-              className="col-span-1 max-h-12 w-full object-contain lg:col-span-1"
+              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
               src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
               alt="Transistor"
               width={158}
@@ -682,8 +674,8 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-16 space-y-4">
-            <CodeSnippet />
+          <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-32 space-y-4">
+            <CodeSnippet variant={"themed"} />
           </div>
         </div>
       </div>
@@ -778,8 +770,8 @@ export default function HomePage() {
             </div>
           </div>
           <section className="col-span-4">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-16">
-              <div className="mx-auto grid gap-4 max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none md:grid-cols-2 xl:grid-cols-4">
+            <div className="mx-auto max-w-7xl px-6 md:px-8 pb-16">
+              <div className="mx-auto grid gap-4 max-w-2xl grid-cols-1 md:mx-0 md:max-w-none md:grid-cols-2 xl:grid-cols-4">
                 {testimonials.map((testimonial, i) => (
                   <div
                     key={i}
