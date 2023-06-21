@@ -68,7 +68,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
               <p className="text-gray-700 truncate">{request.user}</p>
             </li>
           </ul>
-          {properties.length > 0 && request.customProperties && (
+          {/* {properties.length > 0 && request.customProperties && (
             <div className="flex flex-col space-y-2">
               <p className="font-semibold text-gray-900 text-sm">
                 Custom Properties
@@ -96,7 +96,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                 })}
               </div>
             </div>
-          )}
+          )} */}
           <div className="flex flex-col space-y-2">{request.render}</div>
         </div>
       ) : (
