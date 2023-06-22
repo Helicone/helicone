@@ -1,11 +1,12 @@
-import { Env } from "./src";
-import { handleFeedbackEndpoint } from "./src/feedback";
-import { proxyForwarder } from "./src/lib/HeliconeProxyRequest/forwarder";
-import { RequestWrapper } from "./src/lib/RequestWrapper";
-import { handleLoggingEndpoint } from "./src/properties";
+import { Env } from ".";
+import { handleFeedbackEndpoint } from "./feedback";
+import { proxyForwarder } from "./lib/HeliconeProxyRequest/forwarder";
+import { RequestWrapper } from "./lib/RequestWrapper";
+import { handleLoggingEndpoint } from "./properties";
 import { Router, IRequest } from "itty-router";
 
 const router = Router<IRequest, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>();
+//api.hconeai.com/v1
 
 router.post("/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
   return await handleLoggingEndpoint(

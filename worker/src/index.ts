@@ -1,4 +1,4 @@
-import router from "../router";
+import router from "./router";
 import { RequestWrapper } from "./lib/RequestWrapper";
 
 export interface Env {
