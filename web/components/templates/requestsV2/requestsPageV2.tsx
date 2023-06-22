@@ -11,7 +11,7 @@ import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { DateRange } from "react-day-picker";
-import { addDays } from "date-fns";
+import { addDays, endOfDay, startOfDay } from "date-fns";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 interface RequestsPageV2Props {
@@ -31,13 +31,24 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     from: addDays(new Date(), -30),
     to: new Date(),
   });
+
+  // A new handler function
+  const setRangeHandler = (newRange: DateRange) => {
+    let updatedRange: DateRange = {
+      from: newRange.from ? startOfDay(newRange.from) : undefined,
+      to: newRange.to ? endOfDay(newRange.to) : undefined,
+    };
+    setRange(updatedRange);
+  };
+
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const {
     count,
-    isLoading,
+    isDataLoading,
+    isCountLoading,
     requests,
     properties,
     refetch,
@@ -49,9 +60,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     debouncedAdvancedFilter,
     {
       left: {
-        request: {
-          created_at: {
-            gte: range?.from?.toISOString(),
+        left: {
+          request: {
+            created_at: {
+              gte: range?.from?.toISOString(),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request: {
+            created_at: {
+              lte: range?.to?.toISOString(),
+            },
           },
         },
       },
@@ -88,14 +109,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <ThemedTableV5
           defaultData={requests || []}
           defaultColumns={columnsWithProperties}
-          dataLoading={isLoading}
+          dataLoading={isDataLoading}
           sortable={{
             currentSortLeaf: sort,
           }}
           header={{
             currentRange: range,
             onTimeFilter: (range) => {
-              setRange(range);
+              range && setRangeHandler(range);
             },
             flattenedExportData: requests.map((request) => {
               const flattenedRequest: any = {};
@@ -123,9 +144,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             setOpen(true);
           }}
         />
-        {!isLoading && requests.length > 0 && (
+        {/* && requests.length > 0 */}
+        {!isCountLoading && (
           <TableFooter
-            requestLength={requests.length}
             currentPage={currentPage}
             pageSize={pageSize}
             count={count || 0}

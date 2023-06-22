@@ -52,8 +52,7 @@ const useRequestsPageV2 = (
     sortLeaf
   );
 
-  const isLoading =
-    requests.isLoading || count.isLoading || isPropertiesLoading;
+  const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   const getNormalizedRequests = useCallback(() => {
     const rawRequests = requests.data?.data || [];
@@ -68,7 +67,8 @@ const useRequestsPageV2 = (
   return {
     requests: normalizedRequests,
     count: count.data?.data,
-    isLoading,
+    isDataLoading,
+    isCountLoading: count.isLoading,
     properties,
     refetch: requests.refetch,
     searchPropertyFilters,

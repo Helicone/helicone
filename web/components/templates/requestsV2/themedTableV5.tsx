@@ -15,6 +15,7 @@ import { Result } from "../../../lib/result";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../shared/clsx";
+import LoadingAnimation from "../../shared/loadingAnimation";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
@@ -108,7 +109,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         />
       )}
       {dataLoading ? (
-        <p>Loading...</p>
+        <LoadingAnimation title="Loading Requests..." />
       ) : rows.length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
           <TableCellsIcon className="h-12 w-12 text-gray-400" />
