@@ -9,7 +9,9 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       createdAt: this.response.request_created_at,
       requestText: this.response.request_body.messages.at(-1).content,
       responseText:
-        this.response.response_status === 200
+        this.response.response_status === 0
+          ? "pending"
+          : this.response.response_status === 200
           ? this.response.response_body?.choices[0].message.content || ""
           : this.response.response_body?.error?.message || "",
       completionTokens: this.response.completion_tokens,
@@ -23,7 +25,9 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       requestBody: this.response.request_body,
       responseBody: this.response.response_body,
       render:
-        this.response.response_status === 200 ? (
+        this.response.response_status === 0 ? (
+          <p>Pending...</p>
+        ) : this.response.response_status === 200 ? (
           <Chat
             chatProperties={{
               request: this.response.request_body.messages,
