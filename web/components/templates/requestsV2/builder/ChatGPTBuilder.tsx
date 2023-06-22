@@ -10,7 +10,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       requestText: this.response.request_body.messages.at(-1).content,
       responseText:
         this.response.response_status === 200
-          ? this.response.response_body.choices[0].message.content
+          ? this.response.response_body?.choices[0].message.content || ""
           : this.response.response_body?.error?.message || "",
       completionTokens: this.response.completion_tokens,
       latency: this.response.delay_ms,
