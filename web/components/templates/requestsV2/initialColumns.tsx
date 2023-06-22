@@ -49,10 +49,26 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   },
   {
     accessorKey: "totalTokens",
-    header: "Tokens",
+    header: "Total Tokens",
     cell: (info) => info.getValue(),
     meta: {
       sortKey: "total_tokens",
+    },
+  },
+  {
+    accessorKey: "promptTokens",
+    header: "Prompt Tokens",
+    cell: (info) => info.getValue(),
+    meta: {
+      sortKey: "prompt_tokens",
+    },
+  },
+  {
+    accessorKey: "completionTokens",
+    header: "Completion Tokens",
+    cell: (info) => info.getValue(),
+    meta: {
+      sortKey: "completion_tokens",
     },
   },
   {

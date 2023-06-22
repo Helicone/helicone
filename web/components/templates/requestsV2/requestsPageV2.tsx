@@ -32,15 +32,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     to: new Date(),
   });
 
-  // A new handler function
-  const setRangeHandler = (newRange: DateRange) => {
-    let updatedRange: DateRange = {
-      from: newRange.from ? startOfDay(newRange.from) : undefined,
-      to: newRange.to ? endOfDay(newRange.to) : undefined,
-    };
-    setRange(updatedRange);
-  };
-
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
@@ -90,6 +81,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const onPageChangeHandler = async (newPageNumber: number) => {
     setPage(newPageNumber);
     refetch();
+  };
+
+  const setRangeHandler = (newRange: DateRange) => {
+    let updatedRange: DateRange = {
+      from: newRange.from ? startOfDay(newRange.from) : undefined,
+      to: newRange.to ? endOfDay(newRange.to) : undefined,
+    };
+    setRange(updatedRange);
   };
 
   const columnsWithProperties = [...INITIAL_COLUMNS].concat(

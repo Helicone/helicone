@@ -65,10 +65,18 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     setVisibleColumns(newState);
   };
 
+  // this needs to be abstracted out to the parent component to become modular
   useEffect(() => {
     const requestsVisibility =
       window.localStorage.getItem("requestsColumnVisibility") || null;
-    setVisibleColumns(requestsVisibility ? JSON.parse(requestsVisibility) : {});
+    setVisibleColumns(
+      requestsVisibility
+        ? JSON.parse(requestsVisibility)
+        : {
+            promptTokens: false,
+            completionTokens: false,
+          }
+    );
   }, []);
 
   // syncs the visibility state with local storage
