@@ -1,5 +1,5 @@
-import router from "./router";
 import { RequestWrapper } from "./lib/RequestWrapper";
+import baseRouter from "./routers/baseRouter";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -16,10 +16,7 @@ export interface Env {
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
-  const hashedKey = await crypto.subtle.digest(
-    { name: "SHA-256" },
-    encoder.encode(key)
-  );
+  const hashedKey = await crypto.subtle.digest({ name: "SHA-256" }, encoder.encode(key));
   const byteArray = Array.from(new Uint8Array(hashedKey));
   const hexCodes = byteArray.map((value) => {
     const hexCode = value.toString(16);
@@ -30,17 +27,11 @@ export async function hash(key: string): Promise<string> {
 }
 
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext
-  ): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
       const requestWrapper = new RequestWrapper(request);
 
-      return router
-        .handle(request, requestWrapper, env, ctx)
-        .catch(handleError);
+      return baseRouter.handle(request, requestWrapper, env, ctx).catch(handleError);
     } catch (e) {
       return handleError(e);
     }
@@ -51,10 +42,8 @@ function handleError(e: any): Response {
   console.error(e);
   return new Response(
     JSON.stringify({
-      "helicone-message":
-        "Helicone ran into an error servicing your request: " + e,
-      support:
-        "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+      "helicone-message": "Helicone ran into an error servicing your request: " + e,
+      support: "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
       "helicone-error": JSON.stringify(e),
     }),
     {
