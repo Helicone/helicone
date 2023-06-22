@@ -39,7 +39,7 @@ import useRequestsPage, {
 
 export type Message = {
   role: string;
-  content: string;
+  content: string | null;
 };
 
 export type ChatProperties = {
