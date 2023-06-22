@@ -12,7 +12,9 @@ class GPT3Builder extends AbstractRequestBuilder {
         this.response.response_status === 0
           ? "pending"
           : this.response.response_status === 200
-          ? this.response.response_body?.choices[0].text || ""
+          ? this.response.response_body?.choices
+            ? this.response.response_body?.choices[0].text
+            : ""
           : this.response.response_body?.error?.message || "",
       completionTokens: this.response.completion_tokens,
       latency: this.response.delay_ms,
@@ -32,7 +34,9 @@ class GPT3Builder extends AbstractRequestBuilder {
             request={this.response.request_body.prompt}
             response={{
               title: "Response",
-              text: this.response.response_body?.choices[0].text || "",
+              text: this.response.response_body?.choices
+                ? this.response.response_body?.choices[0].text
+                : "",
             }}
           />
         ) : (
