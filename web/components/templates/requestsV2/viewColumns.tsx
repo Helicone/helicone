@@ -53,7 +53,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               Select All
             </button>
           </div>
-          <div className="">
+          <div className="flex flex-col overflow-auto max-h-[40vh]">
             {columns.map((column, idx) => {
               const header = column.columnDef.header as string;
 
