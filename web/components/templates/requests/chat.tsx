@@ -197,7 +197,7 @@ export const Chat = (props: ChatProps) => {
     const completionRequestMessages: ChatCompletionRequestMessage[] =
       heliconeMessagesInput.slice(0, index + 1).map((message: Message) => {
         const formattedPrompt = formatPrompt2({
-          prompt: message.content,
+          prompt: message.content ?? "",
           values: props.keys,
         });
         const content = formattedPrompt.data;
