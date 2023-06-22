@@ -5,7 +5,10 @@ import useRequestsPageV2 from "./useRequestsPageV2";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getTimeIntervalAgo,
@@ -13,14 +16,16 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
-import { DateRange } from "react-day-picker";
-import { addDays, endOfDay, startOfDay } from "date-fns";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 
 interface RequestsPageV2Props {
   currentPage: number;
   pageSize: number;
-  sort: SortLeafRequest;
+  sort: {
+    sortKey: string | null;
+    sortDirection: SortDirection | null;
+    isCustomProperty: boolean;
+  };
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
@@ -41,6 +46,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
+  const sortLeaf: SortLeafRequest =
+    sort.sortKey && sort.sortDirection && sort.isCustomProperty
+      ? {
+          properties: {
+            [sort.sortKey]: sort.sortDirection,
+          },
+        }
+      : sort.sortKey && sort.sortDirection
+      ? {
+          [sort.sortKey]: sort.sortDirection,
+        }
+      : {
+          created_at: "desc",
+        };
+
+  console.log(sortLeaf);
+
   const {
     count,
     isDataLoading,
@@ -59,7 +81,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       operator: "and",
       right: "all",
     },
-    sort
+    sortLeaf
   );
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
@@ -73,9 +95,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    // if key is custom, add a lte filter
     if (key === "custom") {
-      //  `custom:${start.toISOString()}_${end.toISOString()}`
       const [start, end] = value.split("_");
       const filter: FilterNode = {
         left: {
@@ -104,18 +124,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         },
       },
     });
-
-    // refetch();
   };
 
   const columnsWithProperties = [...INITIAL_COLUMNS].concat(
-    properties.map((property) => ({
-      accessorFn: (row) =>
-        row.customProperties ? row.customProperties[property] : "",
-      id: `Custom - ${property}`,
-      header: property,
-      cell: (info) => info.getValue(),
-    }))
+    properties.map((property) => {
+      return {
+        accessorFn: (row) =>
+          row.customProperties ? row.customProperties[property] : "",
+        id: `Custom - ${property}`,
+        header: property,
+        cell: (info) => info.getValue(),
+        meta: {
+          sortKey: property,
+          isCustomProperty: true,
+        },
+      };
+    })
   );
 
   return (
@@ -126,9 +150,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           defaultData={requests || []}
           defaultColumns={columnsWithProperties}
           dataLoading={isDataLoading}
-          sortable={{
-            currentSortLeaf: sort,
-          }}
+          sortable={sort}
           header={{
             onTimeSelectHandler: onTimeSelectHandler,
             flattenedExportData: requests.map((request) => {

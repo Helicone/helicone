@@ -14,7 +14,10 @@ import { DateRange } from "react-day-picker";
 import { Result } from "../../../lib/result";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
@@ -40,7 +43,9 @@ interface ThemedTableV5Props<T> {
     ) => Promise<Result<void, string>>;
   };
   sortable?: {
-    currentSortLeaf: SortLeafRequest;
+    sortKey: string | null;
+    sortDirection: SortDirection | null;
+    isCustomProperty: boolean;
   };
   onRowSelect?: (row: T) => void;
   onColumnSort?: (column: ColumnDef<T>) => void;
@@ -163,36 +168,69 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                             {sortable && hasSortKey && (
                               <span
                                 onClick={() => {
-                                  if (meta) {
-                                    const entry = Object.entries(
-                                      sortable.currentSortLeaf
-                                    ).at(0);
-                                    if (entry) {
-                                      const key = entry[0];
-                                      const value = entry[1];
-                                      if (key === meta.sortKey) {
-                                        router.query.sort = JSON.stringify({
-                                          [meta.sortKey]:
-                                            value === "asc" ? "desc" : "asc",
-                                        });
-                                        router.push(router);
-                                        return;
-                                      } else {
-                                        router.query.sort = JSON.stringify({
-                                          [meta.sortKey]: "asc",
-                                        });
-                                        router.push(router);
-                                      }
+                                  if (meta && sortable) {
+                                    const {
+                                      sortKey,
+                                      isCustomProperty,
+                                      sortDirection,
+                                    } = sortable;
+
+                                    if (sortKey === meta.sortKey) {
+                                      const direction =
+                                        sortDirection === "asc"
+                                          ? "desc"
+                                          : "asc";
+                                      router.query.sortDirection = direction;
+                                    } else {
+                                      router.query.sortDirection = "asc";
                                     }
+
+                                    if (meta.isCustomProperty) {
+                                      router.query.isCustomProperty = "true";
+                                    }
+                                    router.query.sortKey = meta.sortKey;
+                                    router.push(router);
+
+                                    // const currentSortLeaf = Object.entries(
+                                    //   sortable.currentSortLeaf
+                                    // ).at(0);
+
+                                    // if (currentSortLeaf) {
+                                    //   const key = currentSortLeaf[0];
+                                    //   const value = currentSortLeaf[1];
+                                    // }
+
+                                    // const entry = Object.entries(
+                                    //   sortable.currentSortLeaf
+                                    // ).at(0);
+                                    // if (entry) {
+                                    //   if (meta.isCustomProperty) {
+                                    //     router.query.isCustomProperty =
+                                    //       meta.isCustomProperty;
+                                    //   }
+                                    //   const key = entry[0];
+                                    //   const value = entry[1];
+                                    //   if (key === meta.sortKey) {
+                                    //     router.query.sort = JSON.stringify({
+                                    //       [meta.sortKey]:
+                                    //         value === "asc" ? "desc" : "asc",
+                                    //     });
+                                    //     router.push(router);
+                                    //     return;
+                                    //   } else {
+                                    //     router.query.sort = JSON.stringify({
+                                    //       [meta.sortKey]: "asc",
+                                    //     });
+                                    //     router.push(router);
+                                    //   }
+                                    // }
                                   }
                                 }}
                                 className="flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
                               >
                                 {/* render the chevron up icon if this column is ascending */}
-                                {meta.sortKey ===
-                                Object.keys(sortable.currentSortLeaf)[0] ? (
-                                  Object.values(sortable.currentSortLeaf)[0] ===
-                                  "asc" ? (
+                                {meta.sortKey === sortable.sortKey ? (
+                                  sortable.sortDirection === "asc" ? (
                                     <ChevronUpIcon
                                       className="h-4 w-4 border border-yellow-500 rounded-md"
                                       aria-hidden="true"
