@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Result } from "../../../lib/result";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../shared/clsx";
@@ -27,10 +28,8 @@ interface ThemedTableV5Props<T> {
 
   // TODO: change this to a more generic type???
   header?: {
-    currentRange: DateRange | undefined;
-    onTimeFilter: (range: DateRange | undefined) => void;
     flattenedExportData: any[];
-
+    onTimeSelectHandler: (key: TimeInterval, value: string) => void;
     // TODO: rewrite these filters
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
@@ -104,12 +103,11 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     <div className="flex flex-col space-y-4">
       {header && (
         <ThemedTableHeader
-          currentRange={header.currentRange}
+          onTimeSelectHandler={header.onTimeSelectHandler}
           columns={table.getAllColumns()}
           onSelectAll={table.toggleAllColumnsVisible}
           visibleColumns={table.getVisibleLeafColumns().length}
           rows={header.flattenedExportData}
-          onTimeFilter={header.onTimeFilter}
           filterMap={header.filterMap}
           filters={header.filters}
           searchPropertyFilters={header.searchPropertyFilters}

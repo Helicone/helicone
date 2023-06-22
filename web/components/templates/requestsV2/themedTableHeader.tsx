@@ -3,6 +3,7 @@ import { Column } from "@tanstack/react-table";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Result } from "../../../lib/result";
+import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
 import { clsx } from "../../shared/clsx";
 import {
@@ -10,6 +11,7 @@ import {
   UIFilterRow,
 } from "../../shared/themed/themedAdvancedFilters";
 import { ThemedPill } from "../../shared/themed/themedPill";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import DatePicker from "./datePicker";
 import ExportButton from "./exportButton";
 import ViewColumns from "./viewColumns";
@@ -19,9 +21,7 @@ interface ThemedTableHeaderProps<T> {
   rows: T[];
   onSelectAll: (value?: boolean | undefined) => void;
   visibleColumns: number;
-  onTimeFilter: (range: DateRange | undefined) => void;
-  currentRange: DateRange | undefined;
-
+  onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   // TODO: rewrite these filters
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
@@ -38,8 +38,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     onSelectAll,
     visibleColumns,
     rows,
-    onTimeFilter,
-    currentRange,
+    onTimeSelectHandler,
     filterMap,
     filters,
     setAdvancedFilters,
@@ -62,7 +61,22 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex flex-row justify-between">
-        <DatePicker currentRange={currentRange} onTimeFilter={onTimeFilter} />
+        <ThemedTimeFilter
+          timeFilterOptions={[
+            { key: "24h", value: "24H" },
+            { key: "7d", value: "7D" },
+            { key: "1m", value: "1M" },
+            { key: "3m", value: "3M" },
+            { key: "all", value: "All" },
+          ]}
+          onSelect={function (key: string, value: string): void {
+            onTimeSelectHandler(key as TimeInterval, value);
+          }}
+          isFetching={false}
+          defaultValue={"24h"}
+          custom={true}
+        />
+        {/* <DatePicker currentRange={currentRange} onTimeFilter={onTimeFilter} /> */}
         <div className="flex flex-row gap-2">
           <button
             onClick={showFilterHandler}

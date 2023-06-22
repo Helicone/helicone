@@ -7,7 +7,10 @@ import RequestDrawerV2 from "./requestDrawerV2";
 import TableFooter from "./tableFooter";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { DateRange } from "react-day-picker";
@@ -27,11 +30,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<NormalizedRequest>();
-  const [range, setRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), -30),
-    to: new Date(),
+  const [timeFilter, setTimeFilter] = useState<FilterNode>({
+    request: {
+      created_at: {
+        gte: getTimeIntervalAgo("24h").toISOString(),
+      },
+    },
   });
-
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
@@ -50,23 +55,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     currentPageSize,
     debouncedAdvancedFilter,
     {
-      left: {
-        left: {
-          request: {
-            created_at: {
-              gte: range?.from?.toISOString(),
-            },
-          },
-        },
-        operator: "and",
-        right: {
-          request: {
-            created_at: {
-              lte: range?.to?.toISOString(),
-            },
-          },
-        },
-      },
+      left: timeFilter,
       operator: "and",
       right: "all",
     },
@@ -83,12 +72,40 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     refetch();
   };
 
-  const setRangeHandler = (newRange: DateRange) => {
-    let updatedRange: DateRange = {
-      from: newRange.from ? startOfDay(newRange.from) : undefined,
-      to: newRange.to ? endOfDay(newRange.to) : undefined,
-    };
-    setRange(updatedRange);
+  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
+    // if key is custom, add a lte filter
+    if (key === "custom") {
+      //  `custom:${start.toISOString()}_${end.toISOString()}`
+      const [start, end] = value.split("_");
+      const filter: FilterNode = {
+        left: {
+          request: {
+            created_at: {
+              gte: new Date(start).toISOString(),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request: {
+            created_at: {
+              lte: new Date(end).toISOString(),
+            },
+          },
+        },
+      };
+      setTimeFilter(filter);
+      return;
+    }
+    setTimeFilter({
+      request: {
+        created_at: {
+          gte: getTimeIntervalAgo(key).toISOString(),
+        },
+      },
+    });
+
+    // refetch();
   };
 
   const columnsWithProperties = [...INITIAL_COLUMNS].concat(
@@ -113,10 +130,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             currentSortLeaf: sort,
           }}
           header={{
-            currentRange: range,
-            onTimeFilter: (range) => {
-              range && setRangeHandler(range);
-            },
+            onTimeSelectHandler: onTimeSelectHandler,
             flattenedExportData: requests.map((request) => {
               const flattenedRequest: any = {};
               Object.entries(request).forEach(([key, value]) => {

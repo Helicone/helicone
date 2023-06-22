@@ -45,7 +45,7 @@ export default function DatePicker(props: DatePickerProps) {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <Popover.Panel className="absolute mt-2 z-10 bg-white rounded-lg shadow-xl border border-gray-300 p-3">
+        <Popover.Panel className="absolute mt-2 z-10 bg-white rounded-xl shadow-xl border border-gray-300 p-3">
           {({ close }) => (
             <>
               <DayPicker
