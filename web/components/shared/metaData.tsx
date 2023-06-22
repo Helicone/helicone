@@ -23,7 +23,10 @@ const MetaData = (props: MetaDataProps) => {
           content="Monitoring usage and costs for language models shouldn't be a hassle. With Helicone, you can focus on building your product, not building and maintaining your own analytics solution."
           key="desc"
         />
-        <meta property="og:image" content="/assets/landing/helicone.webp" />
+        <meta
+          property="og:image"
+          content="https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
+        />
       </Head>
       {children}
     </>
