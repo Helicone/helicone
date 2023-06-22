@@ -11,7 +11,7 @@ class GPT3Builder extends AbstractRequestBuilder {
       responseText:
         this.response.response_status === 0 ||
         this.response.response_status === null
-          ? "pending..."
+          ? ""
           : this.response.response_status === 200
           ? this.response.response_body?.choices
             ? this.response.response_body?.choices[0].text
