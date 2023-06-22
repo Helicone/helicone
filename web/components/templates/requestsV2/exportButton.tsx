@@ -46,7 +46,9 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
         className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
       >
         <ArrowDownTrayIcon className="h-5 w-5 text-gray-900" />
-        <p className="text-sm font-medium text-gray-900">Export</p>
+        <p className="text-sm font-medium text-gray-900 hidden sm:block">
+          Export
+        </p>
       </button>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">

@@ -24,7 +24,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
       <div>
         <Menu.Button className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2">
           <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-900" />
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-gray-900 hidden sm:block">
             View {`( ${visibleColumns} / ${columns.length} )`}
           </p>
         </Menu.Button>

@@ -34,7 +34,9 @@ const TableFooter = (props: TableFooterProps) => {
     <div className="flex flex-row justify-between text-sm items-center">
       <div className="flex flex-row gap-16 items-center justify-between w-full">
         <div className="flex flex-row gap-2 items-center">
-          <p className="text-gray-700 font-medium">Rows per page</p>
+          <p className="text-gray-700 font-medium hidden sm:block">
+            Rows per page
+          </p>
           <select
             id="location"
             name="location"
@@ -70,7 +72,7 @@ const TableFooter = (props: TableFooterProps) => {
               currentPage <= 1
                 ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
                 : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
-              "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm "
             )}
           >
             <ChevronDoubleLeftIcon className="h-5 w-5" />
@@ -122,7 +124,7 @@ const TableFooter = (props: TableFooterProps) => {
               currentPage >= totalPages
                 ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
                 : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
-              "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+              "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             )}
           >
             <ChevronDoubleRightIcon className="h-5 w-5" />

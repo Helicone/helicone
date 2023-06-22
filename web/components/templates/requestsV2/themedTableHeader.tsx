@@ -60,7 +60,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row justify-between ">
         <ThemedTimeFilter
           timeFilterOptions={[
             { key: "24h", value: "24H" },
@@ -85,7 +85,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             )}
           >
             <FunnelIcon className="h-5 w-5 text-gray-900" />
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-gray-900 hidden sm:block">
               {showFilters ? "Hide" : "Show"} Filters
             </p>
           </button>
