@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { getUSDate } from "../../shared/utils/utils";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   {
@@ -19,16 +20,7 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: (info) =>
-      (info.getValue() as number) === 200 ? (
-        <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-          Success
-        </span>
-      ) : (
-        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-          {`${info.getValue()} Error`}
-        </span>
-      ),
+    cell: (info) => <StatusBadge status={info.getValue() as number | null} />,
     size: 100,
   },
   {

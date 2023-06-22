@@ -4,6 +4,7 @@ import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { getUSDate } from "../../shared/utils/utils";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 interface RequestDrawerV2Props {
   open: boolean;
@@ -48,20 +49,12 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">Latency</p>
               <p className="text-gray-700 truncate">
-                {request.latency ? `${request.latency / 1000}s` : ""}
+                <span>{Number(request.latency) / 1000}s</span>
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">Status</p>
-              {request.status === 200 ? (
-                <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                  Success
-                </span>
-              ) : (
-                <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-                  {`${request.status} Error`}
-                </span>
-              )}
+              <StatusBadge status={request.status} />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">User</p>
