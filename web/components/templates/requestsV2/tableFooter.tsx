@@ -11,13 +11,20 @@ interface TableFooterProps {
   currentPage: number;
   pageSize: number;
   count: number;
+  isCountLoading: boolean;
   onPageChange: (newPageNumber: number) => void;
   onPageSizeChange: (newPageSize: number) => void;
 }
 
 const TableFooter = (props: TableFooterProps) => {
-  const { currentPage, pageSize, count, onPageChange, onPageSizeChange } =
-    props;
+  const {
+    currentPage,
+    pageSize,
+    count,
+    isCountLoading,
+    onPageChange,
+    onPageSizeChange,
+  } = props;
 
   const router = useRouter();
 
@@ -46,9 +53,11 @@ const TableFooter = (props: TableFooterProps) => {
             <option>100</option>
           </select>
         </div>
-        <p className="text-gray-700 font-medium">{`Page ${currentPage} of ${Math.ceil(
-          (count as number) / Number(pageSize || 10)
-        )}`}</p>
+        <p className="text-gray-700 font-medium">{`Page ${currentPage} of ${
+          isCountLoading
+            ? "..."
+            : Math.ceil((count as number) / Number(pageSize || 10))
+        }`}</p>
         <div className="flex flex-row gap-2 items-center">
           <button
             disabled={currentPage <= 1}
