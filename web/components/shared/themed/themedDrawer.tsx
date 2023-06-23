@@ -15,14 +15,11 @@ interface ThemedDrawerProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   children: React.ReactNode;
-  title: string;
   actions?: React.ReactNode;
 }
 
 const ThemedDrawer = (props: ThemedDrawerProps) => {
-  const { open, setOpen, children, title, actions } = props;
-
-  const { setNotification } = useNotification();
+  const { open, setOpen, children, actions } = props;
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -53,7 +50,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
               >
                 <Dialog.Panel
                   className={clsx(
-                    "max-w-full md:max-w-[33vw]",
+                    "min-w-[25rem] w-full md:w-[33vw]",
                     "pointer-events-auto w-screen"
                   )}
                 >
