@@ -123,7 +123,7 @@ export async function proxyForwarder(
     }
     updateRateLimitCounter({
       providerAuthHash: proxyRequest.providerAuthHash,
-      heliconeProperties: proxyRequest.requestWrapper.heliconeProperties,
+      heliconeProperties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
       rateLimitKV: env.RATE_LIMIT_KV,
       rateLimitOptions: proxyRequest.rateLimitOptions,
       userId: proxyRequest.userId,

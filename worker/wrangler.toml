@@ -26,10 +26,8 @@ TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 name = "helicone-worker-prod"
 routes = [
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	# anthropic proxy, base -> provider -> explode
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
-	# async logging
-	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "api.hconeai.com/*", custom_domain = true, zone_name = "hconeai.com" }
 ]
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },

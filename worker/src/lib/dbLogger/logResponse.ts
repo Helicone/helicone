@@ -8,7 +8,8 @@ import { DBLoggableProps } from "./DBLoggable";
 const MAX_USER_ID_LENGTH = 7000;
 
 export async function initialResponseLog(
-  { requestId, startTime }: DBLoggableProps["request"],
+  { requestId }: DBLoggableProps["request"],
+  { startTime, endTime }: DBLoggableProps["timing"],
   dbClient: SupabaseClient<Database>
 ) {
   return dbClient
@@ -16,7 +17,7 @@ export async function initialResponseLog(
     .insert([
       {
         request: requestId,
-        delay_ms: new Date().getTime() - startTime.getTime(),
+        delay_ms: (endTime ?? new Date()).getTime() - startTime.getTime(),
         body: {},
         status: -1,
       },

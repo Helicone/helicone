@@ -1,3 +1,4 @@
+import { getProvider as getProvider } from "./helpers";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import baseRouter from "./routers/baseRouter";
 
@@ -12,6 +13,11 @@ export interface Env {
   CLICKHOUSE_PASSWORD: string;
   PROVIDER: "OPENAI" | "ANTHROPIC";
   TOKEN_CALC_URL: string;
+}
+
+export enum Provider {
+  ANTHROPIC = "ANTHROPIC",
+  OPENAI = "OPENAI",
 }
 
 export async function hash(key: string): Promise<string> {
@@ -29,7 +35,11 @@ export async function hash(key: string): Promise<string> {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
+      
       const requestWrapper = new RequestWrapper(request);
+      const provider = getProvider(requestWrapper, env);
+      requestWrapper.provider = provider;
+      env.PROVIDER = provider;
 
       return baseRouter.handle(request, requestWrapper, env, ctx).catch(handleError);
     } catch (e) {

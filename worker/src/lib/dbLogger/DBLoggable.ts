@@ -9,6 +9,9 @@ import { getTokenCount } from "./tokenCounter";
 import { Result, mapPostgrestErr } from "../../results";
 import { consolidateTextFields, getUsage } from "./responseParserHelpers";
 import { Database } from "../../../supabase/database.types";
+import { HeliconeHeaders } from "../HeliconeHeaders";
+import { RequestWrapper } from "../RequestWrapper";
+import { AsyncLogModel } from "../models/AsyncLog";
 
 export interface DBLoggableProps {
   response: {
@@ -35,6 +38,10 @@ export interface DBLoggableProps {
     omitLog: boolean;
     provider: Env["PROVIDER"];
   };
+  timing: {
+    startTime: Date;
+    endTime?: Date;
+  }
   tokenCalcUrl: string;
 }
 
@@ -57,22 +64,61 @@ export function dbLoggableRequestFromProxyRequest(
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
-    properties: proxyRequest.requestWrapper.heliconeProperties,
+    properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
   };
 }
 
+export async function dbLoggableRequestFromAsyncLogModel(
+  requestWrapper: RequestWrapper,
+  env: Env,
+  asyncLogModel: AsyncLogModel,
+  providerRequestHeaders: HeliconeHeaders,
+  providerResponseHeaders: Headers
+): Promise<DBLoggable> {
+  return new DBLoggable({
+    request: {
+      requestId: providerRequestHeaders.requestId  ?? crypto.randomUUID(),
+      heliconeApiKeyAuthHash: (await requestWrapper.getHeliconeAuthHeader()).data ?? undefined,
+      providerApiKeyAuthHash: await requestWrapper.getProviderAuthHeader(),
+      promptId: providerRequestHeaders.promptId ?? undefined,
+      userId: await requestWrapper.getUserId(), // Where do I get this again?
+      promptFormatter: undefined,
+      startTime: new Date(asyncLogModel.timing.startTime),
+      bodyText: asyncLogModel.providerRequest.body,
+      path: asyncLogModel.providerRequest.url,
+      properties: providerRequestHeaders.heliconeProperties,
+      isStream: JSON.parse(asyncLogModel.providerRequest.body).stream == true ?? false,
+      omitLog: false,
+      provider: env.PROVIDER
+    },
+    response: {
+      getResponseBody: async () => asyncLogModel.providerResponse.body,
+      responseHeaders: providerResponseHeaders,
+      status: asyncLogModel.providerResponse.status,
+      omitLog: false,
+    },
+    timing: {
+      startTime: new Date(asyncLogModel.timing.startTime),
+      endTime: new Date(asyncLogModel.timing.endTime)
+    },
+    tokenCalcUrl: env.TOKEN_COUNT_URL,
+  });
+}
+
 // Represents an object that can be logged to the database
 export class DBLoggable {
   private response: DBLoggableProps["response"];
   private request: DBLoggableProps["request"];
+  private timing: DBLoggableProps["timing"];
   private provider: Env["PROVIDER"];
   private tokenCalcUrl: string;
   constructor(props: DBLoggableProps) {
     this.response = props.response;
     this.request = props.request;
+    this.timing = props.timing;
     this.provider = props.request.provider;
     this.tokenCalcUrl = props.tokenCalcUrl;
   }
@@ -168,7 +214,7 @@ export class DBLoggable {
 
     // Log delay
     const initialResponse = mapPostgrestErr(
-      await initialResponseLog(this.request, dbClient)
+      await initialResponseLog(this.request, this.timing, dbClient)
     );
 
     if (initialResponse.error !== null) {

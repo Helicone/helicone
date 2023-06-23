@@ -16,9 +16,9 @@ baseRouter.post("/v1/feedback", async (_, requestWrapper: RequestWrapper, env: E
 });
 
 baseRouter.all("*", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-  getRouter(requestWrapper, env).then((router) => {
-    router.handle;
-  });
+  const router = await getRouter(env["PROVIDER"]);
+
+  return router.handle(_, requestWrapper, env, ctx);
 });
 
 export default baseRouter;
