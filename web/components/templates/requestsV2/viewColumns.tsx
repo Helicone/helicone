@@ -53,15 +53,15 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               Select All
             </button>
           </div>
-          <div className="flex flex-col overflow-auto max-h-[40vh]">
+          <div className="flex flex-col overflow-auto max-h-[40vh] py-0.5">
             {columns.map((column, idx) => {
               const header = column.columnDef.header as string;
 
               return (
-                <div key={idx} className="flex flex-row my-[3px]">
+                <div key={idx} className="flex flex-row py-0.5">
                   <label
                     key={idx}
-                    className="relative mx-1 my-[1px] px-3 py-2 rounded-md select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 hover:cursor-pointer"
+                    className="relative mx-1 px-3 py-2 rounded-md select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 hover:cursor-pointer"
                   >
                     {column.getIsVisible() ? (
                       <CheckIcon className="h-4 w-4 text-gray-900" />
