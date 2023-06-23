@@ -1,8 +1,9 @@
 // This will store all of the information coming from the client.
 
-import { Env, hash } from "../..";
-import { GenericResult, Result } from "../../results";
-import { HeliconeHeaders, RequestWrapper } from "../RequestWrapper";
+import { Env } from "../..";
+import { Result } from "../../results";
+import { IHeliconeHeaders } from "../HeliconeHeaders";
+import { RequestWrapper } from "../RequestWrapper";
 import {
   ChatPrompt,
   FormattedPrompt,
@@ -26,8 +27,8 @@ export interface HeliconeProxyRequest {
   provider: Env["PROVIDER"];
   tokenCalcUrl: Env["TOKEN_COUNT_URL"];
   rateLimitOptions: Nullable<RateLimitOptions>;
-  retryOptions: HeliconeHeaders["retryHeaders"];
-  omitOptions: HeliconeHeaders["omitHeaders"];
+  retryOptions: IHeliconeHeaders["retryHeaders"];
+  omitOptions: IHeliconeHeaders["omitHeaders"];
 
   requestJson: { stream?: boolean; user?: string } | Record<string, never>;
   bodyText: string | null;
@@ -125,10 +126,10 @@ export class HeliconeProxyRequestMapper {
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,
         tokenCalcUrl: this.tokenCalcUrl,
-        providerAuthHash: await this.getProviderAuthHeader(),
+        providerAuthHash: await this.request.getProviderAuthHeader(),
         omitOptions: this.request.heliconeHeaders.omitHeaders,
         heliconeAuthHash: heliconeAuthHash ?? undefined,
-        heliconeProperties: this.request.heliconeProperties,
+        heliconeProperties: this.request.heliconeHeaders.heliconeProperties,
         userId: await this.request.getUserId(),
         heliconeErrors: this.heliconeErrors,
         api_base,
@@ -148,22 +149,6 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
-  }
-
-  private async getProviderAuthHeader(): Promise<string | undefined> {
-    if (this.provider === "OPENAI") {
-      const azureApiKey = this.request.getHeaders().get("api-key");
-      return this.request.authorization
-        ? await hash(this.request.authorization)
-        : azureApiKey !== null
-        ? await hash(azureApiKey)
-        : undefined;
-    } else if (this.provider === "ANTHROPIC") {
-      return this.request.authorization
-        ? await hash(this.request.authorization)
-        : undefined;
-    }
-    return undefined;
   }
 
   private async getBody(): Promise<string | null> {
