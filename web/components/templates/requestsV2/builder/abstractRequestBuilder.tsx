@@ -14,6 +14,7 @@ export interface NormalizedRequest {
   latency: number | null;
   status: number;
   user: string | null;
+  cost: number | null;
   customProperties: {
     [key: string]: Json;
   } | null;
