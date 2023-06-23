@@ -50,7 +50,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
               >
                 <Dialog.Panel
                   className={clsx(
-                    "max-w-full md:max-w-[33vw]",
+                    "min-w-[25rem] w-full md:w-[33vw]",
                     "pointer-events-auto w-screen"
                   )}
                 >
