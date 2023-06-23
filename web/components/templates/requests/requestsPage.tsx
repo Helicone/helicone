@@ -31,7 +31,6 @@ import {
   getUSDate,
   removeLeadingWhitespace,
 } from "../../shared/utils/utils";
-import RequestDrawer from "./requestDrawer";
 import RequestTable from "./requestTable";
 import useRequestsPage, {
   RequestWrapper,
@@ -751,14 +750,14 @@ const RequestsPage = (props: RequestsPageProps) => {
           </div>
         </div>
       </div>
-      <RequestDrawer
+      {/* <RequestDrawer
         open={open}
         wrappedRequest={selectedData}
         setOpen={setOpen}
         values={values}
         properties={properties}
         feedback={feedback.map((f) => f.name)}
-      />
+      /> */}
     </>
   );
 };

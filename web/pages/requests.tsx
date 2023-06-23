@@ -1,30 +1,42 @@
+import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import RequestsPage from "../components/templates/requests/requestsPage";
+import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { useOrg } from "../components/shared/layout/organizationContext";
+import {
+  SortDirection,
+  SortLeafRequest,
+} from "../services/lib/sorts/requests/sorts";
 
-interface RequestsProps {
-  user: any;
-  page: number;
+interface RequestsV2Props {
+  user: User;
+  currentPage: number;
   pageSize: number;
-  sortBy: string | null;
+  sort: {
+    sortKey: string | null;
+    sortDirection: SortDirection | null;
+    isCustomProperty: boolean;
+  };
 }
 
-const Requests = (props: RequestsProps) => {
-  const { user, page, pageSize, sortBy } = props;
+const RequestsV2 = (props: RequestsV2Props) => {
+  const { user, currentPage, pageSize, sort } = props;
 
   return (
-    <MetaData title="Requests">
+    <MetaData title={"Requests"}>
       <AuthLayout user={user}>
-        <RequestsPage page={page} pageSize={pageSize} sortBy={sortBy} />
+        <RequestsPageV2
+          currentPage={currentPage}
+          pageSize={pageSize}
+          sort={sort}
+        />
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Requests;
+export default RequestsV2;
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
@@ -43,18 +55,22 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size, sort } = context.query;
+  const { page, page_size, sortKey, sortDirection, isCustomProperty } =
+    context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 25;
-  const sortBy = (sort as string) || null;
+  const pageSize = parseInt(page_size as string, 10) || 10;
 
   return {
     props: {
       user: user,
-      page: currentPage,
-      pageSize: pageSize,
-      sortBy: sortBy,
+      currentPage,
+      pageSize,
+      sort: {
+        sortKey: sortKey ? (sortKey as string) : null,
+        sortDirection: sortDirection ? (sortDirection as SortDirection) : null,
+        isCustomProperty: isCustomProperty === "true",
+      },
     },
   };
 };

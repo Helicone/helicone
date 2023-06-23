@@ -225,7 +225,7 @@ const CachePage = (props: CachePageProps) => {
           </div>
         )}
       </div>
-      <ThemedDrawer open={open} setOpen={setOpen} title={"Cached Request"}>
+      <ThemedDrawer open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-2">
           <p className="text-gray-500 text-sm border p-2 rounded-lg border-red-300">
             Cache Bucket response configurable soon...

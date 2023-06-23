@@ -9,39 +9,6 @@ import {
 } from "./getXHoursAgo";
 import { TimeIncrement } from "./fetchTimeData";
 
-export const timeGraphConfig: Record<TimeInterval, TimeGraphConfig> = {
-  "1h": {
-    dbIncrement: "min",
-    start: getXMinutesAgoFloored(60),
-    end: getXMinutesAgoFloored(-1),
-  },
-  "24h": {
-    dbIncrement: "hour",
-    start: getXHoursAgoFloored(24),
-    end: getXMinutesAgoFloored(-1),
-  },
-  "7d": {
-    dbIncrement: "day",
-    start: getXDaysAgoFloored(7),
-    end: getXMinutesAgoFloored(-1),
-  },
-  "1m": {
-    dbIncrement: "day",
-    start: getXDaysAgoFloored(30),
-    end: getXMinutesAgoFloored(-1),
-  },
-  "3m": {
-    dbIncrement: "week",
-    start: getXDaysAgoFloored(30 * 3),
-    end: getXMinutesAgoFloored(-1),
-  },
-  all: {
-    dbIncrement: "week",
-    start: getXDaysAgoFloored(30 * 3),
-    end: getXMinutesAgoFloored(-1),
-  },
-};
-
 const INC_TO_TIME: {
   [key in TimeIncrement]: (startDate: Date, nextDate?: Date) => string;
 } = {

@@ -83,6 +83,7 @@ export type RequestWrapper = {
   probability: number | null;
   requestBody: Json;
   responseBody: Json;
+  status: number;
   [key: string]:
     | Json
     | undefined
@@ -205,6 +206,7 @@ export const convertRequest = (request: HeliconeRequest, values: string[]) => {
     responseText: getResponseText(api),
     logProbs: logProbs,
     probability: logProbs ? Math.exp(logProbs) : null,
+    status: request.response_status,
   };
 
   // add the custom properties to the object
