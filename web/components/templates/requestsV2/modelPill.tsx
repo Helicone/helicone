@@ -25,9 +25,14 @@ const ModelPill = (props: ModelPillProps) => {
         </span>
       );
     case "gpt-3.5-turbo-0613":
-    case "gpt-4-0613":
       return (
         <span className="inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/20">
+          {model}
+        </span>
+      );
+    case "gpt-4-0613":
+      return (
+        <span className="inline-flex items-center rounded-full bg-pink-50 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-600/20">
           {model}
         </span>
       );
