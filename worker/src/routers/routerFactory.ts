@@ -1,17 +1,36 @@
-import { RouterType, Route } from "itty-router";
+import { Route, RouterType } from "itty-router";
 import { Env, Provider } from "..";
+import { handleFeedbackEndpoint } from "../feedback";
 import { RequestWrapper } from "../lib/RequestWrapper";
+import { handleLoggingEndpoint } from "../properties";
+import { getOpenAIRouter } from "./oaiRouter";
+import { getAnthropicRouter } from "./anthropicRouter";
 
-export async function getRouter(
+export function buildRouter(
   provider: Env["PROVIDER"]
-): Promise<RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>> {
+): RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]> {
+  const router = getProviderRouter(provider);
+
+  router.post("/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
+    return await handleLoggingEndpoint(requestWrapper, env);
+  });
+
+  router.post("/v1/feedback", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
+    return await handleFeedbackEndpoint(requestWrapper, env);
+  });
+
+  return router;
+}
+
+export function getProviderRouter(
+  provider: Env["PROVIDER"]
+): RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]> {
   if (provider === Provider.ANTHROPIC) {
-    return (await import("./anthropicRouter")).default;
+    return getAnthropicRouter();
   }
 
   if (provider === Provider.OPENAI) {
-    return (await import("./oaiRouter")).default;
+    return getOpenAIRouter();
   }
-
   throw new Error("Provider not found");
 }
