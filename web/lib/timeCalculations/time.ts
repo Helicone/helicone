@@ -1,6 +1,6 @@
 import { TimeIncrement } from "./fetchTimeData";
 
-export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h" | "all";
+export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h" | "all" | "custom";
 
 export function getTimeIntervalAgo(interval: TimeInterval): Date {
   const now = new Date();
@@ -16,6 +16,8 @@ export function getTimeIntervalAgo(interval: TimeInterval): Date {
     case "1h":
       return new Date(now.setHours(now.getHours() - 1));
     case "all":
+      return new Date(0);
+    default:
       return new Date(0);
   }
 }
