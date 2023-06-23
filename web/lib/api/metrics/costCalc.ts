@@ -40,11 +40,11 @@ export function modelCost(modelRow: ModelMetrics): number {
   const tokens = modelRow.sum_tokens;
   const promptTokens = modelRow.sum_prompt_tokens;
   const completionTokens = modelRow.sum_completion_tokens;
-  if (tokens === null) {
+  if (tokens === null || tokens === undefined) {
     console.error("Tokens is null");
     return 0;
   }
-  if (model === null) {
+  if (model === null || model === undefined) {
     console.error("Model is null");
     return 0;
   }
