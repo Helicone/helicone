@@ -24,7 +24,8 @@ class GPT3Builder extends AbstractRequestBuilder {
       totalTokens: this.response.total_tokens,
       user: this.response.request_user_id,
       customProperties: this.response.request_properties,
-      model: this.response.request_body.model,
+      model:
+        this.response.request_body.model || this.response.response_body.model,
       requestBody: this.response.request_body,
       responseBody: this.response.response_body,
       render:
