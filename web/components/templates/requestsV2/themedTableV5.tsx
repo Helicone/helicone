@@ -1,5 +1,8 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
-import { TableCellsIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
 import {
   ColumnDef,
   flexRender,
@@ -128,6 +131,14 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             No Requests Found
           </p>
         </div>
+      ) : table.getVisibleFlatColumns().length === 0 ? (
+        <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+          <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-400" />
+
+          <p className="text-xl font-semibold text-gray-500">
+            No Columns Selected
+          </p>
+        </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
           <div className="overflow-x-auto text-sm">
@@ -190,40 +201,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                                     }
                                     router.query.sortKey = meta.sortKey;
                                     router.push(router);
-
-                                    // const currentSortLeaf = Object.entries(
-                                    //   sortable.currentSortLeaf
-                                    // ).at(0);
-
-                                    // if (currentSortLeaf) {
-                                    //   const key = currentSortLeaf[0];
-                                    //   const value = currentSortLeaf[1];
-                                    // }
-
-                                    // const entry = Object.entries(
-                                    //   sortable.currentSortLeaf
-                                    // ).at(0);
-                                    // if (entry) {
-                                    //   if (meta.isCustomProperty) {
-                                    //     router.query.isCustomProperty =
-                                    //       meta.isCustomProperty;
-                                    //   }
-                                    //   const key = entry[0];
-                                    //   const value = entry[1];
-                                    //   if (key === meta.sortKey) {
-                                    //     router.query.sort = JSON.stringify({
-                                    //       [meta.sortKey]:
-                                    //         value === "asc" ? "desc" : "asc",
-                                    //     });
-                                    //     router.push(router);
-                                    //     return;
-                                    //   } else {
-                                    //     router.query.sort = JSON.stringify({
-                                    //       [meta.sortKey]: "asc",
-                                    //     });
-                                    //     router.push(router);
-                                    //   }
-                                    // }
                                   }
                                 }}
                                 className="flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
