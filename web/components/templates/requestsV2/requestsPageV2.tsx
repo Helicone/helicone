@@ -17,6 +17,8 @@ import {
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { clsx } from "../../shared/clsx";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -142,7 +144,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <div>
-      <AuthHeader title={"Requests"} />
+      <AuthHeader
+        title={"Requests"}
+        headerActions={
+          <button
+            onClick={() => refetch()}
+            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+          >
+            <ArrowPathIcon
+              className={clsx(
+                isDataLoading ? "animate-spin" : "",
+                "h-5 w-5 inline"
+              )}
+            />
+          </button>
+        }
+      />
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
           defaultData={requests || []}
