@@ -9,6 +9,7 @@ export interface ModelMetrics {
   sum_completion_tokens: number;
   sum_tokens: number;
 }
+
 export async function getModelMetrics(
   filter: FilterNode,
   org_id: string,

@@ -1,3 +1,4 @@
+import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Chat } from "../../requests/chat";
 import AbstractRequestBuilder, {
   NormalizedRequest,
@@ -25,6 +26,13 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       user: this.response.request_user_id,
       customProperties: this.response.request_properties,
       model: this.response.request_body.model,
+      cost: modelCost({
+        model:
+          this.response.request_body.model || this.response.response_body.model,
+        sum_completion_tokens: this.response.completion_tokens || 0,
+        sum_prompt_tokens: this.response.prompt_tokens || 0,
+        sum_tokens: this.response.total_tokens || 0,
+      }),
       requestBody: this.response.request_body,
       responseBody: this.response.response_body,
       render:

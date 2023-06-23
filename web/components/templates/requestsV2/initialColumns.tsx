@@ -4,6 +4,23 @@ import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 
+function formatNumber(num: number) {
+  const numParts = num.toString().split(".");
+
+  if (numParts.length > 1) {
+    const decimalPlaces = numParts[1].length;
+    if (decimalPlaces < 2) {
+      return num.toFixed(2);
+    } else if (decimalPlaces > 6) {
+      return num.toFixed(6);
+    } else {
+      return num;
+    }
+  } else {
+    return num.toFixed(2);
+  }
+}
+
 export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   {
     accessorKey: "createdAt",
@@ -80,7 +97,6 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
       sortKey: "latency",
     },
   },
-
   {
     accessorKey: "user",
     header: "User",
@@ -88,5 +104,10 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
     meta: {
       sortKey: "user_id",
     },
+  },
+  {
+    accessorKey: "cost",
+    header: "Cost",
+    cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
   },
 ];
