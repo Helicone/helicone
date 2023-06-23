@@ -70,6 +70,7 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
     meta: {
       sortKey: "completion_tokens",
     },
+    size: 175,
   },
   {
     accessorKey: "latency",
