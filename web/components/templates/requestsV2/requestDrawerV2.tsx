@@ -1,7 +1,14 @@
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import {
+  CodeBracketIcon,
+  EyeIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
+import { useState } from "react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
+import ThemedTabs from "../../shared/themed/themedTabs";
 import { getUSDate } from "../../shared/utils/utils";
+import { Completion } from "../requests/completion";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
@@ -15,6 +22,8 @@ interface RequestDrawerV2Props {
 
 const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const { open, setOpen, request, properties } = props;
+
+  const [mode, setMode] = useState<"pretty" | "json">("pretty");
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
@@ -91,7 +100,34 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                 </div>
               </div>
             )}
-          <div className="flex flex-col space-y-2">{request.render}</div>
+          <div className="flex w-full justify-end">
+            <ThemedTabs
+              options={[
+                {
+                  label: "Pretty",
+                  icon: EyeIcon,
+                },
+                {
+                  label: "JSON",
+                  icon: CodeBracketIcon,
+                },
+              ]}
+              onOptionSelect={(option) =>
+                setMode(option.toLowerCase() as "pretty" | "json")
+              }
+            />
+          </div>
+          {mode === "pretty" ? (
+            <div className="flex flex-col space-y-2">{request.render}</div>
+          ) : (
+            <Completion
+              request={JSON.stringify(request.requestBody, null, 4)}
+              response={{
+                title: "Response",
+                text: JSON.stringify(request.responseBody, null, 4),
+              }}
+            />
+          )}
         </div>
       ) : (
         <p>Loading...</p>
