@@ -107,9 +107,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
 
   const rows = table.getRowModel().rows;
 
-  console.log("default-data", defaultData);
-  console.log("rows", rows);
-
   return (
     <div className="flex flex-col space-y-4">
       {header && (
