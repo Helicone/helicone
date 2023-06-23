@@ -61,8 +61,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           created_at: "desc",
         };
 
-  console.log(sortLeaf);
-
   const {
     count,
     isDataLoading,

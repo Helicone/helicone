@@ -1,4 +1,4 @@
-import { Menu, Transition } from "@headlessui/react";
+import { Menu, Popover, Transition } from "@headlessui/react";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Fragment, useState } from "react";
 import { clsx } from "../clsx";
@@ -37,30 +37,30 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     >
       {custom && (
         <>
-          <Menu.Button
-            disabled={isFetching}
-            className={clsx(
-              isActive("custom")
-                ? "bg-sky-200 border-sky-300"
-                : "bg-white hover:bg-sky-50 border-gray-300",
-              "relative inline-flex text-gray-900 items-center rounded-l-md border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            )}
-          >
-            <CalendarDaysIcon className="h-5 mr-2" />
-            Custom
-          </Menu.Button>
+          <Popover className="relative">
+            <Popover.Button
+              disabled={isFetching}
+              className={clsx(
+                isActive("custom")
+                  ? "bg-sky-200 border-sky-300"
+                  : "bg-white hover:bg-sky-50 border-gray-300",
+                "relative inline-flex text-gray-900 items-center rounded-l-md border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              )}
+            >
+              <CalendarDaysIcon className="h-5 mr-2" />
+              Custom
+            </Popover.Button>
 
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <Menu.Items className="z-20 absolute left-0 mt-10 w-fit px-1.5 py-3 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-              <Menu.Item>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Popover.Panel className="mt-3 absolute z-10 bg-white rounded-lg shadow-xl p-2">
                 {({ close }) => (
                   <div className="px-4 py-2 flex flex-col space-y-4">
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -107,7 +107,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                     </div>
                     <div className="py-1 w-full flex flex-row gap-3 items-center justify-end">
                       <button
-                        onClick={close}
+                        onClick={() => close()}
                         className="items-center rounded-md bg-white border border-gray-300 px-3 py-1.5 text-sm flex font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                       >
                         Cancel
@@ -152,9 +152,9 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                     </div>
                   </div>
                 )}
-              </Menu.Item>
-            </Menu.Items>
-          </Transition>
+              </Popover.Panel>
+            </Transition>
+          </Popover>
         </>
       )}
 

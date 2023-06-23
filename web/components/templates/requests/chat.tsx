@@ -45,7 +45,7 @@ export const Chat = (props: ChatProps) => {
   }
 
   const renderMessage = (messageContent: string | JSX.Element) => {
-    return <p className="text-sm">{messageContent}</p>;
+    return <p className="text-sm whitespace-pre-wrap">{messageContent}</p>;
   };
 
   return (
