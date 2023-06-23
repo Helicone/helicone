@@ -11,11 +11,11 @@ const MetaData = (props: MetaDataProps) => {
   return (
     <>
       <Head>
-        <title>{`${title} | Helicone - Observability for Generative AI`}</title>
+        <title>{`${title} | Helicone - Monitoring for Generative AI`}</title>
         <link rel="icon" href="/assets/landing/helicone-mobile.webp" />
         <meta
           property="og:title"
-          content="Helicone | Observability for Generative AI"
+          content="Helicone | Monitoring for Generative AI"
         />
         <meta
           property="og:description"
