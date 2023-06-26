@@ -3,6 +3,7 @@ import { clsx } from "../clsx";
 import {
   MinusCircleIcon,
   PlusCircleIcon,
+  TagIcon,
   ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import { ForwardRefExoticComponent, Fragment, SVGProps } from "react";
@@ -30,24 +31,13 @@ export const ThemedMultiSelect = ({
     <Popover className="relative text-sm">
       {({ open }) => (
         <>
-          <Popover.Button
-            className={clsx(
-              open
-                ? "bg-sky-100 text-sky-900"
-                : "hover:bg-sky-100 hover:text-sky-900",
-              "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-            )}
-          >
-            <ViewColumnsIcon
-              className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-              aria-hidden="true"
-            />
-
-            <span className="sm:inline hidden lg:inline">
+          <Popover.Button className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2">
+            <TagIcon className="h-5 w-5 text-gray-900" />
+            <p className="text-sm font-medium text-gray-900 hidden sm:block">
               {`${buttonLabel} (${
                 columns.filter((col) => col.active).length
               } / ${columns.length})`}
-            </span>
+            </p>
           </Popover.Button>
 
           <Transition
