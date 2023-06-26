@@ -12,7 +12,10 @@ export interface NormalizedRequest {
   promptTokens: number | null;
   completionTokens: number | null;
   latency: number | null;
-  status: number;
+  status: {
+    code: number;
+    statusType: "success" | "error" | "pending" | "unknown";
+  };
   user: string | null;
   cost: number | null;
   customProperties: {
@@ -30,6 +33,22 @@ abstract class AbstractRequestBuilder {
 
   constructor(response: HeliconeRequest) {
     this.response = response;
+  }
+
+  getStatusType(): NormalizedRequest["status"]["statusType"] {
+    if (this.response.response_body?.error?.message) {
+      return "error";
+    }
+
+    switch (this.response.response_status) {
+      case 200:
+        return "success";
+      case 0:
+      case null:
+        return "pending";
+      default:
+        return "error";
+    }
   }
 
   abstract build(): NormalizedRequest;
