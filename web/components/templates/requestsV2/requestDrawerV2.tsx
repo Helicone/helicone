@@ -4,7 +4,7 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import { getUSDate } from "../../shared/utils/utils";
@@ -24,6 +24,13 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const { open, setOpen, request, properties } = props;
 
   const [mode, setMode] = useState<"pretty" | "json">("pretty");
+
+  // set the mode to pretty if the drawer closes
+  useEffect(() => {
+    if (!open) {
+      setMode("pretty");
+    }
+  }, [open]);
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>

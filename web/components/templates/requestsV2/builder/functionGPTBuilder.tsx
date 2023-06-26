@@ -6,7 +6,11 @@ import AbstractRequestBuilder, {
 
 class FunctionGPTBuilder extends AbstractRequestBuilder {
   build(): NormalizedRequest {
-    const hasFunctionCall = this.response.request_body.functions !== undefined;
+    const hasNoContent = this.response.response_body?.choices
+      ? this.response.response_body?.choices[0].message.content === null
+      : true;
+
+    console.log(hasNoContent);
     return {
       createdAt: this.response.request_created_at,
       requestText: this.response.request_body.messages.at(-1).content,
@@ -16,11 +20,13 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
           ? ""
           : this.response.response_status === 200
           ? this.response.response_body?.choices
-            ? JSON.stringify(
-                this.response.response_body?.choices[0].message.function_call,
-                null,
-                2
-              )
+            ? hasNoContent
+              ? JSON.stringify(
+                  this.response.response_body?.choices[0].message.function_call,
+                  null,
+                  2
+                )
+              : this.response.response_body?.choices[0].message.content
             : ""
           : this.response.response_body?.error?.message || "",
       completionTokens: this.response.completion_tokens,
@@ -50,11 +56,14 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
               request: this.response.request_body.messages,
               response: {
                 role: "assistant",
-                content: JSON.stringify(
-                  this.response.response_body?.choices[0].message.function_call,
-                  null,
-                  2
-                ),
+                content: hasNoContent
+                  ? JSON.stringify(
+                      this.response.response_body?.choices[0].message
+                        .function_call,
+                      null,
+                      2
+                    )
+                  : this.response.response_body?.choices[0].message.content,
               },
             }}
             status={this.response.response_status}
