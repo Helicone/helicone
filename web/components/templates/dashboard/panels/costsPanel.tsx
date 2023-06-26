@@ -4,7 +4,6 @@ import { CostOverTime } from "../../../../pages/api/metrics/costOverTime";
 import { useGetTopUsers } from "../../../../services/hooks/dashboard";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 import { RenderBarChart } from "../../../shared/metrics/barChart";
-import ThemedListItem from "../../../shared/themed/themedListItem";
 import { getUSDate } from "../../../shared/utils/utils";
 import { Loading } from "../dashboardPage";
 

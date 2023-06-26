@@ -10,7 +10,6 @@ import {
 } from "../../shared/metrics/metricsPanel";
 import { usePropertyCard } from "./useProperty";
 import { MdLaunch } from "react-icons/md";
-import ThemedTable from "../../shared/themed/themedTable";
 import ThemedTableV5 from "../requestsV2/themedTableV5";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
