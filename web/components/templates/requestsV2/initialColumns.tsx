@@ -37,7 +37,11 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: (info) => <StatusBadge status={info.getValue() as number | null} />,
+    cell: (info) => {
+      const { code, statusType } =
+        info.getValue() as NormalizedRequest["status"];
+      return <StatusBadge statusType={statusType} errorCode={code} />;
+    },
     size: 100,
   },
   {

@@ -1,28 +1,36 @@
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+
 interface StatusBadgeProps {
-  status: number | null;
+  statusType: NormalizedRequest["status"]["statusType"];
+  errorCode?: number;
 }
 
 const StatusBadge = (props: StatusBadgeProps) => {
-  const { status } = props;
+  const { statusType, errorCode } = props;
 
-  switch (status) {
-    case 200:
+  switch (statusType) {
+    case "success":
       return (
         <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
           Success
         </span>
       );
-    case 0:
-    case null:
+    case "pending":
       return (
         <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
           Pending
         </span>
       );
-    default:
+    case "error":
       return (
         <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-          {`${status} Error`}
+          {`${errorCode} Error`}
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+          Unknown
         </span>
       );
   }
