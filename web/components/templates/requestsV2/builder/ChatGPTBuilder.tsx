@@ -43,7 +43,8 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           <Chat
             chatProperties={{
               request: this.response.request_body.messages,
-              response: this.response.response_body?.choices[0]?.message || "",
+              response:
+                this.response.response_body?.choices?.[0]?.message || "",
             }}
             status={this.response.response_status}
           />
