@@ -21,7 +21,10 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       completionTokens: this.response.completion_tokens,
       latency: this.response.delay_ms,
       promptTokens: this.response.prompt_tokens,
-      status: this.response.response_status,
+      status: {
+        statusType: this.getStatusType(),
+        code: this.response.response_status,
+      },
       totalTokens: this.response.total_tokens,
       user: this.response.request_user_id,
       customProperties: this.response.request_properties,
