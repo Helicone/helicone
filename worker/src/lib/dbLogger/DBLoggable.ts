@@ -4,7 +4,7 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
 import { initialResponseLog, logRequest } from "./logResponse";
-import { Env } from "../..";
+import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
 import { Result, mapPostgrestErr } from "../../results";
 import { consolidateTextFields, getUsage } from "./responseParserHelpers";
@@ -36,18 +36,16 @@ export interface DBLoggableProps {
     properties: Record<string, string>;
     isStream: boolean;
     omitLog: boolean;
-    provider: Env["PROVIDER"];
+    provider: Provider;
   };
   timing: {
     startTime: Date;
     endTime?: Date;
-  }
+  };
   tokenCalcUrl: string;
 }
 
-export function dbLoggableRequestFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest
-): DBLoggableProps["request"] {
+export function dbLoggableRequestFromProxyRequest(proxyRequest: HeliconeProxyRequest): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
     heliconeApiKeyAuthHash: proxyRequest.heliconeAuthHash,
@@ -71,38 +69,44 @@ export function dbLoggableRequestFromProxyRequest(
   };
 }
 
+interface DBLoggableRequestFromAsyncLogModelProps {
+  requestWrapper: RequestWrapper;
+  env: Env;
+  asyncLogModel: AsyncLogModel;
+  providerRequestHeaders: HeliconeHeaders;
+  providerResponseHeaders: Headers;
+  provider: Provider;
+}
+
 export async function dbLoggableRequestFromAsyncLogModel(
-  requestWrapper: RequestWrapper,
-  env: Env,
-  asyncLogModel: AsyncLogModel,
-  providerRequestHeaders: HeliconeHeaders,
-  providerResponseHeaders: Headers
+  props: DBLoggableRequestFromAsyncLogModelProps
 ): Promise<DBLoggable> {
+  const { requestWrapper, env, asyncLogModel, providerRequestHeaders, providerResponseHeaders, provider } = props;
   return new DBLoggable({
     request: {
-      requestId: providerRequestHeaders.requestId  ?? crypto.randomUUID(),
-      heliconeApiKeyAuthHash: (await requestWrapper.getHeliconeAuthHeader()).data ?? undefined,
-      providerApiKeyAuthHash: await requestWrapper.getProviderAuthHeader(),
+      requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
+      heliconeApiKeyAuthHash: await requestWrapper.getAuthorizationHash(),
+      providerApiKeyAuthHash: "N/A",
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: await requestWrapper.getUserId(), // Where do I get this again?
       promptFormatter: undefined,
-      startTime: new Date(asyncLogModel.timing.startTime),
-      bodyText: asyncLogModel.providerRequest.body,
+      startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
+      bodyText: JSON.stringify(asyncLogModel.providerRequest.body),
       path: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
-      isStream: JSON.parse(asyncLogModel.providerRequest.body).stream == true ?? false,
+      isStream: asyncLogModel.providerRequest.body?.stream == true ?? false,
       omitLog: false,
-      provider: env.PROVIDER
+      provider,
     },
     response: {
-      getResponseBody: async () => asyncLogModel.providerResponse.body,
+      getResponseBody: async () => JSON.stringify(asyncLogModel.providerResponse.body),
       responseHeaders: providerResponseHeaders,
       status: asyncLogModel.providerResponse.status,
       omitLog: false,
     },
     timing: {
-      startTime: new Date(asyncLogModel.timing.startTime),
-      endTime: new Date(asyncLogModel.timing.endTime)
+      startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
+      endTime: new Date(asyncLogModel.timing.endTime.seconds * 1000 + asyncLogModel.timing.endTime.milliseconds),
     },
     tokenCalcUrl: env.TOKEN_COUNT_URL,
   });
@@ -113,7 +117,7 @@ export class DBLoggable {
   private response: DBLoggableProps["response"];
   private request: DBLoggableProps["request"];
   private timing: DBLoggableProps["timing"];
-  private provider: Env["PROVIDER"];
+  private provider: Provider;
   private tokenCalcUrl: string;
   constructor(props: DBLoggableProps) {
     this.response = props.response;
@@ -144,11 +148,7 @@ export class DBLoggable {
     }
 
     try {
-      if (
-        this.provider === "ANTHROPIC" &&
-        responseStatus === 200 &&
-        requestBody
-      ) {
+      if (this.provider === "ANTHROPIC" && responseStatus === 200 && requestBody) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
@@ -213,9 +213,7 @@ export class DBLoggable {
     const responseBody = await this.response.getResponseBody();
 
     // Log delay
-    const initialResponse = mapPostgrestErr(
-      await initialResponseLog(this.request, this.timing, dbClient)
-    );
+    const initialResponse = mapPostgrestErr(await initialResponseLog(this.request, this.timing, dbClient));
 
     if (initialResponse.error !== null) {
       return initialResponse;
@@ -247,10 +245,7 @@ export class DBLoggable {
     }
   }
 
-  async log(db: {
-    supabase: SupabaseClient;
-    clickhouse: ClickhouseClientWrapper;
-  }) {
+  async log(db: { supabase: SupabaseClient; clickhouse: ClickhouseClientWrapper }): Promise<Result<null, string>> {
     const requestResult = await logRequest(this.request, db.supabase);
 
     if (requestResult.data !== null) {
@@ -263,7 +258,16 @@ export class DBLoggable {
           requestResult.data.properties,
           db.clickhouse
         );
+      } else {
+        return responseResult;
       }
+    } else {
+      return requestResult;
     }
+
+    return {
+      data: null,
+      error: null,
+    };
   }
 }

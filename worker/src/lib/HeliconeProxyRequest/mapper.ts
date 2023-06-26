@@ -1,15 +1,10 @@
 // This will store all of the information coming from the client.
 
-import { Env } from "../..";
+import { Env, Provider } from "../..";
 import { Result } from "../../results";
 import { IHeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
-import {
-  ChatPrompt,
-  FormattedPrompt,
-  Prompt,
-  extractPrompt,
-} from "../promptFormater/prompt";
+import { ChatPrompt, FormattedPrompt, Prompt, extractPrompt } from "../promptFormater/prompt";
 import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
 
 export type RetryOptions = {
@@ -24,7 +19,7 @@ type Nullable<T> = T | null;
 
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
-  provider: Env["PROVIDER"];
+  provider: Provider;
   tokenCalcUrl: Env["TOKEN_COUNT_URL"];
   rateLimitOptions: Nullable<RateLimitOptions>;
   retryOptions: IHeliconeHeaders["retryHeaders"];
@@ -50,7 +45,7 @@ export interface HeliconeProxyRequest {
   requestId: string;
 }
 
-const providerBaseUrlMappings: Record<Env["PROVIDER"], string> = {
+const providerBaseUrlMappings: Record<Provider, string> = {
   OPENAI: "https://api.openai.com",
   ANTHROPIC: "https://api.anthropic.com",
 };
@@ -61,7 +56,7 @@ export class HeliconeProxyRequestMapper {
 
   constructor(
     private request: RequestWrapper,
-    private provider: Env["PROVIDER"],
+    private provider: Provider,
     private tokenCalcUrl: Env["TOKEN_COUNT_URL"]
   ) {}
   // WARNING
@@ -69,9 +64,7 @@ export class HeliconeProxyRequestMapper {
   // Please be careful when using this function.
   // It is used in the following places:
   //  - At the beginning when this class is instantiated
-  private async runPromptFormatter(): Promise<
-    Result<FormattedPrompt | null, string>
-  > {
+  private async runPromptFormatter(): Promise<Result<FormattedPrompt | null, string>> {
     if (this.isPromptFormatterEnabled()) {
       console.log("Running prompt formatter");
       const text = await this.request.getText();
@@ -103,8 +96,7 @@ export class HeliconeProxyRequestMapper {
   async tryToProxyRequest(): Promise<Result<HeliconeProxyRequest, string>> {
     const startTime = new Date();
 
-    const { error: promptFormatterError, data: promptFormatter } =
-      await this.runPromptFormatter();
+    const { error: promptFormatterError, data: promptFormatter } = await this.runPromptFormatter();
     if (promptFormatterError !== null) {
       return { data: null, error: promptFormatterError };
     }
@@ -113,8 +105,7 @@ export class HeliconeProxyRequestMapper {
     if (api_base_error !== null) {
       return { data: null, error: api_base_error };
     }
-    const { data: heliconeAuthHash, error: heliconeAuthHashError } =
-      await this.request.getHeliconeAuthHeader();
+    const { data: heliconeAuthHash, error: heliconeAuthHashError } = await this.request.getHeliconeAuthHeader();
     if (heliconeAuthHashError !== null) {
       return { data: null, error: heliconeAuthHashError };
     }
@@ -143,8 +134,7 @@ export class HeliconeProxyRequestMapper {
               prompt: promptFormatter.prompt,
             }
           : null,
-        requestId:
-          this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
+        requestId: this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
         requestWrapper: this.request,
       },
       error: null,
@@ -161,8 +151,7 @@ export class HeliconeProxyRequestMapper {
 
   private isPromptFormatterEnabled(): boolean {
     return (
-      this.request.heliconeHeaders.promptFormat !== undefined &&
-      this.request.heliconeHeaders.promptFormat !== null
+      this.request.heliconeHeaders.promptFormat !== undefined && this.request.heliconeHeaders.promptFormat !== null
     );
   }
 
@@ -196,6 +185,7 @@ export class HeliconeProxyRequestMapper {
     if (api_base) {
       return { data: api_base, error: null };
     } else {
+      console.log("Using default API base", providerBaseUrlMappings[this.provider]);
       return {
         data: providerBaseUrlMappings[this.provider],
         error: null,
@@ -204,9 +194,7 @@ export class HeliconeProxyRequestMapper {
   }
 
   rateLimitOptions(): HeliconeProxyRequest["rateLimitOptions"] {
-    const rateLimitOptions = new RateLimitOptionsBuilder(
-      this.request.heliconeHeaders.rateLimitPolicy
-    ).build();
+    const rateLimitOptions = new RateLimitOptionsBuilder(this.request.heliconeHeaders.rateLimitPolicy).build();
 
     if (rateLimitOptions.error) {
       this.heliconeErrors.push(rateLimitOptions.error);
@@ -215,8 +203,6 @@ export class HeliconeProxyRequestMapper {
   }
 
   async requestJson(): Promise<HeliconeProxyRequest["requestJson"]> {
-    return this.request.getMethod() === "POST"
-      ? await this.request.getJson()
-      : {};
+    return this.request.getMethod() === "POST" ? await this.request.getJson() : {};
   }
 }

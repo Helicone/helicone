@@ -26,10 +26,12 @@ proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
 global_headers = {}
 
+
 class AttributeDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttributeDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
 
 def normalize_data_type(data_type):
     if isinstance(data_type, str):
@@ -49,8 +51,8 @@ def normalize_data_type(data_type):
 
 
 api_key = os.environ.get("HELICONE_API_KEY", None)
-if (api_key is None):
-    warnings.warn("Helicone API key is not set as an environment variable.")
+# if (api_key is None):
+#     warnings.warn("Helicone API key is not set as an environment variable.")
 
 proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
@@ -86,6 +88,7 @@ def prepare_api_base(**kwargs):
             openai.api_base = proxy_url[:-3]
 
     return original_api_base, kwargs
+
 
 class Helicone:
     def __init__(self):
@@ -163,7 +166,7 @@ class Helicone:
         kwargs["headers"] = headers
 
         return helicone_request_id, kwargs
-    
+
     def update_response_headers(self, result, helicone_request_id):
         headers = self.headers_store.get(helicone_request_id, {})
         result["helicone"] = AttributeDict(
@@ -278,7 +281,7 @@ class Helicone:
                 with threading.Lock():
                     self_parent.headers_store[helicone_id] = response.headers
             return response
-        
+
         async def arequest_raw_patched(self, *args, **kwargs):
             helicone_id = kwargs["supplied_headers"]["helicone-request-id"]
             response = await original_arequest_raw(self, *args, **kwargs)
@@ -312,5 +315,5 @@ class Helicone:
                     self_parent._with_helicone_auth_async(async_create_method))
 
 
-helicone = Helicone()
-log_feedback = helicone.log_feedback
+# helicone = Helicone()
+# log_feedback = helicone.log_feedback

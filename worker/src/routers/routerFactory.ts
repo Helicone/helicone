@@ -1,36 +1,36 @@
 import { Route, RouterType } from "itty-router";
-import { Env, Provider } from "..";
+import { Env } from "..";
 import { handleFeedbackEndpoint } from "../feedback";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { handleLoggingEndpoint } from "../properties";
-import { getOpenAIRouter } from "./oaiRouter";
-import { getAnthropicRouter } from "./anthropicRouter";
+import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
+import { getAPIRouter } from "./apiRouter";
+import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 
-export function buildRouter(
-  provider: Env["PROVIDER"]
-): RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]> {
-  const router = getProviderRouter(provider);
+type BaseRouter = RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>;
 
+const WORKER_MAP: {
+  [key in Env["WORKER_TYPE"]]: () => BaseRouter;
+} = {
+  ANTHROPIC_PROXY: getAnthropicProxyRouter,
+  OPENAI_PROXY: getOpenAIProxyRouter,
+  HELICONE_API: getAPIRouter,
+};
+
+export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
+  const router = WORKER_MAP[provider]();
+  console.log("provider", provider);
+  // console.log("router", router);
+
+  //TODO remove this
   router.post("/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     return await handleLoggingEndpoint(requestWrapper, env);
   });
 
+  //TODO remove this
   router.post("/v1/feedback", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     return await handleFeedbackEndpoint(requestWrapper, env);
   });
 
   return router;
-}
-
-export function getProviderRouter(
-  provider: Env["PROVIDER"]
-): RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]> {
-  if (provider === Provider.ANTHROPIC) {
-    return getAnthropicRouter();
-  }
-
-  if (provider === Provider.OPENAI) {
-    return getOpenAIRouter();
-  }
-  throw new Error("Provider not found");
 }

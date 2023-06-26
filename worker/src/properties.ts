@@ -7,18 +7,13 @@ interface LoggingRequestBody {
   [key: string]: unknown;
 }
 
-export async function handleLoggingEndpoint(
-  request: RequestWrapper,
-  env: Env
-): Promise<Response> {
+export async function handleLoggingEndpoint(request: RequestWrapper, env: Env): Promise<Response> {
   const body = await request.getJson<LoggingRequestBody>();
   const heliconeId = body["helicone-id"];
   const propTag = "helicone-property-";
   const heliconeHeaders = Object.fromEntries(
     [...request.getHeaders().entries()]
-      .filter(
-        ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
-      )
+      .filter(([key, _]) => key.startsWith(propTag) && key.length > propTag.length)
       .map(([key, value]) => [key.substring(propTag.length), value])
   );
 
@@ -30,15 +25,8 @@ export async function handleLoggingEndpoint(
   });
 }
 
-export async function updateRequestProperties(
-  id: string,
-  properties: Record<string, string>,
-  env: Env
-): Promise<void> {
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
+export async function updateRequestProperties(id: string, properties: Record<string, string>, env: Env): Promise<void> {
+  const dbClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
   // Fetch the existing properties
   const { data: requestData, error: fetchError } = await dbClient
@@ -59,10 +47,7 @@ export async function updateRequestProperties(
   };
 
   // Save the updated properties to the database
-  const { error: updateError } = await dbClient
-    .from("request")
-    .update({ properties: updatedProperties })
-    .eq("id", id);
+  const { error: updateError } = await dbClient.from("request").update({ properties: updatedProperties }).eq("id", id);
 
   if (updateError) {
     console.error("Error updating properties:", updateError.message);

@@ -3,7 +3,7 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
-import { Env, Provider, hash } from "..";
+import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 
@@ -14,7 +14,6 @@ export class RequestWrapper {
   heliconeHeaders: HeliconeHeaders;
   authorization: string | undefined;
   providerAuth: string | undefined;
-  provider: Env["PROVIDER"] | undefined;
 
   private cachedText: string | null = null;
 
@@ -22,7 +21,6 @@ export class RequestWrapper {
     this.url = new URL(request.url);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
     this.authorization = this.getAuthorization(request.headers);
-    this.providerAuth = this.getProviderAuth(request.headers);
   }
 
   async getText(): Promise<string> {
@@ -81,17 +79,11 @@ export class RequestWrapper {
   }
 
   async getProviderAuthHeader(): Promise<string | undefined> {
-    if (this.provider === Provider.OPENAI) {
-      const azureApiKey = this.providerAuth;
-      return this.authorization
-        ? await hash(this.authorization)
-        : azureApiKey !== undefined
-        ? await hash(azureApiKey)
-        : undefined;
-    } else if (this.provider === Provider.ANTHROPIC) {
-      return this.authorization ? await hash(this.authorization) : undefined;
-    }
-    return undefined;
+    return this.authorization ? await hash(this.authorization) : undefined;
+  }
+
+  async getAuthorizationHash(): Promise<string | undefined> {
+    return this.authorization ? await hash(this.authorization) : undefined;
   }
 
   async getUserId(): Promise<string | undefined> {
@@ -104,11 +96,8 @@ export class RequestWrapper {
     return (
       headers.get("Authorization") ?? // Openai
       headers.get("x-api-key") ?? // Anthropic
+      headers.get("api-key") ?? // Azure
       undefined
     );
-  }
-
-  private getProviderAuth(headers: Headers): string | undefined {
-    return headers.get("api-key") ?? undefined;
   }
 }
