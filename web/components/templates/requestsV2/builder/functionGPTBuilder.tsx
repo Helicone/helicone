@@ -6,6 +6,7 @@ import AbstractRequestBuilder, {
 
 class FunctionGPTBuilder extends AbstractRequestBuilder {
   build(): NormalizedRequest {
+    const hasFunctionCall = this.response.request_body.functions !== undefined;
     return {
       createdAt: this.response.request_created_at,
       requestText: this.response.request_body.messages.at(-1).content,
