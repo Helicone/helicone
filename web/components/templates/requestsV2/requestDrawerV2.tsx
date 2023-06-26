@@ -40,7 +40,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
               <p className="font-semibold text-gray-900">Model</p>
               <ModelPill model={request.model} />
             </li>
-            {request.status === 200 && (
+            {request.status.statusType === "success" && (
               <li className="flex flex-row justify-between items-center py-2 gap-4">
                 <p className="font-semibold text-gray-900">Tokens</p>
                 <div className="flex flex-row items-center space-x-1">
@@ -63,7 +63,10 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">Status</p>
-              <StatusBadge status={request.status} />
+              <StatusBadge
+                statusType={request.status.statusType}
+                errorCode={request.status.code}
+              />
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">User</p>
