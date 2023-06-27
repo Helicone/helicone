@@ -2,6 +2,7 @@ import {
   CloudArrowDownIcon,
   CurrencyDollarIcon,
   TableCellsIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
   MetricsPanel,
@@ -9,7 +10,8 @@ import {
 } from "../../shared/metrics/metricsPanel";
 import { usePropertyCard } from "./useProperty";
 import { MdLaunch } from "react-icons/md";
-import ThemedTable from "../../shared/themed/themedTable";
+import ThemedTableV5 from "../requestsV2/themedTableV5";
+import { INITIAL_COLUMNS } from "./initialColumns";
 
 interface PropertyCardPageProps {
   property: string;
@@ -17,10 +19,11 @@ interface PropertyCardPageProps {
     start: Date;
     end: Date;
   };
+  onDelete: () => void;
 }
 
 const PropertyCard = (props: PropertyCardPageProps) => {
-  const { property, timeFilter } = props;
+  const { property, timeFilter, onDelete } = props;
   const { keyMetrics, valueMetrics } = usePropertyCard({
     timeFilter,
     property,
@@ -56,59 +59,34 @@ const PropertyCard = (props: PropertyCardPageProps) => {
 
   return (
     <>
-      <div className="bg-white p-5 rounded-md">
-        <div className="flex flex-row justify-between items-center py-3">
-          <h1 className="text-2xl font-semibold">{property}</h1>
-          {/* 
-          <button className="border p-2 my-2 shadow-sm hover:shadow-md rounded-md flex flex-row items-center gap-2">
-            Open request page
-            <MdLaunch className="inline-block ml-2" />
-          </button> */}
+      <div className="bg-white p-8 rounded-xl border border-gray-300 shadow-sm flex flex-col space-y-4">
+        <div className="flex flex-row justify-between items-center">
+          <h1 className="text-2xl font-semibold text-gray-900">{property}</h1>
+          <button
+            onClick={onDelete}
+            className="p-1 rounded-lg hover:bg-gray-300"
+          >
+            <XMarkIcon className="h-5 w-5 text-gray-900" />
+          </button>
         </div>
         <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-3 text-gray-900 gap-4">
           {metricsData.map((m, i) => (
             <MetricsPanel metric={m} key={i} />
           ))}
         </div>
-        <div className="flex flex-col gap-2 mt-6">
-          <div>Showing top 10 results</div>
-
-          <ThemedTable
-            columns={[
-              { name: "Value", key: "property_value", hidden: false },
-              { name: "First see", key: "active_since", hidden: false },
-              { name: "Requests", key: "total_requests", hidden: false },
-              {
-                name: "Avg Completion Tokens/Req",
-                key: "avg_completion_tokens_per_request",
-                hidden: true,
-              },
-              {
-                name: "Avg Latency/Req",
-                key: "avg_latency_per_request",
-                subName: "s",
-                hidden: true,
-              },
-              {
-                name: "Avg Cost/Req",
-                key: "average_cost_per_request",
-                hidden: true,
-                subName: "USD",
-              },
-              {
-                name: "Total Cost",
-                key: "total_cost",
-                hidden: true,
-                subName: "USD",
-              },
-            ]}
-            rows={
+        <div className="flex flex-col gap-2 pt-4">
+          <div className="text-gray-500 italic text-sm">
+            Showing top 10 results
+          </div>
+          <ThemedTableV5
+            defaultData={
               valueMetrics.aggregatedKeyMetrics?.data?.data?.map((d) => ({
                 ...d,
                 average_cost_per_request: d.total_cost / d.total_requests,
                 avg_latency_per_request: d.avg_latency_per_request / 1000,
               })) ?? []
             }
+            defaultColumns={INITIAL_COLUMNS}
           />
         </div>
       </div>

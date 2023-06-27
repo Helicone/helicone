@@ -14,7 +14,7 @@ import { ThemedPill } from "../../shared/themed/themedPill";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PropertyCard from "./propertyCard";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, TagIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 
@@ -28,7 +28,11 @@ const PropertiesPage = (props: {}) => {
     end: new Date(),
   });
 
-  const { properties, isLoading: isPropertiesLoading } = useGetProperties();
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+    refetch,
+  } = useGetProperties();
   const [selectedProperties, setSelectedProperties] = useLocalStorage<string[]>(
     "selectedProperties_PropertyPage",
     [],
@@ -49,6 +53,7 @@ const PropertiesPage = (props: {}) => {
                 start: getTimeIntervalAgo(interval),
                 end: new Date(),
               });
+              refetch();
             }}
             className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
           >
@@ -119,29 +124,38 @@ const PropertiesPage = (props: {}) => {
           />
         </div>
 
-        <div className="flex flex-row gap-2 items-center">
-          {selectedProperties.map((property, i) => (
-            <div key={i}>
-              <ThemedPill
-                label={property}
-                onDelete={() => {
-                  setSelectedProperties(
-                    selectedProperties.filter((p) => p !== property)
-                  );
-                }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-8">
           {selectedProperties.length < 1 ? (
             <div className="h-96 p-8 flex flex-col space-y-4 w-full border border-dashed border-gray-300 rounded-xl justify-center items-center text-center">
+              <TagIcon className="h-12 w-12 text-gray-700" />
               <p className="text-2xl font-semibold text-gray-700">
                 No Properties Selected
               </p>
               <p className="text-gray-500">
                 Please select a custom property to view data
               </p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                {properties.slice(0, 8).map((property, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      if (selectedProperties.includes(property)) {
+                        setSelectedProperties(
+                          selectedProperties.filter((p) => p !== property)
+                        );
+                      } else {
+                        setSelectedProperties([
+                          ...selectedProperties,
+                          property,
+                        ]);
+                      }
+                    }}
+                    className="bg-white border border-gray-300 px-4 py-2 rounded-lg"
+                  >
+                    <p className="text-gray-700 text-lg">{property}</p>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             selectedProperties.map((property, i) => (
@@ -149,6 +163,11 @@ const PropertiesPage = (props: {}) => {
                 property={property}
                 key={i}
                 timeFilter={timeFilter}
+                onDelete={() => {
+                  setSelectedProperties(
+                    selectedProperties.filter((p) => p !== property)
+                  );
+                }}
               />
             ))
           )}
