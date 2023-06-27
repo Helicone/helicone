@@ -44,7 +44,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                 isActive("custom")
                   ? "bg-sky-200 border-sky-300"
                   : "bg-white hover:bg-sky-50 border-gray-300",
-                "relative inline-flex text-gray-900 items-center rounded-l-md border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                "relative inline-flex text-gray-900 items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
               )}
             >
               <CalendarDaysIcon className="h-5 mr-2" />

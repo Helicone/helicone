@@ -10,7 +10,6 @@ import {
 import { userTableFilters } from "../../../../services/lib/filters/frontendFilterDefs";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { RenderBarChart } from "../../../shared/metrics/barChart";
-import ThemedListItem from "../../../shared/themed/themedListItem";
 import { getUSDate } from "../../../shared/utils/utils";
 import { Loading } from "../dashboardPage";
 
