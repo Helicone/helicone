@@ -33,6 +33,23 @@ interface UsersPageProps {
   pageSize: number;
 }
 
+function formatNumber(num: number) {
+  const numParts = num.toString().split(".");
+
+  if (numParts.length > 1) {
+    const decimalPlaces = numParts[1].length;
+    if (decimalPlaces < 2) {
+      return num.toFixed(2);
+    } else if (decimalPlaces > 6) {
+      return num.toFixed(6);
+    } else {
+      return num;
+    }
+  } else {
+    return num.toFixed(2);
+  }
+}
+
 const UsersPage = (props: UsersPageProps) => {
   const { page, pageSize } = props;
 
@@ -65,7 +82,7 @@ const UsersPage = (props: UsersPageProps) => {
 
   const { setNotification } = useNotification();
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [index, setIndex] = useState<number>();
   const [selectedUser, setSelectedUser] = useState<UserRow>();
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
@@ -308,7 +325,7 @@ const UsersPage = (props: UsersPageProps) => {
         )}
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div>
+        <div className="w-full min-w-[300px] flex flex-col">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
             <UserCircleIcon
               className="h-8 w-8 text-sky-600"
@@ -349,7 +366,7 @@ const UsersPage = (props: UsersPageProps) => {
               <li className="w-full flex flex-row justify-between gap-4 text-sm">
                 <p>Last Active:</p>
                 <p className="max-w-xl whitespace-pre-wrap text-left">
-                  {selectedUser?.last_active}
+                  {new Date(selectedUser?.last_active || "").toLocaleString()}
                 </p>
               </li>
               <li className="w-full flex flex-row justify-between gap-4 text-sm">
@@ -366,7 +383,9 @@ const UsersPage = (props: UsersPageProps) => {
               </li>
               <li className="w-full flex flex-row justify-between gap-4 text-sm">
                 <p>Total Cost:</p>
-                <p className="italic">{selectedUser?.cost}</p>
+                <p className="">{`$${formatNumber(
+                  selectedUser?.cost || 0
+                )}`}</p>
               </li>
             </ul>
           </div>
