@@ -14,7 +14,7 @@ const SignIn = (props: SignInProps) => {
 
   return (
     <AuthForm
-      handleSubmit={async (email: string, password: string) => {
+      handleEmailSubmit={async (email: string, password: string) => {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email,
           password: password,
@@ -27,6 +27,17 @@ const SignIn = (props: SignInProps) => {
         }
         setNotification("Successfully logged in.", "success");
         router.push("/welcome");
+      }}
+      handleGoogleSubmit={async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+        });
+        if (error) {
+          setNotification("Error logging in. Please try again.", "error");
+          console.error(error);
+          return;
+        }
+        setNotification("Successfully signed in.", "success");
       }}
       authFormType={"signin"}
     />

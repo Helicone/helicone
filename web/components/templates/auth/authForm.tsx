@@ -8,14 +8,17 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 interface AuthFormProps {
-  handleSubmit: (email: string, password: string) => void;
+  handleEmailSubmit: (email: string, password: string) => void;
+  handleGoogleSubmit?: () => void;
   authFormType: "signin" | "signup";
 }
 
 const AuthForm = (props: AuthFormProps) => {
-  const { handleSubmit, authFormType } = props;
+  const { handleEmailSubmit, handleGoogleSubmit, authFormType } = props;
 
-  const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmitHandler = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
     const email = event.currentTarget.elements.namedItem(
@@ -25,7 +28,7 @@ const AuthForm = (props: AuthFormProps) => {
       "password"
     ) as HTMLInputElement;
 
-    handleSubmit(email.value, password.value);
+    handleEmailSubmit(email.value, password.value);
   };
 
   return (
@@ -123,7 +126,7 @@ const AuthForm = (props: AuthFormProps) => {
                   action="#"
                   method="POST"
                   className="space-y-4"
-                  onSubmit={handleSubmitHandler}
+                  onSubmit={handleEmailSubmitHandler}
                 >
                   <div>
                     <label
@@ -173,34 +176,35 @@ const AuthForm = (props: AuthFormProps) => {
                   </div>
                 </form>
               </div>
-
-              <div className="mt-6">
-                <div className="relative">
-                  <div
-                    className="absolute inset-0 flex items-center"
-                    aria-hidden="true"
-                  >
-                    <div className="w-full border-t border-gray-400" />
+              {handleGoogleSubmit && (
+                <div className="mt-6">
+                  <div className="relative">
+                    <div
+                      className="absolute inset-0 flex items-center"
+                      aria-hidden="true"
+                    >
+                      <div className="w-full border-t border-gray-400" />
+                    </div>
+                    <div className="relative flex justify-center text-sm font-medium leading-6">
+                      <span className="px-4 text-gray-600 bg-gray-100">
+                        Or continue with
+                      </span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-sm font-medium leading-6">
-                    <span className="px-4 text-gray-600 bg-gray-100">
-                      Or continue with
-                    </span>
+
+                  <div className="mt-6 grid grid-cols-1 gap-4">
+                    <a
+                      href="#"
+                      className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                    >
+                      <BsGoogle />
+                      <span className="text-sm font-semibold leading-6">
+                        Google
+                      </span>
+                    </a>
                   </div>
                 </div>
-
-                <div className="mt-6 grid grid-cols-1 gap-4">
-                  <a
-                    href="#"
-                    className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                  >
-                    <BsGoogle />
-                    <span className="text-sm font-semibold leading-6">
-                      Google
-                    </span>
-                  </a>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

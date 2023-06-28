@@ -18,12 +18,27 @@ const SignUp = (props: SignUpProps) => {
   return (
     <>
       <AuthForm
-        handleSubmit={async (email: string, password: string) => {
+        handleEmailSubmit={async (email: string, password: string) => {
           const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
           });
 
+          if (error) {
+            setNotification(
+              "Error creating your account. Please try again.",
+              "error"
+            );
+            console.error(error);
+            return;
+          }
+          setNotification("Successfully created account.", "success");
+          setShowEmailConfirmation(true);
+        }}
+        handleGoogleSubmit={async () => {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+          });
           if (error) {
             setNotification(
               "Error creating your account. Please try again.",
