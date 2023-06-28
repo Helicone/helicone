@@ -11,7 +11,7 @@ type ProviderRequest = {
   body: {
     [key: string]: any;
   };
-  headers: Record<string, string>;
+  meta: Record<string, string>;
 };
 
 type ProviderResponse = {
@@ -42,7 +42,7 @@ export function validateAsyncLogModel(logModel: AsyncLogModel): [boolean, string
   const providerRequest = logModel.providerRequest;
   if (
     typeof providerRequest.url !== "string" ||
-    typeof providerRequest.headers !== "object" ||
+    typeof providerRequest.meta !== "object" ||
     typeof providerRequest.body === "undefined"
   ) {
     return [false, "Invalid providerRequest structure or value type"];

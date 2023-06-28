@@ -12,12 +12,17 @@ export const getAPIRouter = () => {
 
   apiRouter.post("/oai/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
+    //TODO Check to make sure auth is correct
+    if (!requestWrapper.authorization) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
     const [isValid, error] = validateAsyncLogModel(asyncLogModel);
     if (!isValid) {
       return new Response(JSON.stringify({ error }), { status: 400 });
     }
 
-    const requestHeaders = new Headers(asyncLogModel.providerRequest.headers);
+    const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
     const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
     const heliconeHeaders = new HeliconeHeaders(requestHeaders);
 
@@ -35,7 +40,9 @@ export const getAPIRouter = () => {
     });
 
     if (logError !== null) {
-      return new Response(JSON.stringify({ error: logError }), { status: 500 });
+      return new Response(JSON.stringify({ error: logError }), {
+        status: 500,
+      });
     }
 
     return new Response("ok", { status: 200 });
@@ -44,7 +51,7 @@ export const getAPIRouter = () => {
   apiRouter.post("/anthropic/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
 
-    const requestHeaders = new Headers(asyncLogModel.providerRequest.headers);
+    const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
     const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
     const heliconeHeaders = new HeliconeHeaders(requestHeaders);
 
@@ -63,7 +70,9 @@ export const getAPIRouter = () => {
     });
 
     if (logError !== null) {
-      return new Response(JSON.stringify({ error: logError }), { status: 500 });
+      return new Response(JSON.stringify({ error: logError }), {
+        status: 500,
+      });
     }
 
     return new Response("ok", { status: 200 });
