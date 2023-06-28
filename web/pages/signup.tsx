@@ -1,0 +1,60 @@
+import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import useNotification from "../components/shared/notification/useNotification";
+import ThemedModal from "../components/shared/themed/themedModal";
+import AuthForm from "../components/templates/auth/authForm";
+
+interface SignUpProps {}
+
+const SignUp = (props: SignUpProps) => {
+  const {} = props;
+
+  const supabase = useSupabaseClient();
+  const { setNotification } = useNotification();
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+
+  return (
+    <>
+      <AuthForm
+        handleSubmit={async (email: string, password: string) => {
+          const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+          });
+
+          if (error) {
+            setNotification(
+              "Error creating your account. Please try again.",
+              "error"
+            );
+            console.error(error);
+            return;
+          }
+          setNotification("Successfully created account.", "success");
+          setShowEmailConfirmation(true);
+        }}
+        authFormType={"signup"}
+      />
+      <ThemedModal
+        open={showEmailConfirmation}
+        setOpen={setShowEmailConfirmation}
+      >
+        <div className="flex flex-col space-y-4 w-full min-w-[300px] justify-center text-center items-center p-2">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Confirm your email
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Please check your email for a confirmation link.
+          </p>
+          <div className="pt-4">
+            <InboxArrowDownIcon className="h-16 w-16 text-gray-700" />
+          </div>
+        </div>
+      </ThemedModal>
+    </>
+  );
+};
+
+export default SignUp;
