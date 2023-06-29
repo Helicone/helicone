@@ -25,7 +25,7 @@ const SignIn = (props: SignInProps) => {
           console.error(error);
           return;
         }
-        setNotification("Successfully logged in.", "success");
+        setNotification("Success. Redirecting...", "success");
         router.push("/dashboard");
       }}
       handleGoogleSubmit={async () => {

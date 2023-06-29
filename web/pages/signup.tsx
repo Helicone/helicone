@@ -1,10 +1,12 @@
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import LoadingAnimation from "../components/shared/loadingAnimation";
 import useNotification from "../components/shared/notification/useNotification";
 import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";
+import { DEMO_EMAIL } from "../lib/constants";
 
 interface SignUpProps {}
 
@@ -14,6 +16,13 @@ const SignUp = (props: SignUpProps) => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+
+  const user = useUser();
+  const router = useRouter();
+
+  if (user && user.email !== DEMO_EMAIL) {
+    router.push("/dashboard");
+  }
 
   return (
     <>
@@ -53,7 +62,6 @@ const SignUp = (props: SignUpProps) => {
             console.error(error);
             return;
           }
-          setNotification("Successfully created account.", "success");
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
