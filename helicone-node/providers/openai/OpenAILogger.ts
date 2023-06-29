@@ -1,3 +1,4 @@
+import { HeliconeAsyncConfiguration } from "../../core/HeliconeAsyncConfiguration";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   CreateChatCompletionRequest,
@@ -14,18 +15,16 @@ import {
   CreateModerationRequest,
   CreateModerationResponse,
 } from "openai";
-import { HeliconeLogger } from "../../core/HeliconeLogger";
-import { AsyncLogModel } from "../../core/Types";
-import { HeliconeConfiguration } from "../../core/HeliconeConfiguration";
+import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "../../core/HeliconeAsyncLogger";
 
 export class OpenAILogger extends OpenAIApi {
-  private heliconeConfiguration: HeliconeConfiguration;
-  private logger: HeliconeLogger;
+  private heliconeConfiguration: HeliconeAsyncConfiguration;
+  private logger: HeliconeAsyncLogger;
 
-  constructor(heliconeConfiguration: HeliconeConfiguration) {
+  constructor(heliconeConfiguration: HeliconeAsyncConfiguration) {
     super(heliconeConfiguration);
     this.heliconeConfiguration = heliconeConfiguration;
-    this.logger = new HeliconeLogger("api.hconeai.com/oai/v1/log");
+    this.logger = new HeliconeAsyncLogger(heliconeConfiguration);
   }
 
   async createChatCompletion(
@@ -87,34 +86,45 @@ export class OpenAILogger extends OpenAIApi {
 
       if (this.configuration?.basePath === undefined) throw new Error("Base path is undefined");
 
-      const result = await apiCall(...args);
+      const providerRequest: ProviderRequest = {
+        url: this.configuration.basePath,
+        json: args[0] as [key: string],
+        meta: this.heliconeConfiguration.getHeliconeHeaders(),
+      };
+
+      let result;
+      try {
+        result = await apiCall(...args);
+      } catch (error) {
+        const endTime = Date.now();
+        const asyncLogRequest: HeliconeAyncLogRequest = {
+          providerRequest: providerRequest,
+          providerResponse: {
+            json: {
+              error: error.message,
+            },
+            status: error.response?.status,
+            headers: error.response?.headers,
+          },
+          timing: HeliconeAsyncLogger.createTiming(startTime, endTime), // <---- Extracted Timing Method
+        };
+        this.logger.log(asyncLogRequest, Provider.OPENAI);
+
+        throw error;
+      }
 
       const endTime = Date.now();
-
-      const asyncLogModel: AsyncLogModel = {
-        providerRequest: {
-          url: this.configuration?.basePath,
-          json: args[0] as [key: string],
-          meta: this.heliconeConfiguration.getHeliconeHeaders(), // Populate headers if available
-        },
+      const asyncLogRequest: HeliconeAyncLogRequest = {
+        providerRequest: providerRequest,
         providerResponse: {
           json: result.data as [key: string],
           status: result.status,
           headers: result.headers,
         },
-        timing: {
-          startTime: {
-            seconds: Math.floor(startTime / 1000),
-            milliseconds: startTime % 1000,
-          },
-          endTime: {
-            seconds: Math.floor(endTime / 1000),
-            milliseconds: endTime % 1000,
-          },
-        },
+        timing: HeliconeAsyncLogger.createTiming(startTime, endTime), // <---- Extracted Timing Method
       };
 
-      this.logger.log(asyncLogModel);
+      this.logger.log(asyncLogRequest, Provider.OPENAI);
 
       return result;
     };

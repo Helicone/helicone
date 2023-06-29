@@ -1,4 +1,3 @@
-import { HeliconeConfigurationOptions } from './Types';
 import {
   ChatCompletionRequestMessageRoleEnum,
   ChatCompletionResponseMessageRoleEnum,
@@ -11,8 +10,18 @@ import {
   Configuration as OpenAIConfiguration,
 } from "openai";
 
-export class HeliconeConfiguration extends OpenAIConfiguration {
+export interface HeliconeConfigurationOptions {
+  apiKey: string;
+  heliconeApiKey?: string;
+  properties?: { [key: string]: any };
+  cache?: boolean;
+  retry?: boolean | { [key: string]: any };
+  rateLimitPolicy?: string | { [key: string]: any };
+}
+
+export class BaseHeliconeConfiguration extends OpenAIConfiguration {
   private heliconeHeaders: { [key: string]: string };
+
   constructor(configuration: HeliconeConfigurationOptions) {
     super({ apiKey: configuration.apiKey });
 
@@ -31,8 +40,6 @@ export class HeliconeConfiguration extends OpenAIConfiguration {
         ...this.heliconeHeaders,
       },
     };
-
-    if(configuration.baseUrl) this.basePath = configuration.baseUrl;
   }
 
   getHeliconeHeaders(): { [key: string]: string } {
@@ -94,5 +101,5 @@ export {
   OpenAIApiFp,
   OpenAIApiFactory,
   OpenAIApiOriginal as OpenAIApi,
-  HeliconeConfiguration as Configuration,
+  BaseHeliconeConfiguration as Configuration,
 };
