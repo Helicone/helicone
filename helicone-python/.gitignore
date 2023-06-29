@@ -1,2 +1,3 @@
-helicone.egg-info/
-helicone/__pycache__/
+*.egg-info/
+__pycache__
+*/.pyc

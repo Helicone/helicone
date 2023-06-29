@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 import dataclasses
+import datetime
 from enum import Enum
 from typing import Optional
+from helicone.globals.helicone import helicone_global
 import requests
 import os
 
@@ -31,6 +33,19 @@ class Timing:
     startTime: UnixTimeStamp
     endTime: UnixTimeStamp
 
+    @staticmethod
+    def from_datetimes(start: datetime.datetime, end: datetime.datetime):
+        return Timing(
+            startTime=UnixTimeStamp(
+                seconds=start.second,
+                milliseconds=start.microsecond
+            ),
+            endTime=UnixTimeStamp(
+                seconds=end.second,
+                milliseconds=end.microsecond
+            )
+        )
+
 
 @dataclass
 class HeliconeAyncLogRequest:
@@ -55,6 +70,13 @@ class HeliconeAsyncLogger:
         self.base_url = base_url or "https://api.hconeai.com"
         self.api_key = api_key or os.environ.get("HELICONE_API_KEY")
 
+    @staticmethod
+    def from_helicone_global() -> 'HeliconeAsyncLogger':
+        return HeliconeAsyncLogger(
+            base_url=helicone_global.base_url,
+            api_key=helicone_global.api_key
+        )
+
     def _request(self, body: dict, url: str) -> requests.Response:
         res = requests.post(
             url=url,
@@ -69,6 +91,7 @@ class HeliconeAsyncLogger:
         return res
 
     def log(self, request: HeliconeAyncLogRequest, provider: Provider):
+        print("logging", request, provider)
         if provider == Provider.OPENAI:
             self._request(
                 body=dataclasses.asdict(request),

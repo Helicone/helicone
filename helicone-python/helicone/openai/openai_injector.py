@@ -1,8 +1,19 @@
+import datetime
 import functools
+import json
 import uuid
 import inspect
 import os
 import aiohttp
+from helicone.async_logger.async_logger import HeliconeAsyncLogger
+from helicone.async_logger.async_logger import (
+    HeliconeAyncLogRequest,
+    ProviderRequest,
+    ProviderResponse,
+    Timing,
+    UnixTimeStamp,
+    Provider
+)
 import openai
 import requests
 import warnings
@@ -26,56 +37,115 @@ helicone_global.api_key = "sk-ql3xnfy-nokuanq-wpf2jci-jriay3k"
 helicone_global.base_url = "https://oai.hconeai.com/v1"
 
 
+class CreateArgsExtractor:
+
+    def __init__(self,
+                 api_key=None,
+                 api_base=None,
+                 api_type=None,
+                 request_id=None,
+                 api_version=None,
+                 organization=None,
+                 **kwargs):
+        self.kwargs = kwargs
+        self.kwargs["api_key"] = api_key
+        self.kwargs["api_base"] = api_base
+        self.kwargs["api_type"] = api_type
+        self.kwargs["request_id"] = request_id
+        self.kwargs["api_version"] = api_version
+        self.kwargs["organization"] = organization
+
+    def get_args(self):
+        return self.kwargs
+
+    def get_body(self):
+        return self.kwargs
+
+
 class OpenAIInjector:
     def __init__(self):
         pass
 
-    def _prepare_headers(self, **kwargs):
-        headers = kwargs.get("headers", {})
+    def update_response_headers(self, result, helicone_request_id):
+        result["helicone_request_id"] = helicone_request_id
 
-        if "Helicone-Auth" not in headers and helicone_global.api_key:
-            headers["Helicone-Auth"] = f"Bearer {helicone_global.api_key}"
+    def _result_interceptor(self,
+                            result,
+                            helicone_meta: dict,
+                            send_response: Callable[[dict], None] = None):
 
-        # Generate a UUID and add it to the headers
-        helicone_request_id = str(uuid.uuid4())
-        headers["helicone-request-id"] = helicone_request_id
-
-        # headers.update(self._get_property_headers(
-        #     kwargs.pop("properties", {})))
-        # headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
-        # headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
-        # headers.update(self._get_rate_limit_policy_headers(
-        # kwargs.pop("rate_limit_policy", None)))
-
-        kwargs["headers"] = headers
-
-        return helicone_request_id, kwargs
-
-    def _modify_result(self, result, helicone_request_id):
-        def result_with_helicone():
+        def generator_intercept_packets():
+            response = {}
+            response["streamed_data"] = []
             for r in result:
-                self.update_response_headers(r, helicone_request_id)
+                r["helicone_meta"] = helicone_meta
+                response["streamed_data"].append(json.loads(r.__str__()))
                 yield r
+            send_response(response)
 
         if inspect.isgenerator(result):
-            return result_with_helicone()
+            return generator_intercept_packets()
         else:
-            self.update_response_headers(result, helicone_request_id)
+            result["helicone_meta"] = helicone_meta
+            send_response(json.loads(result.__str__()))
+
             return result
 
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            helicone_request_id, kwargs = self._prepare_headers(**kwargs)
-            original_api_base, kwargs = prepare_api_base(**kwargs)
+            logger = HeliconeAsyncLogger.from_helicone_global()
 
+            arg_extractor = CreateArgsExtractor(*args, **kwargs)
+            now = datetime.datetime.now()
+
+            providerRequest = ProviderRequest(
+                url=arg_extractor.get_args()["api_base"],
+                body=arg_extractor.get_body(),
+                meta={}
+            )
             try:
-                result = func(*args, **kwargs)
-            finally:
-                openai.api_base = original_api_base
-            print("result", result)
+                result = func(**arg_extractor.get_args())
+            except Exception as e:
+                later = datetime.datetime.now()
+                async_log = HeliconeAyncLogRequest(
+                    providerRequest=providerRequest,
+                    providerResponse=ProviderResponse(
+                        body={
+                            "error": str(e)
+                        },
+                        status=500,
+                        headers={
+                            "openai-version": "ligmaligma"
+                        }
+                    ),
+                    timing=Timing.from_datetimes(now, later)
+                )
+                logger.log(async_log, Provider.OPENAI)
 
-            return self._modify_result(result, helicone_request_id)
+                raise e
+
+            def send_response(response):
+                later = datetime.datetime.now()
+                async_log = HeliconeAyncLogRequest(
+                    providerRequest=providerRequest,
+                    providerResponse=ProviderResponse(
+                        body=response,
+                        status=200,
+                        headers={
+                            "openai-version": "ligmaligma"
+                        }
+                    ),
+                    timing=Timing.from_datetimes(now, later)
+                )
+                print("logging", async_log, Provider.OPENAI)
+                # exit(1)
+
+                logger.log(async_log, Provider.OPENAI)
+
+            return self._result_interceptor(result,
+                                            {},
+                                            send_response)
 
         return wrapper
 

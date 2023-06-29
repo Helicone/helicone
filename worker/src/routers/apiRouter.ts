@@ -19,6 +19,7 @@ export const getAPIRouter = () => {
 
     const [isValid, error] = validateAsyncLogModel(asyncLogModel);
     if (!isValid) {
+      console.error("Invalid asyncLogModel", error);
       return new Response(JSON.stringify({ error }), { status: 400 });
     }
 
