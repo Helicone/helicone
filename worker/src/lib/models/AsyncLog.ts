@@ -8,14 +8,14 @@ export type AsyncLogModel = {
 
 type ProviderRequest = {
   url: string;
-  body: {
+  json: {
     [key: string]: any;
   };
   meta: Record<string, string>;
 };
 
 type ProviderResponse = {
-  body: {
+  json: {
     [key: string]: any;
   };
   status: number;
@@ -43,14 +43,14 @@ export function validateAsyncLogModel(logModel: AsyncLogModel): [boolean, string
   if (
     typeof providerRequest.url !== "string" ||
     typeof providerRequest.meta !== "object" ||
-    typeof providerRequest.body === "undefined"
+    typeof providerRequest.json === "undefined"
   ) {
     return [false, "Invalid providerRequest structure or value type"];
   }
 
   const providerResponse = logModel.providerResponse;
   if (
-    typeof providerResponse.body === "undefined" ||
+    typeof providerResponse.json === "undefined" ||
     typeof providerResponse.status !== "number" ||
     typeof providerResponse.headers !== "object"
   ) {

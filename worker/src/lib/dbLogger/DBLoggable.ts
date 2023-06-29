@@ -91,15 +91,15 @@ export async function dbLoggableRequestFromAsyncLogModel(
       userId: await requestWrapper.getUserId(), // Where do I get this again?
       promptFormatter: undefined,
       startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
-      bodyText: JSON.stringify(asyncLogModel.providerRequest.body),
+      bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
-      isStream: asyncLogModel.providerRequest.body?.stream == true ?? false,
+      isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
     },
     response: {
-      getResponseBody: async () => JSON.stringify(asyncLogModel.providerResponse.body),
+      getResponseBody: async () => JSON.stringify(asyncLogModel.providerResponse.json),
       responseHeaders: providerResponseHeaders,
       status: asyncLogModel.providerResponse.status,
       omitLog: false,

@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { AsyncLogModel } from '../../worker/src/lib/models/AsyncLog';
+import { AsyncLogModel } from "./Types";
 
 export class HeliconeLogger {
     private heliconeUrl: string;
