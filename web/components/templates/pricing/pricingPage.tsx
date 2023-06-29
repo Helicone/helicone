@@ -38,7 +38,7 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $50
+          $25
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
