@@ -26,7 +26,7 @@ const SignIn = (props: SignInProps) => {
           return;
         }
         setNotification("Successfully logged in.", "success");
-        router.push("/welcome");
+        router.push("/dashboard");
       }}
       handleGoogleSubmit={async () => {
         const { error } = await supabase.auth.signInWithOAuth({
