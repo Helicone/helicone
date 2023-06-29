@@ -56,7 +56,6 @@ const SignUp = (props: SignUpProps) => {
 
           if (userSettingsError) {
             console.error(userSettingsError);
-            return;
           }
           setShowEmailConfirmation(true);
         }}
