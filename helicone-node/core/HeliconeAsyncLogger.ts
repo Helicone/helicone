@@ -36,10 +36,10 @@ export type Timing = {
 };
 
 export enum Provider {
-    OPENAI = "openai",
-    AZURE_OPENAI = "azure-openai",
-    ANTHROPIC = "anthropic",
-  }
+  OPENAI = "openai",
+  AZURE_OPENAI = "azure-openai",
+  ANTHROPIC = "anthropic",
+}
 
 export class HeliconeAsyncLogger {
   private configuration: HeliconeAsyncConfiguration;
@@ -49,25 +49,24 @@ export class HeliconeAsyncLogger {
 
   async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<void> {
     if (!asyncLogModel) return;
-
     const options: AxiosRequestConfig = {
       method: "POST",
       data: asyncLogModel,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${this.configuration.apiKey}`,
+        Authorization: `${this.configuration.getHeliconeAuthHeader()}`
       },
     };
 
-    const baseUrl = this.configuration.getHeliconeUrl();
+    const baseUrl = this.configuration.getHeliconeBaseUrl();
 
     // Set Helicone URL
     if (provider == Provider.OPENAI) {
-      options.url = `${baseUrl}oai/v1/log`;
+      options.url = `${baseUrl}/oai/v1/log`;
     } else if (provider == Provider.AZURE_OPENAI) {
-      options.url = `${baseUrl}oai/v1/log`;
+      options.url = `${baseUrl}/oai/v1/log`;
     } else if (provider == Provider.ANTHROPIC) {
-      options.url = `${baseUrl}anthropic/v1/log`;
+      options.url = `${baseUrl}/anthropic/v1/log`;
     } else {
       throw new Error("Invalid provider");
     }

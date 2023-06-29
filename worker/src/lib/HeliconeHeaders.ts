@@ -19,6 +19,7 @@ export interface IHeliconeHeaders {
   requestId: Nullable<string>;
   promptId: Nullable<string>;
   promptName: Nullable<string>;
+  userId: Nullable<string>;
   omitHeaders: {
     omitResponse: boolean;
     omitRequest: boolean;
@@ -36,6 +37,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   requestId: Nullable<string>;
   promptId: Nullable<string>;
   promptName: Nullable<string>;
+  userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
 
   constructor(private headers: Headers) {
@@ -50,6 +52,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.promptId = heliconeHeaders.promptId;
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
+    this.userId = heliconeHeaders.userId;
     this.heliconeProperties = this.getHeliconeProperties();
   }
 
@@ -64,6 +67,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       requestId: this.headers.get("Helicone-Request-Id") ?? null,
       promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
+      userId: this.headers.get("Helicone-User-Id") ?? null,
       omitHeaders: {
         omitResponse: this.headers.get("Helicone-Omit-Response") === "true",
         omitRequest: this.headers.get("Helicone-Omit-Request") === "true",

@@ -84,10 +84,10 @@ export class OpenAILogger extends OpenAIApi {
     return async (...args: any[]): Promise<AxiosResponse<T>> => {
       const startTime = Date.now();
 
-      if (this.configuration?.basePath === undefined) throw new Error("Base path is undefined");
+      if (this.basePath === undefined) throw new Error("Base path is undefined");
 
       const providerRequest: ProviderRequest = {
-        url: this.configuration.basePath,
+        url: this.basePath,
         json: args[0] as [key: string],
         meta: this.heliconeConfiguration.getHeliconeHeaders(),
       };

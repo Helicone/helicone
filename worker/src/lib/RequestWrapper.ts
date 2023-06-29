@@ -87,8 +87,7 @@ export class RequestWrapper {
   }
 
   async getUserId(): Promise<string | undefined> {
-    const heliconeUserIdHeader = "helicone-user-id";
-    const userId = this.request.headers.get(heliconeUserIdHeader) || (await this.getJson<{ user?: string }>()).user;
+    const userId = this.heliconeHeaders.userId || (await this.getJson<{ user?: string }>()).user;
     return userId;
   }
 

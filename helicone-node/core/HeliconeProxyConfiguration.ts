@@ -2,7 +2,7 @@ import { BaseHeliconeConfiguration, HeliconeConfigurationOptions } from "./BaseH
 
 export class HeliconeProxyConfiguration extends BaseHeliconeConfiguration {
   constructor(configuration: HeliconeConfigurationOptions) {
-    super({ apiKey: configuration.apiKey });
+    super(configuration);
     this.basePath = "https://oai.hconeai.com/v1";
   }
 

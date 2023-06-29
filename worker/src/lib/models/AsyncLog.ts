@@ -40,31 +40,48 @@ export function validateAsyncLogModel(logModel: AsyncLogModel): [boolean, string
   }
 
   const providerRequest = logModel.providerRequest;
-  if (
-    typeof providerRequest.url !== "string" ||
-    typeof providerRequest.meta !== "object" ||
-    typeof providerRequest.json === "undefined"
-  ) {
-    return [false, "Invalid providerRequest structure or value type"];
+  if (typeof providerRequest.url !== "string") {
+    return [false, "Invalid providerRequest: 'url' should be a string"];
+  }
+
+  if (typeof providerRequest.meta !== "object") {
+    return [false, "Invalid providerRequest: 'meta' should be an object"];
+  }
+
+  if (typeof providerRequest.json === "undefined") {
+    return [false, "Invalid providerRequest: 'json' is undefined"];
   }
 
   const providerResponse = logModel.providerResponse;
-  if (
-    typeof providerResponse.json === "undefined" ||
-    typeof providerResponse.status !== "number" ||
-    typeof providerResponse.headers !== "object"
-  ) {
-    return [false, "Invalid providerResponse structure or value type"];
+
+  if (typeof providerResponse.json === "undefined") {
+    return [false, "Invalid providerResponse: 'json' is undefined"];
+  }
+
+  if (typeof providerResponse.status !== "number") {
+    return [false, "Invalid providerResponse: 'status' should be a number"];
+  }
+
+  if (typeof providerResponse.headers !== "object") {
+    return [false, "Invalid providerResponse: 'headers' should be an object"];
   }
 
   const timing = logModel.timing;
-  if (
-    typeof timing.startTime.seconds !== "number" ||
-    typeof timing.startTime.milliseconds !== "number" ||
-    typeof timing.endTime.seconds !== "number" ||
-    typeof timing.endTime.milliseconds !== "number"
-  ) {
-    return [false, "Invalid timing structure or value type"];
+
+  if (typeof timing.startTime.seconds !== "number") {
+    return [false, "Invalid timing: 'startTime.seconds' should be a number"];
+  }
+
+  if (typeof timing.startTime.milliseconds !== "number") {
+    return [false, "Invalid timing: 'startTime.milliseconds' should be a number"];
+  }
+
+  if (typeof timing.endTime.seconds !== "number") {
+    return [false, "Invalid timing: 'endTime.seconds' should be a number"];
+  }
+
+  if (typeof timing.endTime.milliseconds !== "number") {
+    return [false, "Invalid timing: 'endTime.milliseconds' should be a number"];
   }
 
   // Check if startTime and endTime are valid Unix timestamps.

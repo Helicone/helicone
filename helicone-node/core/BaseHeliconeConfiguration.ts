@@ -17,6 +17,7 @@ export interface HeliconeConfigurationOptions {
   cache?: boolean;
   retry?: boolean | { [key: string]: any };
   rateLimitPolicy?: string | { [key: string]: any };
+  user?: string;
 }
 
 export class BaseHeliconeConfiguration extends OpenAIConfiguration {
@@ -26,18 +27,19 @@ export class BaseHeliconeConfiguration extends OpenAIConfiguration {
     super({ apiKey: configuration.apiKey });
 
     this.heliconeHeaders = {
-      "Helicone-Auth": `Bearer ${configuration.heliconeApiKey}`,
+       "Helicone-Auth": `Bearer ${configuration.heliconeApiKey}`,
       ...getPropertyHeaders(configuration.properties),
       ...getCacheHeaders(configuration.cache),
       ...getRetryHeaders(configuration.retry),
       ...getRateLimitPolicyHeaders(configuration.rateLimitPolicy),
+      ...getUserHeader(configuration.user)
     };
 
     this.baseOptions = {
       ...this.baseOptions,
       headers: {
         ...this.baseOptions.headers,
-        ...this.heliconeHeaders,
+        // ...this.heliconeHeaders,
       },
     };
   }
@@ -45,6 +47,14 @@ export class BaseHeliconeConfiguration extends OpenAIConfiguration {
   getHeliconeHeaders(): { [key: string]: string } {
     return this.heliconeHeaders;
   }
+
+  getHeliconeAuthHeader(): string {
+    return this.heliconeHeaders["Helicone-Auth"];
+  }
+}
+
+function getUserHeader(user?: string): { [key: string]: string } {
+  return user ? { "helicone-user-id": user } : {};
 }
 
 function getPropertyHeaders(properties?: { [key: string]: any }): {
