@@ -88,7 +88,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       heliconeApiKeyAuthHash: await requestWrapper.getAuthorizationHash(),
       providerApiKeyAuthHash: "N/A",
       promptId: providerRequestHeaders.promptId ?? undefined,
-      userId: await requestWrapper.getUserId(), // Where do I get this again?
+      userId: providerRequestHeaders.userId ?? undefined, // Where do I get this again?
       promptFormatter: undefined,
       startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
