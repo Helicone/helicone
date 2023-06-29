@@ -7,6 +7,7 @@ import AbstractRequestBuilder, {
 class ChatGPTBuilder extends AbstractRequestBuilder {
   build(): NormalizedRequest {
     return {
+      id: this.response.request_id,
       createdAt: this.response.request_created_at,
       requestText: this.response.request_body.messages.at(-1).content,
       responseText:

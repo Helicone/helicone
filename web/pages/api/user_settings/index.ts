@@ -25,67 +25,37 @@ export async function getOrCreateUserSettings(
     .select("*")
     .eq("user", user.id)
     .single();
-  const customer = await stripeServer.customers.list({
-    email: user.email,
-    limit: 1,
-  });
-  // Convert all free users to basic flex users
-  if (userSettings?.tier === "free" || customer.data.length === 0) {
-    const { error: updateUserSettingsError, data: updateUserSettingsData } =
-      await supabaseServer
-        .from("user_settings")
-        .update({
-          tier: "basic_flex",
-        })
-        .eq("user", user.id)
-        .select("*")
-        .single();
-    if (updateUserSettingsError !== null) {
-      return { data: null, error: updateUserSettingsError.message };
-    } else {
-      // create a new account in stripe
-      const createParams: Stripe.CustomerCreateParams = {
-        email: user.email,
-        name: user.email,
-        expand: ["subscriptions"],
-      };
 
-      const customer = await stripeServer.customers.create(createParams);
-
-      // Subscribe the customer to the basic_flex plan
-      const subParams: Stripe.SubscriptionCreateParams = {
-        customer: customer.id,
-        items: [{ price: process.env.STRIPE_BASIC_FLEX_PRICE_ID }],
-      };
-
-      await stripeServer.subscriptions.create(subParams);
-
-      return {
-        data: updateUserSettingsData,
-        error: null,
-      };
-    }
-  } else if (userSettingsError !== null || userSettings === null) {
-    const { error: createUserSettingsError, data: createUserSettingsData } =
+  if (userSettings === null) {
+    // add the user into the userSettings page
+    const { data: newUserSettings, error: newUserSettingsError } =
       await supabaseServer
         .from("user_settings")
         .insert({
           user: user.id,
-          tier: "basic_flex",
+          tier: "free",
+          request_limit: 100_000,
         })
         .select("*")
         .single();
-    if (createUserSettingsError !== null) {
-      return { data: null, error: createUserSettingsError.message };
-    } else {
+
+    if (newUserSettingsError) {
       return {
-        data: createUserSettingsData,
-        error: null,
+        data: null,
+        error: newUserSettingsError.message,
       };
     }
-  } else {
-    return { data: userSettings, error: null };
+
+    return {
+      data: newUserSettings,
+      error: null,
+    };
   }
+
+  return {
+    data: userSettings,
+    error: null,
+  };
 }
 
 export default async function handler(

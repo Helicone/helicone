@@ -1,121 +1,153 @@
-import { CheckIcon } from "@heroicons/react/24/outline";
-import OnboardingButton from "../../shared/auth/onboardingButton";
-import BasePageV2 from "../../shared/layout/basePageV2";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
+import { clsx } from "../../shared/clsx";
+import Footer from "../../shared/layout/footer";
+import NavBarV2 from "../../shared/layout/navBarV2";
 
-interface PricingPageProps {}
-
-const includedFeatures = [
-  "Aggregated Metrics",
-  "User Metrics",
-  "Caching",
-  "User Rate Limiting",
-  "Streaming Support",
-  "Custom Property Support",
+const tiers = [
+  {
+    name: "Free",
+    id: "tier-free",
+    href: "/signup",
+    price: (
+      <p className="mt-6 flex items-baseline gap-x-1">
+        <span className="text-5xl font-bold tracking-tight text-gray-900">
+          $0
+        </span>
+        <span className="text-sm font-semibold leading-6 text-gray-600">
+          /month
+        </span>
+      </p>
+    ),
+    description: "Everything necessary to get started.",
+    features: [
+      "Up to 100,000 requests per month",
+      "Monitoring and Dashboards",
+      "Custom Properties",
+      "Basic Exporting",
+      "1 Organization",
+    ],
+    buttonText: "Try for free",
+    backgroundColor: "bg-sky-600",
+    hoverBackgroundColor: "hover:bg-sky-500",
+    textColor: "text-sky-600",
+  },
+  {
+    name: "Pro",
+    id: "tier-pro",
+    href: "/signup",
+    price: (
+      <p className="mt-6 flex items-baseline gap-x-1">
+        <span className="text-5xl font-bold tracking-tight text-gray-900">
+          $25
+        </span>
+        <span className="text-sm font-semibold leading-6 text-gray-600">
+          /month
+        </span>
+      </p>
+    ),
+    description:
+      "Everything in Basic, plus essential tools for scaling up your business.",
+    features: [
+      "Unlimited Requests",
+      "Bucket Caching",
+      "User Management and Rate Limiting",
+      "GraphQL API",
+      "Request Retries",
+      "Unlimited Organizations",
+      "Up to 2GB of storage",
+    ],
+    buttonText: "Get started",
+    backgroundColor: "bg-pink-600",
+    hoverBackgroundColor: "hover:bg-pink-500",
+    textColor: "text-pink-600",
+  },
+  {
+    name: "Enterprise",
+    id: "tier-enterprise",
+    href: "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call",
+    price: (
+      <p className="mt-6 flex items-baseline gap-x-1">
+        <span className="text-5xl font-bold tracking-tight text-gray-900">
+          Custom
+        </span>
+      </p>
+    ),
+    description:
+      "Everything in Essential, plus features needed for larger enterprises.",
+    features: ["SOC-2 Compliance", "Self-Deployment Management"],
+    buttonText: "Contact us",
+    backgroundColor: "bg-purple-600",
+    hoverBackgroundColor: "hover:bg-purple-500",
+    textColor: "text-purple-600",
+  },
 ];
 
-const PricingPage = (props: PricingPageProps) => {
-  const {} = props;
-
+export default function PricingPage() {
   return (
-    <BasePageV2>
+    <>
+      <NavBarV2 />
       <div className="bg-gray-50">
-        <div className="mx-auto max-w-7xl py-16 sm:py-24 px-6 lg:px-8  border-r border-l border-gray-300 border-dashed">
-          <div className="mx-auto max-w-2xl sm:text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Free to start, easy to scale
-            </h2>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Pricing plans don&apos;t have to be complicated. We built our
-              pricing plan to be simple and straightforward, so you can get
-              started easily and scale with us.
-            </p>
-          </div>
-          {/* Basic Flex */}
-          <div className="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
-            <div className="p-8 sm:p-10 lg:flex-auto">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                Basic Flex
-              </h3>
-              <p className="mt-6 text-base leading-7 text-gray-600">
-                Basic Flex offers 100k free requests monthly, with a
-                pay-as-you-grow model. For every additional 10k requests after
-                the free tier, pay just $1.00. A budget-friendly and scalable
-                solution for users who value flexibility and cost-efficiency.
+        <div className="flex flex-col mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24 border-r border-l border-gray-300 border-dashed">
+          <div className="lg:-mx-8 xl:-mx-4">
+            <div className="lg:px-8 xl:px-14">
+              <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                Pricing thats{" "}
+                <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] pb-1 bg-no-repeat bg-bottom">
+                  simple
+                </span>
+              </h1>
+              <p className="mt-6 w-full text-xl leading-8 text-gray-600">
+                No need to build or maintain expensive infrastructure. Helicone
+                makes monitoring Large-Language Models easy.
               </p>
-              <div className="mt-10 flex items-center gap-x-4">
-                <h4 className="flex-none text-sm font-semibold leading-6 text-sky-600">
-                  What’s included
-                </h4>
-                <div className="h-px flex-auto bg-gray-200" />
-              </div>
-              <ul
-                role="list"
-                className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm leading-6 text-gray-600 lg:grid-cols-3 sm:gap-4"
-              >
-                {includedFeatures.map((feature) => (
-                  <li key={feature} className="flex gap-x-3">
-                    <CheckIcon
-                      className="h-6 w-5 flex-none text-sky-600"
-                      aria-hidden="true"
-                    />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="-mt-2 p-4 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
-              <div className="rounded-2xl h-full bg-gray-200 py-10 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
-                <div className="mx-auto max-w-xs px-8 space-y-8">
-                  <p className="text-md font-semibold text-gray-600">
-                    Your first 100k requests each month are free
-                  </p>
-                  <p className="flex items-baseline justify-center gap-x-2">
-                    <span className="text-5xl font-bold tracking-tight text-gray-900">
-                      $1.00
-                    </span>
-                    <span className="text-sm font-semibold leading-6 tracking-wide text-gray-600">
-                      per 10k requests
-                    </span>
-                  </p>
-                  <OnboardingButton
-                    variant="secondary"
-                    title={"Get Started"}
-                    full
-                  />
-                </div>
-              </div>
             </div>
           </div>
-          {/* Enterprise */}
-          <div className="relative mx-auto mt-8 w-full lg:mt-16">
-            <div className="mx-auto">
-              <div className="rounded-3xl bg-gray-300 px-6 py-8 sm:p-10 lg:flex lg:items-center">
-                <div className="flex-1">
-                  <h3 className="text-2xl font-semibold text-gray-900">
-                    Enterprise
-                  </h3>
-                  <div className="mt-4 text-base leading-7 text-gray-600">
-                    Enterprise is designed for large organizations, offering
-                    custom request limits, advanced features, and 24/7 expert
-                    support. Experience enhanced security and priority access to
-                    new features for mission-critical operations.
-                  </div>
-                </div>
-                <div className="mt-6 rounded-md shadow lg:ml-10 lg:mt-0 lg:flex-shrink-0">
-                  <a
-                    href="#"
-                    className="flex items-center justify-center rounded-md border border-transparent bg-white px-5 py-3 text-md font-semibold text-gray-900 hover:bg-gray-50"
+          <div className="mt-20 flow-root">
+            <div className="isolate -mt-16 grid max-w-sm grid-cols-1 gap-y-16 divide-y divide-gray-300 divide-dashed sm:mx-auto lg:-mx-8 lg:mt-0 lg:max-w-none lg:grid-cols-3 lg:divide-x lg:divide-y-0 xl:-mx-4">
+              {tiers.map((tier) => (
+                <div key={tier.id} className="pt-16 lg:px-8 lg:pt-0 xl:px-14">
+                  <h3
+                    id={tier.id}
+                    className="text-base font-semibold leading-7 text-gray-900"
                   >
-                    Contact Sales
+                    {tier.name}
+                  </h3>
+                  {tier.price}
+                  <a
+                    href={tier.href}
+                    aria-describedby={tier.id}
+                    className={clsx(
+                      tier.backgroundColor,
+                      tier.hoverBackgroundColor,
+                      "mt-10 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 text-white shadow-smfocus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    )}
+                  >
+                    {tier.buttonText}
                   </a>
+                  <p className="mt-10 text-sm font-semibold leading-6 text-gray-900 h-12">
+                    {tier.description}
+                  </p>
+                  <ul
+                    role="list"
+                    className="mt-6 space-y-3 text-sm leading-6 text-gray-600"
+                  >
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex gap-x-3">
+                        <CheckCircleIcon
+                          className={clsx(tier.textColor, "h-6 w-5 flex-none")}
+                          aria-hidden="true"
+                        />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-    </BasePageV2>
+      <Footer />
+    </>
   );
-};
-
-export default PricingPage;
+}

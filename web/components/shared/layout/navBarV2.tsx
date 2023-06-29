@@ -85,7 +85,12 @@ const NavBarV2 = (props: NavBarV2Props) => {
               Sign Out
             </button>
           ) : (
-            <LoginButton />
+            <Link
+              href="/signin"
+              className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
+            >
+              Sign In
+            </Link>
           )}
         </div>
         <div className="flex flex-1 justify-end md:hidden">
