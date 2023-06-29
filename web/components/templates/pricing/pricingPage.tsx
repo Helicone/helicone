@@ -7,7 +7,7 @@ const tiers = [
   {
     name: "Free",
     id: "tier-free",
-    href: "#",
+    href: "/signup",
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
@@ -34,7 +34,7 @@ const tiers = [
   {
     name: "Pro",
     id: "tier-pro",
-    href: "#",
+    href: "/signup",
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
@@ -64,7 +64,7 @@ const tiers = [
   {
     name: "Enterprise",
     id: "tier-enterprise",
-    href: "#",
+    href: "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call",
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">

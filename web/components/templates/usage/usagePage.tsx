@@ -216,18 +216,6 @@ const UsagePage = (props: UsagePageProps) => {
               : Number(count?.data || 0).toLocaleString()}
           </dd>
         </div>
-        <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-          <dt className="text-sm font-medium leading-6 text-gray-700">
-            Estimated Cost
-          </dt>
-          <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-            {isLoading
-              ? "Loading..."
-              : Number(count?.data || 0) > 100_000
-              ? `$${Number(Number(count?.data || 0) - 100_000) / 10_000}`
-              : "$0.00"}
-          </dd>
-        </div>
       </div>
       {/* TODO: Add this in with stripe changes */}
       {/* <ul
