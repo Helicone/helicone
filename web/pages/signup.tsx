@@ -42,21 +42,8 @@ const SignUp = (props: SignUpProps) => {
               "error"
             );
             console.error(error);
-            return;
           }
 
-          // successfully made account, add user to user_settings table under the free tier
-          const { error: userSettingsError } = await supabase
-            .from("user_settings")
-            .insert({
-              user: data.user?.id,
-              tier: "free",
-              request_limit: 100_000,
-            });
-
-          if (userSettingsError) {
-            console.error(userSettingsError);
-          }
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {

@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import { buffer } from "micro";
 import { IncomingMessage } from "http";
 import { supabaseServer } from "../../../../lib/supabaseServer";
+import { dbExecute } from "../../../../lib/api/db/dbExecute";
+import { resultMap } from "../../../../lib/result";
 
 // This is necessary to handle Stripe webhook event types
 interface StripeWebhookEvent extends Stripe.Event {
@@ -56,6 +58,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // Add your own business logic here.
       console.log(`Subscription for ${customer.object} has been updated.`);
       console.log("Email", email);
+
+      //
+
+      const { data: idData, error: idError } = resultMap(
+        await dbExecute<{
+          id: string;
+        }>("SELECT id FROM auth.users WHERE email = $1", [email]),
+        (d) => d[0].id
+      );
 
       // get the user id from supabase by email
       const { data, error } = await supabaseServer
