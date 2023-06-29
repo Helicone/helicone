@@ -11,7 +11,8 @@ type requestBuilderModels =
   | "gpt-3.5-turbo-16k"
   | "gpt-4"
   | "gpt-3.5-turbo-0613"
-  | "gpt-4-0613";
+  | "gpt-4-0613"
+  | "gpt-4-32k";
 
 let requestBuilders: {
   [key in requestBuilderModels]: new (
@@ -26,6 +27,7 @@ let requestBuilders: {
   "gpt-4": ChatGPTBuilder,
   "gpt-3.5-turbo-0613": FunctionGPTBuilder,
   "gpt-4-0613": FunctionGPTBuilder,
+  "gpt-4-32k": ChatGPTBuilder,
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
