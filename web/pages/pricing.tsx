@@ -7,7 +7,7 @@ const Pricing = (props: PricingProps) => {
   const {} = props;
 
   return (
-    <MetaData title="Home">
+    <MetaData title="Pricing">
       <PricingPage />
     </MetaData>
   );

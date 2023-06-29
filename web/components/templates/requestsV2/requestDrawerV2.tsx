@@ -1,10 +1,14 @@
 import {
+  BeakerIcon,
+  ClipboardDocumentIcon,
   CodeBracketIcon,
   EyeIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import { getUSDate } from "../../shared/utils/utils";
@@ -24,6 +28,8 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const { open, setOpen, request, properties } = props;
 
   const [mode, setMode] = useState<"pretty" | "json">("pretty");
+  const { setNotification } = useNotification();
+  const router = useRouter();
 
   // set the mode to pretty if the drawer closes
   useEffect(() => {
@@ -33,7 +39,33 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   }, [open]);
 
   return (
-    <ThemedDrawer open={open} setOpen={setOpen}>
+    <ThemedDrawer
+      open={open}
+      setOpen={setOpen}
+      actions={
+        <div className="w-full flex flex-row justify-between pl-1">
+          <button
+            onClick={() => {
+              if (request) {
+                router.push("/playground?request=" + request.id);
+              }
+            }}
+            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+          >
+            <BeakerIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => {
+              setNotification("Copied to clipboard", "success");
+              navigator.clipboard.writeText(JSON.stringify(request, null, 4));
+            }}
+            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+          >
+            <ClipboardDocumentIcon className="h-5 w-5" />
+          </button>
+        </div>
+      }
+    >
       {request ? (
         <div className="flex flex-col h-full space-y-8">
           <ul className="divide-y divide-gray-200 text-sm">
