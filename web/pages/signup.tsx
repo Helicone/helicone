@@ -21,7 +21,7 @@ const SignUp = (props: SignUpProps) => {
   const router = useRouter();
 
   if (user && user.email !== DEMO_EMAIL) {
-    router.push("/dashboard");
+    router.push("/welcome");
   }
 
   return (
@@ -55,11 +55,7 @@ const SignUp = (props: SignUpProps) => {
             });
 
           if (userSettingsError) {
-            setNotification(
-              "Error creating your account. Please try again.",
-              "error"
-            );
-            console.error(error);
+            console.error(userSettingsError);
             return;
           }
           setShowEmailConfirmation(true);
