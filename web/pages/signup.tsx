@@ -58,7 +58,6 @@ const SignUp = (props: SignUpProps) => {
             console.error(error);
             return;
           }
-          setShowEmailConfirmation(true);
         }}
         authFormType={"signup"}
       />
