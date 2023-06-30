@@ -1,36 +1,25 @@
 import datetime
 import functools
-import json
-import uuid
 import inspect
-import os
-import aiohttp
-from helicone.async_logger.async_logger import HeliconeAsyncLogger
-from helicone.async_logger.async_logger import (
-    HeliconeAyncLogRequest,
-    ProviderRequest,
-    ProviderResponse,
-    Timing,
-    UnixTimeStamp,
-    Provider
-)
-import openai
-import requests
-import warnings
-from openai.api_resources import (
-    ChatCompletion,
-    Completion,
-    Edit,
-    Embedding,
-    Image,
-    Moderation,
-)
+import json
 import logging
+import os
 import threading
 import uuid
+import warnings
 from typing import Callable, Mapping
 
+import aiohttp
+import openai
+import requests
+from openai.api_resources import (ChatCompletion, Completion, Edit, Embedding,
+                                  Image, Moderation)
 
+from helicone.async_logger.async_logger import (HeliconeAsyncLogger,
+                                                HeliconeAyncLogRequest,
+                                                Provider, ProviderRequest,
+                                                ProviderResponse, Timing,
+                                                UnixTimeStamp)
 from helicone.globals import helicone_global
 
 helicone_global.api_key = "sk-ql3xnfy-nokuanq-wpf2jci-jriay3k"
@@ -91,6 +80,28 @@ class OpenAIInjector:
 
             return result
 
+    def _result_interceptor_async(self,
+                                  result,
+                                  helicone_meta: dict,
+                                  send_response: Callable[[dict], None] = None):
+
+        async def generator_intercept_packets():
+            response = {}
+            response["streamed_data"] = []
+            for r in result:
+                r["helicone_meta"] = helicone_meta
+                response["streamed_data"].append(json.loads(r.__str__()))
+                yield r
+            send_response(response)
+
+        if inspect.isgenerator(result):
+            return generator_intercept_packets()
+        else:
+            result["helicone_meta"] = helicone_meta
+            send_response(json.loads(result.__str__()))
+
+            return result
+
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -100,8 +111,8 @@ class OpenAIInjector:
             now = datetime.datetime.now()
 
             providerRequest = ProviderRequest(
-                url=arg_extractor.get_args()["api_base"],
-                body=arg_extractor.get_body(),
+                url="N/A",
+                json=arg_extractor.get_body(),
                 meta={}
             )
             try:
@@ -111,7 +122,7 @@ class OpenAIInjector:
                 async_log = HeliconeAyncLogRequest(
                     providerRequest=providerRequest,
                     providerResponse=ProviderResponse(
-                        body={
+                        json={
                             "error": str(e)
                         },
                         status=500,
@@ -130,16 +141,16 @@ class OpenAIInjector:
                 async_log = HeliconeAyncLogRequest(
                     providerRequest=providerRequest,
                     providerResponse=ProviderResponse(
-                        body=response,
+                        json=response,
                         status=200,
                         headers={
                             "openai-version": "ligmaligma"
                         }
+
                     ),
                     timing=Timing.from_datetimes(now, later)
                 )
                 print("logging", async_log, Provider.OPENAI)
-                # exit(1)
 
                 logger.log(async_log, Provider.OPENAI)
 
@@ -152,14 +163,58 @@ class OpenAIInjector:
     def _with_helicone_auth_async(self, func):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
-            pass
+            logger = HeliconeAsyncLogger.from_helicone_global()
 
-            # try:
-            #     result = await func(*args, **kwargs)
-            # finally:
-            #     openai.api_base = original_api_base
+            arg_extractor = CreateArgsExtractor(*args, **kwargs)
+            now = datetime.datetime.now()
 
-            # return await self._modify_result_async(result, helicone_request_id)
+            providerRequest = ProviderRequest(
+                url="N/A",
+                json=arg_extractor.get_body(),
+                meta={}
+            )
+            try:
+                result = await func(**arg_extractor.get_args())
+            except Exception as e:
+                later = datetime.datetime.now()
+                async_log = HeliconeAyncLogRequest(
+                    providerRequest=providerRequest,
+                    providerResponse=ProviderResponse(
+                        json={
+                            "error": str(e)
+                        },
+                        status=500,
+                        headers={
+                            "openai-version": "ligmaligma"
+                        }
+                    ),
+                    timing=Timing.from_datetimes(now, later)
+                )
+                logger.log(async_log, Provider.OPENAI)
+
+                raise e
+
+            def send_response(response):
+                later = datetime.datetime.now()
+                async_log = HeliconeAyncLogRequest(
+                    providerRequest=providerRequest,
+                    providerResponse=ProviderResponse(
+                        json=response,
+                        status=200,
+                        headers={
+                            "openai-version": "ligmaligma"
+                        }
+
+                    ),
+                    timing=Timing.from_datetimes(now, later)
+                )
+                print("logging", async_log, Provider.OPENAI)
+
+                logger.log(async_log, Provider.OPENAI)
+
+            return self._result_interceptor_async(result,
+                                                  {},
+                                                  send_response)
 
         return wrapper
 

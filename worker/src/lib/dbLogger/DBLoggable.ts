@@ -78,6 +78,15 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   provider: Provider;
 }
 
+function getResponseBody(json: any): string {
+  // This will mock the response as if it came from OpenAI
+  if (json.streamed_data) {
+    const streamedData: any[] = json.streamed_data;
+    return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
+  }
+  return JSON.stringify(json);
+}
+
 export async function dbLoggableRequestFromAsyncLogModel(
   props: DBLoggableRequestFromAsyncLogModelProps
 ): Promise<DBLoggable> {
@@ -99,7 +108,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       provider,
     },
     response: {
-      getResponseBody: async () => JSON.stringify(asyncLogModel.providerResponse.json),
+      getResponseBody: async () => getResponseBody(asyncLogModel.providerResponse.json),
       responseHeaders: providerResponseHeaders,
       status: asyncLogModel.providerResponse.status,
       omitLog: false,

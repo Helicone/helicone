@@ -1,23 +1,26 @@
-from dataclasses import dataclass
 import dataclasses
 import datetime
+import os
+import time
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
-from helicone.globals.helicone import helicone_global
+
 import requests
-import os
+
+from helicone.globals.helicone import helicone_global
 
 
 @dataclass
 class ProviderRequest:
     url: str
-    body: dict
+    json: dict
     meta: dict
 
 
 @dataclass
 class ProviderResponse:
-    body: dict
+    json: dict
     status: int
     headers: dict
 
@@ -27,6 +30,13 @@ class UnixTimeStamp:
     seconds: int
     milliseconds: int
 
+    @staticmethod
+    def from_datetime(dt: datetime) -> 'UnixTimeStamp':
+        timestamp = dt.timestamp()
+        seconds = int(timestamp)
+        milliseconds = int((timestamp - seconds) * 1000)
+        return UnixTimeStamp(seconds, milliseconds)
+
 
 @dataclass
 class Timing:
@@ -34,17 +44,10 @@ class Timing:
     endTime: UnixTimeStamp
 
     @staticmethod
-    def from_datetimes(start: datetime.datetime, end: datetime.datetime):
-        return Timing(
-            startTime=UnixTimeStamp(
-                seconds=start.second,
-                milliseconds=start.microsecond
-            ),
-            endTime=UnixTimeStamp(
-                seconds=end.second,
-                milliseconds=end.microsecond
-            )
-        )
+    def from_datetimes(start: datetime, end: datetime) -> 'Timing':
+        start_timestamp = UnixTimeStamp.from_datetime(start)
+        end_timestamp = UnixTimeStamp.from_datetime(end)
+        return Timing(start_timestamp, end_timestamp)
 
 
 @dataclass

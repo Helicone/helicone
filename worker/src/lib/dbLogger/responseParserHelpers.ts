@@ -11,10 +11,7 @@ export function consolidateTextFields(responseBody: any[]): any {
           choices: acc.choices.map((c: any, i: number) => {
             if (!cur.choices) {
               return c;
-            } else if (
-              c.delta !== undefined &&
-              cur.choices[i]?.delta !== undefined
-            ) {
+            } else if (c.delta !== undefined && cur.choices[i]?.delta !== undefined) {
               return {
                 delta: {
                   ...c.delta,
@@ -23,10 +20,7 @@ export function consolidateTextFields(responseBody: any[]): any {
                     : cur.choices[i].delta.content,
                 },
               };
-            } else if (
-              c.text !== undefined &&
-              cur.choices[i]?.text !== undefined
-            ) {
+            } else if (c.text !== undefined && cur.choices[i]?.text !== undefined) {
               return {
                 ...c,
                 text: c.text + (cur.choices[i].text ?? ""),
@@ -77,10 +71,7 @@ export async function getUsage(
         .map((d) => getResponseText(d))
         .join("")
     );
-    const requestTokenCount = await getRequestTokenCount(
-      JSON.parse(requestBody),
-      tokenCounter
-    );
+    const requestTokenCount = await getRequestTokenCount(JSON.parse(requestBody), tokenCounter);
     const totalTokens = requestTokenCount + responseTokenCount;
     return {
       total_tokens: totalTokens,
