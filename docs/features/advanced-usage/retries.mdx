@@ -37,7 +37,7 @@ openai.Completion.create(
 )
 ```
 
-```node Node
+```js Node
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -65,7 +65,4 @@ You can customize the behavior of the retries feature by setting additional head
 | `helicone-retry-min-timeout` | Minimum timeout (in milliseconds) between retries |
 | `helicone-retry-max-timeout` | Maximum timeout (in milliseconds) between retries |
 
-<Info>
-  {" "}
-  Header values have to be strings, for example `"helicone-retry-num": "3"`{" "}
-</Info>
+<Info> Header values have to be strings, for example `"helicone-retry-num": "3"` </Info>
