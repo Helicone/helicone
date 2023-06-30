@@ -3,42 +3,46 @@ import AbstractRequestBuilder from "./abstractRequestBuilder";
 import ChatGPTBuilder from "./ChatGPTBuilder";
 import FunctionGPTBuilder from "./functionGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
+import ModerationBuilder from "./moderationBuilder";
 
-type requestBuilderModels =
-  | "default-openai"
-  | "text-davinci-003"
-  | "gpt-3.5-turbo"
-  | "gpt-3.5-turbo-16k"
-  | "gpt-4"
-  | "gpt-3.5-turbo-0613"
-  | "gpt-4-0613"
-  | "gpt-4-32k";
+type BuilderType =
+  | "FunctionGPTBuilder"
+  | "ChatGPTBuilder"
+  | "GPT3Builder"
+  | "ModerationBuilder";
 
-let requestBuilders: {
-  [key in requestBuilderModels]: new (
-    request: HeliconeRequest
-  ) => AbstractRequestBuilder;
-} = {
-  // default case is a GPT-3 completion
-  "default-openai": GPT3Builder,
-  "text-davinci-003": GPT3Builder,
-  "gpt-3.5-turbo": ChatGPTBuilder,
-  "gpt-3.5-turbo-16k": ChatGPTBuilder,
-  "gpt-4": ChatGPTBuilder,
-  "gpt-3.5-turbo-0613": FunctionGPTBuilder,
-  "gpt-4-0613": FunctionGPTBuilder,
-  "gpt-4-32k": ChatGPTBuilder,
+const getBuilderType = (model: string): BuilderType => {
+  if (/^(gpt-4|gpt-3\.5-turbo)-(0613|32k-0613)/.test(model)) {
+    return "FunctionGPTBuilder";
+  }
+
+  if (/^(gpt-4|gpt-3\.5-turbo)(|32k)$/.test(model)) {
+    return "ChatGPTBuilder";
+  }
+
+  if (/^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model)) {
+    return "GPT3Builder";
+  }
+
+  if (/^text-moderation(-\[\w+\]|-\d+)?$/.test(model)) {
+    return "ModerationBuilder";
+  }
+
+  return "GPT3Builder";
+};
+
+let builders = {
+  FunctionGPTBuilder: FunctionGPTBuilder,
+  ChatGPTBuilder: ChatGPTBuilder,
+  GPT3Builder: GPT3Builder,
+  ModerationBuilder: ModerationBuilder,
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
   let requestModel = request.request_body.model || request.response_body.model;
-
-  if (Object.keys(requestBuilders).indexOf(requestModel) === -1) {
-    requestModel = "default-openai";
-  }
-  let Builder = requestBuilders[requestModel as requestBuilderModels];
-  let builder = new Builder(request);
-  return builder;
+  const builderType = getBuilderType(requestModel);
+  let builder = builders[builderType];
+  return new builder(request);
 };
 
 export default getRequestBuilder;
