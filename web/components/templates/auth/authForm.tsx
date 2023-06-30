@@ -6,6 +6,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -16,11 +17,14 @@ interface AuthFormProps {
 const AuthForm = (props: AuthFormProps) => {
   const { handleEmailSubmit, handleGoogleSubmit, authFormType } = props;
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleEmailSubmitHandler = async (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
+    setIsLoading(true);
     const email = event.currentTarget.elements.namedItem(
       "email"
     ) as HTMLInputElement;
@@ -28,13 +32,14 @@ const AuthForm = (props: AuthFormProps) => {
       "password"
     ) as HTMLInputElement;
 
-    handleEmailSubmit(email.value, password.value);
+    await handleEmailSubmit(email.value, password.value);
+    setIsLoading(false);
   };
 
   return (
     <>
-      <div className="flex min-h-screen flex-1">
-        <div className="relative hidden w-0 flex-1 lg:flex flex-col bg-black">
+      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 w-full">
+        <div className="relative hidden flex-1 lg:flex flex-col bg-black col-span-1">
           <div className="px-12 py-6 justify-start flex">
             <svg
               width="160"
@@ -93,16 +98,16 @@ const AuthForm = (props: AuthFormProps) => {
             <p className="text-lg mt-6">- Calum Bird</p>
           </div>
         </div>
-        <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-          <div className="mx-auto w-full max-w-sm lg:w-96">
+        <div className="bg-gray-50 h-full col-span-1 flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+          <div className="mx-auto w-full">
             <div>
-              <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
+              <h2 className="mt-8 text-2xl lg:text-3xl font-bold leading-9 tracking-tight text-gray-900">
                 {authFormType === "signin"
                   ? "Welcome back! Sign in below"
                   : "Create an account"}
               </h2>
               {authFormType === "signin" ? (
-                <p className="mt-2 text-sm leading-6 text-gray-500">
+                <p className="mt-2 text-sm lg:text-md leading-6 text-gray-500">
                   Don&apos;t have an account? Click{" "}
                   <Link href={"/signup"} className="underline text-blue-500">
                     here
@@ -110,7 +115,7 @@ const AuthForm = (props: AuthFormProps) => {
                   to sign up
                 </p>
               ) : (
-                <p className="mt-2 text-sm leading-6 text-gray-500">
+                <p className="mt-2 text-sm lg:text-md leading-6 text-gray-500">
                   Already have an account? Click{" "}
                   <Link href={"/signin"} className="underline text-blue-500">
                     here
@@ -131,7 +136,7 @@ const AuthForm = (props: AuthFormProps) => {
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
                     >
                       Email address
                     </label>
@@ -142,14 +147,14 @@ const AuthForm = (props: AuthFormProps) => {
                         type="email"
                         autoComplete="email"
                         required
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                       />
                     </div>
                   </div>
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm lg:text-md  font-medium leading-6 text-gray-900"
                     >
                       Password
                     </label>
@@ -160,18 +165,25 @@ const AuthForm = (props: AuthFormProps) => {
                         type="password"
                         autoComplete="current-password"
                         required
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                       />
                     </div>
                   </div>
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+                      className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm lg:text-md  font-semibold leading-6 text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
                     >
-                      {authFormType === "signin"
-                        ? "Sign in with email"
-                        : "Sign up with email"}
+                      {isLoading ? (
+                        <div className="flex flex-row gap-1 items-center">
+                          <ArrowPathIcon className="animate-spin h-5 w-5 mr-3 text-white" />
+                          <span>Authenticating...</span>
+                        </div>
+                      ) : authFormType === "signin" ? (
+                        "Sign in with email"
+                      ) : (
+                        "Sign up with email"
+                      )}
                     </button>
                   </div>
                 </form>
@@ -185,8 +197,8 @@ const AuthForm = (props: AuthFormProps) => {
                     >
                       <div className="w-full border-t border-gray-400" />
                     </div>
-                    <div className="relative flex justify-center text-sm font-medium leading-6">
-                      <span className="px-4 text-gray-600 bg-gray-100">
+                    <div className="relative flex justify-center text-sm lg:text-md  font-medium leading-6">
+                      <span className="px-4 text-gray-600 bg-gray-50">
                         Or continue with
                       </span>
                     </div>
@@ -198,7 +210,7 @@ const AuthForm = (props: AuthFormProps) => {
                       className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                     >
                       <BsGoogle />
-                      <span className="text-sm font-semibold leading-6">
+                      <span className="text-sm lg:text-md font-semibold leading-6">
                         Google
                       </span>
                     </button>
