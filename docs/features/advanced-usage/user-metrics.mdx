@@ -1,0 +1,49 @@
+---
+title: "User Metrics"
+description: "Get user metrics like number of requests, costs, and activity"
+---
+
+![](/images/users.png)
+
+There are two ways to add user inputs to requests.
+
+### OpenAI API
+
+The OpenAI API has an [optional `user` parameter](https://platform.openai.com/docs/api-reference/completions/create#completions/create-user). By using this option, [OpenAI can also help](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids) monitor and detect abuse of your end-users.
+
+<CodeGroup>
+
+```bash Curl
+curl https://oai.hconeai.com/v1/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Helicone-Auth: Bearer YOUR_API_KEY' \
+  -H 'Helicone-User-Id: "alicebob@gmail.com"'
+```
+
+```python Python
+openai.api_base = "https://oai.hconeai.com/v1"
+
+openai.Completion.create(
+    model="text-davinci-003",
+    prompt="How do I log users?",
+    headers={
+        "Helicone-User-Id": "alicebob@gmail.com"
+    }
+)
+```
+
+```js Node.js
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.hconeai.com/v1",
+  baseOptions: {
+    headers: {
+      Helicone-User-Id: "alicebob@gmail.com",
+    },
+  },
+});
+const openai = new OpenAIApi(configuration);
+```
+
+</CodeGroup>

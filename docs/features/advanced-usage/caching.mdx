@@ -1,0 +1,134 @@
+---
+title: "Caching"
+description: "Reduce latency and save costs by caching on the edge"
+---
+
+Caching, by temporarily storing data closer to the user at the edge, significantly speeds up access time and enhances application performance. This edge deployment ensures low latency, resulting in faster responses and an efficient app development process.
+
+![](/images/caching.png)
+
+### Quick start
+
+To get started, just set `Helicone-Cache-Enabled` to true in the headers, or use the Python or NPM packages to turn it on via parameters.
+
+<CodeGroup>
+
+```bash Curl
+curl https://oai.hconeai.com/v1/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Helicone-Cache-Enabled: true' \
+  -d '{
+    "model": "text-davinci-003",
+    "prompt": "How do I enable caching?",
+}'
+```
+
+```python Python w/Package
+response = openai.Completion.create(
+	model="text-davinci-003",
+	prompt="How do I cache with helicone?",
+	cache=True,
+)
+```
+
+```python Python w/o Package
+openai.api_base = "https://oai.hconeai.com/v1"
+
+openai.Completion.create(
+    model="text-davinci-003",
+    prompt="How do I cache with helicone?",
+    headers={
+      "Helicone-Cache-Enabled": "true",
+    }
+)
+```
+
+```js Node.js
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.hconeai.com/v1",
+  baseOptions: {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+    },
+  },
+});
+const openai = new OpenAIApi(configuration);
+```
+
+</CodeGroup>
+
+The default caching limit is `7 days` , if you want a longer cache please refer to the [Cache Parameters](#Cache Parameters) section and add the Cache-Control header to your request.
+
+### Limitations
+
+The max time limit for a cache limit is `365 days`
+
+### Cache Parameters
+
+`Helicone-Cache-Enabled (required)`: This will enable storing and loading from your cache
+
+`Cache-Control (optional)`: Allow you to configure based on the [Cloudflare Cache Directive](https://developers.cloudflare.com/cache/about/cache-control#cache-control-directives), currently only max-age is supported, but we will be adding more configuration options soon.
+
+Example of setting the cache to `2592000 seconds` aka `30 days`:
+
+`"Cache-Control": "max-age=2592000"`
+
+### Cache Buckets
+
+You can increase the size of the cache bucket, so that after the n'th request we randomly choose from a previously cached element within the bucket.
+
+Here is an example with a bucket size of 3
+
+```
+openai.completion("give me a random number") -> "42"
+# Cache Miss
+openai.completion("give me a random number") -> "47"
+# Cache Miss
+openai.completion("give me a random number") -> "17"
+# Cache Miss
+
+openai.completion("give me a random number") -> This will randomly choose 42 | 47 | 17
+# Cache Hit
+```
+
+### Configuring Bucket size
+
+Simply add `Helicone-Cache-Bucket-Max-Size` with some number to choose how large you want your Bucket size to be.
+
+Note: The max number of caches you can store is `20` within a bucket, if you want more you will need to upgrade to an enterprise plan.
+
+<CodeGroup>
+
+```python Python
+openai.api_base = "https://oai.hconeai.com/v1"
+
+openai.Completion.create(
+model="text-davinci-003",
+prompt="Say this is a test",
+headers={
+"Helicone-Auth": "Bearer HELICONE_API_KEY",
+"Helicone-Cache-Enabled": "true",
+"Helicone-Cache-Bucket-Max-Size": "5",
+}
+)
+```
+
+```typescript TypeScript
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.hconeai.com/v1",
+  baseOptions: {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Bucket-Max-Size": "5",
+    },
+  },
+});
+const openai = new OpenAIApi(configuration);
+```
+
+</CodeGroup>

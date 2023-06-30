@@ -1,0 +1,54 @@
+---
+title: "Omit Logs"
+description: "Omit response and requests"
+---
+
+In some cases you may not want to have Helicone store or log your request body or response body.
+
+You can easily omit these by adding the `Helicone-Omit-Request` or `Helicone-Omit-Response` header and setting it to `"true"`.
+
+### Getting Started
+
+<CodeGroup>
+
+```bash Curl
+curl https://oai.hconeai.com/v1/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer YOUR_API_KEY' \
+  -H 'Helicone-Omit-Request: true' \
+  -H 'Helicone-Omit-Response: true' \
+ -d '{
+    "model": "text-davinci-003",
+    "prompt": "How do I enable custom rate limit policies?",
+}'
+```
+
+```python Python
+openai.api_base = "https://oai.hconeai.com/v1"
+
+openai.Completion.create(
+    model="text-davinci-003",
+    prompt="How do I enable retries?",
+    headers={
+        "Helicone-Omit-Request": "true",
+         "Helicone-Omit-Response": "true",
+    }
+)
+```
+
+```js Node
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  basePath: "https://oai.hconeai.com/v1",
+  baseOptions: {
+    headers: {
+      "Helicone-Omit-Request": "true",
+      "Helicone-Omit-Response": "true",
+    },
+  },
+});
+const openai = new OpenAIApi(configuration);
+```
+
+</CodeGroup>

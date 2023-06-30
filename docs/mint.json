@@ -4,12 +4,11 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
-  "favicon": "/favicon.png",
+  "favicon": "/favicon.webp",
   "colors": {
-    "primary": "#0284C7",
-    "light": "#BAE6FD",
-    "dark": "#111827",
-    "anchors": { "from": "#69B3E7", "to": "#4BA3E3" }
+    "primary": "#4BA3E3",
+    "light": "#4BA3E3",
+    "dark": "#4BA3E3"
   },
   "modeToggle": {
     "default": "light"
@@ -18,12 +17,6 @@
     "name": "Sign In",
     "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-  "topbarLinks": [
-    {
-      "name": "Get Started",
-      "url": "https://www.helicone.ai/onboarding"
-    }
-  ],
   "anchors": [
     {
       "name": "Community",
@@ -34,36 +27,41 @@
       "name": "GitHub",
       "icon": "github",
       "url": "https://github.com/mintlify-onboarding/helicone"
-    },
-    {
-      "name": "Demo",
-      "icon": "circle-play",
-      "url": "https://www.helicone.ai/#:~:text=View-,Demo,-%E2%86%92"
     }
   ],
   "navigation": [
     {
+      "group": "Welcome",
+      "pages": ["introduction", "overview"]
+    },
+    {
       "group": "Getting Started",
       "pages": [
-        "introduction",
+        "getting-started/quick-start",
         {
           "group": "Integrations",
-          "pages": [
-            "getting-started/how-to-integrate",
-            "getting-started/third-party"
-          ]
+          "pages": ["getting-started/integration-method/openai", "getting-started/integration-method/anthropic"]
         },
-        "getting-started/how-encryption-works",
-        "getting-started/how-latency-is-affected"
+        "getting-started/open-source"
       ]
     },
     {
-      "group": "Custom Parameters",
+      "group": "Features",
       "pages": [
-        "custom-parameters/overview",
-        "custom-parameters/user-tracking",
-        "custom-parameters/prompt-tracking"
+        "features/monitoring",
+        "features/advanced-usage/custom-properties",
+        "features/advanced-usage/user-metrics",
+        "features/advanced-usage/templated-prompts",
+        "features/advanced-usage/caching",
+        "features/advanced-usage/retries",
+        "features/advanced-usage/custom-rate-limits",
+        "features/advanced-usage/omit-logs",
+        "features/streaming"
       ]
+    },
+    {
+      "group": "FAQ",
+      "pages": ["faq/how-encryption-works", "faq/latency-affect"]
     }
   ],
   "footerSocials": {
