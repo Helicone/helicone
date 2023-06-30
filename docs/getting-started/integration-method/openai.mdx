@@ -24,17 +24,6 @@ openai.Completion.create(
 ```
 
     That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
-    ```python
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt="What is Helicone?",
-        user="alice@bob.com",
-        cache=True,
-        properties={"conversation_id": 12},
-        rate_limit_policy={"quota": 100, "time_window": 60, "segment": "user"},
-        retry=True, # retry on failure
-    )
-    ```
 
   </Tab>
   <Tab title="Python (w/ package)">
@@ -122,7 +111,7 @@ const openai = new OpenAIApi(configuration);
    + POST https://oai.hconeai.com/v1
    ```
 
-\*\*Add a Helicone-Auth header into the requests
+**Add a Helicone-Auth header into the requests**
 
 ```
 "Helicone-Auth": "Bearer HELICONE_API_KEY"
