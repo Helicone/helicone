@@ -193,15 +193,15 @@ const AuthForm = (props: AuthFormProps) => {
                   </div>
 
                   <div className="mt-6 grid grid-cols-1 gap-4">
-                    <a
-                      href="#"
+                    <button
+                      onClick={() => handleGoogleSubmit()}
                       className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                     >
                       <BsGoogle />
                       <span className="text-sm font-semibold leading-6">
                         Google
                       </span>
-                    </a>
+                    </button>
                   </div>
                 </div>
               )}

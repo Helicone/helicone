@@ -58,7 +58,6 @@ const SignUp = (props: SignUpProps) => {
             console.error(error);
             return;
           }
-          setNotification("Successfully created account.", "success");
           setShowEmailConfirmation(true);
         }}
         authFormType={"signup"}
