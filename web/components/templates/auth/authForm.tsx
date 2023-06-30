@@ -99,7 +99,7 @@ const AuthForm = (props: AuthFormProps) => {
           </div>
         </div>
         <div className="bg-gray-50 h-full col-span-1 flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-          <div className="mx-auto w-full">
+          <div className="mx-auto max-w-md w-full">
             <div>
               <h2 className="mt-8 text-2xl lg:text-3xl font-bold leading-9 tracking-tight text-gray-900">
                 {authFormType === "signin"
