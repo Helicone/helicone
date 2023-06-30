@@ -40,13 +40,9 @@
         "getting-started/quick-start",
         {
           "group": "Integrations",
-          "pages": [
-            "getting-started/integration-method/openai",
-            "getting-started/integration-method/anthropic"
-          ]
+          "pages": ["getting-started/integration-method/openai", "getting-started/integration-method/anthropic"]
         },
-        "getting-started/open-source",
-        "getting-started/latency-affect"
+        "getting-started/open-source"
       ]
     },
     {
@@ -62,6 +58,10 @@
         "features/advanced-usage/omit-logs",
         "features/streaming"
       ]
+    },
+    {
+      "group": "FAQ",
+      "pages": ["faq/how-encryption-works", "faq/latency-affect"]
     }
   ],
   "footerSocials": {
