@@ -6,6 +6,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -16,11 +17,14 @@ interface AuthFormProps {
 const AuthForm = (props: AuthFormProps) => {
   const { handleEmailSubmit, handleGoogleSubmit, authFormType } = props;
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleEmailSubmitHandler = async (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
+    setIsLoading(true);
     const email = event.currentTarget.elements.namedItem(
       "email"
     ) as HTMLInputElement;
@@ -28,7 +32,8 @@ const AuthForm = (props: AuthFormProps) => {
       "password"
     ) as HTMLInputElement;
 
-    handleEmailSubmit(email.value, password.value);
+    await handleEmailSubmit(email.value, password.value);
+    setIsLoading(false);
   };
 
   return (
@@ -169,9 +174,16 @@ const AuthForm = (props: AuthFormProps) => {
                       type="submit"
                       className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm lg:text-md  font-semibold leading-6 text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
                     >
-                      {authFormType === "signin"
-                        ? "Sign in with email"
-                        : "Sign up with email"}
+                      {isLoading ? (
+                        <div className="flex flex-row gap-1 items-center">
+                          <ArrowPathIcon className="animate-spin h-5 w-5 mr-3 text-white" />
+                          <span>Authenticating...</span>
+                        </div>
+                      ) : authFormType === "signin" ? (
+                        "Sign in with email"
+                      ) : (
+                        "Sign up with email"
+                      )}
                     </button>
                   </div>
                 </form>

@@ -186,7 +186,12 @@ export default function HomePage() {
               Large-Language Model operations more efficient.
             </p>
             <div className="flex flex-row gap-8 mt-10">
-              <OnboardingButton title={"Get Started"} />
+              <Link
+                href="/signup"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+              >
+                Get Started
+              </Link>
               {demoLoading ? (
                 <button className="flex flex-row underline underline-offset-2 font-semibold text-gray-900 items-center">
                   <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
