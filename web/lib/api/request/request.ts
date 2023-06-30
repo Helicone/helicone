@@ -8,7 +8,7 @@ import {
   buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
-import { Result } from "../../result";
+import { Result, resultMap } from "../../result";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 export type Provider = "OPENAI" | "ANTHROPIC";
 export interface HeliconeRequest {
@@ -95,15 +95,19 @@ export async function getRequests(
   OFFSET ${offset}
 `;
 
-  const { data, error } = await dbExecute<HeliconeRequest>(
-    query,
-    builtFilter.argsAcc
-  );
+  const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: data, error: null };
+  return resultMap(res, (data) => {
+    return data.map((d) => {
+      return {
+        ...d,
+        response_body: {
+          ...d.response_body,
+          streamed_data: null,
+        },
+      };
+    });
+  });
 }
 
 export async function getRequestCount(

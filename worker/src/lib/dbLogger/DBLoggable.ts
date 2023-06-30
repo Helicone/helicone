@@ -216,6 +216,16 @@ export class DBLoggable {
     }
   }
 
+  tryJsonParse(text: string): any {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      return {
+        error: "error parsing response, " + e + ", " + text,
+      };
+    }
+  }
+
   async readAndLogResponse(
     dbClient: SupabaseClient<Database>
   ): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
@@ -250,7 +260,22 @@ export class DBLoggable {
           .single()
       );
     } else {
-      return parsedResponse;
+      return mapPostgrestErr(
+        await dbClient
+          .from("response")
+          .update({
+            request: this.request.requestId,
+            body: {
+              helicone_error: "error parsing response",
+              parse_response_error: parsedResponse.error,
+              body: this.tryJsonParse(responseBody),
+            },
+            status: this.response.status,
+          })
+          .eq("id", initialResponse.data.id)
+          .select("*")
+          .single()
+      );
     }
   }
 

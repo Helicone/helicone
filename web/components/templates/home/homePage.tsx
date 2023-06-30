@@ -159,29 +159,39 @@ export default function HomePage() {
   return (
     <div className="flex-col w-full">
       <NavBarV2 />
-      <div className="bg-gray-50 overflow-hidden">
-        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
-          <div className="col-start-1 col-span-4 md:col-span-2 space-y-12 h-[80vh] justify-center flex flex-col">
-            <Link
-              href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full w-fit bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10"
-            >
-              Backed by Y Combinator
-            </Link>
-            <div className="text-5xl sm:text-6xl lg:text-7xl leading-none font-bold text-gray-900 text-left space-y-2">
-              <p>Tooling for</p>
-              <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_7px] pb-2 bg-no-repeat bg-bottom">
-                Generative AI
-              </span>
+      <div className="relative isolate overflow-hidden bg-white">
+        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24 border-r border-l border-gray-300 border-dashed">
+          <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+            <div className="mt-24 sm:mt-32 lg:mt-16">
+              <a
+                href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex space-x-6"
+              >
+                <span className="rounded-full bg-orange-600/10 px-3 py-1 text-sm font-semibold leading-6 text-orange-600 ring-1 ring-inset ring-orange-600/10">
+                  Backed by Y Combinator
+                </span>
+              </a>
             </div>
-            <div className="text-lg sm:text-xl sm:leading-relaxed text-gray-700">
+            <h1 className="mt-10 text-4xl sm:leading-tight font-bold tracking-tight text-gray-900 sm:text-5xl">
+              Open-Source{" "}
+              <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] pb-1 bg-no-repeat bg-bottom">
+                Monitoring
+              </span>{" "}
+              <p>for Generative AI</p>
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
               Hundreds of organizations leverage Helicone to make their
               Large-Language Model operations more efficient.
-            </div>
-            <div className="flex flex-row gap-8">
-              <OnboardingButton title={"Get Started"} />
+            </p>
+            <div className="flex flex-row gap-8 mt-10">
+              <Link
+                href="/signup"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+              >
+                Get Started
+              </Link>
               {demoLoading ? (
                 <button className="flex flex-row underline underline-offset-2 font-semibold text-gray-900 items-center">
                   <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
@@ -211,78 +221,18 @@ export default function HomePage() {
               )}
             </div>
           </div>
-          <div className="hidden md:flex mx-auto mt-16 max-w-2xl sm:mt-24 md:ml-16 md:mt-0 md:mr-0 md:max-w-none md:flex-none xl:ml-24">
-            <div className="max-w-3xl flex-none sm:max-w-5xl md:max-w-none">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 md:-m-4 md:rounded-2xl md:p-4">
+          <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
+            <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
+              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <img
                   src="/assets/landing/preview.webp"
                   alt="App screenshot"
                   width={2432}
                   height={1442}
-                  className="w-[60rem] rounded-md shadow-2xl ring-1 ring-gray-900/10"
+                  className="w-[76rem] rounded-md shadow-2xl ring-1 ring-gray-900/10"
                 />
               </div>
             </div>
-          </div>
-
-          <div className="col-span-4 grid grid-cols-4 gap-8 pb-32">
-            {/* <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            />
-            <img
-              className="col-span-1 max-h-12 w-full object-contain md:col-span-1"
-              src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-              alt="Transistor"
-              width={158}
-              height={48}
-            /> */}
           </div>
         </div>
       </div>

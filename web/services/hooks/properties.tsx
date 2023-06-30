@@ -11,7 +11,7 @@ import { getPropertyParams } from "../lib/propertyParams";
 import { useDebounce } from "./debounce";
 
 const useGetProperties = () => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
       return getProperties().then((res) => res);
@@ -77,6 +77,7 @@ const useGetProperties = () => {
     error,
     propertyFilters,
     searchPropertyFilters,
+    refetch,
   };
 };
 

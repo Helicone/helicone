@@ -38,7 +38,6 @@ import { Column } from "../../ThemedTableV2";
 import { AdvancedFilters, UIFilterRow } from "./themedAdvancedFilters";
 import ThemedToggle from "./themedTabs";
 import { Json } from "../../../supabase/database.types";
-import SaveLayoutButton from "./themedSaveLayout";
 import ThemedModal from "./themedModal";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../notification/useNotification";
@@ -180,7 +179,25 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-wrap space-x-1 items-center">
+          <div className="flex flex-wrap space-x-2 items-center">
+            {advancedFilter && (
+              <div className="mx-auto flex text-sm">
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
+                >
+                  <FunnelIcon
+                    className="h-5 w-5 text-gray-900"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
+                    {advancedFilter.filters.length > 0 &&
+                      `(${advancedFilter.filters.length})`}
+                  </p>
+                </button>
+              </div>
+            )}
             {editColumns && (
               <ThemedMultiSelect
                 columns={editColumns.columns.map((col) => ({
@@ -217,140 +234,21 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 }}
               />
             )}
-            {advancedFilter && (
-              <div className="mx-auto flex text-sm">
-                <button
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
-                >
-                  <FunnelIcon
-                    className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                    aria-hidden="true"
-                  />
-                  <p className="sm:inline hidden lg:inline">
-                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
-                    {advancedFilter.filters.length > 0 &&
-                      `(${advancedFilter.filters.length})`}
-                  </p>
-                </button>
-              </div>
-            )}
-            {layout && (
-              <Popover className="relative text-sm">
-                {({ open }) => (
-                  <>
-                    <Popover.Button
-                      className={clsx(
-                        open || layout.currentLayout !== null
-                          ? "bg-sky-100 text-sky-900"
-                          : "hover:bg-sky-100 hover:text-sky-900",
-                        "group flex items-center font-medium text-black px-4 py-2 rounded-lg"
-                      )}
-                    >
-                      <Squares2X2Icon
-                        className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
-                        aria-hidden="true"
-                      />
-                      <span className="sm:inline hidden lg:inline overflow-ellipsis truncate max-w-[100px]">
-                        {layout.currentLayout !== null
-                          ? layout.currentLayout.name
-                          : "Layouts"}
-                      </span>
-                    </Popover.Button>
-
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-200"
-                      enterFrom="opacity-0 translate-y-1"
-                      enterTo="opacity-100 translate-y-0"
-                      leave="transition ease-in duration-150"
-                      leaveFrom="opacity-100 translate-y-0"
-                      leaveTo="opacity-0 translate-y-1"
-                    >
-                      <Popover.Panel className="absolute left-0 right-auto lg:left-auto lg:right-0 z-10 mt-2.5 flex">
-                        {({ close }) => (
-                          <div className="flex-auto rounded-lg bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-                            <div className="grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 rounded-t-lg">
-                              <button
-                                type="button"
-                                onClick={() => setOpenLayout(true)}
-                                className="text-xs flex items-center justify-center gap-x-2.5 p-3 font-semibold text-gray-900 hover:bg-gray-100 border-b border-gray-900/5"
-                              >
-                                <PlusCircleIcon
-                                  className="h-4 w-4 flex-none text-gray-400"
-                                  aria-hidden="true"
-                                />
-                                Create Layout
-                              </button>
-                            </div>
-                            <fieldset className="min-w-[250px] max-h-[400px] w-full overflow-auto flex-auto bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 rounded-b-lg">
-                              {layout.layouts!.length < 1 ? (
-                                <div className="p-4 items-center h-[200px] flex flex-col justify-center text-center text-gray-500 space-y-4">
-                                  <Squares2X2Icon className="h-8 w-8" />
-                                  <p>
-                                    Create layouts to easily switch between
-                                    different filters, column selections, and
-                                    sort orders.
-                                  </p>
-                                </div>
-                              ) : (
-                                <div className="divide-y divide-gray-200 border-gray-200">
-                                  {layout.layouts!.map((l, idx) => (
-                                    <div
-                                      className="flex flex-row justify-between items-center relative"
-                                      key={idx}
-                                    >
-                                      <button
-                                        className={clsx(
-                                          l.id === layout.currentLayout?.id
-                                            ? "bg-sky-100 text-sky-900"
-                                            : "text-gray-900 hover:bg-gray-50",
-                                          "relative p-4 select-none font-medium w-full justify-between items-center flex hover:cursor-pointer"
-                                        )}
-                                        onClick={() => {
-                                          layout.setLayout(l.name);
-                                        }}
-                                      >
-                                        <span className="overflow-ellipsis truncate max-w-[175px]">
-                                          {l.name}
-                                        </span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="absolute right-3 inline-flex items-center rounded-md bg-red-500 p-1 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                                        onClick={() => {
-                                          setDeleteLayout(l);
-                                          setOpenDelete(true);
-                                        }}
-                                      >
-                                        <TrashIcon className="h-4 w-4" />
-                                      </button>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </fieldset>
-                          </div>
-                        )}
-                      </Popover.Panel>
-                    </Transition>
-                  </>
-                )}
-              </Popover>
-            )}
 
             {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">
                   <button
                     onClick={() => csvExport.setOpenExport(true)}
-                    className="group inline-flex items-center justify-center font-medium text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
+                    className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
                   >
                     <ArrowDownTrayIcon
-                      className="mr-2 h-5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+                      className="h-5 w-5 text-gray-900"
                       aria-hidden="true"
                     />
-                    <span className="sm:inline hidden lg:inline">Export</span>
+                    <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                      Export
+                    </p>
                   </button>
                 </Menu>
               </div>

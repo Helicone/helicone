@@ -28,24 +28,26 @@ import { Column } from "../../ThemedTableV2";
 import UserTable from "./userTable";
 import { getUSDate } from "../../shared/utils/utils";
 
-const monthNames = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
 interface UsersPageProps {
   page: number;
   pageSize: number;
+}
+
+function formatNumber(num: number) {
+  const numParts = num.toString().split(".");
+
+  if (numParts.length > 1) {
+    const decimalPlaces = numParts[1].length;
+    if (decimalPlaces < 2) {
+      return num.toFixed(2);
+    } else if (decimalPlaces > 6) {
+      return num.toFixed(6);
+    } else {
+      return num;
+    }
+  } else {
+    return num.toFixed(2);
+  }
 }
 
 const UsersPage = (props: UsersPageProps) => {
@@ -80,7 +82,7 @@ const UsersPage = (props: UsersPageProps) => {
 
   const { setNotification } = useNotification();
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [index, setIndex] = useState<number>();
   const [selectedUser, setSelectedUser] = useState<UserRow>();
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
@@ -322,82 +324,83 @@ const UsersPage = (props: UsersPageProps) => {
           />
         )}
       </div>
-      {open && selectedUser !== undefined && index !== undefined && (
-        <ThemedModal open={open} setOpen={setOpen}>
-          <div>
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-              <UserCircleIcon
-                className="h-8 w-8 text-sky-600"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="mt-3 text-center sm:mt-5">
-              <Dialog.Title
-                as="h3"
-                className="text-lg font-medium leading-6 text-gray-900"
-              >
-                User Information
-              </Dialog.Title>
-              <button
-                type="button"
-                tabIndex={-1}
-                className="inline-flex w-full justify-center text-base font-medium text-gray-500 sm:text-sm items-center"
-                onClick={() => {
-                  setNotification("Copied to clipboard", "success");
-                  navigator.clipboard.writeText(JSON.stringify(selectedUser));
-                }}
-              >
-                Copy to clipboard
-                <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
-              </button>
-              <ul className="mt-4 space-y-2">
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>User Id:</p>
-                  <p>{selectedUser.user_id}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Active For:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedUser.active_for} days
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Last Active:</p>
-                  <p className="max-w-xl whitespace-pre-wrap text-left">
-                    {selectedUser.last_active}
-                  </p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Total Requests:</p>
-                  <p>{selectedUser.total_requests}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Average Requests per day:</p>
-                  <p>{selectedUser.average_requests_per_day_active}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Tokens per request:</p>
-                  <p> {selectedUser.average_tokens_per_request}</p>
-                </li>
-                <li className="w-full flex flex-row justify-between gap-4 text-sm">
-                  <p>Total Cost:</p>
-                  <p className="italic">{selectedUser.cost}</p>
-                </li>
-              </ul>
-            </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="w-full min-w-[300px] flex flex-col">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
+            <UserCircleIcon
+              className="h-8 w-8 text-sky-600"
+              aria-hidden="true"
+            />
           </div>
-          <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
+
+          <div className="mt-3 text-center sm:mt-5">
+            <Dialog.Title
+              as="h3"
+              className="text-lg font-medium leading-6 text-gray-900"
+            >
+              User Information
+            </Dialog.Title>
             <button
               type="button"
               tabIndex={-1}
-              className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
-              onClick={() => setOpen(false)}
+              className="inline-flex w-full justify-center text-base font-medium text-gray-500 sm:text-sm items-center"
+              onClick={() => {
+                setNotification("Copied to clipboard", "success");
+                navigator.clipboard.writeText(JSON.stringify(selectedUser));
+              }}
             >
-              Done
+              Copy to clipboard
+              <ClipboardDocumentIcon className="h-5 w-5 ml-1" />
             </button>
+            <ul className="mt-4 space-y-2">
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>User Id:</p>
+                <p>{selectedUser?.user_id}</p>
+              </li>
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>Active For:</p>
+                <p className="max-w-xl whitespace-pre-wrap text-left">
+                  {selectedUser?.active_for} days
+                </p>
+              </li>
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>Last Active:</p>
+                <p className="max-w-xl whitespace-pre-wrap text-left">
+                  {new Date(selectedUser?.last_active || "").toLocaleString()}
+                </p>
+              </li>
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>Total Requests:</p>
+                <p>{selectedUser?.total_requests}</p>
+              </li>
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>Average Requests per day:</p>
+                <p>{selectedUser?.average_requests_per_day_active}</p>
+              </li>
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>Tokens per request:</p>
+                <p> {selectedUser?.average_tokens_per_request}</p>
+              </li>
+              <li className="w-full flex flex-row justify-between gap-4 text-sm">
+                <p>Total Cost:</p>
+                <p className="">{`$${formatNumber(
+                  selectedUser?.cost || 0
+                )}`}</p>
+              </li>
+            </ul>
           </div>
-        </ThemedModal>
-      )}
+        </div>
+        <div className="mt-5 sm:mt-6 w-full justify-between gap-4 flex flex-row">
+          <button
+            type="button"
+            tabIndex={-1}
+            className="inline-flex w-full justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:text-sm"
+            onClick={() => setOpen(false)}
+          >
+            Done
+          </button>
+        </div>
+      </ThemedModal>
     </>
   );
 };
