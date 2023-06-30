@@ -16,7 +16,7 @@ const getBuilderType = (model: string): BuilderType => {
     return "FunctionGPTBuilder";
   }
 
-  if (/^(gpt-4|gpt-3\.5-turbo)(|32k|16k)$/.test(model)) {
+  if (/^(gpt-4|gpt-3\.5-turbo)(|-32k|-16k)$/.test(model)) {
     return "ChatGPTBuilder";
   }
 
