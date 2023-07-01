@@ -1,4 +1,3 @@
-import { HeliconeAsyncConfiguration } from "../../core/HeliconeAsyncConfiguration";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   CreateChatCompletionRequest,
@@ -16,15 +15,16 @@ import {
   CreateModerationResponse,
 } from "openai";
 import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "../../core/HeliconeAsyncLogger";
+import { IConfigurationProvider } from "../../core/ConfigurationProvider";
 
 export class OpenAILogger extends OpenAIApi {
-  private heliconeConfiguration: HeliconeAsyncConfiguration;
   private logger: HeliconeAsyncLogger;
+  private configurationProvider: IConfigurationProvider;
 
-  constructor(heliconeConfiguration: HeliconeAsyncConfiguration) {
-    super(heliconeConfiguration);
-    this.heliconeConfiguration = heliconeConfiguration;
-    this.logger = new HeliconeAsyncLogger(heliconeConfiguration);
+  constructor(configurationProvider: IConfigurationProvider) {
+    super(configurationProvider.getOpenAIConfiguration(false));
+    this.configurationProvider = configurationProvider;
+    this.logger = new HeliconeAsyncLogger(configurationProvider);
   }
 
   async createChatCompletion(
@@ -82,16 +82,15 @@ export class OpenAILogger extends OpenAIApi {
     apiCall: (...args: any[]) => Promise<AxiosResponse<T>>
   ): (...args: any[]) => Promise<AxiosResponse<T>> {
     return async (...args: any[]): Promise<AxiosResponse<T>> => {
-      const startTime = Date.now();
-
       if (this.basePath === undefined) throw new Error("Base path is undefined");
 
       const providerRequest: ProviderRequest = {
         url: this.basePath,
         json: args[0] as [key: string],
-        meta: this.heliconeConfiguration.getHeliconeHeaders(),
+        meta: this.configurationProvider.getHeliconeHeaders(),
       };
 
+      const startTime = Date.now();
       let result;
       try {
         result = await apiCall(...args);
@@ -106,7 +105,7 @@ export class OpenAILogger extends OpenAIApi {
             status: error.response?.status,
             headers: error.response?.headers,
           },
-          timing: HeliconeAsyncLogger.createTiming(startTime, endTime), // <---- Extracted Timing Method
+          timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
         };
         this.logger.log(asyncLogRequest, Provider.OPENAI);
 
@@ -121,7 +120,7 @@ export class OpenAILogger extends OpenAIApi {
           status: result.status,
           headers: result.headers,
         },
-        timing: HeliconeAsyncLogger.createTiming(startTime, endTime), // <---- Extracted Timing Method
+        timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
       };
 
       this.logger.log(asyncLogRequest, Provider.OPENAI);
@@ -130,5 +129,3 @@ export class OpenAILogger extends OpenAIApi {
     };
   }
 }
-
-export default OpenAILogger;

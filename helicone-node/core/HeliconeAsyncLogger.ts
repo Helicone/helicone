@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { HeliconeAsyncConfiguration } from "./HeliconeAsyncConfiguration";
+import { IConfigurationProvider } from "./ConfigurationProvider";
 
 export type HeliconeAyncLogRequest = {
   providerRequest: ProviderRequest;
@@ -42,8 +42,8 @@ export enum Provider {
 }
 
 export class HeliconeAsyncLogger {
-  private configuration: HeliconeAsyncConfiguration;
-  constructor(configuration: HeliconeAsyncConfiguration) {
+  private configuration: IConfigurationProvider;
+  constructor(configuration: IConfigurationProvider) {
     this.configuration = configuration;
   }
 
@@ -54,26 +54,27 @@ export class HeliconeAsyncLogger {
       data: asyncLogModel,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${this.configuration.getHeliconeAuthHeader()}`
+        Authorization: `${this.configuration.getHeliconeAuthHeader()}`,
       },
     };
 
-    const baseUrl = this.configuration.getHeliconeBaseUrl();
+    const basePath = this.configuration.getBasePath();
+    if (!basePath) throw new Error("Base path not set");
 
     // Set Helicone URL
     if (provider == Provider.OPENAI) {
-      options.url = `${baseUrl}/oai/v1/log`;
+      options.url = `${basePath}/oai/v1/log`;
     } else if (provider == Provider.AZURE_OPENAI) {
-      options.url = `${baseUrl}/oai/v1/log`;
+      options.url = `${basePath}/oai/v1/log`;
     } else if (provider == Provider.ANTHROPIC) {
-      options.url = `${baseUrl}/anthropic/v1/log`;
+      options.url = `${basePath}/anthropic/v1/log`;
     } else {
       throw new Error("Invalid provider");
     }
 
     const result = await axios(options);
     if (result.status != 200) {
-      throw new Error(`Failed to log to ${baseUrl}. Status code ${result.status}`);
+      throw new Error(`Failed to log to ${basePath}. Status code ${result.status}`);
     }
   }
 
