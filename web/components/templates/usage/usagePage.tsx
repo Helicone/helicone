@@ -132,7 +132,7 @@ const UsagePage = (props: UsagePageProps) => {
       getHref: async () => {
         return "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call";
       },
-      display: userSettings?.tier !== "custom",
+      display: userSettings?.tier !== "enterprise",
     },
   ];
 
@@ -218,7 +218,7 @@ const UsagePage = (props: UsagePageProps) => {
         </div>
       </div>
       {/* TODO: Add this in with stripe changes */}
-      {/* <ul
+      <ul
         role="list"
         className="mt-6 grid grid-cols-1 gap-8 border-t border-gray-200 py-6 sm:grid-cols-2"
       >
@@ -265,7 +265,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           ))}
-      </ul> */}
+      </ul>
     </div>
   );
 };

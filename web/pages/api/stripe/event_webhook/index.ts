@@ -39,12 +39,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log("✅ Success:", event.id);
 
-    if (event.type === "customer.subscription.created") {
-      const subscription = event.data.object as any;
-      console.log("Subscription Created", subscription);
-      console.log("Plan", subscription.plan.id);
-    } else if (event.type === "customer.subscription.updated") {
+    if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object;
+
+      console.log("Subscription Obj", subscription);
 
       // Fetch the customer
       const customer = await stripe.customers.retrieve(
@@ -54,35 +52,49 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // Now you have the customer's email address
       const castedCustomer = customer as any;
       const email = castedCustomer.email ? castedCustomer.email : null;
+      console.log(email);
 
-      // Add your own business logic here.
-      console.log(`Subscription for ${customer.object} has been updated.`);
-      console.log("Email", email);
+      if (subscription.cancel_at === null) {
+        // Update the user's tier to pro in supabase by email
+        const { data: idData, error: idError } = resultMap(
+          await dbExecute<{
+            id: string;
+          }>("SELECT id FROM auth.users WHERE email = $1", [email]),
+          (d) => d[0].id
+        );
 
-      //
+        const { error: userSettingsError } = await supabaseServer
+          .from("user_settings")
+          .update({
+            tier: "pro",
+          })
+          .eq("user", idData);
 
-      const { data: idData, error: idError } = resultMap(
-        await dbExecute<{
-          id: string;
-        }>("SELECT id FROM auth.users WHERE email = $1", [email]),
-        (d) => d[0].id
-      );
+        if (userSettingsError) {
+          console.error(userSettingsError);
+          return;
+        }
+      } else {
+        const { data: idData, error: idError } = resultMap(
+          await dbExecute<{
+            id: string;
+          }>("SELECT id FROM auth.users WHERE email = $1", [email]),
+          (d) => d[0].id
+        );
 
-      // get the user id from supabase by email
-      const { data, error } = await supabaseServer
-        .from("user_settings")
-        .update({
-          tier: "pro",
-        })
-        // .select("*")
-        .eq("email", "scott+test7@helicone.ai");
+        const { error: userSettingsError } = await supabaseServer
+          .from("user_settings")
+          .update({
+            tier: "free",
+          })
+          .eq("user", idData);
 
-      if (error) {
-        console.log("Error", error);
-        return;
+        if (userSettingsError) {
+          console.error(userSettingsError);
+          return;
+        }
+        // Update the user's tier to free in supabase by email
       }
-
-      console.log("User", data);
     }
 
     res.json({ received: true });

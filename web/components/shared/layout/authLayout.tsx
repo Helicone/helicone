@@ -4,17 +4,17 @@ import Image from "next/image";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
+  ArrowUpCircleIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BuildingOfficeIcon,
   ChartBarIcon,
   CircleStackIcon,
+  CloudArrowUpIcon,
   CubeTransparentIcon,
   HomeIcon,
-  InformationCircleIcon,
   KeyIcon,
   TableCellsIcon,
-  TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
@@ -32,6 +32,8 @@ import OrgContext, { useOrg } from "./organizationContext";
 import { GrGraphQl } from "react-icons/gr";
 import { BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
+import { useUserSettings } from "../../../services/hooks/userSettings";
+import ThemedModal from "../themed/themedModal";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -46,6 +48,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
+  const { userSettings, isLoading } = useUserSettings(user.id);
+  const [open, setOpen] = useState(false);
 
   const navigation = [
     {
@@ -334,6 +338,23 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
+                {userSettings?.tier === "free" && (
+                  <div className="p-4 flex w-full justify-center">
+                    <button
+                      onClick={() => setOpen(true)}
+                      className="bg-gray-100 border border-gray-300 text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
+                    >
+                      <div className="flex flex-row items-center">
+                        <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                        <p>Free Plan</p>
+                      </div>
+
+                      <p className="text-xs font-normal text-sky-600">
+                        Learn More
+                      </p>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </>
@@ -509,6 +530,55 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </main>
         </div>
       </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="flex flex-col w-[400px] space-y-8">
+          <div className="flex flex-col space-y-4">
+            <CloudArrowUpIcon className="h-10 w-10 text-sky-600" />
+            <h1 className="text-xl font-semibold text-gray-900">
+              You are currently on the free plan
+            </h1>
+            <p className="text-md text-gray-600">
+              Upgrade to remove request limits and unlock the features below:
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              "Unlimited Requests",
+              "Bucket Caching",
+              "User Management",
+              "Rate Limiting",
+              "GraphQL API",
+              "Request Retries",
+              "Unlimited Organizations",
+              "Up to 2GB of storage",
+            ].map((item, i) => (
+              <p key={i} className="text-sm">
+                -{" "}
+                <span className="underline underline-offset-2 decoration-dashed">
+                  {item}
+                </span>
+              </p>
+            ))}
+          </div>
+          <div className="border-t border-gray-300 flex justify-end gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            >
+              Cancel
+            </button>
+            <Link
+              href={`https://buy.stripe.com/test_6oE15FbIYdBBeyYfYZ?prefilled_email=${user.email}`} // HELICONE PRO TEST
+              target="_blank"
+              rel="noopener noreferrer"
+              className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Upgrade
+            </Link>
+          </div>
+        </div>
+      </ThemedModal>
     </>
   );
 };
