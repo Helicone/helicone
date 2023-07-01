@@ -2,6 +2,7 @@ import {
   Bars4Icon,
   BuildingOffice2Icon,
   CalendarIcon,
+  CloudArrowUpIcon,
   CreditCardIcon,
   CubeIcon,
   LightBulbIcon,
@@ -103,10 +104,10 @@ const UsagePage = (props: UsagePageProps) => {
     {
       title: "Upgrade to Pro",
       description: "Unlimited requests and essential tooling for a low price.",
-      icon: CubeIcon,
+      icon: CloudArrowUpIcon,
       background: "bg-pink-500",
       getHref: async () => {
-        return `https://buy.stripe.com/test_6oE15FbIYdBBeyYfYZ?prefilled_email=${user.email}`; // HELICONE PRO TEST
+        return `${process.env.NEXT_PUBLIC_HELICONE_PRO_LINK}?prefilled_email=${user.email}`;
       },
       display: userSettings?.tier === "free",
     },

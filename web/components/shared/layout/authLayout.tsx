@@ -14,6 +14,7 @@ import {
   CubeTransparentIcon,
   HomeIcon,
   KeyIcon,
+  SparklesIcon,
   TableCellsIcon,
   UserCircleIcon,
   UsersIcon,
@@ -552,24 +553,21 @@ const AuthLayout = (props: AuthLayoutProps) => {
               "Unlimited Organizations",
               "Up to 2GB of storage",
             ].map((item, i) => (
-              <p key={i} className="text-sm">
-                -{" "}
-                <span className="underline underline-offset-2 decoration-dashed">
-                  {item}
-                </span>
-              </p>
+              <div key={i} className="text-sm flex flex-row items-center">
+                <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
+                <span className="">{item}</span>
+              </div>
             ))}
           </div>
           <div className="border-t border-gray-300 flex justify-end gap-4 pt-4">
             <button
-              type="button"
               onClick={() => setOpen(false)}
               className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               Cancel
             </button>
             <Link
-              href={`https://buy.stripe.com/test_6oE15FbIYdBBeyYfYZ?prefilled_email=${user.email}`} // HELICONE PRO TEST
+              href={`${process.env.NEXT_PUBLIC_HELICONE_PRO_LINK}?prefilled_email=${user.email}`}
               target="_blank"
               rel="noopener noreferrer"
               className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
