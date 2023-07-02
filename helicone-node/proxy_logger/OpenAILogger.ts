@@ -14,16 +14,16 @@ import {
   CreateModerationRequest,
   CreateModerationResponse,
 } from "openai";
-import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "../../core/HeliconeAsyncLogger";
-import { IConfigurationProvider } from "../../core/ConfigurationProvider";
+import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "../async_logger/HeliconeAsyncLogger";
+import { IConfigurationManager } from "../core/IConfigurationManager";
 
 export class OpenAILogger extends OpenAIApi {
   private logger: HeliconeAsyncLogger;
-  private configurationProvider: IConfigurationProvider;
+  private configurationManager: IConfigurationManager;
 
-  constructor(configurationProvider: IConfigurationProvider) {
-    super(configurationProvider.getOpenAIConfiguration(false));
-    this.configurationProvider = configurationProvider;
+  constructor(configurationProvider: IConfigurationManager) {
+    super(configurationProvider.resolveConfiguration());
+    this.configurationManager = configurationProvider;
     this.logger = new HeliconeAsyncLogger(configurationProvider);
   }
 
@@ -87,8 +87,10 @@ export class OpenAILogger extends OpenAIApi {
       const providerRequest: ProviderRequest = {
         url: this.basePath,
         json: args[0] as [key: string],
-        meta: this.configurationProvider.getHeliconeHeaders(),
+        meta: this.configurationManager.getHeliconeHeaders(),
       };
+
+      console.log("providerRequest", providerRequest);
 
       const startTime = Date.now();
       let result;

@@ -1,5 +1,5 @@
+import { IConfigurationManager } from '../core/IConfigurationManager';
 import axios, { AxiosRequestConfig } from "axios";
-import { IConfigurationProvider } from "./ConfigurationProvider";
 
 export type HeliconeAyncLogRequest = {
   providerRequest: ProviderRequest;
@@ -42,9 +42,9 @@ export enum Provider {
 }
 
 export class HeliconeAsyncLogger {
-  private configuration: IConfigurationProvider;
-  constructor(configuration: IConfigurationProvider) {
-    this.configuration = configuration;
+  private configurationManager: IConfigurationManager;
+  constructor(configurationManager: IConfigurationManager) {
+    this.configurationManager = configurationManager;
   }
 
   async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<void> {
@@ -54,11 +54,11 @@ export class HeliconeAsyncLogger {
       data: asyncLogModel,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${this.configuration.getHeliconeAuthHeader()}`,
+        Authorization: `${this.configurationManager.getHeliconeAuthHeader()}`,
       },
     };
 
-    const basePath = this.configuration.getBasePath();
+    const basePath = this.configurationManager.getBasePath();
     if (!basePath) throw new Error("Base path not set");
 
     // Set Helicone URL
