@@ -39,7 +39,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log("✅ Success:", event.id);
 
-    if (event.type === "customer.subscription.updated") {
+    if (
+      event.type === "customer.subscription.updated" ||
+      event.type === "customer.subscription.created"
+    ) {
       const subscription = event.data.object;
 
       // Fetch the customer
@@ -47,9 +50,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         subscription.customer as string
       );
 
+      console.log("customer", customer);
+
       // Now you have the customer's email address
       const castedCustomer = customer as any;
       const email = castedCustomer.email ? castedCustomer.email : null;
+
+      console.log("email", email);
 
       // get the user id
       const { data: idData, error: idError } = resultMap(
