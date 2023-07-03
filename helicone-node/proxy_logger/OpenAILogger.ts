@@ -147,40 +147,33 @@ export class OpenAILogger extends OpenAIApi {
     result.data.pipe(logStream);
 
     // Logging stream
-    let logData = "";
+    const logData: Record<string, any>[] = [];
     logStream.on("data", (chunk) => {
-      const lines = chunk
+      const lines: string[] = chunk
         .toString()
         .split("\n")
-        .filter((line: any) => line.trim() !== "");
+        .filter((line: string) => line.trim() !== "");
       for (const line of lines) {
         const message = line.replace(/^data: /, "");
         if (message === "[DONE]") {
           return; // Stream finished
         }
 
-        if (logData.length > 0) {
-          logData += ",";
+        try {
+          const parsedMessage = JSON.parse(message);
+          logData.push(parsedMessage);
+        } catch (error) {
+          console.error("Error parsing message as JSON:", error);
         }
-
-        logData += message;
       }
     });
 
     logStream.on("end", () => {
-      logData = '{"streamed_data": [' + logData + "]}";
-      let parsedData: { [key: string]: any };
-      try {
-        parsedData = JSON.parse(logData);
-      } catch (error) {
-        console.error("Error parsing the JSON content:", error);
-      }
-
       const endTime = Date.now();
       const asyncLogRequest: HeliconeAyncLogRequest = {
         providerRequest: providerRequest,
         providerResponse: {
-          json: parsedData,
+          json: { streamed_data: logData },
           status: result.status,
           headers: result.headers,
         },
