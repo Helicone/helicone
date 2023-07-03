@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Result } from "../../../lib/result";
 import { useUserSettings } from "../../../services/hooks/userSettings";
+import { stripeServer } from "../../../utlis/stripeServer";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 

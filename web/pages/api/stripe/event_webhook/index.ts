@@ -20,14 +20,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
-    const buf = await buffer(req);
+    const buf = JSON.stringify(req.body);
     const sig = req.headers["stripe-signature"]!;
 
     let event: StripeWebhookEvent;
 
     try {
       event = stripe.webhooks.constructEvent(
-        buf.toString(),
+        buf,
         sig,
         process.env.STRIPE_WEBHOOK_SECRET!
       ) as StripeWebhookEvent;
