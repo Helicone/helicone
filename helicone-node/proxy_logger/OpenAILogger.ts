@@ -124,7 +124,7 @@ export class OpenAILogger extends OpenAIApi {
       }
 
       if (result.headers["content-type"] === "text/event-stream" && result.data instanceof Readable) {
-        result.data = this.handleStreamLogging(result, startTime, providerRequest);
+        this.handleStreamLogging(result, startTime, providerRequest);
       } else {
         const endTime = Date.now();
         const asyncLogRequest: HeliconeAyncLogRequest = {
@@ -144,11 +144,9 @@ export class OpenAILogger extends OpenAIApi {
     };
   }
 
-  private handleStreamLogging(result: AxiosResponse, startTime: number, providerRequest: ProviderRequest): PassThrough {
+  private handleStreamLogging(result: AxiosResponse, startTime: number, providerRequest: ProviderRequest): void {
     // Splitting stream into two
-    const userStream = new PassThrough();
     const logStream = new PassThrough();
-    result.data.pipe(userStream);
     result.data.pipe(logStream);
 
     // Logging stream
@@ -163,7 +161,7 @@ export class OpenAILogger extends OpenAIApi {
         if (message === "[DONE]") {
           return; // Stream finished
         }
- 
+
         try {
           const parsedMessage = JSON.parse(message);
           logData.push(parsedMessage);
@@ -172,6 +170,8 @@ export class OpenAILogger extends OpenAIApi {
         }
       }
     });
+
+    // TODO: Add a on close or on error if someone cancels the stream
 
     logStream.on("end", () => {
       const endTime = Date.now();
@@ -185,9 +185,10 @@ export class OpenAILogger extends OpenAIApi {
         timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
       };
 
-      this.logger.log(asyncLogRequest, Provider.OPENAI);
+      this.logger.log(asyncLogRequest, Provider.OPENAI).then(() => {
+        const func = this.configurationManager.getOnHeliconeLog();
+        if(func) func(result);
+      })
     });
-
-    return userStream;
   }
 }
