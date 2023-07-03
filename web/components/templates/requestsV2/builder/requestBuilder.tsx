@@ -12,11 +12,11 @@ type BuilderType =
   | "ModerationBuilder";
 
 const getBuilderType = (model: string): BuilderType => {
-  if (/^(gpt-4|gpt-3\.5-turbo)-(0613|32k-0613)/.test(model)) {
+  if (/^(gpt-4|gpt-3\.5-turbo)-(0613|32k-0613|16k-0613)/.test(model)) {
     return "FunctionGPTBuilder";
   }
 
-  if (/^(gpt-4|gpt-3\.5-turbo)(|32k)$/.test(model)) {
+  if (/^(gpt-4|gpt-3\.5-turbo)(|-32k|-16k)$/.test(model)) {
     return "ChatGPTBuilder";
   }
 
