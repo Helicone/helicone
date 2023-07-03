@@ -6,6 +6,7 @@ import {
   CreditCardIcon,
   CubeIcon,
   LightBulbIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
@@ -138,6 +139,12 @@ const UsagePage = (props: UsagePageProps) => {
     },
   ];
 
+  const getProgress = (count: number) => {
+    const cappedCount = Math.min(count, 100000);
+    const percentage = (cappedCount / 100000) * 100;
+    return percentage;
+  };
+
   const renderInfo = () => {
     if (!userSettings) {
       return (
@@ -145,7 +152,7 @@ const UsagePage = (props: UsagePageProps) => {
           <p>Had an issue getting your user settings</p>
         </div>
       );
-    } else {
+    } else if (userSettings.tier === "free") {
       return (
         <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
           <div className="flex flex-row gap-2 w-full h-4">
@@ -153,16 +160,13 @@ const UsagePage = (props: UsagePageProps) => {
               <div
                 className="aboslute h-full bg-purple-500 rounded-md"
                 style={{
-                  width: `${
-                    Math.max(Number(count?.data) / userSettings.request_limit) *
-                    100
-                  }%`,
+                  width: `${getProgress(count?.data || 0)}%`,
                 }}
               ></div>
             </div>
             <div className="flex-1 w-full whitespace-nowrap">
               <p>
-                {Number(count?.data).toLocaleString()} /{" "}
+                {Number(count?.data || 0).toLocaleString()} /{" "}
                 {userSettings.request_limit.toLocaleString()}
               </p>
             </div>
@@ -171,6 +175,33 @@ const UsagePage = (props: UsagePageProps) => {
             <LightBulbIcon className="h-6 w-6 text-gray-600 hidden sm:inline" />
             We continue logging your requests after your limit is reached, but
             you will lose access to the dashboard until you upgrade.
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-col w-full border border-gray-300 border-dashed space-y-8 p-4 rounded-lg">
+          <div className="flex flex-row gap-4 items-center">
+            <LightBulbIcon className="h-5 w-5 text-gray-600 hidden sm:inline" />
+            <p className="text-md text-gray-700">
+              Get the most out of Helicone with the features below
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              "Unlimited Requests",
+              "Bucket Caching",
+              "User Management",
+              "Rate Limiting",
+              "GraphQL API",
+              "Request Retries",
+              "Unlimited Organizations",
+            ].map((item, i) => (
+              <div key={i} className="text-sm flex flex-row items-center">
+                <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
+                <span className="">{item}</span>
+              </div>
+            ))}
           </div>
         </div>
       );
