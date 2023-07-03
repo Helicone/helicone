@@ -1,24 +1,24 @@
 import { Configuration, ConfigurationParameters } from "openai";
-import { IConfigurationManager } from "./IConfigurationManager";
+import { IConfigurationManager, OnHeliconeLog } from "./IConfigurationManager";
 import { IHeliconeConfigurationParameters } from "./IHeliconeConfigurationParameters";
-import { HeaderBuilder } from "./HeaderBuilder";
+import { HeliconeHeaderBuilder } from "./HeliconeHeaderBuilder";
 
 export class ProxyConfigurationManager implements IConfigurationManager {
   private heliconeConfigParameters: IHeliconeConfigurationParameters;
   private configurationParameters: ConfigurationParameters;
   private heliconeHeaders: { [key: string]: string };
-  private basePath: string;
+  private basePath: string | undefined;
 
   constructor(
     heliconeConfigParameters: IHeliconeConfigurationParameters,
     configurationParameters: ConfigurationParameters,
-    basePath: string
+    basePath?: string
   ) {
     this.heliconeConfigParameters = heliconeConfigParameters;
     this.configurationParameters = configurationParameters;
-    this.basePath = basePath;
+    this.basePath = basePath ?? "https://oai.hconeai.com/v1";
 
-    this.heliconeHeaders = new HeaderBuilder(this.heliconeConfigParameters)
+    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigParameters)
       .withPropertiesHeader()
       .withCacheHeader()
       .withRetryHeader()
@@ -27,7 +27,11 @@ export class ProxyConfigurationManager implements IConfigurationManager {
       .build();
   }
 
-  getBasePath(): string {
+  getOnHeliconeLog(): OnHeliconeLog {
+    return undefined;
+  }
+
+  getBasePath(): string | undefined {
     return this.basePath;
   }
 
@@ -49,7 +53,8 @@ export class ProxyConfigurationManager implements IConfigurationManager {
         ...this.heliconeHeaders,
       },
     };
-    configuration.basePath = this.basePath;
+
+    configuration.basePath = this.getBasePath();
 
     return configuration;
   }
