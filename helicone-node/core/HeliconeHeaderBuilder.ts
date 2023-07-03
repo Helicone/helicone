@@ -1,6 +1,6 @@
 import { IHeliconeConfigurationParameters } from "./IHeliconeConfigurationParameters";
 
-export class HeaderBuilder {
+export class HeliconeHeaderBuilder {
   private heliconeConfigParameters: IHeliconeConfigurationParameters;
   private headers: { [key: string]: string } = {};
 
@@ -11,7 +11,7 @@ export class HeaderBuilder {
     };
   }
 
-  withPropertiesHeader(): HeaderBuilder {
+  withPropertiesHeader(): HeliconeHeaderBuilder {
     this.headers = {
       ...this.headers,
       ...this.getPropertyHeaders(this.heliconeConfigParameters.heliconeMeta.properties),
@@ -19,7 +19,7 @@ export class HeaderBuilder {
     return this;
   }
 
-  withCacheHeader(): HeaderBuilder {
+  withCacheHeader(): HeliconeHeaderBuilder {
     this.headers = {
       ...this.headers,
       ...this.getCacheHeaders(this.heliconeConfigParameters.heliconeMeta.cache),
@@ -27,7 +27,7 @@ export class HeaderBuilder {
     return this;
   }
 
-  withRetryHeader(): HeaderBuilder {
+  withRetryHeader(): HeliconeHeaderBuilder {
     this.headers = {
       ...this.headers,
       ...this.getRetryHeaders(this.heliconeConfigParameters.heliconeMeta.retry),
@@ -35,7 +35,7 @@ export class HeaderBuilder {
     return this;
   }
 
-  withRateLimitPolicyHeader(): HeaderBuilder {
+  withRateLimitPolicyHeader(): HeliconeHeaderBuilder {
     this.headers = {
       ...this.headers,
       ...this.getRateLimitPolicyHeaders(this.heliconeConfigParameters.heliconeMeta.rateLimitPolicy),
@@ -43,7 +43,7 @@ export class HeaderBuilder {
     return this;
   }
 
-  withUserHeader(): HeaderBuilder {
+  withUserHeader(): HeliconeHeaderBuilder {
     this.headers = {
       ...this.headers,
       ...this.getUserHeader(this.heliconeConfigParameters.heliconeMeta.user),
@@ -55,15 +55,11 @@ export class HeaderBuilder {
     return this.headers;
   }
 
-  getHeliconeAuthHeader(): string {
-    return this.headers["Helicone-Auth"];
-  }
-
-  getUserHeader(user?: string): { [key: string]: string } {
+  private getUserHeader(user?: string): { [key: string]: string } {
     return user ? { "Helicone-User-Id": user } : {};
   }
 
-  getPropertyHeaders(properties?: { [key: string]: any }): {
+  private getPropertyHeaders(properties?: { [key: string]: any }): {
     [key: string]: string;
   } {
     if (!properties) return {};
@@ -74,11 +70,11 @@ export class HeaderBuilder {
     return headers;
   }
 
-  getCacheHeaders(cache?: boolean): { [key: string]: string } {
+  private getCacheHeaders(cache?: boolean): { [key: string]: string } {
     return cache ? { "Helicone-Cache-Enabled": "true" } : {};
   }
 
-  getRetryHeaders(retry?: boolean | { [key: string]: any }): {
+  private getRetryHeaders(retry?: boolean | { [key: string]: any }): {
     [key: string]: string;
   } {
     if (!retry) return {};
@@ -94,7 +90,7 @@ export class HeaderBuilder {
     return headers;
   }
 
-  getRateLimitPolicyHeaders(rateLimitPolicy?: string | { [key: string]: any }): { [key: string]: string } {
+  private getRateLimitPolicyHeaders(rateLimitPolicy?: string | { [key: string]: any }): { [key: string]: string } {
     if (!rateLimitPolicy) return {};
     let policy = "";
     if (typeof rateLimitPolicy === "string") {

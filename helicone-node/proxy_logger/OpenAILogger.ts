@@ -96,6 +96,11 @@ export class OpenAILogger extends OpenAIApi {
         meta: this.configurationManager.getHeliconeHeaders(),
       };
 
+      // Checking if stream is set to true and set responseType to stream
+      if (args[0]?.stream === true) {
+        args[1] = { responseType: "stream" };
+      }
+
       const startTime = Date.now();
       let result: any;
       try {
@@ -158,12 +163,12 @@ export class OpenAILogger extends OpenAIApi {
         if (message === "[DONE]") {
           return; // Stream finished
         }
-
+ 
         try {
           const parsedMessage = JSON.parse(message);
           logData.push(parsedMessage);
         } catch (error) {
-          console.error("Error parsing message as JSON:", error);
+          throw new Error("Error parsing message as JSON: " + error);
         }
       }
     });

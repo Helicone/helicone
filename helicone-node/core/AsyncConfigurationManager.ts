@@ -1,7 +1,7 @@
 import { Configuration, ConfigurationParameters } from "openai";
 import { IConfigurationManager } from "./IConfigurationManager";
 import { IHeliconeConfigurationParameters } from "./IHeliconeConfigurationParameters";
-import { HeaderBuilder } from "./HeaderBuilder";
+import { HeliconeHeaderBuilder } from "./HeliconeHeaderBuilder";
 
 export class AsyncConfigurationManager implements IConfigurationManager {
   private heliconeConfigParameters: IHeliconeConfigurationParameters;
@@ -18,11 +18,8 @@ export class AsyncConfigurationManager implements IConfigurationManager {
     this.configurationParameters = configurationParameters;
     this.basePath = basePath;
 
-    this.heliconeHeaders = new HeaderBuilder(this.heliconeConfigParameters)
+    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigParameters)
       .withPropertiesHeader()
-      .withCacheHeader()
-      .withRetryHeader()
-      .withRateLimitPolicyHeader()
       .withUserHeader()
       .build();
   }
