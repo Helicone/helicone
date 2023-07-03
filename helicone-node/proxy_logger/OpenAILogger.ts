@@ -14,8 +14,14 @@ import {
   CreateModerationRequest,
   CreateModerationResponse,
 } from "openai";
-import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "../async_logger/HeliconeAsyncLogger";
+import {
+  HeliconeAsyncLogger,
+  HeliconeAyncLogRequest,
+  Provider,
+  ProviderRequest,
+} from "../async_logger/HeliconeAsyncLogger";
 import { IConfigurationManager } from "../core/IConfigurationManager";
+import { PassThrough, Readable } from "stream";
 
 export class OpenAILogger extends OpenAIApi {
   private logger: HeliconeAsyncLogger;
@@ -90,10 +96,8 @@ export class OpenAILogger extends OpenAIApi {
         meta: this.configurationManager.getHeliconeHeaders(),
       };
 
-      console.log("providerRequest", providerRequest);
-
       const startTime = Date.now();
-      let result;
+      let result: any;
       try {
         result = await apiCall(...args);
       } catch (error) {
@@ -114,18 +118,77 @@ export class OpenAILogger extends OpenAIApi {
         throw error;
       }
 
-      const endTime = Date.now();
-      const asyncLogRequest: HeliconeAyncLogRequest = {
-        providerRequest: providerRequest,
-        providerResponse: {
-          json: result.data as [key: string],
-          status: result.status,
-          headers: result.headers,
-        },
-        timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
-      };
+      console.log(`Result header content type: ${result.headers["content-type"]}`);
+      console.log(`result data type: ${typeof result.data}`);
+      if (result.headers["content-type"] === "text/event-stream" && result.data instanceof Readable) {
+        // Splitting stream into two
+        const userStream = new PassThrough();
+        const logStream = new PassThrough();
+        result.data.pipe(userStream);
+        result.data.pipe(logStream);
 
-      this.logger.log(asyncLogRequest, Provider.OPENAI);
+        // Logging stream
+        let logData = "";
+        logStream.on("data", (chunk) => {
+          const lines = chunk
+            .toString()
+            .split("\n")
+            .filter((line: any) => line.trim() !== "");
+          for (const line of lines) {
+            const message = line.replace(/^data: /, "");
+            if (message === "[DONE]") {
+              return; // Stream finished
+            }
+
+            if (logData.length > 0) {
+              logData += ",";
+            }
+
+            logData += message;
+          }
+        });
+
+        logStream.on("end", () => {
+          logData = '[' + logData + ']';
+          let parsedData: { [key: string]: any };
+          try {
+            console.log(`Log data: ${logData}`);
+            parsedData = JSON.parse(logData);
+          } catch (error) {
+            console.error("Error parsing the JSON content:", error);
+          }
+
+          console.log(`Parsed data: ${JSON.stringify(parsedData)}`);
+          const endTime = Date.now();
+          const asyncLogRequest: HeliconeAyncLogRequest = {
+            providerRequest: providerRequest,
+            providerResponse: {
+              json: parsedData,
+              status: result.status,
+              headers: result.headers,
+            },
+            timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
+          };
+
+          this.logger.log(asyncLogRequest, Provider.OPENAI);
+        });
+
+        // Modifying result to contain only the user stream
+        result.data = userStream;
+      } else {
+        const endTime = Date.now();
+        const asyncLogRequest: HeliconeAyncLogRequest = {
+          providerRequest: providerRequest,
+          providerResponse: {
+            json: result.data as [key: string],
+            status: result.status,
+            headers: result.headers,
+          },
+          timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
+        };
+
+        this.logger.log(asyncLogRequest, Provider.OPENAI);
+      }
 
       return result;
     };

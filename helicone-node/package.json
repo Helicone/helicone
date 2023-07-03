@@ -27,7 +27,7 @@
     "author": "Helicone, Inc.",
     "license": "Apache-2.0",
     "dependencies": {
-        "openai": "^3.2.1"
+        "openai": "^3.3.0"
     },
     "devDependencies": {
         "@babel/core": "^7.21.4",

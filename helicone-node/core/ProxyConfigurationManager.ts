@@ -51,8 +51,6 @@ export class ProxyConfigurationManager implements IConfigurationManager {
     };
     configuration.basePath = this.basePath;
 
-    console.log("configuration: ", configuration);
-
     return configuration;
   }
 }
