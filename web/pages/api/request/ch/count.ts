@@ -19,6 +19,11 @@ async function handler({
   const { org_id: orgId } = req.query as {
     org_id: string;
   };
+
+  const { filter } = req.body as {
+    filter: FilterNode;
+  };
+
   const { data: org, error: orgError } = await supabaseClient
     .getClient()
     .from("organization")
@@ -30,7 +35,7 @@ async function handler({
     return;
   }
 
-  const count = await getRequestCountClickhouse(orgId, "all");
+  const count = await getRequestCountClickhouse(orgId, filter);
   res.status(count.error === null ? 200 : 500).json(count);
 }
 
