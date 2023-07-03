@@ -1,6 +1,6 @@
 import { AsyncConfigurationManager } from "./core/AsyncConfigurationManager";
 import { ProxyConfigurationManager } from "./core/ProxyConfigurationManager";
-import { OpenAILogger as HeliconeOpenAIApi } from "./proxy_logger/OpenAILogger";
+import { HeliconeOpenAIApi } from "./proxy_logger/HeliconeOpenAIApi";
 import { CreateChatCompletionRequest } from "openai";
 import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider } from "./async_logger/HeliconeAsyncLogger";
 import { Readable } from "stream";
@@ -116,7 +116,7 @@ async function asyncLoggingStream() {
 
   const chatCompletionRequest: CreateChatCompletionRequest = {
     model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Just say auto async!" }],
+    messages: [{ role: "user", content: "JUST SAY HI" }],
     stream: true,
   };
 
@@ -124,7 +124,7 @@ async function asyncLoggingStream() {
   const result = await openAILogger.createChatCompletion(chatCompletionRequest);
 
   if (result.data instanceof Readable) {
-    result.data.on("data", (chunk) => {
+    result.data.on("data", (chunk: any) => {
       console.log("Proof it splits: " + chunk.toString());
     });
   }
@@ -243,5 +243,5 @@ main()
     console.log("Main function executed successfully.");
   })
   .catch((error) => {
-    console.error("An error occurred:");
+    console.error("An error occurred: " + error);
   });

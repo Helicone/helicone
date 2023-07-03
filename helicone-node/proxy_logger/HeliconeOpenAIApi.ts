@@ -172,25 +172,6 @@ export class HeliconeOpenAIApi extends OpenAIApi {
       }
     });
 
-    // TODO: Add a on close or on error if someone cancels the stream
-    logStream.on("close", () => {
-      const endTime = Date.now();
-      const asyncLogRequest: HeliconeAyncLogRequest = {
-        providerRequest: providerRequest,
-        providerResponse: {
-          json: { streamed_data: logData, error: "Stream closed" },
-          status: 499,
-          headers: result.headers,
-        },
-        timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
-      };
-
-      this.logger.log(asyncLogRequest, Provider.OPENAI).then(() => {
-        const func = this.configurationManager.getOnHeliconeLog();
-        if (func) func(result);
-      });
-    });
-
     logStream.on("end", () => {
       const endTime = Date.now();
       const asyncLogRequest: HeliconeAyncLogRequest = {
