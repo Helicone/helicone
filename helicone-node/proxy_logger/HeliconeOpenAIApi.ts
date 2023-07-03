@@ -23,7 +23,7 @@ import {
 import { IConfigurationManager } from "../core/IConfigurationManager";
 import { PassThrough, Readable } from "stream";
 
-export class OpenAILogger extends OpenAIApi {
+export class HeliconeOpenAIApi extends OpenAIApi {
   private logger: HeliconeAsyncLogger;
   private configurationManager: IConfigurationManager;
 
@@ -152,6 +152,7 @@ export class OpenAILogger extends OpenAIApi {
     // Logging stream
     const logData: Record<string, any>[] = [];
     logStream.on("data", (chunk) => {
+      console.log(`Received ${chunk}`);
       const lines: string[] = chunk
         .toString()
         .split("\n")
@@ -159,7 +160,7 @@ export class OpenAILogger extends OpenAIApi {
       for (const line of lines) {
         const message = line.replace(/^data: /, "");
         if (message === "[DONE]") {
-          return; // Stream finished
+          return;
         }
 
         try {
@@ -172,6 +173,23 @@ export class OpenAILogger extends OpenAIApi {
     });
 
     // TODO: Add a on close or on error if someone cancels the stream
+    logStream.on("close", () => {
+      const endTime = Date.now();
+      const asyncLogRequest: HeliconeAyncLogRequest = {
+        providerRequest: providerRequest,
+        providerResponse: {
+          json: { streamed_data: logData, error: "Stream closed" },
+          status: 499,
+          headers: result.headers,
+        },
+        timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
+      };
+
+      this.logger.log(asyncLogRequest, Provider.OPENAI).then(() => {
+        const func = this.configurationManager.getOnHeliconeLog();
+        if (func) func(result);
+      });
+    });
 
     logStream.on("end", () => {
       const endTime = Date.now();
@@ -187,8 +205,8 @@ export class OpenAILogger extends OpenAIApi {
 
       this.logger.log(asyncLogRequest, Provider.OPENAI).then(() => {
         const func = this.configurationManager.getOnHeliconeLog();
-        if(func) func(result);
-      })
+        if (func) func(result);
+      });
     });
   }
 }
