@@ -20,14 +20,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
-    const buf = JSON.stringify(req.body);
+    const buf = await buffer(req);
     const sig = req.headers["stripe-signature"]!;
 
     let event: StripeWebhookEvent;
 
     try {
       event = stripe.webhooks.constructEvent(
-        buf,
+        buf.toString(),
         sig,
         process.env.STRIPE_WEBHOOK_SECRET!
       ) as StripeWebhookEvent;
@@ -44,6 +44,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       event.type === "customer.subscription.created"
     ) {
       const subscription = event.data.object;
+
+      console.log("subscription", subscription);
 
       // Fetch the customer
       const customer = await stripe.customers.retrieve(
@@ -72,11 +74,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return;
       }
 
+      // check to see if the sub is active
+      let active = false;
+      if (subscription.items.data.length > 0) {
+        active = subscription.items.data[0].plan.active;
+      }
+
       // make the update
       const { error: userSettingsError } = await supabaseServer
         .from("user_settings")
         .update({
-          tier: subscription.cancel_at === null ? "pro" : "free",
+          tier: active ? "pro" : "free",
         })
         .eq("user", idData);
 
