@@ -7,6 +7,6 @@ export interface IHeliconeConfigurationManager {
   resolveConfiguration(): Configuration;
   getHeliconeHeaders(): { [key: string]: string };
   getHeliconeAuthHeader(): string;
-  getBasePath(): string;
+  getBasePath(): string | undefined;
   getOnHeliconeLog(): OnHeliconeLog;
 }
