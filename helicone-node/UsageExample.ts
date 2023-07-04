@@ -1,10 +1,15 @@
-import { AsyncConfigurationManager } from "./core/AsyncConfigurationManager";
-import { ProxyConfigurationManager } from "./core/ProxyConfigurationManager";
-import { HeliconeOpenAIApi } from "./proxy_logger/HeliconeOpenAIApi";
-import { CreateChatCompletionRequest } from "openai";
-import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider } from "./async_logger/HeliconeAsyncLogger";
 import { Readable } from "stream";
-import { OpenAIApi } from "helicone-openai";
+import {
+  ConfigurationParameters,
+  HeliconeAsyncConfigurationManager,
+  HeliconeAsyncLogger,
+  HeliconeAsyncOpenAIApi,
+  HeliconeAyncLogRequest,
+  HeliconeProxyConfigurationManager,
+  HeliconeProxyOpenAIApi,
+  IHeliconeConfigurationParameters,
+  Provider,
+} from ".";
 
 const openAIKey = "";
 const heliconeKey = "";
@@ -28,100 +33,90 @@ const localProxy = "http://127.0.0.1:8787/v1";
 const localAsync = "http://127.0.0.1:8787";
 
 async function testProxyLogging() {
-  const configManager = new ProxyConfigurationManager(
-    {
-      heliconeApiKey: heliconeKey,
-      heliconeMeta: {
-        cache: true,
-        retry: true,
-        properties: {
-          Type: "Proxy Logging",
-        },
-        rateLimitPolicy: {
-          quota: 20,
-          time_window: 60,
-        },
-        user: "test-user",
+  const heliconeConfigParams: IHeliconeConfigurationParameters = {
+    heliconeApiKey: process.env.HELICONE_API,
+    heliconeMeta: {
+      cache: true,
+      retry: true,
+      properties: {
+        Type: "Proxy Logging",
       },
+      rateLimitPolicy: {
+        quota: 20,
+        time_window: 60,
+      },
+      user: "test-user",
     },
-    {
-      apiKey: openAIKey,
-    },
-    localProxy
-  );
+  };
+  const openAIConfigParams: ConfigurationParameters = { apiKey: process.env.OPENAI_API_KEY };
 
-  const chatCompletionRequest: CreateChatCompletionRequest = {
+  const configManager = new HeliconeProxyConfigurationManager(heliconeConfigParams, openAIConfigParams, localProxy);
+
+  const openAIClient = new HeliconeProxyOpenAIApi(configManager);
+  const result = await openAIClient.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: "Just say proxy!" }],
-  };
-
-  const openAIClient = new OpenAIApi(configManager.resolveConfiguration());
-  const result = await openAIClient.createChatCompletion(chatCompletionRequest);
+  });
 }
 
 async function asyncLogging() {
-  const configManager = new AsyncConfigurationManager(
-    {
-      heliconeApiKey: heliconeKey,
-      heliconeMeta: {
-        // cache: false,
-        retry: true,
-        properties: {
-          Type: "AsyncLogging",
-        },
-        rateLimitPolicy: {
-          quota: 20,
-          time_window: 60,
-        },
-        user: "test-user",
+  const heliconeConfigParams: IHeliconeConfigurationParameters = {
+    heliconeApiKey: heliconeKey,
+    heliconeMeta: {
+      // cache: false,
+      retry: true,
+      properties: {
+        Type: "AsyncLogging",
       },
+      rateLimitPolicy: {
+        quota: 20,
+        time_window: 60,
+      },
+      user: "test-user",
     },
-    {
-      apiKey: openAIKey,
-    },
-    localAsync
-  );
-
-  const chatCompletionRequest: CreateChatCompletionRequest = {
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Just say auto async!" }],
   };
 
-  const heliconeOpenAIApi = new HeliconeOpenAIApi(configManager);
-  const result = await heliconeOpenAIApi.createChatCompletion(chatCompletionRequest);
+  const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
+  const configManager = new HeliconeAsyncConfigurationManager(
+    heliconeConfigParams,
+    openAIConfigParams,
+    undefined,
+    async (log: any) => {}
+  );
+
+  const heliconeOpenAIApi = new HeliconeAsyncOpenAIApi(configManager);
+  const result = await heliconeOpenAIApi.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: "Just say auto async!" }],
+  });
 }
 
 async function asyncLoggingStream() {
-  const configManager = new AsyncConfigurationManager(
-    {
-      heliconeApiKey: heliconeKey,
-      heliconeMeta: {
-        // cache: false,
-        retry: true,
-        properties: {
-          Type: "AsyncLogging",
-        },
-        rateLimitPolicy: {
-          quota: 20,
-          time_window: 60,
-        },
-        user: "test-user",
+  const heliconeConfigParams: IHeliconeConfigurationParameters = {
+    heliconeApiKey: heliconeKey,
+    heliconeMeta: {
+      // cache: false,
+      retry: true,
+      properties: {
+        Type: "AsyncLogging",
       },
+      rateLimitPolicy: {
+        quota: 20,
+        time_window: 60,
+      },
+      user: "test-user",
     },
-    {
-      apiKey: openAIKey,
-    },
-    localAsync
-  );
+  };
 
-  const chatCompletionRequest: CreateChatCompletionRequest = {
+  const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
+  const configManager = new HeliconeAsyncConfigurationManager(heliconeConfigParams, openAIConfigParams, localAsync);
+
+  const openAILogger = new HeliconeAsyncOpenAIApi(configManager);
+  const result = await openAILogger.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: "JUST SAY HI" }],
     stream: true,
-  };
-
-  const openAILogger = new HeliconeOpenAIApi(configManager);
-  const result = await openAILogger.createChatCompletion(chatCompletionRequest);
+  });
 
   if (result.data instanceof Readable) {
     result.data.on("data", (chunk: any) => {
@@ -131,34 +126,31 @@ async function asyncLoggingStream() {
 }
 
 async function asyncLoggingManual() {
-  const configManager = new AsyncConfigurationManager(
-    {
-      heliconeApiKey: heliconeKey,
-      heliconeMeta: {
-        // cache: false,
-        retry: true,
-        properties: {
-          Type: "AsyncLoggingManual",
-        },
-        rateLimitPolicy: {
-          quota: 20,
-          time_window: 60,
-        },
-        user: "test-user",
+  const heliconeConfigParams: IHeliconeConfigurationParameters = {
+    heliconeApiKey: heliconeKey,
+    heliconeMeta: {
+      // cache: false,
+      retry: true,
+      properties: {
+        Type: "AsyncLoggingManual",
       },
+      rateLimitPolicy: {
+        quota: 20,
+        time_window: 60,
+      },
+      user: "test-user",
     },
-    {
-      apiKey: openAIKey,
-    },
-    localAsync
-  );
-
-  const chatCompletionRequest: CreateChatCompletionRequest = {
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Just say manual async!" }],
   };
 
-  const openAIClient = new OpenAIApi(configManager.resolveConfiguration());
+  const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
+  const configManager = new HeliconeAsyncConfigurationManager(heliconeConfigParams, openAIConfigParams, localAsync);
+
+  const chatCompletionRequest = {
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user" as any, content: "Just say manual async!" }],
+  };
+
+  const openAIClient = new HeliconeAsyncOpenAIApi(configManager);
   const startTime = Date.now();
   const result = await openAIClient.createChatCompletion(chatCompletionRequest);
   const endTime = Date.now();
@@ -182,35 +174,32 @@ async function asyncLoggingManual() {
 }
 
 async function asyncLoggingStreamManual() {
-  const configManager = new AsyncConfigurationManager(
-    {
-      heliconeApiKey: heliconeKey,
-      heliconeMeta: {
-        // cache: false,
-        retry: true,
-        properties: {
-          Type: "AsyncLoggingManual",
-        },
-        rateLimitPolicy: {
-          quota: 20,
-          time_window: 60,
-        },
-        user: "test-user",
+  const heliconeConfigParams: IHeliconeConfigurationParameters = {
+    heliconeApiKey: heliconeKey,
+    heliconeMeta: {
+      // cache: false,
+      retry: true,
+      properties: {
+        Type: "AsyncLoggingManual",
       },
+      rateLimitPolicy: {
+        quota: 20,
+        time_window: 60,
+      },
+      user: "test-user",
     },
-    {
-      apiKey: openAIKey,
-    },
-    localAsync
-  );
+  };
 
-  const chatCompletionRequest: CreateChatCompletionRequest = {
+  const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
+  const configManager = new HeliconeAsyncConfigurationManager(heliconeConfigParams, openAIConfigParams, localAsync);
+
+  const chatCompletionRequest = {
     model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Just say manual async!" }],
+    messages: [{ role: "user" as any, content: "Just say manual async!" }],
     stream: true,
   };
 
-  const openAIClient = new OpenAIApi(configManager.resolveConfiguration());
+  const openAIClient = new HeliconeAsyncOpenAIApi(configManager);
   const startTime = Date.now();
   const result = await openAIClient.createChatCompletion(chatCompletionRequest, { responseType: "stream" });
   if (!("on" in result.data)) throw new Error("No data received from OpenAI");
