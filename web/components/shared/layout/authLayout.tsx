@@ -35,6 +35,7 @@ import { BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import ThemedModal from "../themed/themedModal";
+import UpgradeProModal from "../upgradeProModal";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -531,52 +532,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </main>
         </div>
       </div>
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col w-[400px] space-y-8">
-          <div className="flex flex-col space-y-4">
-            <CloudArrowUpIcon className="h-10 w-10 text-sky-600" />
-            <h1 className="text-xl font-semibold text-gray-900">
-              You are currently on the free plan
-            </h1>
-            <p className="text-md text-gray-600">
-              Upgrade to remove request limits and unlock the features below:
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              "Unlimited Requests",
-              "Bucket Caching",
-              "User Management",
-              "Rate Limiting",
-              "GraphQL API",
-              "Request Retries",
-              "Unlimited Organizations",
-              "Up to 2GB of storage",
-            ].map((item, i) => (
-              <div key={i} className="text-sm flex flex-row items-center">
-                <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
-                <span className="">{item}</span>
-              </div>
-            ))}
-          </div>
-          <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
-            <button
-              onClick={() => setOpen(false)}
-              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
-              Cancel
-            </button>
-            <Link
-              href={`${process.env.NEXT_PUBLIC_HELICONE_PRO_LINK}?prefilled_email=${user.email}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              Upgrade to Pro
-            </Link>
-          </div>
-        </div>
-      </ThemedModal>
+      <UpgradeProModal open={open} setOpen={setOpen} />
     </>
   );
 };
