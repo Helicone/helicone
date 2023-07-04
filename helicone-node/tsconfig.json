@@ -1,19 +1,14 @@
 {
-    "compilerOptions": {
-      "declaration": true,
-      "target": "es6",
-      "module": "commonjs",
-      "noImplicitAny": true,
-      "esModuleInterop": true,
-      "outDir": "dist",
-      "rootDir": ".",
-      "typeRoots": [
-        "node_modules/@types"
-      ]
-    },
-    "exclude": [
-      "dist",
-      "node_modules"
-    ],
-    "include": ["*.ts"]
+  "compilerOptions": {
+    "declaration": true,
+    "target": "es6",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "typeRoots": ["node_modules/@types"]
+  },
+  "exclude": ["dist", "node_modules"],
+  "include": ["*.ts"]
 }
