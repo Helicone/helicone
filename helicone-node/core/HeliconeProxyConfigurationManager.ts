@@ -1,42 +1,42 @@
 import { Configuration, ConfigurationParameters } from "openai";
-import { IConfigurationManager, OnHeliconeLog } from "./IConfigurationManager";
+import { IHeliconeConfigurationManager as IHeliconeConfigurationManager, OnHeliconeLog } from "./IHeliconeConfigurationManager";
 import { IHeliconeConfigurationParameters } from "./IHeliconeConfigurationParameters";
 import { HeliconeHeaderBuilder } from "./HeliconeHeaderBuilder";
 
-export class AsyncConfigurationManager implements IConfigurationManager {
+export class HeliconeProxyConfigurationManager implements IHeliconeConfigurationManager {
   private heliconeConfigParameters: IHeliconeConfigurationParameters;
   private configurationParameters: ConfigurationParameters;
   private heliconeHeaders: { [key: string]: string };
   private basePath: string | undefined;
-  private onHeliconeLog?: OnHeliconeLog;
 
   constructor(
     heliconeConfigParameters: IHeliconeConfigurationParameters,
     configurationParameters: ConfigurationParameters,
-    basePath?: string,
-    onHeliconeLog?: OnHeliconeLog
+    basePath?: string
   ) {
     this.heliconeConfigParameters = heliconeConfigParameters;
     this.configurationParameters = configurationParameters;
-    this.basePath = basePath ?? "https://api.hconeai.com";
-    this.onHeliconeLog = onHeliconeLog;
+    this.basePath = basePath ?? "https://oai.hconeai.com/v1";
 
     this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigParameters)
       .withPropertiesHeader()
+      .withCacheHeader()
+      .withRetryHeader()
+      .withRateLimitPolicyHeader()
       .withUserHeader()
       .build();
   }
 
   getOnHeliconeLog(): OnHeliconeLog {
-    return this.onHeliconeLog;
-  }
-
-  getHeliconeAuthHeader(): string {
-    return this.heliconeHeaders["Helicone-Auth"];
+    return undefined;
   }
 
   getBasePath(): string | undefined {
     return this.basePath;
+  }
+
+  getHeliconeAuthHeader(): string {
+    return this.heliconeHeaders["Helicone-Auth"];
   }
 
   getHeliconeHeaders(): { [key: string]: string } {
@@ -44,6 +44,18 @@ export class AsyncConfigurationManager implements IConfigurationManager {
   }
 
   resolveConfiguration(): Configuration {
-    return new Configuration(this.configurationParameters);
+    const configuration = new Configuration(this.configurationParameters);
+
+    configuration.baseOptions = {
+      ...configuration.baseOptions,
+      headers: {
+        ...configuration.baseOptions.headers,
+        ...this.heliconeHeaders,
+      },
+    };
+
+    configuration.basePath = this.getBasePath();
+
+    return configuration;
   }
 }

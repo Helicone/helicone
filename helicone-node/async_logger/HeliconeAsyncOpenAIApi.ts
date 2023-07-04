@@ -19,15 +19,15 @@ import {
   HeliconeAyncLogRequest,
   Provider,
   ProviderRequest,
-} from "../async_logger/HeliconeAsyncLogger";
-import { IConfigurationManager } from "../core/IConfigurationManager";
+} from "./HeliconeAsyncLogger";
+import { IHeliconeConfigurationManager } from "../core/IHeliconeConfigurationManager";
 import { PassThrough, Readable } from "stream";
 
-export class HeliconeOpenAIApi extends OpenAIApi {
+export class HeliconeAsyncOpenAIApi extends OpenAIApi {
   private logger: HeliconeAsyncLogger;
-  private configurationManager: IConfigurationManager;
+  private configurationManager: IHeliconeConfigurationManager;
 
-  constructor(configurationProvider: IConfigurationManager) {
+  constructor(configurationProvider: IHeliconeConfigurationManager) {
     super(configurationProvider.resolveConfiguration());
     this.configurationManager = configurationProvider;
     this.logger = new HeliconeAsyncLogger(configurationProvider);

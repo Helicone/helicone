@@ -1,4 +1,4 @@
-import { IConfigurationManager } from '../core/IConfigurationManager';
+import { IHeliconeConfigurationManager } from '../core/IHeliconeConfigurationManager';
 import axios, { AxiosRequestConfig } from "axios";
 
 export type HeliconeAyncLogRequest = {
@@ -42,8 +42,8 @@ export enum Provider {
 }
 
 export class HeliconeAsyncLogger {
-  private configurationManager: IConfigurationManager;
-  constructor(configurationManager: IConfigurationManager) {
+  private configurationManager: IHeliconeConfigurationManager;
+  constructor(configurationManager: IHeliconeConfigurationManager) {
     this.configurationManager = configurationManager;
   }
 

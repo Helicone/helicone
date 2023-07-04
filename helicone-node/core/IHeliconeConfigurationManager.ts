@@ -3,7 +3,7 @@ import { Configuration } from "openai";
 
 export type OnHeliconeLog = (result: AxiosResponse<any, any>) => Promise<void> | undefined;
 
-export interface IConfigurationManager {
+export interface IHeliconeConfigurationManager {
   resolveConfiguration(): Configuration;
   getHeliconeHeaders(): { [key: string]: string };
   getHeliconeAuthHeader(): string;
