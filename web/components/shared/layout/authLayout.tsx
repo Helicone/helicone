@@ -340,7 +340,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
-                {userSettings?.tier === "free" && (
+                {/* {userSettings?.tier === "free" && (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
@@ -356,7 +356,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </p>
                     </button>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </>
