@@ -293,7 +293,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           )}
-          {userSettings?.tier === "free" && (
+          {userSettings?.tier !== "enterprise" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div
