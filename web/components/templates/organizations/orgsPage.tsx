@@ -1,7 +1,9 @@
 import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
+import { useUserSettings } from "../../../services/hooks/userSettings";
 
 import { useOrg } from "../../shared/layout/organizationContext";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import CreateOrgForm from "./createOrgForm";
 import OrgCard from "./orgCard";
@@ -15,6 +17,10 @@ const OrgsPage = (props: OrgsPageProps) => {
 
   const orgContext = useOrg();
 
+  const { userSettings, error } = useUserSettings(user?.id || "");
+
+  const { setNotification } = useNotification();
+
   const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
   const otherOrgs = orgContext?.allOrgs?.filter((d) => d.owner !== user?.id);
 
@@ -25,7 +31,16 @@ const OrgsPage = (props: OrgsPageProps) => {
           <div className="flex flex-row justify-between items-center">
             <p className="text-md font-semibold">Your Organizations</p>
             <button
-              onClick={() => setCreateOpen(true)}
+              onClick={() => {
+                if (userSettings?.tier === "free") {
+                  setNotification(
+                    "You must be on a paid plan to create an organization.",
+                    "error"
+                  );
+                  return;
+                }
+                setCreateOpen(true);
+              }}
               className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
             >
               Create New Organization

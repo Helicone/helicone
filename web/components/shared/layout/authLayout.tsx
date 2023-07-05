@@ -4,17 +4,18 @@ import Image from "next/image";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
+  ArrowUpCircleIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BuildingOfficeIcon,
   ChartBarIcon,
   CircleStackIcon,
+  CloudArrowUpIcon,
   CubeTransparentIcon,
   HomeIcon,
-  InformationCircleIcon,
   KeyIcon,
+  SparklesIcon,
   TableCellsIcon,
-  TagIcon,
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
@@ -32,6 +33,9 @@ import OrgContext, { useOrg } from "./organizationContext";
 import { GrGraphQl } from "react-icons/gr";
 import { BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
+import { useUserSettings } from "../../../services/hooks/userSettings";
+import ThemedModal from "../themed/themedModal";
+import UpgradeProModal from "../upgradeProModal";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -46,6 +50,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
+  const { userSettings, isLoading } = useUserSettings(user.id);
+  const [open, setOpen] = useState(false);
 
   const navigation = [
     {
@@ -334,6 +340,23 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
+                {userSettings?.tier === "free" && (
+                  <div className="p-4 flex w-full justify-center">
+                    <button
+                      onClick={() => setOpen(true)}
+                      className="bg-gray-100 border border-gray-300 text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
+                    >
+                      <div className="flex flex-row items-center">
+                        <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                        <p>Free Plan</p>
+                      </div>
+
+                      <p className="text-xs font-normal text-sky-600">
+                        Learn More
+                      </p>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </>
@@ -376,10 +399,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   {org && (
                     <ThemedDropdown
                       selectedValue={org.currentOrg.id}
-                      options={org.allOrgs.map((org) => ({
-                        label: org.name,
-                        value: org.id,
-                      }))}
+                      options={org.allOrgs.map((org) => {
+                        if (org.owner === user?.id) {
+                          return {
+                            label: org.name + " (Owner)",
+                            value: org.id,
+                          };
+                        } else {
+                          return {
+                            label: org.name,
+                            value: org.id,
+                          };
+                        }
+                      })}
                       onSelect={(value) => {
                         if (value) {
                           org.setCurrentOrg(value);
@@ -509,6 +541,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </main>
         </div>
       </div>
+      <UpgradeProModal open={open} setOpen={setOpen} />
     </>
   );
 };

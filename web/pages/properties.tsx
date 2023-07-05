@@ -12,7 +12,6 @@ interface DashboardProps {
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { keys } = props;
   const user = useUser();
   return (
     <MetaData title="Properties">
@@ -26,33 +25,6 @@ const Dashboard = (props: DashboardProps) => {
 export default Dashboard;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const {
-    userData: { orgId },
-    supabaseClient,
-  } = options;
-  const client = supabaseClient.getClient();
-  const [isRequestLimitOver, hasOnboarded] = await Promise.all([
-    requestOverLimit(client, orgId),
-    checkOnboardedAndUpdate(client),
-  ]);
-  if (!hasOnboarded?.data) {
-    return {
-      redirect: {
-        destination: "/welcome",
-        permanent: false,
-      },
-    };
-  }
-
-  if (isRequestLimitOver) {
-    return {
-      redirect: {
-        destination: "/usage",
-        permanent: false,
-      },
-    };
-  }
-
   return {
     props: {},
   };
