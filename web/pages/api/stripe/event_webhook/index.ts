@@ -39,28 +39,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log("✅ Success:", event.id);
 
-    if (event.type === "customer.subscription.created") {
-      const subscription = event.data.object as any;
-      console.log("Subscription Created", subscription);
-      console.log("Plan", subscription.plan.id);
-    } else if (event.type === "customer.subscription.updated") {
+    if (
+      event.type === "customer.subscription.updated" ||
+      event.type === "customer.subscription.created"
+    ) {
       const subscription = event.data.object;
+
+      console.log("subscription", subscription);
 
       // Fetch the customer
       const customer = await stripe.customers.retrieve(
         subscription.customer as string
       );
 
+      console.log("customer", customer);
+
       // Now you have the customer's email address
       const castedCustomer = customer as any;
       const email = castedCustomer.email ? castedCustomer.email : null;
 
-      // Add your own business logic here.
-      console.log(`Subscription for ${customer.object} has been updated.`);
-      console.log("Email", email);
+      console.log("email", email);
 
-      //
-
+      // get the user id
       const { data: idData, error: idError } = resultMap(
         await dbExecute<{
           id: string;
@@ -68,21 +68,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         (d) => d[0].id
       );
 
-      // get the user id from supabase by email
-      const { data, error } = await supabaseServer
-        .from("user_settings")
-        .update({
-          tier: "pro",
-        })
-        // .select("*")
-        .eq("email", "scott+test7@helicone.ai");
-
-      if (error) {
-        console.log("Error", error);
+      if (idError !== null) {
+        console.error(idError);
+        res.status(400).send(`Unable to find user: ${idError}`);
         return;
       }
 
-      console.log("User", data);
+      // check to see if the sub is active
+      let active = false;
+      if (subscription.items.data.length > 0) {
+        active = subscription.items.data[0].plan.active;
+      }
+
+      // make the update
+      const { error: userSettingsError } = await supabaseServer
+        .from("user_settings")
+        .update({
+          tier: active ? "pro" : "free",
+        })
+        .eq("user", idData);
+
+      if (userSettingsError) {
+        console.error(userSettingsError);
+        res.status(400).send(`Unable to update user settings: ${idError}`);
+        return;
+      }
     }
 
     res.json({ received: true });
