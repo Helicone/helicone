@@ -215,7 +215,7 @@ const UsagePage = (props: UsagePageProps) => {
             </div>
           )}
         </div>
-        <ul
+        {/* <ul
           role="list"
           className="mt-6 grid grid-cols-1 gap-8 border-t border-gray-200 py-6 sm:grid-cols-2"
         >
@@ -327,7 +327,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           )}
-        </ul>
+        </ul> */}
       </div>
       <UpgradeProModal open={open} setOpen={setOpen} />
     </>
