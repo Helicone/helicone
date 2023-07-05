@@ -76,7 +76,7 @@ const Notification = () => {
   if (variant && title && show) {
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-30">
-        <div className="mx-auto max-w-sm px-2 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full sm:max-w-[33vw] px-2 sm:px-6 lg:px-8">
           <Transition
             show={show}
             as={Fragment}
@@ -96,7 +96,7 @@ const Notification = () => {
               <div className="flex flex-wrap items-center justify-between">
                 <div className="flex w-0 flex-1 items-center">
                   <span className="flex rounded-lg p-2">{variantIcon()}</span>
-                  <p className="ml-3 truncate font-medium text-white text-sm">
+                  <p className="ml-3 font-medium text-white text-sm py-1">
                     <span>{title}</span>
                   </p>
                 </div>

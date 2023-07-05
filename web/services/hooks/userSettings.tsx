@@ -19,7 +19,6 @@ const useUserSettings = (userId: string) => {
       }
       return { data: data, error: null };
     },
-    refetchOnWindowFocus: false,
   });
 
   return {
