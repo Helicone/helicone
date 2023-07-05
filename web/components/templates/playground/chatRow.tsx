@@ -53,7 +53,7 @@ const ChatRow = (props: ChatRowProps) => {
           <span
             className={clsx(
               isSystem ? "font-semibold" : "font-normal",
-              "text-gray-900"
+              "text-gray-900 whitespace-pre-wrap"
             )}
           >
             {lastMessage.content}
@@ -83,7 +83,7 @@ const ChatRow = (props: ChatRowProps) => {
                 <span
                   className={clsx(
                     isSystem ? "font-semibold" : "font-normal",
-                    "text-gray-900"
+                    "text-gray-900 whitespace-pre-wrap"
                   )}
                 >
                   {lastMessage.content}
@@ -140,7 +140,7 @@ const ChatRow = (props: ChatRowProps) => {
                 <span
                   className={clsx(
                     isSystem ? "font-semibold" : "font-normal",
-                    "text-gray-900"
+                    "text-gray-900 whitespace-pre-wrap"
                   )}
                 >
                   {lastMessage.content}
