@@ -62,37 +62,6 @@ const Login = (props: LoginProps) => {
       return;
     }
 
-    if (user.user?.id) {
-      // Create a stripe customer account
-      const { data: customer, error: customerError } = await fetch(
-        "/api/stripe/create_account",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: user.user.email,
-            name: user.user.email,
-          } as Stripe.CustomerCreateParams),
-        }
-      ).then((res) => res.json());
-
-      // Subscribe the customer to the basic_flex plan
-      const { data: subscription, error: subscriptionError } = await fetch(
-        "/api/stripe/create_subscription",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customer: customer.id,
-          } as Stripe.SubscriptionCreateParams),
-        }
-      ).then((res) => res.json());
-    }
-
     setLoading(false);
     setShowSignedUpConfirmation(true);
   };
@@ -286,35 +255,6 @@ const Login = (props: LoginProps) => {
                           });
                         if (error) {
                           setAuthError(error.message);
-                        }
-                        // get the user id
-                        if (user) {
-                          // Create a stripe customer account
-                          const { data: customer, error: customerError } =
-                            await fetch("/api/stripe/create_account", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({
-                                email: user.email,
-                                name: user.email,
-                              } as Stripe.CustomerCreateParams),
-                            }).then((res) => res.json());
-
-                          // Subscribe the customer to the basic_flex plan
-                          const {
-                            data: subscription,
-                            error: subscriptionError,
-                          } = await fetch("/api/stripe/create_subscription", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              customer: customer.id,
-                            } as Stripe.SubscriptionCreateParams),
-                          }).then((res) => res.json());
                         }
 
                         setLoading(false);
