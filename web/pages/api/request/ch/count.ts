@@ -38,7 +38,7 @@ async function handler({
     return;
   }
 
-  const count = await getRequestCountClickhouse(orgId, {});
+  const count = await getRequestCountClickhouse(orgId, filter);
   res.status(count.error === null ? 200 : 500).json(count);
 }
 

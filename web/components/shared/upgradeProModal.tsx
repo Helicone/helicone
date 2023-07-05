@@ -111,9 +111,6 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                   );
                   setOpen(false);
                 }}
-                // href={`${process.env.NEXT_PUBLIC_HELICONE_PRO_LINK}?prefilled_email=${user?.email}`}
-                // target="_blank"
-                // rel="noopener noreferrer"
                 className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 I Understand

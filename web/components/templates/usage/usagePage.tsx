@@ -158,8 +158,8 @@ const UsagePage = (props: UsagePageProps) => {
           </div>
           <ul className="">
             <li className="flex flex-row justify-between w-full border-b border-gray-300 pb-2">
-              <p className="font-semibold text-gray-900 text-lg">Org Name</p>
-              <p className="text-gray-600 text-lg">Requests</p>
+              <p className="font-semibold text-gray-900 text-md">Org Name</p>
+              <p className="text-gray-600 text-md">Requests this month</p>
             </li>
             {yourOrgs?.map((org, idx) => (
               <RenderOrgItem org={org} key={idx} />
