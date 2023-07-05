@@ -399,10 +399,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   {org && (
                     <ThemedDropdown
                       selectedValue={org.currentOrg.id}
-                      options={org.allOrgs.map((org) => ({
-                        label: org.name,
-                        value: org.id,
-                      }))}
+                      options={org.allOrgs.map((org) => {
+                        if (org.owner === user?.id) {
+                          return {
+                            label: org.name + " (Owner)",
+                            value: org.id,
+                          };
+                        } else {
+                          return {
+                            label: org.name,
+                            value: org.id,
+                          };
+                        }
+                      })}
                       onSelect={(value) => {
                         if (value) {
                           org.setCurrentOrg(value);
