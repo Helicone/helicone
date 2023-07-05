@@ -40,7 +40,10 @@
         "getting-started/quick-start",
         {
           "group": "Integrations",
-          "pages": ["getting-started/integration-method/openai", "getting-started/integration-method/anthropic"]
+          "pages": [
+            "getting-started/integration-method/openai",
+            "getting-started/integration-method/anthropic"
+          ]
         },
         "getting-started/open-source"
       ]
@@ -58,6 +61,10 @@
         "features/advanced-usage/omit-logs",
         "features/streaming"
       ]
+    },
+    {
+      "group": "GraphQL API",
+      "pages": ["graphql/getting-started", "graphql/python-example"]
     },
     {
       "group": "FAQ",
