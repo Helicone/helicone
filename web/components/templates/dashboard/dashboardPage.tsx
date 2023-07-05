@@ -253,7 +253,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           timeFilter={{
             customTimeFilter: true,
             timeFilterOptions: [
-              { key: "24h", value: "Today" },
+              { key: "24h", value: "24H" },
               { key: "7d", value: "7D" },
               { key: "1m", value: "1M" },
               { key: "3m", value: "3M" },
