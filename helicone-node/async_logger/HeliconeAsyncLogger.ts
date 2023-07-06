@@ -1,5 +1,5 @@
-import { IHeliconeConfigurationManager } from '../core/IHeliconeConfigurationManager';
-import axios, { AxiosRequestConfig } from "axios";
+import { IHeliconeConfigurationManager } from "../core/IHeliconeConfigurationManager";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export type HeliconeAyncLogRequest = {
   providerRequest: ProviderRequest;
@@ -47,7 +47,7 @@ export class HeliconeAsyncLogger {
     this.configurationManager = configurationManager;
   }
 
-  async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<void> {
+  async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<AxiosResponse<any, any>> {
     if (!asyncLogModel) return;
     const options: AxiosRequestConfig = {
       method: "POST",
@@ -76,6 +76,8 @@ export class HeliconeAsyncLogger {
     if (result.status != 200) {
       throw new Error(`Failed to log to ${basePath}. Status code ${result.status}`);
     }
+
+    return result;
   }
 
   static createTiming(startTime: number, endTime: number) {

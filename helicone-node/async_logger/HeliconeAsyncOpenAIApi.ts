@@ -14,12 +14,7 @@ import {
   CreateModerationRequest,
   CreateModerationResponse,
 } from "openai";
-import {
-  HeliconeAsyncLogger,
-  HeliconeAyncLogRequest,
-  Provider,
-  ProviderRequest,
-} from "./HeliconeAsyncLogger";
+import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "./HeliconeAsyncLogger";
 import { IHeliconeConfigurationManager } from "../core/IHeliconeConfigurationManager";
 import { PassThrough, Readable } from "stream";
 
@@ -102,7 +97,7 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
       }
 
       const startTime = Date.now();
-      let result: any;
+      let result: AxiosResponse<T, any>;
       try {
         result = await apiCall(...args);
       } catch (error) {
@@ -123,8 +118,8 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
         throw error;
       }
 
-      if (result.headers["content-type"] === "text/event-stream" && result.data instanceof Readable) {
-        this.handleStreamLogging(result, startTime, providerRequest);
+      if (result.headers["content-type"] === "text/event-stream") {
+        this.handleStreamLogging<T>(result, startTime, providerRequest);
       } else {
         const endTime = Date.now();
         const asyncLogRequest: HeliconeAyncLogRequest = {
@@ -137,17 +132,25 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
           timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
         };
 
-        this.logger.log(asyncLogRequest, Provider.OPENAI);
+        this.logger.log(asyncLogRequest, Provider.OPENAI).then((logResult: AxiosResponse<any, any>) => {
+          const onHeliconeLog = this.configurationManager.getOnHeliconeLog();
+          if (onHeliconeLog) onHeliconeLog(logResult);
+        });
       }
 
       return result;
     };
   }
 
-  private handleStreamLogging(result: AxiosResponse, startTime: number, providerRequest: ProviderRequest): void {
+  private handleStreamLogging<T>(
+    result: AxiosResponse<T, any>,
+    startTime: number,
+    providerRequest: ProviderRequest
+  ): void {
+    if (!(result.data instanceof Readable)) throw new Error("Response data is not a readable stream");
+
     // Splitting stream into two
     const logStream = new PassThrough();
-    result.data.pipe(logStream);
 
     // Logging stream
     const logData: Record<string, any>[] = [];
@@ -184,9 +187,9 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
         timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
       };
 
-      this.logger.log(asyncLogRequest, Provider.OPENAI).then(() => {
-        const func = this.configurationManager.getOnHeliconeLog();
-        if (func) func(result);
+      this.logger.log(asyncLogRequest, Provider.OPENAI).then((logResult: AxiosResponse<any, any>) => {
+        const onHeliconeLog = this.configurationManager.getOnHeliconeLog();
+        if (onHeliconeLog) onHeliconeLog(logResult);
       });
     });
   }

@@ -55,7 +55,7 @@ const configManager = new AsyncConfigurationManager(
   { heliconeApiKey: process.env.OPENAI_API_KEY },
   { apiKey: process.env.OPENAI_API_KEY },
   undefined, // Optionally override the base path for local testing
-  async (log: any) => {} // Optional onHeliconeLog callback to be notified when logging is completed
+  async (log: AxiosResponse<any, any>) => {} // Optional onHeliconeLog callback to be sent the logging response
 );
 
 const heliconeAsyncOpenAIApi = new HeliconeAsyncOpenAIApi(configManager);
