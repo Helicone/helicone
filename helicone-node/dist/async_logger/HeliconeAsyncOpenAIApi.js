@@ -102,7 +102,7 @@ class HeliconeAsyncOpenAIApi extends openai_1.OpenAIApi {
                 this.logger.log(asyncLogRequest, HeliconeAsyncLogger_1.Provider.OPENAI);
                 throw error;
             }
-            if (result.headers["content-type"] === "text/event-stream" && result.data instanceof stream_1.Readable) {
+            if (result.headers["content-type"] === "text/event-stream") {
                 this.handleStreamLogging(result, startTime, providerRequest);
             }
             else {
@@ -116,15 +116,20 @@ class HeliconeAsyncOpenAIApi extends openai_1.OpenAIApi {
                     },
                     timing: HeliconeAsyncLogger_1.HeliconeAsyncLogger.createTiming(startTime, endTime),
                 };
-                this.logger.log(asyncLogRequest, HeliconeAsyncLogger_1.Provider.OPENAI);
+                this.logger.log(asyncLogRequest, HeliconeAsyncLogger_1.Provider.OPENAI).then((logResult) => {
+                    const onHeliconeLog = this.configurationManager.getOnHeliconeLog();
+                    if (onHeliconeLog)
+                        onHeliconeLog(logResult);
+                });
             }
             return result;
         });
     }
     handleStreamLogging(result, startTime, providerRequest) {
+        if (!(result.data instanceof stream_1.Readable))
+            throw new Error("Response data is not a readable stream");
         // Splitting stream into two
         const logStream = new stream_1.PassThrough();
-        result.data.pipe(logStream);
         // Logging stream
         const logData = [];
         logStream.on("data", (chunk) => {
@@ -158,10 +163,10 @@ class HeliconeAsyncOpenAIApi extends openai_1.OpenAIApi {
                 },
                 timing: HeliconeAsyncLogger_1.HeliconeAsyncLogger.createTiming(startTime, endTime),
             };
-            this.logger.log(asyncLogRequest, HeliconeAsyncLogger_1.Provider.OPENAI).then(() => {
-                const func = this.configurationManager.getOnHeliconeLog();
-                if (func)
-                    func(result);
+            this.logger.log(asyncLogRequest, HeliconeAsyncLogger_1.Provider.OPENAI).then((logResult) => {
+                const onHeliconeLog = this.configurationManager.getOnHeliconeLog();
+                if (onHeliconeLog)
+                    onHeliconeLog(logResult);
             });
         });
     }

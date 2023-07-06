@@ -56,6 +56,7 @@ class HeliconeAsyncLogger {
             if (result.status != 200) {
                 throw new Error(`Failed to log to ${basePath}. Status code ${result.status}`);
             }
+            return result;
         });
     }
     static createTiming(startTime, endTime) {

@@ -1,4 +1,5 @@
-import { IHeliconeConfigurationManager } from '../core/IHeliconeConfigurationManager';
+import { IHeliconeConfigurationManager } from "../core/IHeliconeConfigurationManager";
+import { AxiosResponse } from "axios";
 export type HeliconeAyncLogRequest = {
     providerRequest: ProviderRequest;
     providerResponse: ProviderResponse;
@@ -36,7 +37,7 @@ export declare enum Provider {
 export declare class HeliconeAsyncLogger {
     private configurationManager;
     constructor(configurationManager: IHeliconeConfigurationManager);
-    log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<void>;
+    log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<AxiosResponse<any, any>>;
     static createTiming(startTime: number, endTime: number): {
         startTime: {
             seconds: number;
