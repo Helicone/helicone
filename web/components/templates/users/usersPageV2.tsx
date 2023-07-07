@@ -18,12 +18,29 @@ import {
   SortLeafUsers,
 } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedModal from "../../shared/themed/themedModal";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
+function formatNumber(num: number) {
+  const numParts = num.toString().split(".");
+
+  if (numParts.length > 1) {
+    const decimalPlaces = numParts[1].length;
+    if (decimalPlaces < 2) {
+      return num.toFixed(2);
+    } else if (decimalPlaces > 6) {
+      return num.toFixed(6);
+    } else {
+      return num;
+    }
+  } else {
+    return num.toFixed(2);
+  }
+}
 interface UsersPageV2Props {
   currentPage: number;
   pageSize: number;
@@ -62,6 +79,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       "and"
     )
   );
+  const { setNotification } = useNotification();
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -129,8 +147,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
               tabIndex={-1}
               className="inline-flex w-full justify-center text-base font-medium text-gray-500 sm:text-sm items-center"
               onClick={() => {
-                // setNotification("Copied to clipboard", "success");
-                // navigator.clipboard.writeText(JSON.stringify(selectedUser));
+                setNotification("Copied to clipboard", "success");
+                navigator.clipboard.writeText(JSON.stringify(selectedUser));
               }}
             >
               Copy to clipboard
@@ -167,9 +185,9 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
               </li>
               <li className="w-full flex flex-row justify-between gap-4 text-sm">
                 <p>Total Cost:</p>
-                {/* <p className="">{`$${formatNumber(
+                <p className="">{`$${formatNumber(
                   selectedUser?.cost || 0
-                )}`}</p> */}
+                )}`}</p>
               </li>
             </ul>
           </div>
