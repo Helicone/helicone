@@ -1,8 +1,8 @@
 import { OpenAIApi } from "openai";
-import { IHeliconeConfigurationManager } from "./IHeliconeConfigurationManager";
+import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
 
 export class HeliconeOpenAIApi extends OpenAIApi {
-  constructor(configurationProvider: IHeliconeConfigurationManager) {
-    super(configurationProvider.resolveConfiguration());
+  constructor(heliconeConfiguration: IHeliconeConfiguration) {
+    super(heliconeConfiguration);
   }
 }

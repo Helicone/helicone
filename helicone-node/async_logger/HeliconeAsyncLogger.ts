@@ -1,4 +1,4 @@
-import { IHeliconeConfigurationManager } from "../core/IHeliconeConfigurationManager";
+import { IHeliconeConfiguration } from "../core/IHeliconeConfiguration";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export type HeliconeAyncLogRequest = {
@@ -42,9 +42,9 @@ export enum Provider {
 }
 
 export class HeliconeAsyncLogger {
-  private configurationManager: IHeliconeConfigurationManager;
-  constructor(configurationManager: IHeliconeConfigurationManager) {
-    this.configurationManager = configurationManager;
+  private heliconeConfiguration: IHeliconeConfiguration;
+  constructor(heliconeConfiguration: IHeliconeConfiguration) {
+    this.heliconeConfiguration = heliconeConfiguration;
   }
 
   async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<AxiosResponse<any, any>> {
@@ -54,11 +54,11 @@ export class HeliconeAsyncLogger {
       data: asyncLogModel,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${this.configurationManager.getHeliconeAuthHeader()}`,
+        Authorization: `${this.heliconeConfiguration.getHeliconeAuthHeader()}`,
       },
     };
 
-    const basePath = this.configurationManager.getBasePath();
+    const basePath = this.heliconeConfiguration.getBaseUrl();
     if (!basePath) throw new Error("Base path not set");
 
     // Set Helicone URL
@@ -76,6 +76,9 @@ export class HeliconeAsyncLogger {
     if (result.status != 200) {
       throw new Error(`Failed to log to ${basePath}. Status code ${result.status}`);
     }
+
+    const onHeliconeLog = this.heliconeConfiguration.getOnHeliconeLog();
+    if (onHeliconeLog) onHeliconeLog(result);
 
     return result;
   }

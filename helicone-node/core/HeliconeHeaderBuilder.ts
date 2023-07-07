@@ -1,17 +1,18 @@
-import { IHeliconeConfigurationParameters } from "./IHeliconeConfigurationParameters";
+import { IHeliconeBaseConfigurationParameters } from "./IHeliconeConfigurationParameters";
 
-export class HeliconeHeaderBuilder {
-  private heliconeConfigParameters: IHeliconeConfigurationParameters;
+export class HeliconeHeaderBuilder<T extends IHeliconeBaseConfigurationParameters> {
+  private heliconeConfigParameters: T;
   private headers: { [key: string]: string } = {};
 
-  constructor(heliconeConfigParameters: IHeliconeConfigurationParameters) {
+  constructor(heliconeConfigParameters: T) {
     this.heliconeConfigParameters = heliconeConfigParameters;
     this.headers = {
-      "Helicone-Auth": `Bearer ${heliconeConfigParameters.heliconeApiKey}`,
+      "Helicone-Auth": `Bearer ${heliconeConfigParameters.heliconeMeta.apiKey}`,
     };
   }
 
-  withPropertiesHeader(): HeliconeHeaderBuilder {
+  withPropertiesHeader(): HeliconeHeaderBuilder<T> {
+    if (!this.heliconeConfigParameters.heliconeMeta?.properties) return this;
     this.headers = {
       ...this.headers,
       ...this.getPropertyHeaders(this.heliconeConfigParameters.heliconeMeta.properties),
@@ -19,7 +20,8 @@ export class HeliconeHeaderBuilder {
     return this;
   }
 
-  withCacheHeader(): HeliconeHeaderBuilder {
+  withCacheHeader(): HeliconeHeaderBuilder<T> {
+    if (!this.heliconeConfigParameters.heliconeMeta?.cache) return this;
     this.headers = {
       ...this.headers,
       ...this.getCacheHeaders(this.heliconeConfigParameters.heliconeMeta.cache),
@@ -27,7 +29,8 @@ export class HeliconeHeaderBuilder {
     return this;
   }
 
-  withRetryHeader(): HeliconeHeaderBuilder {
+  withRetryHeader(): HeliconeHeaderBuilder<T> {
+    if (!this.heliconeConfigParameters.heliconeMeta?.retry) return this;
     this.headers = {
       ...this.headers,
       ...this.getRetryHeaders(this.heliconeConfigParameters.heliconeMeta.retry),
@@ -35,7 +38,8 @@ export class HeliconeHeaderBuilder {
     return this;
   }
 
-  withRateLimitPolicyHeader(): HeliconeHeaderBuilder {
+  withRateLimitPolicyHeader(): HeliconeHeaderBuilder<T> {
+    if (!this.heliconeConfigParameters.heliconeMeta?.rateLimitPolicy) return this;
     this.headers = {
       ...this.headers,
       ...this.getRateLimitPolicyHeaders(this.heliconeConfigParameters.heliconeMeta.rateLimitPolicy),
@@ -43,7 +47,8 @@ export class HeliconeHeaderBuilder {
     return this;
   }
 
-  withUserHeader(): HeliconeHeaderBuilder {
+  withUserHeader(): HeliconeHeaderBuilder<T> {
+    if (!this.heliconeConfigParameters.heliconeMeta?.user) return this;
     this.headers = {
       ...this.headers,
       ...this.getUserHeader(this.heliconeConfigParameters.heliconeMeta.user),
