@@ -42,6 +42,8 @@ interface ThemedTableHeaderProps<T> {
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { rows, columnsFilter, timeFilter, advancedFilters } = props;
 
+  console.log(columnsFilter?.columns);
+
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {

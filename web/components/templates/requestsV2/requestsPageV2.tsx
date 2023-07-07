@@ -204,6 +204,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           count={count || 0}
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}
+          pageSizeOptions={[10, 25, 50, 100]}
         />
       </div>
       <RequestDrawerV2

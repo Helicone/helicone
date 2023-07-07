@@ -126,7 +126,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             : undefined
         }
         columnsFilter={{
-          columns: table.getVisibleLeafColumns(),
+          columns: table.getAllColumns(),
           onSelectAll: table.toggleAllColumnsVisible,
           visibleColumns: table.getVisibleLeafColumns().length,
         }}

@@ -105,6 +105,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           count={count || 0}
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}
+          pageSizeOptions={[25, 50, 100]}
         />
       </div>
       <ThemedModal open={open} setOpen={setOpen}>

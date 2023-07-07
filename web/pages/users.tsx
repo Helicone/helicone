@@ -24,7 +24,6 @@ const Users = (props: UsersProps) => {
   return (
     <MetaData title="Users">
       <AuthLayout user={user}>
-        <UsersPage page={page} pageSize={pageSize} />
         <UsersPageV2 currentPage={page} pageSize={pageSize} sort={sort} />
       </AuthLayout>
     </MetaData>
@@ -54,7 +53,7 @@ export const getServerSideProps = async (
     context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 10;
+  const pageSize = parseInt(page_size as string, 10) || 25;
 
   return {
     props: {
