@@ -38,9 +38,17 @@
       "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
+        "getting-started/proxy-vs-async",
         {
-          "group": "Integrations",
-          "pages": ["getting-started/integration-method/openai", "getting-started/integration-method/anthropic"]
+          "group": "Proxy Integrations",
+          "pages": [
+            "getting-started/integration-method/openai-proxy",
+            "getting-started/integration-method/anthropic"
+          ]
+        },
+        {
+          "group": "Async Integrations",
+          "pages": ["getting-started/integration-method/openai"]
         },
         "getting-started/open-source"
       ]

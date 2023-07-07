@@ -2,172 +2,222 @@
 title: "OpenAI"
 ---
 
+This page will show you how to log requests in Helicone when using OpenAI. This does not use the Helicone Proxy.
+For more information on Async Logging, see the [Proxy vs Async](/getting-started/proxy-vs-asyn) page.
+
 <Tabs>
   <Tab title="Python">
-  **Set HELICONE_API_KEY as an environment variable**
-  ```python
-  export HELICONE_API_KEY=<your API key>
-  ```
 
-**Change the api base and add a Helicone-Auth header**
+## 1 line integration
+
+Add `HELICONE_API_KEY` to your environment variables.
+
+```bash
+export HELICONE_API_KEY=sk-<your-api-key>
+# You can also set it in your code (See below)
+```
+
+Replace
 
 ```python
-import openai
-
-openai.api_base = "https://oai.hconeai.com/v1"
-openai.Completion.create(
-  # ...other parameters
-  headers={
-    "Helicone-Auth": "Bearer HELICONE_API_KEY",
-  }
-)
+from openai import openai
 ```
 
-    That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
+with
+
+```python
+from helicone.openai import openai
+```
+
+## More complex example
+
+```python
+from helicone.openai import openai, Meta
+
+# export HELICONE_API_KEY=sk-<your-api-key>
+
+# or ...
+
+# from helicone.globals import helicone_global
+
+# helicone_global.api_key = "sk-<your-api-key>"
+
+x = openai.ChatCompletion.create(
+  model="gpt-3.5-turbo",
+  messages=[{
+  "role": "system",
+  "content": "This will be logged"
+  }],
+  max_tokens=512,
+  helicone_meta=Meta(
+    custom_properties={
+    "age": 25
+    }
+  )
+)
+
+```
 
   </Tab>
-  <Tab title="Python (w/ package)">
-    **Set HELICONE_API_KEY as an environment variable**
-    ```python
-    export HELICONE_API_KEY=<your API key>
-    ```
+  <Tab title="NodeJS">
+## 1 line integration
 
-    **Install the Helicone Package**
-    ```python
-    pip install helicone
-    ```
+Add `HELICONE_API_KEY` to your environment variables.
 
-    **Change OpenAI import to use Helicone**
-    ```python
-    from helicone import openai # replace `import openai` with this line
-    ```
+```bash
+export HELICONE_API_KEY=sk-<your-api-key>
+# You can also set it in your code (See below)
+```
 
-    That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
-    ```python
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt="What is Helicone?",
-        user="alice@bob.com",
-        cache=True,
-        properties={"conversation_id": 12},
-        rate_limit_policy={"quota": 100, "time_window": 60, "segment": "user"},
-        retry=True, # retry on failure
-    )
-    ```
+Replace
 
-  </Tab>
-  <Tab title="Node.js">
-  **Set HELICONE_API_KEY as an environment variable**
-    ```javascript
-    export HELICONE_API_KEY=<your API key>
-    ```
-    
-  **Change the base path and add a Helicone-Auth header**
-    ```javascript
-    import { Configuration, OpenAIApi } from "openai";
+```typescript
+const { Configuration, OpenAIApi } = require("openai");
+```
 
-    const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-        basePath: "https://oai.hconeai.com/v1",
-        baseOptions: {
-        headers: {
-            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-        },
-    });
+with
 
+```typescript
+const { HeliconeConfiguration as Configuration, HeliconeOpenAIApi as OpenAIApi } = require("helicone");
+```
+
+## More complex example
+
+```typescript
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  heliconeData: {
+    apiKey: process.env.HELICONE_API_KEY,
+  },
+});
 const openai = new OpenAIApi(configuration);
 
-  </Tab>
-  <Tab title="Node.js (w/ package)">
-    **Set HELICONE_API_KEY as an environment variable**
-    ```javascript
-    export HELICONE_API_KEY=<your API key>
-    ```
-
-    **Install the helicone-openai package**
-    ```javascript
-    npm install helicone-openai
-    ```
-
-    **Change OpenAI import to use Helicone**
-    ```javascript
-    const { Configuration, OpenAIApi } = require("helicone-openai");
-    // replace `require("openai")` with this line
-    ```
-
-    **Include the Helicone API Key into the Configuration object**
-    ```javascript
-    const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-        heliconeApiKey: process.env.HELICONE_API_KEY,
-    })
-    ```
-
-  </Tab>
-  <Tab title="cURL">
-   **Replace the OpenAI Base url with Helicone's**
-   ```
-   - POST https://api.openai.com/v1
-   + POST https://oai.hconeai.com/v1
-   ```
-
-**Add a Helicone-Auth header into the requests**
-
-```
-"Helicone-Auth": "Bearer HELICONE_API_KEY"
+const chatCompletion = await openai.createChatCompletion({
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "user", content: "Hello world" }],
+  heliconeMeta: {
+    properties: {
+      customId: "1234",
+    },
+    user: "test-user",
+  },
+});
+console.log(chatCompletion.data.choices[0].message);
 ```
 
-Here is an example cURL command:
-
-   <Note>
-   Please make sure to replace API keys with your own
-   </Note>
-   ```
-    curl --request POST \
-        --url https://oai.hconeai.com/v1/chat/completions \
-        --header 'Authorization: Bearer <<YOUR_OPENAI_API_KEY>> \
-        --header 'Content-Type: application/json' \
-        --header 'Helicone-Auth: Bearer <<YOUR_HELICONE_API_KEY>> \
-        --data '{
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Say Hello!"
-                }
-            ],
-            "temperature": 1,
-            "max_tokens": 10
-    }'
-   ```
-
   </Tab>
-  <Tab title="Langchain">
-    **Change the api base and add a Helicone-Auth header**
-    ```python
-    openai.api_base = "https://oai.hconeai.com/v1"
+  <Tab title="Raw">
+  The Helicone Async Log Request API is used for logging requests and responses that
+go through an endpoint. This is highly useful for auditing, debugging and observing
+the behavior of your interactions with the system.
 
-    llm = OpenAI(
-        temperature=0.9,
-        headers={
-            "Helicone-Auth": "Bearer HELICONE_API_KEY"
-        }
-    )
-    ```
+## Request Structure
 
-    **Change the base path and add a Helicone-Auth header**
-    ```typescript
-    const model = new OpenAI(
-        {},
-        {
-            basePath: "https://oai.hconeai.com/v1",
-            baseOptions: {
-            headers: {
-                "Helicone-Auth": "Bearer HELICONE_API_KEY"
-            },
-        },
-    );
-    ```
+A typical request will have the following structure:
 
-  </Tab>
+### Endpoint
+
+```
+
+POST https://api.hconeai.com/oai/v1/log
+
+```
+
+### Headers
+
+| Name          | Value            |
+| ------------- | ---------------- |
+| Authorization | Bearer {API_KEY} |
+
+Replace `{API_KEY}` with your actual API Key.
+
+### Body
+
+The body of the request should follow the `HeliconeAyncLogRequest` structure:
+
+```ts
+export type HeliconeAyncLogRequest = {
+  providerRequest: ProviderRequest;
+  providerResponse: ProviderResponse;
+  timing: Timing;
+};
+
+export type ProviderRequest = {
+  url: string;
+  json: {
+    [key: string]: any;
+  };
+  meta: Record<string, string>;
+};
+
+export type ProviderResponse = {
+  json: {
+    [key: string]: any;
+  };
+  status: number;
+  headers: Record<string, string>;
+};
+
+export type Timing = {
+  // From Unix epoch in Milliseconds
+  startTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+  endTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+};
+```
+
+## Example Usage
+
+Here's an example using curl:
+
+```sh
+curl -X POST https://api.hconeai.com/oai/v1/log \
+-H 'Authorization: Bearer your_api_key' \
+-H 'Content-Type: application/json' \
+-d '{
+  "providerRequest": {
+    "url": "https://example.com",
+    "json": {
+      "key1": "value1",
+      "key2": "value2"
+    },
+    "meta": {
+      "metaKey1": "metaValue1",
+      "metaKey2": "metaValue2"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "responseKey1": "responseValue1",
+      "responseKey2": "responseValue2"
+    },
+    "status": 200,
+    "headers": {
+      "headerKey1": "headerValue1",
+      "headerKey2": "headerValue2"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686244,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+In the curl command above, replace `your_api_key` with your actual API key, and adjust the values in the JSON to fit your actual request and response data and timing.
+
+The response body is a JSON object of the entire response returned by OpenAI, unless it is a streamed request. In that case, it is a JSON object with a key called "streamed_data", which is an array of every single chunk.
+
+</Tab>
 </Tabs>

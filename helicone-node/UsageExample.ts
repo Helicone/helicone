@@ -48,9 +48,15 @@ async function testProxyLogging() {
       user: "test-user",
     },
   };
-  const openAIConfigParams: ConfigurationParameters = { apiKey: process.env.OPENAI_API_KEY };
+  const openAIConfigParams: ConfigurationParameters = {
+    apiKey: process.env.OPENAI_API_KEY,
+  };
 
-  const configManager = new HeliconeProxyConfigurationManager(heliconeConfigParams, openAIConfigParams, localProxy);
+  const configManager = new HeliconeProxyConfigurationManager(
+    heliconeConfigParams,
+    openAIConfigParams,
+    localProxy
+  );
 
   const openAIClient = new HeliconeProxyOpenAIApi(configManager);
   const result = await openAIClient.createChatCompletion({
@@ -109,7 +115,11 @@ async function asyncLoggingStream() {
   };
 
   const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
-  const configManager = new HeliconeAsyncConfigurationManager(heliconeConfigParams, openAIConfigParams, localAsync);
+  const configManager = new HeliconeAsyncConfigurationManager(
+    heliconeConfigParams,
+    openAIConfigParams,
+    localAsync
+  );
 
   const openAILogger = new HeliconeAsyncOpenAIApi(configManager);
   const result = await openAILogger.createChatCompletion({
@@ -143,7 +153,11 @@ async function asyncLoggingManual() {
   };
 
   const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
-  const configManager = new HeliconeAsyncConfigurationManager(heliconeConfigParams, openAIConfigParams, localAsync);
+  const configManager = new HeliconeAsyncConfigurationManager(
+    heliconeConfigParams,
+    openAIConfigParams,
+    localAsync
+  );
 
   const chatCompletionRequest = {
     model: "gpt-3.5-turbo",
@@ -191,7 +205,11 @@ async function asyncLoggingStreamManual() {
   };
 
   const openAIConfigParams: ConfigurationParameters = { apiKey: openAIKey };
-  const configManager = new HeliconeAsyncConfigurationManager(heliconeConfigParams, openAIConfigParams, localAsync);
+  const configManager = new HeliconeAsyncConfigurationManager(
+    heliconeConfigParams,
+    openAIConfigParams,
+    localAsync
+  );
 
   const chatCompletionRequest = {
     model: "gpt-3.5-turbo",
@@ -201,9 +219,13 @@ async function asyncLoggingStreamManual() {
 
   const openAIClient = new HeliconeAsyncOpenAIApi(configManager);
   const startTime = Date.now();
-  const result = await openAIClient.createChatCompletion(chatCompletionRequest, { responseType: "stream" });
+  const result = await openAIClient.createChatCompletion(
+    chatCompletionRequest,
+    { responseType: "stream" }
+  );
   if (!("on" in result.data)) throw new Error("No data received from OpenAI");
-  if (!(result.data instanceof Readable)) throw new Error("response data does not have Readable.on stream method");
+  if (!(result.data instanceof Readable))
+    throw new Error("response data does not have Readable.on stream method");
   result.data.on("data", (chunk: Buffer) => {
     console.log(chunk.toString());
   });

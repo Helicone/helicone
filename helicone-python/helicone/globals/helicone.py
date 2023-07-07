@@ -2,6 +2,7 @@
 
 import logging
 from typing import Optional
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,9 @@ class HeliconeGlobal:
 
     @property
     def api_key(self) -> Optional[str]:
+        if (self._api_key is None):
+            self._api_key = os.environ.get("HELICONE_API_KEY")
+
         return self._api_key
 
     @api_key.setter

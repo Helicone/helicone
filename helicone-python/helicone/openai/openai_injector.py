@@ -22,7 +22,6 @@ from helicone.async_logger.async_logger import (HeliconeAsyncLogger,
                                                 UnixTimeStamp)
 from helicone.globals import helicone_global
 
-helicone_global.api_key = "sk-ql3xnfy-nokuanq-wpf2jci-jriay3k"
 helicone_global.base_url = "https://oai.hconeai.com/v1"
 
 
