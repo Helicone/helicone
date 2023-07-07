@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ThemedTableV5 from "./themedTableV5";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
@@ -164,30 +164,33 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         <ThemedTableV5
           defaultData={requests || []}
           defaultColumns={columnsWithProperties}
+          tableKey="requestsColumnVisibility"
           dataLoading={isDataLoading}
           sortable={sort}
-          header={{
-            onTimeSelectHandler: onTimeSelectHandler,
-            flattenedExportData: requests.map((request) => {
-              const flattenedRequest: any = {};
-              Object.entries(request).forEach(([key, value]) => {
-                // key is properties and value is not null
-                if (key === "customProperties" && value !== null) {
-                  Object.entries(value).forEach(([key, value]) => {
-                    if (value !== null) {
-                      flattenedRequest[key] = value;
-                    }
-                  });
-                } else {
-                  flattenedRequest[key] = value;
-                }
-              });
-              return flattenedRequest;
-            }),
+          advancedFilters={{
             filterMap: filterMap,
             filters: advancedFilters,
             setAdvancedFilters: setAdvancedFilters,
             searchPropertyFilters: searchPropertyFilters,
+          }}
+          exportData={requests.map((request) => {
+            const flattenedRequest: any = {};
+            Object.entries(request).forEach(([key, value]) => {
+              // key is properties and value is not null
+              if (key === "customProperties" && value !== null) {
+                Object.entries(value).forEach(([key, value]) => {
+                  if (value !== null) {
+                    flattenedRequest[key] = value;
+                  }
+                });
+              } else {
+                flattenedRequest[key] = value;
+              }
+            });
+            return flattenedRequest;
+          })}
+          timeFilter={{
+            onTimeSelectHandler: onTimeSelectHandler,
           }}
           onRowSelect={(row) => {
             setSelectedData(row);
