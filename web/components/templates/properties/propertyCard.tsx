@@ -87,6 +87,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
               })) ?? []
             }
             defaultColumns={INITIAL_COLUMNS}
+            tableKey="propertyCardColumnVisibility"
           />
         </div>
       </div>
