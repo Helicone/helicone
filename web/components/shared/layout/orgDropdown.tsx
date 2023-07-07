@@ -43,11 +43,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="absolute left-0 mt-2 w-52 z-50 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-200 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="px-1 py-1">
-            <p className="text-gray-500 text-sm px-2 py-2 w-full truncate">
-              {user?.email}
-            </p>
-          </div>
           {ownedOrgs && ownedOrgs.length > 0 && (
             <div className="py-1 px-1">
               <p className="text-gray-900 font-semibold text-sm px-2 py-2 w-full">
