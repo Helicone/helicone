@@ -27,9 +27,9 @@ export default function OrgDropdown(props: OrgDropdownProps) {
 
   return (
     <Menu as="div" className="relative inline-block text-left">
-      <Menu.Button className="flex flex-row space-x-2 items-center hover:bg-gray-200 hover:cursor-pointer rounded-md w-fit py-1 -my-1 pr-1 -mr-2 pl-1 -ml-1">
+      <Menu.Button className="flex flex-row space-x-2 items-center hover:bg-gray-200 hover:cursor-pointer rounded-md w-fit py-1 -my-1 pr-1.5 -mr-2 pl-1 -ml-1">
         <BuildingOffice2Icon className="h-5 w-5 text-sky-500" />
-        <p className="text-md font-semibold text-gray-900 truncate w-36 text-left">
+        <p className="text-md font-semibold text-gray-900 truncate w-fit max-w-[9rem] text-left">
           {orgContext?.currentOrg.name}
         </p>
       </Menu.Button>
