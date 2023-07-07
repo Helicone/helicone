@@ -1,31 +1,38 @@
+from dataclasses import dataclass
 import datetime
 import functools
 import inspect
 import json
-import logging
-import os
-import threading
-import uuid
-import warnings
-from typing import Callable, Mapping
-
-import aiohttp
-import openai
-import requests
+from typing import Callable, Optional
+import openai  # noqa
 from openai.api_resources import (ChatCompletion, Completion, Edit, Embedding,
                                   Image, Moderation)
 
 from helicone.async_logger.async_logger import (HeliconeAsyncLogger,
                                                 HeliconeAyncLogRequest,
                                                 Provider, ProviderRequest,
-                                                ProviderResponse, Timing,
-                                                UnixTimeStamp)
-from helicone.globals import helicone_global
+                                                ProviderResponse, Timing)
 
-helicone_global.base_url = "https://oai.hconeai.com/v1"
+
+@dataclass
+class HeliconeMeta:
+    custom_properties: Optional[dict] = None
+    user_id: Optional[str] = None
+
+    def build(self) -> dict:
+        meta = {}
+        if self.custom_properties:
+            for key, value in self.custom_properties.items():
+                meta[f"Helicone-Property-{key}"] = value
+
+        if self.user_id:
+            meta["Helicone-User-Id"] = self.user_id
+        print("METAAAAA", meta)
+        return meta
 
 
 class CreateArgsExtractor:
+    _helicone_meta: Optional[HeliconeMeta]
 
     def __init__(self,
                  api_key=None,
@@ -42,12 +49,19 @@ class CreateArgsExtractor:
         self.kwargs["request_id"] = request_id
         self.kwargs["api_version"] = api_version
         self.kwargs["organization"] = organization
+        self._helicone_meta = kwargs.get("helicone_meta")
+        self.kwargs.pop("helicone_meta", None)
 
     def get_args(self):
         return self.kwargs
 
     def get_body(self):
         return self.kwargs
+
+    def get_helicone_meta(self) -> dict:
+        if (self._helicone_meta is None):
+            return {}
+        return self._helicone_meta.build()
 
 
 class OpenAIInjector:
@@ -112,7 +126,7 @@ class OpenAIInjector:
             providerRequest = ProviderRequest(
                 url="N/A",
                 json=arg_extractor.get_body(),
-                meta={}
+                meta=arg_extractor.get_helicone_meta()
             )
             try:
                 result = func(**arg_extractor.get_args())
@@ -170,7 +184,7 @@ class OpenAIInjector:
             providerRequest = ProviderRequest(
                 url="N/A",
                 json=arg_extractor.get_body(),
-                meta={}
+                meta=arg_extractor.get_helicone_meta()
             )
             try:
                 result = await func(**arg_extractor.get_args())

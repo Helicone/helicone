@@ -57,6 +57,12 @@ class HeliconeAyncLogRequest:
     timing: Timing
 
 
+@dataclass
+class HeliconeMeta:
+    custom_properties: Optional[dict]
+    user_id: Optional[str]
+
+
 class Provider(Enum):
     OPENAI = "openai"
     AZURE_OPENAI = "azure-openai"
@@ -93,7 +99,10 @@ class HeliconeAsyncLogger:
                 f"Failed to log to {url}. Status code {res.status_code}")
         return res
 
-    def log(self, request: HeliconeAyncLogRequest, provider: Provider):
+    def log(self, request: HeliconeAyncLogRequest,
+            provider: Provider,
+            meta: Optional[HeliconeMeta] = None
+            ):
         print("logging", request, provider)
         if provider == Provider.OPENAI:
             self._request(

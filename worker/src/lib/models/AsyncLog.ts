@@ -1,5 +1,3 @@
-import { Json } from "../../../supabase/database.types";
-
 export type AsyncLogModel = {
   providerRequest: ProviderRequest;
   providerResponse: ProviderResponse;
