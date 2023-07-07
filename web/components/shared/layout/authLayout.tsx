@@ -264,11 +264,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
             <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
-                <div className="flex flex-row justify-between items-center mx-4 border-b border-gray-200 h-16">
+                <div className="flex flex-row justify-between items-center px-4 border-b border-gray-200 h-16">
                   <div className="flex flex-col">
                     <OrgDropdown />
                   </div>
-                  <Menu as="div" className="relative ml-6">
+                  <Menu as="div" className="relative">
                     <div>
                       <Menu.Button className="px-[8.75px] py-0.5 text-md bg-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
                         <span className="sr-only">Open user menu</span>
