@@ -253,6 +253,45 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           })}
                         </nav>
                       </div>
+                      <div>
+                        <Link
+                          className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                          href={"https://docs.helicone.ai/introduction"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <BookOpenIcon className="h-4 w-4" />
+                          <p>View Documentation</p>
+                        </Link>
+                        <Link
+                          className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                          href={"https://discord.gg/zsSTcH2qhG"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <QuestionMarkCircleIcon className="h-4 w-4" />
+                          <p>Help And Support</p>
+                        </Link>
+                      </div>
+                      {userSettings?.tier === "free" ? (
+                        <div className="p-4 flex w-full justify-center">
+                          <button
+                            onClick={() => setOpen(true)}
+                            className="bg-gray-100 border border-gray-300 text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
+                          >
+                            <div className="flex flex-row items-center">
+                              <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                              <p>Free Plan</p>
+                            </div>
+
+                            <p className="text-xs font-normal text-sky-600">
+                              Learn More
+                            </p>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="h-4" />
+                      )}
                     </Dialog.Panel>
                   </Transition.Child>
                   <div className="w-14 flex-shrink-0" aria-hidden="true">
@@ -458,27 +497,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </button>
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
-                <div className="hidden sm:flex text-gray-500">
-                  <Link
-                    href="https://docs.helicone.ai/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={clsx(
-                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-6"
-                    )}
-                  >
-                    Docs
-                  </Link>
-                  <Link
-                    href="https://discord.gg/zsSTcH2qhG"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={clsx(
-                      "flex flex-row px-2 pt-1 text-sm font-medium pb-2 mt-1.5 mr-6"
-                    )}
-                  >
-                    Discord
-                  </Link>
+                <div className="flex md:hidden">
                   {org && (
                     <ThemedDropdown
                       selectedValue={org.currentOrg.id}
@@ -507,7 +526,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-6">
-                  <div>
+                  <div className="flex flex-row gap-4 items-center">
                     <Menu.Button className="px-2.5 py-0.5 text-lg font-light bg-black text-white rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
                       <span className="sr-only">Open user menu</span>
                       {user?.email?.charAt(0).toUpperCase() || (
@@ -547,6 +566,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           )}
                         </Menu.Item>
                       ))}
+
                       <Menu.Item>
                         {({ active }) => (
                           <button
