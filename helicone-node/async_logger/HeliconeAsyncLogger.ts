@@ -73,9 +73,6 @@ export class HeliconeAsyncLogger {
     }
 
     const result = await axios(options);
-    if (result.status != 200) {
-      throw new Error(`Failed to log to ${basePath}. Status code ${result.status}`);
-    }
 
     const onHeliconeLog = this.heliconeConfiguration.getOnHeliconeLog();
     if (onHeliconeLog) onHeliconeLog(result);

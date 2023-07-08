@@ -20,15 +20,17 @@ Use this implementation if you want to proxy your OpenAI calls with Helicone. Th
 all of your calls to OpenAI which can add unwanted latency. Proxy logging supports all of the advanced features explained later.
 
 ```javascript
-const { ProxyConfigurationManager, HeliconeProxyOpenAIApi } = require("helicone");
+const { HeliconeProxyConfiguration, HeliconeProxyOpenAIApi } = require("helicone");
 
-const configManager = new ProxyConfigurationManager(
-  { heliconeApiKey: process.env.OPENAI_API_KEY },
-  { apiKey: process.env.OPENAI_API_KEY },
-  undefined, // Optionally override the base path for local testing
-);
+const heliconeProxyConfiguration = new HeliconeProxyConfiguration({
+  heliconeMeta: {
+    apiKey: heliconeKey,
+  },
+  apiKey: openAIKey,
+});
 
-const heliconeProxyOpenAIApi = new HeliconeProxyOpenAIApi(configManager);
+const heliconeProxyOpenAIApi = new HeliconeProxyOpenAIApi(heliconeProxyConfiguration);
+
 const completion = await heliconeProxyOpenAIApi.createCompletion({
   model: "text-davinci-003",
   prompt: "Hello world",
@@ -49,18 +51,22 @@ Async logging supports the following OpenAI requests:
 - createModeration
 
 ```javascript
-const { AsyncConfigurationManager, HeliconeAsyncOpenAIApi } = require("helicone");
+const { HeliconeAsyncConfiguration, HeliconeAsyncOpenAIApi } = require("helicone");
 
-const configManager = new AsyncConfigurationManager(
-  { heliconeApiKey: process.env.OPENAI_API_KEY },
-  { apiKey: process.env.OPENAI_API_KEY },
-  undefined, // Optionally override the base path for local testing
-  async (log: AxiosResponse<any, any>) => {} // Optional onHeliconeLog callback to be sent the logging response
+const heliconeAsyncConfiguration = new HeliconeAsyncConfiguration(
+  {
+    heliconeMeta: {
+      apiKey: heliconeKey,
+    },
+    apiKey: openAIKey,
+  },
+  // Optional on helicone log callback
+  async (result: AxiosResponse<any, any>) => {}
 );
 
-const heliconeAsyncOpenAIApi = new HeliconeAsyncOpenAIApi(configManager);
+const heliconeAsyncOpenAIApi = new HeliconeAsyncOpenAIApi(heliconeAsyncConfiguration);
 
-const completion = await heliconeOpenAIApi.createCompletion({
+const completion = await heliconeAsyncOpenAIApi.createCompletion({
   model: "text-davinci-003",
   prompt: "Hello world",
 });
@@ -72,14 +78,16 @@ Use this implementation if you want complete control over your logs. This will a
 Helicone log object while using OpenAI directly.
 
 ```javascript
-const { HeliconeOpenAIApi, AsyncConfigurationManager, Provider, HeliconeAsyncLogger } = require("helicone");
+const { HeliconeOpenAIApi, HeliconeAsyncConfiguration, Provider, HeliconeAsyncLogger } = require("helicone");
 
-const configManager = new AsyncConfigurationManager(
-  { heliconeApiKey: process.env.OPENAI_API_KEY },
-  { apiKey: process.env.OPENAI_API_KEY }
-);
+const heliconeAsyncConfiguration = new HeliconeAsyncConfiguration({
+  heliconeMeta: {
+    apiKey: heliconeKey,
+  },
+  apiKey: openAIKey,
+});
 
-const openAIApi = new HeliconeOpenAIApi(configManager);
+const openAIApi = new HeliconeOpenAIApi(heliconeAsyncConfiguration);
 const chatCompletionRequest = {
   model: "text-davinci-003",
   prompt: "Hello world",
@@ -95,7 +103,7 @@ const asyncLogModel = {
   providerRequest: {
     url: "https://api.openai.com/v1",
     json: chatCompletionRequest,
-    meta: configManager.getHeliconeHeaders(),
+    meta: heliconeAsyncConfiguration.getHeliconeHeaders(),
   },
   providerResponse: {
     json: result.data,
@@ -105,47 +113,63 @@ const asyncLogModel = {
   timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
 };
 
-const heliconeAsyncLogger = new HeliconeAsyncLogger(configManager);
+const heliconeAsyncLogger = new HeliconeAsyncLogger(heliconeAsyncConfiguration);
 await heliconeAsyncLogger.log(asyncLogModel, Provider.OPENAI);
 ```
 
 ## Advanced Features
 
-Helicone offers caching, retries, custom properties, and rate limits for your APIs. For all of the advanced features, instantiate them through the IHeliconeConfiguration.
+Helicone offers caching, retries, custom properties, and rate limits for your APIs.
 
 ```javascript
-const heliconeConfiguration = {
-  heliconeApiKey,
-  cache: true,
-  retry: true,
-  properties: {
-    Session: "24",
-    Conversation: "support_issue_2",
+const heliconeConfiguration = new HeliconeProxyConfiguration({
+  heliconeMeta: {
+    apiKey: heliconeApiKey,
+    cache: true,
+    retry: true,
+    properties: {
+      Session: "24",
+      Conversation: "support_issue_2",
+    },
+    rateLimitPolicy: {
+      quota: 10,
+      time_window: 60,
+      segment: "Session",
+    },
+    user: "TestUser",
   },
-  rateLimitPolicy: {
-    quota: 10,
-    time_window: 60,
-    segment: "Session",
-  },
-  user: "TestUser"
-};
+  apiKey: openAIKey,
+});
 ```
 
-> Async logging does not support the following advanced features: Rate limiting, Caching, Retries 
+> Async logging does not support the following advanced features: Rate limiting, Caching, Retries
 
 For more information see our [documentation](https://docs.helicone.ai/advanced-usage/custom-properties).
 
-## Streaming
+## Running Locally
 
-To enable it, set the OpenAI ConfigurationParameters stream field to true and set the responseType to "stream". This is supported in both proxy and async logging.
+If you are running Helicone locally, ensure you override the baseUrl in the heliconeMeta.
 
 ```javascript
-const openAIConfigParams = { apiKey: process.env.OPENAI_API_KEY, stream: true };
+const heliconeConfiguration = new HeliconeProxyConfiguration({
+  heliconeMeta: {
+    apiKey: heliconeApiKey,
+    baseUrl: localHeliconeUrl,
+  },
+  apiKey: openAIKey,
+});
+```
 
+## Streaming
+
+To enable it, set stream to true and set the responseType to "stream". This is supported in both proxy and async logging.
+
+```javascript
 await openAIClient.createCompletion(
   {
     model: "text-davinci-003",
     prompt: "Hello world",
+    stream: true,
   },
   { responseType: "stream" }
 );
