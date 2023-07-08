@@ -1,58 +1,58 @@
-import { IHeliconeBaseConfigurationParameters } from "./IHeliconeConfigurationParameters";
+import { IHeliconeMeta } from "./IHeliconeConfigurationParameters";
 
-export class HeliconeHeaderBuilder<T extends IHeliconeBaseConfigurationParameters> {
-  private heliconeConfigParameters: T;
+export class HeliconeHeaderBuilder {
+  private heliconeMeta: IHeliconeMeta;
   private headers: { [key: string]: string } = {};
 
-  constructor(heliconeConfigParameters: T) {
-    this.heliconeConfigParameters = heliconeConfigParameters;
-    const apiKey = heliconeConfigParameters.heliconeMeta?.apiKey ?? process.env.HELICONE_API_KEY;
+  constructor(heliconeMeta: IHeliconeMeta) {
+    this.heliconeMeta = heliconeMeta;
+    const apiKey = heliconeMeta?.apiKey ?? process.env.HELICONE_API_KEY;
     this.headers = {
       "Helicone-Auth": `Bearer ${apiKey}`,
     };
   }
 
-  withPropertiesHeader(): HeliconeHeaderBuilder<T> {
-    if (!this.heliconeConfigParameters.heliconeMeta?.properties) return this;
+  withPropertiesHeader(): HeliconeHeaderBuilder {
+    if (!this.heliconeMeta?.properties) return this;
     this.headers = {
       ...this.headers,
-      ...this.getPropertyHeaders(this.heliconeConfigParameters.heliconeMeta.properties),
+      ...this.getPropertyHeaders(this.heliconeMeta.properties),
     };
     return this;
   }
 
-  withCacheHeader(): HeliconeHeaderBuilder<T> {
-    if (!this.heliconeConfigParameters.heliconeMeta?.cache) return this;
+  withCacheHeader(): HeliconeHeaderBuilder {
+    if (!this.heliconeMeta?.cache) return this;
     this.headers = {
       ...this.headers,
-      ...this.getCacheHeaders(this.heliconeConfigParameters.heliconeMeta.cache),
+      ...this.getCacheHeaders(this.heliconeMeta.cache),
     };
     return this;
   }
 
-  withRetryHeader(): HeliconeHeaderBuilder<T> {
-    if (!this.heliconeConfigParameters.heliconeMeta?.retry) return this;
+  withRetryHeader(): HeliconeHeaderBuilder {
+    if (!this.heliconeMeta?.retry) return this;
     this.headers = {
       ...this.headers,
-      ...this.getRetryHeaders(this.heliconeConfigParameters.heliconeMeta.retry),
+      ...this.getRetryHeaders(this.heliconeMeta.retry),
     };
     return this;
   }
 
-  withRateLimitPolicyHeader(): HeliconeHeaderBuilder<T> {
-    if (!this.heliconeConfigParameters.heliconeMeta?.rateLimitPolicy) return this;
+  withRateLimitPolicyHeader(): HeliconeHeaderBuilder {
+    if (!this.heliconeMeta?.rateLimitPolicy) return this;
     this.headers = {
       ...this.headers,
-      ...this.getRateLimitPolicyHeaders(this.heliconeConfigParameters.heliconeMeta.rateLimitPolicy),
+      ...this.getRateLimitPolicyHeaders(this.heliconeMeta.rateLimitPolicy),
     };
     return this;
   }
 
-  withUserHeader(): HeliconeHeaderBuilder<T> {
-    if (!this.heliconeConfigParameters.heliconeMeta?.user) return this;
+  withUserHeader(): HeliconeHeaderBuilder {
+    if (!this.heliconeMeta?.user) return this;
     this.headers = {
       ...this.headers,
-      ...this.getUserHeader(this.heliconeConfigParameters.heliconeMeta.user),
+      ...this.getUserHeader(this.heliconeMeta.user),
     };
     return this;
   }

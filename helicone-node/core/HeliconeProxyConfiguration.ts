@@ -13,7 +13,7 @@ export class HeliconeProxyConfiguration extends Configuration implements IHelico
     this.heliconeConfigurationParameters = heliconeConfigParameters;
     this.baseUrl = heliconeConfigParameters.heliconeMeta?.baseUrl ?? "https://oai.hconeai.com/v1";
 
-    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigurationParameters)
+    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigurationParameters.heliconeMeta)
       .withPropertiesHeader()
       .withCacheHeader()
       .withRetryHeader()

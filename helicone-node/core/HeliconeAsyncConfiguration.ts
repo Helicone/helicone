@@ -15,7 +15,7 @@ export class HeliconeAsyncConfiguration extends Configuration implements IHelico
     this.baseUrl = heliconeConfigParameters.heliconeMeta?.baseUrl ?? "https://api.hconeai.com";
     this.onHeliconeLog = onHeliconeLog;
 
-    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigParameters)
+    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigParameters.heliconeMeta)
       .withPropertiesHeader()
       .withUserHeader()
       .build();
