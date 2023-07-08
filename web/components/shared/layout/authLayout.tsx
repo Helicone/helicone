@@ -3,10 +3,13 @@ import Image from "next/image";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
+  ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
   ArrowUpCircleIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
+  BookOpenIcon,
+  BuildingOffice2Icon,
   BuildingOfficeIcon,
   ChartBarIcon,
   CircleStackIcon,
@@ -14,6 +17,7 @@ import {
   CubeTransparentIcon,
   HomeIcon,
   KeyIcon,
+  QuestionMarkCircleIcon,
   SparklesIcon,
   TableCellsIcon,
   UserCircleIcon,
@@ -36,6 +40,7 @@ import Notification from "../notification/Notification";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import ThemedModal from "../themed/themedModal";
 import UpgradeProModal from "../upgradeProModal";
+import OrgDropdown from "./orgDropdown";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -52,6 +57,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const org = useOrg();
   const { userSettings, isLoading } = useUserSettings(user.id);
   const [open, setOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const navigation = [
     {
@@ -67,6 +73,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/requests"),
     },
     {
+      name: "Users",
+      href: "/users",
+      icon: UsersIcon,
+      current: pathname.includes("/users"),
+    },
+    {
       name: "Properties",
       href: "/properties",
       icon: BsTags,
@@ -77,12 +89,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/cache",
       icon: CircleStackIcon,
       current: pathname.includes("/cache"),
-    },
-    {
-      name: "Users",
-      href: "/users",
-      icon: UsersIcon,
-      current: pathname.includes("/users"),
     },
     {
       name: "Models",
@@ -259,31 +265,86 @@ const AuthLayout = (props: AuthLayoutProps) => {
             {/* Static sidebar for desktop */}
             <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col">
               {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-4">
-                <div className="flex flex-shrink-0 items-center px-4">
-                  <button
-                    onClick={() => {
-                      supabaseClient.auth.getUser().then((user) => {
-                        if (user.data.user?.email === DEMO_EMAIL) {
-                          supabaseClient.auth.signOut().then(() => {
-                            router.push("/");
-                          });
-                        } else {
-                          router.push("/dashboard");
-                        }
-                      });
-                    }}
-                  >
-                    <Image
-                      className="block rounded-md"
-                      src="/assets/landing/helicone.webp"
-                      width={150}
-                      height={150 / (1876 / 528)}
-                      alt="Helicone-full-logo"
-                    />
-                  </button>
+              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
+                <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
+                  <div className="flex flex-col">
+                    <OrgDropdown />
+                  </div>
+                  <Menu as="div" className="relative">
+                    <div>
+                      <Menu.Button className="px-[8.75px] py-0.5 text-md bg-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                        <span className="sr-only">Open user menu</span>
+                        {user?.email?.charAt(0).toUpperCase() || (
+                          <UserCircleIcon className="h-8 w-8 text-black" />
+                        )}
+                      </Menu.Button>
+                    </div>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <Menu.Items className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <div className="border-b border-gray-300 ">
+                          <p className="text-gray-900 text-sm px-4 py-2 w-full truncate">
+                            {user?.email}
+                          </p>
+                        </div>
+                        <Menu.Item>
+                          <Link
+                            href="https://docs.helicone.ai/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={clsx(
+                              "block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                            )}
+                          >
+                            Docs
+                          </Link>
+                        </Menu.Item>
+                        <Menu.Item>
+                          <Link
+                            href="https://discord.gg/zsSTcH2qhG"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={clsx(
+                              "block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                            )}
+                          >
+                            Discord
+                          </Link>
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={clsx(
+                                active ? "bg-gray-100" : "",
+                                "flex w-full px-4 py-2 text-sm text-gray-500 border-t border-gray-300"
+                              )}
+                              onClick={async () => {
+                                setIsSigningOut(true);
+                                supabaseClient.auth.signOut().then(() => {
+                                  router.push("/");
+                                  setIsSigningOut(false);
+                                });
+                              }}
+                            >
+                              {isSigningOut && (
+                                <ArrowPathIcon className="mr-2 animate-spin h-5 w-5 text-gray-400" />
+                              )}
+                              Sign out
+                            </button>
+                          )}
+                        </Menu.Item>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
                 </div>
-                <div className="mt-5 flex flex-grow flex-col">
+                <div className="mt-1 flex flex-grow flex-col">
                   <nav className="flex-1 space-y-1 px-2 pb-4 pt-2">
                     {navigation.map((item) => {
                       return (
@@ -340,7 +401,27 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     })}
                   </nav>
                 </div>
-                {userSettings?.tier === "free" && (
+                <div>
+                  <Link
+                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    href={"https://docs.helicone.ai/introduction"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <BookOpenIcon className="h-4 w-4" />
+                    <p>View Documentation</p>
+                  </Link>
+                  <Link
+                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    href={"https://discord.gg/zsSTcH2qhG"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <QuestionMarkCircleIcon className="h-4 w-4" />
+                    <p>Help And Support</p>
+                  </Link>
+                </div>
+                {userSettings?.tier === "free" ? (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
@@ -356,6 +437,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </p>
                     </button>
                   </div>
+                ) : (
+                  <div className="h-4" />
                 )}
               </div>
             </div>
@@ -364,7 +447,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <div
           className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
         >
-          <div className="sticky top-0 z-20 flex h-16 flex-shrink-0 bg-white border-b border-gray-300">
+          <div className="sticky top-0 z-20 h-16 flex md:hidden flex-shrink-0 bg-white border-b border-gray-300">
             <button
               type="button"
               className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
@@ -471,12 +554,17 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               active ? "bg-gray-100" : "",
                               "flex w-full px-4 py-2 text-sm text-gray-500 border-t border-gray-300"
                             )}
-                            onClick={() => {
-                              supabaseClient.auth
-                                .signOut()
-                                .then(() => router.push("/"));
+                            onClick={async () => {
+                              setIsSigningOut(true);
+                              supabaseClient.auth.signOut().then(() => {
+                                router.push("/");
+                                setIsSigningOut(false);
+                              });
                             }}
                           >
+                            {isSigningOut && (
+                              <ArrowPathIcon className="mr-2 animate-spin h-5 w-5 text-gray-400" />
+                            )}
                             Sign out
                           </button>
                         )}
@@ -488,7 +576,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </div>
           </div>
 
-          <main className="flex-1 bg">
+          <main className="flex-1">
             <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
               {/* Replace with your content */}
 
@@ -518,21 +606,26 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </Link>
                     </div>
                     <button
-                      onClick={() =>
+                      onClick={async () => {
+                        setIsSigningOut(true);
                         supabaseClient.auth.signOut().then(() => {
                           router.push("/");
-                        })
-                      }
+                          setIsSigningOut(false);
+                        });
+                      }}
                       type="button"
                       className="-m-1.5 flex-none px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-900 rounded-lg"
                     >
+                      {isSigningOut && (
+                        <ArrowPathIcon className="mr-2 animate-spin h-5 w-5 text-gray-400" />
+                      )}
                       Exit Demo
                     </button>
                   </div>
                 </div>
               )}
               <OrgContext.Provider value={org}>
-                <div className="py-4 sm:py-6" key={org?.renderKey}>
+                <div className="py-4 sm:py-8" key={org?.renderKey}>
                   {children}
                 </div>
               </OrgContext.Provider>

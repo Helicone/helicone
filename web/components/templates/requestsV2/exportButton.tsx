@@ -29,7 +29,7 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
     // Create a download link and click it to start the download
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "requests.csv";
+    link.download = "data.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
