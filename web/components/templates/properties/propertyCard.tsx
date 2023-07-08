@@ -10,7 +10,7 @@ import {
 } from "../../shared/metrics/metricsPanel";
 import { usePropertyCard } from "./useProperty";
 import { MdLaunch } from "react-icons/md";
-import ThemedTableV5 from "../requestsV2/themedTableV5";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 interface PropertyCardPageProps {
@@ -87,6 +87,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
               })) ?? []
             }
             defaultColumns={INITIAL_COLUMNS}
+            tableKey="propertyCardColumnVisibility"
           />
         </div>
       </div>

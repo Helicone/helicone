@@ -14,6 +14,7 @@ interface TableFooterProps {
   isCountLoading: boolean;
   onPageChange: (newPageNumber: number) => void;
   onPageSizeChange: (newPageSize: number) => void;
+  pageSizeOptions: number[];
 }
 
 const TableFooter = (props: TableFooterProps) => {
@@ -24,6 +25,7 @@ const TableFooter = (props: TableFooterProps) => {
     isCountLoading,
     onPageChange,
     onPageSizeChange,
+    pageSizeOptions,
   } = props;
 
   const router = useRouter();
@@ -49,10 +51,9 @@ const TableFooter = (props: TableFooterProps) => {
             }}
             value={router.query.page_size}
           >
-            <option>10</option>
-            <option>25</option>
-            <option>50</option>
-            <option>100</option>
+            {pageSizeOptions?.map((o) => (
+              <option key={o}>{o}</option>
+            ))}
           </select>
         </div>
         <p className="text-gray-700 font-medium">{`Page ${currentPage} of ${

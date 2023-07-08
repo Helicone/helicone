@@ -14,29 +14,27 @@ import {
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { Result } from "../../../lib/result";
-import { TimeInterval } from "../../../lib/timeCalculations/time";
-import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
+import { Result } from "../../../../lib/result";
+import { TimeInterval } from "../../../../lib/timeCalculations/time";
+import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
-import { clsx } from "../../shared/clsx";
-import LoadingAnimation from "../../shared/loadingAnimation";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+} from "../../../../services/lib/sorts/requests/sorts";
+import { clsx } from "../../clsx";
+import LoadingAnimation from "../../loadingAnimation";
+import { UIFilterRow } from "../themedAdvancedFilters";
+import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
+  tableKey: string;
   dataLoading?: boolean;
 
   // TODO: change this to a more generic type???
-  header?: {
-    flattenedExportData: any[];
-    onTimeSelectHandler: (key: TimeInterval, value: string) => void;
-    // TODO: rewrite these filters
+  advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
     setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
@@ -45,21 +43,39 @@ interface ThemedTableV5Props<T> {
       search: string
     ) => Promise<Result<void, string>>;
   };
+  timeFilter?: {
+    onTimeSelectHandler: (key: TimeInterval, value: string) => void;
+  };
+  exportData?: any[];
+  // header?: {
+  //   flattenedExportData: any[];
+  //   onTimeSelectHandler: (key: TimeInterval, value: string) => void;
+  //   // TODO: rewrite these filters
+  //   filterMap: SingleFilterDef<any>[];
+  //   filters: UIFilterRow[];
+  //   setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+  //   searchPropertyFilters: (
+  //     property: string,
+  //     search: string
+  //   ) => Promise<Result<void, string>>;
+  // };
   sortable?: {
     sortKey: string | null;
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T) => void;
-  onColumnSort?: (column: ColumnDef<T>) => void;
 }
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const {
     defaultData,
     defaultColumns,
+    tableKey,
     dataLoading,
-    header,
+    advancedFilters,
+    exportData,
+    timeFilter,
     sortable,
     onRowSelect,
   } = props;
@@ -74,25 +90,14 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
 
   // this needs to be abstracted out to the parent component to become modular
   useEffect(() => {
-    const requestsVisibility =
-      window.localStorage.getItem("requestsColumnVisibility") || null;
-    setVisibleColumns(
-      requestsVisibility
-        ? JSON.parse(requestsVisibility)
-        : {
-            promptTokens: false,
-            completionTokens: false,
-          }
-    );
-  }, []);
+    const requestsVisibility = window.localStorage.getItem(tableKey) || null;
+    setVisibleColumns(requestsVisibility ? JSON.parse(requestsVisibility) : {});
+  }, [tableKey]);
 
   // syncs the visibility state with local storage
   useEffect(() => {
-    localStorage.setItem(
-      "requestsColumnVisibility",
-      JSON.stringify(visibleColumns)
-    );
-  }, [visibleColumns]);
+    localStorage.setItem(tableKey, JSON.stringify(visibleColumns));
+  }, [visibleColumns, tableKey]);
 
   const table = useReactTable({
     data: defaultData,
@@ -109,27 +114,38 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
 
   return (
     <div className="flex flex-col space-y-4">
-      {header && (
-        <ThemedTableHeader
-          onTimeSelectHandler={header.onTimeSelectHandler}
-          columns={table.getAllColumns()}
-          onSelectAll={table.toggleAllColumnsVisible}
-          visibleColumns={table.getVisibleLeafColumns().length}
-          rows={header.flattenedExportData}
-          filterMap={header.filterMap}
-          filters={header.filters}
-          searchPropertyFilters={header.searchPropertyFilters}
-          setAdvancedFilters={header.setAdvancedFilters}
-        />
-      )}
+      <ThemedTableHeader
+        advancedFilters={
+          advancedFilters
+            ? {
+                filterMap: advancedFilters.filterMap,
+                filters: advancedFilters.filters,
+                searchPropertyFilters: advancedFilters.searchPropertyFilters,
+                setAdvancedFilters: advancedFilters.setAdvancedFilters,
+              }
+            : undefined
+        }
+        columnsFilter={{
+          columns: table.getAllColumns(),
+          onSelectAll: table.toggleAllColumnsVisible,
+          visibleColumns: table.getVisibleLeafColumns().length,
+        }}
+        timeFilter={
+          timeFilter
+            ? {
+                onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+              }
+            : undefined
+        }
+        rows={exportData || []}
+      />
+
       {dataLoading ? (
         <LoadingAnimation title="Loading Requests..." />
       ) : rows.length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
           <TableCellsIcon className="h-12 w-12 text-gray-400" />
-          <p className="text-xl font-semibold text-gray-500">
-            No Requests Found
-          </p>
+          <p className="text-xl font-semibold text-gray-500">No Data Found</p>
         </div>
       ) : table.getVisibleFlatColumns().length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
