@@ -6,8 +6,9 @@ export class HeliconeHeaderBuilder<T extends IHeliconeBaseConfigurationParameter
 
   constructor(heliconeConfigParameters: T) {
     this.heliconeConfigParameters = heliconeConfigParameters;
+    const apiKey = heliconeConfigParameters.heliconeMeta?.apiKey ?? process.env.HELICONE_API_KEY;
     this.headers = {
-      "Helicone-Auth": `Bearer ${heliconeConfigParameters.heliconeMeta.apiKey}`,
+      "Helicone-Auth": `Bearer ${apiKey}`,
     };
   }
 

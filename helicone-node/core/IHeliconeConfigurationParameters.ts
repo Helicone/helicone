@@ -2,7 +2,7 @@ import { ConfigurationParameters } from "openai";
 
 export interface IHeliconeBaseConfigurationParameters extends ConfigurationParameters {
   heliconeMeta: {
-    apiKey: string;
+    apiKey?: string;
     properties?: { [key: string]: any };
     cache?: boolean;
     retry?: boolean | { [key: string]: any };
