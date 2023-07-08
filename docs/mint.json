@@ -42,7 +42,8 @@
           "group": "Integrations",
           "pages": [
             "getting-started/integration-method/openai",
-            "getting-started/integration-method/anthropic"
+            "getting-started/integration-method/anthropic",
+            "getting-started/integration-method/azure"
           ]
         },
         "getting-started/open-source"
