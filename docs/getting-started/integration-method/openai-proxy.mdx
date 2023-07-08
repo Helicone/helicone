@@ -81,27 +81,49 @@ openai.Completion.create(
   </Tab>
   <Tab title="Node.js (w/ package)">
     **Set HELICONE_API_KEY as an environment variable**
-    ```javascript
-    export HELICONE_API_KEY=<your API key>
+    ```bash
+    export HELICONE_API_KEY=sk-<your-api-key>
+    # You can also set it in your code (See below)
     ```
 
     **Install the helicone-openai package**
     ```javascript
-    npm install helicone-openai
+    npm install helicone
     ```
 
-    **Change OpenAI import to use Helicone**
-    ```javascript
-    const { Configuration, OpenAIApi } = require("helicone-openai");
-    // replace `require("openai")` with this line
+    Replace
+
+    ```typescript
+    const { Configuration, OpenAIApi } = require("openai");
     ```
 
-    **Include the Helicone API Key into the Configuration object**
-    ```javascript
+    with
+
+    ```typescript
+    const { HeliconeProxyConfiguration as Configuration, HeliconeProxyOpenAIApi as OpenAIApi } = require("helicone");
+    ```
+
+    **More Complex Example**
+    ```typescript
     const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-        heliconeApiKey: process.env.HELICONE_API_KEY,
-    })
+      apiKey: process.env.OPENAI_API_KEY,
+      heliconeMeta: {
+        apiKey: process.env.HELICONE_API_KEY,
+      },
+    });
+    const openai = new OpenAIApi(configuration);
+
+    const chatCompletion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: "Hello world" }],
+      heliconeMeta: {
+        properties: {
+          customId: "1234",
+        },
+        user: "test-user",
+      },
+    });
+    console.log(chatCompletion.data.choices[0].message);
     ```
 
   </Tab>

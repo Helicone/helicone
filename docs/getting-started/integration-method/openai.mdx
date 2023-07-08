@@ -78,7 +78,7 @@ const { Configuration, OpenAIApi } = require("openai");
 with
 
 ```typescript
-const { HeliconeConfiguration as Configuration, HeliconeOpenAIApi as OpenAIApi } = require("helicone");
+const { HeliconeAsyncConfiguration as Configuration, HeliconeAsyncOpenAIApi as OpenAIApi } = require("helicone");
 ```
 
 ## More complex example
@@ -86,7 +86,7 @@ const { HeliconeConfiguration as Configuration, HeliconeOpenAIApi as OpenAIApi }
 ```typescript
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  heliconeData: {
+  heliconeMeta: {
     apiKey: process.env.HELICONE_API_KEY,
   },
 });
