@@ -421,7 +421,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>Help And Support</p>
                   </Link>
                 </div>
-                {userSettings?.tier === "free" && (
+                {userSettings?.tier === "free" ? (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
@@ -437,6 +437,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </p>
                     </button>
                   </div>
+                ) : (
+                  <div className="h-4" />
                 )}
               </div>
             </div>
