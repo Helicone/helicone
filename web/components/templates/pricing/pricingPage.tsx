@@ -74,7 +74,13 @@ const tiers = [
     ),
     description:
       "Everything in Essential, plus features needed for larger enterprises.",
-    features: ["SOC-2 Compliance", "Self-Deployment Management"],
+    features: [
+      "SOC-2 Compliance",
+      "Self-Deployment Management",
+      "Dedicated Support Channel (24/7 access)",
+      "Custom ETL integrations",
+      "Priority Feature Requests",
+    ],
     buttonText: "Contact us",
     backgroundColor: "bg-purple-600",
     hoverBackgroundColor: "hover:bg-purple-500",
