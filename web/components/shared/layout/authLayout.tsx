@@ -8,6 +8,7 @@ import {
   ArrowUpCircleIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
+  BookOpenIcon,
   BuildingOffice2Icon,
   BuildingOfficeIcon,
   ChartBarIcon,
@@ -16,6 +17,7 @@ import {
   CubeTransparentIcon,
   HomeIcon,
   KeyIcon,
+  QuestionMarkCircleIcon,
   SparklesIcon,
   TableCellsIcon,
   UserCircleIcon,
@@ -264,7 +266,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
             <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
-                <div className="flex flex-row justify-between items-center mx-4 border-b border-gray-200 h-16">
+                <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
                   <div className="flex flex-col">
                     <OrgDropdown />
                   </div>
@@ -398,6 +400,26 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       );
                     })}
                   </nav>
+                </div>
+                <div>
+                  <Link
+                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    href={"https://docs.helicone.ai/introduction"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <BookOpenIcon className="h-4 w-4" />
+                    <p>View Documentation</p>
+                  </Link>
+                  <Link
+                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    href={"https://discord.gg/zsSTcH2qhG"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <QuestionMarkCircleIcon className="h-4 w-4" />
+                    <p>Help And Support</p>
+                  </Link>
                 </div>
                 {userSettings?.tier === "free" && (
                   <div className="p-4 flex w-full justify-center">
@@ -601,7 +623,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
               )}
               <OrgContext.Provider value={org}>
-                <div className="py-4 sm:py-[1.65rem]" key={org?.renderKey}>
+                <div className="py-4 sm:py-8" key={org?.renderKey}>
                   {children}
                 </div>
               </OrgContext.Provider>
