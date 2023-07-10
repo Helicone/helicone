@@ -15,14 +15,8 @@ async function handler({
   req,
   res,
   supabaseClient,
+  userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  console.log(1);
-  const { org_id: orgId } = req.query as {
-    org_id: string;
-  };
-
-  console.log("orgId", orgId);
-
   const { filter } = req.body as {
     filter: FilterNode;
   };
