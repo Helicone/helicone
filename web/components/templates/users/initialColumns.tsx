@@ -28,9 +28,6 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
         {info.getValue() ? `${info.getValue()}` : "No User ID"}
       </span>
     ),
-    meta: {
-      sortKey: "user_id",
-    },
   },
   {
     accessorKey: "active_for",
@@ -77,7 +74,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     header: "Total Cost",
     cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
     meta: {
-      sortKey: "last_active",
+      sortKey: "cost",
     },
   },
 ];
