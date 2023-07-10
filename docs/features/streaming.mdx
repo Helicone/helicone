@@ -8,8 +8,8 @@ Currently, **OpenAI doesn't provide usage statistics such as prompt and completi
 
 All you have to do is import helicone or import openai through the Helicone package and the rest of your code works as it does.
 
-```
-from helicone import openai
+```python
+from helicone.openai_proxy import openai
 ```
 
 The following examples work with or without Helicone!
@@ -19,7 +19,7 @@ The following examples work with or without Helicone!
 In this mode, the request is made synchronously, but the response is streamed.
 
 ```python
-pythonCopy codefor chunk in openai.ChatCompletion.create(
+for chunk in openai.ChatCompletion.create(
     model = 'gpt-3.5-turbo',
     messages = [{
         'role': 'user',
@@ -37,7 +37,7 @@ pythonCopy codefor chunk in openai.ChatCompletion.create(
 In this mode, both the request is made asynchronously and the response is streamed. You'll need to use the `await` keyword when calling `openai.ChatCompletion.acreate`, and use an `async` for loop to iterate over the response.
 
 ```python
-pythonCopy codeasync for chunk in await openai.ChatCompletion.acreate(
+for chunk in await openai.ChatCompletion.acreate(
     model = 'gpt-3.5-turbo',
     messages = [{
         'role': 'user',

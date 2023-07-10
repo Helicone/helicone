@@ -3,51 +3,24 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
-export type RequestHandlerType =
-  | "proxy_only"
-  | "proxy_log"
-  | "logging"
-  | "feedback";
+import { Env, hash } from "..";
+import { Result } from "../results";
+import { HeliconeHeaders } from "./HeliconeHeaders";
 
-type Nullable<T> = T | null;
-export interface HeliconeHeaders {
-  heliconeAuth: Nullable<string>;
-  rateLimitPolicy: Nullable<string>;
-  featureFlags: {
-    streamForceFormat: boolean;
-    increaseTimeout: boolean;
-  };
-  retryHeaders: Nullable<{
-    enabled: boolean;
-    retries: number;
-    factor: number;
-    minTimeout: number;
-    maxTimeout: number;
-  }>;
-  openaiBaseUrl: Nullable<string>;
-  promptFormat: Nullable<string>;
-  requestId: Nullable<string>;
-  promptId: Nullable<string>;
-  promptName: Nullable<string>;
-  omitHeaders: {
-    omitResponse: boolean;
-    omitRequest: boolean;
-  };
-}
+export type RequestHandlerType = "proxy_only" | "proxy_log" | "logging" | "feedback";
 
 export class RequestWrapper {
   url: URL;
   heliconeHeaders: HeliconeHeaders;
-  heliconeProperties: Record<string, string>;
   authorization: string | undefined;
+  providerAuth: string | undefined;
 
   private cachedText: string | null = null;
 
   constructor(private request: Request) {
     this.url = new URL(request.url);
-    this.heliconeHeaders = this.getHeliconeHeaders();
-    this.authorization = this.getAuthorization();
-    this.heliconeProperties = this.getHeliconeProperties();
+    this.heliconeHeaders = new HeliconeHeaders(request.headers);
+    this.authorization = this.getAuthorization(request.headers);
   }
 
   async getText(): Promise<string> {
@@ -83,101 +56,47 @@ export class RequestWrapper {
     return this.request.url;
   }
 
-  getRequestHandlerType(): RequestHandlerType {
-    if (this.url.pathname.includes("audio")) {
-      return "proxy_only";
+  async getHeliconeAuthHeader(): Promise<Result<string | null, string>> {
+    const heliconeAuth = this.heliconeHeaders.heliconeAuth;
+    if (!heliconeAuth) {
+      return { data: null, error: null };
     }
-    const method = this.getMethod();
-
-    if (method === "POST" && this.url.pathname === "/v1/log") {
-      return "logging";
-    }
-
-    if (method === "POST" && this.url.pathname === "/v1/feedback") {
-      return "feedback";
+    if (!heliconeAuth.includes("Bearer ")) {
+      return { data: null, error: "Must included Bearer in API Key" };
     }
 
-    return "proxy_log";
+    const apiKey = heliconeAuth.replace("Bearer ", "").trim();
+    const apiKeyPattern = /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+
+    if (!apiKeyPattern.test(apiKey)) {
+      return {
+        data: null,
+        error: "API Key is not well formed",
+      };
+    }
+    const apiKeyHash = await hash(`Bearer ${apiKey}`);
+    return { data: apiKeyHash, error: null };
+  }
+
+  async getProviderAuthHeader(): Promise<string | undefined> {
+    return this.authorization ? await hash(this.authorization) : undefined;
+  }
+
+  async getAuthorizationHash(): Promise<string | undefined> {
+    return this.authorization ? await hash(this.authorization) : undefined;
   }
 
   async getUserId(): Promise<string | undefined> {
-    const heliconeUserIdHeader = "helicone-user-id";
-    const userId =
-      this.request.headers.get(heliconeUserIdHeader) ||
-      (await this.getJson<{ user?: string }>()).user;
+    const userId = this.heliconeHeaders.userId || (await this.getJson<{ user?: string }>()).user;
     return userId;
   }
 
-  private getAuthorization(): string | undefined {
+  private getAuthorization(headers: Headers): string | undefined {
     return (
-      this.getHeaders().get("Authorization") ?? // Openai
-      this.getHeaders().get("x-api-key") ?? // Anthropic
+      headers.get("Authorization") ?? // Openai
+      headers.get("x-api-key") ?? // Anthropic
+      headers.get("api-key") ?? // Azure
       undefined
     );
-  }
-
-  private getHeliconeHeaders(): HeliconeHeaders {
-    return {
-      heliconeAuth: this.getHeaders().get("helicone-auth") ?? null,
-      featureFlags: this.getHeliconeFeatureFlags(),
-      rateLimitPolicy:
-        this.getHeaders().get("Helicone-RateLimit-Policy") ?? null,
-      openaiBaseUrl: this.getHeaders().get("Helicone-OpenAI-Api-Base") ?? null,
-      retryHeaders: this.getRetryHeaders(),
-      promptFormat: this.getHeaders().get("Helicone-Prompt-Format") ?? null,
-      requestId: this.getHeaders().get("Helicone-Request-Id") ?? null,
-      promptId: this.getHeaders().get("Helicone-Prompt-Id") ?? null,
-      promptName: this.getHeaders().get("Helicone-Prompt-Name") ?? null,
-      omitHeaders: {
-        omitResponse:
-          this.getHeaders().get("Helicone-Omit-Response") === "true",
-        omitRequest: this.getHeaders().get("Helicone-Omit-Request") === "true",
-      },
-    };
-  }
-
-  private getRetryHeaders(): HeliconeHeaders["retryHeaders"] {
-    const retryEnabled = this.getHeaders().get("helicone-retry-enabled");
-    if (retryEnabled === null) {
-      return null;
-    }
-    return {
-      enabled: retryEnabled === "true",
-      retries: parseInt(this.getHeaders().get("helicone-retry-num") ?? "5", 10),
-      factor: parseFloat(this.getHeaders().get("helicone-retry-factor") ?? "2"),
-      minTimeout: parseInt(
-        this.getHeaders().get("helicone-retry-min-timeout") ?? "1000",
-        10
-      ),
-      maxTimeout: parseInt(
-        this.getHeaders().get("helicone-retry-max-timeout") ?? "10000",
-        10
-      ),
-    };
-  }
-
-  private getHeliconeFeatureFlags(): HeliconeHeaders["featureFlags"] {
-    const streamForceFormat = this.getHeaders().get(
-      "helicone-stream-force-format"
-    );
-    const increaseTimeout = this.getHeaders().get("helicone-increase-timeout");
-    return {
-      streamForceFormat: streamForceFormat === "true",
-      increaseTimeout: increaseTimeout === "true",
-    };
-  }
-
-  private getHeliconeProperties(): Record<string, string> {
-    const propTag = "helicone-property-";
-    const heliconeHeaders = Object.fromEntries(
-      [...this.getHeaders().entries()]
-        .filter(
-          ([key]) =>
-            key.toLowerCase().startsWith(propTag.toLowerCase()) &&
-            key.length > propTag.length
-        )
-        .map(([key, value]) => [key.substring(propTag.length), value])
-    );
-    return heliconeHeaders;
   }
 }

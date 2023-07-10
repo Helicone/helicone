@@ -34,6 +34,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "events": "^3.3.0",
     "gpt3-tokenizer": "^1.1.5",
+    "itty-router": "^4.0.13",
     "prettier": "^2.8.7",
     "yarn": "^1.22.19"
   }

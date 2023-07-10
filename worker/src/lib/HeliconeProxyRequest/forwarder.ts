@@ -1,30 +1,25 @@
 import { HeliconeProxyRequestMapper } from "./mapper";
-import { Env } from "../..";
+import { Env, Provider } from "../..";
 import { getCacheSettings } from "../cache/cacheSettings";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
-import {
-  getCachedResponse,
-  recordCacheHit,
-  saveToCache,
-} from "../cache/cacheFunctions";
+import { getCachedResponse, recordCacheHit, saveToCache } from "../cache/cacheFunctions";
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
-import { getTokenCount } from "../dbLogger/tokenCounter";
 
 export async function proxyForwarder(
   request: RequestWrapper,
   env: Env,
-  ctx: ExecutionContext
+  ctx: ExecutionContext,
+  provider: Provider
 ): Promise<Response> {
-  const { data: proxyRequest, error: proxyRequestError } =
-    await new HeliconeProxyRequestMapper(
-      request,
-      env.PROVIDER,
-      env.TOKEN_COUNT_URL
-    ).tryToProxyRequest();
+  const { data: proxyRequest, error: proxyRequestError } = await new HeliconeProxyRequestMapper(
+    request,
+    provider,
+    env.TOKEN_COUNT_URL
+  ).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
     return new Response(proxyRequestError, {
@@ -48,10 +43,7 @@ export async function proxyForwarder(
       userId: proxyRequest.userId,
     });
 
-    responseBuilder.addRateLimitHeaders(
-      rateLimitCheckResult,
-      proxyRequest.rateLimitOptions
-    );
+    responseBuilder.addRateLimitHeaders(rateLimitCheckResult, proxyRequest.rateLimitOptions);
     if (rateLimitCheckResult.status === "rate_limited") {
       return responseBuilder.buildRateLimitedResponse();
     }
@@ -71,10 +63,7 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-    const cachedResponse = await getCachedResponse(
-      proxyRequest,
-      cacheSettings.bucketSettings
-    );
+    const cachedResponse = await getCachedResponse(proxyRequest, cacheSettings.bucketSettings);
     if (cachedResponse) {
       ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
       return cachedResponse;
@@ -91,14 +80,7 @@ export async function proxyForwarder(
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache) {
-    ctx.waitUntil(
-      saveToCache(
-        proxyRequest,
-        response,
-        cacheSettings.cacheControl,
-        cacheSettings.bucketSettings
-      )
-    );
+    ctx.waitUntil(saveToCache(proxyRequest, response, cacheSettings.cacheControl, cacheSettings.bucketSettings));
   }
 
   response.headers.forEach((value, key) => {
@@ -108,13 +90,13 @@ export async function proxyForwarder(
   if (cacheSettings.shouldReadFromCache) {
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
-
-  ctx.waitUntil(
-    loggable.log({
+  async function log() {
+    await loggable.log({
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-    })
-  );
+    });
+  }
+  ctx.waitUntil(log());
 
   if (proxyRequest.rateLimitOptions) {
     if (!proxyRequest.providerAuthHash) {
@@ -124,7 +106,7 @@ export async function proxyForwarder(
     }
     updateRateLimitCounter({
       providerAuthHash: proxyRequest.providerAuthHash,
-      heliconeProperties: proxyRequest.requestWrapper.heliconeProperties,
+      heliconeProperties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
       rateLimitKV: env.RATE_LIMIT_KV,
       rateLimitOptions: proxyRequest.rateLimitOptions,
       userId: proxyRequest.userId,

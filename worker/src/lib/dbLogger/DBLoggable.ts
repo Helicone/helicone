@@ -4,11 +4,14 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
 import { initialResponseLog, logRequest } from "./logResponse";
-import { Env } from "../..";
+import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
 import { Result, mapPostgrestErr } from "../../results";
 import { consolidateTextFields, getUsage } from "./responseParserHelpers";
 import { Database } from "../../../supabase/database.types";
+import { HeliconeHeaders } from "../HeliconeHeaders";
+import { RequestWrapper } from "../RequestWrapper";
+import { AsyncLogModel } from "../models/AsyncLog";
 
 export interface DBLoggableProps {
   response: {
@@ -33,14 +36,16 @@ export interface DBLoggableProps {
     properties: Record<string, string>;
     isStream: boolean;
     omitLog: boolean;
-    provider: Env["PROVIDER"];
+    provider: Provider;
+  };
+  timing: {
+    startTime: Date;
+    endTime?: Date;
   };
   tokenCalcUrl: string;
 }
 
-export function dbLoggableRequestFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest
-): DBLoggableProps["request"] {
+export function dbLoggableRequestFromProxyRequest(proxyRequest: HeliconeProxyRequest): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
     heliconeApiKeyAuthHash: proxyRequest.heliconeAuthHash,
@@ -57,22 +62,76 @@ export function dbLoggableRequestFromProxyRequest(
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
-    properties: proxyRequest.requestWrapper.heliconeProperties,
+    properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
   };
 }
 
+interface DBLoggableRequestFromAsyncLogModelProps {
+  requestWrapper: RequestWrapper;
+  env: Env;
+  asyncLogModel: AsyncLogModel;
+  providerRequestHeaders: HeliconeHeaders;
+  providerResponseHeaders: Headers;
+  provider: Provider;
+}
+
+function getResponseBody(json: any): string {
+  // This will mock the response as if it came from OpenAI
+  if (json.streamed_data) {
+    const streamedData: any[] = json.streamed_data;
+    return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
+  }
+  return JSON.stringify(json);
+}
+
+export async function dbLoggableRequestFromAsyncLogModel(
+  props: DBLoggableRequestFromAsyncLogModelProps
+): Promise<DBLoggable> {
+  const { requestWrapper, env, asyncLogModel, providerRequestHeaders, providerResponseHeaders, provider } = props;
+  return new DBLoggable({
+    request: {
+      requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
+      heliconeApiKeyAuthHash: await requestWrapper.getAuthorizationHash(),
+      providerApiKeyAuthHash: "N/A",
+      promptId: providerRequestHeaders.promptId ?? undefined,
+      userId: providerRequestHeaders.userId ?? undefined,
+      promptFormatter: undefined,
+      startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
+      bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
+      path: asyncLogModel.providerRequest.url,
+      properties: providerRequestHeaders.heliconeProperties,
+      isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
+      omitLog: false,
+      provider,
+    },
+    response: {
+      getResponseBody: async () => getResponseBody(asyncLogModel.providerResponse.json),
+      responseHeaders: providerResponseHeaders,
+      status: asyncLogModel.providerResponse.status,
+      omitLog: false,
+    },
+    timing: {
+      startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
+      endTime: new Date(asyncLogModel.timing.endTime.seconds * 1000 + asyncLogModel.timing.endTime.milliseconds),
+    },
+    tokenCalcUrl: env.TOKEN_COUNT_URL,
+  });
+}
+
 // Represents an object that can be logged to the database
 export class DBLoggable {
   private response: DBLoggableProps["response"];
   private request: DBLoggableProps["request"];
-  private provider: Env["PROVIDER"];
+  private timing: DBLoggableProps["timing"];
+  private provider: Provider;
   private tokenCalcUrl: string;
   constructor(props: DBLoggableProps) {
     this.response = props.response;
     this.request = props.request;
+    this.timing = props.timing;
     this.provider = props.request.provider;
     this.tokenCalcUrl = props.tokenCalcUrl;
   }
@@ -98,11 +157,7 @@ export class DBLoggable {
     }
 
     try {
-      if (
-        this.provider === "ANTHROPIC" &&
-        responseStatus === 200 &&
-        requestBody
-      ) {
+      if (this.provider === "ANTHROPIC" && responseStatus === 200 && requestBody) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
@@ -177,9 +232,7 @@ export class DBLoggable {
     const responseBody = await this.response.getResponseBody();
 
     // Log delay
-    const initialResponse = mapPostgrestErr(
-      await initialResponseLog(this.request, dbClient)
-    );
+    const initialResponse = mapPostgrestErr(await initialResponseLog(this.request, this.timing, dbClient));
 
     if (initialResponse.error !== null) {
       return initialResponse;
@@ -226,10 +279,7 @@ export class DBLoggable {
     }
   }
 
-  async log(db: {
-    supabase: SupabaseClient;
-    clickhouse: ClickhouseClientWrapper;
-  }) {
+  async log(db: { supabase: SupabaseClient; clickhouse: ClickhouseClientWrapper }): Promise<Result<null, string>> {
     const requestResult = await logRequest(this.request, db.supabase);
 
     if (requestResult.data !== null) {
@@ -242,7 +292,16 @@ export class DBLoggable {
           requestResult.data.properties,
           db.clickhouse
         );
+      } else {
+        return responseResult;
       }
+    } else {
+      return requestResult;
     }
+
+    return {
+      data: null,
+      error: null,
+    };
   }
 }

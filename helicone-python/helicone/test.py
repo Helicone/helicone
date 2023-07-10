@@ -1,14 +1,14 @@
 import os
 from dotenv import load_dotenv
-import helicone
-from helicone import openai, log_feedback
+from helicone.openai_proxy import openai, log_feedback
+from helicone.globals import helicone_global
 import uuid
 from supabase import create_client
 import hashlib
 import pytest
 
-helicone.proxy_url = "http://127.0.0.1:8787/v1"
-helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
+helicone_global.proxy_url = "http://127.0.0.1:8787/v1"
+helicone_global.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
 
 SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
 SUPABASE_URL = "http://localhost:54321"
@@ -16,6 +16,7 @@ SUPABASE_URL = "http://localhost:54321"
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 load_dotenv()
+
 
 def test_cache_completion():
     unique_id = str(uuid.uuid4())
@@ -44,6 +45,7 @@ def test_cache_completion():
     del response2_copy['helicone']['cache']
 
     assert response1_copy == response2_copy
+
 
 def test_cache_embedding():
     unique_id = str(uuid.uuid4())
@@ -81,7 +83,8 @@ def test_rate_limit_policy():
         messages=[{"role": "user", "content": "Rate limit policy test"}],
         rate_limit_policy=rate_limit_policy_dict
     )
-    assert response.helicone.rate_limit.policy.startswith(rate_limit_policy_str)
+    assert response.helicone.rate_limit.policy.startswith(
+        rate_limit_policy_str)
 
     openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -89,8 +92,8 @@ def test_rate_limit_policy():
         rate_limit_policy=rate_limit_policy_str
     )
     # Assert the prefix of the policy is equal to the str
-    assert response.helicone.rate_limit.policy.startswith(rate_limit_policy_str)
-
+    assert response.helicone.rate_limit.policy.startswith(
+        rate_limit_policy_str)
 
 
 def test_custom_properties():
@@ -169,9 +172,8 @@ def fetch_feedback(helicone_id):
     return feedback_data
 
 
+@pytest.mark.skip(reason="Skipping until feedback is reimplemented")
 def test_log_feedback():
-    helicone.proxy_url = "http://127.0.0.1:8787/v1"
-    helicone.api_key = os.getenv("HELICONE_API_KEY_LOCAL")
     prompt = "Integration test for logging feedback"
 
     response = openai.Completion.create(
@@ -192,6 +194,7 @@ def test_log_feedback():
     assert feedback_data[0]["categorical_value"] is None
 
 
+@pytest.mark.skip(reason="Skipping until feedback is reimplemented")
 def test_sync_nostream():
     response = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',
@@ -215,6 +218,7 @@ def test_sync_nostream():
     assert feedback_data[0]["categorical_value"] is None
 
 
+@pytest.mark.skip(reason="Skipping until feedback is reimplemented")
 def test_sync_stream():
     from collections import deque
 
@@ -241,6 +245,7 @@ def test_sync_stream():
     assert feedback_data[0]["categorical_value"] is None
 
 
+@pytest.mark.skip(reason="Skipping until feedback is reimplemented")
 @pytest.mark.asyncio
 async def test_async_nostream():
     response = (await openai.ChatCompletion.acreate(
@@ -265,6 +270,7 @@ async def test_async_nostream():
     assert feedback_data[0]["categorical_value"] is None
 
 
+@pytest.mark.skip(reason="Skipping until feedback is reimplemented")
 @pytest.mark.asyncio
 async def test_async_stream():
     async for chunk in await openai.ChatCompletion.acreate(
@@ -288,6 +294,7 @@ async def test_async_stream():
     assert feedback_data[0]["float_value"] is None
     assert feedback_data[0]["string_value"] == "acreate_and_stream_true"
     assert feedback_data[0]["categorical_value"] is None
+
 
 def test_sync_nostream_cache():
     unique_id = str(uuid.uuid4())
@@ -322,6 +329,7 @@ def test_sync_nostream_cache():
     del response2_copy['helicone']['cache']
 
     assert response1_copy == response2_copy
+
 
 @pytest.mark.asyncio
 async def test_async_nostream_cache():
@@ -358,6 +366,7 @@ async def test_async_nostream_cache():
 
     assert response1_copy == response2_copy
 
+
 def test_azure():
     openai.api_type = "azure"
     openai.api_base = f"https://{os.environ['AZURE_OPENAI_ENDPOINT']}"
@@ -369,7 +378,7 @@ def test_azure():
         messages=[
             {
                 "role": "user",
-                "content":"Say hi!",
+                "content": "Say hi!",
             },
         ],
         temperature=1,

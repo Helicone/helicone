@@ -1,0 +1,37 @@
+---
+title: "Proxy vs Async"
+description: "Determine when you should use a proxy or async function in Helicone."
+---
+
+## Background
+
+There are two different ways to interface with Helicone. Proxy and Async. Both have their own advantages and disadvantages. This page will help you determine which one is right for you.
+
+|                                                                    | Proxy | Async |
+| ------------------------------------------------------------------ | ----- | ----- |
+| Easy setup                                                         | ✅    | ❌    |
+| [Custom rate limiting](features/advanced-usage/custom-rate-limits) | ✅    | ❌    |
+| [Bucket Cache](/features/advanced-usage/caching)                   | ✅    | ❌    |
+| [Retries](/features/advanced-usage/retries)                        | ✅    | ❌    |
+| Not on critical path                                               | ❌    | ✅    |
+| 0 Propagation Delay                                                | ❌    | ✅    |
+| Open source                                                        | ✅    | ✅    |
+| [Custom Properties](/features/advanced-usage/custom-properties)    | ✅    | ✅    |
+| [User Metrics](/features/advanced-usage/user-metrics)              | ✅    | ✅    |
+| Negligible Logging Delay                                           | ✅    | ✅    |
+| Streaming Support                                                  | ✅    | ✅    |
+
+## Proxy
+
+Helicone Proxy allows it's user to easily integration, where they only have to replace your call to the LLM with a call to the proxy.
+The proxy will then forward the request to the LLM and return the response to the user. Since the proxy sits on the edge and is the gate
+keeper of the requests we are able to instrument a suite of tools like Caching, Backoff and Rate limits directly into the proxy.
+
+<Frame>![](/images/getting-started/proxy-diagram.png)</Frame>
+
+## Async
+
+Helicone Async allows for a more flexible workflow where the actual logging of the event is not on the critical path. This gives some users more confidence that if we are going down
+or if there is a network issue that it will not affect their application. The downside is that we are not able to instrument the same suite of tools as we can with the proxy.
+
+<Frame>![](/images/getting-started/async-diagram.png)</Frame>
