@@ -1,8 +1,9 @@
 import { ArrowLeftIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { getOrCreateUserSettings } from "../../../pages/api/user_settings";
 import { clsx } from "../../shared/clsx";
 import CodeIntegration from "./steps/codeIntegration";
 import EventListen from "./steps/eventListen";
@@ -10,10 +11,12 @@ import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
 
-interface WelcomePageProps {}
+interface WelcomePageProps {
+  user: User;
+}
 
 const WelcomePage = (props: WelcomePageProps) => {
-  const {} = props;
+  const { user } = props;
 
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
@@ -37,7 +40,28 @@ const WelcomePage = (props: WelcomePageProps) => {
     <CodeIntegration key={3} nextStep={nextStep} apiKey={apiKey} />,
     <EventListen
       key={4}
-      nextStep={() => {
+      nextStep={async () => {
+        const { data: userSettings, error: userSettingsError } =
+          await supabaseClient
+            .from("user_settings")
+            .select("*")
+            .eq("user", user.id)
+            .single();
+
+        if (userSettings === null) {
+          // add the user into the userSettings page
+          const { data: newUserSettings, error: newUserSettingsError } =
+            await supabaseClient
+              .from("user_settings")
+              .insert({
+                user: user.id,
+                tier: "free",
+                request_limit: 100_000,
+              })
+              .select("*")
+              .single();
+        }
+
         router.push("/dashboard");
       }}
     />,

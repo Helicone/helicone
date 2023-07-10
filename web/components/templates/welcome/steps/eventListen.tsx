@@ -4,6 +4,7 @@ import Lottie from "react-lottie";
 import { Result } from "../../../../lib/result";
 import { clsx } from "../../../shared/clsx";
 import * as Listening from "../../../../public/lottie/Listening.json";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface EventListenProps {
   nextStep: () => void;
@@ -15,6 +16,13 @@ const EventListen = (props: EventListenProps) => {
   const [loaded, setLoaded] = useState(false);
   const [shouldFetch, setShouldFetch] = useState(true);
   const [notification, setNotification] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const nextStepHandler = async () => {
+    setLoading(true);
+    nextStep();
+    setLoading(false);
+  };
 
   const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
     ["hasOnboarded"],
@@ -103,9 +111,12 @@ const EventListen = (props: EventListenProps) => {
             You&apos;re all set to use Helicone! Click below to get started.
           </p>
           <button
-            onClick={nextStep}
+            onClick={nextStepHandler}
             className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
           >
+            {loading && (
+              <ArrowPathIcon className="w-5 h-5 inline-block mr-2 animate-pulse" />
+            )}
             View Dashboard
           </button>
         </>

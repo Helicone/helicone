@@ -27,7 +27,7 @@ const RenderOrgItem = (props: RenderOrgItemProps) => {
   const { data, isLoading } = useQuery({
     queryKey: [`orgItem-${org.id}`],
     queryFn: async (query) => {
-      const data = await fetch(`/api/request/ch/count?org_id=${org.id}`, {
+      const data = await fetch(`/api/request/ch/count`, {
         method: "POST",
         body: JSON.stringify({
           filter: {
