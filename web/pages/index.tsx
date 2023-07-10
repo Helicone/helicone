@@ -2,6 +2,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import AuthLayout from "../components/shared/layout/authLayout";
 import BasePageV2 from "../components/shared/layout/basePageV2";
+import { useOrg } from "../components/shared/layout/organizationContext";
 import LoadingAnimation from "../components/shared/loadingAnimation";
 import MetaData from "../components/shared/metaData";
 import HomePage from "../components/templates/home/homePage";
@@ -14,6 +15,12 @@ const Home = (props: HomeProps) => {
   const router = useRouter();
 
   const user = useUser();
+  const orgContext = useOrg();
+
+  if (orgContext?.currentOrg?.has_onboarded === false && user !== null) {
+    router.push("/welcome");
+    return <LoadingAnimation title="Redirecting you to onboarding..." />;
+  }
 
   if (user && user.email !== DEMO_EMAIL) {
     router.push("/dashboard");

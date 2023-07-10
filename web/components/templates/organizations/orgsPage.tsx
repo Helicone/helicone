@@ -32,7 +32,12 @@ const OrgsPage = (props: OrgsPageProps) => {
             <p className="text-md font-semibold">Your Organizations</p>
             <button
               onClick={() => {
-                if (userSettings?.tier === "free") {
+                if (
+                  !(
+                    userSettings?.tier === "pro" ||
+                    userSettings?.tier === "enterprise"
+                  )
+                ) {
                   setNotification(
                     "You must be on a paid plan to create an organization.",
                     "error"
