@@ -5,6 +5,7 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import { useUserSettings } from "./userSettings";
+import { Tier } from "../../pages/api/organization/tier";
 
 const useGetTopUsers = (
   currentPage: number,
@@ -50,15 +51,26 @@ const useGetTopUsers = (
   };
 };
 
+const useOrgTier = () => {
+  return useQuery({
+    queryKey: [`orgTierQueryKey`],
+    queryFn: async (query) => {
+      const data = await fetch(`/api/organization/tier`).then(
+        (res) => res.json() as Promise<Result<Tier, string>>
+      );
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+};
+
 const useGetAuthorized = (userId: string) => {
   function getBeginningOfMonth() {
     const today = new Date();
     const firstDateOfMonth = format(today, "yyyy-MM-01");
     return firstDateOfMonth;
   }
-
-  const { userSettings, isLoading: isUserSettingLoading } =
-    useUserSettings(userId);
+  const org = useOrgTier();
 
   const { data: count, isLoading: isCountLoading } = useQuery({
     queryKey: [`requestCount`],
@@ -86,11 +98,10 @@ const useGetAuthorized = (userId: string) => {
     },
     refetchOnWindowFocus: false,
   });
-
+  console.log("org.data?.data", org.data?.data);
   return {
-    authorized:
-      userSettings?.tier === "free" && Number(count?.data || 0) > 100_000,
-    isLoading: isCountLoading || isUserSettingLoading,
+    authorized: org.data?.data === "free" && Number(count?.data || 0) > 100_000,
+    isLoading: isCountLoading || org.isLoading,
   };
 };
 

@@ -1,4 +1,4 @@
-import { useUser } from "@supabase/auth-helpers-react";
+import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
@@ -6,14 +6,16 @@ import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { DEMO_EMAIL } from "../lib/constants";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 
-interface DashboardProps {}
+interface DashboardProps {
+  user: User;
+}
 
 const Dashboard = (props: DashboardProps) => {
-  const user = useUser();
+  const { user } = props;
   return (
     <MetaData title="Dashboard">
       <AuthLayout user={user!}>
-        <DashboardPage />
+        <DashboardPage user={user} />
       </AuthLayout>
     </MetaData>
   );
