@@ -36,7 +36,7 @@ export class HeliconeProxyConfiguration extends Configuration implements IHelico
     return undefined;
   }
 
-  getBaseUrl(): string | undefined {
+  getBaseUrl(): string {
     return this.baseUrl;
   }
 

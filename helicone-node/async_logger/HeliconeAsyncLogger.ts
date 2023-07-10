@@ -48,7 +48,6 @@ export class HeliconeAsyncLogger {
   }
 
   async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<AxiosResponse<any, any>> {
-    if (!asyncLogModel) return;
     const options: AxiosRequestConfig = {
       method: "POST",
       data: asyncLogModel,

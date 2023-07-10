@@ -97,37 +97,34 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
       }
 
       const startTime = Date.now();
-      let result: AxiosResponse<T, any>;
-      try {
-        result = await apiCall(...args);
-      } catch (error) {
+      const response = await apiCall(...args);
+
+      if (response.status != 200) {
         const endTime = Date.now();
         const asyncLogRequest: HeliconeAyncLogRequest = {
           providerRequest: providerRequest,
           providerResponse: {
             json: {
-              error: error.message,
+              error: response.data as [key: string],
             },
-            status: error.response?.status,
-            headers: error.response?.headers,
+            status: response.status,
+            headers: response.headers,
           },
           timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
         };
         this.logger.log(asyncLogRequest, Provider.OPENAI);
-
-        throw error;
       }
 
-      if (result.headers["content-type"] === "text/event-stream") {
-        this.handleStreamLogging<T>(result, startTime, providerRequest);
+      if (response.headers["content-type"] === "text/event-stream") {
+        this.handleStreamLogging<T>(response, startTime, providerRequest);
       } else {
         const endTime = Date.now();
         const asyncLogRequest: HeliconeAyncLogRequest = {
           providerRequest: providerRequest,
           providerResponse: {
-            json: result.data as [key: string],
-            status: result.status,
-            headers: result.headers,
+            json: response.data as [key: string],
+            status: response.status,
+            headers: response.headers,
           },
           timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
         };
@@ -135,7 +132,7 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
         this.logger.log(asyncLogRequest, Provider.OPENAI);
       }
 
-      return result;
+      return response;
     };
   }
 
