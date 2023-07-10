@@ -33,7 +33,7 @@ const Dashboard = (props: DashboardProps) => {
   return (
     <MetaData title="Dashboard">
       <AuthLayout user={user}>
-        <DashboardPage />
+        <DashboardPage user={user} />
       </AuthLayout>
     </MetaData>
   );
