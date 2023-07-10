@@ -48,8 +48,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       },
     };
 
-  await getOrCreateUserSettings(session.user);
-
   return {
     props: {
       initialSession: session,
