@@ -66,13 +66,16 @@ export async function handleProxyRequest(
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
               .omitResponse,
         },
+        timing: {
+          startTime: proxyRequest.startTime
+        },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
       response: new Response(body, {
         ...response,
         headers: responseHeaders,
         status: response.status,
-      }),
+      })
     },
     error: null,
   };

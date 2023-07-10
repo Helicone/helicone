@@ -1,8 +1,7 @@
-import { handleFeedbackEndpoint } from "./feedback";
-import { proxyForwarder } from "./lib/HeliconeProxyRequest/forwarder";
+import { RequestWrapper } from "./lib/RequestWrapper";
+import { buildRouter } from "./routers/routerFactory";
 
-import { RequestHandlerType, RequestWrapper } from "./lib/RequestWrapper";
-import { handleLoggingEndpoint } from "./properties";
+export type Provider = "OPENAI" | "ANTHROPIC";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -13,16 +12,13 @@ export interface Env {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
-  PROVIDER: "OPENAI" | "ANTHROPIC";
+  WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
   TOKEN_CALC_URL: string;
 }
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
-  const hashedKey = await crypto.subtle.digest(
-    { name: "SHA-256" },
-    encoder.encode(key)
-  );
+  const hashedKey = await crypto.subtle.digest({ name: "SHA-256" }, encoder.encode(key));
   const byteArray = Array.from(new Uint8Array(hashedKey));
   const hexCodes = byteArray.map((value) => {
     const hexCode = value.toString(16);
@@ -32,57 +28,61 @@ export async function hash(key: string): Promise<string> {
   return hexCodes.join("");
 }
 
-type Dispatcher = (
-  request: RequestWrapper,
-  env: Env,
-  ctx: ExecutionContext
-) => Promise<Response>;
-
-const dispatcherMap: {
-  [key in RequestHandlerType]: Dispatcher;
-} = {
-  feedback: handleFeedbackEndpoint,
-  logging: handleLoggingEndpoint,
-  proxy_only: async (request: RequestWrapper) => {
-    const new_url = new URL(`https://api.openai.com${request.url.pathname}`);
-    return await fetch(new_url.href, {
-      method: request.getMethod(),
-      headers: request.getHeaders(),
-      body: request.getBody(),
-    });
-  },
-  proxy_log: proxyForwarder,
-};
+// If the url starts with oai.*.<>.com then we know WORKER_TYPE is OPENAI_PROXY
+function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
+  if (env.WORKER_TYPE) {
+    return env;
+  }
+  const url = new URL(request.getUrl());
+  const host = url.host;
+  const hostParts = host.split(".");
+  if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
+    return {
+      ...env,
+      WORKER_TYPE: "OPENAI_PROXY",
+    };
+  } else if (hostParts.length >= 3 && hostParts[0].includes("anthropic")) {
+    return {
+      ...env,
+      WORKER_TYPE: "ANTHROPIC_PROXY",
+    };
+  } else if (hostParts.length >= 3 && hostParts[0].includes("api")) {
+    return {
+      ...env,
+      WORKER_TYPE: "HELICONE_API",
+    };
+  } else {
+    throw new Error("Could not determine worker type");
+  }
+}
 
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext
-  ): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
-      const wrappedRequest = new RequestWrapper(request);
-      const requestHandlerType = wrappedRequest.getRequestHandlerType();
-      const handler = dispatcherMap[requestHandlerType];
-      return await handler(wrappedRequest, env, ctx);
+      const requestWrapper = new RequestWrapper(request);
+      env = modifyEnvBasedOnPath(env, requestWrapper);
+      const router = buildRouter(env.WORKER_TYPE);
+      return router.handle(request, requestWrapper, env, ctx).catch(handleError);
     } catch (e) {
-      console.error(e);
-      return new Response(
-        JSON.stringify({
-          "helicone-message":
-            "Helicone ran into an error servicing your request: " + e,
-          support:
-            "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-          "helicone-error": JSON.stringify(e),
-        }),
-        {
-          status: 500,
-          headers: {
-            "content-type": "application/json;charset=UTF-8",
-            "helicone-error": "true",
-          },
-        }
-      );
+      return handleError(e);
     }
   },
 };
+
+function handleError(e: any): Response {
+  console.error(e);
+  return new Response(
+    JSON.stringify({
+      "helicone-message": "Helicone ran into an error servicing your request: " + e,
+      support: "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+      "helicone-error": JSON.stringify(e),
+    }),
+    {
+      status: 500,
+      headers: {
+        "content-type": "application/json;charset=UTF-8",
+        "helicone-error": "true",
+      },
+    }
+  );
+}
