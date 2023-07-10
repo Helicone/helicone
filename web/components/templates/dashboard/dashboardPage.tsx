@@ -37,8 +37,13 @@ import ErrorsPanel from "./panels/errorsPanel";
 import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
 import { useRouter } from "next/router";
+import { useGetAuthorized } from "../../../services/hooks/dashboard";
+import { User } from "@supabase/auth-helpers-nextjs";
+import UpgradeProModal from "../../shared/upgradeProModal";
 
-interface DashboardPageProps {}
+interface DashboardPageProps {
+  user: User;
+}
 
 type LiveLogType = {
   id: string;
@@ -55,6 +60,7 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
+  const { user } = props;
   const router = useRouter();
   const [interval, setInterval] = useState<TimeInterval>("24h");
   const [timeFilter, setTimeFilter] = useState<{
@@ -64,6 +70,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     start: getTimeIntervalAgo(interval),
     end: new Date(),
   });
+  const [open, setOpen] = useState(false);
 
   const sessionStorageKey =
     typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
@@ -81,6 +88,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     new Date().getTimezoneOffset()
   );
   const timeIncrement = getTimeInterval(timeFilter);
+
+  const { authorized } = useGetAuthorized(user.id);
 
   const { metrics, filterMap, overTimeData, errorMetrics, isAnyLoading } =
     useDashboardPage({
@@ -246,94 +255,115 @@ const DashboardPage = (props: DashboardPageProps) => {
           </div>
         }
       />
+      {authorized ? (
+        <div className="flex flex-col items-center justify-center h-[90vh]">
+          <p className="text-2xl font-semibold text-gray-900">
+            You have reached your monthly limit of 100,000 requests.
+          </p>
+          <p className="mt-4 text-lg font-semibold text-gray-700">
+            Upgrade to a paid plan to view your dashboard.
+          </p>
+          <button
+            onClick={() => {
+              setOpen(true);
+            }}
+            className="mt-8 items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Upgrade to Pro
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <ThemedTableHeader
+            isFetching={isAnyLoading}
+            timeFilter={{
+              customTimeFilter: true,
+              timeFilterOptions: [
+                { key: "24h", value: "24H" },
+                { key: "7d", value: "7D" },
+                { key: "1m", value: "1M" },
+                { key: "3m", value: "3M" },
+              ],
+              defaultTimeFilter: interval,
+              onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                if ((key as string) === "custom") {
+                  value = value.replace("custom:", "");
+                  const start = new Date(value.split("_")[0]);
+                  const end = new Date(value.split("_")[1]);
+                  setInterval(key);
+                  setTimeFilter({
+                    start,
+                    end,
+                  });
+                } else {
+                  setInterval(key);
+                  setTimeFilter({
+                    start: getTimeIntervalAgo(key),
+                    end: new Date(),
+                  });
+                }
+              },
+            }}
+            advancedFilter={{
+              filterMap,
+              onAdvancedFilter: setAdvancedFilters,
+              filters: advancedFilters,
+              searchPropertyFilters: () => {
+                throw new Error("not implemented");
+              },
+            }}
+          />
 
-      <div className="space-y-8">
-        <ThemedTableHeader
-          isFetching={isAnyLoading}
-          timeFilter={{
-            customTimeFilter: true,
-            timeFilterOptions: [
-              { key: "24h", value: "24H" },
-              { key: "7d", value: "7D" },
-              { key: "1m", value: "1M" },
-              { key: "3m", value: "3M" },
-            ],
-            defaultTimeFilter: interval,
-            onTimeSelectHandler: (key: TimeInterval, value: string) => {
-              if ((key as string) === "custom") {
-                value = value.replace("custom:", "");
-                const start = new Date(value.split("_")[0]);
-                const end = new Date(value.split("_")[1]);
-                setInterval(key);
-                setTimeFilter({
-                  start,
-                  end,
-                });
-              } else {
-                setInterval(key);
-                setTimeFilter({
-                  start: getTimeIntervalAgo(key),
-                  end: new Date(),
-                });
-              }
-            },
-          }}
-          advancedFilter={{
-            filterMap,
-            onAdvancedFilter: setAdvancedFilters,
-            filters: advancedFilters,
-            searchPropertyFilters: () => {
-              throw new Error("not implemented");
-            },
-          }}
-        />
+          {metrics.totalRequests?.data?.data === 0 ? (
+            <div className="flex flex-col justify-center items-center w-full h-96 my-10 border-gray-300 border bg-white space-y-8">
+              <p className="text-2xl font-semibold">No requests found!</p>
 
-        {metrics.totalRequests?.data?.data === 0 ? (
-          <div className="flex flex-col justify-center items-center w-full h-96 my-10 border-gray-300 border bg-white space-y-8">
-            <p className="text-2xl font-semibold">No requests found!</p>
-
-            <p>If you have data, please try changing your filters, otherwise</p>
-            <p>if this is your first time using Helicone, click below.</p>
-            <button
-              className="bg-sky-700 text-white px-4 py-2 rounded-md mt-4"
-              onClick={() => {
-                router.push("/welcome");
-              }}
-            >
-              Get Started
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
-              {metricsData.map((m, i) => (
-                <MetricsPanel key={i} metric={m} />
-              ))}
+              <p>
+                If you have data, please try changing your filters, otherwise
+              </p>
+              <p>if this is your first time using Helicone, click below.</p>
+              <button
+                className="bg-sky-700 text-white px-4 py-2 rounded-md mt-4"
+                onClick={() => {
+                  router.push("/welcome");
+                }}
+              >
+                Get Started
+              </button>
             </div>
-            <ThemedTabs
-              options={[
-                {
-                  icon: TableCellsIcon,
-                  label: "Requests",
-                },
-                {
-                  icon: CurrencyDollarIcon,
-                  label: "Costs",
-                },
-                {
-                  icon: ExclamationCircleIcon,
-                  label: "Errors",
-                },
-              ]}
-              onOptionSelect={(option) =>
-                setMode(option.toLowerCase() as DashboardMode)
-              }
-            />
+          ) : (
+            <>
+              <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
+                {metricsData.map((m, i) => (
+                  <MetricsPanel key={i} metric={m} />
+                ))}
+              </div>
+              <ThemedTabs
+                options={[
+                  {
+                    icon: TableCellsIcon,
+                    label: "Requests",
+                  },
+                  {
+                    icon: CurrencyDollarIcon,
+                    label: "Costs",
+                  },
+                  {
+                    icon: ExclamationCircleIcon,
+                    label: "Errors",
+                  },
+                ]}
+                onOptionSelect={(option) =>
+                  setMode(option.toLowerCase() as DashboardMode)
+                }
+              />
 
-            {renderPanel()}
-          </>
-        )}
-      </div>
+              {renderPanel()}
+            </>
+          )}
+        </div>
+      )}
+      <UpgradeProModal open={open} setOpen={setOpen} />
     </>
   );
 };
