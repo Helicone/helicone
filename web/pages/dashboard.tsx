@@ -7,6 +7,8 @@ import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
 import { init } from "commandbar";
 
 import { useEffect } from "react";
+import { useOrg } from "../components/shared/layout/organizationContext";
+import { useRouter } from "next/router";
 
 interface DashboardProps {
   user: User;
@@ -43,16 +45,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user },
     supabaseClient,
   } = options;
-  const client = supabaseClient.getClient();
-  const [hasOnboarded] = await Promise.all([checkOnboardedAndUpdate(client)]);
-  if (!hasOnboarded?.data) {
-    return {
-      redirect: {
-        destination: "/welcome",
-        permanent: false,
-      },
-    };
-  }
 
   return {
     props: {
