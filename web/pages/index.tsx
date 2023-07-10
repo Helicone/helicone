@@ -17,7 +17,7 @@ const Home = (props: HomeProps) => {
   const user = useUser();
   const orgContext = useOrg();
 
-  if (orgContext?.currentOrg?.has_onboarded === false) {
+  if (orgContext?.currentOrg?.has_onboarded === false && user !== null) {
     router.push("/welcome");
     return <LoadingAnimation title="Redirecting you to onboarding..." />;
   }

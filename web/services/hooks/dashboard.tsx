@@ -88,7 +88,8 @@ const useGetAuthorized = (userId: string) => {
   });
 
   return {
-    authorized: userSettings?.tier === "free" && Number(count?.data || 0) > 10,
+    authorized:
+      userSettings?.tier === "free" && Number(count?.data || 0) > 100_000,
     isLoading: isCountLoading || isUserSettingLoading,
   };
 };
