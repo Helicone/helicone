@@ -62,7 +62,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   const [selectedUser, setSelectedUser] = useState<UserMetric>();
 
   const sortLeaf: SortLeafRequest =
-    sort.sortKey && sort.sortDirection && sort.isCustomProperty
+    sort.sortKey && sort.sortDirection
       ? {
           [sort.sortKey]: sort.sortDirection,
         }
