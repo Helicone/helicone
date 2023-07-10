@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
+import { useUserSettings } from "./userSettings";
 
 const useGetTopUsers = (
   currentPage: number,
@@ -48,4 +50,47 @@ const useGetTopUsers = (
   };
 };
 
-export { useGetTopUsers };
+const useGetAuthorized = (userId: string) => {
+  function getBeginningOfMonth() {
+    const today = new Date();
+    const firstDateOfMonth = format(today, "yyyy-MM-01");
+    return firstDateOfMonth;
+  }
+
+  const { userSettings, isLoading: isUserSettingLoading } =
+    useUserSettings(userId);
+
+  const { data: count, isLoading: isCountLoading } = useQuery({
+    queryKey: [`requestCount`],
+    queryFn: async (query) => {
+      const data = await fetch(`/api/request/ch/count`, {
+        method: "POST",
+        body: JSON.stringify({
+          filter: {
+            left: {
+              response_copy_v3: {
+                request_created_at: {
+                  gte: getBeginningOfMonth(),
+                },
+              },
+            },
+            operator: "and",
+            right: "all",
+          },
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((res) => res.json() as Promise<Result<number, string>>);
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    authorized: userSettings?.tier === "free" && Number(count?.data || 0) > 10,
+    isLoading: isCountLoading || isUserSettingLoading,
+  };
+};
+
+export { useGetTopUsers, useGetAuthorized };
