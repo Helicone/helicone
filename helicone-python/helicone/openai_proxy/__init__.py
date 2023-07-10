@@ -1,10 +1,9 @@
 import functools
 import uuid
 import inspect
-import os
+from helicone.globals import helicone_global
 import openai
 import requests
-import warnings
 from openai.api_resources import (
     ChatCompletion,
     Completion,
@@ -18,41 +17,13 @@ import threading
 
 logger = logging.getLogger(__name__)
 
-api_key = os.environ.get("HELICONE_API_KEY", None)
-if (api_key is None):
-    warnings.warn("Helicone API key is not set as an environment variable.")
-
-proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
-
 global_headers = {}
+
 
 class AttributeDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttributeDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
-
-def normalize_data_type(data_type):
-    if isinstance(data_type, str):
-        data_type = data_type.lower()
-
-    if data_type in (str, "str", "string"):
-        return "string"
-    elif data_type in (bool, "bool", "boolean"):
-        return "boolean"
-    elif data_type in (float, int, "float", "int", "numerical"):
-        return "numerical"
-    elif data_type in (object, "object", "categorical"):
-        return "categorical"
-    else:
-        raise ValueError(
-            "Invalid data_type provided. Please use a valid data type or string.")
-
-
-api_key = os.environ.get("HELICONE_API_KEY", None)
-if (api_key is None):
-    warnings.warn("Helicone API key is not set as an environment variable.")
-
-proxy_url = os.environ.get("HELICONE_PROXY_URL", "https://oai.hconeai.com/v1")
 
 
 def normalize_data_type(data_type):
@@ -76,42 +47,23 @@ def prepare_api_base(**kwargs):
     original_api_base = openai.api_base
     kwargs["headers"].update({"Helicone-OpenAI-Api-Base": original_api_base})
 
-    openai.api_base = proxy_url
+    openai.api_base = helicone_global.proxy_url
 
     if openai.api_type == "azure":
-        if proxy_url.endswith('/v1'):
-            if proxy_url != "https://oai.hconeai.com/v1":
+        if helicone_global.proxy_url.endswith('/v1'):
+            if helicone_global.proxy_url != "https://oai.hconeai.com/v1":
                 logging.warning(
-                    f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {proxy_url}. Removing '/v1' from the end.")
-            openai.api_base = proxy_url[:-3]
+                    f"Detected likely invalid Azure API URL when proxying Helicone with proxy url {helicone_global.proxy_url}. Removing '/v1' from the end.")
+            openai.api_base = helicone_global.proxy_url[:-3]
 
     return original_api_base, kwargs
+
 
 class Helicone:
     def __init__(self):
         self.openai = openai
         self.apply_helicone_auth()
         self.headers_store = {}
-
-    @property
-    def api_key(self):
-        global api_key
-        return api_key
-
-    @api_key.setter
-    def api_key(self, value):
-        global api_key
-        api_key = value
-
-    @property
-    def proxy_url(self):
-        global proxy_url
-        return proxy_url
-
-    @proxy_url.setter
-    def proxy_url(self, value):
-        global proxy_url
-        proxy_url = value
 
     def log_feedback(self, response, name, value, data_type=None):
         helicone_id = response.get("helicone", {}).get("id")
@@ -127,11 +79,11 @@ class Helicone:
         if data_type:
             feedback_data["data-type"] = normalize_data_type(data_type)
 
-        url = f"{proxy_url}/feedback"
+        url = f"{helicone_global.proxy_url}/feedback"
 
         headers = {
             "Content-Type": "application/json",
-            "Helicone-Auth": f"Bearer {api_key}",
+            "Helicone-Auth": f"Bearer {helicone_global.api_key}",
         }
 
         response = requests.post(url, headers=headers, json=feedback_data)
@@ -146,8 +98,8 @@ class Helicone:
     def _prepare_headers(self, **kwargs):
         headers = kwargs.get("headers", {})
 
-        if "Helicone-Auth" not in headers and api_key:
-            headers["Helicone-Auth"] = f"Bearer {api_key}"
+        if "Helicone-Auth" not in headers and helicone_global.api_key:
+            headers["Helicone-Auth"] = f"Bearer {helicone_global.api_key}"
 
         # Generate a UUID and add it to the headers
         helicone_request_id = str(uuid.uuid4())
@@ -163,7 +115,7 @@ class Helicone:
         kwargs["headers"] = headers
 
         return helicone_request_id, kwargs
-    
+
     def update_response_headers(self, result, helicone_request_id):
         headers = self.headers_store.get(helicone_request_id, {})
         result["helicone"] = AttributeDict(
@@ -278,7 +230,7 @@ class Helicone:
                 with threading.Lock():
                     self_parent.headers_store[helicone_id] = response.headers
             return response
-        
+
         async def arequest_raw_patched(self, *args, **kwargs):
             helicone_id = kwargs["supplied_headers"]["helicone-request-id"]
             response = await original_arequest_raw(self, *args, **kwargs)

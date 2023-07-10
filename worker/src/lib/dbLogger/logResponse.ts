@@ -8,7 +8,8 @@ import { DBLoggableProps } from "./DBLoggable";
 const MAX_USER_ID_LENGTH = 7000;
 
 export async function initialResponseLog(
-  { requestId, startTime }: DBLoggableProps["request"],
+  { requestId }: DBLoggableProps["request"],
+  { startTime, endTime }: DBLoggableProps["timing"],
   dbClient: SupabaseClient<Database>
 ) {
   return dbClient
@@ -16,7 +17,7 @@ export async function initialResponseLog(
     .insert([
       {
         request: requestId,
-        delay_ms: new Date().getTime() - startTime.getTime(),
+        delay_ms: (endTime ?? new Date()).getTime() - startTime.getTime(),
         body: {},
         status: -1,
       },
@@ -94,10 +95,7 @@ async function getPromptId(
   }
 }
 
-async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
-) {
+async function getHeliconeApiKeyRow(dbClient: SupabaseClient<Database>, heliconeApiKeyHash?: string) {
   const { data, error } = await dbClient
     .from("helicone_api_keys")
     .select("*")
@@ -137,18 +135,16 @@ export async function logRequest(
             request.providerApiKeyAuthHash
           )
         : null;
-    if (
-      formattedPromptResult !== null &&
-      formattedPromptResult.error !== null
-    ) {
+    if (formattedPromptResult !== null && formattedPromptResult.error !== null) {
       return { data: null, error: formattedPromptResult.error };
     }
-    const formattedPromptId =
-      formattedPromptResult !== null ? formattedPromptResult.data : null;
+    const formattedPromptId = formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
-    const { data: heliconeApiKeyRow, error: userIdError } =
-      await getHeliconeApiKeyRow(dbClient, request.heliconeApiKeyAuthHash);
+    const { data: heliconeApiKeyRow, error: userIdError } = await getHeliconeApiKeyRow(
+      dbClient,
+      request.heliconeApiKeyAuthHash
+    );
     if (userIdError !== null) {
       console.error(userIdError);
     }
@@ -170,8 +166,7 @@ export async function logRequest(
     let truncatedUserId = request.userId ?? "";
 
     if (truncatedUserId.length > MAX_USER_ID_LENGTH) {
-      truncatedUserId =
-        truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
+      truncatedUserId = truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
     const { data, error } = await dbClient
@@ -200,24 +195,17 @@ export async function logRequest(
       return { data: null, error: error.message };
     } else {
       // Log custom properties and then return request id
-      const customPropertyRows = Object.entries(request.properties).map(
-        (entry) => ({
-          request_id: request.requestId,
-          auth_hash: request.providerApiKeyAuthHash,
-          user_id: null,
-          key: entry[0],
-          value: entry[1],
-        })
-      );
+      const customPropertyRows = Object.entries(request.properties).map((entry) => ({
+        request_id: request.requestId,
+        auth_hash: request.providerApiKeyAuthHash,
+        user_id: null,
+        key: entry[0],
+        value: entry[1],
+      }));
 
       const customProperties =
         customPropertyRows.length > 0
-          ? (
-              await dbClient
-                .from("properties")
-                .insert(customPropertyRows)
-                .select("*")
-            ).data ?? []
+          ? (await dbClient.from("properties").insert(customPropertyRows).select("*")).data ?? []
           : [];
 
       return {
