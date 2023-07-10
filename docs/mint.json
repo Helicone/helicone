@@ -43,7 +43,8 @@
           "group": "Proxy Integrations",
           "pages": [
             "getting-started/integration-method/openai-proxy",
-            "getting-started/integration-method/anthropic"
+            "getting-started/integration-method/anthropic",
+            "getting-started/integration-method/azure"
           ]
         },
         {
@@ -66,6 +67,10 @@
         "features/advanced-usage/omit-logs",
         "features/streaming"
       ]
+    },
+    {
+      "group": "GraphQL API",
+      "pages": ["graphql/getting-started", "graphql/python-example"]
     },
     {
       "group": "FAQ",
