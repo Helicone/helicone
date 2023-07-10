@@ -1,5 +1,7 @@
 # Helicone
 
+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
+
 [![](https://img.shields.io/badge/Visit%20Us-Helicone.ai-brightgreen)](https://helicone.ai)
 [![](https://img.shields.io/badge/View%20Documentation-Docs-yellow)](https://docs.helicone.ai/)
 [![](https://img.shields.io/badge/Join%20our%20community-Discord-blue)](https://discord.gg/zsSTcH2qhG)
@@ -19,15 +21,18 @@
 
 - 🔜 (Coming soon) APIs to log feedback and evaluate results
 
-
 # Quick Use ⚡️
+
 Get your API key by signing up [here](https://helicone.ai).
+
 ```bash
 export HELICONE_API_KEY=<your API key>
 ```
+
 ```bash
 pip install helicone
 ```
+
 ```python
 from helicone import openai
 
@@ -41,18 +46,22 @@ response = openai.Completion.create(
 	rate_limit_policy={"quota": 100, "time_window": 60, "segment": "user"}
 )
 ```
+
 👉 Then view your logs at [Helicone](www.helicone.ai).
 
 ## More resources
+
 - [Langchain integration](https://python.langchain.com/en/latest/ecosystem/helicone.html)
 - [Python package](https://github.com/Helicone/helicone/tree/main/helicone-python)
 - [Node.JS support](https://docs.helicone.ai/quickstart/integrate-in-less-than-a-minute)
 - [Developer docs](https://docs.helicone.ai/quickstart/integrate-in-less-than-a-minute)
 
 # Local Setup 💻
+
 Helicone's [cloud offering](https://www.helicone.ai) is deployed on Cloudflare and ensures the lowest latency add-on to your API requests.
 
 To get started locally, Helicone is comprised of four services:
+
 - Frontend (Node)
 - The proxy worker (Wrangler)
 - Application database (Supabase)
@@ -155,6 +164,7 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 | [langchainjs](https://github.com/hwchase17/langchainjs)            | [Docs](https://js.langchain.com/docs/ecosystem/helicone)                                  |
 
 ## Contributing
+
 We are extremely open to contributors on documentation, integrations, and feature requests.
 
 - If you have an idea for how Helicone can be better, create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap)
