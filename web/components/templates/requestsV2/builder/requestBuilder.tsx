@@ -5,19 +5,11 @@ import FunctionGPTBuilder from "./functionGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
 
-type BuilderType =
-  | "FunctionGPTBuilder"
-  | "ChatGPTBuilder"
-  | "GPT3Builder"
-  | "ModerationBuilder";
+type BuilderType = "FunctionGPTBuilder" | "GPT3Builder" | "ModerationBuilder";
 
 const getBuilderType = (model: string): BuilderType => {
-  if (/^(gpt-4|gpt-3\.5-turbo)-(0613|32k-0613|16k-0613)/.test(model)) {
+  if (/^(gpt-4|gpt-3\.5)/.test(model)) {
     return "FunctionGPTBuilder";
-  }
-
-  if (/^(gpt-4|gpt-3\.5-turbo)(|-32k|-16k)$/.test(model)) {
-    return "ChatGPTBuilder";
   }
 
   if (/^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model)) {
@@ -33,7 +25,6 @@ const getBuilderType = (model: string): BuilderType => {
 
 let builders = {
   FunctionGPTBuilder: FunctionGPTBuilder,
-  ChatGPTBuilder: ChatGPTBuilder,
   GPT3Builder: GPT3Builder,
   ModerationBuilder: ModerationBuilder,
 };
