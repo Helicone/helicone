@@ -10,7 +10,6 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
       ? this.response.response_body?.choices[0].message.content === null
       : true;
 
-    console.log(hasNoContent);
     return {
       id: this.response.request_id,
       createdAt: this.response.request_created_at,
@@ -62,8 +61,10 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
                 role: "assistant",
                 content: hasNoContent
                   ? JSON.stringify(
-                      this.response.response_body?.choices[0].message
-                        .function_call,
+                      this.response.response_body?.choices
+                        ? this.response.response_body?.choices[0]?.message
+                            .function_call
+                        : "An error occured",
                       null,
                       2
                     )
