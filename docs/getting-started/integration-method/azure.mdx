@@ -63,7 +63,7 @@ const openai = new OpenAIApi(configuration);
   <Tab title="Python w/package">
 
 ```python
-from helicone import openai
+from helicone.openai_proxy import openai
 openai.api_type = "azure"
 openai.api_base = "https://[YOUR_AZURE_DOMAIN].openai.azure.com"
 openai.api_version = "2023-03-15-preview"
