@@ -2,6 +2,7 @@
 
 # Function to create the required directories and files
 create_files() {
+  echo "Creating required directories and files..."
   mkdir -p ~/.helicone
   touch ~/.helicone/proxy_pid
   touch ~/.helicone/mitmproxy.log
@@ -9,29 +10,36 @@ create_files() {
 
 # Function to start the proxy
 start_proxy() {
+  echo "Starting the proxy..."
+
   # Install necessary packages
+  echo "Installing necessary packages..."
   apt update
   apt install -y curl ca-certificates mitmproxy
 
   # Step 1: Add to /etc/hosts
+  echo "Adding entry to /etc/hosts..."
   echo '127.0.0.1 api.openai.com' >> /etc/hosts
 
   # Step 2: Create the add_headers.py file
+  echo "Creating add_headers.py file..."
   echo 'import os' > add_headers.py
   echo 'def request(flow):' >> add_headers.py
   echo '    flow.request.headers["Helicone-Auth"] = "Bearer " + os.environ.get("HELICONE_API_KEY")' >> add_headers.py
   echo '    flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")' >> add_headers.py
 
   # Step 3: Start a reverse proxy and save its PID
+  echo "Starting reverse proxy..."
   nohup mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s add_headers.py > ~/.helicone/mitmproxy.log 2>&1 &
   echo $! > ~/.helicone/proxy_pid
 
   # Step 4: Install the mitmproxy certificate
-  # Note: Run mitmproxy once if the certificate does not exist
+  echo "Installing mitmproxy certificate..."
   cp ~/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy-ca-cert.crt
   update-ca-certificates
 
   # Step 5: Append the mitmproxy certificate to the curl certificate bundle
+  echo "Appending mitmproxy certificate to curl certificate bundle..."
   bash -c 'cat ~/.mitmproxy/mitmproxy-ca-cert.pem >> /etc/ssl/certs/ca-certificates.crt'
 
   echo "Setup complete. Please manually install the mitmproxy certificate in your browser."
@@ -47,6 +55,8 @@ start_proxy() {
 
 # Function to stop the proxy
 stop_proxy() {
+  echo "Stopping the proxy..."
+
   # Check if the process is running
   if ps -p $(cat ~/.helicone/proxy_pid) > /dev/null
   then
@@ -60,6 +70,7 @@ stop_proxy() {
 
 # Function to tail the logs
 tail_logs() {
+  echo "Displaying proxy logs..."
   tail -f ~/.helicone/mitmproxy.log
 }
 
