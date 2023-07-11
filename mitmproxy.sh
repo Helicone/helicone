@@ -20,6 +20,7 @@ start_proxy() {
   echo 'import os' > add_headers.py
   echo 'def request(flow):' >> add_headers.py
   echo '    flow.request.headers["Helicone-Auth"] = "Bearer " + os.environ.get("HELICONE_API_KEY")' >> add_headers.py
+  echo '    flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")' >> add_headers.py
 
   # Step 3: Start a reverse proxy and save its PID
   nohup mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s add_headers.py > ~/.helicone/mitmproxy.log 2>&1 &
