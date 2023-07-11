@@ -7,7 +7,11 @@ import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 
-export type RequestHandlerType = "proxy_only" | "proxy_log" | "logging" | "feedback";
+export type RequestHandlerType =
+  | "proxy_only"
+  | "proxy_log"
+  | "logging"
+  | "feedback";
 
 export class RequestWrapper {
   url: URL;
@@ -33,7 +37,12 @@ export class RequestWrapper {
   }
 
   async getJson<T>(): Promise<T> {
-    return JSON.parse(await this.getText());
+    try {
+      return JSON.parse(await this.getText());
+    } catch (e) {
+      console.error("RequestWrapper.getJson", e, await this.getText());
+      return {} as T;
+    }
   }
 
   getBody(): ReadableStream<Uint8Array> | null {
@@ -66,7 +75,8 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern = /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPattern =
+      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
     if (!apiKeyPattern.test(apiKey)) {
       return {
@@ -87,7 +97,9 @@ export class RequestWrapper {
   }
 
   async getUserId(): Promise<string | undefined> {
-    const userId = this.heliconeHeaders.userId || (await this.getJson<{ user?: string }>()).user;
+    const userId =
+      this.heliconeHeaders.userId ||
+      (await this.getJson<{ user?: string }>()).user;
     return userId;
   }
 
