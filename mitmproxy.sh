@@ -14,8 +14,6 @@ start_proxy() {
   mkdir -p ~/.helicone
   touch ~/.helicone/proxy_pid
   touch ~/.helicone/mitmproxy.log
-  export HELICONE_API_KEY=sk-tm2og4a-7msunia-tqbcuxq-bhbkfha
-  export HELICONE_CACHE_ENABLED=true
   echo "Starting the proxy..."
 
   # Install necessary packages
