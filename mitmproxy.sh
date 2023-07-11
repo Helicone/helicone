@@ -53,6 +53,7 @@ start_proxy() {
       echo "Proxy started."
       break
     else
+      echo "Waiting for the proxy to start..."
       sleep 1
     fi
 
