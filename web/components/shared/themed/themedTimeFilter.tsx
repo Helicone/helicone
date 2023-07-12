@@ -26,6 +26,8 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
 
+  console.log("active key", active);
+
   const isActive = (key: string) => {
     return active === key;
   };
@@ -164,6 +166,8 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
           type="button"
           disabled={isFetching}
           onClick={() => {
+            console.log(1);
+            console.log(option.key);
             setActive(option.key);
             onSelect(option.key, option.value);
           }}

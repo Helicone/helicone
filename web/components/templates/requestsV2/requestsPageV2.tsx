@@ -190,6 +190,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             return flattenedRequest;
           })}
           timeFilter={{
+            defaultValue: "24h",
             onTimeSelectHandler: onTimeSelectHandler,
           }}
           onRowSelect={(row) => {
