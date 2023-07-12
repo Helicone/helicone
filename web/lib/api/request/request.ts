@@ -66,11 +66,11 @@ export async function getRequestsCached(
   const sortSQL = buildRequestSort(sort);
   const query = `
   SELECT response.id AS response_id,
-    response.created_at as response_created_at,
+    cache_hits.created_at as response_created_at,
     response.body AS response_body,
     response.status AS response_status,
     request.id AS request_id,
-    request.created_at as request_created_at,
+    cache_hits.created_at as request_created_at,
     request.body AS request_body,
     request.path AS request_path,
     request.user_id AS request_user_id,
