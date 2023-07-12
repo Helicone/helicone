@@ -63,7 +63,7 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-    const cachedResponse = await getCachedResponse(proxyRequest, cacheSettings.bucketSettings);
+    const cachedResponse = await getCachedResponse(proxyRequest, cacheSettings.bucketSettings, env.CACHE_KV);
     if (cachedResponse) {
       ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
       return cachedResponse;
@@ -80,7 +80,9 @@ export async function proxyForwarder(
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache) {
-    ctx.waitUntil(saveToCache(proxyRequest, response, cacheSettings.cacheControl, cacheSettings.bucketSettings));
+    ctx.waitUntil(
+      saveToCache(proxyRequest, response, cacheSettings.cacheControl, cacheSettings.bucketSettings, env.CACHE_KV)
+    );
   }
 
   response.headers.forEach((value, key) => {
