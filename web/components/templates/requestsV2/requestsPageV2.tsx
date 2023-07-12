@@ -31,6 +31,36 @@ interface RequestsPageV2Props {
   isCached?: boolean;
 }
 
+function getSortLeaf(
+  sortKey: string | null,
+  sortDirection: SortDirection | null,
+  isCustomProperty: boolean,
+  isCached: boolean
+): SortLeafRequest {
+  if (isCached && sortKey === "created_at") {
+    sortKey = "cache_created_at";
+  }
+  if (sortKey && sortDirection && isCustomProperty) {
+    return {
+      properties: {
+        [sortKey]: sortDirection,
+      },
+    };
+  } else if (sortKey && sortDirection) {
+    return {
+      [sortKey]: sortDirection,
+    };
+  } else if (isCached) {
+    return {
+      cache_created_at: "desc",
+    };
+  } else {
+    return {
+      created_at: "desc",
+    };
+  }
+}
+
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const { currentPage, pageSize, sort, isCached = false } = props;
 
@@ -49,20 +79,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
-  const sortLeaf: SortLeafRequest =
-    sort.sortKey && sort.sortDirection && sort.isCustomProperty
-      ? {
-          properties: {
-            [sort.sortKey]: sort.sortDirection,
-          },
-        }
-      : sort.sortKey && sort.sortDirection
-      ? {
-          [sort.sortKey]: sort.sortDirection,
-        }
-      : {
-          created_at: "desc",
-        };
+  const sortLeaf: SortLeafRequest = getSortLeaf(
+    sort.sortKey,
+    sort.sortDirection,
+    sort.isCustomProperty,
+    isCached
+  );
 
   const {
     count,
