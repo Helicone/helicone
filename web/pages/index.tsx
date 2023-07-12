@@ -1,4 +1,5 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -18,30 +19,6 @@ const Home = (props: HomeProps) => {
   const router = useRouter();
 
   const user = useUser();
-  const orgContext = useOrg();
-  const supabaseClient = useSupabaseClient();
-
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const { data: userSettings, error: userSettingsError } =
-  //       await supabaseClient
-  //         .from("user_settings")
-  //         .select("*")
-  //         .eq("user", user?.id)
-  //         .single();
-  //     if (userSettings === null) {
-  //       router.push("/welcome");
-  //     }
-  //   }
-  //   fetchData();
-  // }, [user, supabaseClient, router]);
-
-  // router.push("/dashboard");
-
-  // if (orgContext?.currentOrg?.has_onboarded === false && user !== null) {
-  //   router.push("/welcome");
-  //   return <LoadingAnimation title="Redirecting you to onboarding..." />;
-  // }
 
   if (user && user.email !== DEMO_EMAIL) {
     router.push("/dashboard");
