@@ -33,7 +33,6 @@ const Cache = (props: CacheProps) => {
 export default Cache;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const user = await options.supabaseClient.getClient().auth.getUser();
   const { page, page_size, sortKey, sortDirection, isCustomProperty } =
     options.context.query;
 
@@ -42,7 +41,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   return {
     props: {
-      user: user,
+      user: options.userData.user,
       currentPage,
       pageSize,
       sort: {
