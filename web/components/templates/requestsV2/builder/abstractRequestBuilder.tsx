@@ -15,7 +15,7 @@ export interface NormalizedRequest {
   latency: number | null;
   status: {
     code: number;
-    statusType: "success" | "error" | "pending" | "unknown";
+    statusType: "success" | "error" | "pending" | "unknown" | "cached";
   };
   user: string | null;
   cost: number | null;
