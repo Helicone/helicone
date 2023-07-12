@@ -44,13 +44,6 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   ): Promise<string> {
     const apiKey = await generateAPIKey();
 
-    await supabaseClient
-      .from("helicone_api_keys")
-      .update({
-        soft_delete: true,
-      })
-      .eq("user_id", user.id);
-
     const res = await supabaseClient.from("helicone_api_keys").insert({
       api_key_hash: await hashAuth(apiKey),
       user_id: user.id,
