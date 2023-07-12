@@ -9,6 +9,7 @@ export interface Env {
   TOKENIZER_COUNT_API: string;
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
+  CACHE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
