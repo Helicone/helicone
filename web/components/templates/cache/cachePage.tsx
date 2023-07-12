@@ -16,14 +16,25 @@ import { clsx } from "../../shared/clsx";
 import { MetricsPanel } from "../../shared/metrics/metricsPanel";
 import { RenderPieChart } from "../../shared/metrics/pieChart";
 import { StackedBarChart } from "../../shared/metrics/stackedBarChart";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import ThemedModal from "../../shared/themed/themedModal";
+import RequestsPageV2 from "../requestsV2/requestsPageV2";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 
-interface CachePageProps {}
+interface CachePageProps {
+  currentPage: number;
+  pageSize: number;
+  sort: {
+    sortKey: string | null;
+    sortDirection: SortDirection | null;
+    isCustomProperty: boolean;
+  };
+}
 
 const CachePage = (props: CachePageProps) => {
-  const {} = props;
+  const { currentPage, pageSize, sort } = props;
 
   const data = useCachePageMetrics();
   const cacheOverTime = useCacheOvertime();
@@ -116,6 +127,8 @@ const CachePage = (props: CachePageProps) => {
 
   cacheDist.sort((a, b) => a.name.localeCompare(b.name));
 
+  console.log(topRequests.topRequests.data?.data);
+
   return (
     <>
       <div className="flex flex-col space-y-4 w-full">
@@ -147,12 +160,12 @@ const CachePage = (props: CachePageProps) => {
           </a>
         ) : (
           <div className="gap-4 grid grid-cols-8">
-            <div className="col-span-8 md:col-span-2 grid grid-cols-1 text-gray-900 gap-4">
+            <div className="col-span-8 md:col-span-3 grid grid-cols-1 text-gray-900 gap-4">
               {metrics.map((metric, i) => (
                 <MetricsPanel metric={metric} key={i} />
               ))}
             </div>
-            <div className="col-span-8 md:col-span-6 bg-white border border-gray-300 rounded-lg">
+            <div className="col-span-8 md:col-span-5 bg-white border border-gray-300 rounded-lg">
               <div className="flex flex-col space-y-4 py-6">
                 <h3 className="text-lg font-semibold text-gray-900 text-center">
                   Caches last 30 days
@@ -168,8 +181,7 @@ const CachePage = (props: CachePageProps) => {
                 </div>
               </div>
             </div>
-
-            <div className="col-span-8 md:col-span-5 bg-white border border-gray-300 rounded-lg h-96">
+            <div className="col-span-8 md:col-span-8 bg-white border border-gray-300 rounded-lg h-96">
               <div className="flex flex-col space-y-4 py-6">
                 <h3 className="text-lg font-semibold text-gray-900 text-center">
                   Top Requests
@@ -206,21 +218,13 @@ const CachePage = (props: CachePageProps) => {
                 </ul>
               </div>
             </div>
-            <div className="col-span-8 md:col-span-3 bg-white border border-gray-300 rounded-lg">
-              <div className="flex flex-col space-y-4 py-6">
-                <h3 className="text-lg font-semibold text-gray-900 text-center">
-                  Model Distribution
-                </h3>
-                <div className="h-72">
-                  {topMetrics.topModels.isLoading ? (
-                    <div className="h-full w-full flex-col flex p-8">
-                      <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
-                    </div>
-                  ) : (
-                    <RenderPieChart data={cacheDist} size="sm" />
-                  )}
-                </div>
-              </div>
+            <div className="col-span-8 pt-8">
+              <RequestsPageV2
+                currentPage={currentPage}
+                pageSize={pageSize}
+                sort={sort}
+                isCached={true}
+              />
             </div>
           </div>
         )}
