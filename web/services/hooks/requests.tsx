@@ -9,7 +9,7 @@ const useGetRequests = (
   currentPageSize: number,
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
-  isCached: boolean
+  isCached: boolean = false
 ) => {
   return {
     requests: useQuery({
