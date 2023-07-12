@@ -14,7 +14,7 @@ import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { INITIAL_COLUMNS } from "./initialColumns";
+import { getInitialColumns } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
@@ -28,10 +28,11 @@ interface RequestsPageV2Props {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
+  isCached?: boolean;
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
-  const { currentPage, pageSize, sort } = props;
+  const { currentPage, pageSize, sort, isCached = false } = props;
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
@@ -81,7 +82,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       operator: "and",
       right: "all",
     },
-    sortLeaf
+    sortLeaf,
+    isCached
   );
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
@@ -126,7 +128,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     });
   };
 
-  const columnsWithProperties = [...INITIAL_COLUMNS].concat(
+  const columnsWithProperties = [...getInitialColumns(isCached)].concat(
     properties.map((property) => {
       return {
         accessorFn: (row) =>
@@ -145,7 +147,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   return (
     <div>
       <AuthHeader
-        title={"Requests"}
+        title={isCached ? "Cached Requests" : "Requests"}
         headerActions={
           <button
             onClick={() => refetch()}

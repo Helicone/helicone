@@ -21,7 +21,9 @@ function formatNumber(num: number) {
   }
 }
 
-export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
+export const getInitialColumns: (
+  isCached?: boolean
+) => ColumnDef<NormalizedRequest>[] = (isCached = false) => [
   {
     accessorKey: "createdAt",
     header: "Created At",
@@ -40,7 +42,12 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
     cell: (info) => {
       const { code, statusType } =
         info.getValue() as NormalizedRequest["status"];
-      return <StatusBadge statusType={statusType} errorCode={code} />;
+      return (
+        <StatusBadge
+          statusType={isCached ? "cached" : statusType}
+          errorCode={code}
+        />
+      );
     },
     size: 100,
   },
@@ -96,7 +103,9 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   {
     accessorKey: "latency",
     header: "Latency",
-    cell: (info) => <span>{Number(info.getValue()) / 1000}s</span>,
+    cell: (info) => (
+      <span>{isCached ? 0 : Number(info.getValue()) / 1000}s</span>
+    ),
     meta: {
       sortKey: "latency",
     },
@@ -112,6 +121,8 @@ export const INITIAL_COLUMNS: ColumnDef<NormalizedRequest>[] = [
   {
     accessorKey: "cost",
     header: "Cost",
-    cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
+    cell: (info) => (
+      <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
+    ),
   },
 ];
