@@ -79,6 +79,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
             Showing top 10 results
           </div>
           <ThemedTableV5
+            dataLoading={false}
             defaultData={
               valueMetrics.aggregatedKeyMetrics?.data?.data?.map((d) => ({
                 ...d,
