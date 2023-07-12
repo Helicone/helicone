@@ -160,12 +160,12 @@ const CachePage = (props: CachePageProps) => {
           </a>
         ) : (
           <div className="gap-4 grid grid-cols-8">
-            <div className="col-span-8 md:col-span-2 grid grid-cols-1 text-gray-900 gap-4">
+            <div className="col-span-8 md:col-span-3 grid grid-cols-1 text-gray-900 gap-4">
               {metrics.map((metric, i) => (
                 <MetricsPanel metric={metric} key={i} />
               ))}
             </div>
-            <div className="col-span-8 md:col-span-4 bg-white border border-gray-300 rounded-lg">
+            <div className="col-span-8 md:col-span-5 bg-white border border-gray-300 rounded-lg">
               <div className="flex flex-col space-y-4 py-6">
                 <h3 className="text-lg font-semibold text-gray-900 text-center">
                   Caches last 30 days
@@ -181,7 +181,7 @@ const CachePage = (props: CachePageProps) => {
                 </div>
               </div>
             </div>
-            <div className="col-span-8 md:col-span-2 bg-white border border-gray-300 rounded-lg h-96">
+            <div className="col-span-8 md:col-span-8 bg-white border border-gray-300 rounded-lg h-96">
               <div className="flex flex-col space-y-4 py-6">
                 <h3 className="text-lg font-semibold text-gray-900 text-center">
                   Top Requests
