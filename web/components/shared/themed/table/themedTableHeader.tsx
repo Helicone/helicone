@@ -35,6 +35,7 @@ interface ThemedTableHeaderProps<T> {
 
   // define this if you want the time filter
   timeFilter?: {
+    defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
 }

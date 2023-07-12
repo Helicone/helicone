@@ -42,6 +42,7 @@ interface ThemedTableV5Props<T> {
     ) => Promise<Result<void, string>>;
   };
   timeFilter?: {
+    defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
   exportData?: any[];
@@ -119,6 +120,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         timeFilter={
           timeFilter
             ? {
+                defaultValue: timeFilter.defaultValue,
                 onTimeSelectHandler: timeFilter.onTimeSelectHandler,
               }
             : undefined

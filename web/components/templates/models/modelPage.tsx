@@ -70,6 +70,7 @@ const ModelPage = (props: ModelPageProps) => {
           setSelectedModel(row);
         }}
         timeFilter={{
+          defaultValue: "all",
           onTimeSelectHandler: (key: TimeInterval, value: string) => {
             if ((key as string) === "custom") {
               const [startDate, endDate] = value.split("_");
