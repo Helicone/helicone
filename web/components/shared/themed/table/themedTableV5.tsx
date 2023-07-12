@@ -31,9 +31,7 @@ interface ThemedTableV5Props<T> {
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
   tableKey: string;
-  dataLoading?: boolean;
-
-  // TODO: change this to a more generic type???
+  dataLoading: boolean;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
@@ -47,18 +45,6 @@ interface ThemedTableV5Props<T> {
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
   exportData?: any[];
-  // header?: {
-  //   flattenedExportData: any[];
-  //   onTimeSelectHandler: (key: TimeInterval, value: string) => void;
-  //   // TODO: rewrite these filters
-  //   filterMap: SingleFilterDef<any>[];
-  //   filters: UIFilterRow[];
-  //   setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
-  //   searchPropertyFilters: (
-  //     property: string,
-  //     search: string
-  //   ) => Promise<Result<void, string>>;
-  // };
   sortable?: {
     sortKey: string | null;
     sortDirection: SortDirection | null;
@@ -141,7 +127,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
       />
 
       {dataLoading ? (
-        <LoadingAnimation title="Loading Requests..." />
+        <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
           <TableCellsIcon className="h-12 w-12 text-gray-400" />

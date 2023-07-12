@@ -42,8 +42,6 @@ interface ThemedTableHeaderProps<T> {
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { rows, columnsFilter, timeFilter, advancedFilters } = props;
 
-  console.log(columnsFilter?.columns);
-
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -79,17 +77,19 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           <div />
         )}
         <div className="flex flex-row gap-2">
-          <button
-            onClick={showFilterHandler}
-            className={clsx(
-              "bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
-            )}
-          >
-            <FunnelIcon className="h-5 w-5 text-gray-900" />
-            <p className="text-sm font-medium text-gray-900 hidden sm:block">
-              {showFilters ? "Hide" : "Show"} Filters
-            </p>
-          </button>
+          {advancedFilters && (
+            <button
+              onClick={showFilterHandler}
+              className={clsx(
+                "bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
+              )}
+            >
+              <FunnelIcon className="h-5 w-5 text-gray-900" />
+              <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                {showFilters ? "Hide" : "Show"} Filters
+              </p>
+            </button>
+          )}
           {columnsFilter && (
             <ViewColumns
               columns={columnsFilter.columns}
