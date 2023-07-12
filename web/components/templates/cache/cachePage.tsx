@@ -218,7 +218,7 @@ const CachePage = (props: CachePageProps) => {
                 </ul>
               </div>
             </div>
-            <div className="col-span-8">
+            <div className="col-span-8 pt-8">
               <RequestsPageV2
                 currentPage={currentPage}
                 pageSize={pageSize}

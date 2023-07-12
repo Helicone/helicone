@@ -121,6 +121,8 @@ export const getInitialColumns: (
   {
     accessorKey: "cost",
     header: "Cost",
-    cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
+    cell: (info) => (
+      <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
+    ),
   },
 ];
