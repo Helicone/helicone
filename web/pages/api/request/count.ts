@@ -1,5 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { getRequestCount } from "../../../lib/api/request/request";
+import {
+  getRequestCount,
+  getRequestCountCached,
+} from "../../../lib/api/request/request";
 
 import {
   HandlerWrapperOptions,
@@ -12,10 +15,13 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  const { filter } = req.body as {
+  const { filter, isCached } = req.body as {
     filter: FilterNode;
+    isCached: boolean;
   };
-  const metrics = await getRequestCount(orgId, filter);
+  const metrics = isCached
+    ? await getRequestCountCached(orgId, filter)
+    : await getRequestCount(orgId, filter);
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
 

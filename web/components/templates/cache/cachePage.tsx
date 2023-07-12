@@ -20,11 +20,21 @@ import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import ThemedModal from "../../shared/themed/themedModal";
+import RequestsPageV2 from "../requestsV2/requestsPageV2";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 
-interface CachePageProps {}
+interface CachePageProps {
+  currentPage: number;
+  pageSize: number;
+  sort: {
+    sortKey: string | null;
+    sortDirection: SortDirection | null;
+    isCustomProperty: boolean;
+  };
+}
 
 const CachePage = (props: CachePageProps) => {
-  const {} = props;
+  const { currentPage, pageSize, sort } = props;
 
   const data = useCachePageMetrics();
   const cacheOverTime = useCacheOvertime();
@@ -209,11 +219,11 @@ const CachePage = (props: CachePageProps) => {
               </div>
             </div>
             <div className="col-span-8">
-              <ThemedTableV5
-                defaultData={[]}
-                defaultColumns={[]}
-                tableKey={"cachePage"}
-                dataLoading={false}
+              <RequestsPageV2
+                currentPage={currentPage}
+                pageSize={pageSize}
+                sort={sort}
+                isCached={true}
               />
             </div>
           </div>

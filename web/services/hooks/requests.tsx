@@ -1,16 +1,15 @@
-import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
-import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
-  options?: QueryObserverOptions
+  isCached: boolean
 ) => {
   return {
     requests: useQuery({
@@ -20,12 +19,14 @@ const useGetRequests = (
         currentPageSize,
         advancedFilter,
         sortLeaf,
+        isCached,
       ],
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
         const currentPageSize = query.queryKey[2] as number;
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
+        const isCached = query.queryKey[5];
         return await fetch("/api/request", {
           method: "POST",
           headers: {
@@ -36,6 +37,7 @@ const useGetRequests = (
             offset: (currentPage - 1) * currentPageSize,
             limit: currentPageSize,
             sort: sortLeaf,
+            isCached,
           }),
         }).then(
           (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
@@ -50,9 +52,12 @@ const useGetRequests = (
         currentPageSize,
         advancedFilter,
         sortLeaf,
+        isCached,
       ],
       queryFn: async (query) => {
         const advancedFilter = query.queryKey[3];
+        const isCached = query.queryKey[5];
+
         return await fetch("/api/request/count", {
           method: "POST",
           headers: {
@@ -60,6 +65,7 @@ const useGetRequests = (
           },
           body: JSON.stringify({
             filter: advancedFilter,
+            isCached,
           }),
         }).then((res) => res.json() as Promise<Result<number, string>>);
       },
