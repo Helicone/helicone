@@ -40,6 +40,7 @@ import { useRouter } from "next/router";
 import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface DashboardPageProps {
   user: User;
@@ -273,7 +274,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           </button>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-4">
           <ThemedTableHeader
             isFetching={isAnyLoading}
             timeFilter={{
@@ -314,22 +315,14 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
           />
 
-          {metrics.totalRequests?.data?.data === 0 ? (
-            <div className="flex flex-col justify-center items-center w-full h-96 my-10 border-gray-300 border bg-white space-y-8">
-              <p className="text-2xl font-semibold">No requests found!</p>
-
-              <p>
-                If you have data, please try changing your filters, otherwise
+          {isAnyLoading ? (
+            <LoadingAnimation title={"Loading Data..."} />
+          ) : metrics.totalRequests?.data?.data === 0 ? (
+            <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+              <TableCellsIcon className="h-12 w-12 text-gray-400" />
+              <p className="text-xl font-semibold text-gray-500">
+                No Data Found
               </p>
-              <p>if this is your first time using Helicone, click below.</p>
-              <button
-                className="bg-sky-700 text-white px-4 py-2 rounded-md mt-4"
-                onClick={() => {
-                  router.push("/welcome");
-                }}
-              >
-                Get Started
-              </button>
             </div>
           ) : (
             <>
