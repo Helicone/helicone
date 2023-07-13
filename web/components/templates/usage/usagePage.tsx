@@ -2,6 +2,8 @@ import {
   Bars4Icon,
   BuildingOffice2Icon,
   CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CloudArrowUpIcon,
   CreditCardIcon,
   CubeIcon,
@@ -174,9 +176,14 @@ const UsagePage = (props: UsagePageProps) => {
     <>
       <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
         <div className="flex flex-col space-y-6">
-          <h1 className="text-4xl font-semibold tracking-wide">
-            {monthMap[month]}
-          </h1>
+          <div className="flex flex-row space-x-0.5 items-center">
+            <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
+            <h1 className="text-4xl font-semibold tracking-wide">
+              {monthMap[month]}
+            </h1>
+            <ChevronRightIcon className="h-6 w-6 text-gray-700" />
+          </div>
+
           <p className="text-md">
             Below is a summary of your monthly usage and your plan. Click{" "}
             <Link href="/pricing" className="text-blue-500 underline">
