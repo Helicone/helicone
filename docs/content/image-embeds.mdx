@@ -1,0 +1,141 @@
+---
+title: "Images and Embeds"
+description: "Add image, video, and other HTML elements"
+---
+
+<img
+  className="rounded-md"
+  src="https://mintlify-assets.b-cdn.net/bigbend.jpg"
+/>
+
+## Image
+
+### Using Markdown
+
+The [markdown syntax](https://www.markdownguide.org/basic-syntax/#images) lets you add images using the following code
+
+```md
+![title](/path/image.jpg)
+```
+
+Note that the image file size must be less than 5MB. Otherwise, we recommend hosting on a service like [Cloudinary](https://cloudinary.com/) or [S3](https://aws.amazon.com/s3/). You can then use that URL and embed.
+
+### Using Embeds
+
+To get more customizability with images, you can also use [embeds](/writing-content/embed) to add images.
+
+```html
+<img height="200" src="/path/image.jpg" />
+```
+
+### Disable Image Zoom
+
+To disable the default zoom on click for images, add the noZoom property to image embeds.
+
+```html
+<img height="200" noZoom src="/path/image.jpg" />
+```
+
+### Linking Images
+
+To link an image, for example to create a button on your docs, encompass the image in a link with the `noZoom` property. Images in `a` tags will automatically have a pointer cursor. 
+
+```html
+<a href="https://mintlify.com" target="_blank">
+  <img height="200" noZoom src="/path/image.jpg" />
+</a>
+```
+
+### Related
+
+For more information, we recommend the following sections:
+
+<Card
+  title="Frame Component Reference"
+  icon="frame"
+  href="/content/components/frame"
+>
+  Read the reference for the Frame component
+</Card>
+
+## Videos and other HTML elements
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/4KzFe50RQkQ"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+></iframe>
+
+<video
+  controls
+  className="w-full aspect-video"
+  src="link-to-your-video.com"
+></video>
+
+<br />
+
+<Tip>
+
+Mintlify supports [HTML tags in Markdown](https://www.markdownguide.org/basic-syntax/#html). This is helpful if you prefer HTML tags to Markdown syntax, and lets you create documentation with infinite flexibility.
+
+</Tip>
+
+### Videos
+
+For YouTube videos use:
+
+```html
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/4KzFe50RQkQ"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+></iframe>
+```
+
+For other videos, use:
+
+```html
+<video
+  controls
+  className="w-full aspect-video"
+  src="link-to-your-video.com"
+></video>
+```
+
+### iFrames
+
+Loads another HTML page within the document.
+
+```html
+<iframe src="https://www.youtube.com/embed/4KzFe50RQkQ"> </iframe>
+```
+
+To have videos autoplay, add `autoplay = {true}`.
+
+<Tip>
+  {" "}
+  Additionally, we support mp4 files up to 5 MB and you can also upload your videos
+  to storage services like Cloudinary to reference them in your Mintlify documentation!{" "}
+</Tip>
+
+### Line Breaks
+
+Add a linebreak
+
+```html
+<br />
+```
+
+<Tip>
+
+Although not required, we recommend adding the `alt` and `title` attributes to images for better SEO and accessability. Learn more at [image SEO](https://yoast.com/image-seo-alt-tag-and-title-tag-optimization/).
+
+</Tip>

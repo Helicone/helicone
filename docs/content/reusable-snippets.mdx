@@ -1,0 +1,31 @@
+---
+title: Reusable Snippets
+description: Reusable, custom snippets to keep content in sync
+---
+
+One of the core principles of software development is DRY (Don't Repeat Yourself). This is a principle that we should apply to our documentation as well. If you find yourself repeating the same content in multiple places, you should consider creating a custom snippet to keep your content in sync.
+
+## Creating and using a custom snippet
+
+1. Create a new file in the `_snippets` directory.
+2. Construct your snippet content - it can be a component or a chunk of text.
+
+```md _snippets/my-snippet.mdx
+## My Snippet
+
+This is my snippet.
+
+<Info>I want to use this content in more than one place in my docs.</Info>
+```
+
+3. Navigate to the file where you want to use the snippet.
+4. Add the snippet to the file using the following syntax:
+
+```md destination-file.mdx
+<Snippet file="my-snippet.mdx" />
+```
+
+<Note>
+  You do not need to prepend the "_snippets" directory to the file name and you
+  do not need to import the snippet.
+</Note>

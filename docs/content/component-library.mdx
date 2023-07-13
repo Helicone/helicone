@@ -1,0 +1,80 @@
+---
+title: "Components"
+description: "Enhance your docs with our pre-built components "
+---
+
+Mintlify provides a library of build-in-components to make your docs beautiful without formatting things yourself. They can be added **directly within your files**. Some components are rendered from [Markdown syntax](https://www.markdownguide.org/basic-syntax/), while other components work the same way as [React components](https://reactjs.org/docs/components-and-props.html).
+
+## Examples
+
+### Code Blocks
+
+The following example is a [Code](/writing-content/code) component, which lets you display syntax-highlighted code.
+
+```java
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```
+
+It's rendered using the following code.
+
+````md
+```java
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```
+````
+
+### Callouts
+
+To present additional context outside of the main content, you can use a [Callout](/content/components/callouts) component. Find Warnings and Notes in addition to Tip callouts here.
+
+<Tip>This suggests a helpful tip</Tip>
+
+```md
+<Tip>This suggests a helpful tip</Tip>
+```
+
+### Accordions
+
+Use the [Accordian](/content/components/accordion) component to create a dropdown with additional content.
+
+<Accordion title="I am an Accordion.">
+  You can put any content in here.
+</Accordion>
+
+```md
+<Accordion title="I am an Accordion.">
+  You can put any content in here.
+</Accordion>
+```
+
+### Cards
+
+To highlight important points and links, you can use a [Card](/content/components/card) component.
+
+<Card title="Click on me" icon="link" href="/content/components/card">
+  This is how you use a card with an icon and a link. Clicking on this card
+  brings you to the Card components page.
+</Card>
+
+```md
+<Card title="Click on me" icon="link" href="/content/components/card">
+  This is how you use a card with an icon and a link. Clicking on this card
+  brings you to the Card components page.
+</Card>
+```
+
+### Other
+
+For a full list of pre-built components, see our [Components library](/content/components). You can also contribute to our components in our [repository](https://github.com/mintlify/components).
+
+### Requests
+
+If there are any components that you would like to have but aren't currently available, contact our team at [hi@mintlify.com](mailto:hi@mintlify.com).

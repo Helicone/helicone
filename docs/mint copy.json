@@ -29,31 +29,10 @@
       "url": "https://github.com/mintlify-onboarding/helicone"
     }
   ],
-  "tabs": [
-    {
-      "name": "Writing Content",
-      "url": "content"
-    }
-  ],
-  "feedback": {
-    "suggestEdit": true,
-    "raiseIssue": true
-  },
   "navigation": [
     {
       "group": "Welcome",
       "pages": ["introduction", "overview"]
-    },
-    {
-      "group": "Writing Content",
-      "pages": [
-        "content/component-library",
-        "content/text",
-        "content/image-embeds",
-        "content/list-table",
-        "content/code",
-        "content/reusable-snippets"
-      ]
     },
     {
       "group": "Getting Started",
