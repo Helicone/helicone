@@ -17,22 +17,23 @@ async function handler({
   supabaseClient,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  const { filter } = req.body as {
+  const { filter, organization_id } = req.body as {
     filter: FilterNode;
+    organization_id: string;
   };
 
   const { data: org, error: orgError } = await supabaseClient
     .getClient()
     .from("organization")
     .select("*")
-    .eq("id", orgId);
+    .eq("id", organization_id || orgId);
 
   if (orgError !== null || !org || org.length === 0) {
     res.status(400).json({ error: "Invalid org", data: null });
     return;
   }
 
-  const count = await getRequestCountClickhouse(orgId, filter);
+  const count = await getRequestCountClickhouse(org[0].id, filter);
   res.status(count.error === null ? 200 : 500).json(count);
 }
 
