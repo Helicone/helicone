@@ -111,6 +111,16 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
               <p className="font-semibold text-gray-900">User</p>
               <p className="text-gray-700 truncate">{request.user}</p>
             </li>
+            <li className="flex flex-row justify-between items-center py-2 gap-4">
+              <p className="font-semibold text-gray-900">Path</p>
+              <p className="text-gray-700 truncate">
+                {new URL(request.path).pathname}
+              </p>
+            </li>
+            <li className="flex flex-row justify-between items-center py-2 gap-4">
+              <p className="font-semibold text-gray-900">ID</p>
+              <p className="text-gray-700 truncate">{request.id}</p>
+            </li>
           </ul>
           {request.customProperties &&
             Object.keys(request.customProperties).length > 0 && (
