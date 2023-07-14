@@ -5,6 +5,7 @@ import { Json } from "../../../../supabase/database.types";
 export interface NormalizedRequest {
   // Values to display in requests table
   id: string;
+  path: string;
   createdAt: string;
   model: string;
   requestText: string;

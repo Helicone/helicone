@@ -9,6 +9,7 @@ class ModerationBuilder extends AbstractRequestBuilder {
     return {
       id: this.response.request_id,
       createdAt: this.response.request_created_at,
+      path: this.response.request_path,
       requestText: this.response.request_body.input,
       responseText:
         this.response.response_status === 0 ||
