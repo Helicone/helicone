@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { Result } from "../../../../lib/result";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
 
 // export async function deleteUserIdFromOrg(userId: String) {
@@ -46,7 +46,7 @@ export default async function handler(
     res.status(500).json({ error: orgAccess.error.message, data: null });
     return;
   }
-  const { error: deleteError } = await supabaseServer
+  const { error: deleteError } = await getSupabaseServer()
     .from("organization_member")
     .delete()
     .eq("member", memberId as string)
