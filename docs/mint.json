@@ -17,22 +17,10 @@
     "name": "Sign In",
     "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-  "anchors": [
-    {
-      "name": "Community",
-      "icon": "discord",
-      "url": "https://discord.com/invite/zsSTcH2qhG"
-    },
-    {
-      "name": "GitHub",
-      "icon": "github",
-      "url": "https://github.com/mintlify-onboarding/helicone"
-    }
-  ],
   "tabs": [
     {
-      "name": "Writing Content",
-      "url": "content"
+      "name": "Use Cases",
+      "url": "use-cases"
     }
   ],
   "feedback": {
@@ -45,14 +33,25 @@
       "pages": ["introduction", "overview"]
     },
     {
-      "group": "Writing Content",
+      "group": "CI/CD",
       "pages": [
-        "content/component-library",
-        "content/text",
-        "content/image-embeds",
-        "content/list-table",
-        "content/code",
-        "content/reusable-snippets"
+        "use-cases/github-actions",
+        "use-cases/text",
+        "use-cases/image-embeds",
+        "use-cases/list-table",
+        "use-cases/code",
+        "use-cases/reusable-snippets"
+      ]
+    },
+    {
+      "group": "Auditing",
+      "pages": [
+        "use-cases/component-library",
+        "use-cases/text",
+        "use-cases/image-embeds",
+        "use-cases/list-table",
+        "use-cases/code",
+        "use-cases/reusable-snippets"
       ]
     },
     {
@@ -96,6 +95,16 @@
     {
       "group": "FAQ",
       "pages": ["faq/how-encryption-works", "faq/latency-affect"]
+    }
+  ],
+  "topbarLinks": [
+    {
+      "name": "Discord",
+      "url": "https://discord.com/invite/zsSTcH2qhG"
+    },
+    {
+      "name": "Github",
+      "url": "https://github.com/Helicone/helicone"
     }
   ],
   "footerSocials": {
