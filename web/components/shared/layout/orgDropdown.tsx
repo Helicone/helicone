@@ -50,12 +50,12 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             {orgContext?.currentOrg.name}
           </p>
         </div>
-        <button className="px-[7px] py-0.5 text-sm bg-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+        <div className="px-[7px] py-0.5 text-sm bg-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
           <span className="sr-only">Open user menu</span>
           {user?.email?.charAt(0).toUpperCase() || (
             <UserCircleIcon className="h-8 w-8 text-black" />
           )}
-        </button>
+        </div>
       </Menu.Button>
       <Transition
         as={Fragment}
