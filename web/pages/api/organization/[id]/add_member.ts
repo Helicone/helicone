@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { Result } from "../../../../lib/result";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
+import { supabaseServer } from "../../../../lib/supabaseServer";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export async function getUserId(userEmail: String) {
@@ -35,7 +35,7 @@ export default async function handler(
   }
   if (userId?.length === 0) {
     console.log("signing up");
-    await getSupabaseServer().auth.signInWithOtp({
+    await supabaseServer.auth.signInWithOtp({
       email: email as string,
     });
     const res = await getUserId(email as string);
@@ -48,7 +48,7 @@ export default async function handler(
     return;
   }
 
-  const { error: insertError } = await getSupabaseServer()
+  const { error: insertError } = await supabaseServer
     .from("organization_member")
     .insert([{ organization: id as string, member: userId![0].id }]);
 

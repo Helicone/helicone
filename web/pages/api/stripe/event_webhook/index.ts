@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
 import { IncomingMessage } from "http";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
+import { supabaseServer } from "../../../../lib/supabaseServer";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { resultMap } from "../../../../lib/result";
 
@@ -81,7 +81,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       // make the update
-      const { error: userSettingsError } = await getSupabaseServer()
+      const { error: userSettingsError } = await supabaseServer
         .from("user_settings")
         .update({
           tier: active ? "pro" : "free",
