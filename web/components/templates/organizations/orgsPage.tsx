@@ -36,7 +36,8 @@ const OrgsPage = (props: OrgsPageProps) => {
                   !(
                     userSettings?.tier === "pro" ||
                     userSettings?.tier === "enterprise"
-                  )
+                  ) &&
+                  process.env.NEXT_PUBLIC_HELICONE_RESTRICT_PRO === "true"
                 ) {
                   setNotification(
                     "You must be on a paid plan to create an organization.",
