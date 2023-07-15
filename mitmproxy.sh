@@ -31,8 +31,8 @@ start_proxy() {
   # Create the add_headers.py file
   echo "Step 3: Creating add_headers.py file..."
   echo 'import os' > add_headers.py
-  echo 'import json' >> add_headers.py
-  echo 'import lockfile' >> add_headers.py
+  echo 'import json' > add_headers.py
+  echo 'import lockfile' > add_headers.py
   echo 'def request(flow):' >> add_headers.py
   echo '    flow.request.headers["Helicone-Auth"] = "Bearer " + os.environ.get("HELICONE_API_KEY")' >> add_headers.py
   echo '    flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")' >> add_headers.py
@@ -40,11 +40,17 @@ start_proxy() {
   echo '        if key.startswith("HELICONE_PROPERTY"):' >> add_headers.py
   echo '            header_name = "Helicone-Property-" + key.split("_")[2]' >> add_headers.py
   echo '            flow.request.headers[header_name] = os.environ.get(key)' >> add_headers.py
-  echo '    with lockfile.LockFile(os.path.expanduser("~/.helicone/custom_properties.json.lock")):' >> add_headers.py
-  echo '        with open(os.path.expanduser("~/.helicone/custom_properties.json"), "r") as json_file:' >> add_headers.py
+  echo '    lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")' >> add_headers.py
+  echo '    json_path = os.path.expanduser("~/.helicone/custom_properties.json")' >> add_headers.py
+  echo '    with lockfile.LockFile(lockfile_path):' >> add_headers.py
+  echo '        if not os.path.exists(json_path):' >> add_headers.py
+  echo '            with open(json_path, "w") as json_file:' >> add_headers.py
+  echo '                json.dump({}, json_file)' >> add_headers.py
+  echo '        with open(json_path, "r") as json_file:' >> add_headers.py
   echo '            custom_properties = json.load(json_file)' >> add_headers.py
   echo '            for key, value in custom_properties.items():' >> add_headers.py
   echo '                flow.request.headers["Helicone-Property-" + key] = value' >> add_headers.py
+
 
 
 
