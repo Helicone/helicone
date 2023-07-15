@@ -6,6 +6,7 @@ create_files() {
   mkdir -p ~/.helicone
   touch ~/.helicone/proxy_pid
   touch ~/.helicone/mitmproxy.log
+  echo "{}" > ~/.helicone/custom_properties.json.lock
 }
 
 # Function to start the proxy
@@ -45,9 +46,6 @@ start_proxy() {
   echo '    json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")' >> add_headers.py
   echo '    lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")' >> add_headers.py
   echo '    with lockfile.LockFile(lockfile_path):' >> add_headers.py
-  echo '        if not os.path.isfile(json_file_path):' >> add_headers.py
-  echo '            with open(json_file_path, "w") as json_file:' >> add_headers.py
-  echo '                json.dump({}, json_file)' >> add_headers.py
   echo '        with open(json_file_path, "r") as json_file:' >> add_headers.py
   echo '            custom_properties = json.load(json_file)' >> add_headers.py
   echo '            for key, value in custom_properties.items():' >> add_headers.py
