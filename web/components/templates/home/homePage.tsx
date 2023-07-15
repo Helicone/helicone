@@ -161,7 +161,7 @@ export default function HomePage() {
   return (
     <div className="flex-col w-full">
       <div className="bg-black">
-        <div className="px-0 md:px-4 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
+        <div className="px-4 md:px-8 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
           <div className="flex items-center">
             <SparklesIcon className="h-5 w-5 text-gray-50 mr-2" />
             <p className="text-gray-50 font-medium text-md">
