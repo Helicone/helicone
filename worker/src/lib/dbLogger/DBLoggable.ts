@@ -136,6 +136,10 @@ export class DBLoggable {
     this.tokenCalcUrl = props.tokenCalcUrl;
   }
 
+  async waitForResponse(): Promise<string> {
+    return await this.response.getResponseBody();
+  }
+
   async tokenCounter(text: string): Promise<number> {
     return getTokenCount(text, this.provider, this.tokenCalcUrl);
   }
