@@ -6,7 +6,7 @@ create_files() {
   mkdir -p ~/.helicone
   touch ~/.helicone/proxy_pid
   touch ~/.helicone/mitmproxy.log
-  echo "{}" > ~/.helicone/custom_properties.json.lock
+  echo "{}" > ~/.helicone/custom_properties.json
 }
 
 # Function to start the proxy
