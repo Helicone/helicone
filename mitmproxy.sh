@@ -46,11 +46,7 @@ start_proxy() {
   echo '    json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")' >> add_headers.py
   echo '    lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")' >> add_headers.py
   echo '    with lockfile.LockFile(lockfile_path):' >> add_headers.py
-  echo '        with open(json_file_path, "r") as json_file:' >> add_headers.py
-  echo '            custom_properties = json.load(json_file)' >> add_headers.py
-  echo '            for key, value in custom_properties.items():' >> add_headers.py
-  echo '                print("Adding header: ", "Helicone-Property-" + key, " with value: ", value)' >> add_headers.py
-  echo '                flow.request.headers["Helicone-Property-" + key] = value' >> add_headers.py
+  echo '        pass' >> add_headers.py
 
 
 
