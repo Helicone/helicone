@@ -11,9 +11,10 @@ class HeliconeLockManager:
     @staticmethod
     def check_files():
         os.makedirs(HeliconeLockManager.DIR_PATH, exist_ok=True)
-        if not os.path.exists(HeliconeLockManager.JSON_PATH):
-            with open(HeliconeLockManager.JSON_PATH, 'w') as json_file:
-                json.dump({}, json_file)
+        with lockfile.LockFile(HeliconeLockManager.LOCKFILE_PATH):
+            if not os.path.exists(HeliconeLockManager.JSON_PATH):
+                with open(HeliconeLockManager.JSON_PATH, 'w') as json_file:
+                    json.dump({}, json_file)
 
     @staticmethod
     def write_custom_property(property_name, value):
