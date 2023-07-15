@@ -160,35 +160,38 @@ export default function HomePage() {
 
   return (
     <div className="flex-col w-full">
-      <div className="h-full min-h-[3rem] w-full flex flex-col md:flex-row gap-4 justify-between bg-black items-center px-4 py-4 md:px-8 md:py-4">
-        <div className="flex items-center">
-          <SparklesIcon className="h-5 w-5 text-gray-50 mr-2" />
-          <p className="text-gray-50 font-medium text-md">
-            Explore Helicone&apos;s role in shaping the future LLM stack.
-          </p>
-        </div>
-        <div className="flex space-x-4 md:space-x-8 items-center">
-          <Link
-            className="flex flex-row space-x-1 items-center text-gray-50"
-            href={"https://www.sequoiacap.com/article/llm-stack-perspective/"}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <p className="underline">Sequoia Capital</p>
-            <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
-          </Link>
-          <div className="w-[1px] h-6 bg-gray-50" />
-          <Link
-            className="flex flex-row space-x-1 items-center text-gray-50"
-            href={
-              "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications/"
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <p className="underline">Andreesson Horowitz</p>
-            <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
-          </Link>
+      <div className="bg-black">
+        <div className="px-0 md:px-4 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
+          {/* <div className="h-full mx-auto max-w-7xl min-h-[3rem] w-full flex flex-col md:flex-row gap-4 justify-between bg-black items-center px-4 py-4 md:px-8 md:py-4"> */}
+          <div className="flex items-center">
+            <SparklesIcon className="h-5 w-5 text-gray-50 mr-2" />
+            <p className="text-gray-50 font-medium text-md">
+              Explore Helicone&apos;s role in shaping the future LLM stack.
+            </p>
+          </div>
+          <div className="flex space-x-4 md:space-x-8 items-center">
+            <Link
+              className="flex flex-row space-x-1 items-center text-gray-50"
+              href={"https://www.sequoiacap.com/article/llm-stack-perspective/"}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <p className="underline">Sequoia Capital</p>
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
+            </Link>
+            <div className="w-[1px] h-6 bg-gray-50" />
+            <Link
+              className="flex flex-row space-x-1 items-center text-gray-50"
+              href={
+                "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications/"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <p className="underline">Andreesson Horowitz</p>
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
+            </Link>
+          </div>
         </div>
       </div>
       <NavBarV2 />
