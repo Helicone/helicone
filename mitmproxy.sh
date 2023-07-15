@@ -50,7 +50,7 @@ start_proxy() {
   nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
   echo $! | tee -a ~/.helicone/proxy_pid
   # Wait for the proxy to start
-  for i in {1..30}
+  for i in {1..120}
   do
     if grep -q 'Proxy server listening' ~/.helicone/mitmproxy.log
     then
@@ -62,7 +62,7 @@ start_proxy() {
     fi
 
     # If the loop reached the last iteration, print an error message
-    if [ $i -eq 30 ]
+    if [ $i -eq 120 ]
     then
       echo "Failed to start proxy."
       exit 1
