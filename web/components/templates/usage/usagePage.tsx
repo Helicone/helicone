@@ -18,9 +18,11 @@ import {
   subMonths,
   startOfMonth,
   endOfMonth,
+  formatISO,
+  isAfter,
 } from "date-fns";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Result } from "../../../lib/result";
 import { useGetRequestCountClickhouse } from "../../../services/hooks/requests";
 import { useUserSettings } from "../../../services/hooks/userSettings";
@@ -31,21 +33,6 @@ import useNotification from "../../shared/notification/useNotification";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import RenderOrgItem from "./renderOrgItem";
 
-const monthMap = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 interface UsagePageProps {
   user: User;
 }
@@ -54,12 +41,15 @@ const UsagePage = (props: UsagePageProps) => {
   const { user } = props;
   const { setNotification } = useNotification();
 
-  const [startMonth, setStartMonth] = useState(
-    format(startOfMonth(new Date()), "yyyy-MM-01")
-  );
-  const [endMonth, setEndMonth] = useState(
-    format(endOfMonth(new Date()), "yyyy-MM-dd")
-  );
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+
+  const startOfMonthFormatted = formatISO(currentMonth, {
+    representation: "date",
+  });
+  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
+    representation: "date",
+  });
+  const isNextMonthDisabled = isAfter(addMonths(currentMonth, 1), new Date());
 
   const [open, setOpen] = useState(false);
 
@@ -68,7 +58,11 @@ const UsagePage = (props: UsagePageProps) => {
     count,
     isLoading: isCountLoading,
     refetch,
-  } = useGetRequestCountClickhouse(startMonth, endMonth);
+  } = useGetRequestCountClickhouse(startOfMonthFormatted, endOfMonthFormatted);
+
+  useEffect(() => {
+    refetch();
+  }, [currentMonth, refetch]);
 
   const orgContext = useOrg();
 
@@ -90,27 +84,18 @@ const UsagePage = (props: UsagePageProps) => {
 
   // Function to go to next month
   const nextMonth = () => {
-    setStartMonth((prevMonth) =>
-      format(addMonths(new Date(prevMonth), 1), "yyyy-MM-01")
-    );
-    setEndMonth((prevMonth) =>
-      format(addMonths(new Date(prevMonth), 1), "yyyy-MM-dd")
-    );
+    setCurrentMonth((prevMonth) => startOfMonth(addMonths(prevMonth, 1)));
   };
 
   // Function to go to previous month
   const prevMonth = () => {
-    setStartMonth((prevMonth) =>
-      format(subMonths(new Date(prevMonth), 1), "yyyy-MM-01")
-    );
-    setEndMonth((prevMonth) =>
-      format(subMonths(new Date(prevMonth), 1), "yyyy-MM-dd")
-    );
+    setCurrentMonth((prevMonth) => startOfMonth(subMonths(prevMonth, 1)));
   };
 
-  console.log("startMonth", startOfMonth);
-  console.log("endMonth", endOfMonth);
-  console.log("count", count?.data);
+  const getMonthName = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("default", { month: "long" });
+  };
 
   const renderInfo = () => {
     if (!userSettings) {
@@ -182,14 +167,16 @@ const UsagePage = (props: UsagePageProps) => {
             </button>
 
             <h1 className="text-4xl font-semibold tracking-wide">
-              {startMonth}
+              {getMonthName(startOfMonthFormatted + 1)}
             </h1>
-            <button
-              onClick={nextMonth}
-              className="p-1 hover:bg-gray-200 rounded-md text-gray-500 hover:text-gray-700"
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
+            {!isNextMonthDisabled && (
+              <button
+                onClick={nextMonth}
+                className="p-1 hover:bg-gray-200 rounded-md text-gray-500 hover:text-gray-700"
+              >
+                <ChevronRightIcon className="h-5 w-5" />
+              </button>
+            )}
           </div>
           <p className="text-md">
             Below is a summary of your monthly usage and your plan. Click{" "}
