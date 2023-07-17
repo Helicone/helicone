@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { endOfMonth, format, formatISO } from "date-fns";
+import { useEffect } from "react";
+import { useGetRequestCountClickhouse } from "../../../services/hooks/requests";
 
 interface RenderOrgItemProps {
   org: {
@@ -13,43 +15,28 @@ interface RenderOrgItemProps {
     owner: string;
     soft_delete: boolean;
   };
+  currentMonth: Date;
 }
 
 const RenderOrgItem = (props: RenderOrgItemProps) => {
-  const { org } = props;
+  const { org, currentMonth } = props;
 
-  function getBeginningOfMonth() {
-    const today = new Date();
-    const firstDateOfMonth = format(today, "yyyy-MM-01");
-    return firstDateOfMonth;
-  }
-
-  const { data, isLoading } = useQuery({
-    queryKey: [`orgItem-${org.id}`],
-    queryFn: async (query) => {
-      const data = await fetch(`/api/request/ch/count`, {
-        method: "POST",
-        body: JSON.stringify({
-          filter: {
-            left: {
-              response_copy_v3: {
-                request_created_at: {
-                  gte: getBeginningOfMonth(),
-                },
-              },
-            },
-            operator: "and",
-            right: "all",
-          },
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => res.json());
-      return data;
-    },
-    refetchOnWindowFocus: false,
+  const startOfMonthFormatted = formatISO(currentMonth, {
+    representation: "date",
   });
+  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
+    representation: "date",
+  });
+
+  const { count, isLoading, refetch } = useGetRequestCountClickhouse(
+    startOfMonthFormatted,
+    endOfMonthFormatted,
+    org.id
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [currentMonth, refetch]);
 
   return (
     <>
@@ -58,7 +45,7 @@ const RenderOrgItem = (props: RenderOrgItemProps) => {
       ) : (
         <li className="flex flex-row justify-between items-center pt-3">
           <p className="font-semibold text-gray-900 text-md">{org.name}</p>
-          <p className="text-gray-600 text-md">{data.data}</p>
+          <p className="text-gray-600 text-md">{count.data}</p>
         </li>
       )}
     </>
