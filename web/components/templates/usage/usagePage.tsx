@@ -82,12 +82,10 @@ const UsagePage = (props: UsagePageProps) => {
     return percentage;
   };
 
-  // Function to go to next month
   const nextMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(addMonths(prevMonth, 1)));
   };
 
-  // Function to go to previous month
   const prevMonth = () => {
     setCurrentMonth((prevMonth) => startOfMonth(subMonths(prevMonth, 1)));
   };
@@ -146,7 +144,7 @@ const UsagePage = (props: UsagePageProps) => {
               <p className="text-gray-600 text-md">Requests this month</p>
             </li>
             {yourOrgs?.map((org, idx) => (
-              <RenderOrgItem org={org} key={idx} />
+              <RenderOrgItem org={org} key={idx} currentMonth={currentMonth} />
             ))}
           </ul>
         </div>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { endOfMonth, format, formatISO } from "date-fns";
+import { useEffect } from "react";
 import { useGetRequestCountClickhouse } from "../../../services/hooks/requests";
 
 interface RenderOrgItemProps {
@@ -14,16 +15,29 @@ interface RenderOrgItemProps {
     owner: string;
     soft_delete: boolean;
   };
+  currentMonth: Date;
 }
 
 const RenderOrgItem = (props: RenderOrgItemProps) => {
-  const { org } = props;
+  const { org, currentMonth } = props;
 
-  const { count, isLoading } = useGetRequestCountClickhouse(
-    format(new Date(), "yyyy-MM-01"),
-    format(new Date(), "yyyy-MM-dd"),
+  const startOfMonthFormatted = formatISO(currentMonth, {
+    representation: "date",
+  });
+  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
+    representation: "date",
+  });
+
+  const { count, isLoading, refetch } = useGetRequestCountClickhouse(
+    startOfMonthFormatted,
+    endOfMonthFormatted,
     org.id
   );
+
+  useEffect(() => {
+    refetch();
+  }, [currentMonth, refetch]);
+
   return (
     <>
       {isLoading ? (
