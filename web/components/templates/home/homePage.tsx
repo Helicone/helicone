@@ -25,11 +25,13 @@ import { createRef, SVGProps, useEffect, useRef, useState } from "react";
 import OnboardingButton from "../../shared/auth/onboardingButton";
 import {
   ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
   BanknotesIcon,
   ChevronRightIcon,
   CloudArrowDownIcon,
   CloudArrowUpIcon,
   CurrencyDollarIcon,
+  SparklesIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
@@ -158,6 +160,39 @@ export default function HomePage() {
 
   return (
     <div className="flex-col w-full">
+      <div className="bg-black">
+        <div className="px-4 md:px-8 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
+          <div className="flex items-center">
+            <SparklesIcon className="h-5 w-5 text-gray-50 mr-2" />
+            <p className="text-gray-50 font-medium text-md">
+              Explore Helicone&apos;s role in shaping the future LLM stack.
+            </p>
+          </div>
+          <div className="flex space-x-4 md:space-x-8 items-center">
+            <Link
+              className="flex flex-row space-x-1 items-center text-gray-50"
+              href={"https://www.sequoiacap.com/article/llm-stack-perspective/"}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <p className="underline">Sequoia Capital</p>
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
+            </Link>
+            <div className="w-[1px] h-6 bg-gray-50" />
+            <Link
+              className="flex flex-row space-x-1 items-center text-gray-50"
+              href={
+                "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications/"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <p className="underline">Andreesson Horowitz</p>
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
+            </Link>
+          </div>
+        </div>
+      </div>
       <NavBarV2 />
       <div className="relative isolate overflow-hidden bg-white">
         <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24 border-r border-l border-gray-300 border-dashed">

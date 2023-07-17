@@ -55,7 +55,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
-  const { userSettings, isLoading } = useUserSettings(user.id);
+  const { userSettings, isLoading } = useUserSettings(user?.id || "");
   const [open, setOpen] = useState(false);
 
   const navigation = [

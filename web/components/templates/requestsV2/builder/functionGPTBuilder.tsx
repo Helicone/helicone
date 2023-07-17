@@ -13,7 +13,10 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
     return {
       id: this.response.request_id,
       createdAt: this.response.request_created_at,
-      requestText: this.response.request_body.messages.at(-1).content,
+      path: this.response.request_path,
+      requestText: this.response.request_body.messages
+        ? this.response.request_body.messages.at(-1).content
+        : "",
       responseText:
         this.response.response_status === 0 ||
         this.response.response_status === null
