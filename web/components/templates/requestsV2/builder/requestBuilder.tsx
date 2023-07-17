@@ -1,6 +1,4 @@
 import { HeliconeRequest } from "../../../../lib/api/request/request";
-import AbstractRequestBuilder from "./abstractRequestBuilder";
-import ChatGPTBuilder from "./ChatGPTBuilder";
 import FunctionGPTBuilder from "./functionGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";

@@ -201,7 +201,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             const flattenedRequest: any = {};
             Object.entries(request).forEach(([key, value]) => {
               // key is properties and value is not null
-              if (key === "customProperties" && value !== null) {
+              if (
+                key === "customProperties" &&
+                value !== null &&
+                value !== undefined
+              ) {
                 Object.entries(value).forEach(([key, value]) => {
                   if (value !== null) {
                     flattenedRequest[key] = value;

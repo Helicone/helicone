@@ -2,14 +2,12 @@ import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
   NormalizedRequest,
+  SpecificFields,
 } from "./abstractRequestBuilder";
 
 class ModerationBuilder extends AbstractRequestBuilder {
-  build(): NormalizedRequest {
+  protected buildSpecific(): SpecificFields {
     return {
-      id: this.response.request_id,
-      createdAt: this.response.request_created_at,
-      path: this.response.request_path,
       requestText: this.response.request_body.input,
       responseText:
         this.response.response_status === 0 ||
@@ -18,20 +16,9 @@ class ModerationBuilder extends AbstractRequestBuilder {
           : this.response.response_status === 200
           ? JSON.stringify(this.response.response_body.results || "", null, 4)
           : this.response.response_body?.error?.message || "",
-      completionTokens: this.response.completion_tokens,
-      latency: this.response.delay_ms,
-      promptTokens: this.response.prompt_tokens,
-      status: {
-        statusType: this.getStatusType(),
-        code: this.response.response_status,
-      },
-      totalTokens: this.response.total_tokens,
-      user: this.response.request_user_id,
-      customProperties: this.response.request_properties,
       model:
         this.response.request_body.model || this.response.response_body.model,
-      requestBody: this.response.request_body,
-      responseBody: this.response.response_body,
+
       cost: 0,
       render:
         this.response.response_status === 0 ||

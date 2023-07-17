@@ -2,33 +2,38 @@ import { ReactNode } from "react";
 import { HeliconeRequest } from "../../../../lib/api/request/request";
 import { Json } from "../../../../supabase/database.types";
 
-export interface NormalizedRequest {
-  // Values to display in requests table
+type CommonFields = {
   id: string;
   path: string;
   createdAt: string;
-  model: string;
-  requestText: string;
-  responseText: string;
   totalTokens: number | null;
   promptTokens: number | null;
   completionTokens: number | null;
   latency: number | null;
+  user: string | null;
   status: {
     code: number;
     statusType: "success" | "error" | "pending" | "unknown" | "cached";
   };
-  user: string | null;
-  cost: number | null;
   customProperties: {
     [key: string]: Json;
   } | null;
-
-  // Values to display in request drawer
   requestBody: JSON;
   responseBody: JSON;
+};
+
+export type NormalizedRequest = CommonFields & {
+  // Values to display in requests table
+  model: string;
+  requestText: string;
+  responseText: string;
+  cost: number | null;
+
+  // Value to display in request drawer
   render: ReactNode;
-}
+};
+
+export type SpecificFields = Omit<NormalizedRequest, keyof CommonFields>;
 
 abstract class AbstractRequestBuilder {
   protected response: HeliconeRequest;
@@ -37,11 +42,38 @@ abstract class AbstractRequestBuilder {
     this.response = response;
   }
 
+  public build(): NormalizedRequest {
+    const commonFields = this.getCommonFields();
+    return { ...commonFields, ...this.buildSpecific() };
+  }
+
+  protected getCommonFields(): CommonFields {
+    return {
+      id: this.response.request_id,
+      createdAt: this.response.request_created_at,
+      path: this.response.request_path,
+      completionTokens: this.response.completion_tokens,
+      promptTokens: this.response.prompt_tokens,
+      totalTokens: this.response.total_tokens,
+      latency: this.response.delay_ms,
+      user: this.response.request_user_id,
+      customProperties: this.response.request_properties,
+      requestBody: this.response.request_body,
+      responseBody: this.response.response_body,
+      status: {
+        statusType: this.getStatusType(),
+        code: this.response.response_status,
+      },
+    };
+  }
+
+  // Child classes will need to provide their own implementation of this method
+  protected abstract buildSpecific(): SpecificFields;
+
   getStatusType(): NormalizedRequest["status"]["statusType"] {
     if (this.response.response_body?.error?.message) {
       return "error";
     }
-
     switch (this.response.response_status) {
       case 200:
         return "success";
@@ -52,8 +84,6 @@ abstract class AbstractRequestBuilder {
         return "error";
     }
   }
-
-  abstract build(): NormalizedRequest;
 }
 
 export default AbstractRequestBuilder;
