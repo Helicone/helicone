@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
@@ -74,4 +75,49 @@ const useGetRequests = (
   };
 };
 
-export { useGetRequests };
+const useGetRequestCountClickhouse = (
+  startDateISO: string,
+  endDateISO: string,
+  orgId?: string
+) => {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: [`org-count`, orgId],
+    queryFn: async (query) => {
+      const data = await fetch(`/api/request/ch/count`, {
+        method: "POST",
+        body: JSON.stringify({
+          filter: {
+            left: {
+              response_copy_v3: {
+                request_created_at: {
+                  gte: startDateISO,
+                },
+              },
+            },
+            operator: "and",
+            right: {
+              response_copy_v3: {
+                request_created_at: {
+                  lte: endDateISO,
+                },
+              },
+            },
+          },
+          organization_id: query.queryKey[1],
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((res) => res.json());
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+  return {
+    count: data,
+    isLoading,
+    refetch,
+  };
+};
+
+export { useGetRequests, useGetRequestCountClickhouse };
