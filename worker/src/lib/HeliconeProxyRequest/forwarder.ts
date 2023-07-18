@@ -104,10 +104,15 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
   async function log() {
-    await loggable.log({
+    const res = await loggable.log({
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
     });
+    if (res.error !== null) {
+      request.getAuthorizationHash().then((hash) => {
+        console.error("Error logging", res.error, "\n\nHash:", hash);
+      });
+    }
   }
   ctx.waitUntil(log());
 
