@@ -154,11 +154,14 @@ export async function logRequest(
     //   return { data: null, error: userIdError };
     // }
 
+    let bodyText = request.bodyText ?? "{}";
+    bodyText = bodyText.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
+
     let requestBody = {
-      error: `error parsing request body: ${request.bodyText}`,
+      error: `error parsing request body: ${bodyText}`,
     };
     try {
-      requestBody = JSON.parse(request.bodyText ?? "{}");
+      requestBody = JSON.parse(bodyText ?? "{}");
     } catch (e) {
       console.error("Error parsing request body", e);
     }
