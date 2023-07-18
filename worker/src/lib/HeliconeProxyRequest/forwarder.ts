@@ -79,7 +79,7 @@ export async function proxyForwarder(
   }
   const { loggable, response } = data;
 
-  if (cacheSettings.shouldSaveToCache) {
+  if (cacheSettings.shouldSaveToCache && response.status === 200) {
     ctx.waitUntil(
       loggable
         .waitForResponse()
