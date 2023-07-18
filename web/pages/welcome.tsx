@@ -25,7 +25,10 @@ export default Welcome;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
+  const cookies = ctx.req.headers.cookie;
+  console.log("cookies", cookies);
   const supabase = new SupabaseServerWrapper(ctx).getClient();
+
   // Check if we have a session
   const {
     data: { session },
