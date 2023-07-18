@@ -124,6 +124,7 @@ export function withAuthSSR<T>(
     console.log("cookies", cookies);
     const supabaseClient = new SupabaseServerWrapper(context);
     const { data, error } = await supabaseClient.getUserAndOrg();
+    console.log("getUserAndOrg", data, error);
     if (error !== null || !data.orgId || !data.userId) {
       return {
         redirect: {
