@@ -6,3 +6,4 @@ tmp/
 main.py
 __pycache__/
 .DS_Store
+resend-cli/

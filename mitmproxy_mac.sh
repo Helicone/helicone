@@ -70,10 +70,6 @@ def request(flow):
     api_key = os.environ.get("HELICONE_API_KEY") or open(os.path.expanduser("~/.helicone/api_key")).read().strip()
     flow.request.headers["Helicone-Auth"] = "Bearer " + api_key
     flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED") or "false"
-    for key in os.environ.keys():
-        if key.startswith("HELICONE_PROPERTY"):
-            header_name = "Helicone-Property-" + key.split("_")[2]
-            flow.request.headers[header_name] = os.environ.get(key)
 EOF
 
   # Start a reverse proxy and save its PID
