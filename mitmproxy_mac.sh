@@ -80,7 +80,7 @@ EOF
   # Wait for the proxy to start
   for i in {1..120}
   do
-    if grep -q 'Proxy server listening' ~/.helicone/mitmproxy.log
+    if grep -q 'listening' ~/.helicone/mitmproxy.log
     then
       echo "Proxy started."
       break
