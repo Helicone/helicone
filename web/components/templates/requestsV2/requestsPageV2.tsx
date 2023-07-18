@@ -22,6 +22,7 @@ import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import getRequestBuilder from "./builder/requestBuilder";
+import { Result } from "../../../lib/result";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -32,7 +33,7 @@ interface RequestsPageV2Props {
     isCustomProperty: boolean;
   };
   isCached?: boolean;
-  initialRequest?: HeliconeRequest;
+  initialRequestId?: string;
 }
 
 function getSortLeaf(
@@ -71,20 +72,58 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     pageSize,
     sort,
     isCached = false,
-    initialRequest,
+    initialRequestId,
   } = props;
 
-  const normalizedRequest = (heliconeRequest: HeliconeRequest) => {
-    const requestBuilder = getRequestBuilder(heliconeRequest);
-    return requestBuilder.build();
-  };
+  // set the initial selected data on component load
+  useEffect(() => {
+    if (initialRequestId) {
+      const fetchRequest = async () => {
+        const resp = await fetch(`/api/request/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: initialRequestId,
+                  },
+                },
+              },
+              operator: "and",
+              right: "all",
+            } as FilterNode,
+            offset: 0,
+            limit: 1,
+            sort: {},
+          }),
+        })
+          .then(
+            (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
+          )
+          .then((res) => {
+            const { data, error } = res;
+            if (data !== null && data.length > 0) {
+              const normalizedRequest = getRequestBuilder(data[0]).build();
+              setSelectedData(normalizedRequest);
+              setOpen(true);
+              console.log(normalizedRequest);
+            }
+          });
+      };
+      fetchRequest();
+    }
+  }, [initialRequestId]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [open, setOpen] = useState(initialRequest ? true : false);
+  const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
-  >(initialRequest ? normalizedRequest(initialRequest) : undefined);
+  >(undefined);
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {

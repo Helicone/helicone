@@ -28,7 +28,8 @@ let builders = {
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
-  let requestModel = request.request_body.model || request.response_body.model;
+  let requestModel =
+    request.request_body.model || request.response_body.model || "";
   const builderType = getBuilderType(requestModel);
   let builder = builders[builderType];
   return new builder(request);
