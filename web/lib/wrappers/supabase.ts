@@ -46,6 +46,7 @@ export class SupabaseServerWrapper<T> {
     >
   > {
     const user = await this.client.auth.getUser();
+    console.log("this.client.auth.getUser()", user);
     if (!user.data || !user.data.user) {
       return { error: "Unauthorized", data: null };
     }

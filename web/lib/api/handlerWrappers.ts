@@ -125,6 +125,9 @@ export function withAuthSSR<T>(
     const supabaseClient = new SupabaseServerWrapper(context);
     const { data, error } = await supabaseClient.getUserAndOrg();
     console.log("getUserAndOrg", data, error);
+    if (error) {
+      console.error("withAuthSSR", error, data);
+    }
     if (error !== null || !data.orgId || !data.userId) {
       return {
         redirect: {
