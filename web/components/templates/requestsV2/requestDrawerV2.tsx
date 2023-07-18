@@ -71,7 +71,11 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
           <button
             onClick={() => {
               setNotification("Copied to clipboard", "success");
-              navigator.clipboard.writeText(JSON.stringify(request, null, 4));
+              const copy = { ...request };
+              delete copy.render;
+              navigator.clipboard.writeText(
+                JSON.stringify(copy || {}, null, 4)
+              );
             }}
             className="hover:bg-gray-200 rounded-md -m-1 p-1"
           >
