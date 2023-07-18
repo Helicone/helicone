@@ -120,6 +120,8 @@ export function withAuthSSR<T>(
   return async (
     context: GetServerSidePropsContext
   ): Promise<ReturnType<GetServerSideProps>> => {
+    const cookies = context.req.headers.cookie;
+    console.log("cookies", cookies);
     const supabaseClient = new SupabaseServerWrapper(context);
     const { data, error } = await supabaseClient.getUserAndOrg();
     if (error !== null || !data.orgId || !data.userId) {
