@@ -98,10 +98,6 @@ EOF
   done
   cat ~/.helicone/mitmproxy.log
 
-  echo  "FINDING MITMPROXY CERTIFICATE"
-  find ~ -name 'mitmproxy-ca-cert.pem'
-  echo  "DONE FINDING MITMPROXY CERTIFICATE"
-
   # Install the mitmproxy certificate
   echo "Step 5: Installing the mitmproxy certificate..."
   # Note: Run mitmproxy once if the certificate does not exist
