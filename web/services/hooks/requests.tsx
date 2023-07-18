@@ -5,6 +5,38 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 
+const useGetRequest = (requestId: string) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["requestData", requestId],
+    queryFn: async (query) => {
+      const requestId = query.queryKey[1] as string;
+      return await fetch(`/api/request/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: {
+            left: {
+              request: {
+                id: {
+                  equals: requestId,
+                },
+              },
+            },
+            operator: "and",
+            right: "all",
+          } as FilterNode,
+        }),
+      }).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
+    },
+  });
+  return {
+    request: data?.data,
+    isLoading,
+  };
+};
+
 const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
@@ -120,4 +152,4 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequests, useGetRequestCountClickhouse };
+export { useGetRequests, useGetRequestCountClickhouse, useGetRequest };

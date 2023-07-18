@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
@@ -19,6 +19,9 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
+import { useRouter } from "next/router";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import getRequestBuilder from "./builder/requestBuilder";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -29,6 +32,7 @@ interface RequestsPageV2Props {
     isCustomProperty: boolean;
   };
   isCached?: boolean;
+  initialRequest?: HeliconeRequest;
 }
 
 function getSortLeaf(
@@ -62,12 +66,25 @@ function getSortLeaf(
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
-  const { currentPage, pageSize, sort, isCached = false } = props;
+  const {
+    currentPage,
+    pageSize,
+    sort,
+    isCached = false,
+    initialRequest,
+  } = props;
+
+  const normalizedRequest = (heliconeRequest: HeliconeRequest) => {
+    const requestBuilder = getRequestBuilder(heliconeRequest);
+    return requestBuilder.build();
+  };
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [open, setOpen] = useState(false);
-  const [selectedData, setSelectedData] = useState<NormalizedRequest>();
+  const [open, setOpen] = useState(initialRequest ? true : false);
+  const [selectedData, setSelectedData] = useState<
+    NormalizedRequest | undefined
+  >(initialRequest ? normalizedRequest(initialRequest) : undefined);
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
@@ -77,6 +94,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   });
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
+  const router = useRouter();
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const sortLeaf: SortLeafRequest = getSortLeaf(
@@ -166,6 +184,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
+  const onRowSelectHandler = (row: NormalizedRequest) => {
+    setSelectedData(row);
+    setOpen(true);
+    router.push(
+      {
+        pathname: "/requests",
+        query: { ...router.query, requestId: row.id },
+      },
+      undefined,
+      {}
+    );
+  };
+
   return (
     <div>
       <AuthHeader
@@ -222,8 +253,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             onTimeSelectHandler: onTimeSelectHandler,
           }}
           onRowSelect={(row) => {
-            setSelectedData(row);
-            setOpen(true);
+            onRowSelectHandler(row);
           }}
         />
         <TableFooter

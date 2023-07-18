@@ -31,17 +31,31 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const { setNotification } = useNotification();
   const router = useRouter();
 
-  // set the mode to pretty if the drawer closes
+  const setOpenHandler = (drawerOpen: boolean) => {
+    // if the drawerOpen boolean is true, open the drawer
+    if (drawerOpen) {
+      setOpen(true);
+    }
+    // if the drawerOpen boolean is false, close the drawer and clear the requestId
+    else {
+      setOpen(false);
+      const { pathname, query } = router;
+      delete router.query.requestId;
+      router.replace({ pathname, query }, undefined, { shallow: true });
+    }
+  };
+
+  // set the mode to pretty if the drawer closes, also clear the requestId
   useEffect(() => {
     if (!open) {
       setMode("pretty");
     }
-  }, [open]);
+  }, [open, router]);
 
   return (
     <ThemedDrawer
       open={open}
-      setOpen={setOpen}
+      setOpen={setOpenHandler}
       actions={
         <div className="w-full flex flex-row justify-between pl-1">
           <button
