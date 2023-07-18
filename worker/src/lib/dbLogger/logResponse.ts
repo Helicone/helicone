@@ -194,7 +194,6 @@ export async function logRequest(
       .select("*")
       .single();
 
-      console.log(error);
     if (error !== null) {
       return { data: null, error: error.message };
     } else {
