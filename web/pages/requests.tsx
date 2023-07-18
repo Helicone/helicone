@@ -74,36 +74,36 @@ export const getServerSideProps = async (
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
   let initialRequest: HeliconeRequest | null = null;
-  if (requestId) {
-    const { data, error } = await getRequests(
-      "69c2783c-c523-4522-b3d1-ff2696343609",
-      {
-        left: {
-          request: {
-            id: {
-              equals: requestId,
-            },
-          },
-        },
-        operator: "and",
-        right: "all",
-      } as FilterNode,
-      0,
-      1,
-      {}
-    );
-    if (data && data.length > 0) {
-      initialRequest = data[0];
-      if (initialRequest.response_created_at) {
-        initialRequest.response_created_at =
-          initialRequest.response_created_at.toString();
-      }
-      if (initialRequest.request_created_at) {
-        initialRequest.request_created_at =
-          initialRequest.request_created_at.toString();
-      }
-    }
-  }
+  // if (requestId) {
+  //   const { data, error } = await getRequests(
+  //     "69c2783c-c523-4522-b3d1-ff2696343609",
+  //     {
+  //       left: {
+  //         request: {
+  //           id: {
+  //             equals: requestId,
+  //           },
+  //         },
+  //       },
+  //       operator: "and",
+  //       right: "all",
+  //     } as FilterNode,
+  //     0,
+  //     1,
+  //     {}
+  //   );
+  //   if (data && data.length > 0) {
+  //     initialRequest = data[0];
+  //     if (initialRequest.response_created_at) {
+  //       initialRequest.response_created_at =
+  //         initialRequest.response_created_at.toString();
+  //     }
+  //     if (initialRequest.request_created_at) {
+  //       initialRequest.request_created_at =
+  //         initialRequest.request_created_at.toString();
+  //     }
+  //   }
+  // }
 
   return {
     props: {
