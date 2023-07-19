@@ -4,8 +4,10 @@
 create_files() {
   echo "Creating necessary directories and files..."
   mkdir -p ~/.helicone
+  mkdir -p ~/.helicone/proxy_dir
   touch ~/.helicone/proxy_pid
   touch ~/.helicone/mitmproxy.log
+  touch ~/.helicone/api_key
   echo "{}" > ~/.helicone/custom_properties.json
 }
 
@@ -31,28 +33,29 @@ start_proxy() {
   pip install lockfile
   # Create the add_headers.py file
   # Create the add_headers.py file
-  echo "Step 3: Creating add_headers.py file..."
-  echo 'import os' > add_headers.py
-  echo 'import json' >> add_headers.py
-  echo 'import lockfile' >> add_headers.py
-  echo 'def request(flow):' >> add_headers.py
-  echo '    flow.request.headers["Helicone-Auth"] = "Bearer " + os.environ.get("HELICONE_API_KEY")' >> add_headers.py
-  echo '    flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")' >> add_headers.py
-  echo '    for key in os.environ.keys():' >> add_headers.py
-  echo '        if key.startswith("HELICONE_PROPERTY"):' >> add_headers.py
-  echo '            header_name = "Helicone-Property-" + key.split("_")[2]' >> add_headers.py
-  echo '            print("Adding header: ", header_name, " with value: ", os.environ.get(key))' >> add_headers.py
-  echo '            flow.request.headers[header_name] = os.environ.get(key)' >> add_headers.py
-  echo '    json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")' >> add_headers.py
-  echo '    lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")' >> add_headers.py
-  echo '    with lockfile.LockFile(lockfile_path):' >> add_headers.py
-  echo '        with open(json_file_path, "r") as json_file:' >> add_headers.py
-  echo '            custom_properties = json.load(json_file)' >> add_headers.py
-  echo '            for key, value in custom_properties.items():' >> add_headers.py
-  echo '                print("Adding header: ", "Helicone-Property-" + key, " with value: ", value)' >> add_headers.py
-  echo '                flow.request.headers["Helicone-Property-" + key] = value' >> add_headers.py
+  cat <<EOF > ~/.helicone/proxy_dir/add_headers.py
+import os
+import json
+import lockfile
 
-
+def request(flow):
+    api_key = os.environ.get("HELICONE_API_KEY") or open(os.path.expanduser("~/.helicone/api_key")).read().strip()
+    flow.request.headers["Helicone-Auth"] = "Bearer " + api_key
+    flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")
+    for key in os.environ.keys():
+        if key.startswith("HELICONE_PROPERTY"):
+            header_name = "Helicone-Property-" + key.split("_")[2]
+            print("Adding header: ", header_name, " with value: ", os.environ.get(key))
+            flow.request.headers[header_name] = os.environ.get(key)
+    json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")
+    lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")
+    with lockfile.LockFile(lockfile_path):
+        with open(json_file_path, "r") as json_file:
+            custom_properties = json.load(json_file)
+            for key, value in custom_properties.items():
+                print("Adding header: ", "Helicone-Property-" + key, " with value: ", value)
+                flow.request.headers["Helicone-Property-" + key] = value
+EOF
 
 
 
@@ -64,7 +67,7 @@ start_proxy() {
   sudo chmod 500 /etc/authbind/byport/443
   sudo chown $USER /etc/authbind/byport/443
 
-  nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
+  nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
   echo $! | tee -a ~/.helicone/proxy_pid
   # Wait for the proxy to start
   for i in {1..120}
