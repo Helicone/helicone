@@ -19,6 +19,10 @@ start_proxy() {
   touch ~/.helicone/mitmproxy.log
   echo "Starting the proxy..."
 
+  echo "moving old logs to ~/.helicone/mitmproxy.log.old"
+  cat ~/.helicone/mitmproxy.log >> ~/.helicone/mitmproxy.log.old
+  echo "" > ~/.helicone/mitmproxy.log
+  
   # Install necessary packages
   echo "Step 1: Installing necessary packages..."
   sudo apt update
