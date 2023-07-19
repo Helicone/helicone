@@ -101,6 +101,8 @@ SELECT
     COUNT(DISTINCT CASE WHEN u.last_sign_in_at >= DATE_TRUNC('month', u.created_at) + INTERVAL '1 month' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
 FROM
     auth.users u
+WHERE
+    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
 GROUP BY 
     DATE_TRUNC('month', u.created_at)
 ORDER BY 
@@ -113,6 +115,8 @@ SELECT
     COUNT(DISTINCT CASE WHEN u.last_sign_in_at >= DATE_TRUNC('week', u.created_at) + INTERVAL '1 week' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
 FROM
     auth.users u
+WHERE
+    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
@@ -125,6 +129,8 @@ SELECT
     COUNT(DISTINCT CASE WHEN u.last_sign_in_at < DATE_TRUNC('month', u.created_at) + INTERVAL '1 month' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
 FROM
     auth.users u
+WHERE
+    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
 GROUP BY 
     DATE_TRUNC('month', u.created_at)
 ORDER BY 
@@ -137,6 +143,8 @@ SELECT
     COUNT(DISTINCT CASE WHEN u.last_sign_in_at < DATE_TRUNC('week', u.created_at) + INTERVAL '1 week' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
 FROM
     auth.users u
+WHERE
+    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
