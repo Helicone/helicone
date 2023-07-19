@@ -1,0 +1,50 @@
+import { modelCost } from "../../../../lib/api/metrics/costCalc";
+import { Completion } from "../../requests/completion";
+import AbstractRequestBuilder, {
+  SpecificFields,
+} from "./abstractRequestBuilder";
+
+class EmbeddingBuilder extends AbstractRequestBuilder {
+  protected buildSpecific(): SpecificFields {
+    return {
+      requestText: this.response.request_body.input || "Invalid Input",
+      responseText: "",
+      cost: modelCost({
+        model:
+          this.response.request_body.model || this.response.response_body.model,
+        sum_completion_tokens: this.response.completion_tokens || 0,
+        sum_prompt_tokens: this.response.prompt_tokens || 0,
+        sum_tokens: this.response.total_tokens || 0,
+      }),
+      model:
+        this.response.request_body.model || this.response.response_body.model,
+      render:
+        this.response.response_status === 0 ||
+        this.response.response_status === null ? (
+          <p>Pending...</p>
+        ) : this.response.response_status === 200 ? (
+          <Completion
+            request={this.response.request_body.input}
+            response={{
+              title: "Response",
+              text: JSON.stringify(
+                this.response.response_body?.data[0].embedding,
+                null,
+                4
+              ),
+            }}
+          />
+        ) : (
+          <Completion
+            request={this.response.request_body.input || "n/a"}
+            response={{
+              title: "Error",
+              text: this.response.response_body?.error?.message || "n/a",
+            }}
+          />
+        ),
+    };
+  }
+}
+
+export default EmbeddingBuilder;
