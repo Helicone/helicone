@@ -15,6 +15,7 @@ type WeeklyActiveIntegrations = {
 
 export interface HeliconeStats {
   weeklyActiveUsers: WeeklyActiveIntegrations[];
+  monthlyActiveUsers: WeeklyActiveIntegrations[];
   dailyActiveUsers: WeeklyActiveIntegrations[];
   integratedUsers: CountOverTime[];
   growthOverTime: CountOverTime[];
@@ -31,6 +32,15 @@ export async function getModelUsageOverTime(): Promise<
   GROUP BY (date_trunc('week'::text, request_created_at))
   ORDER BY (date_trunc('week'::text, request_created_at)) DESC;
 `;
+  const monthlyActiveUsersQuery = `
+SELECT date_trunc('month'::text, request_created_at) AS time_step,
+  count(DISTINCT response_copy_v3.organization_id) AS user_count_step,
+  count(response_copy_v3.request_id) AS request_count_step
+FROM response_copy_v3
+GROUP BY (date_trunc('month'::text, request_created_at))
+ORDER BY (date_trunc('month'::text, request_created_at)) DESC;
+`;
+
   const dailyActiveUsersQuery = `
 SELECT date_trunc('day'::text, request_created_at) AS time_step,
   count(DISTINCT response_copy_v3.organization_id) AS user_count_step,
@@ -82,11 +92,13 @@ time_step DESC;`;
   const [
     { data: integratedUsers, error: integratedUsersError },
     { data: weeklyActiveUsers, error: weeklyActiveUsersError },
+    { data: monthlyActiveUsers, error: monthlyActiveUsersError },
     { data: dailyActive, error: dailyActiveError },
     { data: growthOverTime, error: growthOverTimeError },
   ] = await Promise.all([
     dbExecute<CountOverTime>(usersOverTimeQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(weeklyActiveUsersQuery, []),
+    dbQueryClickhouse<WeeklyActiveIntegrations>(monthlyActiveUsersQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(dailyActiveUsersQuery, []),
     dbExecute<CountOverTime>(growthOverTimeQuery, []),
   ]);
@@ -97,6 +109,10 @@ time_step DESC;`;
 
   if (weeklyActiveUsersError !== null) {
     return { data: null, error: weeklyActiveUsersError };
+  }
+
+  if (monthlyActiveUsersError !== null) {
+    return { data: null, error: monthlyActiveUsersError };
   }
 
   if (dailyActiveError !== null) {
@@ -110,6 +126,10 @@ time_step DESC;`;
   return {
     data: {
       weeklyActiveUsers: weeklyActiveUsers!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      monthlyActiveUsers: monthlyActiveUsers!.map((d) => ({
         ...d,
         time_step: new Date(d.time_step),
       })),
