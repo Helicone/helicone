@@ -43,7 +43,7 @@ setup_proxy_environment() {
   echo "Creating necessary directories and files..."
   mkdir -p ~/.helicone
   mkdir -p ~/.helicone/proxy_dir
-  : > ~/.helicone/proxy_pid
+  touch > ~/.helicone/proxy_pid
   touch ~/.helicone/mitmproxy.log
   touch ~/.helicone/api_key
 }
