@@ -28,6 +28,7 @@ export interface HeliconeStats {
   weeklyChurnRate: RetentionAndChurnRate[];
   monthlyRetentionRate: RetentionAndChurnRate[];
   weeklyRetentionRate: RetentionAndChurnRate[];
+  weeklyUserBounceRate: RetentionAndChurnRate[];
 }
 
 export async function getModelUsageOverTime(): Promise<
@@ -102,7 +103,7 @@ SELECT
 FROM
     auth.users u
 WHERE
-    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
+    u.last_sign_in_at - u.created_at > INTERVAL '1 day'
 GROUP BY 
     DATE_TRUNC('month', u.created_at)
 ORDER BY 
@@ -116,7 +117,7 @@ SELECT
 FROM
     auth.users u
 WHERE
-    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
+    u.last_sign_in_at - u.created_at > INTERVAL '1 day'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
@@ -130,7 +131,7 @@ SELECT
 FROM
     auth.users u
 WHERE
-    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
+    u.last_sign_in_at - u.created_at > INTERVAL '1 day'
 GROUP BY 
     DATE_TRUNC('month', u.created_at)
 ORDER BY 
@@ -144,7 +145,21 @@ SELECT
 FROM
     auth.users u
 WHERE
-    u.last_sign_in_at - u.created_at > INTERVAL '1 week'
+    u.last_sign_in_at - u.created_at > INTERVAL '1 day'
+GROUP BY 
+    DATE_TRUNC('week', u.created_at)
+ORDER BY 
+    time_step DESC;
+`;
+
+  const weeklyUserBounceRateQuery = `
+SELECT 
+    DATE_TRUNC('week', u.created_at) AS time_step,
+    COUNT(DISTINCT CASE WHEN u.last_sign_in_at < DATE_TRUNC('week', u.created_at) + INTERVAL '1 week' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
+FROM
+    auth.users u
+WHERE 
+    u.last_sign_in_at - u.created_at > INTERVAL '1 day'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
@@ -164,6 +179,7 @@ ORDER BY
     { data: weeklyRetentionRate, error: weeklyRetentionRateError },
     { data: monthlyChurnRate, error: monthlyChurnRateError },
     { data: weeklyChurnRate, error: weeklyChurnRateError },
+    { data: weeklyUserBounceRate, error: weeklyUserBounceRateError },
   ] = await Promise.all([
     dbExecute<CountOverTime>(usersOverTimeQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(weeklyActiveUsersQuery, []),
@@ -174,6 +190,7 @@ ORDER BY
     dbExecute<RetentionAndChurnRate>(weeklyRetentionRateQuery, []),
     dbExecute<RetentionAndChurnRate>(monthlyChurnRateQuery, []),
     dbExecute<RetentionAndChurnRate>(weeklyChurnRateQuery, []),
+    dbExecute<RetentionAndChurnRate>(weeklyUserBounceRateQuery, []),
   ]);
 
   if (integratedUsersError !== null) {
@@ -211,6 +228,10 @@ ORDER BY
     return { data: null, error: weeklyChurnRateError };
   }
 
+  if (weeklyUserBounceRateError !== null) {
+    return { data: null, error: weeklyUserBounceRateError };
+  }
+
   return {
     data: {
       weeklyActiveUsers: weeklyActiveUsers!.map((d) => ({
@@ -246,6 +267,10 @@ ORDER BY
         time_step: new Date(d.time_step),
       })),
       weeklyChurnRate: weeklyChurnRate!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      weeklyUserBounceRate: weeklyUserBounceRate!.map((d) => ({
         ...d,
         time_step: new Date(d.time_step),
       })),

@@ -182,7 +182,7 @@ const Home = (props: HomeProps) => {
               />
             </div>
             <h1 className="text-3xl font-bold text-center">
-              Monthly Churn Rate
+              Monthly Churn Rate (Active for more than 1 day)
             </h1>
             <div className="h-96">
               <RenderBarChart
@@ -206,7 +206,7 @@ const Home = (props: HomeProps) => {
             </div>
 
             <h1 className="text-3xl font-bold text-center">
-              Weekly Churn Rate
+              Weekly Churn Rate (Active for more than 1 day)
             </h1>
             <div className="h-96">
               <RenderBarChart
@@ -230,7 +230,7 @@ const Home = (props: HomeProps) => {
             </div>
 
             <h1 className="text-3xl font-bold text-center">
-              Monthly Retention Rate
+              Monthly Retention Rate (Active for more than 1 day)
             </h1>
             <div className="h-96">
               <RenderBarChart
@@ -254,7 +254,30 @@ const Home = (props: HomeProps) => {
             </div>
 
             <h1 className="text-3xl font-bold text-center">
-              Weekly Retention Rate
+              Weekly Retention Rate (Active for more than 1 day)
+            </h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.weeklyRetentionRate
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      rate: +v.rate,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.rate,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Retention Rate"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-center">
+              Weekly Bounce rate (Active for less than 1 day)
             </h1>
             <div className="h-96">
               <RenderBarChart
