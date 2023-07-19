@@ -45,7 +45,9 @@ def request(flow):
     if not api_key:
         raise Exception("No API key found. Please set HELICONE_API_KEY environment variable or create ~/.helicone/api_key file")
     flow.request.headers["Helicone-Auth"] = "Bearer " + api_key
-    flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")
+    cache_enabled = os.environ.get("HELICONE_CACHE_ENABLED")
+    if cache_enabled.lower() == "true":
+        flow.request.headers["Helicone-Cache-Enabled"] = "true"
     for key in os.environ.keys():
         if key.startswith("HELICONE_PROPERTY"):
             header_name = "Helicone-Property-" + key.split("_")[2]
@@ -116,7 +118,7 @@ EOF
 # Function to stop the proxy
 stop_proxy() {
   echo "Stopping the proxy..."
-   pkill -f mitmweb
+  pkill -f mitmweb
 
   # Check if the process is running
   if ps -p $(cat ~/.helicone/proxy_pid) > /dev/null
