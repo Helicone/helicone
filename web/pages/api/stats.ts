@@ -159,7 +159,7 @@ SELECT
 FROM
     auth.users u
 WHERE 
-    u.last_sign_in_at - u.created_at > INTERVAL '1 day'
+    u.last_sign_in_at - u.created_at < INTERVAL '1 day'
 GROUP BY 
     DATE_TRUNC('week', u.created_at)
 ORDER BY 
