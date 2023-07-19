@@ -6,9 +6,32 @@ import AbstractRequestBuilder, {
 
 class EmbeddingBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
+    const getResponseText = () => {
+      const statusCode = this.response.response_status;
+      if (statusCode === 200) {
+        // successful response, check for an error from openai
+        if (this.response.response_body?.error) {
+          return this.response.response_body?.error?.message || "";
+        }
+        // successful response, check for choices
+        if (
+          this.response.response_body?.data &&
+          this.response.response_body?.data.length > 0
+        ) {
+          return JSON.stringify(this.response.response_body?.data[0].embedding);
+        }
+      } else if (statusCode === 0 || statusCode === null) {
+        // pending response
+        return "";
+      } else {
+        // network error
+        return this.response.response_body?.error?.message || "network error";
+      }
+    };
+
     return {
       requestText: this.response.request_body.input || "Invalid Input",
-      responseText: "",
+      responseText: getResponseText(),
       cost: modelCost({
         model:
           this.response.request_body.model || this.response.response_body.model,
