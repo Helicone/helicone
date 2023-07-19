@@ -13,12 +13,21 @@ type WeeklyActiveIntegrations = {
   time_step: Date;
 };
 
+type RetentionAndChurnRate = {
+  time_step: Date;
+  rate: number;
+};
+
 export interface HeliconeStats {
   weeklyActiveUsers: WeeklyActiveIntegrations[];
   monthlyActiveUsers: WeeklyActiveIntegrations[];
   dailyActiveUsers: WeeklyActiveIntegrations[];
   integratedUsers: CountOverTime[];
   growthOverTime: CountOverTime[];
+  monthlyChurnRate: RetentionAndChurnRate[];
+  weeklyChurnRate: RetentionAndChurnRate[];
+  monthlyRetentionRate: RetentionAndChurnRate[];
+  weeklyRetentionRate: RetentionAndChurnRate[];
 }
 
 export async function getModelUsageOverTime(): Promise<
@@ -86,6 +95,54 @@ GROUP BY
 ORDER BY
 time_step DESC;`;
 
+  const monthlyRetentionRateQuery = `
+SELECT 
+    DATE_TRUNC('month', u.created_at) AS time_step,
+    COUNT(DISTINCT CASE WHEN u.last_sign_in_at >= DATE_TRUNC('month', u.created_at) + INTERVAL '1 month' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
+FROM
+    auth.users u
+GROUP BY 
+    DATE_TRUNC('month', u.created_at)
+ORDER BY 
+    time_step DESC;
+`;
+
+  const weeklyRetentionRateQuery = `
+SELECT 
+    DATE_TRUNC('week', u.created_at) AS time_step,
+    COUNT(DISTINCT CASE WHEN u.last_sign_in_at >= DATE_TRUNC('week', u.created_at) + INTERVAL '1 week' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
+FROM
+    auth.users u
+GROUP BY 
+    DATE_TRUNC('week', u.created_at)
+ORDER BY 
+    time_step DESC;
+`;
+
+  const monthlyChurnRateQuery = `
+SELECT 
+    DATE_TRUNC('month', u.created_at) AS time_step,
+    COUNT(DISTINCT CASE WHEN u.last_sign_in_at < DATE_TRUNC('month', u.created_at) + INTERVAL '1 month' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
+FROM
+    auth.users u
+GROUP BY 
+    DATE_TRUNC('month', u.created_at)
+ORDER BY 
+    time_step DESC;
+`;
+
+  const weeklyChurnRateQuery = `
+SELECT 
+    DATE_TRUNC('week', u.created_at) AS time_step,
+    COUNT(DISTINCT CASE WHEN u.last_sign_in_at < DATE_TRUNC('week', u.created_at) + INTERVAL '1 week' THEN u.id END)::float / COUNT(DISTINCT u.id)::float AS rate
+FROM
+    auth.users u
+GROUP BY 
+    DATE_TRUNC('week', u.created_at)
+ORDER BY 
+    time_step DESC;
+`;
+
   // const newUsersOverTimeQuery = `
   // WITH users_with_api_keys AS (
 
@@ -95,12 +152,20 @@ time_step DESC;`;
     { data: monthlyActiveUsers, error: monthlyActiveUsersError },
     { data: dailyActive, error: dailyActiveError },
     { data: growthOverTime, error: growthOverTimeError },
+    { data: monthlyRetentionRate, error: monthlyRetentionRateError },
+    { data: weeklyRetentionRate, error: weeklyRetentionRateError },
+    { data: monthlyChurnRate, error: monthlyChurnRateError },
+    { data: weeklyChurnRate, error: weeklyChurnRateError },
   ] = await Promise.all([
     dbExecute<CountOverTime>(usersOverTimeQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(weeklyActiveUsersQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(monthlyActiveUsersQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(dailyActiveUsersQuery, []),
     dbExecute<CountOverTime>(growthOverTimeQuery, []),
+    dbExecute<RetentionAndChurnRate>(monthlyRetentionRateQuery, []),
+    dbExecute<RetentionAndChurnRate>(weeklyRetentionRateQuery, []),
+    dbExecute<RetentionAndChurnRate>(monthlyChurnRateQuery, []),
+    dbExecute<RetentionAndChurnRate>(weeklyChurnRateQuery, []),
   ]);
 
   if (integratedUsersError !== null) {
@@ -122,6 +187,21 @@ time_step DESC;`;
   if (growthOverTimeError !== null) {
     return { data: null, error: growthOverTimeError };
   }
+  if (monthlyRetentionRateError !== null) {
+    return { data: null, error: monthlyRetentionRateError };
+  }
+
+  if (weeklyRetentionRateError !== null) {
+    return { data: null, error: weeklyRetentionRateError };
+  }
+
+  if (monthlyChurnRateError !== null) {
+    return { data: null, error: monthlyChurnRateError };
+  }
+
+  if (weeklyChurnRateError !== null) {
+    return { data: null, error: weeklyChurnRateError };
+  }
 
   return {
     data: {
@@ -142,6 +222,22 @@ time_step DESC;`;
         time_step: new Date(d.time_step),
       })),
       growthOverTime: growthOverTime!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      monthlyRetentionRate: monthlyRetentionRate!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      weeklyRetentionRate: weeklyRetentionRate!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      monthlyChurnRate: monthlyChurnRate!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      weeklyChurnRate: weeklyChurnRate!.map((d) => ({
         ...d,
         time_step: new Date(d.time_step),
       })),

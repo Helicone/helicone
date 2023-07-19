@@ -181,6 +181,101 @@ const Home = (props: HomeProps) => {
                 valueLabel="Requests"
               />
             </div>
+            <h1 className="text-3xl font-bold text-center">
+              Monthly Churn Rate
+            </h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.monthlyChurnRate
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      rate: +v.rate,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.rate,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Churn Rate"
+              />
+            </div>
+
+            <h1 className="text-3xl font-bold text-center">
+              Weekly Churn Rate
+            </h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.weeklyChurnRate
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      rate: +v.rate,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.rate,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Churn Rate"
+              />
+            </div>
+
+            <h1 className="text-3xl font-bold text-center">
+              Monthly Retention Rate
+            </h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.monthlyRetentionRate
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      rate: +v.rate,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.rate,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Retention Rate"
+              />
+            </div>
+
+            <h1 className="text-3xl font-bold text-center">
+              Weekly Retention Rate
+            </h1>
+            <div className="h-96">
+              <RenderBarChart
+                data={
+                  data?.data?.weeklyRetentionRate
+                    .map((v) => ({
+                      time_step: new Date(v.time_step),
+                      rate: +v.rate,
+                    }))
+                    .sort(
+                      (a, b) => a.time_step.getTime() - b.time_step.getTime()
+                    )
+                    .map((v) => ({
+                      time: v.time_step,
+                      value: v.rate,
+                    })) ?? []
+                }
+                timeMap={(v) => v.toLocaleDateString()}
+                valueLabel="Retention Rate"
+              />
+            </div>
           </div>
         )}
       </BasePageV2>
