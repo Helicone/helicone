@@ -1,8 +1,8 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { Result } from "../../../../lib/result";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
+import { supabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
 
 // export async function deleteUserIdFromOrg(userId: String) {
@@ -18,7 +18,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<null, string>>
 ) {
-  const client = createServerSupabaseClient<Database>({ req, res });
+  const client = createPagesServerClient<Database>({ req, res });
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });
@@ -46,7 +46,7 @@ export default async function handler(
     res.status(500).json({ error: orgAccess.error.message, data: null });
     return;
   }
-  const { error: deleteError } = await getSupabaseServer()
+  const { error: deleteError } = await supabaseServer
     .from("organization_member")
     .delete()
     .eq("member", memberId as string)

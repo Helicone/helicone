@@ -1,7 +1,8 @@
 import {
   SupabaseClient,
   User,
-  createServerSupabaseClient,
+  createPagesServerClient,
+  createRouteHandlerClient,
 } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../supabase/database.types";
 import {
@@ -9,7 +10,7 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { getSupabaseUrl } from "../supabaseServer";
+import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
 import { Result } from "../result";
 
@@ -24,9 +25,9 @@ export class SupabaseServerWrapper<T> {
   client: SupabaseClient<Database>;
   ctx: SSRContext<T>;
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
-    const supabaseUrl = options?.supabaseUrl ?? getSupabaseUrl() ?? "";
+    const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
     this.ctx = ctx;
-    this.client = createServerSupabaseClient<Database>(ctx, {
+    this.client = createPagesServerClient<Database>(ctx, {
       supabaseUrl,
     });
   }

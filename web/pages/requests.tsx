@@ -2,8 +2,13 @@ import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
+import { NormalizedRequest } from "../components/templates/requestsV2/builder/abstractRequestBuilder";
+import getRequestBuilder from "../components/templates/requestsV2/builder/requestBuilder";
 import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
+import { getRequests, HeliconeRequest } from "../lib/api/request/request";
+import { Result } from "../lib/result";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import { FilterNode } from "../services/lib/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
@@ -18,10 +23,11 @@ interface RequestsV2Props {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
+  initialRequestId: string | null;
 }
 
 const RequestsV2 = (props: RequestsV2Props) => {
-  const { user, currentPage, pageSize, sort } = props;
+  const { user, currentPage, pageSize, sort, initialRequestId } = props;
 
   return (
     <MetaData title={"Requests"}>
@@ -30,6 +36,9 @@ const RequestsV2 = (props: RequestsV2Props) => {
           currentPage={currentPage}
           pageSize={pageSize}
           sort={sort}
+          initialRequestId={
+            initialRequestId === null ? undefined : initialRequestId
+          }
         />
       </AuthLayout>
     </MetaData>
@@ -55,8 +64,14 @@ export const getServerSideProps = async (
       },
     };
 
-  const { page, page_size, sortKey, sortDirection, isCustomProperty } =
-    context.query;
+  const {
+    page,
+    page_size,
+    sortKey,
+    sortDirection,
+    isCustomProperty,
+    requestId,
+  } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
@@ -71,6 +86,7 @@ export const getServerSideProps = async (
         sortDirection: sortDirection ? (sortDirection as SortDirection) : null,
         isCustomProperty: isCustomProperty === "true",
       },
+      initialRequestId: requestId ? (requestId as string) : null,
     },
   };
 };
