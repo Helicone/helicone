@@ -39,7 +39,11 @@ import json
 import lockfile
 
 def request(flow):
-    api_key = os.environ.get("HELICONE_API_KEY") or open(os.path.expanduser("~/.helicone/api_key")).read().strip()
+    api_key = os.environ.get("HELICONE_API_KEY")
+    if not api_key:
+        api_key = open(os.path.expanduser("~/.helicone/api_key")).read().strip()
+    if not api_key:
+        raise Exception("No API key found. Please set HELICONE_API_KEY environment variable or create ~/.helicone/api_key file")
     flow.request.headers["Helicone-Auth"] = "Bearer " + api_key
     flow.request.headers["Helicone-Cache-Enabled"] = os.environ.get("HELICONE_CACHE_ENABLED")
     for key in os.environ.keys():
