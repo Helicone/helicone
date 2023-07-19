@@ -112,6 +112,7 @@ EOF
 # Function to stop the proxy
 stop_proxy() {
   echo "Stopping the proxy..."
+   pkill -f mitmweb
 
   # Check if the process is running
   if ps -p $(cat ~/.helicone/proxy_pid) > /dev/null
@@ -122,6 +123,11 @@ stop_proxy() {
   else
      echo "Proxy is not running."
   fi
+
+  # Remove the openai entry from /etc/hosts
+  echo "Removing openai entry from /etc/hosts..."
+  sudo sed -i '' '/api.openai.com/d' /etc/hosts
+
 }
 
 # Function to tail the logs
