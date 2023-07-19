@@ -46,7 +46,7 @@ def request(flow):
         raise Exception("No API key found. Please set HELICONE_API_KEY environment variable or create ~/.helicone/api_key file")
     flow.request.headers["Helicone-Auth"] = "Bearer " + api_key
     cache_enabled = os.environ.get("HELICONE_CACHE_ENABLED")
-    if cache_enabled.lower() == "true":
+    if cache_enabled and cache_enabled.lower() == "true":
         flow.request.headers["Helicone-Cache-Enabled"] = "true"
     for key in os.environ.keys():
         if key.startswith("HELICONE_PROPERTY"):
@@ -95,11 +95,6 @@ EOF
     fi
   done
   cat ~/.helicone/mitmproxy.log
-
-  echo  "FINDING MITMPROXY CERTIFICATE"
-  find ~ -name 'mitmproxy-ca-cert.pem'
-  sudo find ~ -name 'mitmproxy-ca-cert.pem'
-  echo  "DONE FINDING MITMPROXY CERTIFICATE"
 
 
   # Install the mitmproxy certificate
