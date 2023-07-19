@@ -11,10 +11,13 @@ import EventListen from "./steps/eventListen";
 import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
+import MethodFork from "./steps/methodFork";
 
 interface WelcomePageProps {
   user: User;
 }
+
+export type HeliconeMethod = "proxy" | "async";
 
 const WelcomePage = (props: WelcomePageProps) => {
   const { user } = props;
@@ -38,9 +41,10 @@ const WelcomePage = (props: WelcomePageProps) => {
       apiKey={apiKey}
       setApiKey={setApiKey}
     />,
-    <CodeIntegration key={3} nextStep={nextStep} apiKey={apiKey} />,
+    <MethodFork key={3} nextStep={nextStep} />,
+    <CodeIntegration key={4} nextStep={nextStep} apiKey={apiKey} />,
     <EventListen
-      key={4}
+      key={5}
       nextStep={async () => {
         const { data: userSettings, error: userSettingsError } =
           await supabaseClient
