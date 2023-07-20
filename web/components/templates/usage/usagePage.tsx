@@ -2,6 +2,8 @@ import {
   Bars4Icon,
   BuildingOffice2Icon,
   CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CloudArrowUpIcon,
   CreditCardIcon,
   CubeIcon,
@@ -10,9 +12,19 @@ import {
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  addMonths,
+  format,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  formatISO,
+  isAfter,
+} from "date-fns";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Result } from "../../../lib/result";
+import { useGetRequestCountClickhouse } from "../../../services/hooks/requests";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import { stripeServer } from "../../../utlis/stripeServer";
 import { clsx } from "../../shared/clsx";
@@ -21,82 +33,39 @@ import useNotification from "../../shared/notification/useNotification";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import RenderOrgItem from "./renderOrgItem";
 
-const monthMap = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 interface UsagePageProps {
   user: User;
 }
-
-const useUsagePage = () => {
-  function getBeginningOfMonthISO(): string {
-    const now = new Date();
-    const beginningOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1,
-      0,
-      0,
-      0,
-      0
-    );
-    return beginningOfMonth.toISOString();
-  }
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["usagePage"],
-    queryFn: async (query) => {
-      const data = fetch("/api/request/count", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request: {
-                created_at: {
-                  gte: getBeginningOfMonthISO(),
-                },
-              },
-            },
-            operator: "and",
-            right: "all",
-          },
-        }),
-      }).then((res) => res.json() as Promise<Result<number, string>>);
-      return data;
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  return {
-    data,
-    isLoading,
-  };
-};
 
 const UsagePage = (props: UsagePageProps) => {
   const { user } = props;
   const { setNotification } = useNotification();
 
-  const month = new Date().getMonth();
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+
+  const startOfMonthFormatted = formatISO(currentMonth, {
+    representation: "date",
+  });
+  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
+    representation: "date",
+  });
+  const isNextMonthDisabled = isAfter(addMonths(currentMonth, 1), new Date());
+
   const [open, setOpen] = useState(false);
+
   const { isLoading, userSettings } = useUserSettings(user.id);
-  const { data: count, isLoading: isRequestsLoading } = useUsagePage();
+  const {
+    count,
+    isLoading: isCountLoading,
+    refetch,
+  } = useGetRequestCountClickhouse(startOfMonthFormatted, endOfMonthFormatted);
+
+  useEffect(() => {
+    refetch();
+  }, [currentMonth, refetch]);
+
   const orgContext = useOrg();
+
   const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
 
   const capitalizeHelper = (str: string) => {
@@ -111,6 +80,19 @@ const UsagePage = (props: UsagePageProps) => {
     const cappedCount = Math.min(count, 100000);
     const percentage = (cappedCount / 100000) * 100;
     return percentage;
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth((prevMonth) => startOfMonth(addMonths(prevMonth, 1)));
+  };
+
+  const prevMonth = () => {
+    setCurrentMonth((prevMonth) => startOfMonth(subMonths(prevMonth, 1)));
+  };
+
+  const getMonthName = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("default", { month: "long" });
   };
 
   const renderInfo = () => {
@@ -162,7 +144,7 @@ const UsagePage = (props: UsagePageProps) => {
               <p className="text-gray-600 text-md">Requests this month</p>
             </li>
             {yourOrgs?.map((org, idx) => (
-              <RenderOrgItem org={org} key={idx} />
+              <RenderOrgItem org={org} key={idx} currentMonth={currentMonth} />
             ))}
           </ul>
         </div>
@@ -174,9 +156,26 @@ const UsagePage = (props: UsagePageProps) => {
     <>
       <div className="mt-8 flex flex-col text-gray-900 max-w-2xl space-y-8">
         <div className="flex flex-col space-y-6">
-          <h1 className="text-4xl font-semibold tracking-wide">
-            {monthMap[month]}
-          </h1>
+          <div className="flex flex-row space-x-4 items-center">
+            <button
+              onClick={prevMonth}
+              className="p-1 hover:bg-gray-200 rounded-md text-gray-500 hover:text-gray-700"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+
+            <h1 className="text-4xl font-semibold tracking-wide">
+              {getMonthName(startOfMonthFormatted + 1)}
+            </h1>
+            {!isNextMonthDisabled && (
+              <button
+                onClick={nextMonth}
+                className="p-1 hover:bg-gray-200 rounded-md text-gray-500 hover:text-gray-700"
+              >
+                <ChevronRightIcon className="h-5 w-5" />
+              </button>
+            )}
+          </div>
           <p className="text-md">
             Below is a summary of your monthly usage and your plan. Click{" "}
             <Link href="/pricing" className="text-blue-500 underline">
@@ -208,7 +207,7 @@ const UsagePage = (props: UsagePageProps) => {
                 Requests
               </dt>
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                {isLoading
+                {isCountLoading
                   ? "Loading..."
                   : Number(count?.data || 0).toLocaleString()}
               </dd>

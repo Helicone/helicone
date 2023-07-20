@@ -27,22 +27,20 @@ export async function kvKeyFromRequest(request: HeliconeProxyRequest, freeIndex:
 export async function saveToCache(
   request: HeliconeProxyRequest,
   response: Response,
+  responseBody: string,
   cacheControl: string,
   settings: { maxSize: number },
   cacheKv: KVNamespace
 ): Promise<void> {
   console.log("Saving to cache");
-  const responseClone = response.clone();
-
   const expirationTtl = cacheControl.includes("max-age=") ? parseInt(cacheControl.split("max-age=")[1]) : 0;
-  console.log("cache response", response.headers);
   const { freeIndexes } = await getMaxCachedResponses(request, settings, cacheKv);
   if (freeIndexes.length > 0) {
     cacheKv.put(
       await kvKeyFromRequest(request, freeIndexes[0]),
       JSON.stringify({
-        headers: Object.fromEntries(responseClone.headers.entries()),
-        body: await responseClone.text(),
+        headers: Object.fromEntries(response.headers.entries()),
+        body: responseBody,
       }),
       {
         expirationTtl,
@@ -71,7 +69,6 @@ export async function getCachedResponse(
   cacheKv: KVNamespace
 ): Promise<Response | null> {
   const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(request, settings, cacheKv);
-  console.log("freeIndexes", freeIndexes, requestCaches);
   if (freeIndexes.length > 0) {
     console.log("Max cache size reached, not caching");
     return null;

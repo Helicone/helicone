@@ -1,8 +1,41 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+
+const useGetRequest = (requestId: string) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["requestData", requestId],
+    queryFn: async (query) => {
+      const requestId = query.queryKey[1] as string;
+      return await fetch(`/api/request/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: {
+            left: {
+              request: {
+                id: {
+                  equals: requestId,
+                },
+              },
+            },
+            operator: "and",
+            right: "all",
+          } as FilterNode,
+        }),
+      }).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
+    },
+  });
+  return {
+    request: data?.data,
+    isLoading,
+  };
+};
 
 const useGetRequests = (
   currentPage: number,
@@ -74,4 +107,49 @@ const useGetRequests = (
   };
 };
 
-export { useGetRequests };
+const useGetRequestCountClickhouse = (
+  startDateISO: string,
+  endDateISO: string,
+  orgId?: string
+) => {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: [`org-count`, orgId],
+    queryFn: async (query) => {
+      const data = await fetch(`/api/request/ch/count`, {
+        method: "POST",
+        body: JSON.stringify({
+          filter: {
+            left: {
+              response_copy_v3: {
+                request_created_at: {
+                  gte: startDateISO,
+                },
+              },
+            },
+            operator: "and",
+            right: {
+              response_copy_v3: {
+                request_created_at: {
+                  lte: endDateISO,
+                },
+              },
+            },
+          },
+          organization_id: query.queryKey[1],
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((res) => res.json());
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+  return {
+    count: data,
+    isLoading,
+    refetch,
+  };
+};
+
+export { useGetRequests, useGetRequestCountClickhouse, useGetRequest };

@@ -1,38 +1,36 @@
+import { ReactNode } from "react";
 import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
   NormalizedRequest,
+  SpecificFields,
 } from "./abstractRequestBuilder";
 
 class GPT3Builder extends AbstractRequestBuilder {
-  build(): NormalizedRequest {
+  protected buildSpecific(): SpecificFields {
+    const getResponseText = () => {
+      const statusCode = this.response.response_status;
+      if (statusCode === 200) {
+        // successful response, check for an error from openai
+        if (this.response.response_body?.error) {
+          return this.response.response_body?.error?.message || "";
+        }
+        // successful response, check for choices
+        if (this.response.response_body?.choices) {
+          return this.response.response_body?.choices[0].text;
+        }
+      } else if (statusCode === 0 || statusCode === null) {
+        // pending response
+        return "";
+      } else {
+        // network error
+        return this.response.response_body?.error?.message || "network error";
+      }
+    };
+
     return {
-      id: this.response.request_id,
-      createdAt: this.response.request_created_at,
-      requestText: this.response.request_body.prompt,
-      responseText:
-        this.response.response_status === 0 ||
-        this.response.response_status === null
-          ? ""
-          : this.response.response_status === 200
-          ? this.response.response_body?.choices
-            ? this.response.response_body?.choices[0].text
-            : ""
-          : this.response.response_body?.error?.message || "",
-      completionTokens: this.response.completion_tokens,
-      latency: this.response.delay_ms,
-      promptTokens: this.response.prompt_tokens,
-      status: {
-        statusType: this.getStatusType(),
-        code: this.response.response_status,
-      },
-      totalTokens: this.response.total_tokens,
-      user: this.response.request_user_id,
-      customProperties: this.response.request_properties,
-      model:
-        this.response.request_body.model || this.response.response_body.model,
-      requestBody: this.response.request_body,
-      responseBody: this.response.response_body,
+      requestText: this.response.request_body.prompt || "Invalid Prompt",
+      responseText: getResponseText(),
       cost: modelCost({
         model:
           this.response.request_body.model || this.response.response_body.model,
@@ -40,6 +38,9 @@ class GPT3Builder extends AbstractRequestBuilder {
         sum_prompt_tokens: this.response.prompt_tokens || 0,
         sum_tokens: this.response.total_tokens || 0,
       }),
+      model:
+        this.response.request_body.model || this.response.response_body.model,
+
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (
@@ -56,10 +57,10 @@ class GPT3Builder extends AbstractRequestBuilder {
           />
         ) : (
           <Completion
-            request={this.response.request_body.prompt}
+            request={this.response.request_body.prompt || "n/a"}
             response={{
               title: "Error",
-              text: this.response.response_body?.error?.message || "",
+              text: this.response.response_body?.error?.message || "n/a",
             }}
           />
         ),

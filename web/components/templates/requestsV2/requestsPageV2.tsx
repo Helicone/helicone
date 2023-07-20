@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
@@ -19,6 +19,10 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
+import { useRouter } from "next/router";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import getRequestBuilder from "./builder/requestBuilder";
+import { Result } from "../../../lib/result";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -29,15 +33,97 @@ interface RequestsPageV2Props {
     isCustomProperty: boolean;
   };
   isCached?: boolean;
+  initialRequestId?: string;
+}
+
+function getSortLeaf(
+  sortKey: string | null,
+  sortDirection: SortDirection | null,
+  isCustomProperty: boolean,
+  isCached: boolean
+): SortLeafRequest {
+  if (isCached && sortKey === "created_at") {
+    sortKey = "cache_created_at";
+  }
+  if (sortKey && sortDirection && isCustomProperty) {
+    return {
+      properties: {
+        [sortKey]: sortDirection,
+      },
+    };
+  } else if (sortKey && sortDirection) {
+    return {
+      [sortKey]: sortDirection,
+    };
+  } else if (isCached) {
+    return {
+      cache_created_at: "desc",
+    };
+  } else {
+    return {
+      created_at: "desc",
+    };
+  }
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
-  const { currentPage, pageSize, sort, isCached = false } = props;
+  const {
+    currentPage,
+    pageSize,
+    sort,
+    isCached = false,
+    initialRequestId,
+  } = props;
+
+  // set the initial selected data on component load
+  useEffect(() => {
+    if (initialRequestId) {
+      const fetchRequest = async () => {
+        const resp = await fetch(`/api/request/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: initialRequestId,
+                  },
+                },
+              },
+              operator: "and",
+              right: "all",
+            } as FilterNode,
+            offset: 0,
+            limit: 1,
+            sort: {},
+          }),
+        })
+          .then(
+            (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
+          )
+          .then((res) => {
+            const { data, error } = res;
+            if (data !== null && data.length > 0) {
+              const normalizedRequest = getRequestBuilder(data[0]).build();
+              setSelectedData(normalizedRequest);
+              setOpen(true);
+              console.log(normalizedRequest);
+            }
+          });
+      };
+      fetchRequest();
+    }
+  }, [initialRequestId]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [open, setOpen] = useState(false);
-  const [selectedData, setSelectedData] = useState<NormalizedRequest>();
+  const [selectedData, setSelectedData] = useState<
+    NormalizedRequest | undefined
+  >(undefined);
   const [timeFilter, setTimeFilter] = useState<FilterNode>({
     request: {
       created_at: {
@@ -47,22 +133,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   });
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
+  const router = useRouter();
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
-  const sortLeaf: SortLeafRequest =
-    sort.sortKey && sort.sortDirection && sort.isCustomProperty
-      ? {
-          properties: {
-            [sort.sortKey]: sort.sortDirection,
-          },
-        }
-      : sort.sortKey && sort.sortDirection
-      ? {
-          [sort.sortKey]: sort.sortDirection,
-        }
-      : {
-          created_at: "desc",
-        };
+  const sortLeaf: SortLeafRequest = getSortLeaf(
+    sort.sortKey,
+    sort.sortDirection,
+    sort.isCustomProperty,
+    isCached
+  );
 
   const {
     count,
@@ -144,6 +223,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
+  const onRowSelectHandler = (row: NormalizedRequest) => {
+    setSelectedData(row);
+    setOpen(true);
+    router.push(
+      {
+        pathname: "/requests",
+        query: { ...router.query, requestId: row.id },
+      },
+      undefined,
+      {}
+    );
+  };
+
   return (
     <div>
       <AuthHeader
@@ -179,7 +271,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             const flattenedRequest: any = {};
             Object.entries(request).forEach(([key, value]) => {
               // key is properties and value is not null
-              if (key === "customProperties" && value !== null) {
+              if (
+                key === "customProperties" &&
+                value !== null &&
+                value !== undefined
+              ) {
                 Object.entries(value).forEach(([key, value]) => {
                   if (value !== null) {
                     flattenedRequest[key] = value;
@@ -196,8 +292,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             onTimeSelectHandler: onTimeSelectHandler,
           }}
           onRowSelect={(row) => {
-            setSelectedData(row);
-            setOpen(true);
+            onRowSelectHandler(row);
           }}
         />
         <TableFooter

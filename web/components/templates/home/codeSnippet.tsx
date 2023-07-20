@@ -3,10 +3,12 @@ import { Tab } from "@headlessui/react";
 import { clsx } from "../../shared/clsx";
 import { DiffHighlight } from "../welcome/diffHighlight";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 const CODE_CONVERTS = {
   curl: (key: string) => `
     curl --request POST \\
-    --url https://oai.hconeai.com/v1/chat/completions \\
+    --url ${BASE_PATH}/chat/completions \\
     --header 'Authorization: Bearer OPENAI_API_KEY' \\
     --header 'Helicone-Auth: Bearer ${key}' \\
     --header 'Content-Type: application/json' \\
@@ -28,7 +30,7 @@ const CODE_CONVERTS = {
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
     // Add a basePath to the Configuration
-    basePath: "https://oai.hconeai.com/v1",
+    basePath: "${BASE_PATH}",
     baseOptions: {
       headers: {
         // Add your Helicone API Key
@@ -40,7 +42,7 @@ const CODE_CONVERTS = {
   const openai = new OpenAIApi(configuration);`,
 
   python: (key: string) => `
-  openai.api_base = "https://oai.hconeai.com/v1"
+  openai.api_base = "${BASE_PATH}"
   
   openai.Completion.create(
       # ...other parameters
@@ -51,7 +53,7 @@ const CODE_CONVERTS = {
   `,
 
   langchain_python: (key: string) => `
-  openai.api_base = "https://oai.hconeai.com/v1"
+  openai.api_base = "${BASE_PATH}"
   
   llm = OpenAI(
     temperature=0.9,
@@ -64,7 +66,7 @@ const CODE_CONVERTS = {
   const model = new OpenAI(
     {},
     {
-      basePath: "https://oai.hconeai.com/v1",
+      basePath: "${BASE_PATH}",
       baseOptions: {
         headers: {
           "Helicone-Auth": "Bearer ${key}"

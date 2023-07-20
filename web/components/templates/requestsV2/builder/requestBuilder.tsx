@@ -1,6 +1,4 @@
 import { HeliconeRequest } from "../../../../lib/api/request/request";
-import AbstractRequestBuilder from "./abstractRequestBuilder";
-import ChatGPTBuilder from "./ChatGPTBuilder";
 import FunctionGPTBuilder from "./functionGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
@@ -30,7 +28,8 @@ let builders = {
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
-  let requestModel = request.request_body.model || request.response_body.model;
+  let requestModel =
+    request.request_body.model || request.response_body.model || "";
   const builderType = getBuilderType(requestModel);
   let builder = builders[builderType];
   return new builder(request);

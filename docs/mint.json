@@ -19,8 +19,14 @@
   },
   "tabs": [
     {
-      "name": "Use Cases",
-      "url": "use-cases"
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.com/invite/zsSTcH2qhG"
+    },
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/helicone/helicone"
     }
   ],
   "feedback": {
