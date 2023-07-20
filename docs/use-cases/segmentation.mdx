@@ -4,16 +4,15 @@ description: "Partition your data within custom segments to understand costs and
 ---
 
 Using [Custom Properties](features/advanced-usage/custom-properties),
-you can segment your data in a variety of ways. This allows you to understand the costs and behavior of specific groups of users.
+you can segment your data in various ways. This technique enables you to understand the costs and behavior of specific groups of users, which can inform strategic decisions and optimizations.
 
-In this doc we are going to go over some recommend ways to segment your data.
+In this document, we will provide some recommended ways to segment your data, along with illustrative examples.
 
 ## Segmenting Example
 
-One of the most common ways to segment your data is by user type. For example,
-you may want to understand the costs and behavior of your paying users vs your free users.
+One of the most common ways to segment your data is by user type. For instance, you may want to differentiate between paying and free users to better understand their respective behaviors and associated costs.
 
-To do this, you can use the `user_type` property. This property is automatically set to `free` for all users, but you can set it to `paid` for your paying users.
+To do this, you can create your own `user_type` property. In the example below, we assign the property "free" to the user type:
 
 ```python
 openai.Completion.create(
@@ -24,8 +23,7 @@ openai.Completion.create(
 )
 ```
 
-Segmenting gets even more powerful when you start combining it with other properties. For example,
-you may want to understand the costs and behavior of your paying users and their usage of a specific feature.
+Segmentation becomes even more powerful when you combine it with other properties. Let's say you want to understand the behavior of paying users when they use a specific feature, like spell check. You can do this by adding another property, like this:
 
 ```python
 openai.Completion.create(
@@ -37,7 +35,7 @@ openai.Completion.create(
 )
 ```
 
-Since you are able to add as many custom properties as you want, you can get very granular with your segments.
+With the ability to add as many custom properties as you want, you can create highly granular segments. The following example adds additional properties for plan type and job ID:
 
 ```python
 openai.Completion.create(
@@ -50,3 +48,13 @@ openai.Completion.create(
     }
 )
 ```
+
+## Understanding Segmented Data
+
+Once you've segmented your data, you can analyze it to draw insights. For example, you might find that your free users are making more use of the spellcheck feature than your paid users. This could indicate an opportunity to promote this feature more heavily within your premium plans.
+
+## Additional Properties for Segmentation
+
+You can tailor your segments even further by including other properties like location (`Helicone-Property-Location`), device type (`Helicone-Property-Device-Type`), or user activity level (`Helicone-Property-Activity-Level`). Keep in mind that the more granular your segments, the more targeted your analysis can be, leading to more precise insights.
+
+Remember, the key is to choose properties that best align with your objectives and that will provide valuable insights when analyzed. Happy segmenting!
