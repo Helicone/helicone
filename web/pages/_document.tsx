@@ -19,10 +19,10 @@ class MyDocument extends Document {
         (1000 * 3600 * 24)
     );
     const newOpacity = 1 - daysSinceDemoDay * 0.005;
-    const basedOpacity = newOpacity < 0.05 ? 0.05 : newOpacity;
+    const basedOpacity = newOpacity < 0.05 ? 5 : newOpacity;
 
     return (
-      <Html className={`h-full bg-gray-100 opacity-[${basedOpacity}]`}>
+      <Html className="h-full bg-gray-100" style={{ opacity: basedOpacity }}>
         <Head />
         <body className="h-full">
           <Main />
