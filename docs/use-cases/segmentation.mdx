@@ -1,0 +1,52 @@
+---
+title: "Segmentation"
+description: "Partition your data within custom segments to understand costs and user behavior"
+---
+
+Using [Custom Properties](features/advanced-usage/custom-properties),
+you can segment your data in a variety of ways. This allows you to understand the costs and behavior of specific groups of users.
+
+In this doc we are going to go over some recommend ways to segment your data.
+
+## Segmenting Example
+
+One of the most common ways to segment your data is by user type. For example,
+you may want to understand the costs and behavior of your paying users vs your free users.
+
+To do this, you can use the `user_type` property. This property is automatically set to `free` for all users, but you can set it to `paid` for your paying users.
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-User-Type": "free",
+    }
+)
+```
+
+Segmenting gets even more powerful when you start combining it with other properties. For example,
+you may want to understand the costs and behavior of your paying users and their usage of a specific feature.
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-User-Type": "paid",
+        "Helicone-Property-Feature": "spellcheck",
+    }
+)
+```
+
+Since you are able to add as many custom properties as you want, you can get very granular with your segments.
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-User-Type": "paid",
+        "Helicone-Property-Feature": "spellcheck",
+        "Helicone-Property-Plan": "enterprise",
+        "Helicone-Property-Job-UUID": "1234-5678-9012-3456",
+    }
+)
+```
