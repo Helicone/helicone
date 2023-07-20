@@ -17,7 +17,7 @@
     "name": "Sign In",
     "url": "https://www.helicone.ai/#:~:text=Discord-,Sign,-In"
   },
-  "tabs": [
+  "anchors": [
     {
       "name": "Community",
       "icon": "discord",
@@ -27,6 +27,12 @@
       "name": "GitHub",
       "icon": "github",
       "url": "https://github.com/helicone/helicone"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "Use Cases",
+      "url": "use-cases"
     }
   ],
   "feedback": {
@@ -40,25 +46,7 @@
     },
     {
       "group": "CI/CD",
-      "pages": [
-        "use-cases/github-actions",
-        "use-cases/text",
-        "use-cases/image-embeds",
-        "use-cases/list-table",
-        "use-cases/code",
-        "use-cases/reusable-snippets"
-      ]
-    },
-    {
-      "group": "Auditing",
-      "pages": [
-        "use-cases/component-library",
-        "use-cases/text",
-        "use-cases/image-embeds",
-        "use-cases/list-table",
-        "use-cases/code",
-        "use-cases/reusable-snippets"
-      ]
+      "pages": ["use-cases/github-actions"]
     },
     {
       "group": "Getting Started",
