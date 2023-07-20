@@ -1,0 +1,57 @@
+---
+title: "Cards"
+description: "Highlight main points or links with customizable icons"
+icon: "rectangle"
+---
+
+<Card title="Card Title" icon="link" href="/content/components/card-group">
+  This is how you use a card with an icon and a link. Clicking on this card
+  brings you to the Card Group page.
+</Card>
+
+<RequestExample>
+
+```jsx Card Example
+<Card title="Click on me" icon="link" href="/content/components/card-group">
+  This is how you use a card with an icon and a link. Clicking on this card
+  brings you to the Card Group page.
+</Card>
+```
+
+</RequestExample>
+
+### Icon Settings
+
+Adjust the icon type using the `iconType` property color by using the `color` property.
+
+<Card title="Colored Card" icon="lightbulb" iconType="duotone" color="#ca8b04">
+  Here is a card with a duotone yellow icon
+</Card>
+
+```jsx Card Icon Example
+<Card title="Colored Card" icon="lightbulb" iconType="duotone" color="#ca8b04">
+  Here is a card with a duotone yellow icon
+</Card>
+```
+
+## Props
+
+<ResponseField name="title" type="string" required>
+  The title of the card
+</ResponseField>
+
+<ResponseField name="icon" type="string or svg">
+  A [Font Awesome icon](https://fontawesome.com/icons) or SVG code in `icon={}`
+</ResponseField>
+
+<ResponseField name="iconType" type="string">
+  One of `regular`, `solid`, `light`, `thin`, `sharp-solid`, `duotone`, `brands`
+</ResponseField>
+
+<ResponseField name="color" type="string">
+  The color of the icon as a hex code
+</ResponseField>
+
+<ResponseField name="href" type="string">
+  The url that clicking on the card would navigate the user to
+</ResponseField>

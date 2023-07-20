@@ -1,0 +1,49 @@
+---
+title: 'Card Group'
+description: 'Show cards side by side in a grid format'
+icon: 'rectangles-mixed'
+---
+
+The `CardGroup` component lets you group multiple `Card` components together. It's most often used to put multiple cards on the same column.
+
+<CardGroup cols={2}>
+  <Card title="First Card" icon="square-1" color="#ea5a0c">
+    Neque porro quisquam est qui dolorem ipsum quia dolor sit amet
+  </Card>
+  <Card title="Second Card" icon="square-2" color="#0285c7">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  </Card>
+  <Card title="Third Card" icon="square-3" color="#16a34a">
+    Ut enim ad minim veniam, quis nostrud exercitation ullamco
+  </Card>
+  <Card title="Fourth Card" icon="square-4" color="#dc2626">
+    Excepteur sint occaecat cupidatat non proident
+  </Card>
+</CardGroup>
+
+<RequestExample>
+
+```jsx Card Group Example
+<CardGroup cols={2}>
+  <Card title="First Card" icon="square-1" color="#ea5a0c">
+    Neque porro quisquam est qui dolorem ipsum quia dolor sit amet
+  </Card>
+  <Card title="Second Card" icon="square-2" color="#0285c7">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  </Card>
+  <Card title="Third Card" icon="square-3" color="#16a34a">
+    Ut enim ad minim veniam, quis nostrud exercitation ullamco
+  </Card>
+  <Card title="Fourth Card" icon="square-4" color="#dc2626">
+    Excepteur sint occaecat cupidatat non proident
+  </Card>
+</CardGroup>
+```
+
+</RequestExample>
+
+## Props
+
+<ResponseField name="cols" default={2}>
+  The number of columns per row
+</ResponseField>

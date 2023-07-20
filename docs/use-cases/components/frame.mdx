@@ -1,0 +1,67 @@
+---
+title: 'Image Frame'
+description: 'Use the Frame component to wrap images or other components in a container.'
+icon: 'frame'
+---
+
+Frames are very helpful if you want to center an image.
+
+<Frame>
+  <img
+    className="rounded-md"
+    src="https://mintlify-assets.b-cdn.net/yellowstone.jpeg"
+  />
+</Frame>
+
+## Captions
+
+You can add additional context to an image using the optional `caption` prop.
+
+<Frame caption="Yosemite National Park is visited by over 3.5 million people every year">
+  <img
+    className="rounded-md"
+    src="https://mintlify-assets.b-cdn.net/yosemite.jpg"
+  />
+</Frame>
+
+## Glass Frame
+
+Specify the `type` property to `glass` to get see a transparent frame.
+
+<Frame type="glass">
+  <img
+    className="rounded-md"
+    src="https://mintlify-assets.b-cdn.net/grand-canyon.jpeg"
+  />
+</Frame>
+
+## Props
+
+<ResponseField name="type" type="string">
+  Specify the style of the frame. Allowed values are `simple` and `glass`
+</ResponseField>
+
+<ResponseField name="caption" type="string">
+  Optional caption text to show centered under your component.
+</ResponseField>
+
+<RequestExample>
+  ```jsx Frame
+  <Frame>
+    <img src="/path/image.jpg" />
+  </Frame>
+  ```
+
+```jsx Frame with Captions
+<Frame caption="Caption Text">
+  <img src="/path/image.jpg" />
+</Frame>
+```
+
+```jsx Glass Frame
+<Frame type="glass">
+  <img src="/path/image.jpg" />
+</Frame>
+```
+
+</RequestExample>
