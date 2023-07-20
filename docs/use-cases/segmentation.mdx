@@ -1,0 +1,60 @@
+---
+title: "Segmentation"
+description: "Partition your data within custom segments to understand costs and user behavior"
+---
+
+Using [Custom Properties](features/advanced-usage/custom-properties),
+you can segment your data in various ways. This technique enables you to understand the costs and behavior of specific groups of users, which can inform strategic decisions and optimizations.
+
+In this document, we will provide some recommended ways to segment your data, along with illustrative examples.
+
+## Segmenting Example
+
+One of the most common ways to segment your data is by user type. For instance, you may want to differentiate between paying and free users to better understand their respective behaviors and associated costs.
+
+To do this, you can create your own `user_type` property. In the example below, we assign the property "free" to the user type:
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-User-Type": "free",
+    }
+)
+```
+
+Segmentation becomes even more powerful when you combine it with other properties. Let's say you want to understand the behavior of paying users when they use a specific feature, like spell check. You can do this by adding another property, like this:
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-User-Type": "paid",
+        "Helicone-Property-Feature": "spellcheck",
+    }
+)
+```
+
+With the ability to add as many custom properties as you want, you can create highly granular segments. The following example adds additional properties for plan type and job ID:
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-User-Type": "paid",
+        "Helicone-Property-Feature": "spellcheck",
+        "Helicone-Property-Plan": "enterprise",
+        "Helicone-Property-Job-UUID": "1234-5678-9012-3456",
+    }
+)
+```
+
+## Understanding Segmented Data
+
+Once you've segmented your data, you can analyze it to draw insights. For example, you might find that your free users are making more use of the spellcheck feature than your paid users. This could indicate an opportunity to promote this feature more heavily within your premium plans.
+
+## Additional Properties for Segmentation
+
+You can tailor your segments even further by including other properties like location (`Helicone-Property-Location`), device type (`Helicone-Property-Device-Type`), or user activity level (`Helicone-Property-Activity-Level`). Keep in mind that the more granular your segments, the more targeted your analysis can be, leading to more precise insights.
+
+Remember, the key is to choose properties that best align with your objectives and that will provide valuable insights when analyzed. Happy segmenting!

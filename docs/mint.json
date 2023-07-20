@@ -49,6 +49,18 @@
       "pages": ["use-cases/github-actions"]
     },
     {
+      "group": "Analytics",
+      "pages": ["use-cases/segmentation"]
+    },
+    {
+      "group": "Developer",
+      "pages": [
+        "use-cases/debugging",
+        "use-cases/etl",
+        "use-cases/data-autonomy"
+      ]
+    },
+    {
       "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
@@ -81,6 +93,10 @@
         "features/advanced-usage/omit-logs",
         "features/streaming"
       ]
+    },
+    {
+      "group": "Tools",
+      "pages": ["tools/mitm-proxy"]
     },
     {
       "group": "GraphQL API",
