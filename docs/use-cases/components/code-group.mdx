@@ -1,0 +1,53 @@
+---
+title: "Code Groups"
+description: "The CodeGroup component lets you combine code blocks in a display separated by tabs"
+icon: "rectangle-code"
+---
+
+You will need to make [Code Blocks](/content/components/code) then add the `<CodeGroup>` component around them. Every Code Block must have a filename because we use the names for the tab buttons.
+
+See below for an example of the end result.
+
+<CodeGroup>
+
+```javascript helloWorld.js
+console.log("Hello World");
+```
+
+```python hello_world.py
+print('Hello World!')
+```
+
+```java HelloWorld.java
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```
+
+</CodeGroup>
+
+<RequestExample>
+````md Code Group Example
+<CodeGroup>
+
+```javascript helloWorld.js
+console.log("Hello World");
+```
+
+```python hello_world.py
+print('Hello World!')
+```
+
+```java HelloWorld.java
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```
+
+</CodeGroup>
+````
+</RequestExample>
