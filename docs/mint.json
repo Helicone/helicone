@@ -104,7 +104,11 @@
     },
     {
       "group": "FAQ",
-      "pages": ["faq/how-encryption-works", "faq/latency-affect"]
+      "pages": [
+        "faq/how-encryption-works",
+        "faq/latency-affect",
+        "faq/how-we-calculate-cost"
+      ]
     }
   ],
   "topbarLinks": [
