@@ -1,0 +1,58 @@
+---
+title: "Custom Embeds"
+description: "Images, videos, and any HTML elements"
+---
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/4KzFe50RQkQ"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+></iframe>
+
+<br />
+
+<Tip>
+
+Mintlify supports [HTML tags in Markdown](https://www.markdownguide.org/basic-syntax/#html). This is helpful if you prefer HTML tags to Markdown syntax, and lets you create documentation with infinite flexibility.
+
+</Tip>
+
+Here are some common HTML tags that are used for documentation
+
+## Embed
+
+### iFrames
+
+Loads another HTML page within the document. Most commonly used for embedding videos.
+
+```html
+<iframe src="https://www.youtube.com/embed/4KzFe50RQkQ"> </iframe>
+```
+
+To have videos autoplay, add `autoplay = {true}`.
+
+<Tip>
+  Additionally, we support mp4 files up to 5 MB and you can also upload your
+  videos to storage services like Cloudinary to reference them in your Mintlify
+  documentation!
+</Tip>
+
+### Images
+
+Insert an image onto the page. Used over the standard [markdown image syntax](/writing-content/image-embeds#using-markdown) for more control over the image styling.
+
+```html
+<img height="200" src="/path/image.jpg" />
+```
+
+### Line Breaks
+
+Add a linebreak
+
+```html
+<br />
+```

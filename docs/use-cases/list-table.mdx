@@ -1,0 +1,87 @@
+---
+title: "Lists and Tables"
+description: "Display information in lists and tables"
+---
+## Lists
+### Ordered List
+
+To create an ordered list, add line items with numbers followed by periods
+
+1. First item
+2. Second item
+3. Third item
+4. Fourth item
+
+```md
+1. First item
+2. Second item
+3. Third item
+4. Fourth item
+```
+
+### Unordered List
+
+To create an unordered list, add dashes (`-`), asterisks (`*`), or plus signs (`+`) in front of line items
+
+- First item
+- Second item
+- Third item
+- Fourth item
+
+```md
+- First item
+- Second item
+- Third item
+- Fourth item
+```
+
+### Nested List
+
+Add indents on list items to nest them
+
+- First item
+- Second item
+  - Additional item
+  - Additional item
+- Third item
+
+```md
+- First item
+- Second item
+  - Additional item
+  - Additional item
+- Third item
+```
+
+<Tip>
+
+Lists follows the official [markdown syntax](https://www.markdownguide.org/basic-syntax/#lists-1).
+
+</Tip>
+
+## Tables
+
+| Property | Description                           |
+| -------- | ------------------------------------- |
+| Name     | Full name of user                     |
+| Age      | Reported age                          |
+| Joined   | Whether the user joined the community |
+
+
+### Creating a table
+
+<Tip>
+
+The Table component follows the official [markdown syntax](https://www.markdownguide.org/extended-syntax/#tables).
+
+</Tip>
+
+To add a table, use three or more hyphens (`---`) to create each column's header, and use pipes (`|`) to separate each column. For compatibility, you should also add a pipe on either end of the row.
+
+```md
+| Property | Description                           |
+| -------- | ------------------------------------- |
+| Name     | Full name of user                     |
+| Age      | Reported age                          |
+| Joined   | Whether the user joined the community |
+```

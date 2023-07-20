@@ -26,27 +26,13 @@
     {
       "name": "GitHub",
       "icon": "github",
-      "url": "https://github.com/helicone/helicone"
+      "url": "https://github.com/mintlify-onboarding/helicone"
     }
   ],
-  "tabs": [
-    {
-      "name": "Use Cases",
-      "url": "use-cases"
-    }
-  ],
-  "feedback": {
-    "suggestEdit": true,
-    "raiseIssue": true
-  },
   "navigation": [
     {
       "group": "Welcome",
       "pages": ["introduction", "overview"]
-    },
-    {
-      "group": "CI/CD",
-      "pages": ["use-cases/github-actions"]
     },
     {
       "group": "Getting Started",
@@ -89,16 +75,6 @@
     {
       "group": "FAQ",
       "pages": ["faq/how-encryption-works", "faq/latency-affect"]
-    }
-  ],
-  "topbarLinks": [
-    {
-      "name": "Discord",
-      "url": "https://discord.com/invite/zsSTcH2qhG"
-    },
-    {
-      "name": "Github",
-      "url": "https://github.com/Helicone/helicone"
     }
   ],
   "footerSocials": {
