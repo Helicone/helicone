@@ -6,6 +6,9 @@ const featuredPost = {
     "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
   date: "Mar 16, 2020",
   datetime: "2020-03-16",
+  imageUrl:
+    "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+
   author: {
     name: "Matt Bornstein and Rajko Radovanovic",
     href: "#",
@@ -24,6 +27,9 @@ const posts = [
       "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
     date: "Mar 10, 2020",
     datetime: "2020-03-16",
+    imageUrl:
+      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+
     author: {
       name: "Lindsay Walton",
       href: "#",
@@ -40,6 +46,9 @@ const posts = [
       "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
     date: "Mar 10, 2020",
     datetime: "2020-03-16",
+    imageUrl:
+      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+
     author: {
       name: "Lindsay Walton",
       href: "#",
@@ -56,6 +65,9 @@ const posts = [
       "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
     date: "Mar 10, 2020",
     datetime: "2020-03-16",
+    imageUrl:
+      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+
     author: {
       name: "Lindsay Walton",
       href: "#",
@@ -71,7 +83,15 @@ export default function BlogPage() {
     <div className="bg-white py-24 sm:py-32 min-h-[80vh]">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-8 gap-y-12 px-6 sm:gap-y-16 lg:grid-cols-2 lg:px-8">
         <article className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-lg">
-          <div className="flex flex-row gap-2">
+          <div className="relative w-full">
+            <img
+              src={featuredPost.imageUrl}
+              alt=""
+              className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[2/1]"
+            />
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+          </div>
+          <div className="flex flex-row gap-2 pt-8">
             <time
               dateTime={featuredPost.datetime}
               className="block text-sm leading-6 text-gray-600"
@@ -82,7 +102,6 @@ export default function BlogPage() {
               {featuredPost.tag}
             </span>
           </div>
-
           <h2
             id="featured-post"
             className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
@@ -121,7 +140,15 @@ export default function BlogPage() {
           <div className="-my-12 divide-y divide-gray-900/10">
             {posts.map((post) => (
               <article key={post.id} className="py-12">
-                <div className="group relative max-w-xl">
+                <div className="relative w-full">
+                  <img
+                    src={featuredPost.imageUrl}
+                    alt=""
+                    className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[8/3] lg:aspect-[8/3]"
+                  />
+                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+                </div>
+                <div className="group relative max-w-xl pt-8">
                   <div className="flex flex-row gap-2">
                     <time
                       dateTime={post.datetime}
