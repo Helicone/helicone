@@ -58,29 +58,33 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
       setOpen={setOpenHandler}
       actions={
         <div className="w-full flex flex-row justify-between pl-1">
-          <button
-            onClick={() => {
-              if (request) {
-                router.push("/playground?request=" + request.id);
-              }
-            }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1"
-          >
-            <BeakerIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => {
-              setNotification("Copied to clipboard", "success");
-              const copy = { ...request };
-              delete copy.render;
-              navigator.clipboard.writeText(
-                JSON.stringify(copy || {}, null, 4)
-              );
-            }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1"
-          >
-            <ClipboardDocumentIcon className="h-5 w-5" />
-          </button>
+          <Tooltip title="Playground">
+            <button
+              onClick={() => {
+                if (request) {
+                  router.push("/playground?request=" + request.id);
+                }
+              }}
+              className="hover:bg-gray-200 rounded-md -m-1 p-1"
+            >
+              <BeakerIcon className="h-5 w-5" />
+            </button>
+          </Tooltip>
+          <Tooltip title="Copy">
+            <button
+              onClick={() => {
+                setNotification("Copied to clipboard", "success");
+                const copy = { ...request };
+                delete copy.render;
+                navigator.clipboard.writeText(
+                  JSON.stringify(copy || {}, null, 4)
+                );
+              }}
+              className="hover:bg-gray-200 rounded-md -m-1 p-1"
+            >
+              <ClipboardDocumentIcon className="h-5 w-5" />
+            </button>
+          </Tooltip>
         </div>
       }
     >
