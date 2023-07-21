@@ -8,9 +8,11 @@ interface DiffHighlightProps {
   language: string;
   newLines: number[];
   oldLines: number[];
+  minHeight?: boolean; // should this code block have a min height?
 }
 
 export function DiffHighlight(props: DiffHighlightProps) {
+  const { minHeight = true } = props;
   return (
     <div className={clsx("ph-no-capture w-full overflow-auto")}>
       <Prism
@@ -23,7 +25,8 @@ export function DiffHighlight(props: DiffHighlightProps) {
           <pre
             className={clsx(
               className,
-              "p-6 text-xs min-h-[300px] md:text-sm rounded-xl md:min-h-[420px] mt-3 overflow-auto"
+              minHeight ? "min-h-[300px] md:min-h-[420px]" : "",
+              "p-6 text-xs md:text-sm rounded-xl mt-3 overflow-auto"
             )}
             style={style}
           >
