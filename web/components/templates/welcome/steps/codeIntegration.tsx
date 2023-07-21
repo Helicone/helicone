@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import CodeSnippet from "../../home/codeSnippet";
+import { UnionProviderMethods } from "../welcomePage";
+import AnthropicProxy from "./codeSnippets/anthropic-proxy";
+import OpenAIAsync from "./codeSnippets/openai-async";
 
 interface CodeIntegrationProps {
   nextStep: () => void;
+  providerMethod?: UnionProviderMethods;
   apiKey?: string;
 }
 
 const CodeIntegration = (props: CodeIntegrationProps) => {
-  const { nextStep, apiKey = "<YOUR_API_KEY>" } = props;
+  const {
+    nextStep,
+    providerMethod = "openai-proxy",
+    apiKey = "<YOUR_API_KEY>",
+  } = props;
 
   const [loaded, setLoaded] = useState(false);
 
@@ -28,16 +36,27 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
       )}
     >
       <p className="text-2xl md:text-5xl font-semibold text-center">
-        Code Change
+        {providerMethod
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")}
       </p>
       <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
-        Choose your preferred platform and add the code snippets
+        Choose your preferred platform and follow the directions
       </p>
       <div className="flex w-full md:w-[650px] mt-8">
-        <CodeSnippet
-          variant="simple"
-          apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey}
-        />
+        {providerMethod === "openai-proxy" && (
+          <CodeSnippet
+            variant="simple"
+            apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey}
+          />
+        )}
+        {providerMethod === "openai-async" && (
+          <OpenAIAsync apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
+        )}
+        {providerMethod === "anthropic-proxy" && (
+          <AnthropicProxy apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
+        )}
       </div>
       <button
         onClick={nextStep}
