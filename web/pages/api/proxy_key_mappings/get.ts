@@ -12,6 +12,10 @@ async function handler({
   res,
   userData,
 }: HandlerWrapperOptions<Result<DecryptedProviderKeyMapping[], string>>) {
+  if (req.method !== "GET") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+  }
+
   const query = `
   SELECT map.id, map.org_id, map.helicone_proxy_key, map.helicone_proxy_key_name, map.provider_key_id,
   key.provider_name, key.decrypted_provider_key

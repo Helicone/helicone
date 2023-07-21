@@ -15,7 +15,10 @@ async function handler({
   res,
   userData,
 }: HandlerWrapperOptions<Result<DecryptedProviderKey, string>>) {
-  console.log(JSON.stringify(req.body, null, 2));
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+  }
+
   const { providerName, providerKey, providerKeyName } = req.body as {
     providerName: string;
     providerKey: string;
@@ -56,7 +59,10 @@ async function handler({
   }
 
   // Retrieve decrypted key
-  const decryptedKey = await getDecryptedProviderKeyById(supabaseServer, key.data.id);
+  const decryptedKey = await getDecryptedProviderKeyById(
+    supabaseServer,
+    key.data.id
+  );
 
   if (decryptedKey.error !== null) {
     console.error(

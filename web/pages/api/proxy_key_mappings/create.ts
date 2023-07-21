@@ -12,6 +12,10 @@ async function handler({
   res,
   userData,
 }: HandlerWrapperOptions<Result<HeliconeProxyKeyMapping, string>>) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+  }
+
   const { providerKeyId, heliconeProxyKeyName, heliconeProxyKey } =
     req.body as {
       providerKeyId: string;

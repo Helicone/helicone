@@ -6,15 +6,20 @@ CREATE TABLE provider_keys (
     provider_name TEXT NOT NULL,
     provider_key TEXT NOT NULL,
     provider_key_name TEXT NOT NULL,
-    key_id uuid not null DEFAULT uuid_generate_v4(),
-    nonce bytea default pgsodium.crypto_aead_det_noncegen(),
+    key_id uuid NOT NULL REFERENCES pgsodium.key(id) DEFAULT (pgsodium.create_key()).id,
+    nonce bytea NOT NULL DEFAULT pgsodium.crypto_aead_det_noncegen(),
     CONSTRAINT org_provider_key_name_uniq UNIQUE (org_id, provider_key_name)
 );
 
-SECURITY LABEL FOR pgsodium ON COLUMN public.provider_keys.provider_key IS 'ENCRYPT WITH KEY COLUMN key_id ASSOCIATED (org_id) NONCE nonce';
+SECURITY LABEL FOR pgsodium ON COLUMN public.provider_keys.provider_key IS 'ENCRYPT WITH KEY COLUMN key_id NONCE nonce ASSOCIATED (org_id)';
+
+GRANT USAGE ON SCHEMA pgsodium TO service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA pgsodium TO service_role;
 
 ALTER TABLE
     public.provider_keys ENABLE ROW LEVEL SECURITY;
+
+ALTER VIEW public.decrypted_provider_keys SET (security_invoker = on);
 
 CREATE TABLE proxy_key_mappings (
     id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
