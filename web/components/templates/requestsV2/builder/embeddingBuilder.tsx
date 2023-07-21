@@ -1,12 +1,10 @@
-import { ReactNode } from "react";
 import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
-  NormalizedRequest,
   SpecificFields,
 } from "./abstractRequestBuilder";
 
-class GPT3Builder extends AbstractRequestBuilder {
+class EmbeddingBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const getResponseText = () => {
       const statusCode = this.response.response_status;
@@ -16,8 +14,11 @@ class GPT3Builder extends AbstractRequestBuilder {
           return this.response.response_body?.error?.message || "";
         }
         // successful response, check for choices
-        if (this.response.response_body?.choices) {
-          return this.response.response_body?.choices[0].text;
+        if (
+          this.response.response_body?.data &&
+          this.response.response_body?.data.length > 0
+        ) {
+          return JSON.stringify(this.response.response_body?.data[0].embedding);
         }
       } else if (statusCode === 0 || statusCode === null) {
         // pending response
@@ -29,7 +30,7 @@ class GPT3Builder extends AbstractRequestBuilder {
     };
 
     return {
-      requestText: this.response.request_body.prompt || "Invalid Prompt",
+      requestText: this.response.request_body.input || "Invalid Input",
       responseText: getResponseText(),
       cost: modelCost({
         model:
@@ -40,24 +41,25 @@ class GPT3Builder extends AbstractRequestBuilder {
       }),
       model:
         this.response.request_body.model || this.response.response_body.model,
-
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Completion
-            request={this.response.request_body.prompt}
+            request={this.response.request_body.input}
             response={{
               title: "Response",
-              text: this.response.response_body?.choices
-                ? this.response.response_body?.choices[0].text
-                : "",
+              text: JSON.stringify(
+                this.response.response_body?.data[0].embedding,
+                null,
+                4
+              ),
             }}
           />
         ) : (
           <Completion
-            request={this.response.request_body.prompt || "n/a"}
+            request={this.response.request_body.input || "n/a"}
             response={{
               title: "Error",
               text: this.response.response_body?.error?.message || "n/a",
@@ -68,4 +70,4 @@ class GPT3Builder extends AbstractRequestBuilder {
   }
 }
 
-export default GPT3Builder;
+export default EmbeddingBuilder;

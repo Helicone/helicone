@@ -1,5 +1,5 @@
 import { HeliconeProxyRequestMapper } from "./mapper";
-import { Env, Provider } from "../..";
+import { Env, Provider, hash } from "../..";
 import { getCacheSettings } from "../cache/cacheSettings";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
@@ -79,7 +79,7 @@ export async function proxyForwarder(
   }
   const { loggable, response } = data;
 
-  if (cacheSettings.shouldSaveToCache) {
+  if (cacheSettings.shouldSaveToCache && response.status === 200) {
     ctx.waitUntil(
       loggable
         .waitForResponse()
@@ -104,10 +104,18 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
   async function log() {
-    await loggable.log({
+    const res = await loggable.log({
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
     });
+    if (res.error !== null) {
+      request
+        .getHeliconeAuthHeader()
+        .then((x) => hash(x.data || ""))
+        .then((hash) => {
+          console.error("Error logging", res.error, "\n\nHash:", hash);
+        });
+    }
   }
   ctx.waitUntil(log());
 

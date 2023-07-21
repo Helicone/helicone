@@ -1,0 +1,58 @@
+---
+title: "Github Actions"
+description: "Automatically monitor and cache LLM calls in your CI pipelines"
+---
+
+<Warning> 
+<b>STOP AND READ BEFORE CONTINUING</b>
+
+There are serious security and performance risks involved when using Man-In-The-Middle software like this.
+Please see [tools/mitm-proxy](/tools/mitm-proxy) for more information and understand the scripts
+involved before running this in your CI pipeline.
+
+</Warning>
+
+# Github Actions W/ Ubuntu/Debian
+
+Unlock Helicone's full potential by using it in your CI pipelines. This guide will show you how to use Helicone in your Github Actions workflows.
+
+## Setup
+
+Add the following steps to your Github Actions workflow:
+
+Add the proxy to your workflow:
+
+```bash
+curl -s https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh | bash -s start
+```
+
+Set your ENV variables:
+
+```yml
+OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+HELICONE_API_KEY: ${{ secrets.HELICONE_API_KEY }}
+REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+HELICONE_CACHE_ENABLED: "true"
+HELICONE_PROPERTY_<KEY>: <VALUE>
+```
+
+You can also set variables within your test, see the [mitm docs](/tools/mitm-proxy).
+
+## Example
+
+```yml
+# ...Rest of yml
+tests:
+  steps:
+    - name: Run OpenAI tests
+      run: |
+        curl -s https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh | bash -s start
+        # Run your tests here
+
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        HELICONE_API_KEY: ${{ secrets.HELICONE_API_KEY }}
+        REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+        HELICONE_CACHE_ENABLED: "true"
+        HELICONE_PROPERTY_<KEY>: <VALUE>
+```
