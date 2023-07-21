@@ -26,39 +26,13 @@
     {
       "name": "GitHub",
       "icon": "github",
-      "url": "https://github.com/helicone/helicone"
+      "url": "https://github.com/mintlify-onboarding/helicone"
     }
   ],
-  "tabs": [
-    {
-      "name": "Use Cases",
-      "url": "use-cases"
-    }
-  ],
-  "feedback": {
-    "suggestEdit": true,
-    "raiseIssue": true
-  },
   "navigation": [
     {
       "group": "Welcome",
       "pages": ["introduction", "overview"]
-    },
-    {
-      "group": "CI/CD",
-      "pages": ["use-cases/github-actions"]
-    },
-    {
-      "group": "Analytics",
-      "pages": ["use-cases/segmentation"]
-    },
-    {
-      "group": "Developer",
-      "pages": [
-        "use-cases/debugging",
-        "use-cases/etl",
-        "use-cases/data-autonomy"
-      ]
     },
     {
       "group": "Getting Started",
@@ -95,30 +69,12 @@
       ]
     },
     {
-      "group": "Tools",
-      "pages": ["tools/mitm-proxy"]
-    },
-    {
       "group": "GraphQL API",
       "pages": ["graphql/getting-started", "graphql/python-example"]
     },
     {
       "group": "FAQ",
-      "pages": [
-        "faq/how-encryption-works",
-        "faq/latency-affect",
-        "faq/how-we-calculate-cost"
-      ]
-    }
-  ],
-  "topbarLinks": [
-    {
-      "name": "Discord",
-      "url": "https://discord.com/invite/zsSTcH2qhG"
-    },
-    {
-      "name": "Github",
-      "url": "https://github.com/Helicone/helicone"
+      "pages": ["faq/how-encryption-works", "faq/latency-affect"]
     }
   ],
   "footerSocials": {
