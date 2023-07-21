@@ -361,7 +361,7 @@ export interface Database {
       }
       provider_keys: {
         Row: {
-          id: number
+          id: string
           key_id: string
           nonce: string | null
           org_id: string
@@ -370,7 +370,7 @@ export interface Database {
           provider_name: string
         }
         Insert: {
-          id?: number
+          id?: string
           key_id?: string
           nonce?: string | null
           org_id: string
@@ -379,7 +379,7 @@ export interface Database {
           provider_name: string
         }
         Update: {
-          id?: number
+          id?: string
           key_id?: string
           nonce?: string | null
           org_id?: string
@@ -398,25 +398,25 @@ export interface Database {
       }
       proxy_key_mappings: {
         Row: {
-          helicone_key_name: string
           helicone_proxy_key: string
-          id: number
+          helicone_proxy_key_name: string
+          id: string
           org_id: string
-          provider_key_id: number
+          provider_key_id: string
         }
         Insert: {
-          helicone_key_name: string
           helicone_proxy_key: string
-          id?: number
+          helicone_proxy_key_name: string
+          id?: string
           org_id: string
-          provider_key_id: number
+          provider_key_id: string
         }
         Update: {
-          helicone_key_name?: string
           helicone_proxy_key?: string
-          id?: number
+          helicone_proxy_key_name?: string
+          id?: string
           org_id?: string
-          provider_key_id?: number
+          provider_key_id?: string
         }
         Relationships: [
           {
@@ -615,7 +615,7 @@ export interface Database {
       decrypted_provider_keys: {
         Row: {
           decrypted_provider_key: string | null
-          id: number | null
+          id: string | null
           key_id: string | null
           nonce: string | null
           org_id: string | null
@@ -625,7 +625,7 @@ export interface Database {
         }
         Insert: {
           decrypted_provider_key?: never
-          id?: number | null
+          id?: string | null
           key_id?: string | null
           nonce?: string | null
           org_id?: string | null
@@ -635,7 +635,7 @@ export interface Database {
         }
         Update: {
           decrypted_provider_key?: never
-          id?: number | null
+          id?: string | null
           key_id?: string | null
           nonce?: string | null
           org_id?: string | null

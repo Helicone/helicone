@@ -92,10 +92,6 @@ export class RequestWrapper {
     return this.authorization ? await hash(this.authorization) : undefined;
   }
 
-  async getAuthorizationHash(): Promise<string | undefined> {
-    return this.authorization ? await hash(this.authorization) : undefined;
-  }
-
   async getUserId(): Promise<string | undefined> {
     const userId =
       this.heliconeHeaders.userId ||

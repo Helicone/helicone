@@ -94,7 +94,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      heliconeApiKeyAuthHash: await requestWrapper.getAuthorizationHash(),
+      heliconeApiKeyAuthHash: await requestWrapper.getProviderAuthHeader(),
       providerApiKeyAuthHash: "N/A",
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: providerRequestHeaders.userId ?? undefined,
