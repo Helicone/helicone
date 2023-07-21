@@ -50,3 +50,21 @@ th,
     opacity: 1;
   }
 }
+
+@keyframes slideUpButton1 {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50vh);
+  } /* Adjust as needed */
+}
+
+@keyframes slideUpButton2 {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
