@@ -10,6 +10,11 @@ export type DecryptedProviderKey = {
   providerKeyName: string | null;
 };
 
+export type HeliconeProxyKeyMapping =
+  Database["public"]["Tables"]["proxy_key_mappings"]["Row"];
+
+export type DecryptedProviderKeyMapping = DecryptedProviderKey & HeliconeProxyKeyMapping;
+
 export type AddKeyObj = {
   userId: string;
   apiKeyHash: string;
