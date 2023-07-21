@@ -1,12 +1,10 @@
-import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
-import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { Permission } from "../../../../services/lib/user";
 import { Result } from "../../../../lib/result";
-import { HeliconeProxyKeyMapping } from "../../../../services/lib/keys";
+import { supabaseServer } from "../../../../lib/supabaseServer";
 
 async function handler({
   req,
@@ -18,7 +16,6 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
-  const client = supabaseClient.getClient();
   const { id } = req.query;
 
   if (id === undefined || typeof id !== "string") {
@@ -26,7 +23,7 @@ async function handler({
     return;
   }
 
-  const { error } = await client
+  const { error } = await supabaseServer
     .from("proxy_key_mappings")
     .delete()
     .eq("org_id", userData.orgId)

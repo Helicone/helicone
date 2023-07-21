@@ -3,17 +3,15 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
+import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeyMapping } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 
 async function handler({
   req,
   res,
-  supabaseClient,
   userData,
 }: HandlerWrapperOptions<Result<HeliconeProxyKeyMapping, string>>) {
-  const client = supabaseClient.getClient();
-
   const { providerKeyId, heliconeProxyKeyName, heliconeProxyKey } =
     req.body as {
       providerKeyId: string;
@@ -36,7 +34,7 @@ async function handler({
     return;
   }
 
-  const providerKey = await client
+  const providerKey = await supabaseServer
     .from("provider_keys")
     .select("*")
     .eq("org_id", userData.orgId)
@@ -51,7 +49,7 @@ async function handler({
 
   // Constraint prevents provider key mapping twice to same helicone proxy key
   // e.g. HeliconeKey1 can't map to OpenAIKey1 and OpenAIKey2
-  const newProxyMapping = await client
+  const newProxyMapping = await supabaseServer
     .from("proxy_key_mappings")
     .insert({
       org_id: userData.orgId,

@@ -6,15 +6,10 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
 import { Permission } from "../../../services/lib/user";
-import { Database } from "../../../supabase/database.types";
-
-type HeliconeProxyKey =
-  Database["public"]["Tables"]["proxy_key_mappings"]["Row"];
 
 async function handler({
   req,
   res,
-  supabaseClient,
   userData,
 }: HandlerWrapperOptions<Result<DecryptedProviderKeyMapping[], string>>) {
   const query = `

@@ -4,18 +4,17 @@ import {
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { Permission } from "../../../../services/lib/user";
+import { supabaseServer } from "../../../../lib/supabaseServer";
 
 async function handler({
   req,
   res,
-  supabaseClient,
   userData,
 }: HandlerWrapperOptions<Result<null, string>>) {
   if (req.method !== "DELETE") {
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
-  const client = supabaseClient.getClient();
   const { id } = req.query;
 
   if (id === undefined || typeof id !== "string") {
@@ -23,7 +22,7 @@ async function handler({
     return;
   }
 
-  const { error } = await client
+  const { error } = await supabaseServer
     .from("provider_keys")
     .delete()
     .eq("org_id", userData.orgId)

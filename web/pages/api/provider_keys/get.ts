@@ -3,6 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
+import { supabaseServer } from "../../../lib/supabaseServer";
 import {
   DecryptedProviderKey,
   getDecryptedProviderKeysByOrgId,
@@ -12,12 +13,9 @@ import { Permission } from "../../../services/lib/user";
 async function handler({
   req,
   res,
-  supabaseClient,
   userData,
 }: HandlerWrapperOptions<Result<DecryptedProviderKey[], string>>) {
-  const client = supabaseClient.getClient();
-
-  const decryptedKeys = await getDecryptedProviderKeysByOrgId(client, userData.orgId);
+  const decryptedKeys = await getDecryptedProviderKeysByOrgId(supabaseServer, userData.orgId);
 
   if (decryptedKeys.error !== null) {
     console.error(
