@@ -9,7 +9,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 
@@ -24,6 +24,10 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
   const { open, setOpen, children, actions } = props;
 
   const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    setExpanded(false);
+  }, []);
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -57,7 +61,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                     expanded
                       ? "min-w-[60rem] w-full md:w-[33vw]"
                       : "min-w-[35rem] w-full md:w-[33vw]",
-                    "pointer-events-auto w-screen ease-in-out duration-300"
+                    "pointer-events-auto ease-in-out duration-300"
                   )}
                 >
                   <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-2xl">
