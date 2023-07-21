@@ -7,6 +7,8 @@
 
 ## Open-source observability platform for LLMs
 
+Helicone is an open-source observability platform for Language Learning Models (LLMs). It offers the following features:
+
 - 📝 Logs all of your requests to OpenAI in a user-friendly UI
 
 - 💾 Caching, custom rate limits, and retries
@@ -167,3 +169,7 @@ We are extremely open to contributors on documentation, integrations, and featur
 
 - If you have an idea for how Helicone can be better, create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap)
 - Join [discord](https://discord.gg/zsSTcH2qhG) to ask questions
+
+## License
+
+Helicone is licensed under the [MIT License](LICENSE).
