@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# How to use:
+# bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/25ddc401ae54d38074141cea886970dab55d054c/mitmproxy.sh)" -s tail
+# python3
+# python3 -m pip install openao
+# python3 -m pip install openai
+# apt install -y python3-pip
+# export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
 # Function to create the required directories and files
 create_files() {
   echo "Creating necessary directories and files..."
