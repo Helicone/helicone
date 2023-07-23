@@ -17,12 +17,14 @@ import {
 import { getInitialColumns } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, BoltIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import getRequestBuilder from "./builder/requestBuilder";
 import { Result } from "../../../lib/result";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import useNotification from "../../shared/notification/useNotification";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -74,6 +76,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
   } = props;
+  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+  const { setNotification } = useNotification();
 
   // set the initial selected data on component load
   useEffect(() => {
@@ -162,7 +166,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       right: "all",
     },
     sortLeaf,
-    isCached
+    isCached,
+    isLive
   );
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
@@ -241,17 +246,50 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       <AuthHeader
         title={isCached ? "Cached Requests" : "Requests"}
         headerActions={
-          <button
-            onClick={() => refetch()}
-            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
-          >
-            <ArrowPathIcon
-              className={clsx(
-                isDataLoading ? "animate-spin" : "",
-                "h-5 w-5 inline"
+          <div className="flex flex-row gap-2">
+            <div
+              onClick={() => {
+                setIsLive(!isLive);
+                if (!isLive) {
+                  setNotification("Live mode enabled", "success", {
+                    xPosition: "right",
+                    yPosition: "top",
+                  });
+                } else {
+                  setNotification("Live mode disabled", "success", {
+                    xPosition: "right",
+                    yPosition: "top",
+                  });
+                }
+              }}
+              className="flex flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 gap-2 hover:bg-sky-50 hover:cursor-pointer"
+            >
+              <BoltIcon className="h-5 w-5 text-gray-900" />
+              Live
+              {isLive ? (
+                <div className="flex flex-row items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-600 animate-pulse"></div>
+                </div>
+              ) : (
+                <div className="flex flex-row items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-red-700"></div>
+                </div>
               )}
-            />
-          </button>
+            </div>
+            {isLive || (
+              <button
+                onClick={() => refetch()}
+                className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+              >
+                <ArrowPathIcon
+                  className={clsx(
+                    isDataLoading ? "animate-spin" : "",
+                    "h-5 w-5 inline"
+                  )}
+                />
+              </button>
+            )}
+          </div>
         }
       />
       <div className="flex flex-col space-y-4">
