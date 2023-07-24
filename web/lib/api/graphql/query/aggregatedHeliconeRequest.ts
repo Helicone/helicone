@@ -37,7 +37,7 @@ export async function aggregatedHeliconeRequest(
   args: QueryAggregatedHeliconeRequestArgs,
   context: Context,
   info: any
-): Promise<AggregatedHeliconeRequest[]> {
+): Promise<AggregatedHeliconeRequest> {
   const orgId = await context.getOrgIdOrThrow();
   const { properties } = {
     properties: args.properties ?? [],
@@ -125,15 +125,11 @@ export async function aggregatedHeliconeRequest(
     };
   }
 
-  return [
-    {
-      id: "1",
-      cost: cost,
-      firstRequest: dateRange.min.toISOString(),
-      lastRequest: dateRange.max.toISOString(),
-      cache: requestedFields.includes("cache")
-        ? await getCacheData()
-        : undefined,
-    },
-  ];
+  return {
+    id: "1",
+    cost: cost,
+    firstRequest: dateRange.min.toISOString(),
+    lastRequest: dateRange.max.toISOString(),
+    cache: requestedFields.includes("cache") ? await getCacheData() : undefined,
+  };
 }

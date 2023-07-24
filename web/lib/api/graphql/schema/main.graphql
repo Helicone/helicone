@@ -9,7 +9,7 @@ type Query {
   ): [HeliconeRequest]
   aggregatedHeliconeRequest(
     properties: [PropertyFilter!]
-  ): [AggregatedHeliconeRequest]
+  ): AggregatedHeliconeRequest
 }
 
 type AggregatedHeliconeRequest {
