@@ -100,7 +100,7 @@ export type PropertyFilter = {
 
 export type Query = {
   __typename?: "Query";
-  aggregatedHeliconeRequest?: Maybe<Array<Maybe<AggregatedHeliconeRequest>>>;
+  aggregatedHeliconeRequest?: Maybe<AggregatedHeliconeRequest>;
   heliconeRequest?: Maybe<Array<Maybe<HeliconeRequest>>>;
   user?: Maybe<Array<Maybe<User>>>;
 };
