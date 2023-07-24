@@ -127,7 +127,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         }
         rows={exportData || []}
       />
-
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (

@@ -21,7 +21,8 @@ const useRequestsPageV2 = (
   uiFilterIdxs: UIFilterRow[],
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
-  isCached: boolean
+  isCached: boolean,
+  isLive: boolean
 ) => {
   const {
     properties,
@@ -48,7 +49,8 @@ const useRequestsPageV2 = (
     currentPageSize,
     filter,
     sortLeaf,
-    isCached
+    isCached,
+    isLive
   );
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;
