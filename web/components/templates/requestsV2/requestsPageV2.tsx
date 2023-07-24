@@ -26,7 +26,7 @@ import { Result } from "../../../lib/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
-import { BoltIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -295,7 +295,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     )}
                     aria-hidden="true"
                   >
-                    <XMarkIcon className="h-3 w-3 text-gray-400" />
+                    <BoltSlashIcon className="h-3 w-3 text-gray-400" />
                   </span>
                   <span
                     className={clsx(
