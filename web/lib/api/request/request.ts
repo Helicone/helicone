@@ -116,6 +116,36 @@ export async function getRequestsCached(
   });
 }
 
+export async function getRequestsDateRange(
+  orgId: string,
+  filter: FilterNode
+): Promise<Result<{ min: Date; max: Date }, string>> {
+  const builtFilter = await buildFilterWithAuth({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `
+  SELECT min(request.created_at) as min, max(request.created_at) as max
+  FROM request
+  WHERE (
+    (${builtFilter.filter})
+  )
+`;
+
+  const res = await dbExecute<{ min: Date; max: Date }>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  return resultMap(res, (data) => {
+    return {
+      min: new Date(data[0].min),
+      max: new Date(data[0].max),
+    };
+  });
+}
+
 export async function getRequests(
   orgId: string,
   filter: FilterNode,
