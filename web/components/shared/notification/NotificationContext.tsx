@@ -1,9 +1,17 @@
 import { createContext, ReactNode, useState } from "react";
 
 const ALERT_TIME = 3000;
-const initialState = {
-  variant: "", //  variant?: "success" | "info" | "error";
+type NotificationVariants = "success" | "info" | "error";
+type XPosition = "left" | "middle" | "right";
+type YPosition = "top" | "middle" | "bottom";
+
+const initialState: {
+  variant: NotificationVariants;
+  title: string;
+} = {
+  variant: "info", //  variant?: "success" | "info" | "error";
   title: "",
+
   // description: "",
 };
 
@@ -15,8 +23,6 @@ const NotificationContext = createContext({
     variant: NotificationVariants
   ) => {},
 });
-
-type NotificationVariants = "success" | "info" | "error";
 
 interface NotificationProviderProps {
   children: ReactNode;
