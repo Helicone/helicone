@@ -12,8 +12,7 @@ import { clsx } from "../clsx";
 import useNotification from "./useNotification";
 
 const Notification = () => {
-  const { variant, title, setNotification, position } = useNotification();
-  const { yPosition, xPosition } = position;
+  const { variant, title, setNotification } = useNotification();
 
   const [show, setShow] = useState(true);
 
@@ -41,35 +40,6 @@ const Notification = () => {
       default:
         return "bg-green-600";
     }
-  };
-  const positionClasses = () => {
-    let classes = "";
-
-    switch (yPosition) {
-      case "middle":
-        classes += "items-center ";
-        break;
-      case "top":
-        classes += "items-start ";
-        break;
-      case "bottom":
-        classes += "items-end ";
-        break;
-    }
-
-    switch (xPosition) {
-      case "middle":
-        classes += "justify-center ";
-        break;
-      case "right":
-        classes += "justify-end ";
-        break;
-      case "left":
-        classes += "justify-start ";
-        break;
-    }
-
-    return classes;
   };
 
   const variantIcon = () => {
@@ -107,7 +77,7 @@ const Notification = () => {
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-30">
         <div
-          className={`w-full px-2 sm:px-6 lg:px-8 flex ${positionClasses()} h-full pb-10`}
+          className={`w-full px-2 sm:px-6 lg:px-8 flex items-center h-full pb-10`}
         >
           <Transition
             show={show}

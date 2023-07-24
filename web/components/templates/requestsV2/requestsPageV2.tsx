@@ -251,15 +251,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               onClick={() => {
                 setIsLive(!isLive);
                 if (!isLive) {
-                  setNotification("Live mode enabled", "success", {
-                    xPosition: "right",
-                    yPosition: "top",
-                  });
+                  setNotification("Live mode enabled", "success");
                 } else {
-                  setNotification("Live mode disabled", "success", {
-                    xPosition: "right",
-                    yPosition: "top",
-                  });
+                  setNotification("Live mode disabled", "success");
                 }
               }}
               className="flex flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 gap-2 hover:bg-sky-50 hover:cursor-pointer"
