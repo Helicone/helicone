@@ -17,7 +17,7 @@ import {
 import { getInitialColumns } from "./initialColumns";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ArrowPathIcon, BoltIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
 import { HeliconeRequest } from "../../../lib/api/request/request";
@@ -25,6 +25,8 @@ import getRequestBuilder from "./builder/requestBuilder";
 import { Result } from "../../../lib/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import useNotification from "../../shared/notification/useNotification";
+import { Switch } from "@headlessui/react";
+import { BoltIcon, XMarkIcon } from "@heroicons/react/20/solid";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -247,43 +249,69 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         title={isCached ? "Cached Requests" : "Requests"}
         headerActions={
           <div className="flex flex-row gap-2">
-            <div
-              onClick={() => {
-                setIsLive(!isLive);
-                if (!isLive) {
-                  setNotification("Live mode enabled", "success");
-                } else {
-                  setNotification("Live mode disabled", "success");
-                }
-              }}
-              className="flex flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 gap-2 hover:bg-sky-50 hover:cursor-pointer"
+            <button
+              onClick={() => refetch()}
+              className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
             >
-              <BoltIcon className="h-5 w-5 text-gray-900" />
-              Live
-              {isLive ? (
-                <div className="flex flex-row items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-600 animate-pulse"></div>
-                </div>
-              ) : (
-                <div className="flex flex-row items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-red-700"></div>
-                </div>
-              )}
-            </div>
-            {isLive || (
-              <button
-                onClick={() => refetch()}
-                className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
-              >
-                <ArrowPathIcon
-                  className={clsx(
-                    isDataLoading ? "animate-spin" : "",
-                    "h-5 w-5 inline"
-                  )}
-                />
-              </button>
-            )}
+              <ArrowPathIcon
+                className={clsx(
+                  isDataLoading ? "animate-spin" : "",
+                  "h-5 w-5 inline"
+                )}
+              />
+            </button>
           </div>
+        }
+        actions={
+          <>
+            <Switch.Group
+              as="div"
+              className="flex items-center space-x-3 hover:cursor-pointer"
+            >
+              <Switch.Label as="span" className="text-sm">
+                <span className="font-semibold text-gray-700">Live</span>
+              </Switch.Label>
+              <Switch
+                checked={isLive}
+                onChange={setIsLive}
+                className={clsx(
+                  isLive ? "bg-emerald-500" : "bg-gray-200",
+                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                )}
+              >
+                <span className="sr-only">Use setting</span>
+                <span
+                  className={clsx(
+                    isLive ? "translate-x-5" : "translate-x-0",
+                    "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                  )}
+                >
+                  <span
+                    className={clsx(
+                      isLive
+                        ? "opacity-0 duration-100 ease-out"
+                        : "opacity-100 duration-200 ease-in",
+                      "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                    )}
+                    aria-hidden="true"
+                  >
+                    <XMarkIcon className="h-3 w-3 text-gray-400" />
+                  </span>
+                  <span
+                    className={clsx(
+                      isLive
+                        ? "opacity-100 duration-200 ease-in"
+                        : "opacity-0 duration-100 ease-out",
+                      "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                    )}
+                    aria-hidden="true"
+                  >
+                    <BoltIcon className="h-3 w-3 text-emerald-500" />
+                  </span>
+                </span>
+              </Switch>
+            </Switch.Group>
+          </>
         }
       />
       <div className="flex flex-col space-y-4">

@@ -76,9 +76,7 @@ const Notification = () => {
   if (variant && title && show) {
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-0 pb-8 pt-0 sm:pb-0 sm:top-0 sm:pt-6 z-30">
-        <div
-          className={`w-full px-2 sm:px-6 lg:px-8 flex items-center h-full pb-10`}
-        >
+        <div className="mx-auto w-full sm:max-w-[33vw] px-2 sm:px-6 lg:px-8">
           <Transition
             show={show}
             as={Fragment}
@@ -92,7 +90,7 @@ const Notification = () => {
             <div
               className={clsx(
                 variantBgColor(),
-                "rounded-lg px-2 py-1 shadow-lg sm:max-w-[33vw] grow"
+                "rounded-lg px-2 py-1 shadow-lg"
               )}
             >
               <div className="flex flex-wrap items-center justify-between">
