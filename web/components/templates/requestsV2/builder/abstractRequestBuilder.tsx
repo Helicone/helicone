@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { HeliconeRequest } from "../../../../lib/api/request/request";
 import { Json } from "../../../../supabase/database.types";
+import { modelCost } from "../../../../lib/api/metrics/costCalc";
 
 type CommonFields = {
   id: string;
@@ -20,6 +21,7 @@ type CommonFields = {
   } | null;
   requestBody: JSON;
   responseBody: JSON;
+  cost: number | null;
 };
 
 export type NormalizedRequest = CommonFields & {
@@ -27,7 +29,6 @@ export type NormalizedRequest = CommonFields & {
   model: string;
   requestText: string;
   responseText: string;
-  cost: number | null;
 
   // Value to display in request drawer
   render: ReactNode;
@@ -50,6 +51,13 @@ abstract class AbstractRequestBuilder {
   protected getCommonFields(): CommonFields {
     return {
       id: this.response.request_id,
+      cost: modelCost({
+        model:
+          this.response.request_body.model || this.response.response_body.model,
+        sum_completion_tokens: this.response.completion_tokens || 0,
+        sum_prompt_tokens: this.response.prompt_tokens || 0,
+        sum_tokens: this.response.total_tokens || 0,
+      }),
       createdAt: this.response.request_created_at,
       path: this.response.request_path,
       completionTokens: this.response.completion_tokens,
