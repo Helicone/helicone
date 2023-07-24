@@ -774,13 +774,9 @@
               }
             ],
             "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "AggregatedHeliconeRequest",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "AggregatedHeliconeRequest",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
