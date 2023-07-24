@@ -18,8 +18,6 @@ class ModerationBuilder extends AbstractRequestBuilder {
           : this.response.response_body?.error?.message || "",
       model:
         this.response.request_body.model || this.response.response_body.model,
-
-      cost: 0,
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (

@@ -19,31 +19,24 @@ import {
   PropertyFilter,
   DateOperators,
 } from "../schema/types/graphql";
-
-function convertTextOperators(op: GQLTextOperators): SingleKey<TextOperators> {
-  if (op.not_equals) {
-    return { "not-equals": op.not_equals };
-  } else {
-    return { ...op } as SingleKey<TextOperators>;
-  }
-}
-
-function convertTimeOperators(
-  op: DateOperators
-): SingleKey<TimestampOperators> {
-  if (op.gte) {
-    return { gte: op.gte };
-  } else if (op.lte) {
-    return { lte: op.lte };
-  }
-  throw new Error("Invalid date operator");
-}
+import { modelCost } from "../../metrics/costCalc";
+import { convertTextOperators, convertTimeOperators } from "./helper";
 
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeRequestFilter]: (
     filter: HeliconeRequestFilter[key]
   ) => FilterLeaf | undefined;
 } = {
+  requestId: (requestId) => {
+    if (requestId === undefined || requestId === null) {
+      return undefined;
+    }
+    return {
+      request: {
+        id: convertTextOperators(requestId),
+      },
+    };
+  },
   property: (property) => {
     if (property === undefined || property === null) {
       return undefined;
@@ -134,6 +127,7 @@ export async function heliconeRequest(
   const { data, error } = await getRequests(orgId, filter, offset, limit, {
     created_at: "desc",
   });
+
   if (error !== null) {
     throw new ApolloError(error, "UNAUTHENTICATED");
   }
@@ -141,6 +135,13 @@ export async function heliconeRequest(
   return data.map((r) => ({
     id: r.request_id,
     createdAt: r.request_created_at,
+    model: r.response_body?.model ?? r.request_body?.model ?? null,
+    costUSD: modelCost({
+      model: r.response_body?.model ?? r.request_body?.model ?? null,
+      sum_completion_tokens: r.completion_tokens ?? 0,
+      sum_prompt_tokens: r.prompt_tokens ?? 0,
+      sum_tokens: (r.total_tokens ?? 0) + (r.completion_tokens ?? 0),
+    }),
     prompt: r.request_prompt,
     response: r.response_prompt,
     user: r.request_user_id
