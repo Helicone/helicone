@@ -1,4 +1,4 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, BoltIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { ColumnOrderState, ColumnSizingState } from "@tanstack/react-table";
 import { NextRouter, useRouter } from "next/router";
