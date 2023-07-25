@@ -31,10 +31,25 @@ export default async function handler(
     .eq("id", id as string)
     .single();
 
-  // TODO check if user is admin of org
   if (orgAccess.error !== null || orgAccess.data === null) {
     console.error("Error", orgAccess.error);
     res.status(500).json({ error: orgAccess.error.message, data: null });
+    return;
+  }
+
+  const { data: orgMember } = await supabaseServer
+    .from("organization_member")
+    .select("*")
+    .eq("member", user.data.user.id)
+    .eq("organization", id as string)
+    .single();
+
+  // check if the user is an admin role OR the owner
+  const isAdmin = orgMember !== null && orgMember.org_role === "admin";
+  const isOwner = orgAccess.data.owner === user.data.user.id;
+
+  if (!isAdmin && !isOwner) {
+    res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
 
