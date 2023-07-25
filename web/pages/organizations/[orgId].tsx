@@ -35,7 +35,7 @@ const OrganizationId = (props: OrganizationIdProps) => {
     <MetaData title="Organizations">
       <AuthLayout user={user}>
         <AuthHeader
-          title={organization?.name || (orgId as string)}
+          title={""}
           breadcrumb={{
             href: "/organizations",
             title: "Organizations",
