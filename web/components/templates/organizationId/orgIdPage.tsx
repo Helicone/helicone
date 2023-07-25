@@ -11,6 +11,7 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
+import { getUSDate } from "../../shared/utils/utils";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
@@ -69,25 +70,31 @@ const OrgIdPage = (props: OrgIdPageProps) => {
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
-        <div className="flex flex-col gap-4 md:flex-row justify-between">
-          <div className="flex flex-row space-x-2">
+        <div className="flex flex-col gap-4 md:flex-row items-center justify-between">
+          <div className="flex flex-col space-y-1">
             <h1 className="text-3xl font-semibold">{org.name}</h1>
+            {org.created_at !== null && (
+              <p className="text-gray-500 font-light">
+                Created at: {getUSDate(org.created_at)}
+              </p>
+            )}
           </div>
-
-          <div className="flex flex-row space-x-4">
-            <button
-              onClick={() => setEditOpen(true)}
-              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => setAddOpen(true)}
-              className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              Invite Members
-            </button>
-          </div>
+          {isUserAdmin && (
+            <div className="flex flex-row space-x-4">
+              <button
+                onClick={() => setEditOpen(true)}
+                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setAddOpen(true)}
+                className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Invite Members
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex flex-col h-full space-y-4 w-full">
           {isLoading || isOrgOwnerLoading ? (
@@ -115,6 +122,19 @@ const OrgIdPage = (props: OrgIdPageProps) => {
             </ul>
           )}
         </div>
+        {isOwner && !org.is_personal && (
+          <div className="py-36 flex flex-col">
+            <div className="flex flex-row">
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete Organization
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <ThemedModal open={editOpen} setOpen={setEditOpen}>
         <div className="w-[400px]">
