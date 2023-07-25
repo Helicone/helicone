@@ -1,9 +1,13 @@
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { AcademicCapIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Tooltip } from "@mui/material";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Database } from "../../../supabase/database.types";
+import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
+import ThemedDropdown from "../../shared/themed/themedDropdown";
 import ThemedModal from "../../shared/themed/themedModal";
 
 interface OrgMemberItemProps {
@@ -14,13 +18,14 @@ interface OrgMemberItemProps {
     isOwner: boolean;
     org_role: string | undefined;
   };
+  isUserAdmin: boolean;
   orgId: string;
   refetch: () => void;
   refreshOrgs: () => void;
 }
 
 const OrgMemberItem = (props: OrgMemberItemProps) => {
-  const { index, orgMember, orgId, refetch, refreshOrgs } = props;
+  const { index, orgMember, isUserAdmin, orgId, refetch, refreshOrgs } = props;
 
   const { setNotification } = useNotification();
 
@@ -29,8 +34,6 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
   const user = useUser();
 
   const router = useRouter();
-
-  const supabaseClient = useSupabaseClient<Database>();
 
   const [memberRole, setMemberRole] = useState<string>(
     orgMember.org_role || "member"
@@ -41,47 +44,73 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
   return (
     <>
       <li key={index} className="py-3 grid grid-cols-8 gap-2 items-center">
-        <p className="truncate overflow-ellipsis col-span-4">
+        <p className="truncate overflow-ellipsis col-span-8 md:col-span-4">
           {orgMember.email}
         </p>
-        <select
-          id="location"
-          name="location"
-          className="col-span-2 block w-fit rounded-md border-gray-300 py-1.5 pl-3 pr-8 items-center text-base focus:border-sky-500 hover:cursor-pointer focus:outline-none focus:ring-sky-500 sm:text-sm"
-          onChange={async (e) => {
-            fetch(`/api/organization/${orgId}/update_member`, {
-              method: "PATCH",
-              body: JSON.stringify({
-                orgRole: e.target.value,
-                memberId: orgMember.member,
-              } as {
-                orgRole: string;
-                memberId: string;
-              }),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-              .then((res) => res.json())
-              .then((res) => {
-                if (res.error) {
-                  setNotification("Error updating member", "error");
-                  console.error(res);
-                } else {
-                  setNotification("Successfully updated member", "success");
-                }
-              });
-            setMemberRole(e.target.value);
-          }}
-          value={memberRole}
-        >
-          {["admin", "member"]?.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
-        </select>
-        <div className="col-span-2 flex justify-end">
+        <div className="col-span-4 md:col-span-2 w-fit md:min-w-[8rem]">
+          {isUserAdmin ? (
+            <ThemedDropdown
+              options={[
+                {
+                  label: "admin",
+                  value: "admin",
+                  subtitle: "Can manage members, configurations, and settings",
+                },
+                {
+                  label: "member",
+                  value: "member",
+                  subtitle: "Can view data, create keys, and use API",
+                },
+              ]}
+              selectedValue={memberRole}
+              onSelect={(role) => {
+                fetch(`/api/organization/${orgId}/update_member`, {
+                  method: "PATCH",
+                  body: JSON.stringify({
+                    orgRole: role,
+                    memberId: orgMember.member,
+                  } as {
+                    orgRole: string;
+                    memberId: string;
+                  }),
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                })
+                  .then((res) => res.json())
+                  .then((res) => {
+                    if (res.error) {
+                      setNotification("Error updating member", "error");
+                      console.error(res);
+                    } else {
+                      setNotification("Successfully updated member", "success");
+                    }
+                  });
+                setMemberRole(role);
+              }}
+            />
+          ) : (
+            <Tooltip title="Requires admin privileges">
+              <div
+                className={clsx(
+                  "bg-gray-50 hover:cursor-not-allowed relative w-full cursor-default rounded-md border border-gray-300 py-2 pl-3 pr-10 text-left shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"
+                )}
+              >
+                <span className="block truncate">{orgMember.org_role}</span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronDownIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
+                </span>
+              </div>
+            </Tooltip>
+          )}
+        </div>
+        <div className="col-span-4 md:col-span-2 flex justify-end">
           {orgMember.isOwner ? (
-            <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+            <span className="inline-flex items-center rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-300">
+              <AcademicCapIcon className="h-4 w-4 mr-1" />
               Owner
             </span>
           ) : isUser ? (
@@ -113,20 +142,22 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                   });
               }}
             >
-              <p className="hover:bg-gray-200 inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+              <p className="hover:bg-gray-200 inline-flex items-center rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-300">
                 Leave
               </p>
             </button>
-          ) : (
+          ) : isUserAdmin ? (
             <button
               onClick={() => {
                 setOpenDelete(true);
               }}
             >
-              <p className="hover:bg-gray-200 inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+              <p className="hover:bg-gray-200 inline-flex items-center rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-300">
                 Remove
               </p>
             </button>
+          ) : (
+            <div></div>
           )}
         </div>
       </li>

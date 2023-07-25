@@ -52,8 +52,6 @@ const OrgIdPage = (props: OrgIdPageProps) => {
       })
     : [];
 
-  console.log("members", members);
-
   const orgMembers = [
     {
       email: orgOwner?.data?.at(0)?.email,
@@ -64,13 +62,14 @@ const OrgIdPage = (props: OrgIdPageProps) => {
     ...members,
   ];
 
-  const icon = ORGANIZATION_ICONS.find((icon) => icon.name === org.icon);
-  const color = ORGANIZATION_COLORS.find((color) => color.name === org.color);
+  const isUserAdmin =
+    isOwner ||
+    orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
 
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 max-w-3xl space-y-8">
-        <div className="flex flex-row justify-between">
+      <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
+        <div className="flex flex-col gap-4 md:flex-row justify-between">
           <div className="flex flex-row space-x-2">
             <h1 className="text-3xl font-semibold">{org.name}</h1>
           </div>
@@ -109,6 +108,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                   orgMember={member}
                   orgId={org.id}
                   refetch={refetch}
+                  isUserAdmin={isUserAdmin}
                   refreshOrgs={() => orgContext && orgContext?.refetchOrgs}
                 />
               ))}
