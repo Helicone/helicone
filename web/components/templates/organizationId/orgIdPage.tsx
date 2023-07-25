@@ -1,4 +1,4 @@
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { BuildingOfficeIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -11,7 +11,11 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import CreateOrgForm from "../organizations/createOrgForm";
+import { getUSDate } from "../../shared/utils/utils";
+import CreateOrgForm, {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "../organizations/createOrgForm";
 import OrgMemberItem from "./orgMemberItem";
 
 interface OrgIdPageProps {
@@ -36,6 +40,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
   const [addOpen, setAddOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const isOwner = org.owner === user?.id;
 
@@ -53,63 +58,72 @@ const OrgIdPage = (props: OrgIdPageProps) => {
       email: orgOwner?.data?.at(0)?.email,
       member: "",
       isOwner: true,
+      org_role: "admin",
     },
     ...members,
   ];
 
+  const isUserAdmin =
+    isOwner ||
+    orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
+
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 max-w-3xl space-y-8">
-        <div className="flex flex-col md:flex-row space-y-16 md:space-y-0 space-x-0 md:space-x-4">
-          <div className="flex flex-col w-full md:min-w-[400px] border-b md:border-b-0 md:border-r border-gray-300 py-8 pr-0 md:py-0 md:pr-8">
-            <CreateOrgForm
-              initialValues={{
-                id: org.id,
-                name: org.name,
-                color: org.color || "",
-                icon: org.icon || "",
-              }}
-            />
-          </div>
-          <div className="flex flex-col h-full pl-4 space-y-4 w-full max-w-screen md:max-w-[300px]">
-            <div className="flex flex-row justify-between items-center">
-              <p className="text-lg font-semibold">Members</p>
-              <button
-                onClick={() => setAddOpen(true)}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                Add
-              </button>
-            </div>
-
-            {isLoading || isOrgOwnerLoading ? (
-              <ul className="flex flex-col space-y-6">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <li
-                    key={index}
-                    className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
-                  ></li>
-                ))}
-              </ul>
-            ) : (
-              <ul className="divide-y divide-gray-300">
-                {orgMembers.map((member, index) => (
-                  <OrgMemberItem
-                    key={index}
-                    index={index}
-                    orgMember={member}
-                    orgId={org.id}
-                    refetch={refetch}
-                    refreshOrgs={() => orgContext && orgContext?.refetchOrgs}
-                  />
-                ))}
-              </ul>
+      <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
+        <div className="flex flex-col gap-4 md:flex-row items-center justify-between">
+          <div className="flex flex-col space-y-1">
+            <h1 className="text-3xl font-semibold">{org.name}</h1>
+            {org.created_at !== null && (
+              <p className="text-gray-500 font-light">
+                Created at: {getUSDate(org.created_at)}
+              </p>
             )}
           </div>
+          {isUserAdmin && (
+            <div className="flex flex-row space-x-4">
+              <button
+                onClick={() => setEditOpen(true)}
+                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setAddOpen(true)}
+                className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Invite Members
+              </button>
+            </div>
+          )}
         </div>
-
+        <div className="flex flex-col h-full space-y-4 w-full">
+          {isLoading || isOrgOwnerLoading ? (
+            <ul className="flex flex-col space-y-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <li
+                  key={index}
+                  className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                ></li>
+              ))}
+            </ul>
+          ) : (
+            <ul className="divide-y divide-gray-200 border-t border-gray-200">
+              {orgMembers.map((member, index) => (
+                <OrgMemberItem
+                  key={index}
+                  index={index}
+                  orgMember={member}
+                  orgId={org.id}
+                  refetch={refetch}
+                  isUserAdmin={isUserAdmin}
+                  refreshOrgs={() => orgContext && orgContext?.refetchOrgs}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
         {isOwner && !org.is_personal && (
-          <div className="py-28 flex flex-col">
+          <div className="py-36 flex flex-col">
             <div className="flex flex-row">
               <button
                 type="button"
@@ -122,6 +136,19 @@ const OrgIdPage = (props: OrgIdPageProps) => {
           </div>
         )}
       </div>
+      <ThemedModal open={editOpen} setOpen={setEditOpen}>
+        <div className="w-[400px]">
+          <CreateOrgForm
+            onCancelHandler={setEditOpen}
+            initialValues={{
+              id: org.id,
+              name: org.name,
+              color: org.color || "",
+              icon: org.icon || "",
+            }}
+          />
+        </div>
+      </ThemedModal>
       <ThemedModal open={addOpen} setOpen={setAddOpen}>
         <div className="flex flex-col gap-4 w-full">
           <p className="font-semibold text-lg">Add New Member</p>
