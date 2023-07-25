@@ -117,7 +117,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
                       })) ?? []
                     }
                     timeMap={(date) => date.toLocaleString()}
-                    valueLabel="requests"
+                    valueLabel="user count"
                   />
                 )}
               </div>
