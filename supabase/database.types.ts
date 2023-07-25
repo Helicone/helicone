@@ -48,12 +48,71 @@ export interface Database {
           request_id?: string
         }
       }
+      feedback: {
+        Row: {
+          boolean_value: boolean | null
+          categorical_value: string | null
+          created_at: string | null
+          created_by: string
+          feedback_metric_id: number
+          float_value: number | null
+          id: number
+          response_id: string
+          string_value: string | null
+        }
+        Insert: {
+          boolean_value?: boolean | null
+          categorical_value?: string | null
+          created_at?: string | null
+          created_by: string
+          feedback_metric_id: number
+          float_value?: number | null
+          id?: number
+          response_id: string
+          string_value?: string | null
+        }
+        Update: {
+          boolean_value?: boolean | null
+          categorical_value?: string | null
+          created_at?: string | null
+          created_by?: string
+          feedback_metric_id?: number
+          float_value?: number | null
+          id?: number
+          response_id?: string
+          string_value?: string | null
+        }
+      }
+      feedback_metrics: {
+        Row: {
+          created_at: string
+          data_type: string
+          helicone_api_key_id: number
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          helicone_api_key_id: number
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          helicone_api_key_id?: number
+          id?: number
+          name?: string
+        }
+      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
           api_key_name: string
           created_at: string
           id: number
+          organization_id: string
           soft_delete: boolean
           user_id: string
         }
@@ -62,6 +121,7 @@ export interface Database {
           api_key_name: string
           created_at?: string
           id?: number
+          organization_id: string
           soft_delete?: boolean
           user_id: string
         }
@@ -70,6 +130,7 @@ export interface Database {
           api_key_name?: string
           created_at?: string
           id?: number
+          organization_id?: string
           soft_delete?: boolean
           user_id?: string
         }
@@ -100,6 +161,61 @@ export interface Database {
           user_id?: string
         }
       }
+      organization: {
+        Row: {
+          color: string
+          created_at: string | null
+          has_onboarded: boolean
+          icon: string
+          id: string
+          is_personal: boolean
+          name: string
+          owner: string
+          soft_delete: boolean
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          has_onboarded?: boolean
+          icon?: string
+          id?: string
+          is_personal?: boolean
+          name: string
+          owner: string
+          soft_delete?: boolean
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          has_onboarded?: boolean
+          icon?: string
+          id?: string
+          is_personal?: boolean
+          name?: string
+          owner?: string
+          soft_delete?: boolean
+        }
+      }
+      organization_member: {
+        Row: {
+          created_at: string | null
+          member: string
+          org_role: string
+          organization: string
+        }
+        Insert: {
+          created_at?: string | null
+          member: string
+          org_role?: string
+          organization: string
+        }
+        Update: {
+          created_at?: string | null
+          member?: string
+          org_role?: string
+          organization?: string
+        }
+      }
       prompt: {
         Row: {
           auth_hash: string
@@ -126,30 +242,30 @@ export interface Database {
       properties: {
         Row: {
           auth_hash: string | null
-          created_at: string | null
+          created_at: string
           id: number
-          key: string | null
+          key: string
           request_id: string | null
           user_id: string | null
-          value: string | null
+          value: string
         }
         Insert: {
           auth_hash?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
-          key?: string | null
+          key: string
           request_id?: string | null
           user_id?: string | null
-          value?: string | null
+          value: string
         }
         Update: {
           auth_hash?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
-          key?: string | null
+          key?: string
           request_id?: string | null
           user_id?: string | null
-          value?: string | null
+          value?: string
         }
       }
       request: {
@@ -159,12 +275,14 @@ export interface Database {
           created_at: string
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
+          helicone_org_id: string | null
           helicone_user: string | null
           id: string
           path: string
           prompt_id: string | null
           prompt_values: Json | null
           properties: Json | null
+          provider: string
           user_id: string | null
         }
         Insert: {
@@ -173,12 +291,14 @@ export interface Database {
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
+          helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
+          provider?: string
           user_id?: string | null
         }
         Update: {
@@ -187,12 +307,14 @@ export interface Database {
           created_at?: string
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
+          helicone_org_id?: string | null
           helicone_user?: string | null
           id?: string
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
+          provider?: string
           user_id?: string | null
         }
       }
@@ -202,6 +324,7 @@ export interface Database {
           completion_tokens: number | null
           created_at: string
           delay_ms: number | null
+          feedback: Json | null
           id: string
           prompt_tokens: number | null
           request: string
@@ -212,6 +335,7 @@ export interface Database {
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
+          feedback?: Json | null
           id?: string
           prompt_tokens?: number | null
           request: string
@@ -222,6 +346,7 @@ export interface Database {
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
+          feedback?: Json | null
           id?: string
           prompt_tokens?: number | null
           request?: string
@@ -365,13 +490,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
@@ -379,16 +504,39 @@ export interface Database {
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
+      ensure_personal: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      get_org_id: {
+        Args: {
+          request_id: string
+        }
+        Returns: string
+      }
+      insert_feedback_and_update_response: {
+        Args: {
+          response_id: string
+          feedback_metric_id: number
+          boolean_value: boolean
+          numerical_value: number
+          string_value: string
+          categorical_value: string
+          created_by: string
+          name: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
