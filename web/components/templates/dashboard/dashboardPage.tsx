@@ -41,6 +41,8 @@ import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { RenderBarChart } from "../../shared/metrics/barChart";
+import MainGraph from "./graphs/mainGraph";
 
 interface DashboardPageProps {
   user: User;
@@ -326,31 +328,53 @@ const DashboardPage = (props: DashboardPageProps) => {
           ) : (
             <>
               <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
-                {metricsData.map((m, i) => (
+                {/* {metricsData.map((m, i) => (
                   <MetricsPanel key={i} metric={m} />
-                ))}
+                ))} */}
+                <MainGraph
+                  isLoading={overTimeData.requests.isLoading}
+                  dataOverTime={
+                    overTimeData.requests.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.count,
+                    })) ?? []
+                  }
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Requests"}
+                  value={+(metrics.totalRequests?.data?.data?.toFixed(2) ?? 0)}
+                />
+                <MainGraph
+                  isLoading={overTimeData.requests.isLoading}
+                  dataOverTime={
+                    overTimeData.costs.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.cost,
+                    })) ?? []
+                  }
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Costs"}
+                  value={
+                    metrics.totalCost.data?.data
+                      ? `$${metrics.totalCost.data?.data.toFixed(2)}`
+                      : "$0.00"
+                  }
+                />
+                <CostPanel
+                  costOverTime={overTimeData.costs.data ?? "loading"}
+                  timeMap={getTimeMap(timeIncrement)}
+                  advancedFilters={filterListToTree(
+                    filterUIToFilterLeafs(
+                      userTableFilters,
+                      debouncedAdvancedFilters
+                    ),
+                    "and"
+                  )}
+                />
+                <ErrorsPanel
+                  errorsOverTime={overTimeData.errors.data ?? "loading"}
+                  errorMetrics={errorMetrics.errorCodes}
+                />
               </div>
-              <ThemedTabs
-                options={[
-                  {
-                    icon: TableCellsIcon,
-                    label: "Requests",
-                  },
-                  {
-                    icon: CurrencyDollarIcon,
-                    label: "Costs",
-                  },
-                  {
-                    icon: ExclamationCircleIcon,
-                    label: "Errors",
-                  },
-                ]}
-                onOptionSelect={(option) =>
-                  setMode(option.toLowerCase() as DashboardMode)
-                }
-              />
-
-              {renderPanel()}
             </>
           )}
         </div>

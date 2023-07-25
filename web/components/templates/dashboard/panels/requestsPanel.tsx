@@ -1,4 +1,7 @@
-import { UserGroupIcon } from "@heroicons/react/24/outline";
+import {
+  EllipsisVerticalIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 import { Result } from "../../../../lib/result";
 import { RequestsOverTime } from "../../../../lib/timeCalculations/fetchTimeData";
 import { useGetTopUsers } from "../../../../services/hooks/dashboard";
@@ -12,6 +15,7 @@ import LoadingAnimation from "../../../shared/loadingAnimation";
 import { RenderBarChart } from "../../../shared/metrics/barChart";
 import { getUSDate } from "../../../shared/utils/utils";
 import { Loading } from "../dashboardPage";
+import MainGraph from "../graphs/mainGraph";
 
 interface RequestsPanelProps {
   requestsOverTime: RequestsOverTime[];
@@ -20,85 +24,46 @@ interface RequestsPanelProps {
   advancedFilters: FilterNode;
 }
 
-function unwrapDefaultEmpty<T>(data: Loading<Result<T[], string>>): T[] {
-  if (data === "loading") {
-    return [];
-  }
-  if (data.error !== null) {
-    return [];
-  }
-  return data.data;
-}
-
 const RequestsPanel = (props: RequestsPanelProps) => {
   const { requestsOverTime, timeMap, advancedFilters, isLoading } = props;
 
-  // const { data, isLoading } = useGetTopUsers(
-  //   1,
-  //   10,
-  //   {
-  //     total_requests: "desc",
-  //   },
-  //   advancedFilters
-  // );
-
   return (
-    <div className="grid grid-cols-5 gap-4 h-96">
-      <div className="col-span-5 md:col-span-5 bg-white border border-gray-300 rounded-lg">
-        <div className="flex flex-col space-y-4 py-6">
-          <h3 className="text-lg font-semibold text-gray-900 text-center">
-            Requests
-          </h3>
-          <div className="h-72 px-4">
-            {isLoading ? (
-              <div className="h-full w-full flex-col flex p-8">
-                <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
-              </div>
-            ) : (
-              <RenderBarChart
-                data={requestsOverTime.map((r) => ({
-                  ...r,
-                  value: r.count,
-                }))}
-                timeMap={timeMap}
-                valueLabel="requests"
-              />
-            )}
-          </div>
-        </div>
-      </div>
-      {/* <div className="col-span-5 md:col-span-2 bg-white border border-gray-300 rounded-lg">
-        <div className="flex flex-col space-y-4 py-6">
-          <h3 className="text-lg font-semibold text-gray-900 text-center">
-            Top Users by Request
-          </h3>
-          <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300">
-            {isLoading ? (
-              <div className="flex flex-col space-y-6">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <li
-                    key={index}
-                    className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
-                  ></li>
-                ))}
-              </div>
-            ) : (
-              data?.data?.map((user, i) => (
-                <ThemedListItem
-                  key={i}
-                  onClickHandler={() => {}}
-                  title={user.user_id || "n/a"}
-                  subtitle={`Last Active: ${getUSDate(
-                    user.last_active.toLocaleString()
-                  )}`}
-                  value={user.total_requests}
-                />
-              ))
-            )}
-          </ul>
-        </div>
-      </div> */}
-    </div>
+    <MainGraph
+      isLoading={false}
+      dataOverTime={[]}
+      timeMap={function (date: Date): string {
+        throw new Error("Function not implemented.");
+      }}
+    />
+    // <div className="col-span-2 xl:col-span-1 h-96">
+    //   <div className="bg-white border border-gray-300 rounded-lg px-4 pt-4 shadow-md">
+    //     <div className="flex flex-col space-y-4">
+    //       <div className="flex flex-row w-full justify-between items-start">
+    //         <div className="flex flex-col space-y-0.5">
+    //           <p className="text-sm text-gray-700">Requests</p>
+    //           <h3 className="text-3xl font-semibold text-gray-900">1,231</h3>
+    //         </div>
+    //         <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
+    //       </div>
+    //       <div className="h-40">
+    //         {isLoading ? (
+    //           <div className="h-full w-full flex-col flex p-8">
+    //             <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
+    //           </div>
+    //         ) : (
+    //           <RenderBarChart
+    //             data={requestsOverTime.map((r) => ({
+    //               ...r,
+    //               value: r.count,
+    //             }))}
+    //             timeMap={timeMap}
+    //             valueLabel="requests"
+    //           />
+    //         )}
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>
   );
 };
 

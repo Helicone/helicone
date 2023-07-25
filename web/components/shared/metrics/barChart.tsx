@@ -1,6 +1,7 @@
 import {
   Bar,
   BarChart,
+  CartesianAxis,
   CartesianGrid,
   Legend,
   Line,
@@ -35,19 +36,11 @@ export const RenderBarChart = ({
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        width={500}
-        height={300}
-        data={chartData}
-        margin={{
-          right: 30,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="time" />
-        <YAxis />
+      <BarChart width={500} height={300} data={chartData}>
+        <CartesianAxis strokeDasharray={"3 3"} />
+        <XAxis dataKey="time" tickSize={4} fontSize={12} />
+        <YAxis hide />
         <Tooltip />
-        <Legend />
         <Bar dataKey="value" fill="#0ea4e9" name={valueLabel} />
       </BarChart>
     </ResponsiveContainer>
