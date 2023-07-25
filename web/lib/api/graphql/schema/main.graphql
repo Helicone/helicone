@@ -7,10 +7,29 @@ type Query {
     offset: Int
     filters: [HeliconeRequestFilter!]
   ): [HeliconeRequest]
+  aggregatedHeliconeRequest(
+    properties: [PropertyFilter!]
+  ): AggregatedHeliconeRequest
+}
+
+type AggregatedHeliconeRequest {
+  id: ID!
+  cost: Float
+  firstRequest: String!
+  lastRequest: String!
+  cache: Cache
+}
+
+type Cache {
+  hits: Int!
+  misses: Int!
+  savedUSD: Float!
 }
 
 type HeliconeRequest {
   id: ID!
+  costUSD: Float!
+  model: String!
   createdAt: String!
   prompt: String
   response: String
@@ -25,6 +44,7 @@ type HeliconeRequest {
 
 input HeliconeRequestFilter {
   id: NumberOperators
+  requestId: TextOperators
   prompt: TextOperators
   response: TextOperators
   user: TextOperators

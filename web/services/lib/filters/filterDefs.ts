@@ -97,6 +97,7 @@ export type FilterLeafPropertiesCopyV2 = SingleKey<PropertiesCopyV2ToOperators>;
 
 type PropertyWithResponseV1ToOperators = {
   property_key: SingleKey<TextOperators>;
+  property_value: SingleKey<TextOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
   organization_id: SingleKey<TextOperators>;
 };

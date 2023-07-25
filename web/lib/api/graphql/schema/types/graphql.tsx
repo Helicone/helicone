@@ -22,6 +22,22 @@ export type Scalars = {
   JSON: any;
 };
 
+export type AggregatedHeliconeRequest = {
+  __typename?: "AggregatedHeliconeRequest";
+  cache?: Maybe<Cache>;
+  cost?: Maybe<Scalars["Float"]>;
+  firstRequest: Scalars["String"];
+  id: Scalars["ID"];
+  lastRequest: Scalars["String"];
+};
+
+export type Cache = {
+  __typename?: "Cache";
+  hits: Scalars["Int"];
+  misses: Scalars["Int"];
+  savedUSD: Scalars["Float"];
+};
+
 export type DateOperators = {
   gte?: InputMaybe<Scalars["String"]>;
   lte?: InputMaybe<Scalars["String"]>;
@@ -30,9 +46,11 @@ export type DateOperators = {
 export type HeliconeRequest = {
   __typename?: "HeliconeRequest";
   cacheHits?: Maybe<Scalars["Int"]>;
+  costUSD: Scalars["Float"];
   createdAt: Scalars["String"];
   id: Scalars["ID"];
   latency?: Maybe<Scalars["Float"]>;
+  model: Scalars["String"];
   prompt?: Maybe<Scalars["String"]>;
   properties?: Maybe<Array<Maybe<Property>>>;
   requestBody?: Maybe<Scalars["JSON"]>;
@@ -47,6 +65,7 @@ export type HeliconeRequestFilter = {
   id?: InputMaybe<NumberOperators>;
   prompt?: InputMaybe<TextOperators>;
   property?: InputMaybe<PropertyFilter>;
+  requestId?: InputMaybe<TextOperators>;
   response?: InputMaybe<TextOperators>;
   user?: InputMaybe<TextOperators>;
 };
@@ -81,8 +100,13 @@ export type PropertyFilter = {
 
 export type Query = {
   __typename?: "Query";
+  aggregatedHeliconeRequest?: Maybe<AggregatedHeliconeRequest>;
   heliconeRequest?: Maybe<Array<Maybe<HeliconeRequest>>>;
   user?: Maybe<Array<Maybe<User>>>;
+};
+
+export type QueryAggregatedHeliconeRequestArgs = {
+  properties?: InputMaybe<Array<PropertyFilter>>;
 };
 
 export type QueryHeliconeRequestArgs = {
@@ -109,10 +133,10 @@ export type TextOperators = {
 export type User = {
   __typename?: "User";
   id: Scalars["String"];
-  total_completion_tokens?: Maybe<Scalars["Int"]>;
-  total_prompt_tokens?: Maybe<Scalars["Int"]>;
+  total_completion_tokens?: Maybe<Scalars["Float"]>;
+  total_prompt_tokens?: Maybe<Scalars["Float"]>;
   total_requests?: Maybe<Scalars["Int"]>;
-  total_tokens?: Maybe<Scalars["Int"]>;
+  total_tokens?: Maybe<Scalars["Float"]>;
 };
 
 export type Value = {

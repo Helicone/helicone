@@ -88,6 +88,7 @@ const whereKeyMappings: KeyMappings = {
   },
   property_with_response_v1: {
     property_key: "property_with_response_v1.property_key",
+    property_value: "property_with_response_v1.property_value",
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
   },
