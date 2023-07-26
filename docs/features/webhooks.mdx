@@ -1,24 +1,23 @@
 ---
 title: "Monitoring"
-description: "Helicone is a sophisticated platform designed to streamline the use and management of large language models (LLMs) for developers and enterprises. "
+description: "Helicone is an advanced platform designed to simplify the utilization and management of large language models (LLMs) for developers and enterprises."
 ---
 
 <Warning>
-  Webhooks is in beta, if you want access please contact us on discord or email us at
+  Please note that Webhooks is currently in beta. If you wish to gain access, kindly contact us via Discord or email us at
   <a href="mailto:sales@helicone.ai">
 </Warning>
+
+## NextJS Example
 
 ```bash
 
 npm install graphql-tag @apollo/client
-# or yarn add graphql-tag @apollo/client
+# Alternatively, you can use yarn add graphql-tag @apollo/client
 curl -sSL https://raw.githubusercontent.com/Helicone/helicone/main/web/lib/api/graphql/schema/types/graphql.tsx > heliconeTypes.tsx
 ```
 
-NextJS Example
-
 ```tsx
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import gql from "graphql-tag";
@@ -29,7 +28,7 @@ const client = new ApolloClient({
   uri: "https://www.helicone.ai/api/graphql",
   cache: new InMemoryCache(),
   headers: {
-    Authorization: `Bearer ${process.env.HELICONE_API_KEY}}`,
+    Authorization: `Bearer ${process.env.HELICONE_API_KEY}`,
   },
 });
 
