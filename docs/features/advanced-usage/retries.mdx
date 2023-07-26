@@ -5,6 +5,10 @@ description: "Intelligently retry requests to overcome rate limits and overloade
 
 Retrying requests is a common best practice when dealing with overloaded servers or hitting rate limits. These issues typically manifest as HTTP status codes 429 (Too Many Requests) and 500 (Internal Server Error). For more information on error codes, see the [OpenAI API error codes documentation](https://platform.openai.com/docs/guides/error-codes/api-errors).
 
+### Intelligent Rate Limits
+
+In addition to the standard retry mechanism, we have introduced a more intelligent way to handle rate limit errors. When a rate limit error (429) is encountered, the system checks for the `x-ratelimit-reset-requests` header in the response. This header indicates the time until the rate limit resets. The system extracts this value and uses it as the retry timeout, overriding the `helicone-retry-min-timeout` value. This ensures that the system waits for the appropriate amount of time before retrying the request, thus adhering to the rate limit policy more efficiently.
+
 ### Exponential Backoff
 
 To effectively deal with retries, we use a strategy called exponential backoff. Exponential backoff involves increasing the wait time between retries exponentially, which helps to spread out the request load and gives the server a chance to recover. This is done by multiplying the wait time by a factor (default is 2) for each subsequent retry.
