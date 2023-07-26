@@ -83,7 +83,7 @@
     {
       "group": "Features",
       "pages": [
-        "features/monitoring",
+        "features/webhooks",
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/templated-prompts",
