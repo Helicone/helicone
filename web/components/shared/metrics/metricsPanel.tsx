@@ -23,7 +23,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
 
   return (
     <div
-      className="p-6 bg-white border border-gray-300 rounded-lg space-y-2"
+      className="p-6 bg-white border border-gray-300 rounded-lg shadow-md space-y-2"
       key={metric.label}
     >
       <div className="w-full flex flex-row items-center justify-between">
