@@ -32,9 +32,6 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import { Toggle } from "../../shared/themed/themedToggle";
-import CostPanel from "./panels/costsPanel";
-import ErrorsPanel from "./panels/errorsPanel";
-import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
 import { useRouter } from "next/router";
 import { useGetAuthorized } from "../../../services/hooks/dashboard";
