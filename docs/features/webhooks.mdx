@@ -1,0 +1,75 @@
+---
+title: "Monitoring"
+description: "Helicone is a sophisticated platform designed to streamline the use and management of large language models (LLMs) for developers and enterprises. "
+---
+
+<Warning>
+  Webhooks is in beta, if you want access please contact us on discord or email us at
+  <a href="mailto:sales@helicone.ai">
+</Warning>
+
+```bash
+
+npm install graphql-tag @apollo/client
+# or yarn add graphql-tag @apollo/client
+curl -sSL https://raw.githubusercontent.com/Helicone/helicone/main/web/lib/api/graphql/schema/types/graphql.tsx > heliconeTypes.tsx
+```
+
+NextJS Example
+
+```tsx
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import type { NextApiRequest, NextApiResponse } from "next";
+
+import gql from "graphql-tag";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { HeliconeRequest } from "./heliconeTypes";
+
+const client = new ApolloClient({
+  uri: "https://www.helicone.ai/api/graphql",
+  cache: new InMemoryCache(),
+  headers: {
+    Authorization: `Bearer ${process.env.HELICONE_API_KEY}}`,
+  },
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<null>
+) {
+  const { request_id: requestId } = req.body as {
+    request_id: string;
+  };
+  const GET_USERS = gql`
+    query GetHeliconeRequest($id: String!) {
+      heliconeRequest(filters: [{ requestId: { equals: $id } }]) {
+        id
+        responseBody
+        values {
+          name
+          value
+        }
+        response
+        requestBody
+        prompt
+        model
+        properties {
+          name
+          value
+        }
+        latency
+        createdAt
+        costUSD
+        cacheHits
+      }
+    }
+  `;
+
+  const heliconeRequest = await client.query<HeliconeRequest>({
+    query: GET_USERS,
+    variables: { id: requestId },
+  });
+  console.log(heliconeRequest.data);
+  res.status(200).json(null);
+}
+```
