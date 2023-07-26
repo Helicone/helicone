@@ -15,6 +15,7 @@ interface MainGraphProps {
   value: string | number;
   valueLabel: string;
   type: "double-line" | "bar" | "area";
+  labelFormatter?: (value: string) => string;
 }
 
 export default function MainGraph(props: MainGraphProps) {
@@ -27,6 +28,7 @@ export default function MainGraph(props: MainGraphProps) {
     value,
     valueLabel,
     type,
+    labelFormatter,
   } = props;
 
   return (
@@ -49,12 +51,14 @@ export default function MainGraph(props: MainGraphProps) {
               data={dataOverTime}
               timeMap={timeMap}
               valueLabel={valueLabel}
+              labelFormatter={labelFormatter}
             />
           ) : type === "area" ? (
             <RenderAreaChart
               data={dataOverTime}
               timeMap={timeMap}
               valueLabel={valueLabel}
+              labelFormatter={labelFormatter}
             />
           ) : type === "double-line" && doubleLineOverTime ? (
             <RenderDoubleAreaChart
@@ -62,6 +66,7 @@ export default function MainGraph(props: MainGraphProps) {
               timeMap={timeMap}
               valueLabel1={valueLabel}
               valueLabel2={"errors"}
+              labelFormatter={labelFormatter}
             />
           ) : null}
         </div>

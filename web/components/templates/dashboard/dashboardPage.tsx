@@ -97,43 +97,25 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { authorized } = useGetAuthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, errorMetrics, isAnyLoading } =
-    useDashboardPage({
-      timeFilter,
-      uiFilters: debouncedAdvancedFilters,
-      apiKeyFilter,
-      timeZoneDifference,
-      dbIncrement: timeIncrement,
-    });
+  const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
+    timeFilter,
+    uiFilters: debouncedAdvancedFilters,
+    apiKeyFilter,
+    timeZoneDifference,
+    dbIncrement: timeIncrement,
+  });
 
   const combineRequestsAndErrors = () => {
-    // combine the requests and errors into one object formatted {time: Date, requests: number, errors: number}
-    const combined: DoubleAreaChartData[] = [];
-    overTimeData.errors.data?.data?.forEach((r) => {
-      const existing = combined.find((c) => c.time === r.time);
-      if (existing) {
-        existing.value2 = r.count;
-      } else {
-        combined.push({
-          time: r.time,
-          value2: r.count,
-          value1: 0,
-        });
-      }
-    });
-    overTimeData.requests.data?.data?.forEach((r) => {
-      const existing = combined.find((c) => c.time === r.time);
-      if (existing) {
-        existing.value1 = r.count;
-      } else {
-        combined.push({
-          time: r.time,
-          value1: r.count,
-          value2: 0,
-        });
-      }
-    });
-    return combined;
+    let combinedArray = overTimeData.requests.data?.data?.map(
+      (request, index) => ({
+        time: request.time,
+        value1: request.count,
+        value2: overTimeData.errors.data?.data
+          ? overTimeData.errors.data?.data[index].count
+          : 0,
+      })
+    );
+    return combinedArray;
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
@@ -148,7 +130,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       icon: ChartBarIcon,
       isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
     },
-
     {
       value:
         metrics.averageTokensPerRequest?.data?.data &&
@@ -300,9 +281,9 @@ const DashboardPage = (props: DashboardPageProps) => {
             </div>
           ) : (
             <>
-              <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
+              <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 xl:grid-cols-12 text-gray-900 gap-4">
                 {/* Combine the requests and error into one graph */}
-                <div className="col-span-2 xl:col-span-4 h-full">
+                <div className="col-span-2 xl:col-span-12 h-full">
                   <MainGraph
                     isLoading={overTimeData.requests.isLoading}
                     dataOverTime={
@@ -325,7 +306,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     type="double-line"
                   />
                 </div>{" "}
-                <div className="col-span-2 xl:col-span-1 h-full">
+                <div className="col-span-2 xl:col-span-4 h-full">
                   <MainGraph
                     isLoading={overTimeData.costs.isLoading}
                     dataOverTime={
@@ -346,9 +327,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                     }
                     valueLabel={"cost"}
                     type="bar"
+                    labelFormatter={(value) => `$${Number(value).toFixed(2)}`}
                   />
                 </div>
-                <div className="col-span-2 xl:col-span-1 h-full">
+                <div className="col-span-2 xl:col-span-4 h-full">
                   <MainGraph
                     isLoading={overTimeData.latency.isLoading}
                     dataOverTime={
@@ -360,14 +342,35 @@ const DashboardPage = (props: DashboardPageProps) => {
                     timeMap={getTimeMap(timeIncrement)}
                     title={"Latency"}
                     value={`${
-                      metrics.averageLatency.data?.data?.toFixed(2) ?? 0
+                      metrics.averageLatency.data?.data?.toFixed(0) ?? 0
                     } ms / req`}
                     valueLabel={"latency"}
                     type={"area"}
+                    labelFormatter={(value) =>
+                      `${parseInt(value).toFixed(0)} ms`
+                    }
+                  />
+                </div>
+                <div className="col-span-2 xl:col-span-4 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.users.isLoading}
+                    dataOverTime={
+                      overTimeData.users.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.count,
+                      })) ?? []
+                    }
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Active Users"}
+                    value={metrics.activeUsers.data?.data ?? 0}
+                    valueLabel={" Users"}
+                    type={"bar"}
                   />
                 </div>
                 {metricsData.map((m, i) => (
-                  <MetricsPanel key={i} metric={m} />
+                  <div className="col-span-2 xl:col-span-3" key={i}>
+                    <MetricsPanel metric={m} />
+                  </div>
                 ))}
               </div>
             </>
