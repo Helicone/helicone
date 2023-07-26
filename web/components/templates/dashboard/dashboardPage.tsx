@@ -49,9 +49,16 @@ interface DashboardPageProps {
   user: User;
 }
 
-function formatNumberString(numString: string) {
+function formatNumberString(
+  numString: string,
+  minimumFractionDigits?: boolean
+) {
   const num = parseFloat(numString);
-  return num.toLocaleString("en-US");
+  if (minimumFractionDigits) {
+    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  } else {
+    return num.toLocaleString("en-US");
+  }
 }
 
 export type Loading<T> = T | "loading";
@@ -294,11 +301,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           ) : (
             <>
               <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
-                {/* {metricsData.map((m, i) => (
-                  <MetricsPanel key={i} metric={m} />
-                ))} */}
                 {/* Combine the requests and error into one graph */}
-                <div className="col-span-4 xl:col-span-2 h-full">
+                <div className="col-span-2 xl:col-span-4 h-full">
                   <MainGraph
                     isLoading={overTimeData.requests.isLoading}
                     dataOverTime={
@@ -323,7 +327,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>{" "}
                 <div className="col-span-2 xl:col-span-1 h-full">
                   <MainGraph
-                    isLoading={overTimeData.requests.isLoading}
+                    isLoading={overTimeData.costs.isLoading}
                     dataOverTime={
                       overTimeData.costs.data?.data?.map((r) => ({
                         ...r,
@@ -335,7 +339,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                     value={
                       metrics.totalCost.data?.data
                         ? `$${formatNumberString(
-                            metrics.totalCost.data?.data.toFixed(2)
+                            metrics.totalCost.data?.data.toFixed(2),
+                            true
                           )}`
                         : "$0.00"
                     }
@@ -345,7 +350,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>
                 <div className="col-span-2 xl:col-span-1 h-full">
                   <MainGraph
-                    isLoading={overTimeData.errors.isLoading}
+                    isLoading={overTimeData.latency.isLoading}
                     dataOverTime={
                       overTimeData.latency.data?.data?.map((r) => ({
                         ...r,
@@ -361,6 +366,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                     type={"area"}
                   />
                 </div>
+                {metricsData.map((m, i) => (
+                  <MetricsPanel key={i} metric={m} />
+                ))}
               </div>
             </>
           )}

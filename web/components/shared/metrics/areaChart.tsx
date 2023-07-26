@@ -43,7 +43,13 @@ export const RenderAreaChart = ({
         <XAxis dataKey="time" tickSize={4} fontSize={12} />
         <YAxis hide />
         <Tooltip />
-        <Area type="monotone" dataKey="value" stroke="#0ea4e9" fill="#E1F5FE" />
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke="#0ea4e9"
+          fill="#E1F5FE"
+          name={valueLabel}
+        />
       </AreaChart>
     </ResponsiveContainer>
   );
