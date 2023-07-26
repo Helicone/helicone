@@ -108,7 +108,7 @@ class Helicone:
         headers.update(self._get_property_headers(
             kwargs.pop("properties", {})))
         headers.update(self._get_cache_headers(kwargs.pop("cache", None)))
-        headers.update(self._get_retry_headers(kwargs.pop("retry", None)))
+        headers.update(self._get_retry_headers(kwargs.pop("retry", None), kwargs.get("response")))
         headers.update(self._get_rate_limit_policy_headers(
             kwargs.pop("rate_limit_policy", None)))
 
@@ -190,7 +190,7 @@ class Helicone:
     def _get_cache_headers(self, cache):
         return {"Helicone-Cache-Enabled": "true"} if cache is True else {}
 
-    def _get_retry_headers(self, retry):
+    def _get_retry_headers(self, retry, response):
         if isinstance(retry, bool) and retry:
             return {"Helicone-Retry-Enabled": "true"}
         elif isinstance(retry, dict):
@@ -202,6 +202,9 @@ class Helicone:
             if "min_timeout" in retry:
                 headers["Helicone-Retry-Min-Timeout"] = str(
                     retry["min_timeout"])
+            else:
+                headers["Helicone-Retry-Min-Timeout"] = response.headers.get(
+                    "x-ratelimit-reset-requests", "0")
             if "max_timeout" in retry:
                 headers["Helicone-Retry-Max-Timeout"] = str(
                     retry["max_timeout"])
