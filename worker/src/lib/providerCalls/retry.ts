@@ -19,7 +19,7 @@ export async function callProviderWithRetry(
           lastResponse = res;
           // Throw an error if the status code is 429
           if (res.status === 429 || res.status === 500) {
-            const retryAfter = res.headers.get('x-ratelimit-reset-requests') || retryOptions.minTimeout;
+            const retryAfter = (res.headers.get('x-ratelimit-reset-requests') * 60) || retryOptions.minTimeout;
             setTimeout(() => {}, retryAfter);
             throw new Error(`Status code ${res.status}`);
           }
