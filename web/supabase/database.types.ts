@@ -220,16 +220,19 @@ export interface Database {
         Row: {
           created_at: string | null
           member: string
+          org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
           member: string
+          org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
           member?: string
+          org_role?: string
           organization?: string
         }
       }
