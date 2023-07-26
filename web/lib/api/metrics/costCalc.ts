@@ -8,6 +8,11 @@ const COSTS_PROMPT = {
   davinci: 0.02,
   "gpt-3.5-turbo": 0.002,
   "gpt-4": 0.03,
+  "gpt-4-32k-0314": 0.06,
+  "gpt-4-32k-0613": 0.06,
+  "gpt-3.5-turbo-0613": 0.0015,
+  "gpt-3.5-turbo-16k-0613": 0.003,
+  "text-embedding-ada-002-v2": 0.0001,
   //TODO add clauden https://console.anthropic.com/account/pricing
 };
 
@@ -18,6 +23,10 @@ const COSTS_COMPLETIONS = {
   davinci: 0.02,
   "gpt-3.5-turbo": 0.002,
   "gpt-4": 0.06,
+  "gpt-4-32k-0314": 0.12,
+  "gpt-4-32k-0613": 0.12,
+  "gpt-3.5-turbo-0613": 0.002,
+  "gpt-3.5-turbo-16k-0613": 0.004,
   //TODO add claude https://console.anthropic.com/account/pricing
 };
 

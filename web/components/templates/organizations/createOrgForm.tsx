@@ -245,6 +245,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               } else {
                 setNotification("Organization updated successfully", "success");
               }
+              onCancelHandler && onCancelHandler(false);
               orgContext?.refetchOrgs();
             } else {
               const { data, error } = await supabaseClient

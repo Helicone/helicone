@@ -1,3 +1,4 @@
+import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { ReactNode } from "react";
 
@@ -20,15 +21,13 @@ const AuthHeader = (props: AuthHeaderProps) => {
       <div className="sm:flex-auto items-center flex flex-row space-x-4">
         <div className="flex flex-row space-x-4 items-center">
           {breadcrumb && (
-            <div className="flex flex-row space-x-4 items-center">
-              <Link
-                className="text-xl font-semibold text-gray-900  hover:underline"
-                href={breadcrumb.href}
-              >
-                {breadcrumb.title}
-              </Link>
-              <p>/</p>
-            </div>
+            <Link
+              className="text-xl font-semibold text-gray-900 flex flex-row items-center hover:underline space-x-2"
+              href={breadcrumb.href}
+            >
+              <ArrowUturnLeftIcon className="h-4 w-4 text-gray-900" />
+              <p>{breadcrumb.title}</p>
+            </Link>
           )}
           <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
           {props.subtitle && (

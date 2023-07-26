@@ -54,14 +54,6 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
       responseText: getResponseText(),
       model:
         this.response.request_body.model || this.response.response_body.model,
-      cost: modelCost({
-        model:
-          this.response.request_body.model || this.response.response_body.model,
-        sum_completion_tokens: this.response.completion_tokens || 0,
-        sum_prompt_tokens: this.response.prompt_tokens || 0,
-        sum_tokens: this.response.total_tokens || 0,
-      }),
-
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (
