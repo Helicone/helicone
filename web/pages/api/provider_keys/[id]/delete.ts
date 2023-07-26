@@ -24,12 +24,12 @@ async function handler({
 
   const { error } = await supabaseServer
     .from("provider_keys")
-    .delete()
+    .update({ soft_delete: true })
     .eq("org_id", userData.orgId)
     .eq("id", id);
 
   if (error) {
-    console.log("Failed to delete proxy key");
+    console.log("Failed to soft_delete provider key");
     res.status(500).json({ error: error.message, data: null });
     return;
   }

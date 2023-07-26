@@ -9,7 +9,6 @@ import { supabaseServer } from "../../../../lib/supabaseServer";
 async function handler({
   req,
   res,
-  supabaseClient,
   userData,
 }: HandlerWrapperOptions<Result<null, string>>) {
   if (req.method !== "DELETE") {
@@ -24,13 +23,13 @@ async function handler({
   }
 
   const { error } = await supabaseServer
-    .from("proxy_key_mappings")
-    .delete()
+    .from("helicone_proxy_keys")
+    .update({ soft_delete: true })
     .eq("org_id", userData.orgId)
     .eq("id", id);
 
   if (error) {
-    console.log("Failed to delete proxy key mapping");
+    console.log("Failed to soft delete proxy key");
     res.status(500).json({ error: error.message, data: null });
     return;
   }

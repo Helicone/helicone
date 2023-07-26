@@ -4,14 +4,14 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import { HeliconeProxyKeyMapping } from "../../../services/lib/keys";
+import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 
 async function handler({
   req,
   res,
   userData,
-}: HandlerWrapperOptions<Result<HeliconeProxyKeyMapping, string>>) {
+}: HandlerWrapperOptions<Result<HeliconeProxyKeys, string>>) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed", data: null });
   }
@@ -54,7 +54,7 @@ async function handler({
   // Constraint prevents provider key mapping twice to same helicone proxy key
   // e.g. HeliconeKey1 can't map to OpenAIKey1 and OpenAIKey2
   const newProxyMapping = await supabaseServer
-    .from("proxy_key_mappings")
+    .from("helicone_proxy_keys")
     .insert({
       org_id: userData.orgId,
       helicone_proxy_key_name: heliconeProxyKeyName,
@@ -64,9 +64,20 @@ async function handler({
     .select("*")
     .single();
 
-  if (newProxyMapping.error !== null || newProxyMapping.data === null) {
+  if (newProxyMapping.error !== null) {
     console.error("Failed to insert proxy key mapping", newProxyMapping.error);
     res.status(500).json({ error: newProxyMapping.error.message, data: null });
+    return;
+  }
+
+  if (newProxyMapping.data === null) {
+    console.error("Failed to insert proxy key mapping, no data returned");
+    res
+      .status(500)
+      .json({
+        error: "Failed to insert proxy key mapping, no data returned",
+        data: null,
+      });
     return;
   }
 

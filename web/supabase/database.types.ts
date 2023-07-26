@@ -178,6 +178,46 @@ export interface Database {
           }
         ]
       }
+      helicone_proxy_keys: {
+        Row: {
+          helicone_proxy_key: string
+          helicone_proxy_key_name: string
+          id: string
+          org_id: string
+          provider_key_id: string
+          soft_delete: boolean
+        }
+        Insert: {
+          helicone_proxy_key: string
+          helicone_proxy_key_name: string
+          id?: string
+          org_id: string
+          provider_key_id: string
+          soft_delete?: boolean
+        }
+        Update: {
+          helicone_proxy_key?: string
+          helicone_proxy_key_name?: string
+          id?: string
+          org_id?: string
+          provider_key_id?: string
+          soft_delete?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helicone_proxy_keys_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       layout: {
         Row: {
           columns: Json | null
@@ -362,79 +402,33 @@ export interface Database {
       provider_keys: {
         Row: {
           id: string
-          key_id: string
-          nonce: string | null
           org_id: string
-          provider_key: string
           provider_key_name: string
           provider_name: string
+          soft_delete: boolean
+          vault_key_id: string
         }
         Insert: {
           id?: string
-          key_id?: string
-          nonce?: string | null
           org_id: string
-          provider_key: string
           provider_key_name: string
           provider_name: string
+          soft_delete?: boolean
+          vault_key_id: string
         }
         Update: {
           id?: string
-          key_id?: string
-          nonce?: string | null
           org_id?: string
-          provider_key?: string
           provider_key_name?: string
           provider_name?: string
+          soft_delete?: boolean
+          vault_key_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "provider_keys_org_id_fkey"
             columns: ["org_id"]
             referencedRelation: "organization"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      proxy_key_mappings: {
-        Row: {
-          helicone_proxy_key: string
-          helicone_proxy_key_name: string
-          id: string
-          org_id: string
-          provider_key_id: string
-        }
-        Insert: {
-          helicone_proxy_key: string
-          helicone_proxy_key_name: string
-          id?: string
-          org_id: string
-          provider_key_id: string
-        }
-        Update: {
-          helicone_proxy_key?: string
-          helicone_proxy_key_name?: string
-          id?: string
-          org_id?: string
-          provider_key_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proxy_key_mappings_org_id_fkey"
-            columns: ["org_id"]
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proxy_key_mappings_provider_key_id_fkey"
-            columns: ["provider_key_id"]
-            referencedRelation: "provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proxy_key_mappings_provider_key_id_fkey"
-            columns: ["provider_key_id"]
-            referencedRelation: "decrypted_provider_keys"
             referencedColumns: ["id"]
           }
         ]
@@ -612,46 +606,6 @@ export interface Database {
       }
     }
     Views: {
-      decrypted_provider_keys: {
-        Row: {
-          decrypted_provider_key: string | null
-          id: string | null
-          key_id: string | null
-          nonce: string | null
-          org_id: string | null
-          provider_key: string | null
-          provider_key_name: string | null
-          provider_name: string | null
-        }
-        Insert: {
-          decrypted_provider_key?: never
-          id?: string | null
-          key_id?: string | null
-          nonce?: string | null
-          org_id?: string | null
-          provider_key?: string | null
-          provider_key_name?: string | null
-          provider_name?: string | null
-        }
-        Update: {
-          decrypted_provider_key?: never
-          id?: string | null
-          key_id?: string | null
-          nonce?: string | null
-          org_id?: string | null
-          provider_key?: string | null
-          provider_key_name?: string | null
-          provider_name?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_keys_org_id_fkey"
-            columns: ["org_id"]
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       materialized_response_and_request: {
         Row: {
           is_cached: boolean | null

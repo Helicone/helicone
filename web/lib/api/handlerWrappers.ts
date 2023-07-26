@@ -11,6 +11,8 @@ import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
+import { IVault } from "../../services/lib/vault.ts/IVault";
+import HashiCorpVault from "../../services/lib/vault.ts/HashiCorpVault";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -64,6 +66,7 @@ export class RequestBodyParser {
 export interface HandlerWrapperOptions<RetVal>
   extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
+  vault: IVault;
   userData: {
     userId: string;
     orgId: string;
@@ -80,7 +83,8 @@ export interface HandlerWrapperOptionsAPI<RetVal>
 
 export function withAuth<T>(
   handler: (supabaseServer: HandlerWrapperOptions<T>) => Promise<void>,
-  permissions?: Permission[]
+  permissions?: Permission[],
+  includeVault: boolean = false
 ) {
   return async (
     req: NextApiRequest,
@@ -109,11 +113,14 @@ export function withAuth<T>(
       return;
     }
 
+    const vault = new HashiCorpVault();
+
     await handler({
       req,
       res,
       supabaseClient,
       userData: data,
+      vault,
       body: new RequestBodyParser(req),
     });
   };

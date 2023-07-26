@@ -4,16 +4,14 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import {
-  DecryptedProviderKey,
-  getDecryptedProviderKeyById,
-} from "../../../services/lib/keys";
+import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 
 async function handler({
   req,
   res,
   userData,
+  vault,
 }: HandlerWrapperOptions<Result<DecryptedProviderKey, string>>) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed", data: null });
@@ -40,41 +38,41 @@ async function handler({
     return;
   }
 
-  // insert provider key
+  const vaultKeyId = crypto.randomUUID();
+
+  const { error } = await vault.writeProviderKey(userData.orgId, vaultKeyId, providerKey);
+
+  if (error !== null) {
+    console.error("Failed to write provider key to vault", error);
+    res.status(500).json({ error: error, data: null });
+    return;
+  }
+
   const key = await supabaseServer
     .from("provider_keys")
     .insert({
       org_id: userData.orgId,
       provider_name: providerName,
-      provider_key: providerKey,
       provider_key_name: providerKeyName,
+      vault_key_id: vaultKeyId,
     })
     .select("*")
     .single();
 
   if (key.error !== null || key.data === null) {
-    console.error("Failed to insert proxy key", key.error);
+    console.error("Failed to insert provider key", key.error);
     res.status(500).json({ error: key.error.message, data: null });
     return;
   }
 
-  // Retrieve decrypted key
-  const decryptedKey = await getDecryptedProviderKeyById(
-    supabaseServer,
-    key.data.id
-  );
-
-  if (decryptedKey.error !== null) {
-    console.error(
-      "Failed to retrieve decrypted provider key",
-      decryptedKey.error
-    );
-    res.status(500).json({ error: decryptedKey.error, data: null });
-    return;
-  }
-
   res.status(200).json({
-    data: decryptedKey.data,
+    data: {
+      id: key.data.id,
+      orgId: key.data.org_id,
+      providerKey: providerKey,
+      providerName: key.data.provider_name,
+      providerKeyName: key.data.provider_key_name,
+    },
     error: null,
   });
 }
