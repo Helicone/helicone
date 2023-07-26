@@ -39,7 +39,6 @@ export default function MainGraph(props: MainGraphProps) {
             <p className="text-sm text-gray-700">{title}</p>
             <h3 className="text-xl font-semibold text-gray-900">{value}</h3>
           </div>
-          <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
         </div>
         <div className="h-40">
           {isLoading ? (
