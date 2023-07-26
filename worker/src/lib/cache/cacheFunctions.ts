@@ -2,9 +2,14 @@ import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 
+const IGNORED_HEADERS = ['Helicone-Property-Session'];
+
 export async function kvKeyFromRequest(request: HeliconeProxyRequest, freeIndex: number): Promise<string> {
   const headers = new Headers();
   for (const [key, value] of request.requestWrapper.getHeaders().entries()) {
+    if (IGNORED_HEADERS.includes(key)) {
+      continue;
+    }
     if (key.toLowerCase().startsWith("helicone-cache")) {
       headers.set(key, value);
     }
