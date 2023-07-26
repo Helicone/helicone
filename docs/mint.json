@@ -83,7 +83,6 @@
     {
       "group": "Features",
       "pages": [
-        "features/webhooks",
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/templated-prompts",
@@ -91,7 +90,8 @@
         "features/advanced-usage/retries",
         "features/advanced-usage/custom-rate-limits",
         "features/advanced-usage/omit-logs",
-        "features/streaming"
+        "features/streaming",
+        "features/webhooks"
       ]
     },
     {
