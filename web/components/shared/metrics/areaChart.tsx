@@ -1,0 +1,50 @@
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianAxis,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { getUSDate, getUSDateShort } from "../utils/utils";
+import { clsx } from "../clsx";
+
+export interface AreaChartData {
+  time: Date;
+  value: number;
+}
+
+export const RenderAreaChart = ({
+  data,
+  timeMap,
+  valueLabel,
+}: {
+  data: AreaChartData[];
+  timeMap: (date: Date) => string;
+  valueLabel?: string;
+}) => {
+  const chartData = data.map((d) => ({
+    ...d,
+    time: timeMap(d.time),
+  }));
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart width={500} height={300} data={chartData}>
+        <CartesianAxis strokeDasharray={"3 3"} />
+        <XAxis dataKey="time" tickSize={4} fontSize={12} />
+        <YAxis hide />
+        <Tooltip />
+        <Area type="monotone" dataKey="value" stroke="#0ea4e9" fill="#E1F5FE" />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+};

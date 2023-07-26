@@ -43,20 +43,16 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { RenderBarChart } from "../../shared/metrics/barChart";
 import MainGraph from "./graphs/mainGraph";
+import { DoubleAreaChartData } from "../../shared/metrics/doubleAreaChart";
 
 interface DashboardPageProps {
   user: User;
 }
 
-type LiveLogType = {
-  id: string;
-  requestMsg: string;
-  model?: string;
-  createdAt?: string;
-  totalTokens?: number;
-  latency?: number; // in ms
-  responseMsg?: string;
-};
+function formatNumberString(numString: string) {
+  const num = parseFloat(numString);
+  return num.toLocaleString("en-US");
+}
 
 export type Loading<T> = T | "loading";
 
@@ -103,59 +99,37 @@ const DashboardPage = (props: DashboardPageProps) => {
       dbIncrement: timeIncrement,
     });
 
-  const renderPanel = () => {
-    if (mode === "requests") {
-      return (
-        <RequestsPanel
-          requestsOverTime={overTimeData.requests.data?.data ?? []}
-          isLoading={
-            overTimeData.requests.isLoading || overTimeData.requests.isLoading
-          }
-          timeMap={getTimeMap(timeIncrement)}
-          advancedFilters={filterListToTree(
-            filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
-            "and"
-          )}
-        />
-      );
-    } else if (mode === "costs") {
-      return (
-        <CostPanel
-          costOverTime={overTimeData.costs.data ?? "loading"}
-          timeMap={getTimeMap(timeIncrement)}
-          advancedFilters={filterListToTree(
-            filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
-            "and"
-          )}
-        />
-      );
-    } else if (mode === "errors") {
-      return (
-        <ErrorsPanel
-          errorsOverTime={overTimeData.errors.data ?? "loading"}
-          errorMetrics={errorMetrics.errorCodes}
-        />
-      );
-    }
+  const combineRequestsAndErrors = () => {
+    // combine the requests and errors into one object formatted {time: Date, requests: number, errors: number}
+    const combined: DoubleAreaChartData[] = [];
+    overTimeData.errors.data?.data?.forEach((r) => {
+      const existing = combined.find((c) => c.time === r.time);
+      if (existing) {
+        existing.value2 = r.count;
+      } else {
+        combined.push({
+          time: r.time,
+          value2: r.count,
+          value1: 0,
+        });
+      }
+    });
+    overTimeData.requests.data?.data?.forEach((r) => {
+      const existing = combined.find((c) => c.time === r.time);
+      if (existing) {
+        existing.value1 = r.count;
+      } else {
+        combined.push({
+          time: r.time,
+          value1: r.count,
+          value2: 0,
+        });
+      }
+    });
+    return combined;
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
-    {
-      value: metrics.totalCost.data?.data
-        ? `$${metrics.totalCost.data?.data.toFixed(2)}`
-        : "$0.00",
-      label: "Total Cost",
-      labelUnits: "(estimated)",
-      icon: CurrencyDollarIcon,
-      isLoading: metrics.totalCost.isLoading,
-      onInformationHref: "https://docs.helicone.ai/faq/how-we-calculate-cost",
-    },
-    {
-      value: +(metrics.totalRequests?.data?.data?.toFixed(2) ?? 0),
-      label: "Total Requests",
-      icon: TableCellsIcon,
-      isLoading: metrics.totalRequests.isLoading,
-    },
     {
       value:
         metrics.totalCost.data?.data && metrics.totalRequests?.data?.data
@@ -167,13 +141,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       icon: ChartBarIcon,
       isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
     },
-    {
-      value: metrics.averageLatency.data?.data?.toFixed(2) ?? "n/a",
-      label: "Avg Latency/Req",
-      labelUnits: "ms",
-      icon: CloudArrowDownIcon,
-      isLoading: metrics.averageLatency.isLoading,
-    },
+
     {
       value:
         metrics.averageTokensPerRequest?.data?.data &&
@@ -316,9 +284,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
           />
 
-          {isAnyLoading ? (
-            <LoadingAnimation title={"Loading Data..."} />
-          ) : metrics.totalRequests?.data?.data === 0 ? (
+          {metrics.totalRequests?.data?.data === 0 ? (
             <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
               <TableCellsIcon className="h-12 w-12 text-gray-400" />
               <p className="text-xl font-semibold text-gray-500">
@@ -331,6 +297,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 {/* {metricsData.map((m, i) => (
                   <MetricsPanel key={i} metric={m} />
                 ))} */}
+                {/* Combine the requests and error into one graph */}
                 <MainGraph
                   isLoading={overTimeData.requests.isLoading}
                   dataOverTime={
@@ -339,9 +306,18 @@ const DashboardPage = (props: DashboardPageProps) => {
                       value: r.count,
                     })) ?? []
                   }
+                  doubleLineOverTime={combineRequestsAndErrors()}
                   timeMap={getTimeMap(timeIncrement)}
                   title={"Requests"}
-                  value={+(metrics.totalRequests?.data?.data?.toFixed(2) ?? 0)}
+                  value={
+                    metrics.totalRequests?.data?.data
+                      ? `${formatNumberString(
+                          metrics.totalRequests?.data?.data.toFixed(2)
+                        )}`
+                      : "0"
+                  }
+                  valueLabel={"requests"}
+                  type="double-line"
                 />
                 <MainGraph
                   isLoading={overTimeData.requests.isLoading}
@@ -355,24 +331,29 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={"Costs"}
                   value={
                     metrics.totalCost.data?.data
-                      ? `$${metrics.totalCost.data?.data.toFixed(2)}`
+                      ? `$${formatNumberString(
+                          metrics.totalCost.data?.data.toFixed(2)
+                        )}`
                       : "$0.00"
                   }
+                  valueLabel={"cost"}
+                  type="bar"
                 />
-                <CostPanel
-                  costOverTime={overTimeData.costs.data ?? "loading"}
+                <MainGraph
+                  isLoading={overTimeData.errors.isLoading}
+                  dataOverTime={
+                    overTimeData.latency.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.duration,
+                    })) ?? []
+                  }
                   timeMap={getTimeMap(timeIncrement)}
-                  advancedFilters={filterListToTree(
-                    filterUIToFilterLeafs(
-                      userTableFilters,
-                      debouncedAdvancedFilters
-                    ),
-                    "and"
-                  )}
-                />
-                <ErrorsPanel
-                  errorsOverTime={overTimeData.errors.data ?? "loading"}
-                  errorMetrics={errorMetrics.errorCodes}
+                  title={"Latency"}
+                  value={`${
+                    metrics.averageLatency.data?.data?.toFixed(2) ?? 0
+                  } ms / req`}
+                  valueLabel={"latency"}
+                  type={"area"}
                 />
               </div>
             </>

@@ -24,6 +24,7 @@ import {
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -118,6 +119,16 @@ export const useDashboardPage = ({
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ cost: +d.cost, time: new Date(d.time) }))
+        );
+      },
+    }),
+    latency: useBackendMetricCall<Result<LatencyOverTime[], string>>({
+      params,
+      endpoint: "/api/metrics/latencyOverTime",
+      key: "latencyOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ duration: +d.duration, time: new Date(d.time) }))
         );
       },
     }),
