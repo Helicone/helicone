@@ -298,63 +298,69 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <MetricsPanel key={i} metric={m} />
                 ))} */}
                 {/* Combine the requests and error into one graph */}
-                <MainGraph
-                  isLoading={overTimeData.requests.isLoading}
-                  dataOverTime={
-                    overTimeData.requests.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.count,
-                    })) ?? []
-                  }
-                  doubleLineOverTime={combineRequestsAndErrors()}
-                  timeMap={getTimeMap(timeIncrement)}
-                  title={"Requests"}
-                  value={
-                    metrics.totalRequests?.data?.data
-                      ? `${formatNumberString(
-                          metrics.totalRequests?.data?.data.toFixed(2)
-                        )}`
-                      : "0"
-                  }
-                  valueLabel={"requests"}
-                  type="double-line"
-                />
-                <MainGraph
-                  isLoading={overTimeData.requests.isLoading}
-                  dataOverTime={
-                    overTimeData.costs.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.cost,
-                    })) ?? []
-                  }
-                  timeMap={getTimeMap(timeIncrement)}
-                  title={"Costs"}
-                  value={
-                    metrics.totalCost.data?.data
-                      ? `$${formatNumberString(
-                          metrics.totalCost.data?.data.toFixed(2)
-                        )}`
-                      : "$0.00"
-                  }
-                  valueLabel={"cost"}
-                  type="bar"
-                />
-                <MainGraph
-                  isLoading={overTimeData.errors.isLoading}
-                  dataOverTime={
-                    overTimeData.latency.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.duration,
-                    })) ?? []
-                  }
-                  timeMap={getTimeMap(timeIncrement)}
-                  title={"Latency"}
-                  value={`${
-                    metrics.averageLatency.data?.data?.toFixed(2) ?? 0
-                  } ms / req`}
-                  valueLabel={"latency"}
-                  type={"area"}
-                />
+                <div className="col-span-4 xl:col-span-2 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.requests.isLoading}
+                    dataOverTime={
+                      overTimeData.requests.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.count,
+                      })) ?? []
+                    }
+                    doubleLineOverTime={combineRequestsAndErrors()}
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Requests"}
+                    value={
+                      metrics.totalRequests?.data?.data
+                        ? `${formatNumberString(
+                            metrics.totalRequests?.data?.data.toFixed(2)
+                          )}`
+                        : "0"
+                    }
+                    valueLabel={"requests"}
+                    type="double-line"
+                  />
+                </div>{" "}
+                <div className="col-span-2 xl:col-span-1 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.requests.isLoading}
+                    dataOverTime={
+                      overTimeData.costs.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.cost,
+                      })) ?? []
+                    }
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Costs"}
+                    value={
+                      metrics.totalCost.data?.data
+                        ? `$${formatNumberString(
+                            metrics.totalCost.data?.data.toFixed(2)
+                          )}`
+                        : "$0.00"
+                    }
+                    valueLabel={"cost"}
+                    type="bar"
+                  />
+                </div>
+                <div className="col-span-2 xl:col-span-1 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.errors.isLoading}
+                    dataOverTime={
+                      overTimeData.latency.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.duration,
+                      })) ?? []
+                    }
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Latency"}
+                    value={`${
+                      metrics.averageLatency.data?.data?.toFixed(2) ?? 0
+                    } ms / req`}
+                    valueLabel={"latency"}
+                    type={"area"}
+                  />
+                </div>
               </div>
             </>
           )}
