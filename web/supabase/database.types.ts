@@ -48,6 +48,26 @@ export interface Database {
           request_id?: string
         }
       }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          feature: string
+          id: number
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature: string
+          id?: number
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature?: string
+          id?: number
+          org_id?: string
+        }
+      }
       feedback: {
         Row: {
           boolean_value: boolean | null
@@ -200,19 +220,16 @@ export interface Database {
         Row: {
           created_at: string | null
           member: string
-          org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
           member: string
-          org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
           member?: string
-          org_role?: string
           organization?: string
         }
       }
@@ -396,6 +413,55 @@ export interface Database {
           user?: string
         }
       }
+      webhook_subscriptions: {
+        Row: {
+          created_at: string | null
+          event: string
+          id: number
+          payload_type: Json
+          webhook_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          event: string
+          id?: number
+          payload_type: Json
+          webhook_id: number
+        }
+        Update: {
+          created_at?: string | null
+          event?: string
+          id?: number
+          payload_type?: Json
+          webhook_id?: number
+        }
+      }
+      webhooks: {
+        Row: {
+          created_at: string | null
+          destination: string
+          id: number
+          is_verified: boolean
+          org_id: string
+          txt_record: string
+        }
+        Insert: {
+          created_at?: string | null
+          destination: string
+          id?: number
+          is_verified?: boolean
+          org_id: string
+          txt_record: string
+        }
+        Update: {
+          created_at?: string | null
+          destination?: string
+          id?: number
+          is_verified?: boolean
+          org_id?: string
+          txt_record?: string
+        }
+      }
     }
     Views: {
       metrics_rbac: {
@@ -490,13 +556,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
@@ -504,13 +570,13 @@ export interface Database {
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
