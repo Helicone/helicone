@@ -4,8 +4,8 @@ import {
   CartesianAxis,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
+  Area,
+  AreaChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -15,20 +15,23 @@ import { ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { getUSDate, getUSDateShort } from "../utils/utils";
 import { clsx } from "../clsx";
 
-export interface BarChartData {
+export interface DoubleAreaChartData {
   time: Date;
-  value: number;
+  value1: number;
+  value2: number;
 }
 
-export const RenderBarChart = ({
+export const RenderDoubleAreaChart = ({
   data,
   timeMap,
-  valueLabel,
+  valueLabel1,
+  valueLabel2,
   labelFormatter,
 }: {
-  data: BarChartData[];
+  data: DoubleAreaChartData[];
   timeMap: (date: Date) => string;
-  valueLabel?: string;
+  valueLabel1?: string;
+  valueLabel2?: string;
   labelFormatter?: (value: string) => string;
 }) => {
   const chartData = data.map((d) => ({
@@ -38,7 +41,7 @@ export const RenderBarChart = ({
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart width={500} height={300} data={chartData} syncId="dashboard">
+      <AreaChart width={500} height={300} data={chartData} syncId="dashboard">
         <CartesianAxis strokeDasharray={"3 3"} />
         <XAxis dataKey="time" tickSize={4} fontSize={12} />
         <YAxis hide />
@@ -47,8 +50,21 @@ export const RenderBarChart = ({
             labelFormatter ? labelFormatter(value.toString()) : value.toString()
           }
         />
-        <Bar dataKey="value" fill="#0ea4e9" name={valueLabel} />
-      </BarChart>
+        <Area
+          type="monotone"
+          dataKey="value1"
+          stroke="#4CAF50"
+          fill="#E8F5E9"
+          name={valueLabel1}
+        />
+        <Area
+          type="monotone"
+          dataKey="value2"
+          stroke="#F44336"
+          fill="#FFEBEE"
+          name={valueLabel2}
+        />
+      </AreaChart>
     </ResponsiveContainer>
   );
 };
