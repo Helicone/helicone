@@ -66,7 +66,7 @@ export class RequestBodyParser {
 export interface HandlerWrapperOptions<RetVal>
   extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
-  vault: IVault;
+  vault: IVault | null;
   userData: {
     userId: string;
     orgId: string;
@@ -83,8 +83,7 @@ export interface HandlerWrapperOptionsAPI<RetVal>
 
 export function withAuth<T>(
   handler: (supabaseServer: HandlerWrapperOptions<T>) => Promise<void>,
-  permissions?: Permission[],
-  includeVault: boolean = false
+  permissions?: Permission[]
 ) {
   return async (
     req: NextApiRequest,
@@ -113,7 +112,10 @@ export function withAuth<T>(
       return;
     }
 
-    const vault = new HashiCorpVault();
+    let vault: IVault | null = null;
+    if (process.env.VAULT_ENABLED === "true") {
+      vault = new HashiCorpVault();
+    }
 
     await handler({
       req,

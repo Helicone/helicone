@@ -2,6 +2,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
+import { hashAuth } from "../../../lib/hashClient";
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
@@ -38,6 +39,8 @@ async function handler({
     return;
   }
 
+  const heliconeProxyKeyHash = await hashAuth(heliconeProxyKey);
+
   const providerKey = await supabaseServer
     .from("provider_keys")
     .select("*")
@@ -58,7 +61,7 @@ async function handler({
     .insert({
       org_id: userData.orgId,
       helicone_proxy_key_name: heliconeProxyKeyName,
-      helicone_proxy_key: heliconeProxyKey,
+      helicone_proxy_key: heliconeProxyKeyHash,
       provider_key_id: providerKey.data.id,
     })
     .select("*")

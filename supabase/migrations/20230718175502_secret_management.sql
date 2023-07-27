@@ -4,12 +4,11 @@ CREATE TABLE provider_keys (
     provider_name TEXT NOT NULL,
     provider_key_name TEXT NOT NULL,
     vault_key_id uuid NOT NULL,
-    soft_delete BOOLEAN NOT NULL DEFAULT FALSE,
-    CONSTRAINT org_provider_key_name_uniq UNIQUE (org_id, provider_key_name)
+    soft_delete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX org_provider_key_name_not_deleted_uniq
-    ON provider_keys (org_id, provider_key_name)
+    ON public.provider_keys (org_id, provider_key_name)
     WHERE soft_delete = FALSE;
 
 ALTER TABLE
