@@ -7,6 +7,43 @@
 # python3 -m pip install openai
 # apt install -y python3-pip
 # export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+# ...
+
+# Test the endpoint
+test_endpoint() {
+  echo "Testing the endpoint..."
+
+  # Step 1: Install Python requests library
+  python3 -m pip install requests
+
+  # Step 2: Request the endpoint and check for "Hello World!"
+  python3 -c "
+import requests
+response = requests.get('https://api.openai.com/helicone/test')
+print('First response body:', response.text)
+if 'Hello World!' in response.text:
+  print('Test passed.')
+else:
+  print('Test failed.')
+  "
+
+  # Step 3: Install Helicone library
+  python3 -m pip install helicone
+
+  # Step 4: Write a custom property and re-request the endpoint
+  python3 -c "
+from helicone.lock import HeliconeLockManager
+import requests
+HeliconeLockManager.write_custom_property('job_id', '1')
+response = requests.get('https://api.openai.com/helicone/test')
+print('Second response body:', response.text)
+if 'job_id' in response.text:
+  print('Test passed.')
+else:
+  print('Test failed.')
+  "
+}
+
 
 # Function to create the required directories and files
 create_files() {
@@ -163,6 +200,7 @@ create_files
 case $1 in
    start)
       start_proxy
+      test_endpoint
       ;;
    stop)
       stop_proxy
