@@ -22,23 +22,6 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
   console.log("provider", provider);
   // console.log("router", router);
 
-  router.get("/helicone/test", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    const properties = requestWrapper.heliconeHeaders.heliconeProperties;
-    return new Response(
-      JSON.stringify({
-        test: "Hello World!",
-        properties: {
-          ...properties,
-        },
-      }),
-      {
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
-  });
-
   //TODO remove this
   router.post("/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     return await handleLoggingEndpoint(requestWrapper, env);
