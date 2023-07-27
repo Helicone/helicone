@@ -35,6 +35,7 @@ else:
   python3 -c "
 from helicone.lock import HeliconeLockManager
 import requests
+import os
 HeliconeLockManager.write_custom_property('job_id', '1')
 with open(os.path.expanduser('~/.helicone/custom_properties.json'), 'r') as f:
   print('Custom properties:', f.read())
