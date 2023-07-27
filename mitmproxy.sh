@@ -88,7 +88,7 @@ start_proxy() {
   echo "Step 2: Adding entry to /etc/hosts..."
   echo '127.0.0.1 api.openai.com' | sudo tee -a /etc/hosts
 
-  pip install lockfile
+  python3 -m pip install lockfile
   # Create the add_headers.py file
   # Create the add_headers.py file
   cat <<EOF > ~/.helicone/proxy_dir/add_headers.py
@@ -137,7 +137,7 @@ EOF
   sudo chmod 500 /etc/authbind/byport/443
   sudo chown $USER /etc/authbind/byport/443
 
-  nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
+  nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py > ~/.helicone/mitmproxy.log 2>&1 &
   echo $! | tee -a ~/.helicone/proxy_pid
   # Wait for the proxy to start
   for i in {1..120}
