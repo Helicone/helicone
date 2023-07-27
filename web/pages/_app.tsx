@@ -1,4 +1,4 @@
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
@@ -31,9 +31,7 @@ export default function MyApp({
 }>) {
   const queryClient = new QueryClient();
   // Create a new supabase browser client on every first render.
-  // const [supabaseClient] = useState(() => createBrowserSupabaseClient());
-  const supabaseClient = createClientComponentClient();
-
+  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
   if (typeof window !== "undefined") {
     document.documentElement.classList.add("dark");
   }

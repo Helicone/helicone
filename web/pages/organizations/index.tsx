@@ -1,4 +1,7 @@
-import { createPagesServerClient, User } from "@supabase/auth-helpers-nextjs";
+import {
+  createServerSupabaseClient,
+  User,
+} from "@supabase/auth-helpers-nextjs";
 
 import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../../components/shared/authHeader";
@@ -28,7 +31,7 @@ export default Org;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
-  const supabase = createPagesServerClient(ctx);
+  const supabase = createServerSupabaseClient(ctx);
   // Check if we have a session
   const {
     data: { session },
