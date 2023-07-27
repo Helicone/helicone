@@ -7,6 +7,52 @@
 # python3 -m pip install openai
 # apt install -y python3-pip
 # export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+# ...
+
+# Test the endpoint
+test_endpoint() {
+  echo "Testing the endpoint..."
+
+  # Step 1: Install Python requests library
+  python3 -m pip install requests
+
+  # Step 2: Request the endpoint and check for "Hello World!"
+  python3 -c "
+import requests
+response = requests.get('https://api.openai.com/helicone/test')
+print('First response body:', response.text)
+if 'Hello World!' in response.text:
+  print('Test passed.')
+else:
+  print('Test failed.')
+  with open(os.path.expanduser('~/.helicone/mitmproxy.log'), 'r') as f:
+    print('Mitmproxy log:', f.read())
+  exit(1)
+  "
+
+  # Step 3: Install Helicone library
+  python3 -m pip install helicone
+
+  # Step 4: Write a custom property and re-request the endpoint
+  python3 -c "
+from helicone.lock import HeliconeLockManager
+import requests
+import os
+HeliconeLockManager.write_custom_property('job_id', '1')
+with open(os.path.expanduser('~/.helicone/custom_properties.json'), 'r') as f:
+  print('Custom properties:', f.read())
+response = requests.get('https://api.openai.com/helicone/test')
+print('Second response body:', response.text)
+if 'job_id' in response.text:
+  print('Test passed.')
+else:
+  print('Test failed.')
+  with open(os.path.expanduser('~/.helicone/mitmproxy.log'), 'r') as f:
+    print('Mitmproxy log:', f.read())
+  exit(1)
+  "
+}
+
 
 # Function to create the required directories and files
 create_files() {
@@ -42,15 +88,16 @@ start_proxy() {
   echo "Step 2: Adding entry to /etc/hosts..."
   echo '127.0.0.1 api.openai.com' | sudo tee -a /etc/hosts
 
-  pip install lockfile
   # Create the add_headers.py file
   # Create the add_headers.py file
   cat <<EOF > ~/.helicone/proxy_dir/add_headers.py
 import os
 import json
-import lockfile
+import time
 
 def request(flow):
+    print("----------------------------")
+    print("Adding headers to request...")
     api_key = os.environ.get("HELICONE_API_KEY")
     if not api_key:
         api_key = open(os.path.expanduser("~/.helicone/api_key")).read().strip()
@@ -67,12 +114,30 @@ def request(flow):
             flow.request.headers[header_name] = os.environ.get(key)
     json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")
     lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")
-    with lockfile.LockFile(lockfile_path):
+    print("json_file_path: ", json_file_path)
+
+    # Lock file with timeout
+    start_time = time.time()
+    while os.path.exists(lockfile_path):
+        if time.time() - start_time > 0.5:  # timeout after 0.5 seconds
+            raise Exception("Could not acquire lock, giving up after 0.5 seconds.")
+        time.sleep(0.01)  # wait a bit and retry
+    try:
+        open(lockfile_path, 'x').close()  # try to create lockfile
+    except FileExistsError:
+        pass  # someone else created it first
+
+    try:
         with open(json_file_path, "r") as json_file:
+            print("Reading custom properties from file...")
+            print("json_file: ", json_file)
             custom_properties = json.load(json_file)
+            print("custom_properties: ", custom_properties)
             for key, value in custom_properties.items():
                 print("Adding header: ", "Helicone-Property-" + key, " with value: ", value)
                 flow.request.headers["Helicone-Property-" + key] = value
+    finally:
+        os.remove(lockfile_path)  # release lock
 EOF
 
 
@@ -85,7 +150,7 @@ EOF
   sudo chmod 500 /etc/authbind/byport/443
   sudo chown $USER /etc/authbind/byport/443
 
-  nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py | tee -a ~/.helicone/mitmproxy.log 2>&1 &
+  nohup authbind --deep mitmweb --mode reverse:https://oai.hconeai.com:443 --listen-port 443 -s ~/.helicone/proxy_dir/add_headers.py > ~/.helicone/mitmproxy.log 2>&1 &
   echo $! | tee -a ~/.helicone/proxy_pid
   # Wait for the proxy to start
   for i in {1..120}
@@ -163,6 +228,7 @@ create_files
 case $1 in
    start)
       start_proxy
+      test_endpoint
       ;;
    stop)
       stop_proxy
