@@ -6,6 +6,7 @@ import { useOrg } from "../../shared/layout/organizationContext";
 import ThemedTable from "../../shared/themed/themedTable";
 import { useState } from "react";
 import { Result } from "../../../lib/result";
+import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 
 interface WebhooksPageProps {
   user: User;
@@ -16,7 +17,11 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   const { setNotification } = useNotification();
   const org = useOrg();
 
-  const { data: webhooks, refetch: refetchWebhooks } = useQuery({
+  const {
+    data: webhooks,
+    refetch: refetchWebhooks,
+    isLoading,
+  } = useQuery({
     queryKey: ["webhooks"],
     queryFn: async (query) => {
       return client
@@ -26,6 +31,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     },
     refetchOnWindowFocus: false,
   });
+
   const [selectedModel, setSelectedModel] = useState<{
     destination: string;
   }>();

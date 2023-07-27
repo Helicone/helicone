@@ -54,7 +54,7 @@ const ThemedTable = (props: ThemedTableProps) => {
         <tbody>
           {rows &&
             rows.map((row, rowIdx) => (
-              <tr key={row.id}>
+              <tr key={row.id} className="hover:bg-gray-200">
                 {columns.map((col, colIdx) => {
                   if (colIdx === 0) {
                     return (
@@ -65,7 +65,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                           "relative py-2.5 pl-4 sm:pl-6 pr-3 text-sm"
                         )}
                       >
-                        <div className="font-medium text-gray-900 overflow-ellipsis max-w-[120px] overflow-hidden">
+                        <div className="font-medium text-gray-900 overflow-hidden">
                           {row[col.key] || "n/a"}
                         </div>
                         {rowIdx !== 0 ? (
@@ -80,7 +80,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-gray-200",
                           col.hidden ? "hidden" : "",
-                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell overflow-ellipsis max-w-[120px] overflow-hidden"
+                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate max-w-[120px]"
                         )}
                       >
                         {col.key === "cost"
@@ -113,10 +113,10 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {deleteHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-red-600 p-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => deleteHandler(row)}
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      <TrashIcon className="h-3 w-3" />
                     </button>
                   )}
 
