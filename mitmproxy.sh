@@ -25,6 +25,7 @@ if 'Hello World!' in response.text:
   print('Test passed.')
 else:
   print('Test failed.')
+  exit(1)
   "
 
   # Step 3: Install Helicone library
@@ -35,12 +36,15 @@ else:
 from helicone.lock import HeliconeLockManager
 import requests
 HeliconeLockManager.write_custom_property('job_id', '1')
+with open(os.path.expanduser('~/.helicone/custom_properties.json'), 'r') as f:
+  print('Custom properties:', f.read())
 response = requests.get('https://api.openai.com/helicone/test')
 print('Second response body:', response.text)
 if 'job_id' in response.text:
   print('Test passed.')
 else:
   print('Test failed.')
+  exit(1)
   "
 }
 
