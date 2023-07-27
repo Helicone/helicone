@@ -17,6 +17,11 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
+  if (vault === null) {
+    res.status(500).json({ error: "Failed to connect to vault", data: null });
+    return;
+  }
+
   const keyIds = await supabaseServer
     .from("provider_keys")
     .select("*")
@@ -48,15 +53,17 @@ async function handler({
     return;
   }
 
-  const decryptedKeys: DecryptedProviderKey[] = keyIds.data.map((keyData, index) => {
-    return {
-      id: keyData.id,
-      org_id: keyData.org_id,
-      provider_key: keys[index]?.data || null,
-      provider_name: keyData.provider_name,
-      provider_key_name: keyData.provider_key_name
-    };
-  });
+  const decryptedKeys: DecryptedProviderKey[] = keyIds.data.map(
+    (keyData, index) => {
+      return {
+        id: keyData.id,
+        org_id: keyData.org_id,
+        provider_key: keys[index]?.data || null,
+        provider_name: keyData.provider_name,
+        provider_key_name: keyData.provider_key_name,
+      };
+    }
+  );
 
   res.status(200).json({
     data: decryptedKeys,

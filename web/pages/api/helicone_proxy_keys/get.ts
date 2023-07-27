@@ -17,6 +17,11 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
+  if (vault === null) {
+    res.status(500).json({ error: "Failed to connect to vault", data: null });
+    return;
+  }
+
   const query = `
   SELECT map.id, map.org_id, map.helicone_proxy_key, map.helicone_proxy_key_name, map.provider_key_id,
   key.provider_name, key.vault_key_id, key.provider_key_name

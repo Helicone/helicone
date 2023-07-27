@@ -17,6 +17,11 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
+  if (vault === null) {
+    res.status(500).json({ error: "Failed to connect to vault", data: null });
+    return;
+  }
+
   const { providerName, providerKey, providerKeyName } = req.body as {
     providerName: string;
     providerKey: string;
