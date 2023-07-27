@@ -37,6 +37,34 @@ export interface Database {
           }
         ]
       }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          feature: string
+          id: number
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature: string
+          id?: number
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature?: string
+          id?: number
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flags_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       feedback: {
         Row: {
           boolean_value: boolean | null
@@ -134,84 +162,6 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
-      }
-      feature_flags: {
-        Row: {
-          created_at: string | null
-          feature: string
-          id: number
-          org_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          feature: string
-          id?: number
-          org_id: string
-        }
-        Update: {
-          created_at?: string | null
-          feature?: string
-          id?: number
-          org_id?: string
-        }
-      }
-      feedback: {
-        Row: {
-          boolean_value: boolean | null
-          categorical_value: string | null
-          created_at: string | null
-          created_by: string
-          feedback_metric_id: number
-          float_value: number | null
-          id: number
-          response_id: string
-          string_value: string | null
-        }
-        Insert: {
-          boolean_value?: boolean | null
-          categorical_value?: string | null
-          created_at?: string | null
-          created_by: string
-          feedback_metric_id: number
-          float_value?: number | null
-          id?: number
-          response_id: string
-          string_value?: string | null
-        }
-        Update: {
-          boolean_value?: boolean | null
-          categorical_value?: string | null
-          created_at?: string | null
-          created_by?: string
-          feedback_metric_id?: number
-          float_value?: number | null
-          id?: number
-          response_id?: string
-          string_value?: string | null
-        }
-      }
-      feedback_metrics: {
-        Row: {
-          created_at: string
-          data_type: string
-          helicone_api_key_id: number
-          id: number
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          data_type: string
-          helicone_api_key_id: number
-          id?: number
-          name: string
-        }
-        Update: {
-          created_at?: string
-          data_type?: string
-          helicone_api_key_id?: number
-          id?: number
-          name?: string
-        }
       }
       helicone_api_keys: {
         Row: {
@@ -522,6 +472,7 @@ export interface Database {
           formatted_prompt_id: string | null
           helicone_api_key_id: number | null
           helicone_org_id: string | null
+          helicone_proxy_key_id: string | null
           helicone_user: string | null
           id: string
           path: string
@@ -538,6 +489,7 @@ export interface Database {
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
+          helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
           path: string
@@ -554,6 +506,7 @@ export interface Database {
           formatted_prompt_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
+          helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
           path?: string
@@ -580,6 +533,12 @@ export interface Database {
             foreignKeyName: "request_helicone_org_id_fkey"
             columns: ["helicone_org_id"]
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_proxy_key_id_fkey"
+            columns: ["helicone_proxy_key_id"]
+            referencedRelation: "helicone_proxy_keys"
             referencedColumns: ["id"]
           },
           {
@@ -707,6 +666,14 @@ export interface Database {
           payload_type?: Json
           webhook_id?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_subscriptions_webhook_id_fkey"
+            columns: ["webhook_id"]
+            referencedRelation: "webhooks"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       webhooks: {
         Row: {
@@ -733,6 +700,14 @@ export interface Database {
           org_id?: string
           txt_record?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "webhooks_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

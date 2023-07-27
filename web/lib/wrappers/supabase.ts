@@ -56,6 +56,7 @@ export class SupabaseServerWrapper<T> {
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY])
       .single();
+
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
       return {
         error: "Unauthorized",
@@ -76,6 +77,7 @@ export class SupabaseServerWrapper<T> {
       };
     }
 
+    // If not owner, check if member
     const orgMember = await this.client
       .from("organization_member")
       .select("*")
@@ -95,7 +97,7 @@ export class SupabaseServerWrapper<T> {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
         user: user.data.user,
-        role: "member", // todo: add role to orgMember
+        role: orgMember.data.org_role,
       },
       error: null,
     };
