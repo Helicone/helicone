@@ -49,3 +49,5 @@ FOR EACH ROW EXECUTE FUNCTION soft_delete_helicone_proxy_keys();
 
 ALTER TABLE public.request 
 ADD COLUMN helicone_proxy_key_id uuid NULL REFERENCES public.helicone_proxy_keys(id);
+
+CREATE EXTENSION IF NOT EXISTS pgsodium;

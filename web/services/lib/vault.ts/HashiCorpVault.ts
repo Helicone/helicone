@@ -44,7 +44,6 @@ class HashiCorpVault implements IVault {
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
     try {
       const data = await this.vault.read(vaultPath);
-      console.log(`data is ${JSON.stringify(data)}`);
       return { error: null, data: data.data?.data?.value ?? "" };
     } catch (error: any) {
       console.error("Error reading from vault", error);

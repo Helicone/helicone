@@ -1,8 +1,8 @@
+import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { hashAuth } from "../../../lib/hashClient";
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
@@ -39,7 +39,9 @@ async function handler({
     return;
   }
 
-  const heliconeProxyKeyHash = await hashAuth(heliconeProxyKey);
+  type HashedPasswordRow = {
+    hashed_password: string;
+  };
 
   const providerKey = await supabaseServer
     .from("provider_keys")
@@ -54,6 +56,17 @@ async function handler({
     return;
   }
 
+  const query = `SELECT encode(pgsodium.crypto_pwhash_str($1), 'hex') as hashed_password;`;
+  const result = await dbExecute<HashedPasswordRow>(query, [heliconeProxyKey]);
+
+  if (result.error || !result.data || result.data.length === 0) {
+    res.status(500).json({
+      error: result.error ?? "Failed to retrieve hashed api key",
+      data: null,
+    });
+    return;
+  }
+
   // Constraint prevents provider key mapping twice to same helicone proxy key
   // e.g. HeliconeKey1 can't map to OpenAIKey1 and OpenAIKey2
   const newProxyMapping = await supabaseServer
@@ -61,7 +74,7 @@ async function handler({
     .insert({
       org_id: userData.orgId,
       helicone_proxy_key_name: heliconeProxyKeyName,
-      helicone_proxy_key: heliconeProxyKeyHash,
+      helicone_proxy_key: result.data[0].hashed_password,
       provider_key_id: providerKey.data.id,
     })
     .select("*")
@@ -75,12 +88,10 @@ async function handler({
 
   if (newProxyMapping.data === null) {
     console.error("Failed to insert proxy key mapping, no data returned");
-    res
-      .status(500)
-      .json({
-        error: "Failed to insert proxy key mapping, no data returned",
-        data: null,
-      });
+    res.status(500).json({
+      error: "Failed to insert proxy key mapping, no data returned",
+      data: null,
+    });
     return;
   }
 
