@@ -25,6 +25,8 @@ if 'Hello World!' in response.text:
   print('Test passed.')
 else:
   print('Test failed.')
+  with open(os.path.expanduser('~/.helicone/mitmproxy.log'), 'r') as f:
+    print('Mitmproxy log:', f.read())
   exit(1)
   "
 
@@ -45,6 +47,8 @@ if 'job_id' in response.text:
   print('Test passed.')
 else:
   print('Test failed.')
+  with open(os.path.expanduser('~/.helicone/mitmproxy.log'), 'r') as f:
+    print('Mitmproxy log:', f.read())
   exit(1)
   "
 }
@@ -93,6 +97,8 @@ import json
 import lockfile
 
 def request(flow):
+    print("----------------------------")
+    print("Adding headers to request...")
     api_key = os.environ.get("HELICONE_API_KEY")
     if not api_key:
         api_key = open(os.path.expanduser("~/.helicone/api_key")).read().strip()
@@ -109,9 +115,13 @@ def request(flow):
             flow.request.headers[header_name] = os.environ.get(key)
     json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")
     lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")
+    print("json_file_path: ", json_file_path)
     with lockfile.LockFile(lockfile_path):
         with open(json_file_path, "r") as json_file:
+            print("Reading custom properties from file...")
+            print("json_file: ", json_file)
             custom_properties = json.load(json_file)
+            print("custom_properties: ", custom_properties)
             for key, value in custom_properties.items():
                 print("Adding header: ", "Helicone-Property-" + key, " with value: ", value)
                 flow.request.headers["Helicone-Property-" + key] = value
