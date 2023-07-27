@@ -12,7 +12,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
@@ -52,6 +52,7 @@ interface ThemedTableV5Props<T> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T) => void;
+  chart?: React.ReactNode;
 }
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
@@ -65,6 +66,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     timeFilter,
     sortable,
     onRowSelect,
+    chart,
   } = props;
 
   const router = useRouter();
@@ -127,7 +129,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         }
         rows={exportData || []}
       />
-
+      {chart}
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (

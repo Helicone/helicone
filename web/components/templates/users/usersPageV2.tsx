@@ -24,6 +24,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedModal from "../../shared/themed/themedModal";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
+import { RenderBarChart } from "../../shared/metrics/barChart";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -70,15 +71,16 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           last_active: "desc",
         };
 
-  const { users, count, from, isLoading, to, refetch } = useUsers(
-    currentPage,
-    currentPageSize,
-    sortLeaf,
-    filterListToTree(
-      filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
-      "and"
-    )
-  );
+  const { users, count, from, isLoading, to, refetch, dailyActiveUsers } =
+    useUsers(
+      currentPage,
+      currentPageSize,
+      sortLeaf,
+      filterListToTree(
+        filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
+        "and"
+      )
+    );
   const { setNotification } = useNotification();
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
@@ -95,6 +97,33 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     <>
       <AuthHeader title={"Users"} />
       <div className="flex flex-col space-y-4">
+        <div className="grid grid-cols-5 gap-4 h-96">
+          <div className="col-span-5 md:col-span-5 bg-white border border-gray-300 rounded-lg">
+            <div className="flex flex-col space-y-4 py-6">
+              <h3 className="text-lg font-semibold text-gray-900 text-center">
+                Daily Active users
+              </h3>
+              <div className="h-72 px-4">
+                {isLoading ? (
+                  <div className="h-full w-full flex-col flex p-8">
+                    <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
+                  </div>
+                ) : (
+                  <RenderBarChart
+                    data={
+                      dailyActiveUsers?.data?.map((r) => ({
+                        time: new Date(r.time_step),
+                        value: r.user_count_step,
+                      })) ?? []
+                    }
+                    timeMap={(date) => date.toLocaleString()}
+                    valueLabel="user count"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
         <ThemedTableV5
           defaultData={users}
           defaultColumns={INITIAL_COLUMNS}

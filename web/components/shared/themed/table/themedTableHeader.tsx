@@ -1,4 +1,8 @@
-import { FunnelIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
+import {
+  BoltIcon,
+  FunnelIcon,
+  ViewColumnsIcon,
+} from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
@@ -11,6 +15,9 @@ import { ThemedPill } from "../themedPill";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "../../../templates/requestsV2/exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
+import { Toggle } from "../themedToggle";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import useNotification from "../../notification/useNotification";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -41,6 +48,7 @@ interface ThemedTableHeaderProps<T> {
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
+  const { setNotification } = useNotification();
   const { rows, columnsFilter, timeFilter, advancedFilters } = props;
 
   const [showFilters, setShowFilters] = useState(false);
@@ -54,6 +62,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     setShowFilters(!showFilters);
     window.localStorage.setItem("showFilters", JSON.stringify(!showFilters));
   };
+  const [isLive, setIsLive] = useLocalStorage("isLive", false);
 
   return (
     <div className="flex flex-col space-y-4">

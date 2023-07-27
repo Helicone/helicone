@@ -42,7 +42,8 @@ const useGetRequests = (
   currentPageSize: number,
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
-  isCached: boolean = false
+  isCached: boolean = false,
+  isLive: boolean = false
 ) => {
   return {
     requests: useQuery({
@@ -77,6 +78,7 @@ const useGetRequests = (
         );
       },
       refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 2_000 : false,
     }),
     count: useQuery({
       queryKey: [
@@ -103,6 +105,7 @@ const useGetRequests = (
         }).then((res) => res.json() as Promise<Result<number, string>>);
       },
       refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 2_000 : false,
     }),
   };
 };

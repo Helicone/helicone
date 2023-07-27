@@ -135,6 +135,84 @@ export interface Database {
           }
         ]
       }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          feature: string
+          id: number
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature: string
+          id?: number
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature?: string
+          id?: number
+          org_id?: string
+        }
+      }
+      feedback: {
+        Row: {
+          boolean_value: boolean | null
+          categorical_value: string | null
+          created_at: string | null
+          created_by: string
+          feedback_metric_id: number
+          float_value: number | null
+          id: number
+          response_id: string
+          string_value: string | null
+        }
+        Insert: {
+          boolean_value?: boolean | null
+          categorical_value?: string | null
+          created_at?: string | null
+          created_by: string
+          feedback_metric_id: number
+          float_value?: number | null
+          id?: number
+          response_id: string
+          string_value?: string | null
+        }
+        Update: {
+          boolean_value?: boolean | null
+          categorical_value?: string | null
+          created_at?: string | null
+          created_by?: string
+          feedback_metric_id?: number
+          float_value?: number | null
+          id?: number
+          response_id?: string
+          string_value?: string | null
+        }
+      }
+      feedback_metrics: {
+        Row: {
+          created_at: string
+          data_type: string
+          helicone_api_key_id: number
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          helicone_api_key_id: number
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          helicone_api_key_id?: number
+          id?: number
+          name?: string
+        }
+      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
@@ -299,16 +377,19 @@ export interface Database {
         Row: {
           created_at: string | null
           member: string
+          org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
           member: string
+          org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
           member?: string
+          org_role?: string
           organization?: string
         }
         Relationships: [
@@ -603,6 +684,55 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
+      }
+      webhook_subscriptions: {
+        Row: {
+          created_at: string | null
+          event: string
+          id: number
+          payload_type: Json
+          webhook_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          event: string
+          id?: number
+          payload_type: Json
+          webhook_id: number
+        }
+        Update: {
+          created_at?: string | null
+          event?: string
+          id?: number
+          payload_type?: Json
+          webhook_id?: number
+        }
+      }
+      webhooks: {
+        Row: {
+          created_at: string | null
+          destination: string
+          id: number
+          is_verified: boolean
+          org_id: string
+          txt_record: string
+        }
+        Insert: {
+          created_at?: string | null
+          destination: string
+          id?: number
+          is_verified?: boolean
+          org_id: string
+          txt_record: string
+        }
+        Update: {
+          created_at?: string | null
+          destination?: string
+          id?: number
+          is_verified?: boolean
+          org_id?: string
+          txt_record?: string
+        }
       }
     }
     Views: {

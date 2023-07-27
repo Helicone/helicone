@@ -23,6 +23,10 @@ import { useRouter } from "next/router";
 import { HeliconeRequest } from "../../../lib/api/request/request";
 import getRequestBuilder from "./builder/requestBuilder";
 import { Result } from "../../../lib/result";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import useNotification from "../../shared/notification/useNotification";
+import { Switch } from "@headlessui/react";
+import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -74,6 +78,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
   } = props;
+  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+  const { setNotification } = useNotification();
 
   // set the initial selected data on component load
   useEffect(() => {
@@ -162,7 +168,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       right: "all",
     },
     sortLeaf,
-    isCached
+    isCached,
+    isLive
   );
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
@@ -241,17 +248,70 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       <AuthHeader
         title={isCached ? "Cached Requests" : "Requests"}
         headerActions={
-          <button
-            onClick={() => refetch()}
-            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
-          >
-            <ArrowPathIcon
-              className={clsx(
-                isDataLoading ? "animate-spin" : "",
-                "h-5 w-5 inline"
-              )}
-            />
-          </button>
+          <div className="flex flex-row gap-2">
+            <button
+              onClick={() => refetch()}
+              className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+            >
+              <ArrowPathIcon
+                className={clsx(
+                  isDataLoading ? "animate-spin" : "",
+                  "h-5 w-5 inline"
+                )}
+              />
+            </button>
+          </div>
+        }
+        actions={
+          <>
+            <Switch.Group
+              as="div"
+              className="flex items-center space-x-3 hover:cursor-pointer"
+            >
+              <Switch.Label as="span" className="text-sm">
+                <span className="font-semibold text-gray-700">Live</span>
+              </Switch.Label>
+              <Switch
+                checked={isLive}
+                onChange={setIsLive}
+                className={clsx(
+                  isLive ? "bg-emerald-500" : "bg-gray-200",
+                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                )}
+              >
+                <span className="sr-only">Use setting</span>
+                <span
+                  className={clsx(
+                    isLive ? "translate-x-5" : "translate-x-0",
+                    "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                  )}
+                >
+                  <span
+                    className={clsx(
+                      isLive
+                        ? "opacity-0 duration-100 ease-out"
+                        : "opacity-100 duration-200 ease-in",
+                      "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                    )}
+                    aria-hidden="true"
+                  >
+                    <BoltSlashIcon className="h-3 w-3 text-gray-400" />
+                  </span>
+                  <span
+                    className={clsx(
+                      isLive
+                        ? "opacity-100 duration-200 ease-in"
+                        : "opacity-0 duration-100 ease-out",
+                      "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                    )}
+                    aria-hidden="true"
+                  >
+                    <BoltIcon className="h-3 w-3 text-emerald-500" />
+                  </span>
+                </span>
+              </Switch>
+            </Switch.Group>
+          </>
         }
       />
       <div className="flex flex-col space-y-4">

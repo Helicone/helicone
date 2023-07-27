@@ -4,10 +4,12 @@ import {
   ChevronDoubleRightIcon,
 } from "@heroicons/react/20/solid";
 import {
+  ArrowsPointingInIcon,
   ClipboardDocumentListIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Fragment, useState } from "react";
+import { Tooltip } from "@mui/material";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 
@@ -20,6 +22,12 @@ interface ThemedDrawerProps {
 
 const ThemedDrawer = (props: ThemedDrawerProps) => {
   const { open, setOpen, children, actions } = props;
+
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    setExpanded(false);
+  }, []);
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -50,19 +58,36 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
               >
                 <Dialog.Panel
                   className={clsx(
-                    "min-w-[25rem] w-full md:w-[33vw]",
-                    "pointer-events-auto w-screen"
+                    expanded
+                      ? "min-w-[60rem] w-full md:w-[33vw]"
+                      : "min-w-[35rem] w-full md:w-[33vw]",
+                    "pointer-events-auto ease-in-out duration-300"
                   )}
                 >
                   <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-2xl">
                     <div className="px-4 sm:px-6 flex flex-row justify-between">
                       <div className="flex flex-row items-center space-x-2 text-gray-500 w-full">
-                        <button
-                          onClick={() => setOpen(false)}
-                          className="hover:bg-gray-200 rounded-md -m-1 p-1"
-                        >
-                          <ChevronDoubleRightIcon className="h-5 w-5" />
-                        </button>
+                        <Tooltip title={"Close"}>
+                          <button
+                            onClick={() => setOpen(false)}
+                            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                          >
+                            <ChevronDoubleRightIcon className="h-5 w-5" />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
+                          <button
+                            onClick={() => setExpanded(!expanded)}
+                            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                          >
+                            {expanded ? (
+                              <ArrowsPointingInIcon className="h-5 w-5" />
+                            ) : (
+                              <ArrowsPointingOutIcon className="h-5 w-5" />
+                            )}
+                          </button>
+                        </Tooltip>
+
                         <div className="w-full">{actions}</div>
                       </div>
                     </div>

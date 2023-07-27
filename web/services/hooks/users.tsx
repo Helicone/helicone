@@ -6,6 +6,7 @@ import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
+import { DailyActiveUsers } from "../../pages/api/request_users/dau";
 
 const useUsers = (
   currentPage: number,
@@ -20,7 +21,16 @@ const useUsers = (
       const currentPageSize = query.queryKey[2] as number;
       const advancedFilter = query.queryKey[3];
       const sortLeaf = query.queryKey[4];
-      const [response, count] = await Promise.all([
+      const [dailyActiveUsers, response, count] = await Promise.all([
+        fetch("/api/request_users/dau", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: advancedFilter,
+          }),
+        }).then((res) => res.json() as Promise<DailyActiveUsers>),
         fetch("/api/request_users", {
           method: "POST",
           headers: {
@@ -44,15 +54,20 @@ const useUsers = (
         }).then((res) => res.json() as Promise<Result<number, string>>),
       ]);
 
-      return [response, count] as [
-        Result<UserMetric[], string>,
-        Result<number, string>
-      ];
+      return {
+        response,
+        count,
+        dailyActiveUsers,
+      };
     },
     refetchOnWindowFocus: false,
   });
 
-  const [response, count] = data || [null, null];
+  const { response, count, dailyActiveUsers } = data || {
+    response: undefined,
+    count: undefined,
+    dailyActiveUsers: undefined,
+  };
 
   const users = response?.data || [];
   const from = (currentPage - 1) * currentPageSize;
@@ -61,6 +76,7 @@ const useUsers = (
 
   return {
     users,
+    dailyActiveUsers,
     count: count?.data ?? 0,
     from,
     to,

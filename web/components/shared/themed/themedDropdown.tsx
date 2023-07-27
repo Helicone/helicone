@@ -11,6 +11,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 interface DropdownOption<T> {
   label: string;
   value: T;
+  subtitle?: string;
   category?: string;
 }
 
@@ -130,7 +131,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                     verticalAlign === "top"
                       ? "bottom-full mb-1.5"
                       : "top-full mt-1.5",
-                    "overflow-hidden absolute z-30 max-h-80 w-full min-w-[200px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    "absolute z-30 max-h-80 w-full min-w-[250px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
                   {Object.keys(categories).length >= 2 && (
@@ -163,7 +164,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   <Listbox.Options
                     className={clsx(
                       align === "left" ? "left-0" : "right-0",
-                      "max-h-[200px] overflow-y-auto"
+                      "max-h-[200px] divide-y divide-gray-200"
                     )}
                   >
                     {options.map((option, i) => (
@@ -186,11 +187,15 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                           <>
                             <span
                               className={clsx(
-                                selected ? "font-semibold" : "font-normal",
-                                "block truncate"
+                                "block truncate font-semibold text-md"
                               )}
                             >
                               {option.label}
+                              {option.subtitle && (
+                                <p className="text-gray-500 font-light whitespace-pre-wrap text-sm">
+                                  {option.subtitle}
+                                </p>
+                              )}
                             </span>
 
                             {selected ? (

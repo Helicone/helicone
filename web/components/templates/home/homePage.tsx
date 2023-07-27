@@ -175,7 +175,8 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <p className="underline">Sequoia Capital</p>
+              <p className="underline hidden lg:block">Sequoia Capital</p>
+              <p className="underline block lg:hidden">Sequoia</p>
               <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
             </Link>
             <div className="w-[1px] h-6 bg-gray-50" />
@@ -187,7 +188,8 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <p className="underline">Andreesson Horowitz</p>
+              <p className="underline hidden lg:block">Andreesson Horowitz</p>
+              <p className="underline block lg:hidden">a16z</p>
               <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
             </Link>
           </div>

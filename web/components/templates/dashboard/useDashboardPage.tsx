@@ -1,4 +1,4 @@
-import { UseQueryResult } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
 import { Result, resultMap } from "../../../lib/result";
 import {
@@ -17,6 +17,7 @@ import {
 } from "../../../services/hooks/useBackendFunction";
 import {
   FilterLeaf,
+  filterListToTree,
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
 import {
@@ -24,6 +25,9 @@ import {
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
+import { DailyActiveUsers } from "../../../pages/api/request_users/dau";
+import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -90,6 +94,7 @@ export const useDashboardPage = ({
     dbIncrement,
     timeZoneDifference,
   };
+
   const overTimeData = {
     errors: useBackendMetricCall<Result<ErrorOverTime[], string>>({
       params,
@@ -121,6 +126,26 @@ export const useDashboardPage = ({
         );
       },
     }),
+    latency: useBackendMetricCall<Result<LatencyOverTime[], string>>({
+      params,
+      endpoint: "/api/metrics/latencyOverTime",
+      key: "latencyOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ duration: +d.duration, time: new Date(d.time) }))
+        );
+      },
+    }),
+    users: useBackendMetricCall<Result<UsersOverTime[], string>>({
+      params,
+      endpoint: "/api/metrics/usersOverTime",
+      key: "usersOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+        );
+      },
+    }),
   };
 
   const metrics = {
@@ -142,30 +167,24 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/averageTokensPerRequest",
     }),
-  };
-
-  const errorMetrics = {
-    errorCodes: useBackendMetricCall<
-      UnPromise<ReturnType<typeof getErrorCodes>>
-    >({
+    activeUsers: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/errorCodes",
+      endpoint: "/api/metrics/activeUsers",
     }),
   };
 
   function isLoading(x: UseQueryResult<any>) {
     return x.isLoading || x.isFetching;
   }
+
   const isAnyLoading =
     Object.values(overTimeData).some(isLoading) ||
-    Object.values(metrics).some(isLoading) ||
-    Object.values(errorMetrics).some(isLoading);
+    Object.values(metrics).some(isLoading);
 
   return {
     filterMap,
     metrics,
     overTimeData,
-    errorMetrics,
     isAnyLoading,
   };
 };

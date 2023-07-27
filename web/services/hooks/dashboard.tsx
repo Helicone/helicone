@@ -98,7 +98,7 @@ const useGetAuthorized = (userId: string) => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("org.data?.data", org.data?.data);
+
   return {
     authorized: org.data?.data === "free" && Number(count?.data || 0) > 100_000,
     isLoading: isCountLoading || org.isLoading,

@@ -11,10 +11,16 @@ import EventListen from "./steps/eventListen";
 import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
+import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
 
 interface WelcomePageProps {
   user: User;
 }
+
+export type HeliconeMethod = "proxy" | "async";
+
+export type UnionProviderMethods = `${keyof Providers &
+  string}-${keyof IntegrationMethods & string}`;
 
 const WelcomePage = (props: WelcomePageProps) => {
   const { user } = props;
@@ -24,6 +30,7 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const [step, setStep] = useState<number>(0);
   const [apiKey, setApiKey] = useState<string>("");
+  const [providerMethod, setProviderMethod] = useState<UnionProviderMethods>();
 
   const nextStep = () => {
     setStep(step + 1);
@@ -31,16 +38,34 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const stepArray = [
     <GetStarted key={0} nextStep={nextStep} />,
-    <Features key={1} nextStep={nextStep} />,
+    // <Features key={1} nextStep={nextStep} />,
     <GenerateAPIKey
       key={2}
       nextStep={nextStep}
       apiKey={apiKey}
       setApiKey={setApiKey}
     />,
-    <CodeIntegration key={3} nextStep={nextStep} apiKey={apiKey} />,
-    <EventListen
+    <MethodFork
+      key={3}
+      nextStep={(provider, integration) => {
+        setProviderMethod(`${provider}-${integration}`);
+        nextStep();
+      }}
+      currentIntegration={
+        providerMethod?.split("-")[1] as keyof IntegrationMethods | undefined
+      }
+      currentProvider={
+        providerMethod?.split("-")[0] as keyof Providers | undefined
+      }
+    />,
+    <CodeIntegration
       key={4}
+      nextStep={nextStep}
+      apiKey={apiKey}
+      providerMethod={providerMethod}
+    />,
+    <EventListen
+      key={5}
       nextStep={async () => {
         const { data: userSettings, error: userSettingsError } =
           await supabaseClient

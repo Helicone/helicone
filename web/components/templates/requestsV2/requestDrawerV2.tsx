@@ -23,6 +23,13 @@ interface RequestDrawerV2Props {
   request?: NormalizedRequest;
   properties: string[];
 }
+function getPathName(url: string) {
+  try {
+    return new URL(url).pathname;
+  } catch (e) {
+    return url;
+  }
+}
 
 const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const { open, setOpen, request, properties } = props;
@@ -58,29 +65,33 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
       setOpen={setOpenHandler}
       actions={
         <div className="w-full flex flex-row justify-between pl-1">
-          <button
-            onClick={() => {
-              if (request) {
-                router.push("/playground?request=" + request.id);
-              }
-            }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1"
-          >
-            <BeakerIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => {
-              setNotification("Copied to clipboard", "success");
-              const copy = { ...request };
-              delete copy.render;
-              navigator.clipboard.writeText(
-                JSON.stringify(copy || {}, null, 4)
-              );
-            }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1"
-          >
-            <ClipboardDocumentIcon className="h-5 w-5" />
-          </button>
+          <Tooltip title="Playground">
+            <button
+              onClick={() => {
+                if (request) {
+                  router.push("/playground?request=" + request.id);
+                }
+              }}
+              className="hover:bg-gray-200 rounded-md -m-1 p-1"
+            >
+              <BeakerIcon className="h-5 w-5" />
+            </button>
+          </Tooltip>
+          <Tooltip title="Copy">
+            <button
+              onClick={() => {
+                setNotification("Copied to clipboard", "success");
+                const copy = { ...request };
+                delete copy.render;
+                navigator.clipboard.writeText(
+                  JSON.stringify(copy || {}, null, 4)
+                );
+              }}
+              className="hover:bg-gray-200 rounded-md -m-1 p-1"
+            >
+              <ClipboardDocumentIcon className="h-5 w-5" />
+            </button>
+          </Tooltip>
         </div>
       }
     >
@@ -132,7 +143,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">Path</p>
               <p className="text-gray-700 truncate">
-                {new URL(request.path).pathname}
+                {getPathName(request.path)}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">

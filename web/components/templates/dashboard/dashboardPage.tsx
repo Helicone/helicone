@@ -32,29 +32,31 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import { Toggle } from "../../shared/themed/themedToggle";
-import CostPanel from "./panels/costsPanel";
-import ErrorsPanel from "./panels/errorsPanel";
-import RequestsPanel from "./panels/requestsPanel";
 import { useDashboardPage } from "./useDashboardPage";
 import { useRouter } from "next/router";
 import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import LoadingAnimation from "../../shared/loadingAnimation";
+import { RenderBarChart } from "../../shared/metrics/barChart";
+import MainGraph from "./graphs/mainGraph";
+import { DoubleAreaChartData } from "../../shared/metrics/doubleAreaChart";
 
 interface DashboardPageProps {
   user: User;
 }
 
-type LiveLogType = {
-  id: string;
-  requestMsg: string;
-  model?: string;
-  createdAt?: string;
-  totalTokens?: number;
-  latency?: number; // in ms
-  responseMsg?: string;
-};
+function formatNumberString(
+  numString: string,
+  minimumFractionDigits?: boolean
+) {
+  const num = parseFloat(numString);
+  if (minimumFractionDigits) {
+    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  } else {
+    return num.toLocaleString("en-US");
+  }
+}
 
 export type Loading<T> = T | "loading";
 
@@ -92,68 +94,28 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { authorized } = useGetAuthorized(user.id);
 
-  const { metrics, filterMap, overTimeData, errorMetrics, isAnyLoading } =
-    useDashboardPage({
-      timeFilter,
-      uiFilters: debouncedAdvancedFilters,
-      apiKeyFilter,
-      timeZoneDifference,
-      dbIncrement: timeIncrement,
-    });
+  const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
+    timeFilter,
+    uiFilters: debouncedAdvancedFilters,
+    apiKeyFilter,
+    timeZoneDifference,
+    dbIncrement: timeIncrement,
+  });
 
-  const renderPanel = () => {
-    if (mode === "requests") {
-      return (
-        <RequestsPanel
-          requestsOverTime={overTimeData.requests.data?.data ?? []}
-          isLoading={
-            overTimeData.requests.isLoading || overTimeData.requests.isLoading
-          }
-          timeMap={getTimeMap(timeIncrement)}
-          advancedFilters={filterListToTree(
-            filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
-            "and"
-          )}
-        />
-      );
-    } else if (mode === "costs") {
-      return (
-        <CostPanel
-          costOverTime={overTimeData.costs.data ?? "loading"}
-          timeMap={getTimeMap(timeIncrement)}
-          advancedFilters={filterListToTree(
-            filterUIToFilterLeafs(userTableFilters, debouncedAdvancedFilters),
-            "and"
-          )}
-        />
-      );
-    } else if (mode === "errors") {
-      return (
-        <ErrorsPanel
-          errorsOverTime={overTimeData.errors.data ?? "loading"}
-          errorMetrics={errorMetrics.errorCodes}
-        />
-      );
-    }
+  const combineRequestsAndErrors = () => {
+    let combinedArray = overTimeData.requests.data?.data?.map(
+      (request, index) => ({
+        time: request.time,
+        value1: request.count,
+        value2: overTimeData.errors.data?.data
+          ? overTimeData.errors.data?.data[index].count
+          : 0,
+      })
+    );
+    return combinedArray;
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
-    {
-      value: metrics.totalCost.data?.data
-        ? `$${metrics.totalCost.data?.data.toFixed(2)}`
-        : "$0.00",
-      label: "Total Cost",
-      labelUnits: "(estimated)",
-      icon: CurrencyDollarIcon,
-      isLoading: metrics.totalCost.isLoading,
-      onInformationHref: "https://docs.helicone.ai/faq/how-we-calculate-cost",
-    },
-    {
-      value: +(metrics.totalRequests?.data?.data?.toFixed(2) ?? 0),
-      label: "Total Requests",
-      icon: TableCellsIcon,
-      isLoading: metrics.totalRequests.isLoading,
-    },
     {
       value:
         metrics.totalCost.data?.data && metrics.totalRequests?.data?.data
@@ -164,13 +126,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       label: "Avg Cost/Req",
       icon: ChartBarIcon,
       isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
-    },
-    {
-      value: metrics.averageLatency.data?.data?.toFixed(2) ?? "n/a",
-      label: "Avg Latency/Req",
-      labelUnits: "ms",
-      icon: CloudArrowDownIcon,
-      isLoading: metrics.averageLatency.isLoading,
     },
     {
       value:
@@ -314,9 +269,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
           />
 
-          {isAnyLoading ? (
-            <LoadingAnimation title={"Loading Data..."} />
-          ) : metrics.totalRequests?.data?.data === 0 ? (
+          {metrics.totalRequests?.data?.data === 0 ? (
             <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
               <TableCellsIcon className="h-12 w-12 text-gray-400" />
               <p className="text-xl font-semibold text-gray-500">
@@ -325,32 +278,101 @@ const DashboardPage = (props: DashboardPageProps) => {
             </div>
           ) : (
             <>
-              <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 text-gray-900 gap-4">
+              <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 xl:grid-cols-12 text-gray-900 gap-4">
+                {/* Combine the requests and error into one graph */}
+                <div className="col-span-2 xl:col-span-12 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.requests.isLoading}
+                    dataOverTime={
+                      overTimeData.requests.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.count,
+                      })) ?? []
+                    }
+                    doubleLineOverTime={combineRequestsAndErrors()}
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Requests"}
+                    value={
+                      metrics.totalRequests?.data?.data
+                        ? `${formatNumberString(
+                            metrics.totalRequests?.data?.data.toFixed(2)
+                          )}`
+                        : "0"
+                    }
+                    valueLabel={"requests"}
+                    type="double-line"
+                  />
+                </div>{" "}
+                <div className="col-span-2 xl:col-span-4 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.costs.isLoading}
+                    dataOverTime={
+                      overTimeData.costs.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.cost,
+                      })) ?? []
+                    }
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Costs"}
+                    value={
+                      metrics.totalCost.data?.data
+                        ? `$${formatNumberString(
+                            metrics.totalCost.data?.data.toFixed(2),
+                            true
+                          )}`
+                        : "$0.00"
+                    }
+                    valueLabel={"cost"}
+                    type="bar"
+                    labelFormatter={(value) => `$${Number(value).toFixed(2)}`}
+                  />
+                </div>
+                <div className="col-span-2 xl:col-span-4 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.latency.isLoading}
+                    dataOverTime={
+                      overTimeData.latency.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.duration,
+                      })) ?? []
+                    }
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Latency"}
+                    value={`${
+                      metrics.averageLatency.data?.data?.toFixed(0) ?? 0
+                    } ms / req`}
+                    valueLabel={"latency"}
+                    type={"area"}
+                    labelFormatter={(value) =>
+                      `${parseInt(value).toFixed(0)} ms`
+                    }
+                  />
+                </div>
+                <div className="col-span-2 xl:col-span-4 h-full">
+                  <MainGraph
+                    isLoading={overTimeData.users.isLoading}
+                    dataOverTime={
+                      overTimeData.users.data?.data?.map((r) => ({
+                        ...r,
+                        value: r.count,
+                      })) ?? []
+                    }
+                    timeMap={getTimeMap(timeIncrement)}
+                    title={"Active Users"}
+                    value={metrics.activeUsers.data?.data ?? 0}
+                    valueLabel={" Users"}
+                    type={"bar"}
+                  />
+                </div>
                 {metricsData.map((m, i) => (
-                  <MetricsPanel key={i} metric={m} />
+                  <div
+                    className="col-span-2 md:col-span-1 xl:col-span-3"
+                    key={i}
+                  >
+                    <MetricsPanel metric={m} />
+                  </div>
                 ))}
               </div>
-              <ThemedTabs
-                options={[
-                  {
-                    icon: TableCellsIcon,
-                    label: "Requests",
-                  },
-                  {
-                    icon: CurrencyDollarIcon,
-                    label: "Costs",
-                  },
-                  {
-                    icon: ExclamationCircleIcon,
-                    label: "Errors",
-                  },
-                ]}
-                onOptionSelect={(option) =>
-                  setMode(option.toLowerCase() as DashboardMode)
-                }
-              />
-
-              {renderPanel()}
             </>
           )}
         </div>
