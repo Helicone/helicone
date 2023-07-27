@@ -88,13 +88,12 @@ start_proxy() {
   echo "Step 2: Adding entry to /etc/hosts..."
   echo '127.0.0.1 api.openai.com' | sudo tee -a /etc/hosts
 
-  python3 -m pip install lockfile
   # Create the add_headers.py file
   # Create the add_headers.py file
   cat <<EOF > ~/.helicone/proxy_dir/add_headers.py
 import os
 import json
-import lockfile
+import time
 
 def request(flow):
     print("----------------------------")
@@ -116,7 +115,19 @@ def request(flow):
     json_file_path = os.path.expanduser("~/.helicone/custom_properties.json")
     lockfile_path = os.path.expanduser("~/.helicone/custom_properties.json.lock")
     print("json_file_path: ", json_file_path)
-    with lockfile.LockFile(lockfile_path):
+
+    # Lock file with timeout
+    start_time = time.time()
+    while os.path.exists(lockfile_path):
+        if time.time() - start_time > 0.5:  # timeout after 0.5 seconds
+            raise Exception("Could not acquire lock, giving up after 0.5 seconds.")
+        time.sleep(0.01)  # wait a bit and retry
+    try:
+        open(lockfile_path, 'x').close()  # try to create lockfile
+    except FileExistsError:
+        pass  # someone else created it first
+
+    try:
         with open(json_file_path, "r") as json_file:
             print("Reading custom properties from file...")
             print("json_file: ", json_file)
@@ -125,6 +136,8 @@ def request(flow):
             for key, value in custom_properties.items():
                 print("Adding header: ", "Helicone-Property-" + key, " with value: ", value)
                 flow.request.headers["Helicone-Property-" + key] = value
+    finally:
+        os.remove(lockfile_path)  # release lock
 EOF
 
 
