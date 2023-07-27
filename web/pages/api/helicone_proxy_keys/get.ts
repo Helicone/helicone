@@ -19,10 +19,12 @@ async function handler({
 
   const query = `
   SELECT map.id, map.org_id, map.helicone_proxy_key, map.helicone_proxy_key_name, map.provider_key_id,
-  key.provider_name, key.vault_key_id
+  key.provider_name, key.vault_key_id, key.provider_key_name
   FROM helicone_proxy_keys map
   INNER JOIN provider_keys key ON key.id = map.provider_key_id
   WHERE map.org_id = $1
+  AND map.soft_delete = false
+  AND key.soft_delete = false
   `;
 
   const keyMappings = await dbExecute<DecryptedProviderKeyMapping>(query, [
@@ -40,7 +42,7 @@ async function handler({
   }
 
   const promises = keyMappings.data.map((mapping) =>
-    vault.readProviderKey(userData.orgId, mapping.vaultKeyId as string)
+    vault.readProviderKey(userData.orgId, mapping.vault_key_id as string)
   );
 
   const keys: Result<string, string>[] = await Promise.all(promises);
@@ -60,7 +62,7 @@ async function handler({
 
   const decryptedKeys: DecryptedProviderKeyMapping[] = keyMappings.data.map(
     (keyData, index) => {
-      const { vaultKeyId, ...keyDataWithoutVaultKeyId } = keyData;
+      const { vault_key_id: vaultKeyId, ...keyDataWithoutVaultKeyId } = keyData;
       return {
         ...keyDataWithoutVaultKeyId,
         providerKey: keys[index]?.data || null,

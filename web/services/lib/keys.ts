@@ -4,11 +4,11 @@ import { Result } from "../../lib/result";
 
 export type DecryptedProviderKey = {
   id: string | null;
-  orgId: string | null;
-  providerKey: string | null;
-  providerName: string | null;
-  providerKeyName: string | null;
-  vaultKeyId?: string | null;
+  org_id: string | null;
+  provider_key: string | null;
+  provider_name: string | null;
+  provider_key_name: string | null;
+  vault_key_id?: string | null;
 };
 
 export type HeliconeProxyKeys =

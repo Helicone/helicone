@@ -20,7 +20,8 @@ async function handler({
   const keyIds = await supabaseServer
     .from("provider_keys")
     .select("*")
-    .eq("org_id", userData.orgId);
+    .eq("org_id", userData.orgId)
+    .eq("soft_delete", false);
 
   if (keyIds.error !== null) {
     console.error("Failed to retrieve provider keys", keyIds.error);
@@ -50,10 +51,10 @@ async function handler({
   const decryptedKeys: DecryptedProviderKey[] = keyIds.data.map((keyData, index) => {
     return {
       id: keyData.id,
-      orgId: keyData.org_id,
-      providerKey: keys[index]?.data || null,
-      providerName: keyData.provider_name,
-      providerKeyName: keyData.provider_key_name
+      org_id: keyData.org_id,
+      provider_key: keys[index]?.data || null,
+      provider_name: keyData.provider_name,
+      provider_key_name: keyData.provider_key_name
     };
   });
 

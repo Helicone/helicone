@@ -68,10 +68,10 @@ async function handler({
   res.status(200).json({
     data: {
       id: key.data.id,
-      orgId: key.data.org_id,
-      providerKey: providerKey,
-      providerName: key.data.provider_name,
-      providerKeyName: key.data.provider_key_name,
+      org_id: key.data.org_id,
+      provider_key: providerKey,
+      provider_name: key.data.provider_name,
+      provider_key_name: key.data.provider_key_name,
     },
     error: null,
   });
