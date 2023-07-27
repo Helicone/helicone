@@ -365,7 +365,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </div>
                 {metricsData.map((m, i) => (
-                  <div className="col-span-2 xl:col-span-3" key={i}>
+                  <div
+                    className="col-span-2 md:col-span-1 xl:col-span-3"
+                    key={i}
+                  >
                     <MetricsPanel metric={m} />
                   </div>
                 ))}
