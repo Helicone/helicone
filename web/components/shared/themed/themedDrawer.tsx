@@ -69,6 +69,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                       <div className="flex flex-row items-center space-x-2 text-gray-500 w-full">
                         <Tooltip title={"Close"}>
                           <button
+                            tabIndex={-1}
                             onClick={() => setOpen(false)}
                             className="hover:bg-gray-200 rounded-md -m-1 p-1"
                           >
@@ -77,6 +78,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                         </Tooltip>
                         <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
                           <button
+                            tabIndex={-1}
                             onClick={() => setExpanded(!expanded)}
                             className="hover:bg-gray-200 rounded-md -m-1 p-1"
                           >
