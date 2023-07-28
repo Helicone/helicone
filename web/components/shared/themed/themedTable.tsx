@@ -1,16 +1,21 @@
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  PencilIcon,
+  TrashIcon,
+  ViewfinderCircleIcon,
+} from "@heroicons/react/24/outline";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import { clsx } from "../clsx";
 
 interface ThemedTableProps {
   columns: { name: string; subName?: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
   rows?: any[];
+  viewHandler?: (row: any) => void;
   editHandler?: (row: any) => void;
   deleteHandler?: (row: any) => void;
 }
 
 const ThemedTable = (props: ThemedTableProps) => {
-  const { columns, rows, editHandler, deleteHandler } = props;
+  const { columns, rows, viewHandler, editHandler, deleteHandler } = props;
 
   return (
     <div className="ring-1 ring-gray-300 rounded-lg bg-white">
@@ -62,10 +67,12 @@ const ThemedTable = (props: ThemedTableProps) => {
                         key={colIdx}
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-transparent",
+                          viewHandler ? "cursor-pointer underline" : "",
                           "relative py-2.5 pl-4 sm:pl-6 pr-3 text-sm"
                         )}
+                        onClick={() => viewHandler && viewHandler(row)}
                       >
-                        <div className="font-medium text-gray-900 overflow-ellipsis max-w-[120px] overflow-hidden">
+                        <div className="font-medium text-gray-900 truncate max-w-[300px]">
                           {row[col.key] || "n/a"}
                         </div>
                         {rowIdx !== 0 ? (
@@ -80,7 +87,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-gray-200",
                           col.hidden ? "hidden" : "",
-                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell overflow-ellipsis max-w-[120px] overflow-hidden"
+                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate max-w-[150px]"
                         )}
                       >
                         {col.key === "cost"
@@ -98,25 +105,34 @@ const ThemedTable = (props: ThemedTableProps) => {
                   scope="col"
                   className={clsx(
                     rowIdx === 0 ? "" : "border-t border-transparent",
-                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium"
+                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right"
                   )}
                 >
+                  {viewHandler && (
+                    <button
+                      type="button"
+                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs text-white shadow-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      onClick={() => viewHandler(row)}
+                    >
+                      View
+                    </button>
+                  )}
                   {editHandler && (
                     <button
                       type="button"
-                      className="inline-flex items-center rounded-md bg-gray-500 p-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs text-white shadow-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => editHandler(row)}
                     >
-                      <PencilIcon className="h-4 w-4" />
+                      Edit
                     </button>
                   )}
                   {deleteHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-red-600 p-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-red-600 px-2 py-1 text-xs text-white shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => deleteHandler(row)}
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      Delete
                     </button>
                   )}
 

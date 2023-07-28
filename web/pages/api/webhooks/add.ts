@@ -35,6 +35,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     .select("*")
     .eq("org_id", orgId)
     .eq("feature", "webhook_beta");
+
   if (ffError || !ffData || ffData.length === 0) {
     res.status(400).json({
       error: "Feature flag not found",
@@ -42,6 +43,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     });
     return;
   }
+
   const { destination } = option.req.body as {
     destination: string;
   };

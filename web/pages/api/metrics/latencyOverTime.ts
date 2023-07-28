@@ -38,17 +38,7 @@ async function handler(
     timeZoneDifference,
   });
 
-  console.log(resp);
-  res.status(200).json(
-    resp
-    // await getLatencyOverTime({
-    //   timeFilter,
-    //   userFilter: userFilters,
-    //   orgId,
-    //   dbIncrement: dbIncrement ?? "hour",
-    //   timeZoneDifference,
-    // })
-  );
+  res.status(200).json(resp);
 }
 
 export default withAuth(handler);
