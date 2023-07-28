@@ -51,3 +51,23 @@ ALTER TABLE public.request
 ADD COLUMN helicone_proxy_key_id uuid NULL REFERENCES public.helicone_proxy_keys(id);
 
 CREATE EXTENSION IF NOT EXISTS pgsodium;
+
+CREATE OR REPLACE FUNCTION verify_helicone_proxy_key(api_key text, stored_hashed_key text)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    is_verified boolean;
+BEGIN
+    -- Verify the api key
+    is_verified := (
+        SELECT pgsodium.crypto_pwhash_str_verify(stored_hashed_key, api_key)
+    );
+    
+    RETURN is_verified;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.verify_helicone_proxy_key(text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.verify_helicone_proxy_key(text, text) FROM authenticated;

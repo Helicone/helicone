@@ -37,13 +37,6 @@ async function handler({
     return;
   }
 
-  // Generate a new proxy key
-  const proxyKeyId = crypto.randomUUID();
-  const proxyKey = `sk-helicone-proxy${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}-${proxyKeyId}`.toLowerCase();
-
   const providerKey = await supabaseServer
     .from("provider_keys")
     .select("*")
@@ -56,6 +49,13 @@ async function handler({
     res.status(500).json({ error: providerKey.error.message, data: null });
     return;
   }
+
+  // Generate a new proxy key
+  const proxyKeyId = crypto.randomUUID();
+  const proxyKey = `sk-helicone-proxy-${generateApiKey({
+    method: "base32",
+    dashes: true,
+  }).toString()}-${proxyKeyId}`.toLowerCase();
 
   const query = `SELECT encode(pgsodium.crypto_pwhash_str($1), 'hex') as hashed_password;`;
   const result = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
