@@ -14,6 +14,7 @@ export class RequestWrapper {
   heliconeHeaders: HeliconeHeaders;
   authorization: string | undefined;
   providerAuth: string | undefined;
+  headers: Headers;
 
   private cachedText: string | null = null;
 
@@ -21,26 +22,37 @@ export class RequestWrapper {
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
   like this (Bearer sk-123, Beaer helicone-sk-123)
   */
-  private mutateAuthorizationHeaders(request: Request): void {
+  private mutatedAuthorizationHeaders(request: Request): Headers {
+    console.log("MUTATING AUTHORIZATION... REQUEST", request);
     const authorization = request.headers.get("Authorization");
     if (!authorization) {
-      return;
+      return request.headers;
     }
-    const [providerAuth, heliconeAuth] = authorization.split(",").map((x) => x.trim());
+    if (!authorization.includes(",") || !authorization.includes("helicone-sk-")) {
+      return request.headers;
+    }
+    console.log("MUTATING AUTHORIZATION HEADER", authorization);
+
+    const headers = new Headers(request.headers);
+    const authorizationKeys = authorization.split(",").map((x) => x.trim());
+
+    const heliconeAuth = authorizationKeys.find((x) => x.includes("helicone-sk-"));
+    const providerAuth = authorizationKeys.find((x) => !x.includes("helicone-sk-"));
+
     if (providerAuth) {
-      request.headers.set("Authorization", providerAuth);
+      headers.set("Authorization", providerAuth);
     }
     if (heliconeAuth) {
-      request.headers.set("helicone-auth", heliconeAuth);
+      headers.set("helicone-auth", heliconeAuth.replace("helicone-", "").trim());
     }
+    return headers;
   }
 
   constructor(private request: Request) {
-    mutateAuthorizationHeaders(request);
+    this.headers = this.mutatedAuthorizationHeaders(request);
     this.url = new URL(request.url);
-    request.headers.set("Authorization", "");
-    this.heliconeHeaders = new HeliconeHeaders(request.headers);
-    this.authorization = this.getAuthorization(request.headers);
+    this.heliconeHeaders = new HeliconeHeaders(this.headers);
+    this.authorization = this.getAuthorization(this.headers);
   }
 
   async getText(): Promise<string> {
@@ -66,11 +78,11 @@ export class RequestWrapper {
   }
 
   getHeaders(): Headers {
-    return this.request.headers;
+    return this.headers;
   }
 
   setHeader(key: string, value: string): void {
-    this.request.headers.set(key, value);
+    this.headers.set(key, value);
   }
 
   getMethod(): string {
