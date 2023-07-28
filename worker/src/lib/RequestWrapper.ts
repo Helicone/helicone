@@ -111,4 +111,13 @@ export class RequestWrapper {
       undefined
     );
   }
+
+  getOpenAIKey(): string | undefined {
+    const authHeader = this.getHeaders().get('Authorization');
+    if (!authHeader) {
+      return undefined;
+    }
+    const keys = authHeader.split(', ');
+    return keys.find(key => key.startsWith('Bearer '));
+  }
 }
