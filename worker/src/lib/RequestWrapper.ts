@@ -7,7 +7,11 @@ import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 
-export type RequestHandlerType = "proxy_only" | "proxy_log" | "logging" | "feedback";
+export type RequestHandlerType =
+  | "proxy_only"
+  | "proxy_log"
+  | "logging"
+  | "feedback";
 
 export class RequestWrapper {
   url: URL;
@@ -28,7 +32,10 @@ export class RequestWrapper {
     if (!authorization) {
       return request.headers;
     }
-    if (!authorization.includes(",") || !authorization.includes("helicone-sk-")) {
+    if (
+      !authorization.includes(",") ||
+      !authorization.includes("helicone-sk-")
+    ) {
       return request.headers;
     }
     console.log("MUTATING AUTHORIZATION HEADER", authorization);
@@ -36,14 +43,21 @@ export class RequestWrapper {
     const headers = new Headers(request.headers);
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
 
-    const heliconeAuth = authorizationKeys.find((x) => x.includes("helicone-sk-"));
-    const providerAuth = authorizationKeys.find((x) => !x.includes("helicone-sk-"));
+    const heliconeAuth = authorizationKeys.find((x) =>
+      x.includes("helicone-sk-")
+    );
+    const providerAuth = authorizationKeys.find(
+      (x) => !x.includes("helicone-sk-")
+    );
 
     if (providerAuth) {
       headers.set("Authorization", providerAuth);
     }
     if (heliconeAuth) {
-      headers.set("helicone-auth", heliconeAuth.replace("helicone-", "").trim());
+      headers.set(
+        "helicone-auth",
+        heliconeAuth.replace("helicone-", "").trim()
+      );
     }
     return headers;
   }
@@ -103,7 +117,8 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern = /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPattern =
+      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
     if (!apiKeyPattern.test(apiKey)) {
       return {
@@ -124,7 +139,9 @@ export class RequestWrapper {
   }
 
   async getUserId(): Promise<string | undefined> {
-    const userId = this.heliconeHeaders.userId || (await this.getJson<{ user?: string }>()).user;
+    const userId =
+      this.heliconeHeaders.userId ||
+      (await this.getJson<{ user?: string }>()).user;
     return userId;
   }
 
