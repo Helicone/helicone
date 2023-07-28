@@ -103,12 +103,22 @@ export class RequestWrapper {
     return userId;
   }
 
-  private getAuthorization(headers: Headers): string | undefined {
-    return (
-      headers.get("Authorization") ?? // Openai
-      headers.get("x-api-key") ?? // Anthropic
-      headers.get("api-key") ?? // Azure
-      undefined
-    );
+  private getAuthorization(headers: Headers): { openaiKey: string, heliconeKey: string } | undefined {
+    const authHeader = headers.get("Authorization");
+    if (!authHeader) {
+      return undefined;
+    }
+
+    const keys = authHeader.split(',').map(key => key.trim());
+    let openaiKey, heliconeKey;
+    keys.forEach(key => {
+      if (key.startsWith('Bearer <OpenAI API Key>')) {
+        openaiKey = key;
+      } else if (key.startsWith('Bearer helicone-sk-')) {
+        heliconeKey = key;
+      }
+    });
+
+    return { openaiKey, heliconeKey };
   }
 }
