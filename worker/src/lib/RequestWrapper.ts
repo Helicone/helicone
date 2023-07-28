@@ -3,9 +3,11 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
+import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
+import HashiCorpVault from "./vault/HashiCorpVault";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -21,7 +23,7 @@ export class RequestWrapper {
 
   private cachedText: string | null = null;
 
-  constructor(private request: Request) {
+  constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
     this.authorization = this.getAuthorization(request.headers);
@@ -100,11 +102,20 @@ export class RequestWrapper {
   }
 
   private getAuthorization(headers: Headers): string | undefined {
-    return (
+    const authKey =
       headers.get("Authorization") ?? // Openai
       headers.get("x-api-key") ?? // Anthropic
       headers.get("api-key") ?? // Azure
-      undefined
-    );
+      undefined;
+
+    if (this.env.VAULT_ENABLED && authKey?.startsWith("Bearer sk-helicone-proxy")) {
+      const vault = new HashiCorpVault();
+      // const supabaseClient = createClient(this.env.SUPABASE_URL, this.env.SUPABASE_SERVICE_ROLE_KEY);
+      // supabaseClient.from("helicone_proxy_keys")
+      // .select("*")
+      // .eq()
+    }
+
+    return authKey;
   }
 }

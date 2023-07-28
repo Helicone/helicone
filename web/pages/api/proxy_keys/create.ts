@@ -1,3 +1,4 @@
+import generateApiKey from "generate-api-key";
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
@@ -8,6 +9,10 @@ import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 
+type HashedPasswordRow = {
+  hashed_password: string;
+};
+
 async function handler({
   req,
   res,
@@ -17,12 +22,10 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
-  const { providerKeyId, heliconeProxyKeyName, heliconeProxyKey } =
-    req.body as {
-      providerKeyId: string;
-      heliconeProxyKeyName: string;
-      heliconeProxyKey: string;
-    };
+  const { providerKeyId, heliconeProxyKeyName } = req.body as {
+    providerKeyId: string;
+    heliconeProxyKeyName: string;
+  };
 
   if (providerKeyId === undefined) {
     res.status(500).json({ error: "Invalid providerKeyId", data: null });
@@ -34,14 +37,12 @@ async function handler({
     return;
   }
 
-  if (heliconeProxyKey === undefined) {
-    res.status(500).json({ error: "Invalid heliconeProxyKey", data: null });
-    return;
-  }
-
-  type HashedPasswordRow = {
-    hashed_password: string;
-  };
+  // Generate a new proxy key
+  const proxyKeyId = crypto.randomUUID();
+  const proxyKey = `sk-helicone-proxy${generateApiKey({
+    method: "base32",
+    dashes: true,
+  }).toString()}-${proxyKeyId}`.toLowerCase();
 
   const providerKey = await supabaseServer
     .from("provider_keys")
@@ -57,7 +58,7 @@ async function handler({
   }
 
   const query = `SELECT encode(pgsodium.crypto_pwhash_str($1), 'hex') as hashed_password;`;
-  const result = await dbExecute<HashedPasswordRow>(query, [heliconeProxyKey]);
+  const result = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
 
   if (result.error || !result.data || result.data.length === 0) {
     res.status(500).json({
@@ -72,6 +73,7 @@ async function handler({
   const newProxyMapping = await supabaseServer
     .from("helicone_proxy_keys")
     .insert({
+      id: proxyKeyId,
       org_id: userData.orgId,
       helicone_proxy_key_name: heliconeProxyKeyName,
       helicone_proxy_key: result.data[0].hashed_password,
