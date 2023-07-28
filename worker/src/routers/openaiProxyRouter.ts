@@ -27,9 +27,14 @@ export const getOpenAIProxyRouter = () => {
     console.log("requestWrapper.url.pathname", requestWrapper.url.pathname);
     if (requestWrapper.url.pathname.includes("audio")) {
       const new_url = new URL(`https://api.openai.com${requestWrapper.url.pathname}`);
-      return await fetch(new_url.href, {
+    const headers = requestWrapper.getHeaders();
+    const authHeader = headers['Authorization'];
+    const keys = authHeader.split(', ');
+    const openAIKey = keys.find(key => key.startsWith('Bearer <OpenAI API Key>'));
+    headers['Authorization'] = openAIKey;
+    return await fetch(new_url.href, {
         method: requestWrapper.getMethod(),
-        headers: requestWrapper.getHeaders(),
+        headers: headers,
         body: requestWrapper.getBody(),
       });
     }
