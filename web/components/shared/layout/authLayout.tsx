@@ -15,6 +15,7 @@ import {
   CircleStackIcon,
   CloudArrowUpIcon,
   CubeTransparentIcon,
+  GlobeAltIcon,
   HomeIcon,
   KeyIcon,
   QuestionMarkCircleIcon,
@@ -41,6 +42,7 @@ import { useUserSettings } from "../../../services/hooks/userSettings";
 import ThemedModal from "../themed/themedModal";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
+import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -57,6 +59,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const org = useOrg();
   const { userSettings, isLoading } = useUserSettings(user?.id || "");
   const [open, setOpen] = useState(false);
+  const { hasFlag, isLoading: isFlagLoading } = useFeatureFlags(
+    org?.currentOrg.id || "",
+    "webhook_beta"
+  );
 
   const navigation = [
     {
@@ -129,6 +135,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/graphql"),
     },
   ];
+
+  if (hasFlag) {
+    accountNav.push({
+      name: "Webhooks",
+      href: "/webhooks",
+      icon: GlobeAltIcon,
+      current: pathname.includes("/webhooks"),
+    });
+  }
 
   return (
     <>
