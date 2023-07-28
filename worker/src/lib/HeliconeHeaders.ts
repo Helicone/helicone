@@ -57,8 +57,9 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   private getHeliconeHeaders(): IHeliconeHeaders {
+    const heliconeAuth = this.headers.get("helicone-auth") ?? this.headers.get("Authorization");
     return {
-      heliconeAuth: this.headers.get("helicone-auth") ?? null,
+      heliconeAuth: heliconeAuth,
       featureFlags: this.getHeliconeFeatureFlags(),
       rateLimitPolicy: this.headers.get("Helicone-RateLimit-Policy") ?? null,
       openaiBaseUrl: this.headers.get("Helicone-OpenAI-Api-Base") ?? null,
