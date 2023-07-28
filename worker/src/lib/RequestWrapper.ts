@@ -7,11 +7,7 @@ import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 
-export type RequestHandlerType =
-  | "proxy_only"
-  | "proxy_log"
-  | "logging"
-  | "feedback";
+export type RequestHandlerType = "proxy_only" | "proxy_log" | "logging" | "feedback";
 
 export class RequestWrapper {
   url: URL;
@@ -21,8 +17,28 @@ export class RequestWrapper {
 
   private cachedText: string | null = null;
 
+  /*
+  We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
+  like this (Bearer sk-123, Beaer helicone-sk-123)
+  */
+  private mutateAuthorizationHeaders(request: Request): void {
+    const authorization = request.headers.get("Authorization");
+    if (!authorization) {
+      return;
+    }
+    const [providerAuth, heliconeAuth] = authorization.split(",").map((x) => x.trim());
+    if (providerAuth) {
+      request.headers.set("Authorization", providerAuth);
+    }
+    if (heliconeAuth) {
+      request.headers.set("helicone-auth", heliconeAuth);
+    }
+  }
+
   constructor(private request: Request) {
+    mutateAuthorizationHeaders(request);
     this.url = new URL(request.url);
+    request.headers.set("Authorization", "");
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
     this.authorization = this.getAuthorization(request.headers);
   }
@@ -75,8 +91,7 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern =
-      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPattern = /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
     if (!apiKeyPattern.test(apiKey)) {
       return {
@@ -97,9 +112,7 @@ export class RequestWrapper {
   }
 
   async getUserId(): Promise<string | undefined> {
-    const userId =
-      this.heliconeHeaders.userId ||
-      (await this.getJson<{ user?: string }>()).user;
+    const userId = this.heliconeHeaders.userId || (await this.getJson<{ user?: string }>()).user;
     return userId;
   }
 
