@@ -36,6 +36,7 @@ export interface HeliconeProxyRequest {
   heliconeErrors: string[];
   providerAuthHash?: string;
   heliconeAuthHash?: string;
+  heliconeProxyKeyId?: string;
   api_base: string;
   heliconeProperties: HeliconeProperties;
   userId?: string;
@@ -133,6 +134,7 @@ export class HeliconeProxyRequestMapper {
         providerAuthHash: await this.request.getProviderAuthHeader(),
         omitOptions: this.request.heliconeHeaders.omitHeaders,
         heliconeAuthHash: heliconeAuthHash ?? undefined,
+        heliconeProxyKeyId: this.request.heliconeProxyKeyId,
         heliconeProperties: this.request.heliconeHeaders.heliconeProperties,
         userId: await this.request.getUserId(),
         heliconeErrors: this.heliconeErrors,

@@ -22,6 +22,7 @@ export class RequestWrapper {
   headers: Headers;
   heliconeHeaders: HeliconeHeaders;
   providerAuth: string | undefined;
+  heliconeProxyKeyId: string | undefined;
 
   private cachedText: string | null = null;
 
@@ -169,6 +170,8 @@ export class RequestWrapper {
         error: "Proxy key not found",
       };
     }
+
+    this.heliconeProxyKeyId = storedProxyKey.data.id;
 
     const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
       api_key: proxyKey,

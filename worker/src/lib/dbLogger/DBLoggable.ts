@@ -25,6 +25,7 @@ export interface DBLoggableProps {
     userId?: string;
     heliconeApiKeyAuthHash?: string;
     providerApiKeyAuthHash?: string;
+    heliconeProxyKeyId?: string;
     promptId?: string;
     promptFormatter?: {
       prompt: Prompt | ChatPrompt;
@@ -52,6 +53,7 @@ export function dbLoggableRequestFromProxyRequest(
     requestId: proxyRequest.requestId,
     heliconeApiKeyAuthHash: proxyRequest.heliconeAuthHash,
     providerApiKeyAuthHash: proxyRequest.providerAuthHash,
+    heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
     promptFormatter:
