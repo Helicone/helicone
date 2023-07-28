@@ -193,22 +193,6 @@ const DashboardPage = (props: DashboardPageProps) => {
             />
           </button>
         }
-        actions={
-          <div className="flex flex-row items-center gap-5">
-            <div className="flex flex-row gap-1 items-center">
-              UTC
-              <Toggle
-                onChange={(checked) => {
-                  if (checked) {
-                    setTimeZoneDifference(0);
-                  } else {
-                    setTimeZoneDifference(new Date().getTimezoneOffset());
-                  }
-                }}
-              />
-            </div>
-          </div>
-        }
       />
       {authorized ? (
         <div className="flex flex-col items-center justify-center h-[90vh]">
