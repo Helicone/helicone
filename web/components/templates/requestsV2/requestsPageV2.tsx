@@ -184,16 +184,21 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         value: string;
       }[];
       if (queryFilters) {
-        const newFilters: UIFilterRow[] = queryFilters.map((filter) => {
-          const filterMapIdx = filterMap.findIndex(
-            (f) => f.column === filter.key
-          );
-          return {
-            filterMapIdx: filterMapIdx,
-            operatorIdx: 0,
-            value: filter.value,
-          };
-        });
+        const newFilters: UIFilterRow[] = queryFilters
+          .filter(
+            (filter) =>
+              filterMap.findIndex((f) => f.column === filter.key) !== -1
+          )
+          .map((filter) => {
+            const filterMapIdx = filterMap.findIndex(
+              (f) => f.column === filter.key
+            );
+            return {
+              filterMapIdx: filterMapIdx,
+              operatorIdx: 0,
+              value: filter.value,
+            };
+          });
 
         if (!advancedFilters || advancedFilters.length === 0) {
           setAdvancedFilters(newFilters);
