@@ -97,6 +97,7 @@ async function handler({
     return;
   }
 
+  newProxyMapping.data.helicone_proxy_key = proxyKey;
   res.status(200).json({ error: null, data: newProxyMapping.data });
 }
 

@@ -89,11 +89,19 @@ export class HeliconeProxyRequestMapper {
         };
       }
       const body = promptFormatter.data.body;
+      const headers = await this.request.getHeaders();
+
+      if (headers.error || headers.data === null) {
+        return {
+          data: null,
+          error: headers.error ?? "Headers are null",
+        };
+      }
 
       this.request = new RequestWrapper(
         new Request(this.request.url.href, {
           method: this.request.getMethod(),
-          headers: this.request.getHeaders(),
+          headers: headers.data,
           body,
         }),
         this.env

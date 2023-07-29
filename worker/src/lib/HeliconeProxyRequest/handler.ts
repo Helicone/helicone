@@ -16,7 +16,16 @@ export async function handleProxyRequest(
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
-  const callProps = callPropsFromProxyRequest(proxyRequest);
+  const headers = await proxyRequest.requestWrapper.getHeaders();
+
+  if (headers.error || !headers.data) {
+    return {
+      data: null,
+      error: headers.error ?? "Unknown error getting headers",
+    };
+  }
+
+  const callProps = callPropsFromProxyRequest(proxyRequest, headers.data);
   const response = await (retryOptions
     ? callProviderWithRetry(callProps, retryOptions)
     : callProvider(callProps));
@@ -67,7 +76,7 @@ export async function handleProxyRequest(
               .omitResponse,
         },
         timing: {
-          startTime: proxyRequest.startTime
+          startTime: proxyRequest.startTime,
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
@@ -75,7 +84,7 @@ export async function handleProxyRequest(
         ...response,
         headers: responseHeaders,
         status: response.status,
-      })
+      }),
     },
     error: null,
   };

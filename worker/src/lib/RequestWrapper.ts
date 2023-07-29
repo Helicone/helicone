@@ -3,7 +3,11 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import {
+  PostgrestSingleResponse,
+  SupabaseClient,
+  createClient,
+} from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
@@ -54,8 +58,25 @@ export class RequestWrapper {
     return this.request.body;
   }
 
-  getHeaders(): Headers {
-    return this.request.headers;
+  async getHeaders(): Promise<Result<Headers, string>> {
+    if (this.authorization) {
+      return { data: this.request.headers, error: null };
+    }
+
+    // Compute the auth header for provider request
+    const authHeader = await this.getAuthorization();
+
+    if (authHeader.error) {
+      return { data: null, error: authHeader.error };
+    }
+
+    if (!authHeader.data) {
+      return { data: null, error: "No auth header" };
+    }
+
+    this.request.headers.set("Authorization", authHeader.data);
+
+    return { data: this.request.headers, error: null };
   }
 
   setHeader(key: string, value: string): void {
@@ -120,7 +141,9 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
+      console.log("About to get provider key from proxy");
       const providerKey = await this.getProviderKeyFromProxy(authKey);
+      console.log(`providerKey`, providerKey);
 
       if (providerKey.error || !providerKey.data) {
         return {
@@ -140,7 +163,7 @@ export class RequestWrapper {
   private async getProviderKeyFromProxy(
     authKey: string
   ): Promise<Result<string | undefined, string>> {
-    const vault = new HashiCorpVault();
+    console.log(`SupabaseUrl ${this.env.SUPABASE_URL} SupabaseKey ${this.env.SUPABASE_SERVICE_ROLE_KEY}`)
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
       this.env.SUPABASE_SERVICE_ROLE_KEY
@@ -150,6 +173,7 @@ export class RequestWrapper {
     const regex =
       /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
     const match = proxyKey.match(regex);
+
     if (!match) {
       return {
         data: null,
@@ -158,11 +182,29 @@ export class RequestWrapper {
     }
     const proxyKeyId = match ? match[0] : null;
 
-    const storedProxyKey = await supabaseClient
-      .from("helicone_proxy_keys")
-      .select("*")
-      .eq("id", proxyKeyId)
-      .single();
+    console.log(`Proxy key idjkl; ${proxyKeyId}`);
+    let storedProxyKey: PostgrestSingleResponse<{
+      helicone_proxy_key: string;
+      helicone_proxy_key_name: string;
+      id: string;
+      org_id: string;
+      provider_key_id: string;
+      soft_delete: boolean;
+    }>;
+
+    try {
+      // storedProxyKey = await supabaseClient
+      //   .from("helicone_proxy_keys")
+      //   .select("*")
+      //   .eq("id", proxyKeyId)
+      //   .single();
+
+      storedProxyKey = null;
+
+      console.log(`Stored proxy key ${JSON.stringify(storedProxyKey)}`);
+    } catch (e) {
+      console.log("Error getting proxy key", e);
+    }
 
     if (storedProxyKey.error || !storedProxyKey.data) {
       return {
@@ -172,6 +214,10 @@ export class RequestWrapper {
     }
 
     this.heliconeProxyKeyId = storedProxyKey.data.id;
+
+    console.log(
+      `Verifying proxy key ${proxyKey} with stored key ${storedProxyKey.data.helicone_proxy_key}`
+    );
 
     const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
       api_key: proxyKey,
@@ -198,6 +244,7 @@ export class RequestWrapper {
       };
     }
 
+    const vault = new HashiCorpVault();
     const vaultProviderKey = await vault.readProviderKey(
       storedProxyKey.data.org_id,
       providerKey.data.vault_key_id

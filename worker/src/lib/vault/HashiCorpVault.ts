@@ -1,17 +1,14 @@
-import NodeVault from "node-vault";
-import { IVault } from "./IVault";
 import { Result } from "../../results";
+import { IVault } from "./IVault";
 
 class HashiCorpVault implements IVault {
-  private vault: NodeVault.client;
+  private endpoint: string;
+  private token: string;
 
   constructor() {
-    const options = {
-      apiVersion: "v1",
-      endpoint: process.env.HASHICORP_VAULT_ENDPOINT ?? "http://127.0.0.1:8200",
-      token: process.env.HASHICORP_VAULT_TOKEN ?? "myroot",
-    };
-    this.vault = NodeVault(options);
+    this.endpoint =
+      process.env.HASHICORP_VAULT_ENDPOINT ?? "http://127.0.0.1:8200";
+    this.token = process.env.HASHICORP_VAULT_TOKEN ?? "myroot";
   }
 
   async writeProviderKey(
@@ -21,11 +18,23 @@ class HashiCorpVault implements IVault {
   ): Promise<Result<null, string>> {
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
     try {
-      await this.vault.write(vaultPath, {
-        data: {
-          value: providerKey,
-        },
-      });
+      const response: Response = await fetch(
+        this.endpoint + "/v1/" + vaultPath,
+        {
+          method: "POST",
+          headers: {
+            "X-Vault-Token": this.token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: {
+              value: providerKey,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error(await response.text());
 
       return { error: null, data: null };
     } catch (error: any) {
@@ -40,11 +49,23 @@ class HashiCorpVault implements IVault {
   async readProviderKey(
     orgId: string,
     vaultKeyId: string
-  ): Promise<Result<string, string>> {
+  ): Promise<Result<string | null, string>> {
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
     try {
-      const data = await this.vault.read(vaultPath);
-      return { error: null, data: data.data?.data?.value ?? "" };
+      const response: Response = await fetch(
+        this.endpoint + "/v1/" + vaultPath,
+        {
+          headers: {
+            "X-Vault-Token": this.token,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error(await response.text());
+
+      const data: { data?: { data?: { value?: string } } } | null =
+        await response.json();
+      return { error: null, data: data?.data?.data?.value ?? null };
     } catch (error: any) {
       console.error("Error reading from vault", error);
       return {

@@ -26,7 +26,7 @@ const ProviderKeysPage = () => {
       .then(({ data }) => data && setProviderKeys(data))
       .catch(console.error);
 
-    fetch("/api/helicone_proxy_keys/get")
+    fetch("/api/proxy_keys/get")
       .then(
         (res) =>
           res.json() as Promise<Result<DecryptedProviderKeyMapping[], string>>
@@ -77,7 +77,7 @@ const ProviderKeysPage = () => {
     providerKeyId: string,
     heliconeProxyKey: string
   ) => {
-    fetch("/api/helicone_proxy_keys/create", {
+    fetch("/api/proxy_keys/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -101,7 +101,7 @@ const ProviderKeysPage = () => {
   };
 
   const deleteHeliconeProxyKey = async (id: string) => {
-    fetch(`/api/helicone_proxy_keys/${id}/delete`, { method: "DELETE" })
+    fetch(`/api/proxy_keys/${id}/delete`, { method: "DELETE" })
       .then(() =>
         setHeliconeProxyKeys((prev) => prev.filter((key) => key.id !== id))
       )
