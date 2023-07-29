@@ -129,7 +129,7 @@ const KeyPage = (props: KeyPageProps) => {
                 </div>
                 <button
                   onClick={() => {
-                    const apiKey = `sk-${generateApiKey({
+                    const apiKey = `sk-helicone-${generateApiKey({
                       method: "base32",
                       dashes: true,
                     }).toString()}`.toLowerCase();
