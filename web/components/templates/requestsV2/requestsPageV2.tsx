@@ -172,6 +172,38 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
+  useEffect(() => {
+    if (isDataLoading || !router.query.propertyFilters) {
+      return;
+    }
+    try {
+      const queryFilters = JSON.parse(
+        router.query.propertyFilters as string
+      ) as {
+        key: string;
+        value: string;
+      }[];
+      if (queryFilters) {
+        const newFilters: UIFilterRow[] = queryFilters.map((filter) => {
+          const filterMapIdx = filterMap.findIndex(
+            (f) => f.column === filter.key
+          );
+          return {
+            filterMapIdx: filterMapIdx,
+            operatorIdx: 0,
+            value: filter.value,
+          };
+        });
+
+        if (!advancedFilters || advancedFilters.length === 0) {
+          setAdvancedFilters(newFilters);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [router.query, isDataLoading, filterMap, advancedFilters]);
+
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
     refetch();
