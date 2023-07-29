@@ -27,37 +27,34 @@ export class RequestWrapper {
   like this (Bearer sk-123, Beaer helicone-sk-123)
   */
   private mutatedAuthorizationHeaders(request: Request): Headers {
-    
+    const HELICONE_KEY_ID = "sk-helicone-";
+
     const authorization = request.headers.get("Authorization");
     if (!authorization) {
       return request.headers;
     }
     if (
       !authorization.includes(",") ||
-      !authorization.includes("helicone-sk-")
+      !authorization.includes(HELICONE_KEY_ID)
     ) {
       return request.headers;
     }
-    
 
     const headers = new Headers(request.headers);
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
 
     const heliconeAuth = authorizationKeys.find((x) =>
-      x.includes("helicone-sk-")
+      x.includes(HELICONE_KEY_ID)
     );
     const providerAuth = authorizationKeys.find(
-      (x) => !x.includes("helicone-sk-")
+      (x) => !x.includes(HELICONE_KEY_ID)
     );
 
     if (providerAuth) {
       headers.set("Authorization", providerAuth);
     }
     if (heliconeAuth) {
-      headers.set(
-        "helicone-auth",
-        heliconeAuth.replace("helicone-", "").trim()
-      );
+      headers.set("helicone-auth", heliconeAuth);
     }
     return headers;
   }
