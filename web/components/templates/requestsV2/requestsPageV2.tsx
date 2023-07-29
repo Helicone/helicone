@@ -202,12 +202,25 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
         if (!advancedFilters || advancedFilters.length === 0) {
           setAdvancedFilters(newFilters);
+          const newQuery = {
+            ...router.query,
+          };
+          delete newQuery.propertyFilters;
+
+          router.replace(
+            {
+              pathname: "/requests",
+              query: newQuery,
+            },
+            undefined,
+            {}
+          );
         }
       }
     } catch (e) {
       console.error(e);
     }
-  }, [router.query, isDataLoading, filterMap, advancedFilters]);
+  }, [router, isDataLoading, filterMap, advancedFilters]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
