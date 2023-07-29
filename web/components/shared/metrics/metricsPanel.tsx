@@ -27,7 +27,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
       key={metric.label}
     >
       <div className="w-full flex flex-row items-center justify-between">
-        <div className="text-sm  text-gray-700 flex flex-row gap-1 items-center">
+        <div className="text-sm text-gray-700 flex flex-row gap-1 items-center">
           {metric.label}
           {onInformationHref && (
             <Link href={onInformationHref} target="_blank">
@@ -38,10 +38,10 @@ export function MetricsPanel(props: MetricsPanelProps) {
             </Link>
           )}
         </div>
-        {<metric.icon className="h-5 w-5" aria-hidden="true" />}
+        {/* {<metric.icon className="h-5 w-5" aria-hidden="true" />} */}
       </div>
 
-      <div className="text-2xl font-semibold flex flex-row items-end gap-1">
+      <div className="text-xl font-semibold flex flex-row items-end gap-1">
         {metric.isLoading ? (
           <div className="h-8 w-16 bg-gray-300 rounded-lg animate-pulse" />
         ) : (

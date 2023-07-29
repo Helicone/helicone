@@ -21,16 +21,7 @@ const useUsers = (
       const currentPageSize = query.queryKey[2] as number;
       const advancedFilter = query.queryKey[3];
       const sortLeaf = query.queryKey[4];
-      const [dailyActiveUsers, response, count] = await Promise.all([
-        fetch("/api/request_users/dau", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: advancedFilter,
-          }),
-        }).then((res) => res.json() as Promise<DailyActiveUsers>),
+      const [response, count] = await Promise.all([
         fetch("/api/request_users", {
           method: "POST",
           headers: {
@@ -57,13 +48,12 @@ const useUsers = (
       return {
         response,
         count,
-        dailyActiveUsers,
       };
     },
     refetchOnWindowFocus: false,
   });
 
-  const { response, count, dailyActiveUsers } = data || {
+  const { response, count } = data || {
     response: undefined,
     count: undefined,
     dailyActiveUsers: undefined,
@@ -76,7 +66,7 @@ const useUsers = (
 
   return {
     users,
-    dailyActiveUsers,
+
     count: count?.data ?? 0,
     from,
     to,
