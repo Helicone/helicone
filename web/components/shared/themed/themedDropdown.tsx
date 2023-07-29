@@ -164,7 +164,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   <Listbox.Options
                     className={clsx(
                       align === "left" ? "left-0" : "right-0",
-                      "max-h-[200px] divide-y divide-gray-200"
+                      "max-h-[200px] divide-y divide-gray-200 overflow-auto"
                     )}
                   >
                     {options.map((option, i) => (
