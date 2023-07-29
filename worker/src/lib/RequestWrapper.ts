@@ -41,6 +41,13 @@ export class RequestWrapper {
     }
 
     const headers = new Headers(request.headers);
+
+    if (headers.has("helicone-auth")) {
+      throw new Error(
+        "Cannot have both helicone-auth and Helicone Authorization headers"
+      );
+    }
+
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
 
     const heliconeAuth = authorizationKeys.find((x) =>
@@ -116,8 +123,10 @@ export class RequestWrapper {
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
     const apiKeyPattern =
       /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPatternV2 =
+      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
-    if (!apiKeyPattern.test(apiKey)) {
+    if (!(apiKeyPattern.test(apiKey) || apiKeyPatternV2.test(apiKey))) {
       return {
         data: null,
         error: "API Key is not well formed",
