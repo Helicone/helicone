@@ -195,9 +195,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           };
         });
 
-        console.log("NEW FILTERS", newFilters);
         if (!advancedFilters || advancedFilters.length === 0) {
-          console.log("SETTING ADVANCED FILTERS");
           setAdvancedFilters(newFilters);
         }
       }
