@@ -27,7 +27,7 @@ export class RequestWrapper {
   like this (Bearer sk-123, Beaer helicone-sk-123)
   */
   private mutatedAuthorizationHeaders(request: Request): Headers {
-    console.log("MUTATING AUTHORIZATION... REQUEST", request);
+    
     const authorization = request.headers.get("Authorization");
     if (!authorization) {
       return request.headers;
@@ -38,7 +38,7 @@ export class RequestWrapper {
     ) {
       return request.headers;
     }
-    console.log("MUTATING AUTHORIZATION HEADER", authorization);
+    
 
     const headers = new Headers(request.headers);
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
