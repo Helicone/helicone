@@ -186,9 +186,7 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      console.log("About to get provider key from proxy");
       const providerKey = await this.getProviderKeyFromProxy(authKey);
-      console.log(`providerKey`, providerKey);
 
       if (providerKey.error || !providerKey.data) {
         return {
@@ -233,8 +231,6 @@ export class RequestWrapper {
     }
     const proxyKeyId = match ? match[0] : null;
 
-    console.log(`Proxy key idjkl; ${proxyKeyId}`);
-
     const storedProxyKey = await supabaseClient
       .from("helicone_proxy_keys")
       .select("*")
@@ -250,16 +246,10 @@ export class RequestWrapper {
 
     this.heliconeProxyKeyId = storedProxyKey.data.id;
 
-    console.log(
-      `Verifying proxy key ${proxyKey} with stored key ${storedProxyKey.data.helicone_proxy_key}`
-    );
-
     const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
       api_key: proxyKey,
       stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
     });
-
-    console.log(`Verified ${JSON.stringify(verified)}`);
 
     if (verified.error || !verified.data) {
       return {
