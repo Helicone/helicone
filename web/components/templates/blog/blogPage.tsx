@@ -96,12 +96,13 @@ export default function BlogPage() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-8 gap-y-12 px-6 sm:gap-y-16 lg:grid-cols-2 lg:px-8">
         <article className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-lg">
           <div className="relative w-full">
-            <img
-              src={featuredPost.imageUrl}
-              alt=""
-              className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[2/1]"
-            />
-            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+            <a href={featuredPost.href}>
+              <img
+                src={featuredPost.imageUrl}
+                alt=""
+                className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[2/1]"
+              />
+            </a>
           </div>
           <div className="flex flex-row gap-2 pt-8">
             <time
@@ -118,7 +119,7 @@ export default function BlogPage() {
             id="featured-post"
             className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
           >
-            {featuredPost.title}
+            <a href={featuredPost.href}>{featuredPost.title}</a>
           </h2>
           <p className="mt-4 text-lg leading-8 text-gray-600">
             {featuredPost.description}
@@ -158,12 +159,13 @@ export default function BlogPage() {
             {posts.map((post, id) => (
               <article key={id} className="py-12">
                 <div className="relative w-full">
-                  <img
-                    src={post.imageUrl}
-                    alt=""
-                    className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[8/3] lg:aspect-[8/3]"
-                  />
-                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+                  <a href={post.href}>
+                    <img
+                      src={post.imageUrl}
+                      alt=""
+                      className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[8/3] lg:aspect-[8/3]"
+                    />
+                  </a>
                 </div>
                 <div className="group relative max-w-xl pt-8">
                   <div className="flex flex-row gap-2">
