@@ -17,9 +17,9 @@ const ExampleBlog = (props: ExampleBlogProps) => {
       <NavBarV2 />
       <section className="bg-white">
         <div className="flex flex-col py-32 items-center">
-          <div className="px-12 max-w-7xl text-base leading-7 text-gray-700">
+          <div className="px-4 sm:px-12 max-w-7xl text-base leading-7 text-gray-700">
             <img
-              className="h-full w-auto mx-auto max-w-2xl"
+              className="h-full w-full sm:w-auto mx-auto max-w-2xl"
               src="/assets/autoGPTxHelicone.png"
               alt="Workflow"
             />
@@ -119,9 +119,14 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               OpenAI. Here is a code snippet showcasing how this was
               accomplished:
             </p>
-            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
-              <code>{`bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)" -s start`}</code>
+            <pre className="mt-6 p-4 w-[80vw] lg:w-full max-w-3xl bg-gray-800 text-white rounded-md text-xs  overflow-scroll">
+              <code className="text-xs overflow-scroll whitespace-pre-wrap">
+                {`bash -c "$(curl -fsSL
+                https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)"
+                -s start`}
+              </code>
             </pre>
+
             <p className="mt-6">
               Within the benchmarks, AutoGPT implemented a Python library where
               they could set specific custom properties for detailed
@@ -134,7 +139,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               </a>
               .
             </p>
-            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
+            <pre className="mt-6 p-4 w-[80vw] lg:w-full max-w-3xl bg-gray-800 text-white rounded-md text-xs  overflow-scroll">
               <code>{`HeliconeLockManager.write_custom_property("job_id", "1")
 HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </pre>
@@ -142,7 +147,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               If AutoGPT wants to enable caching, they can do so by simply
               setting an environment variable like this:
             </p>
-            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
+            <pre className="mt-6 p-4 w-[80vw] lg:w-full max-w-3xl bg-gray-800 text-white rounded-md text-xs  overflow-scroll">
               <code>{`export HELICONE_CACHE_ENABLED="true"`}</code>
             </pre>
             <p className="mt-6">
@@ -158,7 +163,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
+                className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/agentComparisons.png"
                 alt="Agent Comparisons"
               />
@@ -176,7 +181,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
+                className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/agentFilters.png"
                 alt="Agent Filters"
               />
@@ -199,7 +204,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
+                className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/cachePageStats.png"
                 alt="Cache Page Stats"
               />
@@ -218,7 +223,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
+                className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/cacheRequestTable.png"
                 alt="Cache Request Table"
               />
@@ -240,7 +245,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
+                className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/graphQL.png"
                 alt="GraphQL"
               />
@@ -257,7 +262,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               have a tight integration between report generation and Helicone.
               Here is a preview of what a benchmark report will look like:
             </p>
-            <pre className="mt-8 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
+            <pre className="mt-6 p-4 w-[80vw] lg:w-full max-w-3xl bg-gray-800 text-white rounded-md text-xs  overflow-scroll">
               <code>
                 {`AutoGPT report
 Job-Id: 8AB138BF-3DEA-4E84-BC27-5FE624B956BC
