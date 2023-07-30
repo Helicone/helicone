@@ -404,6 +404,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           onRowSelect={(row) => {
             onRowSelectHandler(row);
           }}
+          expandedRow={(row) => {
+            return (
+              <div className="flex flex-col space-y-2">
+                {row.render}
+                <div className="flex flex-row space-x-2">
+                  <div>{new Date(row.createdAt).toLocaleString()}</div>
+                  <div>{row.path}</div>
+                  <div>{row.id}</div>
+                </div>
+              </div>
+            );
+          }}
         />
         <TableFooter
           currentPage={currentPage}
