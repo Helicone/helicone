@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 const featuredPost = {
   id: 1,
   title: "Emerging Architectures for LLM Applications",
@@ -60,7 +61,7 @@ const posts = [
   {
     id: 4,
     title: "Boost your conversion rate",
-    href: "#",
+    href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",
     description:
       "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
     date: "Mar 10, 2020",
@@ -69,10 +70,10 @@ const posts = [
       "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
 
     author: {
-      name: "Lindsay Walton",
-      href: "#",
+      name: " Matt Bornstein and Rajko Radovanovic",
+      href: "https://a16z.com/author/rajko-radovanovic/",
       imageUrl:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
     },
     tag: "External",
   },
@@ -161,7 +162,7 @@ export default function BlogPage() {
                     </span>
                   </div>
                   <h2 className="mt-2 text-lg font-semibold text-gray-900 group-hover:text-gray-600">
-                    <a href={`/blog/${post.href}`}>
+                    <a href={`${post.href}`}>
                       <span className="absolute inset-0" />
                       {post.title}
                     </a>
