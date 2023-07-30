@@ -89,23 +89,24 @@ export class HeliconeProxyRequestMapper {
         };
       }
       const body = promptFormatter.data.body;
-      const headers = await this.request.getHeaders();
 
-      if (headers.error || headers.data === null) {
-        return {
-          data: null,
-          error: headers.error ?? "Headers are null",
-        };
-      }
-
-      this.request = new RequestWrapper(
+      const requestWrapper = await RequestWrapper.create(
         new Request(this.request.url.href, {
           method: this.request.getMethod(),
-          headers: headers.data,
+          headers: this.request.getHeaders(),
           body,
         }),
         this.env
       );
+
+      if (requestWrapper.error || !requestWrapper.data) {
+        return {
+          data: null,
+          error: requestWrapper.error ?? "RequestWrapper is null",
+        };
+      }
+
+      this.request = requestWrapper.data;
 
       this.request.setHeader("Content-Length", `${body.length}`);
       return { data: promptFormatter.data, error: null };
