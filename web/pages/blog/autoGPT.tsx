@@ -13,7 +13,10 @@ const ExampleBlog = (props: ExampleBlogProps) => {
   const {} = props;
 
   return (
-    <MetaData title="AutoGPT x Helicone: Optimizing Evaluation Pipelines">
+    <MetaData
+      title="AutoGPT x Helicone: Optimizing Evaluation Pipelines"
+      image="https://www.helicone.ai/assets/autoGPTxHelicone.png"
+    >
       <NavBarV2 />
       <section className="bg-white">
         <div className="flex flex-col py-32 items-center">
