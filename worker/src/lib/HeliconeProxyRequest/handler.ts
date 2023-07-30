@@ -67,7 +67,7 @@ export async function handleProxyRequest(
               .omitResponse,
         },
         timing: {
-          startTime: proxyRequest.startTime,
+          startTime: proxyRequest.startTime
         },
         tokenCalcUrl: proxyRequest.tokenCalcUrl,
       }),
@@ -75,7 +75,7 @@ export async function handleProxyRequest(
         ...response,
         headers: responseHeaders,
         status: response.status,
-      }),
+      })
     },
     error: null,
   };
