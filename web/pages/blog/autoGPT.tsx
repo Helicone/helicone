@@ -27,18 +27,18 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               AutoGPT {"<>"} Helicone
             </h1>
             <p className="mt-6 text-xl leading-8">
-              Constructing the Optimal Evaluation Pipeline for Agent Comparison
+              Building the Optimal Evaluation Pipeline for Agent Comparison
             </p>
             <div className="mt-10 max-w-7xl">
               <p>
-                AutoGPT is diligently working on their{" "}
+                AutoGPT is diligently developing their{" "}
                 <a
                   href="https://github.com/Significant-Gravitas/Auto-GPT-Benchmarks"
                   className="text-indigo-600"
                 >
                   Auto-GPT-Benchmarks repository
                 </a>
-                . Their objective? To build the optimal evaluation pipeline for
+                . Their goal? To construct the optimal evaluation pipeline for
                 comparing different agents. AutoGPT is fully leveraging the
                 capabilities of Helicone without modifying a single line of
                 code. Here are the key features that facilitate this synergy:
@@ -53,8 +53,8 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                     <strong className="font-semibold text-gray-900">
                       Proxy Integration:
                     </strong>{" "}
-                    Helicone&apos;s role as a proxy allows AutoGPT to keep their
-                    codebase intact. Learn more about this feature in our{" "}
+                    Helicone&apos;s role as a proxy allows AutoGPT to maintain
+                    their codebase intact. Learn more about this feature in our{" "}
                     <a
                       href="https://docs.helicone.ai/tools/mitm-proxy"
                       className="text-indigo-600"
@@ -105,18 +105,19 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               AutoGPT&apos;s Workflow with Helicone
             </h2>
             <p className="mt-6">
-              AutoGPT&apos;s workflow took advantage of Helicone&apos;s
-              Man-In-The-Middle (MITM) tools. This facilitated the interception
-              of all traffic that would have been directed to OpenAI from their
-              CI machine and rerouted it to Helicone. Consequently, AutoGPT can
-              now leverage all of Helicone&apos;s features.
+              AutoGPT&apos;s workflow leverages Helicone&apos;s
+              Man-In-The-Middle (MITM) tools. This allows the interception of
+              all traffic that would have been directed to OpenAI from their CI
+              machine and reroutes it to Helicone. Consequently, AutoGPT can now
+              utilize all of Helicone&apos;s features.
             </p>
             <h3 className="mt-10 text-xl font-bold tracking-tight text-gray-900">
               Integration
             </h3>
             <p className="mt-6">
-              AutoGPT used a MITM approach to capture all logs intended for
-              OpenAI. Here is a code snippet showcasing how this was done:
+              AutoGPT employed a MITM approach to capture all logs intended for
+              OpenAI. Here is a code snippet showcasing how this was
+              accomplished:
             </p>
             <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
               <code>{`bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)" -s start`}</code>
@@ -309,7 +310,7 @@ Challenge send-email
             </h2>
             <p className="mt-6">
               We appreciate your time in reading our first blog post. We are
-              thrilled to be partnering with AutoGPT to enable rich logging for
+              excited to be partnering with AutoGPT to enable rich logging for
               them and deliver value using Helicone. If you are interested in
               learning more about Helicone or would like to meet the team,
               please email me at justin @ helicone.ai or join our{" "}
