@@ -54,7 +54,14 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                       Proxy Integration:
                     </strong>{" "}
                     Helicone&apos;s role as a proxy allows AutoGPT to keep their
-                    codebase intact.
+                    codebase intact. Learn more about this feature in our{" "}
+                    <a
+                      href="https://docs.helicone.ai/tools/mitm-proxy"
+                      className="text-indigo-600"
+                    >
+                      MITM Proxy documentation
+                    </a>
+                    .
                   </span>
                 </li>
                 <li className="flex gap-x-3">
@@ -69,7 +76,14 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                     For minor code modifications that don&apos;t necessitate
                     re-calling the LLM for an entire CI pipeline, requests can
                     be cached on edge servers. This feature saves AutoGPT over
-                    $10 per PR!
+                    $10 per PR! You can read more about this in our{" "}
+                    <a
+                      href="https://docs.helicone.ai/features/advanced-usage/caching"
+                      className="text-indigo-600"
+                    >
+                      Caching documentation
+                    </a>
+                    .
                   </span>
                 </li>
                 <li className="flex gap-x-3">
@@ -110,7 +124,14 @@ const ExampleBlog = (props: ExampleBlogProps) => {
             <p className="mt-6">
               Within the benchmarks, AutoGPT implemented a Python library where
               they could set specific custom properties for detailed
-              measurements, as shown here:
+              measurements, as shown here. You can learn more about this in our{" "}
+              <a
+                href="https://docs.helicone.ai/features/advanced-usage/custom-properties"
+                className="text-indigo-600"
+              >
+                Custom Properties documentation
+              </a>
+              .
             </p>
             <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
               <code>{`HeliconeLockManager.write_custom_property("job_id", "1")
