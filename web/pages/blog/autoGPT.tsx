@@ -19,7 +19,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
         <div className="bg-white px-6 py-6 lg:px-8">
           <div className="mx-auto max-w-7xl text-base leading-7 text-gray-700">
             <img
-              className="h-full w-auto"
+              className="h-full w-auto mx-auto"
               src="/assets/autoGPTxHelicone.png"
               alt="Workflow"
             />
@@ -29,7 +29,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
             <p className="mt-6 text-xl leading-8">
               Building the Best Evaluation Pipeline for Agents Comparison
             </p>
-            <div className="mt-10 max-w-2xl">
+            <div className="mt-10 max-w-7xl">
               <p>
                 AutoGPT is hard at work on their Auto-GPT-Benchmarks repository.
                 Their goal? To construct the best evaluation pipeline for
