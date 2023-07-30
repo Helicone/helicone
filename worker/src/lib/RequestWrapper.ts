@@ -210,9 +210,6 @@ export class RequestWrapper {
   private async getProviderKeyFromProxy(
     authKey: string
   ): Promise<Result<string | undefined, string>> {
-    console.log(
-      `SupabaseUrl ${this.env.SUPABASE_URL} SupabaseKey ${this.env.SUPABASE_SERVICE_ROLE_KEY}`
-    );
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
       this.env.SUPABASE_SERVICE_ROLE_KEY
