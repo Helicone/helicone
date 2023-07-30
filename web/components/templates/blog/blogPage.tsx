@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 const featuredPost = {
-  id: 1,
   title: "Emerging Architectures for LLM Applications",
   href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications/",
   description:
@@ -10,71 +9,84 @@ const featuredPost = {
   imageUrl:
     "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
 
-  author: {
-    name: "Matt Bornstein and Rajko Radovanovic",
-    href: "#",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
+  authors: [
+    {
+      name: "Matt Bornstein and Rajko Radovanovic",
+      href: "#",
+      imageUrl:
+        "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    },
+  ],
   tag: "External",
 };
 
 const posts = [
   {
-    id: 2,
-    title: "Boost your conversion rate",
-    href: "/example",
+    title: "Generative AI with Helicone",
+    href: "https://dailybaileyai.com/software/helicone.php",
     description:
-      "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
-    date: "Mar 10, 2020",
-    datetime: "2020-03-16",
-    imageUrl:
-      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
-
-    author: {
-      name: "Lindsay Walton",
-      href: "#",
-      imageUrl:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    },
+      "In the rapidly evolving world of generative AI, companies face the exciting challenge of building innovative solutions while effectively managing costs, result quality, and latency. Enter Helicone, an open-source observability platform specifically designed for these cutting-edge endeavors. With just one line of code, companies gain access to a powerful tool that allows them to log requests made to providers like OpenAI, thereby gaining deep insights into their AI systems' performance and resource usage.",
+    date: "Jul 21, 2023",
+    datetime: "2023-07-21",
+    imageUrl: "https://dailybaileyai.com/home_page_files/banner_image.jpg",
+    authors: [
+      {
+        name: "George Bailey",
+        href: "https://dailybaileyai.com/index.php",
+        imageUrl: "https://dailybaileyai.com/images/avatars/my_profile.png",
+      },
+    ],
     tag: "External",
   },
   {
-    id: 3,
-    title: "Boost your conversion rate",
-    href: "#",
-    description:
-      "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
-    date: "Mar 10, 2020",
-    datetime: "2020-03-16",
-    imageUrl:
-      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
-
-    author: {
-      name: "Lindsay Walton",
-      href: "#",
-      imageUrl:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    },
-    tag: "External",
-  },
-  {
-    id: 4,
-    title: "Boost your conversion rate",
+    title: "(a16z) Emerging Architectures for LLM Applications",
     href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",
     description:
-      "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel iusto corrupti dicta laboris incididunt.",
-    date: "Mar 10, 2020",
-    datetime: "2020-03-16",
+      "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
+    date: "Jun 20, 2023",
+    datetime: "2023-06-20",
     imageUrl:
-      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+      "https://i0.wp.com/a16z.com/wp-content/uploads/2023/06/2657-Emerging-LLM-App-Stack-R2-1-of-4-2.png?w=2000&ssl=1",
 
-    author: {
-      name: " Matt Bornstein and Rajko Radovanovic",
-      href: "https://a16z.com/author/rajko-radovanovic/",
-      imageUrl:
-        "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
-    },
+    authors: [
+      {
+        name: "Matt Bornstein",
+        href: "https://a16z.com/author/matt-bornstein/",
+        imageUrl:
+          "https://a16z.com/wp-content/uploads/2019/07/MattBornstein-Investing-400x400.jpg",
+      },
+      {
+        name: "Rajko Radovanovic",
+        href: "https://a16z.com/author/rajko-radovanovic/",
+        imageUrl:
+          "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
+      },
+    ],
+    tag: "External",
+  },
+  {
+    title: "(Sequoia) The New Language Model Stack",
+    href: "https://www.sequoiacap.com/article/llm-stack-perspective/",
+    description: "How companies are bringing AI applications to life",
+    date: "Jun 14, 2023",
+    datetime: "2023-06-14",
+    imageUrl:
+      "https://www.sequoiacap.com/wp-content/uploads/sites/6/2023/06/llm-landscape-10.png?resize=1536,1333",
+
+    authors: [
+      {
+        name: "Michelle Fradin",
+        href: "https://www.sequoiacap.com/people/michelle-fradin/",
+        imageUrl:
+          "https://www.sequoiacap.com/wp-content/uploads/sites/6/2021/12/Michelle-Bailhe-profile-1.jpg?resize=880,880",
+      },
+      {
+        name: "Lauren Reeder",
+        href: "https://www.sequoiacap.com/people/lauren-reeder/",
+        imageUrl:
+          "https://www.sequoiacap.com/wp-content/uploads/sites/6/2022/01/211118_clifford_sequoia-laurenreeder_DSF9377.jpg?resize=880,880",
+      },
+    ],
     tag: "External",
   },
 ];
@@ -122,28 +134,33 @@ export default function BlogPage() {
                 Continue reading <span aria-hidden="true">&rarr;</span>
               </a>
             </div>
-            <div className="flex lg:border-t lg:border-gray-900/10 lg:pt-8">
-              <a
-                href={featuredPost.author.href}
-                className="flex gap-x-2.5 text-sm font-semibold leading-6 text-gray-900"
+            {featuredPost.authors.map((author, i) => (
+              <div
+                className="flex lg:border-t lg:border-gray-900/10 lg:pt-8"
+                key={i}
               >
-                <img
-                  src={featuredPost.author.imageUrl}
-                  alt=""
-                  className="h-6 w-6 flex-none rounded-full bg-gray-50"
-                />
-                {featuredPost.author.name}
-              </a>
-            </div>
+                <a
+                  href={author.href}
+                  className="flex gap-x-2.5 text-sm font-semibold leading-6 text-gray-900"
+                >
+                  <img
+                    src={author.imageUrl}
+                    alt=""
+                    className="h-6 w-6 flex-none rounded-full bg-gray-50"
+                  />
+                  {author.name}
+                </a>
+              </div>
+            ))}
           </div>
         </article>
         <div className="mx-auto w-full max-w-2xl border-t border-gray-900/10 pt-12 sm:pt-16 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-0">
           <div className="-my-12 divide-y divide-gray-900/10">
-            {posts.map((post) => (
-              <article key={post.id} className="py-12">
+            {posts.map((post, id) => (
+              <article key={id} className="py-12">
                 <div className="relative w-full">
                   <img
-                    src={featuredPost.imageUrl}
+                    src={post.imageUrl}
                     alt=""
                     className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[8/3] lg:aspect-[8/3]"
                   />
@@ -171,18 +188,25 @@ export default function BlogPage() {
                     {post.description}
                   </p>
                 </div>
-                <div className="mt-4 flex">
-                  <a
-                    href={post.author.href}
-                    className="relative flex gap-x-2.5 text-sm font-semibold leading-6 text-gray-900"
-                  >
-                    <img
-                      src={post.author.imageUrl}
-                      alt=""
-                      className="h-6 w-6 flex-none rounded-full bg-gray-50"
-                    />
-                    {post.author.name}
-                  </a>
+                <div className="flex flex-row space-x-2">
+                  {post.authors.map((author, i) => (
+                    <div
+                      className="flex lg:border-t lg:border-gray-900/10 lg:pt-8"
+                      key={i}
+                    >
+                      <a
+                        href={author.href}
+                        className="relative flex gap-x-2.5 text-sm font-semibold leading-6 text-gray-900"
+                      >
+                        <img
+                          src={author.imageUrl}
+                          alt=""
+                          className="h-6 w-6 flex-none rounded-full bg-gray-50"
+                        />
+                        {author.name}
+                      </a>
+                    </div>
+                  ))}
                 </div>
               </article>
             ))}
