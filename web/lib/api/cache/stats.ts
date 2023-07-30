@@ -13,7 +13,11 @@ import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import {
+  dbExecute,
+  dbQueryClickhouse,
+  printRunnableQuery,
+} from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
 

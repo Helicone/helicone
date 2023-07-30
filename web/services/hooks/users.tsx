@@ -6,6 +6,7 @@ import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
+import { DailyActiveUsers } from "../../pages/api/request_users/dau";
 
 const useUsers = (
   currentPage: number,
@@ -44,15 +45,19 @@ const useUsers = (
         }).then((res) => res.json() as Promise<Result<number, string>>),
       ]);
 
-      return [response, count] as [
-        Result<UserMetric[], string>,
-        Result<number, string>
-      ];
+      return {
+        response,
+        count,
+      };
     },
     refetchOnWindowFocus: false,
   });
 
-  const [response, count] = data || [null, null];
+  const { response, count } = data || {
+    response: undefined,
+    count: undefined,
+    dailyActiveUsers: undefined,
+  };
 
   const users = response?.data || [];
   const from = (currentPage - 1) * currentPageSize;
@@ -61,6 +66,7 @@ const useUsers = (
 
   return {
     users,
+
     count: count?.data ?? 0,
     from,
     to,

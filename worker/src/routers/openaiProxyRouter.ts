@@ -6,6 +6,23 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 export const getOpenAIProxyRouter = () => {
   const oaiRouter = Router<IRequest, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>();
   // Proxy only + proxy forwarder
+  oaiRouter.get("/helicone/test", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
+    const properties = requestWrapper.heliconeHeaders.heliconeProperties;
+    return new Response(
+      JSON.stringify({
+        test: "Hello World!",
+        properties: {
+          ...properties,
+        },
+      }),
+      {
+        headers: {
+          "content-type": "application/json",
+        },
+      }
+    );
+  });
+
   oaiRouter.all("*", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     console.log("requestWrapper.url.pathname", requestWrapper.url.pathname);
     if (requestWrapper.url.pathname.includes("audio")) {

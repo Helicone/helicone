@@ -12,7 +12,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
@@ -52,6 +52,8 @@ interface ThemedTableV5Props<T> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T) => void;
+  chart?: React.ReactNode;
+  expandedRow?: (row: T) => React.ReactNode;
 }
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
@@ -65,6 +67,8 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     timeFilter,
     sortable,
     onRowSelect,
+    expandedRow,
+    chart,
   } = props;
 
   const router = useRouter();
@@ -127,7 +131,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         }
         rows={exportData || []}
       />
-
+      {chart}
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
@@ -142,6 +146,12 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
           <p className="text-xl font-semibold text-gray-500">
             No Columns Selected
           </p>
+        </div>
+      ) : router.query.expanded && expandedRow ? (
+        <div className="overflow-x-auto text-sm bg-white rounded-lg border border-gray-300 py-2 px-4">
+          {rows.map((row, i) => (
+            <div key={"expanded-row" + i}>{expandedRow(row.original)}</div>
+          ))}
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
@@ -209,7 +219,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                                 }}
                                 className="flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
                               >
-                                {/* render the chevron up icon if this column is ascending */}
                                 {meta.sortKey === sortable.sortKey ? (
                                   sortable.sortDirection === "asc" ? (
                                     <ChevronUpIcon

@@ -31,13 +31,6 @@ class GPT3Builder extends AbstractRequestBuilder {
     return {
       requestText: this.response.request_body.prompt || "Invalid Prompt",
       responseText: getResponseText(),
-      cost: modelCost({
-        model:
-          this.response.request_body.model || this.response.response_body.model,
-        sum_completion_tokens: this.response.completion_tokens || 0,
-        sum_prompt_tokens: this.response.prompt_tokens || 0,
-        sum_tokens: this.response.total_tokens || 0,
-      }),
       model:
         this.response.request_body.model || this.response.response_body.model,
 

@@ -46,6 +46,7 @@ import Link from "next/link";
 import { Result } from "../../../lib/result";
 import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
+import { Toggle } from "./themedToggle";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -234,7 +235,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                 }}
               />
             )}
-
             {csvExport && (
               <div className="mx-auto flex text-sm">
                 <Menu as="div" className="relative inline-block">

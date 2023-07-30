@@ -24,6 +24,7 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedModal from "../../shared/themed/themedModal";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
+import { RenderBarChart } from "../../shared/metrics/barChart";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");

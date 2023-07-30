@@ -48,6 +48,84 @@ export interface Database {
           request_id?: string
         }
       }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          feature: string
+          id: number
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature: string
+          id?: number
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature?: string
+          id?: number
+          org_id?: string
+        }
+      }
+      feedback: {
+        Row: {
+          boolean_value: boolean | null
+          categorical_value: string | null
+          created_at: string | null
+          created_by: string
+          feedback_metric_id: number
+          float_value: number | null
+          id: number
+          response_id: string
+          string_value: string | null
+        }
+        Insert: {
+          boolean_value?: boolean | null
+          categorical_value?: string | null
+          created_at?: string | null
+          created_by: string
+          feedback_metric_id: number
+          float_value?: number | null
+          id?: number
+          response_id: string
+          string_value?: string | null
+        }
+        Update: {
+          boolean_value?: boolean | null
+          categorical_value?: string | null
+          created_at?: string | null
+          created_by?: string
+          feedback_metric_id?: number
+          float_value?: number | null
+          id?: number
+          response_id?: string
+          string_value?: string | null
+        }
+      }
+      feedback_metrics: {
+        Row: {
+          created_at: string
+          data_type: string
+          helicone_api_key_id: number
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          helicone_api_key_id: number
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          helicone_api_key_id?: number
+          id?: number
+          name?: string
+        }
+      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
@@ -142,16 +220,19 @@ export interface Database {
         Row: {
           created_at: string | null
           member: string
+          org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
           member: string
+          org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
           member?: string
+          org_role?: string
           organization?: string
         }
       }
@@ -221,6 +302,7 @@ export interface Database {
           prompt_id: string | null
           prompt_values: Json | null
           properties: Json | null
+          provider: string
           user_id: string | null
         }
         Insert: {
@@ -236,6 +318,7 @@ export interface Database {
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
+          provider?: string
           user_id?: string | null
         }
         Update: {
@@ -251,6 +334,7 @@ export interface Database {
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
+          provider?: string
           user_id?: string | null
         }
       }
@@ -260,33 +344,33 @@ export interface Database {
           completion_tokens: number | null
           created_at: string
           delay_ms: number | null
+          feedback: Json | null
           id: string
           prompt_tokens: number | null
           request: string
           status: number | null
-          feedback: Json | null
         }
         Insert: {
           body: Json
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
+          feedback?: Json | null
           id?: string
           prompt_tokens?: number | null
           request: string
           status?: number | null
-          feedback?: Json | null
         }
         Update: {
           body?: Json
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
+          feedback?: Json | null
           id?: string
           prompt_tokens?: number | null
           request?: string
           status?: number | null
-          feedback?: Json | null
         }
       }
       user_api_keys: {
@@ -330,6 +414,55 @@ export interface Database {
           request_limit?: number
           tier?: string
           user?: string
+        }
+      }
+      webhook_subscriptions: {
+        Row: {
+          created_at: string | null
+          event: string
+          id: number
+          payload_type: Json
+          webhook_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          event: string
+          id?: number
+          payload_type: Json
+          webhook_id: number
+        }
+        Update: {
+          created_at?: string | null
+          event?: string
+          id?: number
+          payload_type?: Json
+          webhook_id?: number
+        }
+      }
+      webhooks: {
+        Row: {
+          created_at: string | null
+          destination: string
+          id: number
+          is_verified: boolean
+          org_id: string
+          txt_record: string
+        }
+        Insert: {
+          created_at?: string | null
+          destination: string
+          id?: number
+          is_verified?: boolean
+          org_id: string
+          txt_record: string
+        }
+        Update: {
+          created_at?: string | null
+          destination?: string
+          id?: number
+          is_verified?: boolean
+          org_id?: string
+          txt_record?: string
         }
       }
     }
@@ -459,6 +592,19 @@ export interface Database {
           request_id: string
         }
         Returns: string
+      }
+      insert_feedback_and_update_response: {
+        Args: {
+          response_id: string
+          feedback_metric_id: number
+          boolean_value: boolean
+          numerical_value: number
+          string_value: string
+          categorical_value: string
+          created_by: string
+          name: string
+        }
+        Returns: number
       }
     }
     Enums: {

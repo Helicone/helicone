@@ -17,12 +17,14 @@ import { heliconeRequest } from "../../../lib/api/graphql/query/heliconeRequest"
 import { queryUser } from "../../../lib/api/graphql/query/user";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import { DEFAULT_EXAMPLE_QUERY } from "../../../components/templates/graphql/graphqlPage";
+import { aggregatedHeliconeRequest } from "../../../lib/api/graphql/query/aggregatedHeliconeRequest";
 
 const resolvers = {
   JSON: GraphQLJSON,
 
   Query: {
     heliconeRequest: heliconeRequest,
+    aggregatedHeliconeRequest: aggregatedHeliconeRequest,
     user: queryUser,
   },
   // Mutation: {
