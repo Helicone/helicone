@@ -11,7 +11,7 @@ const ModelPill = (props: ModelPillProps) => {
 
   let modelMapping = {
     FunctionGPTBuilder: "purple",
-    GPT3Builder: "lime",
+    GPT3Builder: "green",
     ModerationBuilder: "teal",
     EmbeddingBuilder: "blue",
     ClaudeBuilder: "orange",
