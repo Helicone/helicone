@@ -16,7 +16,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
     <MetaData title="AutoGPT x Helicone: Optimizing Evaluation Pipelines">
       <NavBarV2 />
       <section className="bg-white">
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col py-32 items-center">
           <div className="px-12 max-w-7xl text-base leading-7 text-gray-700">
             <img
               className="h-full w-auto mx-auto max-w-2xl"
@@ -290,7 +290,14 @@ Challenge send-email
               thrilled to be partnering with AutoGPT to enable rich logging for
               them and deliver value using Helicone. If you are interested in
               learning more about Helicone or would like to meet the team,
-              please email me at justin @ helicone.ai
+              please email me at justin @ helicone.ai or join our{" "}
+              <a
+                href="https://discord.gg/2TkeWdXNPQ"
+                className="text-indigo-600"
+              >
+                discord
+              </a>
+              !
             </p>
           </div>
         </div>
