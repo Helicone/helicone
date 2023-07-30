@@ -16,7 +16,7 @@ const featuredPost = {
         "https://media.licdn.com/dms/image/D5603AQG1fVqLULxCYA/profile-displayphoto-shrink_800_800/0/1673810039348?e=1696464000&v=beta&t=UTxO3PbbnF8bLmP2CosOwCnmh5yxyOJYAIG2XmV8uAM",
     },
   ],
-  tag: "External",
+  tag: undefined,
 };
 
 const posts = [
@@ -111,9 +111,11 @@ export default function BlogPage() {
             >
               {featuredPost.date}
             </time>
-            <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-700/10">
-              {featuredPost.tag}
-            </span>
+            {featuredPost.tag && (
+              <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-700/10">
+                {featuredPost.tag}
+              </span>
+            )}
           </div>
           <h2
             id="featured-post"
