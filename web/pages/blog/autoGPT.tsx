@@ -19,7 +19,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
         <div className="flex flex-col items-center">
           <div className="px-12 max-w-7xl text-base leading-7 text-gray-700">
             <img
-              className="h-full w-auto mx-auto"
+              className="h-full w-auto mx-auto max-w-2xl"
               src="/assets/autoGPTxHelicone.png"
               alt="Workflow"
             />
@@ -31,12 +31,17 @@ const ExampleBlog = (props: ExampleBlogProps) => {
             </p>
             <div className="mt-10 max-w-7xl">
               <p>
-                AutoGPT is diligently working on their Auto-GPT-Benchmarks
-                repository. Their objective? To build the optimal evaluation
-                pipeline for comparing different agents. AutoGPT is fully
-                leveraging the capabilities of Helicone without modifying a
-                single line of code. Here are the key features that facilitate
-                this synergy:
+                AutoGPT is diligently working on their{" "}
+                <a
+                  href="https://github.com/Significant-Gravitas/Auto-GPT-Benchmarks"
+                  className="text-indigo-600"
+                >
+                  Auto-GPT-Benchmarks repository
+                </a>
+                . Their objective? To build the optimal evaluation pipeline for
+                comparing different agents. AutoGPT is fully leveraging the
+                capabilities of Helicone without modifying a single line of
+                code. Here are the key features that facilitate this synergy:
               </p>
               <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
                 <li className="flex gap-x-3">
@@ -131,7 +136,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover"
+                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
                 src="/assets/blog/agentComparisons.png"
                 alt="Agent Comparisons"
               />
@@ -149,7 +154,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover"
+                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
                 src="/assets/blog/agentFilters.png"
                 alt="Agent Filters"
               />
@@ -172,7 +177,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover"
+                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
                 src="/assets/blog/cachePageStats.png"
                 alt="Cache Page Stats"
               />
@@ -212,7 +217,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
-                className="aspect-video rounded-xl bg-gray-50 object-cover"
+                className="aspect-video rounded-xl bg-gray-50 object-cover max-w-2xl"
                 src="/assets/blog/graphQL.png"
                 alt="GraphQL"
               />

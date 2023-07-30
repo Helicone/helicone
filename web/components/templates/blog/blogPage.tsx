@@ -1,20 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 const featuredPost = {
-  title: "Emerging Architectures for LLM Applications",
-  href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications/",
+  title: "Helicone Partners with AutoGPT",
+  href: "/blog/autoGPT",
   description:
-    "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
-  date: "Mar 16, 2020",
-  datetime: "2020-03-16",
-  imageUrl:
-    "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+    "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development.",
+  date: "Jul 30, 2023",
+  datetime: "2023-07-30",
+  imageUrl: "/assets/autoGPTLogo.png",
 
   authors: [
     {
-      name: "Matt Bornstein and Rajko Radovanovic",
-      href: "#",
+      name: "Justin Torre",
+      href: "https://www.linkedin.com/in/justintorre/",
       imageUrl:
-        "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://media.licdn.com/dms/image/D5603AQG1fVqLULxCYA/profile-displayphoto-shrink_800_800/0/1673810039348?e=1696464000&v=beta&t=UTxO3PbbnF8bLmP2CosOwCnmh5yxyOJYAIG2XmV8uAM",
     },
   ],
   tag: "External",
