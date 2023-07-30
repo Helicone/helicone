@@ -30,10 +30,25 @@ export class RequestWrapper {
 
   private cachedText: string | null = null;
 
-  constructor(private request: Request, private env: Env) {
+  private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
     this.headers = request.headers;
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
+  }
+
+  static async create(
+    request: Request,
+    env: Env
+  ): Promise<Result<RequestWrapper, string>> {
+    const requestWrapper = new RequestWrapper(request, env);
+
+    const authorization = await requestWrapper.setAuthorization();
+
+    if (authorization.error) {
+      return { data: null, error: authorization.error };
+    }
+
+    return { data: requestWrapper, error: null };
   }
 
   async getText(): Promise<string> {
@@ -58,25 +73,8 @@ export class RequestWrapper {
     return this.request.body;
   }
 
-  async getHeaders(): Promise<Result<Headers, string>> {
-    if (this.authorization) {
-      return { data: this.request.headers, error: null };
-    }
-
-    // Compute the auth header for provider request
-    const authHeader = await this.getAuthorization();
-
-    if (authHeader.error) {
-      return { data: null, error: authHeader.error };
-    }
-
-    if (!authHeader.data) {
-      return { data: null, error: "No auth header" };
-    }
-
-    this.request.headers.set("Authorization", authHeader.data);
-
-    return { data: this.request.headers, error: null };
+  getHeaders(): Headers {
+    return this.headers;
   }
 
   setHeader(key: string, value: string): void {
@@ -125,7 +123,13 @@ export class RequestWrapper {
     return userId;
   }
 
-  async getAuthorization(): Promise<Result<string | undefined, string>> {
+  getAuthorization(): string | undefined {
+    return this.authorization || undefined;
+  }
+
+  private async setAuthorization(): Promise<
+    Result<string | undefined, string>
+  > {
     if (this.authorization) {
       return { data: this.authorization, error: null };
     }
@@ -153,8 +157,10 @@ export class RequestWrapper {
       }
 
       this.authorization = providerKey.data;
+      this.headers.set("Authorization", `Bearer ${providerKey.data}`);
     } else {
       this.authorization = authKey;
+      return { data: this.authorization, error: null };
     }
 
     return { data: this.authorization, error: null };
@@ -163,7 +169,9 @@ export class RequestWrapper {
   private async getProviderKeyFromProxy(
     authKey: string
   ): Promise<Result<string | undefined, string>> {
-    console.log(`SupabaseUrl ${this.env.SUPABASE_URL} SupabaseKey ${this.env.SUPABASE_SERVICE_ROLE_KEY}`)
+    console.log(
+      `SupabaseUrl ${this.env.SUPABASE_URL} SupabaseKey ${this.env.SUPABASE_SERVICE_ROLE_KEY}`
+    );
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
       this.env.SUPABASE_SERVICE_ROLE_KEY
@@ -183,28 +191,12 @@ export class RequestWrapper {
     const proxyKeyId = match ? match[0] : null;
 
     console.log(`Proxy key idjkl; ${proxyKeyId}`);
-    let storedProxyKey: PostgrestSingleResponse<{
-      helicone_proxy_key: string;
-      helicone_proxy_key_name: string;
-      id: string;
-      org_id: string;
-      provider_key_id: string;
-      soft_delete: boolean;
-    }>;
 
-    try {
-      // storedProxyKey = await supabaseClient
-      //   .from("helicone_proxy_keys")
-      //   .select("*")
-      //   .eq("id", proxyKeyId)
-      //   .single();
-
-      storedProxyKey = null;
-
-      console.log(`Stored proxy key ${JSON.stringify(storedProxyKey)}`);
-    } catch (e) {
-      console.log("Error getting proxy key", e);
-    }
+    const storedProxyKey = await supabaseClient
+      .from("helicone_proxy_keys")
+      .select("*")
+      .eq("id", proxyKeyId)
+      .single();
 
     if (storedProxyKey.error || !storedProxyKey.data) {
       return {

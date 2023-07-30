@@ -16,16 +16,7 @@ export async function handleProxyRequest(
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
-  const headers = await proxyRequest.requestWrapper.getHeaders();
-
-  if (headers.error || !headers.data) {
-    return {
-      data: null,
-      error: headers.error ?? "Unknown error getting headers",
-    };
-  }
-
-  const callProps = callPropsFromProxyRequest(proxyRequest, headers.data);
+  const callProps = callPropsFromProxyRequest(proxyRequest);
   const response = await (retryOptions
     ? callProviderWithRetry(callProps, retryOptions)
     : callProvider(callProps));

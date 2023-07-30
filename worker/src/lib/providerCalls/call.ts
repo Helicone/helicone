@@ -10,13 +10,12 @@ export interface CallProps {
 }
 
 export function callPropsFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest,
-  headers: Headers
+  proxyRequest: HeliconeProxyRequest
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base,
     body: proxyRequest.bodyText,
-    headers: headers,
+    headers: proxyRequest.requestWrapper.getHeaders(),
     method: proxyRequest.requestWrapper.getMethod(),
     increaseTimeout:
       proxyRequest.requestWrapper.heliconeHeaders.featureFlags.increaseTimeout,

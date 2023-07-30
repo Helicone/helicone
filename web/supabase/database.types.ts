@@ -893,6 +893,13 @@ export interface Database {
         }
         Returns: number
       }
+      verify_helicone_proxy_key: {
+        Args: {
+          api_key: string
+          stored_hashed_key: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

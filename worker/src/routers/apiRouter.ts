@@ -13,8 +13,7 @@ export const getAPIRouter = () => {
   apiRouter.post("/oai/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
     const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
     //TODO Check to make sure auth is correct
-    const auth = await requestWrapper.getAuthorization();
-    if (!auth) {
+    if (!requestWrapper.getAuthorization()) {
       return new Response("Unauthorized", { status: 401 });
     }
 
