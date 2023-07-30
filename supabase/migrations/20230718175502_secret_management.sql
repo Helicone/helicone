@@ -62,7 +62,7 @@ DECLARE
 BEGIN
     -- Verify the api key
     is_verified := (
-        SELECT pgsodium.crypto_pwhash_str_verify(stored_hashed_key, api_key)
+        SELECT pgsodium.crypto_pwhash_str_verify(decode(stored_hashed_key, 'hex'), convert_to(api_key, 'utf8'))
     );
     
     RETURN is_verified;

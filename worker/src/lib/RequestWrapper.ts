@@ -3,11 +3,7 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
-import {
-  PostgrestSingleResponse,
-  SupabaseClient,
-  createClient,
-} from "@supabase/supabase-js";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
@@ -215,6 +211,8 @@ export class RequestWrapper {
       api_key: proxyKey,
       stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
     });
+
+    console.log(`Verified ${JSON.stringify(verified)}`);
 
     if (verified.error || !verified.data) {
       return {
