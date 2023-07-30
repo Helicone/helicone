@@ -71,10 +71,8 @@ export class RequestWrapper {
   }
 
   private constructor(private request: Request, private env: Env) {
-    this.headers = this.mutatedAuthorizationHeaders(request);
-
     this.url = new URL(request.url);
-    this.headers = request.headers;
+    this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
   }
 
@@ -83,7 +81,6 @@ export class RequestWrapper {
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
     const requestWrapper = new RequestWrapper(request, env);
-
     const authorization = await requestWrapper.setAuthorization();
 
     if (authorization.error) {
@@ -201,7 +198,9 @@ export class RequestWrapper {
       }
 
       this.authorization = providerKey.data;
-      this.headers.set("Authorization", `Bearer ${providerKey.data}`);
+      const headers = new Headers(this.headers);
+      headers.set("Authorization", `Bearer ${providerKey.data}`);
+      this.headers = headers;
     } else {
       this.authorization = authKey;
       return { data: this.authorization, error: null };
