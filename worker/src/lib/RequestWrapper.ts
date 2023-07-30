@@ -19,14 +19,60 @@ export type RequestHandlerType =
 export class RequestWrapper {
   private authorization: string | undefined;
   url: URL;
-  headers: Headers;
   heliconeHeaders: HeliconeHeaders;
   providerAuth: string | undefined;
+  headers: Headers;
   heliconeProxyKeyId: string | undefined;
 
   private cachedText: string | null = null;
 
+  /*
+  We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
+  like this (Bearer sk-123, Beaer helicone-sk-123)
+  */
+  private mutatedAuthorizationHeaders(request: Request): Headers {
+    const HELICONE_KEY_ID = "sk-helicone-";
+
+    const authorization = request.headers.get("Authorization");
+    if (!authorization) {
+      return request.headers;
+    }
+    if (
+      !authorization.includes(",") ||
+      !authorization.includes(HELICONE_KEY_ID)
+    ) {
+      return request.headers;
+    }
+
+    const headers = new Headers(request.headers);
+
+    if (headers.has("helicone-auth")) {
+      throw new Error(
+        "Cannot have both helicone-auth and Helicone Authorization headers"
+      );
+    }
+
+    const authorizationKeys = authorization.split(",").map((x) => x.trim());
+
+    const heliconeAuth = authorizationKeys.find((x) =>
+      x.includes(HELICONE_KEY_ID)
+    );
+    const providerAuth = authorizationKeys.find(
+      (x) => !x.includes(HELICONE_KEY_ID)
+    );
+
+    if (providerAuth) {
+      headers.set("Authorization", providerAuth);
+    }
+    if (heliconeAuth) {
+      headers.set("helicone-auth", heliconeAuth);
+    }
+    return headers;
+  }
+
   private constructor(private request: Request, private env: Env) {
+    this.headers = this.mutatedAuthorizationHeaders(request);
+
     this.url = new URL(request.url);
     this.headers = request.headers;
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
@@ -74,7 +120,7 @@ export class RequestWrapper {
   }
 
   setHeader(key: string, value: string): void {
-    this.request.headers.set(key, value);
+    this.headers.set(key, value);
   }
 
   getMethod(): string {
@@ -97,8 +143,10 @@ export class RequestWrapper {
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
     const apiKeyPattern =
       /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPatternV2 =
+      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
-    if (!apiKeyPattern.test(apiKey)) {
+    if (!(apiKeyPattern.test(apiKey) || apiKeyPatternV2.test(apiKey))) {
       return {
         data: null,
         error: "API Key is not well formed",

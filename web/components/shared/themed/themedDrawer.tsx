@@ -67,14 +67,13 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                   <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-2xl">
                     <div className="px-4 sm:px-6 flex flex-row justify-between">
                       <div className="flex flex-row items-center space-x-2 text-gray-500 w-full">
-                        <Tooltip title={"Close"}>
-                          <button
-                            onClick={() => setOpen(false)}
-                            className="hover:bg-gray-200 rounded-md -m-1 p-1"
-                          >
-                            <ChevronDoubleRightIcon className="h-5 w-5" />
-                          </button>
-                        </Tooltip>
+                        <button
+                          onClick={() => setOpen(false)}
+                          className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                        >
+                          <ChevronDoubleRightIcon className="h-5 w-5" />
+                        </button>
+
                         <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
                           <button
                             onClick={() => setExpanded(!expanded)}

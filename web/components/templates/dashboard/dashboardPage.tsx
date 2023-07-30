@@ -123,7 +123,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               metrics.totalCost.data.data / metrics.totalRequests?.data?.data
             ).toFixed(3)}`
           : "$0.00",
-      label: "Avg Cost/Req",
+      label: "Avg Cost / Req",
       icon: ChartBarIcon,
       isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
     },
@@ -134,8 +134,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           ? `${metrics.averageTokensPerRequest.data.data.average_prompt_tokens_per_response.toFixed(
               2
             )}`
-          : "N/A",
-      label: "Avg Prompt Tokens/Req",
+          : "n/a",
+      label: "Avg Prompt Tokens / Req",
       icon: ChartBarIcon,
       isLoading:
         metrics.averageTokensPerRequest.isLoading ||
@@ -148,8 +148,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           ? `${metrics.averageTokensPerRequest.data.data.average_completion_tokens_per_response.toFixed(
               2
             )}`
-          : "N/A",
-      label: "Avg Completion Tokens/Req",
+          : "n/a",
+      label: "Avg Completion Tokens / Req",
       icon: ChartBarIcon,
       isLoading:
         metrics.averageTokensPerRequest.isLoading ||
@@ -162,8 +162,8 @@ const DashboardPage = (props: DashboardPageProps) => {
           ? `${metrics.averageTokensPerRequest.data.data.average_total_tokens_per_response.toFixed(
               2
             )}`
-          : "N/A",
-      label: "Avg Total Tokens/Req",
+          : "n/a",
+      label: "Avg Total Tokens / Req",
       icon: ChartBarIcon,
       isLoading:
         metrics.averageTokensPerRequest.isLoading ||
@@ -192,22 +192,6 @@ const DashboardPage = (props: DashboardPageProps) => {
               )}
             />
           </button>
-        }
-        actions={
-          <div className="flex flex-row items-center gap-5">
-            <div className="flex flex-row gap-1 items-center">
-              UTC
-              <Toggle
-                onChange={(checked) => {
-                  if (checked) {
-                    setTimeZoneDifference(0);
-                  } else {
-                    setTimeZoneDifference(new Date().getTimezoneOffset());
-                  }
-                }}
-              />
-            </div>
-          </div>
         }
       />
       {authorized ? (
@@ -269,112 +253,99 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
           />
 
-          {metrics.totalRequests?.data?.data === 0 ? (
-            <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-              <TableCellsIcon className="h-12 w-12 text-gray-400" />
-              <p className="text-xl font-semibold text-gray-500">
-                No Data Found
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 xl:grid-cols-12 text-gray-900 gap-4">
-                {/* Combine the requests and error into one graph */}
-                <div className="col-span-2 xl:col-span-12 h-full">
-                  <MainGraph
-                    isLoading={overTimeData.requests.isLoading}
-                    dataOverTime={
-                      overTimeData.requests.data?.data?.map((r) => ({
-                        ...r,
-                        value: r.count,
-                      })) ?? []
-                    }
-                    doubleLineOverTime={combineRequestsAndErrors()}
-                    timeMap={getTimeMap(timeIncrement)}
-                    title={"Requests"}
-                    value={
-                      metrics.totalRequests?.data?.data
-                        ? `${formatNumberString(
-                            metrics.totalRequests?.data?.data.toFixed(2)
-                          )}`
-                        : "0"
-                    }
-                    valueLabel={"requests"}
-                    type="double-line"
-                  />
-                </div>{" "}
-                <div className="col-span-2 xl:col-span-4 h-full">
-                  <MainGraph
-                    isLoading={overTimeData.costs.isLoading}
-                    dataOverTime={
-                      overTimeData.costs.data?.data?.map((r) => ({
-                        ...r,
-                        value: r.cost,
-                      })) ?? []
-                    }
-                    timeMap={getTimeMap(timeIncrement)}
-                    title={"Costs"}
-                    value={
-                      metrics.totalCost.data?.data
-                        ? `$${formatNumberString(
-                            metrics.totalCost.data?.data.toFixed(2),
-                            true
-                          )}`
-                        : "$0.00"
-                    }
-                    valueLabel={"cost"}
-                    type="bar"
-                    labelFormatter={(value) => `$${Number(value).toFixed(2)}`}
-                  />
-                </div>
-                <div className="col-span-2 xl:col-span-4 h-full">
-                  <MainGraph
-                    isLoading={overTimeData.latency.isLoading}
-                    dataOverTime={
-                      overTimeData.latency.data?.data?.map((r) => ({
-                        ...r,
-                        value: r.duration,
-                      })) ?? []
-                    }
-                    timeMap={getTimeMap(timeIncrement)}
-                    title={"Latency"}
-                    value={`${
-                      metrics.averageLatency.data?.data?.toFixed(0) ?? 0
-                    } ms / req`}
-                    valueLabel={"latency"}
-                    type={"area"}
-                    labelFormatter={(value) =>
-                      `${parseInt(value).toFixed(0)} ms`
-                    }
-                  />
-                </div>
-                <div className="col-span-2 xl:col-span-4 h-full">
-                  <MainGraph
-                    isLoading={overTimeData.users.isLoading}
-                    dataOverTime={
-                      overTimeData.users.data?.data?.map((r) => ({
-                        ...r,
-                        value: r.count,
-                      })) ?? []
-                    }
-                    timeMap={getTimeMap(timeIncrement)}
-                    title={"Active Users"}
-                    value={metrics.activeUsers.data?.data ?? 0}
-                    valueLabel={" Users"}
-                    type={"bar"}
-                  />
-                </div>
-                {metricsData.map((m, i) => (
-                  <div
-                    className="col-span-2 md:col-span-1 xl:col-span-3"
-                    key={i}
-                  >
-                    <MetricsPanel metric={m} />
-                  </div>
-                ))}
+          <>
+            <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-12 text-gray-900 gap-4">
+              {/* Combine the requests and error into one graph */}
+              <div className="col-span-2 lg:col-span-12 h-full">
+                <MainGraph
+                  isLoading={overTimeData.requests.isLoading}
+                  dataOverTime={
+                    overTimeData.requests.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.count,
+                    })) ?? []
+                  }
+                  doubleLineOverTime={combineRequestsAndErrors()}
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Requests"}
+                  value={
+                    metrics.totalRequests?.data?.data
+                      ? `${formatNumberString(
+                          metrics.totalRequests?.data?.data.toFixed(2)
+                        )}`
+                      : "0"
+                  }
+                  valueLabel={"requests"}
+                  type="double-line"
+                />
+              </div>{" "}
+              <div className="col-span-2 lg:col-span-4 h-full">
+                <MainGraph
+                  isLoading={overTimeData.costs.isLoading}
+                  dataOverTime={
+                    overTimeData.costs.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.cost,
+                    })) ?? []
+                  }
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Costs"}
+                  value={
+                    metrics.totalCost.data?.data
+                      ? `$${formatNumberString(
+                          metrics.totalCost.data?.data.toFixed(2),
+                          true
+                        )}`
+                      : "$0.00"
+                  }
+                  valueLabel={"cost"}
+                  type="bar"
+                  labelFormatter={(value) => `$${Number(value).toFixed(2)}`}
+                />
               </div>
-            </>
-          )}
+              <div className="col-span-2 lg:col-span-4 h-full">
+                <MainGraph
+                  isLoading={overTimeData.latency.isLoading}
+                  dataOverTime={
+                    overTimeData.latency.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.duration,
+                    })) ?? []
+                  }
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Latency"}
+                  value={`${
+                    metrics.averageLatency.data?.data?.toFixed(0) ?? 0
+                  } ms / req`}
+                  valueLabel={"latency"}
+                  type={"area"}
+                  labelFormatter={(value) => `${parseInt(value).toFixed(0)} ms`}
+                />
+              </div>
+              <div className="col-span-2 lg:col-span-4 h-full">
+                <MainGraph
+                  isLoading={overTimeData.users.isLoading}
+                  dataOverTime={
+                    overTimeData.users.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.count,
+                    })) ?? []
+                  }
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Active Users"}
+                  value={metrics.activeUsers.data?.data ?? 0}
+                  valueLabel={" Users"}
+                  type={"bar"}
+                />
+              </div>
+              {metricsData.map((m, i) => (
+                <div className="col-span-2 md:col-span-1 lg:col-span-3" key={i}>
+                  <MetricsPanel metric={m} />
+                </div>
+              ))}
+            </div>
+          </>
+          {/* )} */}
         </div>
       )}
       <UpgradeProModal open={open} setOpen={setOpen} />
