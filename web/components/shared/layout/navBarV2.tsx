@@ -58,7 +58,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
             rel="noopener noreferrer"
             className="text-md font-semibold text-gray-900"
           >
-            Documentation
+            Docs
           </Link>
           <Link href="/roadmap" className="text-md font-semibold text-gray-900">
             Roadmap
@@ -70,6 +70,9 @@ const NavBarV2 = (props: NavBarV2Props) => {
             className="text-md font-semibold text-gray-900"
           >
             Github
+          </Link>
+          <Link href="/blog" className="text-md font-semibold text-gray-900">
+            Blog
           </Link>
         </div>
         <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
