@@ -104,7 +104,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               AutoGPT used a MITM approach to capture all logs intended for
               OpenAI. Here is a code snippet showcasing how this was done:
             </p>
-            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md">
+            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
               <code>{`bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)" -s start`}</code>
             </pre>
             <p className="mt-6">
@@ -112,7 +112,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               they could set specific custom properties for detailed
               measurements, as shown here:
             </p>
-            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md">
+            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
               <code>{`HeliconeLockManager.write_custom_property("job_id", "1")
 HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </pre>
@@ -120,7 +120,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               If AutoGPT wants to enable caching, they can do so by simply
               setting an environment variable like this:
             </p>
-            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md">
+            <pre className="mt-6 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
               <code>{`export HELICONE_CACHE_ENABLED="true"`}</code>
             </pre>
             <p className="mt-6">
@@ -191,7 +191,8 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
             </figure>
             <p className="mt-6">
               We also maintain a log of each cached request, ensuring that
-              caching is effective and marking agents as "Cacheable Agents".
+              caching is effective and marking agents as &quot;Cacheable
+              Agents&quot;.
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
               <img
@@ -234,7 +235,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               have a tight integration between report generation and Helicone.
               Here is a preview of what a benchmark report will look like:
             </p>
-            <pre className="mt-8 p-4 bg-gray-800 text-white rounded-md text-xs max-w-lg">
+            <pre className="mt-8 p-4 bg-gray-800 text-white rounded-md text-xs max-w-3xl">
               <code>
                 {`AutoGPT report
 Job-Id: 8AB138BF-3DEA-4E84-BC27-5FE624B956BC
