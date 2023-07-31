@@ -26,6 +26,7 @@ export type AggregatedHeliconeRequest = {
   __typename?: "AggregatedHeliconeRequest";
   cache?: Maybe<Cache>;
   cost?: Maybe<Scalars["Float"]>;
+  costUSD?: Maybe<Scalars["Float"]>;
   firstRequest: Scalars["String"];
   id: Scalars["ID"];
   lastRequest: Scalars["String"];

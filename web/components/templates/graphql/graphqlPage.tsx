@@ -92,7 +92,7 @@ const GraphQLPage = (props: GraphQLPageProps) => {
           )}
         </button>
       </div>
-      <div className="overflow-hidden h-[calc(60vh)] w-full">
+      <div className="overflow-hidden h-[calc(90vh)] w-full">
         <ApolloExplorer
           endpointUrl="/api/graphql"
           schema={print(mainTypeDefs)}
