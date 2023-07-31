@@ -15,6 +15,7 @@ type Query {
 type AggregatedHeliconeRequest {
   id: ID!
   cost: Float
+  costUSD: Float
   firstRequest: String!
   lastRequest: String!
   cache: Cache
