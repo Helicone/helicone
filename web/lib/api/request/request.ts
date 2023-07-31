@@ -198,9 +198,14 @@ export async function getRequests(
 `;
 
   const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
   return resultMap(res, (data) => {
     return data.map((d) => {
+      if (d.request_path.includes("embeddings") && limit >= 5) {
+        return {
+          ...d,
+          response_body: null,
+        };
+      }
       return {
         ...d,
         response_body: {
