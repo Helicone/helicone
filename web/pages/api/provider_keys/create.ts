@@ -45,7 +45,11 @@ async function handler({
 
   const vaultKeyId = crypto.randomUUID();
 
-  const { error } = await vault.writeProviderKey(userData.orgId, vaultKeyId, providerKey);
+  const { error } = await vault.writeProviderKey(
+    userData.orgId,
+    vaultKeyId,
+    providerKey
+  );
 
   if (error !== null) {
     console.error("Failed to write provider key to vault", error);
