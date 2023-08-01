@@ -373,12 +373,8 @@ services:
       - VAULT_DEV_ROOT_TOKEN_ID=myroot
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
     volumes:
-      # - ./volumes/vault/config:/vault/config
       - ./volumes/vault/file:/vault/file
       - ./volumes/vault/logs:/vault/logs
       - ./volumes/vault/config:/vault/config
     healthcheck:
       retries: 5
-    # entrypoint: vault server -config=/vault/config/config.hcl
-    # command: vault server -config=/vault/config/config.hcl
-    # command: server -config /vault/config/config.hcl -- used when not in dev mode
