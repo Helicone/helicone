@@ -1,3 +1,4 @@
+import { clsx } from "../../shared/clsx";
 import { getBuilderType } from "./builder/requestBuilder";
 
 interface ModelPillProps {
@@ -21,7 +22,10 @@ const ModelPill = (props: ModelPillProps) => {
 
   return (
     <span
-      className={`inline-flex items-center rounded-full bg-${color}-50 px-2 py-1 text-xs font-medium text-${color}-700 ring-1 ring-inset ring-${color}-600/20`}
+      className={clsx(
+        `bg-${color}-50 text-${color}-700 ring-${color}-200`,
+        `inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset`
+      )}
     >
       {model && model !== "" ? model : "Unknown"}
     </span>
