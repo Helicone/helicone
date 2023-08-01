@@ -180,6 +180,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         query: { ...router.query, page: 1 },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedAdvancedFilter]);
 
   useEffect(() => {
