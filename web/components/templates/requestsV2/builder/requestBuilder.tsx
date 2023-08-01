@@ -62,7 +62,7 @@ const getRequestBuilder = (request: HeliconeRequest) => {
   let requestModel =
     request.request_body?.model ||
     request.response_body?.model ||
-    request.response_body?.body.model ||
+    request.response_body?.body?.model || // anthropic
     getModelFromPath(request.request_path) ||
     "";
   const builderType = getBuilderType(requestModel);
