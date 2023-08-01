@@ -103,7 +103,9 @@ export const usePlaygroundPage = (requestId: string) => {
     chat,
     hasData: request.requests.data && request.requests.data.length > 0,
     isChat:
-      (request.requests.data && "chat" in request.requests.data[0].api) ||
+      (request.requests.data &&
+        request.requests.data.length > 0 &&
+        "chat" in request.requests.data[0].api) ||
       false,
   };
 };
