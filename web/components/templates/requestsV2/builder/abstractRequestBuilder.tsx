@@ -22,11 +22,11 @@ type CommonFields = {
   requestBody: JSON;
   responseBody: JSON;
   cost: number | null;
+  model: string;
 };
 
 export type NormalizedRequest = CommonFields & {
   // Values to display in requests table
-  model: string;
   requestText: string;
   responseText: string;
 
@@ -38,9 +38,11 @@ export type SpecificFields = Omit<NormalizedRequest, keyof CommonFields>;
 
 abstract class AbstractRequestBuilder {
   protected response: HeliconeRequest;
+  protected model: string;
 
-  constructor(response: HeliconeRequest) {
+  constructor(response: HeliconeRequest, model: string) {
     this.response = response;
+    this.model = model;
   }
 
   public build(): NormalizedRequest {
@@ -50,10 +52,10 @@ abstract class AbstractRequestBuilder {
 
   protected getCommonFields(): CommonFields {
     return {
+      model: this.model,
       id: this.response.request_id,
       cost: modelCost({
-        model:
-          this.response.request_body.model || this.response.response_body.model,
+        model: this.model,
         sum_completion_tokens: this.response.completion_tokens || 0,
         sum_prompt_tokens: this.response.prompt_tokens || 0,
         sum_tokens: this.response.total_tokens || 0,
