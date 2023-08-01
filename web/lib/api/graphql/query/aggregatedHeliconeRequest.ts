@@ -28,7 +28,10 @@ import {
 } from "../schema/types/graphql";
 import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators } from "./helper";
-import { getTotalCostRaw } from "../../property/totalCosts";
+import {
+  getTotalCostProperties,
+  getTotalCostRaw,
+} from "../../property/totalCosts";
 import { getCacheCount, getModelMetrics } from "../../cache/stats";
 import { resultMap, resultsAll } from "../../../result";
 
@@ -43,30 +46,14 @@ export async function aggregatedHeliconeRequest(
     properties: args.properties ?? [],
   };
 
-  const clickhousePropertyFilter: FilterNode[] = properties.map((p) => ({
-    left: {
-      property_with_response_v1: {
-        property_key: {
-          equals: p.name,
-        },
-      },
-    },
-    right: {
-      property_with_response_v1: {
-        property_value: convertTextOperators(p.value),
-      },
-    },
-    operator: "and",
-  }));
-
   const postgrestPropertyFilter: FilterNode[] = properties.map((p) => ({
     properties: {
       [p.name]: convertTextOperators(p.value),
     },
   }));
 
-  const { data: cost, error: costError } = await getTotalCostRaw(
-    filterListToTree(clickhousePropertyFilter, "and"),
+  const { data: cost, error: costError } = await getTotalCostProperties(
+    properties,
     orgId
   );
 
