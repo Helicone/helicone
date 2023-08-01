@@ -32,8 +32,6 @@ class EmbeddingBuilder extends AbstractRequestBuilder {
     return {
       requestText: this.response.request_body.input || "Invalid Input",
       responseText: getResponseText(),
-      model:
-        this.response.request_body.model || this.response.response_body.model,
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (
