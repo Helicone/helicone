@@ -378,3 +378,5 @@ services:
       - ./volumes/vault/config:/vault/config
     healthcheck:
       retries: 5
+
+    # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
