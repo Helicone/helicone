@@ -47,6 +47,9 @@ CREATE TRIGGER soft_delete_helicone_proxy_keys
 AFTER UPDATE OF soft_delete ON public.provider_keys
 FOR EACH ROW EXECUTE FUNCTION soft_delete_helicone_proxy_keys();
 
+REVOKE EXECUTE ON FUNCTION public.soft_delete_helicone_proxy_keys() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.soft_delete_helicone_proxy_keys() FROM authenticated;
+
 ALTER TABLE public.request 
 ADD COLUMN helicone_proxy_key_id uuid NULL REFERENCES public.helicone_proxy_keys(id);
 
