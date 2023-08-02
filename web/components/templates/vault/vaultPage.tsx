@@ -73,7 +73,6 @@ const VaultPage = () => {
             These keys are used to map proxy keys. This is where you will enter
             in your OpenAI key.
           </p>
-
           <ThemedTable
             columns={[
               { name: "Name", key: "provider_key_name", hidden: false },

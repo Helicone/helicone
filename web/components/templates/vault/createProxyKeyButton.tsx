@@ -1,4 +1,7 @@
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 import generateApiKey from "generate-api-key";
 import { FormEvent, useEffect, useState } from "react";
 import { Result } from "../../../lib/result";
@@ -21,6 +24,7 @@ const CreateProxyKeyButton = (props: CreateProxyKeyButtonProps) => {
   const [returnedKey, setReturnedKey] =
     useState<DecryptedProviderKeyMapping | null>(null);
   const { setNotification } = useNotification();
+  const [isLoading, setIsLoading] = useState(false);
 
   // returned key should be set to null when the modal is closed
   useEffect(() => {
@@ -39,6 +43,7 @@ const CreateProxyKeyButton = (props: CreateProxyKeyButtonProps) => {
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
     const proxyKeyName = event.currentTarget.elements.namedItem(
       "proxy-key-name"
     ) as HTMLInputElement;
@@ -77,7 +82,10 @@ const CreateProxyKeyButton = (props: CreateProxyKeyButtonProps) => {
           onSuccess();
         }
       })
-      .catch(console.error);
+      .catch(() => {
+        setNotification("Error Creating Proxy Key", "error");
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -142,6 +150,9 @@ const CreateProxyKeyButton = (props: CreateProxyKeyButtonProps) => {
                 type="submit"
                 className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
+                {isLoading && (
+                  <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                )}
                 Create Proxy Key
               </button>
             </div>
