@@ -20,7 +20,6 @@ class HashiCorpVault implements IVault {
     providerKey: string
   ): Promise<Result<null, string>> {
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
-    console.log(`Writing to vault path ${vaultPath} with value ${providerKey}`);
     try {
       await this.vault.write(vaultPath, {
         data: {
@@ -42,6 +41,7 @@ class HashiCorpVault implements IVault {
     orgId: string,
     vaultKeyId: string
   ): Promise<Result<string, string>> {
+    console.log(`Reading provider key ${vaultKeyId} with orgId ${orgId} from vault`)
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
     try {
       const data = await this.vault.read(vaultPath);

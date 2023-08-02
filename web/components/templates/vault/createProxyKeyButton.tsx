@@ -33,14 +33,6 @@ const CreateProxyKeyButton = (props: CreateProxyKeyButtonProps) => {
     }
   }, [open]);
 
-  function generateAPIKey() {
-    const apiKey = `sk-helicone-proxy${generateApiKey({
-      method: "base32",
-      dashes: true,
-    }).toString()}`.toLowerCase();
-    return apiKey;
-  }
-
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -68,7 +60,6 @@ const CreateProxyKeyButton = (props: CreateProxyKeyButtonProps) => {
       body: JSON.stringify({
         heliconeProxyKeyName: proxyKeyName.value,
         providerKeyId: providerKeyName.value,
-        heliconeProxyKey: generateAPIKey(),
       }),
     })
       .then(
