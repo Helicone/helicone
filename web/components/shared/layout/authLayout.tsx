@@ -18,6 +18,7 @@ import {
   GlobeAltIcon,
   HomeIcon,
   KeyIcon,
+  LockClosedIcon,
   QuestionMarkCircleIcon,
   SparklesIcon,
   TableCellsIcon,
@@ -127,6 +128,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/keys",
       icon: KeyIcon,
       current: pathname.includes("/keys"),
+    },
+    {
+      name: "Vault",
+      href: "/vault",
+      icon: LockClosedIcon,
+      current: pathname.includes("/vault"),
     },
     {
       name: "GraphQL",

@@ -23,7 +23,7 @@ async function handler({
   }
 
   const query = `
-  SELECT map.id, map.org_id, map.helicone_proxy_key, map.helicone_proxy_key_name, map.provider_key_id,
+  SELECT map.id, map.org_id, map.helicone_proxy_key_name, map.provider_key_id,
   key.provider_name, key.vault_key_id, key.provider_key_name
   FROM helicone_proxy_keys map
   INNER JOIN provider_keys key ON key.id = map.provider_key_id
@@ -46,31 +46,12 @@ async function handler({
     return;
   }
 
-  const promises = keyMappings.data.map((mapping) =>
-    vault.readProviderKey(userData.orgId, mapping.vault_key_id as string)
-  );
-
-  const keys: Result<string, string>[] = await Promise.all(promises);
-
-  let errors: string[] = [];
-  for (const key of keys) {
-    if (key.error) {
-      errors.push(key.error);
-    }
-  }
-
-  if (errors.length > 0) {
-    console.error("Failed to read provider keys from vault", errors);
-    res.status(500).json({ error: errors.join(", "), data: null });
-    return;
-  }
-
   const decryptedKeys: DecryptedProviderKeyMapping[] = keyMappings.data.map(
     (keyData, index) => {
       const { vault_key_id: vaultKeyId, ...keyDataWithoutVaultKeyId } = keyData;
       return {
         ...keyDataWithoutVaultKeyId,
-        providerKey: keys[index]?.data || null,
+        provider_key: null,
       };
     }
   );

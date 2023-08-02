@@ -20,6 +20,7 @@ class HashiCorpVault implements IVault {
     providerKey: string
   ): Promise<Result<null, string>> {
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
+    console.log(`Writing to vault path ${vaultPath} with value ${providerKey}`);
     try {
       await this.vault.write(vaultPath, {
         data: {
