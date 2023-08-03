@@ -65,6 +65,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
     "webhook_beta"
   );
 
+  const isVaultEnabled = process.env.NEXT_PUBLIC_VAULT_ENABLED === "true";
+
   const navigation = [
     {
       name: "Dashboard",
@@ -124,24 +126,27 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/organizations"),
     },
     {
-      name: "Keys",
-      href: "/keys",
-      icon: KeyIcon,
-      current: pathname.includes("/keys"),
-    },
-    {
-      name: "Vault",
-      href: "/vault",
-      icon: LockClosedIcon,
-      current: pathname.includes("/vault"),
-    },
-    {
       name: "GraphQL",
       href: "/graphql",
       icon: GrGraphQl,
       current: pathname.includes("/graphql"),
     },
+    {
+      name: "Keys",
+      href: "/keys",
+      icon: KeyIcon,
+      current: pathname.includes("/keys"),
+    },
   ];
+
+  if (isVaultEnabled) {
+    accountNav.push({
+      name: "Vault",
+      href: "/vault",
+      icon: LockClosedIcon,
+      current: pathname.includes("/vault"),
+    });
+  }
 
   if (hasFlag) {
     accountNav.push({
