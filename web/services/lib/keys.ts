@@ -1,6 +1,21 @@
 import { SupabaseClient, User } from "@supabase/auth-helpers-nextjs";
-import { DEMO_EMAIL } from "../../lib/constants";
 import { Database } from "../../supabase/database.types";
+import { Result } from "../../lib/result";
+
+export type DecryptedProviderKey = {
+  id: string | null;
+  org_id: string | null;
+  provider_key: string | null;
+  provider_name: string | null;
+  provider_key_name: string | null;
+  vault_key_id?: string | null;
+};
+
+export type HeliconeProxyKeys =
+  Database["public"]["Tables"]["helicone_proxy_keys"]["Row"];
+
+export type DecryptedProviderKeyMapping = DecryptedProviderKey &
+  HeliconeProxyKeys;
 
 export type AddKeyObj = {
   userId: string;

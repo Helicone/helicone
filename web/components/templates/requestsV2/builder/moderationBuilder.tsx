@@ -16,8 +16,6 @@ class ModerationBuilder extends AbstractRequestBuilder {
           : this.response.response_status === 200
           ? JSON.stringify(this.response.response_body.results || "", null, 4)
           : this.response.response_body?.error?.message || "",
-      model:
-        this.response.request_body.model || this.response.response_body.model,
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (

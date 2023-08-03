@@ -53,6 +53,7 @@ interface ThemedTableV5Props<T> {
   };
   onRowSelect?: (row: T) => void;
   chart?: React.ReactNode;
+  expandedRow?: (row: T) => React.ReactNode;
 }
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
@@ -66,6 +67,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     timeFilter,
     sortable,
     onRowSelect,
+    expandedRow,
     chart,
   } = props;
 
@@ -145,6 +147,12 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             No Columns Selected
           </p>
         </div>
+      ) : router.query.expanded && expandedRow ? (
+        <div className="overflow-x-auto text-sm bg-white rounded-lg border border-gray-300 py-2 px-4">
+          {rows.map((row, i) => (
+            <div key={"expanded-row" + i}>{expandedRow(row.original)}</div>
+          ))}
+        </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
           <div className="overflow-x-auto text-sm">
@@ -211,7 +219,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                                 }}
                                 className="flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
                               >
-                                {/* render the chevron up icon if this column is ascending */}
                                 {meta.sortKey === sortable.sortKey ? (
                                   sortable.sortDirection === "asc" ? (
                                     <ChevronUpIcon

@@ -1,4 +1,5 @@
 import { HeliconeRequest } from "../../../../lib/api/request/request";
+import ClaudeBuilder from "./claudeBuilder";
 import EmbeddingBuilder from "./embeddingBuilder";
 import FunctionGPTBuilder from "./functionGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
@@ -8,7 +9,8 @@ export type BuilderType =
   | "FunctionGPTBuilder"
   | "GPT3Builder"
   | "ModerationBuilder"
-  | "EmbeddingBuilder";
+  | "EmbeddingBuilder"
+  | "ClaudeBuilder";
 
 export const getBuilderType = (model: string): BuilderType => {
   if (/^(gpt-4|gpt-3\.5)/.test(model)) {
@@ -27,6 +29,10 @@ export const getBuilderType = (model: string): BuilderType => {
     return "EmbeddingBuilder";
   }
 
+  if (/^claude/.test(model)) {
+    return "ClaudeBuilder";
+  }
+
   return "GPT3Builder";
 };
 
@@ -35,14 +41,33 @@ let builders = {
   GPT3Builder: GPT3Builder,
   ModerationBuilder: ModerationBuilder,
   EmbeddingBuilder: EmbeddingBuilder,
+  ClaudeBuilder: ClaudeBuilder,
+};
+
+const getModelFromPath = (path: string) => {
+  let regex = /\/engines\/([^\/]+)/;
+  let match = path.match(regex);
+
+  if (match && match[1]) {
+    return match[1];
+  } else {
+    console.log("No match found");
+    return undefined;
+  }
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
+  // /v1/engines/text-embedding-ada-002/embeddings
+
   let requestModel =
-    request.request_body.model || request.response_body.model || "";
+    request.request_body?.model ||
+    request.response_body?.model ||
+    request.response_body?.body?.model || // anthropic
+    getModelFromPath(request.request_path) ||
+    "";
   const builderType = getBuilderType(requestModel);
   let builder = builders[builderType];
-  return new builder(request);
+  return new builder(request, requestModel);
 };
 
 export default getRequestBuilder;

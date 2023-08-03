@@ -99,7 +99,6 @@ export async function getRequestsCached(
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-  console.log("RUNNABLE QUERY", printRunnableQuery(query, builtFilter.argsAcc));
 
   const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
@@ -198,9 +197,16 @@ export async function getRequests(
 `;
 
   const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
   return resultMap(res, (data) => {
     return data.map((d) => {
+      if (d.request_path.includes("embeddings") && limit >= 5) {
+        return {
+          ...d,
+          response_body: {
+            heliconeMessage: "Embeddings are too large to serve in bulk",
+          },
+        };
+      }
       return {
         ...d,
         response_body: {

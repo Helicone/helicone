@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
@@ -79,7 +79,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     initialRequestId,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
-  const { setNotification } = useNotification();
 
   // set the initial selected data on component load
   useEffect(() => {
@@ -140,6 +139,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const router = useRouter();
+
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const sortLeaf: SortLeafRequest = getSortLeaf(
@@ -171,6 +171,67 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
+
+  useEffect(() => {
+    if (router.query.page) {
+      setPage(1);
+      router.replace({
+        pathname: router.pathname,
+        query: { ...router.query, page: 1 },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedAdvancedFilter]);
+
+  useEffect(() => {
+    if (isDataLoading || !router.query.propertyFilters) {
+      return;
+    }
+    try {
+      const queryFilters = JSON.parse(
+        router.query.propertyFilters as string
+      ) as {
+        key: string;
+        value: string;
+      }[];
+      if (queryFilters) {
+        const newFilters: UIFilterRow[] = queryFilters
+          .filter(
+            (filter) =>
+              filterMap.findIndex((f) => f.column === filter.key) !== -1
+          )
+          .map((filter) => {
+            const filterMapIdx = filterMap.findIndex(
+              (f) => f.column === filter.key
+            );
+            return {
+              filterMapIdx: filterMapIdx,
+              operatorIdx: 0,
+              value: filter.value,
+            };
+          });
+
+        if (!advancedFilters || advancedFilters.length === 0) {
+          setAdvancedFilters(newFilters);
+          const newQuery = {
+            ...router.query,
+          };
+          delete newQuery.propertyFilters;
+
+          router.replace(
+            {
+              pathname: "/requests",
+              query: newQuery,
+            },
+            undefined,
+            {}
+          );
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [router, isDataLoading, filterMap, advancedFilters]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -353,6 +414,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }}
           onRowSelect={(row) => {
             onRowSelectHandler(row);
+          }}
+          expandedRow={(row) => {
+            return (
+              <div className="flex flex-col space-y-2">
+                {row.render}
+                <div className="flex flex-row space-x-2">
+                  <div>{new Date(row.createdAt).toLocaleString()}</div>
+                  <div>{row.path}</div>
+                  <div>{row.id}</div>
+                </div>
+              </div>
+            );
           }}
         />
         <TableFooter

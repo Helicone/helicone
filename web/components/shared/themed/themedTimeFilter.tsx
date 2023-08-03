@@ -26,8 +26,6 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   const [startDate, setStartDate] = useState<string>();
   const [endDate, setEndDate] = useState<string>();
 
-  console.log("active key", active);
-
   const isActive = (key: string) => {
     return active === key;
   };

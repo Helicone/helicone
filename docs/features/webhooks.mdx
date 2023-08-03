@@ -1,0 +1,76 @@
+---
+title: "Webhooks"
+description: "Webhooks allow you to build or set up integrations which subscribe to certain events on Helicone.ai. When one of those events is triggered, we'll send a HTTP POST payload to the webhook's configured URL. Webhooks can be used to update an external issue tracker, trigger CI builds, update a backup mirror, or even deploy to your production server."
+---
+
+## Beta warning
+
+<Warning>
+  Please note that Webhooks is currently in beta. If you wish to gain access,
+  kindly contact us via Discord or email us at sales@helicone.ai
+</Warning>
+
+## NextJS Example
+
+```bash
+
+npm install graphql-tag @apollo/client
+# Alternatively, you can use yarn add graphql-tag @apollo/client
+curl -sSL https://raw.githubusercontent.com/Helicone/helicone/main/web/lib/api/graphql/schema/types/graphql.tsx > heliconeTypes.tsx
+```
+
+```tsx
+import type { NextApiRequest, NextApiResponse } from "next";
+
+import gql from "graphql-tag";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { HeliconeRequest } from "./heliconeTypes";
+
+const client = new ApolloClient({
+  uri: "https://www.helicone.ai/api/graphql",
+  cache: new InMemoryCache(),
+  headers: {
+    Authorization: `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<null>
+) {
+  const { request_id: requestId } = req.body as {
+    request_id: string;
+  };
+  const GET_USERS = gql`
+    query GetHeliconeRequest($id: String!) {
+      heliconeRequest(filters: [{ requestId: { equals: $id } }]) {
+        id
+        responseBody
+        values {
+          name
+          value
+        }
+        response
+        requestBody
+        prompt
+        model
+        properties {
+          name
+          value
+        }
+        latency
+        createdAt
+        costUSD
+        cacheHits
+      }
+    }
+  `;
+
+  const heliconeRequest = await client.query<HeliconeRequest>({
+    query: GET_USERS,
+    variables: { id: requestId },
+  });
+  console.log(heliconeRequest.data);
+  res.status(200).json(null);
+}
+```

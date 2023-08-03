@@ -1,8 +1,7 @@
 import {
   SupabaseClient,
   User,
-  createPagesServerClient,
-  createRouteHandlerClient,
+  createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../supabase/database.types";
 import {
@@ -27,7 +26,7 @@ export class SupabaseServerWrapper<T> {
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
     const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
     this.ctx = ctx;
-    this.client = createPagesServerClient<Database>(ctx, {
+    this.client = createServerSupabaseClient<Database>(ctx, {
       supabaseUrl,
     });
   }
@@ -42,6 +41,7 @@ export class SupabaseServerWrapper<T> {
         userId: string;
         orgId: string;
         user: User;
+        role: string;
       },
       "Unauthorized"
     >
@@ -56,7 +56,36 @@ export class SupabaseServerWrapper<T> {
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY])
       .single();
+
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
+      return {
+        error: "Unauthorized",
+        data: null,
+      };
+    }
+
+    // If owner, return role as owner
+    if (orgAccessCheck.data.owner === user.data.user.id) {
+      return {
+        data: {
+          userId: user.data.user.id,
+          orgId: orgAccessCheck.data.id,
+          user: user.data.user,
+          role: "owner",
+        },
+        error: null,
+      };
+    }
+
+    // If not owner, check if member
+    const orgMember = await this.client
+      .from("organization_member")
+      .select("*")
+      .eq("member", user.data.user.id)
+      .eq("organization", orgAccessCheck.data.id)
+      .single();
+
+    if (!orgMember.data || orgMember.error !== null) {
       return {
         error: "Unauthorized",
         data: null,
@@ -68,6 +97,7 @@ export class SupabaseServerWrapper<T> {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
         user: user.data.user,
+        role: orgMember.data.org_role,
       },
       error: null,
     };

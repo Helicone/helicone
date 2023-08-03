@@ -1,12 +1,7 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
 import {
-  buildFilter,
   buildFilterClickHouse,
-  buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
 } from "../../../services/lib/filters/filters";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";

@@ -74,6 +74,7 @@ export const getInitialColumns: (
     meta: {
       sortKey: "body_model",
     },
+    minSize: 200,
   },
   {
     accessorKey: "totalTokens",

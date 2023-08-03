@@ -25,6 +25,7 @@ export interface DBLoggableProps {
     userId?: string;
     heliconeApiKeyAuthHash?: string;
     providerApiKeyAuthHash?: string;
+    heliconeProxyKeyId?: string;
     promptId?: string;
     promptFormatter?: {
       prompt: Prompt | ChatPrompt;
@@ -45,11 +46,14 @@ export interface DBLoggableProps {
   tokenCalcUrl: string;
 }
 
-export function dbLoggableRequestFromProxyRequest(proxyRequest: HeliconeProxyRequest): DBLoggableProps["request"] {
+export function dbLoggableRequestFromProxyRequest(
+  proxyRequest: HeliconeProxyRequest
+): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
     heliconeApiKeyAuthHash: proxyRequest.heliconeAuthHash,
     providerApiKeyAuthHash: proxyRequest.providerAuthHash,
+    heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
     promptFormatter:
@@ -87,19 +91,31 @@ function getResponseBody(json: any): string {
   return JSON.stringify(json);
 }
 
+type UnPromise<T> = T extends Promise<infer U> ? U : T;
+
 export async function dbLoggableRequestFromAsyncLogModel(
   props: DBLoggableRequestFromAsyncLogModelProps
 ): Promise<DBLoggable> {
-  const { requestWrapper, env, asyncLogModel, providerRequestHeaders, providerResponseHeaders, provider } = props;
+  const {
+    requestWrapper,
+    env,
+    asyncLogModel,
+    providerRequestHeaders,
+    providerResponseHeaders,
+    provider,
+  } = props;
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      heliconeApiKeyAuthHash: await requestWrapper.getAuthorizationHash(),
+      heliconeApiKeyAuthHash: await requestWrapper.getProviderAuthHeader(),
       providerApiKeyAuthHash: "N/A",
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: providerRequestHeaders.userId ?? undefined,
       promptFormatter: undefined,
-      startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
+      startTime: new Date(
+        asyncLogModel.timing.startTime.seconds * 1000 +
+          asyncLogModel.timing.startTime.milliseconds
+      ),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
@@ -108,14 +124,21 @@ export async function dbLoggableRequestFromAsyncLogModel(
       provider,
     },
     response: {
-      getResponseBody: async () => getResponseBody(asyncLogModel.providerResponse.json),
+      getResponseBody: async () =>
+        getResponseBody(asyncLogModel.providerResponse.json),
       responseHeaders: providerResponseHeaders,
       status: asyncLogModel.providerResponse.status,
       omitLog: false,
     },
     timing: {
-      startTime: new Date(asyncLogModel.timing.startTime.seconds * 1000 + asyncLogModel.timing.startTime.milliseconds),
-      endTime: new Date(asyncLogModel.timing.endTime.seconds * 1000 + asyncLogModel.timing.endTime.milliseconds),
+      startTime: new Date(
+        asyncLogModel.timing.startTime.seconds * 1000 +
+          asyncLogModel.timing.startTime.milliseconds
+      ),
+      endTime: new Date(
+        asyncLogModel.timing.endTime.seconds * 1000 +
+          asyncLogModel.timing.endTime.milliseconds
+      ),
     },
     tokenCalcUrl: env.TOKEN_COUNT_URL,
   });
@@ -161,7 +184,11 @@ export class DBLoggable {
     }
 
     try {
-      if (this.provider === "ANTHROPIC" && responseStatus === 200 && requestBody) {
+      if (
+        this.provider === "ANTHROPIC" &&
+        responseStatus === 200 &&
+        requestBody
+      ) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
@@ -236,7 +263,9 @@ export class DBLoggable {
     const responseBody = await this.response.getResponseBody();
 
     // Log delay
-    const initialResponse = mapPostgrestErr(await initialResponseLog(this.request, this.timing, dbClient));
+    const initialResponse = mapPostgrestErr(
+      await initialResponseLog(this.request, this.timing, dbClient)
+    );
 
     if (initialResponse.error !== null) {
       return initialResponse;
@@ -283,7 +312,99 @@ export class DBLoggable {
     }
   }
 
-  async log(db: { supabase: SupabaseClient; clickhouse: ClickhouseClientWrapper }): Promise<Result<null, string>> {
+  async sendToWebhook(
+    dbClient: SupabaseClient<Database>,
+    payload: {
+      request: UnPromise<ReturnType<typeof logRequest>>["data"];
+      response: Database["public"]["Tables"]["response"]["Row"];
+    },
+    webhook: Database["public"]["Tables"]["webhooks"]["Row"]
+  ): Promise<Result<undefined, string>> {
+    // Check FF
+    const checkWebhookFF = await dbClient
+      .from("feature_flags")
+      .select("*")
+      .eq("feature", "webhook_beta")
+      .eq("org_id", payload.request?.request.helicone_org_id ?? "");
+    if (checkWebhookFF.error !== null || checkWebhookFF.data.length === 0) {
+      console.error(
+        "Error checking webhook ff or webhooks not enabled for user trying to use them",
+        checkWebhookFF.error
+      );
+      return {
+        data: undefined,
+        error: null,
+      };
+    }
+
+    const subscriptions =
+      (
+        await dbClient
+          .from("webhook_subscriptions")
+          .select("*")
+          .eq("webhook_id", webhook.id)
+      ).data ?? [];
+
+    const shouldSend =
+      subscriptions
+        .map((subscription) => {
+          return subscription.event === "beta";
+        })
+        .filter((x) => x).length > 0;
+
+    if (shouldSend) {
+      console.log("SENDING", webhook.destination, payload.request?.request.id);
+      await fetch(webhook.destination, {
+        method: "POST",
+        body: JSON.stringify({
+          request_id: payload.request?.request.id,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+    return {
+      data: undefined,
+      error: null,
+    };
+  }
+
+  async sendToWebhooks(
+    dbClient: SupabaseClient<Database>,
+    payload: {
+      request: UnPromise<ReturnType<typeof logRequest>>["data"];
+      response: Database["public"]["Tables"]["response"]["Row"];
+    }
+  ): Promise<Result<undefined, string>> {
+    const webhooks = await dbClient
+      .from("webhooks")
+      .select("*")
+      .eq("org_id", payload.request?.request.helicone_org_id ?? "")
+      .eq("is_verified", true);
+    if (webhooks.error !== null) {
+      return {
+        data: null,
+        error: webhooks.error.message,
+      };
+    }
+    for (const webhook of webhooks.data ?? []) {
+      const res = await this.sendToWebhook(dbClient, payload, webhook);
+      if (res.error !== null) {
+        return res;
+      }
+    }
+
+    return {
+      data: undefined,
+      error: null,
+    };
+  }
+
+  async log(db: {
+    supabase: SupabaseClient<Database>;
+    clickhouse: ClickhouseClientWrapper;
+  }): Promise<Result<null, string>> {
     const requestResult = await logRequest(this.request, db.supabase);
 
     if (requestResult.data !== null) {
@@ -296,6 +417,19 @@ export class DBLoggable {
           requestResult.data.properties,
           db.clickhouse
         );
+
+        // TODO We should probably move the webhook stuff out of dbLogger
+        const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
+          request: requestResult.data,
+          response: responseResult.data,
+        });
+        if (webhookError !== null) {
+          console.error("Error sending to webhooks", webhookError);
+          return {
+            data: null,
+            error: webhookError,
+          };
+        }
       } else {
         return responseResult;
       }

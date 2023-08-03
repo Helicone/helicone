@@ -23,6 +23,13 @@ interface RequestDrawerV2Props {
   request?: NormalizedRequest;
   properties: string[];
 }
+function getPathName(url: string) {
+  try {
+    return new URL(url).pathname;
+  } catch (e) {
+    return url;
+  }
+}
 
 const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const { open, setOpen, request, properties } = props;
@@ -136,7 +143,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900">Path</p>
               <p className="text-gray-700 truncate">
-                {new URL(request.path).pathname}
+                {getPathName(request.path)}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
