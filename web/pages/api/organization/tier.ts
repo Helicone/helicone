@@ -19,11 +19,12 @@ async function handler({
     .eq("id", orgId)
     .single();
 
-  const { data: orgOwnerSettings, error: userSettingsError } = await supabaseServer
-    .from("user_settings")
-    .select("*")
-    .eq("user", org?.owner)
-    .single();
+  const { data: orgOwnerSettings, error: userSettingsError } =
+    await supabaseServer
+      .from("user_settings")
+      .select("*")
+      .eq("user", org?.owner)
+      .single();
 
   if (orgError !== null || userSettingsError !== null) {
     res.status(400).json({
