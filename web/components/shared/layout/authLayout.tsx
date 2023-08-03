@@ -65,7 +65,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
     "webhook_beta"
   );
 
-  const isVaultEnabled = process.env.NEXT_PUBLIC_VAULT_ENABLED === "true";
+  const isVaultFlag = process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "";
+  const isVaultEnabled = isVaultFlag === "true";
 
   const navigation = [
     {
