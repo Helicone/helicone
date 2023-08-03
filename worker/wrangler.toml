@@ -22,6 +22,7 @@ CLICKHOUSE_PASSWORD = ""
 PROVIDER = "OPENAI"
 TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
+VAULT_ENABLED = "true"
 
 [env.production]
 name = "helicone-worker-prod"

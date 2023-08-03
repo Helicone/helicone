@@ -15,6 +15,7 @@ export interface Env {
   CLICKHOUSE_PASSWORD: string;
   WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
   TOKEN_CALC_URL: string;
+  VAULT_ENABLED: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -60,10 +61,13 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
-      const requestWrapper = new RequestWrapper(request);
-      env = modifyEnvBasedOnPath(env, requestWrapper);
+      const requestWrapper = await RequestWrapper.create(request, env);
+      if (requestWrapper.error || !requestWrapper.data) {
+        return handleError(requestWrapper.error);
+      }
+      env = modifyEnvBasedOnPath(env, requestWrapper.data);
       const router = buildRouter(env.WORKER_TYPE);
-      return router.handle(request, requestWrapper, env, ctx).catch(handleError);
+      return router.handle(request, requestWrapper.data, env, ctx).catch(handleError);
     } catch (e) {
       return handleError(e);
     }

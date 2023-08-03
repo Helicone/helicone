@@ -3,9 +3,12 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
+import HashiCorpVault from "./vault/HashiCorpVault";
+import { Database } from "../../supabase/database.types";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -14,11 +17,12 @@ export type RequestHandlerType =
   | "feedback";
 
 export class RequestWrapper {
+  private authorization: string | undefined;
   url: URL;
   heliconeHeaders: HeliconeHeaders;
-  authorization: string | undefined;
   providerAuth: string | undefined;
   headers: Headers;
+  heliconeProxyKeyId: string | undefined;
 
   private cachedText: string | null = null;
 
@@ -66,11 +70,24 @@ export class RequestWrapper {
     return headers;
   }
 
-  constructor(private request: Request) {
-    this.headers = this.mutatedAuthorizationHeaders(request);
+  private constructor(private request: Request, private env: Env) {
     this.url = new URL(request.url);
-    this.heliconeHeaders = new HeliconeHeaders(this.headers);
-    this.authorization = this.getAuthorization(this.headers);
+    this.headers = this.mutatedAuthorizationHeaders(request);
+    this.heliconeHeaders = new HeliconeHeaders(request.headers);
+  }
+
+  static async create(
+    request: Request,
+    env: Env
+  ): Promise<Result<RequestWrapper, string>> {
+    const requestWrapper = new RequestWrapper(request, env);
+    const authorization = await requestWrapper.setAuthorization();
+
+    if (authorization.error) {
+      return { data: null, error: authorization.error };
+    }
+
+    return { data: requestWrapper, error: null };
   }
 
   async getText(): Promise<string> {
@@ -140,10 +157,6 @@ export class RequestWrapper {
     return this.authorization ? await hash(this.authorization) : undefined;
   }
 
-  async getAuthorizationHash(): Promise<string | undefined> {
-    return this.authorization ? await hash(this.authorization) : undefined;
-  }
-
   async getUserId(): Promise<string | undefined> {
     const userId =
       this.heliconeHeaders.userId ||
@@ -151,12 +164,126 @@ export class RequestWrapper {
     return userId;
   }
 
-  private getAuthorization(headers: Headers): string | undefined {
-    return (
-      headers.get("Authorization") ?? // Openai
-      headers.get("x-api-key") ?? // Anthropic
-      headers.get("api-key") ?? // Azure
-      undefined
+  getAuthorization(): string | undefined {
+    return this.authorization || undefined;
+  }
+
+  private async setAuthorization(): Promise<
+    Result<string | undefined, string>
+  > {
+    if (this.authorization) {
+      return { data: this.authorization, error: null };
+    }
+
+    const authKey =
+      this.headers.get("Authorization") ?? // Openai
+      this.headers.get("x-api-key") ?? // Anthropic
+      this.headers.get("api-key") ?? // Azure
+      undefined;
+
+    // If using proxy key, get the real key from vault
+    if (
+      this.env.VAULT_ENABLED &&
+      authKey?.startsWith("Bearer sk-helicone-proxy")
+    ) {
+      const providerKey = await this.getProviderKeyFromProxy(authKey);
+
+      if (providerKey.error || !providerKey.data) {
+        return {
+          data: null,
+          error: "Proxy key not found",
+        };
+      }
+
+      this.authorization = providerKey.data;
+      const headers = new Headers(this.headers);
+      headers.set("Authorization", `Bearer ${providerKey.data}`);
+      this.headers = headers;
+    } else {
+      this.authorization = authKey;
+      return { data: this.authorization, error: null };
+    }
+
+    return { data: this.authorization, error: null };
+  }
+
+  private async getProviderKeyFromProxy(
+    authKey: string
+  ): Promise<Result<string | undefined, string>> {
+    const supabaseClient: SupabaseClient<Database> = createClient(
+      this.env.SUPABASE_URL,
+      this.env.SUPABASE_SERVICE_ROLE_KEY
     );
+
+    const proxyKey = authKey?.replace("Bearer ", "").trim();
+    const regex =
+      /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+    const match = proxyKey.match(regex);
+
+    if (!match) {
+      return {
+        data: null,
+        error: "Proxy key id not found",
+      };
+    }
+    const proxyKeyId = match ? match[0] : null;
+
+    const storedProxyKey = await supabaseClient
+      .from("helicone_proxy_keys")
+      .select("*")
+      .eq("id", proxyKeyId)
+      .single();
+
+    if (storedProxyKey.error || !storedProxyKey.data) {
+      return {
+        data: null,
+        error: "Proxy key not found",
+      };
+    }
+
+    this.heliconeProxyKeyId = storedProxyKey.data.id;
+
+    const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
+      api_key: proxyKey,
+      stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
+    });
+
+    if (verified.error || !verified.data) {
+      return {
+        data: null,
+        error: "Proxy key not verified",
+      };
+    }
+
+    const providerKey = await supabaseClient
+      .from("provider_keys")
+      .select("*")
+      .eq("id", storedProxyKey.data.provider_key_id)
+      .single();
+
+    if (providerKey.error || !providerKey.data) {
+      return {
+        data: null,
+        error: "Provider key not found",
+      };
+    }
+
+    const vault = new HashiCorpVault();
+    const vaultProviderKey = await vault.readProviderKey(
+      storedProxyKey.data.org_id,
+      providerKey.data.vault_key_id
+    );
+
+    if (vaultProviderKey.error || !vaultProviderKey.data) {
+      return {
+        data: null,
+        error: "Provider key not found in vault",
+      };
+    }
+
+    return {
+      data: vaultProviderKey.data,
+      error: null,
+    };
   }
 }
