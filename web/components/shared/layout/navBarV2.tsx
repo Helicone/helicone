@@ -7,6 +7,7 @@ import {
   ChatBubbleLeftRightIcon,
   CodeBracketIcon,
   QuestionMarkCircleIcon,
+  StarIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -17,6 +18,7 @@ import OnboardingButton from "../auth/onboardingButton";
 import { SocialMeta } from "./basePageV2";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import LoginButton from "../auth/loginButton";
+import { clsx } from "../clsx";
 
 interface NavBarV2Props {}
 
@@ -70,19 +72,23 @@ const NavBarV2 = (props: NavBarV2Props) => {
             >
               Roadmap
             </Link>
-            <Link
-              href="https://github.com/Helicone/helicone"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-md font-semibold text-gray-900"
-            >
-              Github
-            </Link>
             <Link href="/blog" className="text-md font-semibold text-gray-900">
               Blog
             </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
+            <Link
+              href="https://github.com/Helicone/helicone"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={clsx(
+                "text-xs font-semibold text-gray-900 flex flex-row gap-x-2 items-center"
+              )}
+            >
+              <StarIcon className="h-3 w-3 text-gray-900 " />
+              <a className="hidden lg:block">Star us on Github</a>
+              <a className="lg:hidden">Github</a>
+            </Link>
             {user ? (
               <button
                 onClick={() => {
