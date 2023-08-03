@@ -19,14 +19,12 @@ async function handler({
     .eq("id", orgId)
     .single();
 
-  const { data: userSettings, error: userSettingsError } = await supabaseServer
+  const { data: orgOwnerSettings, error: userSettingsError } = await supabaseServer
     .from("user_settings")
     .select("*")
     .eq("user", org?.owner)
     .single();
 
-  console.log("userSettings", userSettings);
-  console.log("org", org);
   if (orgError !== null || userSettingsError !== null) {
     res.status(400).json({
       error: `{orgError: ${orgError}, userSettingsError: ${userSettingsError}}`,
@@ -34,7 +32,7 @@ async function handler({
     });
   } else {
     res.status(200).json({
-      data: userSettings.tier as Tier,
+      data: orgOwnerSettings.tier as Tier,
       error: null,
     });
   }
