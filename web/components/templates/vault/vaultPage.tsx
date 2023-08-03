@@ -37,6 +37,7 @@ const VaultPage = () => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })
       .then(() => {
         refetchProviderKeys();
+        refetchProxyKeys();
         setNotification("Provider Key Deleted", "success");
         setDeleteProviderOpen(false);
       })
