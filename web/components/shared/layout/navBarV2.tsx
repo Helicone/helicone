@@ -43,7 +43,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <span className="sr-only">Helicone</span>
               {/* 1324 × 364 */}
               <Image
-                className="block rounded-xl"
+                className="block rounded-lg"
                 src="/assets/landing/helicone.webp"
                 width={150}
                 height={150 / (1876 / 528)}
@@ -96,14 +96,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
                     router.push("/");
                   });
                 }}
-                className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Sign Out
               </button>
             ) : (
               <Link
                 href="/signin"
-                className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Sign In
               </Link>
@@ -146,7 +146,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 <a href="#" className="-m-1.5 p-1.5">
                   <span className="sr-only">Helicone</span>
                   <Image
-                    className="block rounded-md"
+                    className="block rounded-lg"
                     src="/assets/landing/helicone.webp"
                     width={150}
                     height={150 / (1876 / 528)}
@@ -201,20 +201,27 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       Blog
                     </Link>
                   </div>
-                  {user ? (
-                    <button
-                      onClick={() => {
-                        supabaseClient.auth.signOut().then(() => {
-                          router.push("/");
-                        });
-                      }}
-                      className="px-4 py-2 border border-gray-900 font-semibold text-gray-900 rounded-xl"
-                    >
-                      Sign Out
-                    </button>
-                  ) : (
-                    <LoginButton />
-                  )}
+                  <div className="pt-16 w-full">
+                    {user ? (
+                      <button
+                        onClick={() => {
+                          supabaseClient.auth.signOut().then(() => {
+                            router.push("/");
+                          });
+                        }}
+                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                      >
+                        Sign Out
+                      </button>
+                    ) : (
+                      <Link
+                        href="/signin"
+                        className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                      >
+                        Sign In
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
