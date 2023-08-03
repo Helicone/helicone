@@ -18,6 +18,7 @@ import {
   GlobeAltIcon,
   HomeIcon,
   KeyIcon,
+  LockClosedIcon,
   QuestionMarkCircleIcon,
   SparklesIcon,
   TableCellsIcon,
@@ -63,6 +64,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
     org?.currentOrg.id || "",
     "webhook_beta"
   );
+
+  const isVaultFlag = process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "";
+  const isVaultEnabled = isVaultFlag === "true";
 
   const navigation = [
     {
@@ -123,18 +127,27 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/organizations"),
     },
     {
-      name: "Keys",
-      href: "/keys",
-      icon: KeyIcon,
-      current: pathname.includes("/keys"),
-    },
-    {
       name: "GraphQL",
       href: "/graphql",
       icon: GrGraphQl,
       current: pathname.includes("/graphql"),
     },
+    {
+      name: "Keys",
+      href: "/keys",
+      icon: KeyIcon,
+      current: pathname.includes("/keys"),
+    },
   ];
+
+  if (isVaultEnabled) {
+    accountNav.push({
+      name: "Vault",
+      href: "/vault",
+      icon: LockClosedIcon,
+      current: pathname.includes("/vault"),
+    });
+  }
 
   if (hasFlag) {
     accountNav.push({

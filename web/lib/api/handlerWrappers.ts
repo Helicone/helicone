@@ -10,6 +10,9 @@ import { Result, err, ok } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode } from "../../services/lib/filters/filterDefs";
+import { Permission, Role, hasPermission } from "../../services/lib/user";
+import { IVault } from "../../services/lib/vault.ts/IVault";
+import HashiCorpVault from "../../services/lib/vault.ts/HashiCorpVault";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -63,10 +66,12 @@ export class RequestBodyParser {
 export interface HandlerWrapperOptions<RetVal>
   extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
+  vault: IVault | null;
   userData: {
     userId: string;
     orgId: string;
     user: User;
+    role: string;
   };
   body: RequestBodyParser;
 }
@@ -77,7 +82,8 @@ export interface HandlerWrapperOptionsAPI<RetVal>
 }
 
 export function withAuth<T>(
-  handler: (supabaseServer: HandlerWrapperOptions<T>) => Promise<void>
+  handler: (supabaseServer: HandlerWrapperOptions<T>) => Promise<void>,
+  permissions?: Permission[]
 ) {
   return async (
     req: NextApiRequest,
@@ -92,11 +98,31 @@ export function withAuth<T>(
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
+
+    // Check permissions
+    if (
+      permissions &&
+      permissions.length > 0 &&
+      !permissions.every((permission) =>
+        hasPermission(data.role as Role, permission)
+      )
+    ) {
+      console.log("User does not have required permissions");
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+
+    let vault: IVault | null = null;
+    if (process.env.NEXT_PUBLIC_VAULT_ENABLED === "true") {
+      vault = new HashiCorpVault();
+    }
+
     await handler({
       req,
       res,
       supabaseClient,
       userData: data,
+      vault,
       body: new RequestBodyParser(req),
     });
   };
