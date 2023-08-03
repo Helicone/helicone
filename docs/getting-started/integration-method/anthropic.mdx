@@ -30,7 +30,7 @@ title: "Anthropic"
     **Replace the Anthropic Base url with Helicone's**
    ```
    - POST https://api.anthropic.com
-   + POST POST https://anthropic.hconeai.com
+   + POST https://anthropic.hconeai.com
    ```
 
 **Add a Helicone-Auth header into the requests**
@@ -45,7 +45,7 @@ Example cURL command
 
 ```
 curl --request POST \
-  --url https://api.anthropic.com/v1/complete \
+  --url https://anthropic.hconeai.com/v1/complete \
   --header 'Content-Type: application/json' \
   --header 'Helicone-Auth: Bearer <<HELICONE_API_KEY>> \
   --header 'x-api-key: <<ANTHROPIC_API_KEY>> \
