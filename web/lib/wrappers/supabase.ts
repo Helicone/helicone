@@ -97,7 +97,7 @@ export class SupabaseServerWrapper<T> {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
         user: user.data.user,
-        role: "member",
+        role: orgMember.data.org_role,
       },
       error: null,
     };
