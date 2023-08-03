@@ -81,7 +81,7 @@ export class SupabaseServerWrapper<T> {
     const orgMember = await this.client
       .from("organization_member")
       .select("*")
-      .eq("id", user.data.user.id)
+      .eq("member", user.data.user.id)
       .eq("organization", orgAccessCheck.data.id)
       .single();
 
