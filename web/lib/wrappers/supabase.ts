@@ -77,27 +77,27 @@ export class SupabaseServerWrapper<T> {
       };
     }
 
-    // If not owner, check if member
-    const orgMember = await this.client
-      .from("organization_member")
-      .select("*")
-      .eq("id", user.data.user.id)
-      .eq("organization", orgAccessCheck.data.id)
-      .single();
+    // // If not owner, check if member
+    // const orgMember = await this.client
+    //   .from("organization_member")
+    //   .select("*")
+    //   .eq("id", user.data.user.id)
+    //   .eq("organization", orgAccessCheck.data.id)
+    //   .single();
 
-    if (!orgMember.data || orgMember.error !== null) {
-      return {
-        error: "Unauthorized",
-        data: null,
-      };
-    }
+    // if (!orgMember.data || orgMember.error !== null) {
+    //   return {
+    //     error: "Unauthorized",
+    //     data: null,
+    //   };
+    // }
 
     return {
       data: {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
         user: user.data.user,
-        role: orgMember.data.org_role,
+        role: "member",
       },
       error: null,
     };
