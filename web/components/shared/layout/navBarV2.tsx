@@ -18,6 +18,7 @@ import OnboardingButton from "../auth/onboardingButton";
 import { SocialMeta } from "./basePageV2";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import LoginButton from "../auth/loginButton";
+import { clsx } from "../clsx";
 
 interface NavBarV2Props {}
 
@@ -80,12 +81,12 @@ const NavBarV2 = (props: NavBarV2Props) => {
               href="https://github.com/Helicone/helicone"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-md font-semibold text-gray-900 flex flex-row gap-x-2 items-center"
+              className={clsx(
+                "text-xs font-semibold text-gray-900 flex flex-row gap-x-2 items-center"
+              )}
             >
-              <StarIcon className="h-6 w-6 text-gray-900 hover:fill-yellow-400" />
-              <a className="hidden lg:block hover:border-b-2">
-                Star us on Github
-              </a>
+              <StarIcon className="h-3 w-3 text-gray-900 " />
+              <a className="hidden lg:block">Star us on Github</a>
               <a className="lg:hidden">Github</a>
             </Link>
             {user ? (
