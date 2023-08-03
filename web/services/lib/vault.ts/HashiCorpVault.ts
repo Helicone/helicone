@@ -41,7 +41,6 @@ class HashiCorpVault implements IVault {
     orgId: string,
     vaultKeyId: string
   ): Promise<Result<string, string>> {
-    console.log(`Reading provider key ${vaultKeyId} with orgId ${orgId} from vault`)
     const vaultPath = this.createProviderVaultPath(orgId, vaultKeyId);
     try {
       const data = await this.vault.read(vaultPath);

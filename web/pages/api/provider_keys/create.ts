@@ -17,8 +17,6 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
-  console.log("made it");
-
   if (vault === null) {
     res
       .status(500)
