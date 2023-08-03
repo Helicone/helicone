@@ -71,8 +71,7 @@ const VaultPage = () => {
             <CreateProviderKeyButton onSuccess={() => refetchProviderKeys()} />
           </div>
           <p className="text-gray-600">
-            These keys are used to map proxy keys. This is where you will enter
-            in your OpenAI key.
+            These keys will be used to authenticate with your provider.
           </p>
           <ThemedTable
             columns={[
@@ -98,7 +97,8 @@ const VaultPage = () => {
             />
           </div>
           <p className="text-gray-600">
-            These keys will be mapped to the provider keys.
+            These keys will replace your provider keys in your application. This
+            ensures that any usage will be logged in Helicone.
           </p>
           <ThemedTable
             columns={[
