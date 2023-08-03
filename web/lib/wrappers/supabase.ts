@@ -41,6 +41,7 @@ export class SupabaseServerWrapper<T> {
         userId: string;
         orgId: string;
         user: User;
+        role: string;
       },
       "Unauthorized"
     >
@@ -55,7 +56,36 @@ export class SupabaseServerWrapper<T> {
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY])
       .single();
+
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
+      return {
+        error: "Unauthorized",
+        data: null,
+      };
+    }
+
+    // If owner, return role as owner
+    if (orgAccessCheck.data.owner === user.data.user.id) {
+      return {
+        data: {
+          userId: user.data.user.id,
+          orgId: orgAccessCheck.data.id,
+          user: user.data.user,
+          role: "owner",
+        },
+        error: null,
+      };
+    }
+
+    // If not owner, check if member
+    const orgMember = await this.client
+      .from("organization_member")
+      .select("*")
+      .eq("id", user.data.user.id)
+      .eq("organization", orgAccessCheck.data.id)
+      .single();
+
+    if (!orgMember.data || orgMember.error !== null) {
       return {
         error: "Unauthorized",
         data: null,
@@ -67,6 +97,7 @@ export class SupabaseServerWrapper<T> {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
         user: user.data.user,
+        role: orgMember.data.org_role,
       },
       error: null,
     };

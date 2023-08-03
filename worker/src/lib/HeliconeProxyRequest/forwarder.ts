@@ -18,7 +18,7 @@ export async function proxyForwarder(
   const { data: proxyRequest, error: proxyRequestError } = await new HeliconeProxyRequestMapper(
     request,
     provider,
-    env.TOKEN_COUNT_URL
+    env
   ).tryToProxyRequest();
 
   if (proxyRequestError !== null) {

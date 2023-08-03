@@ -189,6 +189,7 @@ export async function logRequest(
           helicone_api_key_id: heliconeApiKeyRow?.id,
           helicone_org_id: heliconeApiKeyRow?.organization_id,
           provider: request.provider,
+          helicone_proxy_key_id: request.heliconeProxyKeyId
         },
       ])
       .select("*")
