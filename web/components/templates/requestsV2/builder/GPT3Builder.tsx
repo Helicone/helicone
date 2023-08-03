@@ -31,9 +31,6 @@ class GPT3Builder extends AbstractRequestBuilder {
     return {
       requestText: this.response.request_body.prompt || "Invalid Prompt",
       responseText: getResponseText(),
-      model:
-        this.response.request_body.model || this.response.response_body.model,
-
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (

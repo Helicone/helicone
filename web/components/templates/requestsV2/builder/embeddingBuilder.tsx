@@ -18,7 +18,9 @@ class EmbeddingBuilder extends AbstractRequestBuilder {
           this.response.response_body?.data &&
           this.response.response_body?.data.length > 0
         ) {
-          return JSON.stringify(this.response.response_body?.data[0].embedding);
+          return JSON.stringify(
+            this.response.response_body?.data?.[0].embedding
+          );
         }
       } else if (statusCode === 0 || statusCode === null) {
         // pending response
@@ -32,8 +34,6 @@ class EmbeddingBuilder extends AbstractRequestBuilder {
     return {
       requestText: this.response.request_body.input || "Invalid Input",
       responseText: getResponseText(),
-      model:
-        this.response.request_body.model || this.response.response_body.model,
       render:
         this.response.response_status === 0 ||
         this.response.response_status === null ? (
@@ -44,7 +44,7 @@ class EmbeddingBuilder extends AbstractRequestBuilder {
             response={{
               title: "Response",
               text: JSON.stringify(
-                this.response.response_body?.data[0].embedding,
+                this.response.response_body?.data?.[0].embedding,
                 null,
                 4
               ),

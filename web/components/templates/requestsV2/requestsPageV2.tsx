@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
@@ -79,7 +79,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     initialRequestId,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
-  const { setNotification } = useNotification();
 
   // set the initial selected data on component load
   useEffect(() => {
@@ -140,6 +139,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const router = useRouter();
+
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const sortLeaf: SortLeafRequest = getSortLeaf(
@@ -171,6 +171,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
+
+  useEffect(() => {
+    if (router.query.page) {
+      setPage(1);
+      router.replace({
+        pathname: router.pathname,
+        query: { ...router.query, page: 1 },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedAdvancedFilter]);
 
   useEffect(() => {
     if (isDataLoading || !router.query.propertyFilters) {
