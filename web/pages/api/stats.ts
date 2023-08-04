@@ -24,6 +24,8 @@ export interface HeliconeStats {
   dailyActiveUsers: WeeklyActiveIntegrations[];
   integratedUsers: CountOverTime[];
   growthOverTime: CountOverTime[];
+  growthPerMonth: CountOverTime[];
+  growthPerWeek: CountOverTime[];
   monthlyChurnRate: RetentionAndChurnRate[];
   weeklyChurnRate: RetentionAndChurnRate[];
   monthlyRetentionRate: RetentionAndChurnRate[];
@@ -93,6 +95,28 @@ FROM
   auth.users u
 GROUP BY
   date_trunc('day', u.created_at)
+ORDER BY
+time_step DESC;`;
+
+  const growthPerMonthQuery = `
+SELECT
+date_trunc('month', u.created_at) AS time_step,
+COUNT(u.id) AS count_step
+FROM
+  auth.users u
+GROUP BY
+  date_trunc('month', u.created_at)
+ORDER BY
+time_step DESC;`;
+
+  const growthPerWeekQuery = `
+SELECT
+date_trunc('week', u.created_at) AS time_step,
+COUNT(u.id) AS count_step
+FROM
+  auth.users u
+GROUP BY
+  date_trunc('week', u.created_at)
 ORDER BY
 time_step DESC;`;
 
@@ -175,6 +199,8 @@ ORDER BY
     { data: monthlyActiveUsers, error: monthlyActiveUsersError },
     { data: dailyActive, error: dailyActiveError },
     { data: growthOverTime, error: growthOverTimeError },
+    { data: growthPerMonth, error: growthPerMonthError },
+    { data: growthPerWeek, error: growthPerWeekError },
     { data: monthlyRetentionRate, error: monthlyRetentionRateError },
     { data: weeklyRetentionRate, error: weeklyRetentionRateError },
     { data: monthlyChurnRate, error: monthlyChurnRateError },
@@ -186,6 +212,8 @@ ORDER BY
     dbQueryClickhouse<WeeklyActiveIntegrations>(monthlyActiveUsersQuery, []),
     dbQueryClickhouse<WeeklyActiveIntegrations>(dailyActiveUsersQuery, []),
     dbExecute<CountOverTime>(growthOverTimeQuery, []),
+    dbExecute<CountOverTime>(growthPerMonthQuery, []),
+    dbExecute<CountOverTime>(growthPerWeekQuery, []),
     dbExecute<RetentionAndChurnRate>(monthlyRetentionRateQuery, []),
     dbExecute<RetentionAndChurnRate>(weeklyRetentionRateQuery, []),
     dbExecute<RetentionAndChurnRate>(monthlyChurnRateQuery, []),
@@ -212,6 +240,15 @@ ORDER BY
   if (growthOverTimeError !== null) {
     return { data: null, error: growthOverTimeError };
   }
+
+  if (growthPerMonthError !== null) {
+    return { data: null, error: growthPerMonthError };
+  }
+
+  if (growthPerWeekError !== null) {
+    return { data: null, error: growthPerWeekError };
+  }
+
   if (monthlyRetentionRateError !== null) {
     return { data: null, error: monthlyRetentionRateError };
   }
@@ -251,6 +288,14 @@ ORDER BY
         time_step: new Date(d.time_step),
       })),
       growthOverTime: growthOverTime!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      growthPerMonth: growthPerMonth!.map((d) => ({
+        ...d,
+        time_step: new Date(d.time_step),
+      })),
+      growthPerWeek: growthPerWeek!.map((d) => ({
         ...d,
         time_step: new Date(d.time_step),
       })),
