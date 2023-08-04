@@ -13,16 +13,11 @@
   }
   ```
 */
-import { StarIcon } from "@heroicons/react/20/solid";
-import AdvancedAnalytics from "./AdvancedAnalytics";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import Details from "./detailsV2";
-import BasePageV2 from "../../shared/layout/basePageV2";
 
-import { createRef, SVGProps, useEffect, useRef, useState } from "react";
-import OnboardingButton from "../../shared/auth/onboardingButton";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
@@ -36,9 +31,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
-import { Dialog } from "@headlessui/react";
-import { useQuery } from "@tanstack/react-query";
-import Logos from "./logos";
 import {
   ChartPieIcon,
   CircleStackIcon,
@@ -47,9 +39,6 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import CodeSnippet from "./codeSnippet";
-import LoginButton from "../../shared/auth/loginButton";
-import { BsDiscord } from "react-icons/bs";
-import NavBar from "../../shared/layout/navbar";
 import Footer from "../../shared/layout/footer";
 import NavBarV2 from "../../shared/layout/navBarV2";
 
@@ -197,9 +186,9 @@ export default function HomePage() {
       </div>
       <NavBarV2 />
       <div className="relative isolate overflow-hidden bg-white">
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24 border-r border-l border-gray-300 border-dashed">
-          <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
-            <div className="mt-24 sm:mt-32 lg:mt-16">
+        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24  border-gray-300">
+          <div className="mx-auto lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+            {/* <div className="">
               <a
                 href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
                 target="_blank"
@@ -210,27 +199,28 @@ export default function HomePage() {
                   Backed by Y Combinator
                 </span>
               </a>
-            </div>
-            <h1 className="mt-10 text-4xl sm:leading-tight font-bold tracking-tight text-gray-900 sm:text-5xl">
+            </div> */}
+            <h1 className="mt-8 sm:mt-16 lg:mt-0 text-4xl sm:leading-tight font-bold tracking-tight text-gray-800 sm:text-7xl antialiased">
               Open-Source{" "}
-              <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] pb-1 bg-no-repeat bg-bottom">
+              <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] sm:bg-[length:100%_6px] pb-1 sm:pb-1.5 bg-no-repeat bg-bottom">
                 Monitoring
               </span>{" "}
               <p>for Generative AI</p>
             </h1>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Hundreds of organizations leverage Helicone to make their
-              Large-Language Model operations more efficient.
+            <p className="mt-6 text-lg leading-8 max-w-md text-gray-700 antialiased">
+              Thousands of users and organizations leverage Helicone to monitor
+              their LLM applications. Instantly get insights into your latency,
+              costs, and much more.
             </p>
             <div className="flex flex-row gap-8 mt-10">
               <Link
                 href="/signup"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white text-sm rounded-lg"
               >
                 Get Started
               </Link>
               {demoLoading ? (
-                <button className="flex flex-row underline underline-offset-2 font-semibold text-gray-900 items-center">
+                <button className="flex flex-row underline underline-offset-4 font-semibold text-gray-900 items-center text-sm">
                   <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
                   Logging In...
                 </button>
@@ -251,22 +241,33 @@ export default function HomePage() {
                         });
                     });
                   }}
-                  className="underline underline-offset-2 font-semibold text-gray-900"
+                  className="underline underline-offset-4 font-semibold text-gray-900 text-sm"
                 >
                   View Demo
                 </button>
               )}
             </div>
           </div>
-          <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
-            <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
+          <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
+            <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
+              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
                 <img
                   src="/assets/landing/preview.webp"
                   alt="App screenshot"
-                  width={2432}
-                  height={1442}
-                  className="w-[76rem] rounded-md shadow-2xl ring-1 ring-gray-900/10"
+                  width={2720}
+                  height={1844}
+                  className="w-[55rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+                />
+              </div>
+            </div>
+            <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
+              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
+                <img
+                  src="/assets/landing/request-preview.png"
+                  alt="App screenshot"
+                  width={556}
+                  height={916}
+                  className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
                 />
               </div>
             </div>
@@ -274,7 +275,7 @@ export default function HomePage() {
         </div>
       </div>
       <div className="bg-gray-100">
-        <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
+        <div className="px-8 pb-24 relative grid grid-cols-4 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
           <div className="flex flex-col col-span-4 md:col-span-2 space-y-8 py-32 md:pr-32">
             <p className="text-lg text-sky-500 tracking-wide font-semibold">
               Real Time Metrics
@@ -612,7 +613,7 @@ export default function HomePage() {
         </div>
       </div>
       <div className="bg-[#0a2540] h-full">
-        <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-400 border-dashed w-full items-center justify-center">
+        <div className="px-8 pb-16 relative grid grid-cols-4 h-full max-w-7xl mx-auto  border-gray-400  w-full items-center justify-center">
           <div className="col-span-4 md:col-span-2 flex flex-col space-y-12 py-32 md:pr-32">
             <p className="text-lg text-sky-400 tracking-wide font-semibold">
               Made By Developers, For Developers
@@ -667,7 +668,7 @@ export default function HomePage() {
         </div>
       </div>
       <div className="bg-gray-50">
-        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-r border-l border-gray-300 border-dashed w-full items-center justify-center">
+        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
           <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
             <p className="text-4xl text-sky-500 tracking-wide font-semibold">
               Open Source
@@ -737,7 +738,7 @@ export default function HomePage() {
         </div>
       </div>
       <div className="bg-violet-200 h-full">
-        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto border-r border-l border-gray-400 border-dashed w-full text-center items-center justify-center">
+        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto  border-gray-400  w-full text-center items-center justify-center">
           <div className="col-span-4 flex flex-col space-y-8 py-32">
             <p className="text-4xl text-violet-900 tracking-wide font-semibold">
               Join Our Community

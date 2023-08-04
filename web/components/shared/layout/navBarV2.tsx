@@ -32,10 +32,10 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const supabaseClient = useSupabaseClient();
 
   return (
-    <header className="bg-gray-50 top-0 sticky z-50 ">
+    <header className="bg-gray-50 top-0 sticky z-50">
       {!mobileMenuOpen && (
         <nav
-          className="mx-auto flex max-w-7xl items-center md:gap-x-8 gap-x-16 p-4 md:px-8 border-b border-gray-200"
+          className="mx-auto flex max-w-7xl items-center md:gap-x-8 gap-x-16 p-4 md:px-8"
           aria-label="Global"
         >
           <div className="flex">
@@ -86,8 +86,8 @@ const NavBarV2 = (props: NavBarV2Props) => {
               )}
             >
               <StarIcon className="h-3 w-3 text-gray-900 " />
-              <a className="hidden lg:block">Star us on Github</a>
-              <a className="lg:hidden">Github</a>
+              <div className="hidden lg:block">Star us on Github</div>
+              <div className="lg:hidden">Github</div>
             </Link>
             {user ? (
               <button
