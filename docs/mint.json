@@ -75,7 +75,7 @@
         },
         {
           "group": "Async Integrations",
-          "pages": ["getting-started/integration-method/openai"]
+          "pages": ["getting-started/integration-method/openai","getting-started/integration-method/litellm"]
         },
         "getting-started/open-source"
       ]
