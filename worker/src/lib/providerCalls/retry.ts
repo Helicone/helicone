@@ -18,7 +18,7 @@ export async function callProviderWithRetry(
 
           lastResponse = res;
           // Throw an error if the status code is 429
-          if (res.status === 429 || res.status === 500) {
+          if (res.status === 429 || res.status === 500 || res.status === 522) {
             throw new Error(`Status code ${res.status}`);
           }
           return res;
