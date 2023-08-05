@@ -88,6 +88,25 @@ const testimonials = [
   // More testimonials...
 ];
 
+const faqs = [
+  {
+    question: "How does Helicone work under the hood?",
+    answer:
+      "Our recommended integration is via a proxy, but we also support an async logging integration. We log the request and response payloads, and use that to build a user-level view of your LLM usage.",
+  },
+  {
+    question: "What is the latency impact?",
+    answer:
+      "We know latency is a huge concern for your LLM-powered application, so we use Cloudflare Workers to ensure the latency impact is negligible. You can read more about our architecture here.",
+  },
+  {
+    question: "I do not want to use a proxy. What are my options?",
+    answer:
+      "We have an async logging integration for users that do not want to use a proxy. We also provide a self-hosted version of our proxy for users that want to host it themselves.",
+  },
+  // More questions...
+];
+
 export default function HomePage() {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
@@ -110,8 +129,11 @@ export default function HomePage() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          console.log("entry", entry);
+
           if (entry.isIntersecting) {
             setCurrentPanel(entry.target.id);
+            return;
           }
         });
       },
@@ -148,7 +170,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="flex-col w-full">
+    <div className="flex-col w-full antialiased">
       <div className="bg-black">
         <div className="px-4 md:px-8 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
           <div className="flex items-center">
@@ -186,9 +208,9 @@ export default function HomePage() {
       </div>
       <NavBarV2 />
       <div className="relative isolate overflow-hidden bg-white">
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24  border-gray-300">
-          <div className="mx-auto lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
-            {/* <div className="">
+        <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-32  border-gray-300">
+          <div className="mx-auto lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-0">
+            <div className="">
               <a
                 href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
                 target="_blank"
@@ -199,8 +221,8 @@ export default function HomePage() {
                   Backed by Y Combinator
                 </span>
               </a>
-            </div> */}
-            <h1 className="mt-8 sm:mt-16 lg:mt-0 text-4xl sm:leading-tight font-bold tracking-tight text-gray-800 sm:text-7xl antialiased">
+            </div>
+            <h1 className="mt-8 sm:mt-16 lg:mt-8 leading-tight lg:leading-tight font-bold tracking-tight text-gray-800  text-5xl lg:text-6xl antialiased">
               Open-Source{" "}
               <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] sm:bg-[length:100%_6px] pb-1 sm:pb-1.5 bg-no-repeat bg-bottom">
                 Monitoring
@@ -321,14 +343,14 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <div className="flex-col hidden md:flex col-span-2 h-full flex-1 sticky top-[5%] 2xl:top-[15%] py-28">
-            <div className="h-full relative">
+          <div className="flex-col hidden md:flex col-span-2 h-[85%] w-full flex-1 sticky top-[10%] pt-16 pb-8">
+            <div className="h-full w-full relative">
               <div
                 className={clsx(
                   currentPanel === "observability"
                     ? "bg-sky-50 border-sky-500 text-sky-500"
                     : "bg-gray-50 border-gray-300 text-gray-500",
-                  "h-[10%] w-[10%] z-10 shadow-sm border rounded-xl absolute top-0 flex items-center justify-center"
+                  "p-4 z-10 shadow-lg border-[1.5px] rounded-xl absolute top-0 flex items-center justify-center"
                 )}
               >
                 <ChartPieIcon className="h-8 w-8" />
@@ -338,7 +360,7 @@ export default function HomePage() {
                   currentPanel === "rate"
                     ? "bg-pink-50 border-pink-500 text-pink-500"
                     : "bg-gray-50 border-gray-300 text-gray-500",
-                  "h-[10%] w-[10%] z-10 shadow-sm border rounded-xl absolute top-1/3 right-0 flex items-center justify-center"
+                  "p-4 z-10 shadow-lg border-[1.5px] rounded-xl absolute top-1/3 right-0 flex items-center justify-center"
                 )}
               >
                 <UserGroupIcon className="h-8 w-8" />
@@ -348,7 +370,7 @@ export default function HomePage() {
                   currentPanel === "bucket"
                     ? "bg-purple-50 border-purple-500 text-purple-500"
                     : "bg-gray-50 border-gray-300 text-gray-500",
-                  "h-[10%] w-[10%] z-10 shadow-sm border rounded-xl absolute left-[10%] bottom-0 flex items-center justify-center"
+                  "p-4 z-10 shadow-lg border-[1.5px] rounded-xl absolute left-[10%] bottom-0 flex items-center justify-center"
                 )}
               >
                 <CodeBracketIcon className="h-8 w-8" />
@@ -420,7 +442,7 @@ export default function HomePage() {
                   currentPanel === "observability" && "border-sky-500",
                   currentPanel === "rate" && "border-pink-500",
                   currentPanel === "bucket" && "border-purple-500",
-                  "h-[70%] w-[70%] shadow-md border rounded-xl bg-white absolute top-0 bottom-0 left-0 right-0 m-auto p-4"
+                  "h-[70%] w-[70%] shadow-lg border-[1.5px] rounded-xl bg-white absolute top-0 bottom-0 left-0 right-0 m-auto p-4"
                 )}
               >
                 {currentPanel === "observability" && (
@@ -536,11 +558,12 @@ export default function HomePage() {
             <p className="text-5xl text-gray-900 font-semibold">
               Easily manage your application&apos;s users
             </p>
-            <div ref={rateDiv} id="rate" className="sr-only" />
+
             <p className="text-xl text-gray-700 font-normal leading-8">
               Our intuitive user management tools offer a hassle-free way to
               control access to your system.
             </p>
+            <div ref={rateDiv} id="rate" className="sr-only" />
             <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
               <li>
                 <p className="leading-7">
@@ -577,11 +600,12 @@ export default function HomePage() {
               <p className="text-5xl text-gray-900 font-semibold">
                 Tools to scale your LLM-powered application
               </p>
-              <div ref={bucketDiv} id="bucket" className="sr-only" />
+
               <p className="text-xl text-gray-700 font-normal leading-8">
                 Our toolkit provides an array of features to manage and control
                 your AI applications.
               </p>
+              <div ref={bucketDiv} id="bucket" className="sr-only" />
               <ul className="flex flex-col space-y-4 list-disc ml-4 font-normal text-gray-700">
                 <li>
                   <p className="leading-7">
@@ -656,7 +680,7 @@ export default function HomePage() {
                 href="https://docs.helicone.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-xl"
+                className="px-4 py-2 bg-sky-400 font-semibold text-gray-900 rounded-lg"
               >
                 Read Our Docs
               </Link>
@@ -670,11 +694,11 @@ export default function HomePage() {
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
           <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
-            <p className="text-4xl text-sky-500 tracking-wide font-semibold">
+            <p className="text-5xl text-sky-500 tracking-wide font-semibold">
               Open Source
             </p>
-            <p className="text-2xl text-gray-900 font-semibold">
-              Open-source is more than a choice—it&apos;s a commitment to
+            <p className="text-xl text-gray-700 font-medium leading-8">
+              Open-Source is more than a choice—it&apos;s a commitment to
               user-centric development, community collaboration, and absolute
               transparency.
             </p>
@@ -683,7 +707,7 @@ export default function HomePage() {
                 href="https://github.com/Helicone/helicone"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
               >
                 Star us on GitHub
               </Link>
@@ -698,7 +722,7 @@ export default function HomePage() {
           <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
               <CloudIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-lg">
+              <p className="text-gray-900 font-semibold text-xl">
                 Cloud Solution
               </p>
             </div>
@@ -718,7 +742,7 @@ export default function HomePage() {
           <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
             <div className="flex flex-col space-y-2">
               <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-lg">AWS Deploy</p>
+              <p className="text-gray-900 font-semibold text-xl">AWS Deploy</p>
             </div>
             <p className="text-gray-500">
               Deploy your own instance of Helicone on AWS, with just a few
@@ -737,55 +761,45 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      <div className="bg-violet-200 h-full">
-        <div className="px-8 grid grid-cols-4 h-full max-w-7xl mx-auto  border-gray-400  w-full text-center items-center justify-center">
-          <div className="col-span-4 flex flex-col space-y-8 py-32">
-            <p className="text-4xl text-violet-900 tracking-wide font-semibold">
-              Join Our Community
+      <div className="bg-violet-100">
+        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-gray-300 w-full justify-center">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
+            <p className="text-5xl text-violet-500 tracking-wide font-semibold">
+              Frequently Asked Questions
             </p>
-            <p className="text-2xl text-gray-700 font-medium">
-              We&apos;re always looking for new contributors to help us improve
+            <p className="text-xl text-gray-700 font-medium leading-8">
+              Can’t find the answer you’re looking for? Join our Discord server
+              or contact us directly.
             </p>
-            <div className="flex flex-row gap-8 w-full justify-center">
+            <div className="flex flex-row gap-8 items-center">
               <Link
                 href="https://discord.gg/zsSTcH2qhG"
                 target="_blank"
-                rel="noreferrer noopener"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-xl"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
               >
                 Join Discord
               </Link>
+              <Link
+                href="mailto:sales@helicone.ai"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
+                Contact Us
+              </Link>
             </div>
           </div>
-          <section className="col-span-4">
-            <div className="mx-auto max-w-7xl px-6 md:px-8 pb-16">
-              <div className="mx-auto grid gap-4 max-w-2xl grid-cols-1 md:mx-0 md:max-w-none md:grid-cols-2 xl:grid-cols-4">
-                {testimonials.map((testimonial, i) => (
-                  <div
-                    key={i}
-                    className="bg-violet-100 shadow-sm flex flex-col p-8 rounded-xl space-y-4 h-full justify-between"
-                  >
-                    <blockquote className="text-sm leading-6">
-                      <p>{`“${testimonial.body}”`}</p>
-                    </blockquote>
-                    <figcaption className="flex items-center gap-x-4 w-fit">
-                      <img
-                        className="h-10 w-10 flex-none rounded-full bg-gray-50"
-                        src={testimonial.author.imageUrl}
-                        alt=""
-                      />
-                      <div className="flex-auto text-left">
-                        <div className="font-semibold">
-                          {testimonial.author.name}
-                        </div>
-                        <div className="text-gray-600">{`@${testimonial.author.handle}`}</div>
-                      </div>
-                    </figcaption>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
+            <ul className="space-y-16">
+              {faqs.map((faq, idx) => (
+                <li key={idx}>
+                  <p className="text-xl text-gray-900 font-bold leading-8">
+                    {faq.question}
+                  </p>
+                  <p className="text-gray-700 mt-2 leading-7">{faq.answer}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
       <Footer />
