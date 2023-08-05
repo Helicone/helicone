@@ -14,6 +14,9 @@ CREATE UNIQUE INDEX org_provider_key_name_not_deleted_uniq
 ALTER TABLE
     public.provider_keys ENABLE ROW LEVEL SECURITY;
 
+REVOKE ALL PRIVILEGES ON TABLE public.provider_keys FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.provider_keys FROM authenticated;
+
 CREATE TABLE helicone_proxy_keys (
     id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
     org_id UUID NOT NULL REFERENCES public.organization(id),
@@ -29,6 +32,9 @@ CREATE UNIQUE INDEX org_helicone_key_name_not_deleted_uniq
 
 ALTER TABLE
     public.helicone_proxy_keys ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL PRIVILEGES ON TABLE public.helicone_proxy_keys FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.helicone_proxy_keys FROM authenticated;
 
 CREATE OR REPLACE FUNCTION soft_delete_helicone_proxy_keys() 
 RETURNS TRIGGER 
@@ -49,6 +55,7 @@ FOR EACH ROW EXECUTE FUNCTION soft_delete_helicone_proxy_keys();
 
 REVOKE EXECUTE ON FUNCTION public.soft_delete_helicone_proxy_keys() FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.soft_delete_helicone_proxy_keys() FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.soft_delete_helicone_proxy_keys() FROM anon;
 
 ALTER TABLE public.request 
 ADD COLUMN helicone_proxy_key_id uuid NULL REFERENCES public.helicone_proxy_keys(id);
@@ -74,3 +81,4 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.verify_helicone_proxy_key(text, text) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.verify_helicone_proxy_key(text, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.verify_helicone_proxy_key(text, text) FROM anon;
