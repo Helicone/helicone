@@ -93,7 +93,7 @@ export default function PricingPage() {
     <>
       <NavBarV2 />
       <div className="bg-gray-50">
-        <div className="flex flex-col mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24 border-r border-l border-gray-300 border-dashed">
+        <div className="flex flex-col mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24">
           <div className="lg:-mx-8 xl:-mx-4">
             <div className="lg:px-8 xl:px-14">
               <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
