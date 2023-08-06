@@ -4,7 +4,11 @@ import { getCacheSettings } from "../cache/cacheSettings";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
-import { getCachedResponse, recordCacheHit, saveToCache } from "../cache/cacheFunctions";
+import {
+  getCachedResponse,
+  recordCacheHit,
+  saveToCache,
+} from "../cache/cacheFunctions";
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
@@ -15,11 +19,12 @@ export async function proxyForwarder(
   ctx: ExecutionContext,
   provider: Provider
 ): Promise<Response> {
-  const { data: proxyRequest, error: proxyRequestError } = await new HeliconeProxyRequestMapper(
-    request,
-    provider,
-    env
-  ).tryToProxyRequest();
+  const { data: proxyRequest, error: proxyRequestError } =
+    await new HeliconeProxyRequestMapper(
+      request,
+      provider,
+      env
+    ).tryToProxyRequest();
 
   if (proxyRequestError !== null) {
     return new Response(proxyRequestError, {
@@ -43,7 +48,10 @@ export async function proxyForwarder(
       userId: proxyRequest.userId,
     });
 
-    responseBuilder.addRateLimitHeaders(rateLimitCheckResult, proxyRequest.rateLimitOptions);
+    responseBuilder.addRateLimitHeaders(
+      rateLimitCheckResult,
+      proxyRequest.rateLimitOptions
+    );
     if (rateLimitCheckResult.status === "rate_limited") {
       return responseBuilder.buildRateLimitedResponse();
     }
@@ -63,7 +71,11 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-    const cachedResponse = await getCachedResponse(proxyRequest, cacheSettings.bucketSettings, env.CACHE_KV);
+    const cachedResponse = await getCachedResponse(
+      proxyRequest,
+      cacheSettings.bucketSettings,
+      env.CACHE_KV
+    );
     if (cachedResponse) {
       ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
       return cachedResponse;
@@ -127,7 +139,8 @@ export async function proxyForwarder(
     }
     updateRateLimitCounter({
       providerAuthHash: proxyRequest.providerAuthHash,
-      heliconeProperties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+      heliconeProperties:
+        proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
       rateLimitKV: env.RATE_LIMIT_KV,
       rateLimitOptions: proxyRequest.rateLimitOptions,
       userId: proxyRequest.userId,

@@ -32,9 +32,18 @@ type Timing = {
   };
 };
 
-export function validateAsyncLogModel(logModel: AsyncLogModel): [boolean, string?] {
-  if (!logModel.providerRequest || !logModel.providerResponse || !logModel.timing) {
-    return [false, "One of the required fields is missing, providerRequest, providerResponse, or timing"];
+export function validateAsyncLogModel(
+  logModel: AsyncLogModel
+): [boolean, string?] {
+  if (
+    !logModel.providerRequest ||
+    !logModel.providerResponse ||
+    !logModel.timing
+  ) {
+    return [
+      false,
+      "One of the required fields is missing, providerRequest, providerResponse, or timing",
+    ];
   }
 
   const providerRequest = logModel.providerRequest;
@@ -71,7 +80,10 @@ export function validateAsyncLogModel(logModel: AsyncLogModel): [boolean, string
   }
 
   if (typeof timing.startTime.milliseconds !== "number") {
-    return [false, "Invalid timing: 'startTime.milliseconds' should be a number"];
+    return [
+      false,
+      "Invalid timing: 'startTime.milliseconds' should be a number",
+    ];
   }
 
   if (typeof timing.endTime.seconds !== "number") {
@@ -85,8 +97,12 @@ export function validateAsyncLogModel(logModel: AsyncLogModel): [boolean, string
   // Check if startTime and endTime are valid Unix timestamps.
   // Timestamps should be within the valid range for your application.
 
-  const startTime = new Date(timing.startTime.seconds * 1000 + timing.startTime.milliseconds);
-  const endTime = new Date(timing.endTime.seconds * 1000 + timing.endTime.milliseconds);
+  const startTime = new Date(
+    timing.startTime.seconds * 1000 + timing.startTime.milliseconds
+  );
+  const endTime = new Date(
+    timing.endTime.seconds * 1000 + timing.endTime.milliseconds
+  );
 
   if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
     return [false, "Invalid timing structure or value type"];

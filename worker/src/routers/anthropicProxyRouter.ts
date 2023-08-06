@@ -4,12 +4,23 @@ import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 
 export const getAnthropicProxyRouter = () => {
-  const anthropicRouter = Router<IRequest, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>();
+  const anthropicRouter = Router<
+    IRequest,
+    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+  >();
 
   // proxy forwarder only
-  anthropicRouter.all("*", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    return await proxyForwarder(requestWrapper, env, ctx, "ANTHROPIC");
-  });
+  anthropicRouter.all(
+    "*",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await proxyForwarder(requestWrapper, env, ctx, "ANTHROPIC");
+    }
+  );
 
   return anthropicRouter;
 };
