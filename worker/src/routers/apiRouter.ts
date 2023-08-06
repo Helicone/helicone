@@ -8,81 +8,112 @@ import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 
 export const getAPIRouter = () => {
-  const apiRouter = Router<IRequest, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>();
+  const apiRouter = Router<
+    IRequest,
+    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+  >();
 
-  apiRouter.post("/oai/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
-    //TODO Check to make sure auth is correct
-    if (!requestWrapper.getAuthorization()) {
-      return new Response("Unauthorized", { status: 401 });
-    }
+  apiRouter.post(
+    "/oai/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
+      //TODO Check to make sure auth is correct
+      if (!requestWrapper.getAuthorization()) {
+        return new Response("Unauthorized", { status: 401 });
+      }
 
-    const [isValid, error] = validateAsyncLogModel(asyncLogModel);
-    if (!isValid) {
-      console.error("Invalid asyncLogModel", error);
-      return new Response(JSON.stringify({ error }), { status: 400 });
-    }
+      const [isValid, error] = validateAsyncLogModel(asyncLogModel);
+      if (!isValid) {
+        console.error("Invalid asyncLogModel", error);
+        return new Response(JSON.stringify({ error }), { status: 400 });
+      }
 
-    const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
-    const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
-    const heliconeHeaders = new HeliconeHeaders(requestHeaders);
+      const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
+      const responseHeaders = new Headers(
+        asyncLogModel.providerResponse.headers
+      );
+      const heliconeHeaders = new HeliconeHeaders(requestHeaders);
 
-    const loggable = await dbLoggableRequestFromAsyncLogModel({
-      requestWrapper,
-      env,
-      asyncLogModel,
-      providerRequestHeaders: heliconeHeaders,
-      providerResponseHeaders: responseHeaders,
-      provider: "OPENAI",
-    });
-    const { error: logError } = await loggable.log({
-      clickhouse: new ClickhouseClientWrapper(env),
-      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-    });
-
-    if (logError !== null) {
-      return new Response(JSON.stringify({ error: logError }), {
-        status: 500,
+      const loggable = await dbLoggableRequestFromAsyncLogModel({
+        requestWrapper,
+        env,
+        asyncLogModel,
+        providerRequestHeaders: heliconeHeaders,
+        providerResponseHeaders: responseHeaders,
+        provider: "OPENAI",
       });
-    }
-
-    return new Response("ok", { status: 200 });
-  });
-
-  apiRouter.post("/anthropic/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
-
-    const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
-    const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
-    const heliconeHeaders = new HeliconeHeaders(requestHeaders);
-
-    const loggable = await dbLoggableRequestFromAsyncLogModel({
-      requestWrapper,
-      env,
-      asyncLogModel,
-      providerRequestHeaders: heliconeHeaders,
-      providerResponseHeaders: responseHeaders,
-      provider: "OPENAI",
-    });
-
-    const { error: logError } = await loggable.log({
-      clickhouse: new ClickhouseClientWrapper(env),
-      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-    });
-
-    if (logError !== null) {
-      return new Response(JSON.stringify({ error: logError }), {
-        status: 500,
+      const { error: logError } = await loggable.log({
+        clickhouse: new ClickhouseClientWrapper(env),
+        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
       });
-    }
 
-    return new Response("ok", { status: 200 });
-  });
+      if (logError !== null) {
+        return new Response(JSON.stringify({ error: logError }), {
+          status: 500,
+        });
+      }
+
+      return new Response("ok", { status: 200 });
+    }
+  );
+
+  apiRouter.post(
+    "/anthropic/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
+
+      const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
+      const responseHeaders = new Headers(
+        asyncLogModel.providerResponse.headers
+      );
+      const heliconeHeaders = new HeliconeHeaders(requestHeaders);
+
+      const loggable = await dbLoggableRequestFromAsyncLogModel({
+        requestWrapper,
+        env,
+        asyncLogModel,
+        providerRequestHeaders: heliconeHeaders,
+        providerResponseHeaders: responseHeaders,
+        provider: "OPENAI",
+      });
+
+      const { error: logError } = await loggable.log({
+        clickhouse: new ClickhouseClientWrapper(env),
+        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      });
+
+      if (logError !== null) {
+        return new Response(JSON.stringify({ error: logError }), {
+          status: 500,
+        });
+      }
+
+      return new Response("ok", { status: 200 });
+    }
+  );
 
   // Proxy only + proxy forwarder
-  apiRouter.all("*", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    return new Response("invalid path", { status: 400 });
-  });
+  apiRouter.all(
+    "*",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return new Response("invalid path", { status: 400 });
+    }
+  );
 
   return apiRouter;
 };

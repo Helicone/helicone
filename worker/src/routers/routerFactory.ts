@@ -7,7 +7,10 @@ import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 
-type BaseRouter = RouterType<Route, [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]>;
+type BaseRouter = RouterType<
+  Route,
+  [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+>;
 
 const WORKER_MAP: {
   [key in Env["WORKER_TYPE"]]: () => BaseRouter;
@@ -23,14 +26,30 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
   // console.log("router", router);
 
   //TODO remove this
-  router.post("/v1/log", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    return await handleLoggingEndpoint(requestWrapper, env);
-  });
+  router.post(
+    "/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await handleLoggingEndpoint(requestWrapper, env);
+    }
+  );
 
   //TODO remove this
-  router.post("/v1/feedback", async (_, requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext) => {
-    return await handleFeedbackEndpoint(requestWrapper, env);
-  });
+  router.post(
+    "/v1/feedback",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await handleFeedbackEndpoint(requestWrapper, env);
+    }
+  );
 
   return router;
 }

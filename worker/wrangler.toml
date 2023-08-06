@@ -22,7 +22,7 @@ CLICKHOUSE_PASSWORD = ""
 PROVIDER = "OPENAI"
 TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
-VAULT_ENABLED = "true"
+VAULT_ENABLED = "false"
 
 [env.production]
 name = "helicone-worker-prod"
@@ -40,7 +40,7 @@ kv_namespaces = [
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
-
+VAULT_ENABLED = "false"
 
 [env.production_staging]
 name = "helicone-worker-prod-staging"
@@ -58,3 +58,4 @@ kv_namespaces = [
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
+VAULT_ENABLED = "false"
