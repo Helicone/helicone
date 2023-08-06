@@ -2,7 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 
-export async function kvKeyFromRequest(request: HeliconeProxyRequest, freeIndex: number): Promise<string> {
+export async function kvKeyFromRequest(
+  request: HeliconeProxyRequest,
+  freeIndex: number
+): Promise<string> {
   const headers = new Headers();
   for (const [key, value] of request.requestWrapper.getHeaders().entries()) {
     if (key.toLowerCase().startsWith("helicone-cache")) {
@@ -33,8 +36,14 @@ export async function saveToCache(
   cacheKv: KVNamespace
 ): Promise<void> {
   console.log("Saving to cache");
-  const expirationTtl = cacheControl.includes("max-age=") ? parseInt(cacheControl.split("max-age=")[1]) : 0;
-  const { freeIndexes } = await getMaxCachedResponses(request, settings, cacheKv);
+  const expirationTtl = cacheControl.includes("max-age=")
+    ? parseInt(cacheControl.split("max-age=")[1])
+    : 0;
+  const { freeIndexes } = await getMaxCachedResponses(
+    request,
+    settings,
+    cacheKv
+  );
   if (freeIndexes.length > 0) {
     cacheKv.put(
       await kvKeyFromRequest(request, freeIndexes[0]),
@@ -51,14 +60,22 @@ export async function saveToCache(
   }
 }
 
-export async function recordCacheHit(headers: Headers, env: Env): Promise<void> {
+export async function recordCacheHit(
+  headers: Headers,
+  env: Env
+): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
   }
-  const dbClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-  const { error } = await dbClient.from("cache_hits").insert({ request_id: requestId });
+  const dbClient = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const { error } = await dbClient
+    .from("cache_hits")
+    .insert({ request_id: requestId });
   if (error) {
     console.error(error);
   }
@@ -68,7 +85,11 @@ export async function getCachedResponse(
   settings: { maxSize: number },
   cacheKv: KVNamespace
 ): Promise<Response | null> {
-  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(request, settings, cacheKv);
+  const { requests: requestCaches, freeIndexes } = await getMaxCachedResponses(
+    request,
+    settings,
+    cacheKv
+  );
   if (freeIndexes.length > 0) {
     console.log("Max cache size reached, not caching");
     return null;
@@ -77,7 +98,10 @@ export async function getCachedResponse(
     const randomCache = requestCaches[cacheIdx];
     const cachedResponseHeaders = new Headers(randomCache.headers);
     cachedResponseHeaders.append("Helicone-Cache", "HIT");
-    cachedResponseHeaders.append("Helicone-Cache-Bucket-Idx", cacheIdx.toString());
+    cachedResponseHeaders.append(
+      "Helicone-Cache-Bucket-Idx",
+      cacheIdx.toString()
+    );
     return new Response(randomCache.body, {
       headers: cachedResponseHeaders,
     });
@@ -103,6 +127,8 @@ async function getMaxCachedResponses(
       headers: Record<string, string>;
       body: string;
     }[],
-    freeIndexes: requests.map((r, idx) => idx).filter((idx) => requests[idx] === null),
+    freeIndexes: requests
+      .map((r, idx) => idx)
+      .filter((idx) => requests[idx] === null),
   };
 }
