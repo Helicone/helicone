@@ -31,7 +31,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
-  retryHeaders: Nullable<{ enabled: boolean; retries: number; factor: number; minTimeout: number; maxTimeout: number }>;
+  retryHeaders: Nullable<{
+    enabled: boolean;
+    retries: number;
+    factor: number;
+    minTimeout: number;
+    maxTimeout: number;
+  }>;
   openaiBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
@@ -84,8 +90,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       enabled: retryEnabled === "true",
       retries: parseInt(this.headers.get("helicone-retry-num") ?? "5", 10),
       factor: parseFloat(this.headers.get("helicone-retry-factor") ?? "2"),
-      minTimeout: parseInt(this.headers.get("helicone-retry-min-timeout") ?? "1000", 10),
-      maxTimeout: parseInt(this.headers.get("helicone-retry-max-timeout") ?? "10000", 10),
+      minTimeout: parseInt(
+        this.headers.get("helicone-retry-min-timeout") ?? "1000",
+        10
+      ),
+      maxTimeout: parseInt(
+        this.headers.get("helicone-retry-max-timeout") ?? "10000",
+        10
+      ),
     };
   }
 
@@ -102,7 +114,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     const propTag = "helicone-property-";
     const heliconeHeaders = Object.fromEntries(
       [...this.headers.entries()]
-        .filter(([key]) => key.toLowerCase().startsWith(propTag.toLowerCase()) && key.length > propTag.length)
+        .filter(
+          ([key]) =>
+            key.toLowerCase().startsWith(propTag.toLowerCase()) &&
+            key.length > propTag.length
+        )
         .map(([key, value]) => [key.substring(propTag.length), value])
     );
     return heliconeHeaders;

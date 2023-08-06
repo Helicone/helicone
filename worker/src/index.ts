@@ -20,7 +20,10 @@ export interface Env {
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
-  const hashedKey = await crypto.subtle.digest({ name: "SHA-256" }, encoder.encode(key));
+  const hashedKey = await crypto.subtle.digest(
+    { name: "SHA-256" },
+    encoder.encode(key)
+  );
   const byteArray = Array.from(new Uint8Array(hashedKey));
   const hexCodes = byteArray.map((value) => {
     const hexCode = value.toString(16);
@@ -59,7 +62,11 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<Response> {
     try {
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
@@ -67,7 +74,9 @@ export default {
       }
       env = modifyEnvBasedOnPath(env, requestWrapper.data);
       const router = buildRouter(env.WORKER_TYPE);
-      return router.handle(request, requestWrapper.data, env, ctx).catch(handleError);
+      return router
+        .handle(request, requestWrapper.data, env, ctx)
+        .catch(handleError);
     } catch (e) {
       return handleError(e);
     }
@@ -78,8 +87,10 @@ function handleError(e: any): Response {
   console.error(e);
   return new Response(
     JSON.stringify({
-      "helicone-message": "Helicone ran into an error servicing your request: " + e,
-      support: "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+      "helicone-message":
+        "Helicone ran into an error servicing your request: " + e,
+      support:
+        "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
       "helicone-error": JSON.stringify(e),
     }),
     {
