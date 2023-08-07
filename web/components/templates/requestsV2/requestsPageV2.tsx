@@ -27,6 +27,7 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { RequestView } from "./RequestView";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -417,13 +418,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }}
           expandedRow={(row) => {
             return (
-              <div className="flex flex-col space-y-2">
-                {row.render}
-                <div className="flex flex-row space-x-2">
-                  <div>{new Date(row.createdAt).toLocaleString()}</div>
-                  <div>{row.path}</div>
-                  <div>{row.id}</div>
-                </div>
+              <div className="flex flex-col space-y-2 border-2 p-2 my-2">
+                <RequestView
+                  request={row}
+                  properties={[]}
+                  open={true}
+                  wFull={true}
+                />
               </div>
             );
           }}
