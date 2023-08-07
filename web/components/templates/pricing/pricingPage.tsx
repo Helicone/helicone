@@ -93,9 +93,8 @@ export default function PricingPage() {
     <>
       <NavBarV2 />
       <div className="bg-gray-50">
-        <div className="flex flex-col mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24">
-          <div className="lg:-mx-8 xl:-mx-4">
-            <div className="lg:px-8 xl:px-14">
+        <div className="flex flex-col mx-auto max-w-7xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24">
+         
               <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
                 Pricing thats{" "}
                 <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] pb-1 bg-no-repeat bg-bottom">
@@ -106,10 +105,10 @@ export default function PricingPage() {
                 No need to build or maintain expensive infrastructure. Helicone
                 makes monitoring Large-Language Models easy.
               </p>
-            </div>
-          </div>
+
+  
           <div className="mt-20 flow-root">
-            <div className="isolate -mt-16 grid max-w-sm grid-cols-1 gap-y-16 divide-y divide-gray-300 divide-dashed sm:mx-auto lg:-mx-8 lg:mt-0 lg:max-w-none lg:grid-cols-3 lg:divide-x lg:divide-y-0 xl:-mx-4">
+            <div className="isolate -mt-16 grid max-w-sm grid-cols-1 gap-y-16 divide-y divide-gray-300 divide-dashed sm:mx-auto lg:-mx-8 lg:mt-0 lg:max-w-none lg:grid-cols-3 lg:divide-x lg:divide-y-0 xl:-mx-14">
               {tiers.map((tier) => (
                 <div key={tier.id} className="pt-16 lg:px-8 lg:pt-0 xl:px-14">
                   <h3
