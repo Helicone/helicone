@@ -51,7 +51,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               />
             </Link>
           </div>
-          <div className="hidden md:flex md:gap-x-8 lg:gap-x-16 items-center">
+          <div className="hidden md:flex md:gap-x-8 lg:gap-x-16 items-center pl-4">
             <Link
               href="/pricing"
               className="text-md font-semibold text-gray-900"
