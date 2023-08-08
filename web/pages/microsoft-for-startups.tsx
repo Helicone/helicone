@@ -80,6 +80,7 @@ const MicrosoftForStartups = () => {
           <div className="flex flex-row items-center gap-6 divide-x divide-gray-300 divide-dashed">
             <Image
               className="rounded-lg"
+              priority
               src={"/assets/landing/helicone-mobile.webp"}
               alt={"Helicone-mobile"}
               width={60}
@@ -87,6 +88,7 @@ const MicrosoftForStartups = () => {
             />
             <div>
               <Image
+                priority
                 src={"/assets/mfs.png"}
                 alt={"Helicone-mobile"}
                 width={250}
