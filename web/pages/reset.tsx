@@ -1,82 +1,53 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
+import useNotification from "../components/shared/notification/useNotification";
+import AuthForm from "../components/templates/auth/authForm";
 import { useState } from "react";
-import AuthenticationForm from "../components/shared/AuthenticationForm";
-import { SSRContext, SupabaseServerWrapper } from "../lib/wrappers/supabase";
+import ThemedModal from "../components/shared/themed/themedModal";
+import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 
-const Login = () => {
-  const supabaseClient = useSupabaseClient();
-  const [error, setError] = useState<string | null>(null);
+interface ResetProps {}
+
+const Reset = (props: ResetProps) => {
   const router = useRouter();
-  const user = useUser();
+  const supabase = useSupabaseClient();
+  const { setNotification } = useNotification();
+  const [open, setOpen] = useState(false);
 
-  if (user) {
-    return (
-      <AuthenticationForm
-        formType="resetPassword"
-        onSubmit={(state) => {
-          supabaseClient.auth
-            .updateUser({
-              email: user.email,
-              password: state.password,
-            })
-            .then((res) => {
-              if (res.error) {
-                setError(res.error.message);
-              } else {
-                setError(
-                  "Password successfully reset, redirecting to dashboard in 3 seconds..."
-                );
-                setTimeout(() => {
-                  router.push("/");
-                }, 3000);
-              }
-            });
+  return (
+    <>
+      <AuthForm
+        handleEmailSubmit={async (email: string, password: string) => {
+          const { data, error } = await supabase.auth.resetPasswordForEmail(
+            email,
+            {
+              redirectTo: `${window.location.origin}/reset-password`,
+            }
+          );
+
+          if (error) {
+            setNotification(
+              "Error resetting password. Please try again.",
+              "error"
+            );
+            console.error(error);
+            return;
+          }
+          setOpen(true);
         }}
-        error={error}
-        resetEmail={user.email}
+        authFormType={"reset"}
       />
-    );
-  } else {
-    return (
-      <AuthenticationForm
-        formType="reset"
-        onSubmit={(state) => {
-          supabaseClient.auth
-            .resetPasswordForEmail(state.email, {
-              redirectTo: `${window.location.origin}/reset`,
-            })
-            .then((res) => {
-              if (res.error) {
-                setError(res.error.message);
-              } else {
-                setError("Check your email for the confirmation link.");
-              }
-            });
-        }}
-        error={error}
-      />
-    );
-  }
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <InboxArrowDownIcon className="w-8 h-8 text-gray-900" />
+          <h1 className="text-2xl font-semibold">Reset Password</h1>
+          <p className="text-gray-700">
+            Please check your email for a link to reset your password.
+          </p>
+        </div>
+      </ThemedModal>
+    </>
+  );
 };
 
-export const getServerSideProps = async (ctx: SSRContext<any>) => {
-  const supabase = new SupabaseServerWrapper(ctx).getClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (session?.user.email === "heliconedemo@gmail.com") {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {},
-  };
-};
-
-export default Login;
+export default Reset;

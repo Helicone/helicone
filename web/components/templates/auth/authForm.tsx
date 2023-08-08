@@ -11,7 +11,7 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
   handleGoogleSubmit?: () => void;
-  authFormType: "signin" | "signup";
+  authFormType: "signin" | "signup" | "reset" | "reset-password";
 }
 
 const AuthForm = (props: AuthFormProps) => {
@@ -32,14 +32,14 @@ const AuthForm = (props: AuthFormProps) => {
       "password"
     ) as HTMLInputElement;
 
-    await handleEmailSubmit(email.value, password.value);
+    await handleEmailSubmit(email?.value || "", password?.value || "");
     setIsLoading(false);
   };
 
   return (
     <>
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 w-full">
-        <div className="relative hidden flex-1 lg:flex flex-col bg-black col-span-1">
+        <div className="relative hidden flex-1 lg:flex flex-col bg-gradient-to-tr from-black to-gray-700 col-span-1">
           <div className="px-12 py-6 justify-start flex">
             <svg
               width="160"
@@ -104,23 +104,25 @@ const AuthForm = (props: AuthFormProps) => {
               <h2 className="mt-8 text-2xl lg:text-3xl font-bold leading-9 tracking-tight text-gray-900">
                 {authFormType === "signin"
                   ? "Welcome back! Sign in below"
-                  : "Create an account"}
+                  : authFormType === "signup"
+                  ? "Create an account"
+                  : "Reset your password"}
               </h2>
-              {authFormType === "signin" ? (
-                <p className="mt-2 text-sm lg:text-md leading-6 text-gray-500">
-                  Don&apos;t have an account? Click{" "}
-                  <Link href={"/signup"} className="underline text-blue-500">
-                    here
-                  </Link>{" "}
-                  to sign up
-                </p>
-              ) : (
+              {authFormType === "signup" ? (
                 <p className="mt-2 text-sm lg:text-md leading-6 text-gray-500">
                   Already have an account? Click{" "}
                   <Link href={"/signin"} className="underline text-blue-500">
                     here
                   </Link>{" "}
                   to sign in
+                </p>
+              ) : (
+                <p className="mt-2 text-sm lg:text-md leading-6 text-gray-500">
+                  Don&apos;t have an account? Click{" "}
+                  <Link href={"/signup"} className="underline text-blue-500">
+                    here
+                  </Link>{" "}
+                  to sign up
                 </p>
               )}
             </div>
@@ -133,42 +135,61 @@ const AuthForm = (props: AuthFormProps) => {
                   className="space-y-4"
                   onSubmit={handleEmailSubmitHandler}
                 >
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
-                    >
-                      Email address
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                      />
+                  {authFormType !== "reset-password" && (
+                    <div>
+                      <label
+                        htmlFor="email"
+                        className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+                      >
+                        Email address
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          required
+                          className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                        />
+                      </div>
                     </div>
+                  )}
+                  <div className="flex flex-col space-y-2">
+                    {authFormType !== "reset" && (
+                      <div>
+                        <label
+                          htmlFor="password"
+                          className="block text-sm lg:text-md  font-medium leading-6 text-gray-900"
+                        >
+                          Password
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            autoComplete="current-password"
+                            required
+                            className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {authFormType === "signin" && (
+                      <div className="flex items-center justify-end">
+                        <div className="text-sm lg:text-md leading-6">
+                          <Link
+                            href={"/reset"}
+                            className="font-medium text-blue-500 hover:text-blue-400 focus:outline-none focus:underline transition ease-in-out duration-150"
+                          >
+                            Forgot your password?
+                          </Link>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm lg:text-md  font-medium leading-6 text-gray-900"
-                    >
-                      Password
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-                      />
-                    </div>
-                  </div>
+
                   <div className="pt-2">
                     <button
                       type="submit"
@@ -181,8 +202,12 @@ const AuthForm = (props: AuthFormProps) => {
                         </div>
                       ) : authFormType === "signin" ? (
                         "Sign in with email"
-                      ) : (
+                      ) : authFormType === "signup" ? (
                         "Sign up with email"
+                      ) : authFormType === "reset" ? (
+                        "Reset password"
+                      ) : (
+                        "Update password"
                       )}
                     </button>
                   </div>
