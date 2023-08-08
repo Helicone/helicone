@@ -20,3 +20,14 @@ CREATE TABLE public.feedback (
 );
 
 CREATE INDEX idx_feedback_response ON public.feedback(response_id);
+
+ALTER TABLE
+    public.feedback ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL PRIVILEGES ON TABLE public.feedback
+FROM
+    anon;
+
+REVOKE ALL PRIVILEGES ON TABLE public.feedback
+FROM
+    authenticated;
