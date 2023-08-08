@@ -232,6 +232,7 @@ export class RequestWrapper {
       .from("helicone_proxy_keys")
       .select("*")
       .eq("id", proxyKeyId)
+      .eq("soft_delete", "false")
       .single();
 
     if (storedProxyKey.error || !storedProxyKey.data) {
@@ -259,6 +260,7 @@ export class RequestWrapper {
       .from("provider_keys")
       .select("*")
       .eq("id", storedProxyKey.data.provider_key_id)
+      .eq("soft_delete", "false")
       .single();
 
     if (providerKey.error || !providerKey.data) {
