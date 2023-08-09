@@ -41,6 +41,7 @@ import {
 import CodeSnippet from "./codeSnippet";
 import Footer from "../../shared/layout/footer";
 import NavBarV2 from "../../shared/layout/navBarV2";
+import ManageHostedButton from "./manageHostedButton";
 
 const testimonials = [
   {
@@ -292,6 +293,71 @@ export default function HomePage() {
                   className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
                 />
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-gray-50">
+        <div className="px-8 grid grid-cols-4 gap-16 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
+            <p className="text-5xl text-sky-500 tracking-wide font-semibold">
+              Open Source
+            </p>
+            <p className="text-xl text-gray-700 font-medium leading-8">
+              Open-Source is more than a choice—it&apos;s a commitment to
+              user-centric development, community collaboration, and absolute
+              transparency.
+            </p>
+            <div className="flex flex-row gap-8 items-center">
+              <Link
+                href="https://github.com/Helicone/helicone"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
+              >
+                Star us on GitHub
+              </Link>
+              <Link
+                href="/roadmap"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
+                View Roadmap
+              </Link>
+            </div>
+          </div>
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
+            <div className="flex flex-col space-y-2">
+              <CloudIcon className="h-8 w-8 inline text-sky-500" />
+              <p className="text-gray-900 font-semibold text-xl">
+                Cloud Solution
+              </p>
+            </div>
+            <p className="text-gray-500">
+              We offer a hosted cloud solution for users that want to get up and
+              running quickly.
+            </p>
+            <div>
+              <Link
+                href="/pricing"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
+                View Pricing
+              </Link>
+            </div>
+          </div>
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
+            <div className="flex flex-col space-y-2">
+              <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
+              <p className="text-gray-900 font-semibold text-xl">
+                Manage Hosted
+              </p>
+            </div>
+            <p className="text-gray-500">
+              Deploy Helicone on your own infrastructure to maintain full
+              control over your data.
+            </p>
+            <div>
+              <ManageHostedButton />
             </div>
           </div>
         </div>
@@ -691,77 +757,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      <div className="bg-gray-50">
-        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
-          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
-            <p className="text-5xl text-sky-500 tracking-wide font-semibold">
-              Open Source
-            </p>
-            <p className="text-xl text-gray-700 font-medium leading-8">
-              Open-Source is more than a choice—it&apos;s a commitment to
-              user-centric development, community collaboration, and absolute
-              transparency.
-            </p>
-            <div className="flex flex-row gap-8 items-center">
-              <Link
-                href="https://github.com/Helicone/helicone"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
-              >
-                Star us on GitHub
-              </Link>
-              <Link
-                href="/roadmap"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Roadmap
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
-            <div className="flex flex-col space-y-2">
-              <CloudIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-xl">
-                Cloud Solution
-              </p>
-            </div>
-            <p className="text-gray-500">
-              We offer a fully-managed cloud solution, allowing you to focus on
-              what matters most.
-            </p>
-            <div>
-              <Link
-                href="/pricing"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Pricing
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
-            <div className="flex flex-col space-y-2">
-              <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-xl">AWS Deploy</p>
-            </div>
-            <p className="text-gray-500">
-              Deploy your own instance of Helicone on AWS, with just a few
-              clicks.
-            </p>
-            <div>
-              <Link
-                href="https://docs.helicone.ai/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Docs
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="bg-violet-100">
+      <div className="bg-violet-50">
         <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-gray-300 w-full justify-center">
           <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
             <p className="text-5xl text-violet-500 tracking-wide font-semibold">
