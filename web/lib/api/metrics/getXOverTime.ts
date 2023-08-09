@@ -61,7 +61,8 @@ export async function getXOverTime<T>(
     dbIncrement,
     timeZoneDifference,
   }: DataOverTimeRequest,
-  countColumn: string
+  countColumn: string,
+  printQuery = false
 ): Promise<
   Result<
     (T & {
@@ -132,6 +133,10 @@ WHERE (
 GROUP BY ${dateTrunc}
 ORDER BY ${dateTrunc} ASC ${fill}
 `;
+
+  if (printQuery) {
+    printRunnableQuery(query, argsAcc);
+  }
 
   type ResultType = T & {
     created_at_trunc: Date;
