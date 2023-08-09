@@ -15,7 +15,7 @@ import {
   printRunnableQuery,
 } from "../db/dbExecute";
 export type Provider = "OPENAI" | "ANTHROPIC";
-const maxBodySize = 1500000;
+const MAX_TOTAL_BODY_SIZE = 3900000;
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
@@ -95,8 +95,7 @@ export async function getRequestsCached(
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})
-    AND LENGTH(response.body::text) <= ${maxBodySize}
-    AND LENGTH(request.body::text) <= ${maxBodySize}
+    AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
@@ -193,8 +192,7 @@ export async function getRequests(
     left join prompt on request.formatted_prompt_id = prompt.id
   WHERE (
     (${builtFilter.filter})
-    AND LENGTH(response.body::text) <= ${maxBodySize}
-    AND LENGTH(request.body::text) <= ${maxBodySize}
+    AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
