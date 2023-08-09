@@ -1,59 +1,22 @@
-import { createClient } from "@supabase/supabase-js";
+import { request } from "https";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
+import { Database } from "../supabase/database.types";
+import { Result } from "./results";
 
-export function isFeedbackEndpoint(request: Request): boolean {
-  const url = new URL(request.url);
-  const method = request.method;
-  const endpoint = url.pathname;
-  return method === "POST" && endpoint === "/v1/feedback";
-}
-
-type DataType = "boolean" | "numerical" | "string" | "categorical";
-
-interface FeedbackRequestBody {
+interface FeedbackRequestBodyV2 {
   "helicone-id": string;
-  "data-type": DataType;
-  name: string;
-  value: boolean | number | string;
+  is_thumbs_up: boolean;
 }
 
-function isBoolean(value: any): value is boolean {
-  return typeof value === "boolean";
-}
-
-function isString(value: any): value is string {
-  return typeof value === "string";
-}
-
-function isNumber(value: any): value is number {
-  return typeof value === "number";
-}
-
-export async function handleFeedbackEndpoint(
+export async function handleFeedback(
   request: RequestWrapper,
   env: Env
 ): Promise<Response> {
-  const body = await request.getJson<FeedbackRequestBody>();
+  const body = await request.getJson<FeedbackRequestBodyV2>();
   const heliconeId = body["helicone-id"];
-  const value = body["value"];
-  const name = body["name"];
-  let dataType: DataType;
-  // if `data-type` is in the body, use that
-  if (body["data-type"]) {
-    dataType = body["data-type"];
-  } else {
-    // otherwise, infer the data type from the value
-    if (isBoolean(value)) {
-      dataType = "boolean";
-    } else if (isString(value)) {
-      dataType = "string";
-    } else if (isNumber(value)) {
-      dataType = "numerical";
-    } else {
-      throw new Error("Invalid data type.");
-    }
-  }
+  const isThumbsUp = body["is_thumbs_up"];
 
   const heliconeAuth = request.heliconeHeaders.heliconeAuth;
   if (!heliconeAuth) {
@@ -63,7 +26,7 @@ export async function handleFeedbackEndpoint(
   let responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
 
   // If response not logged, retry up to two more times
-  if (responseId === undefined) {
+  if (responseId === null || responseId.error) {
     console.log("Response not logged, retrying up to two more times.");
     for (let i = 0; i < 2; i++) {
       console.log(`Retry ${i + 1}...`);
@@ -72,67 +35,89 @@ export async function handleFeedbackEndpoint(
 
       responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
 
-      if (responseId !== undefined) {
+      if (responseId !== undefined || responseId !== null) {
         break;
       }
     }
   }
 
-  if (responseId !== undefined) {
-    try {
-      await addFeedback(
-        heliconeId,
-        responseId,
-        name,
-        dataType,
-        value,
-        env,
-        heliconeAuth
-      ); // TODO: return the feedback id as a uuid and return it in the response
-      return new Response(
-        JSON.stringify({
-          message: "Feedback added successfully.",
-          helicone_id: heliconeId,
-        }),
-        { status: 200 }
-      );
-    } catch (error) {
-      console.error("Error adding feedback:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      return new Response(`Error adding feedback: ${errorMessage}`, {
-        status: 500,
-      });
-    }
-  } else {
+  if (responseId.error || responseId.data === null) {
     return new Response(
       `Error: Response not found for heliconeId "${heliconeId}".`,
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
+
+  const insertResponse = await insertFeedback(
+    responseId.data,
+    isThumbsUp,
+    env,
+    heliconeAuth
+  );
+
+  if (insertResponse.error || insertResponse.data === null) {
+    return new Response(`Error adding feedback: ${insertResponse.error}`, {
+      status: 500,
+    });
+  }
+
+  return new Response(
+    JSON.stringify({
+      message: "Feedback added successfully.",
+      helicone_id: heliconeId,
+    }),
+    { status: 200 }
+  );
 }
 
-interface ResponseData {
-  id: number;
-  request: {
-    api_key_hash: string;
-  };
+export async function insertFeedback(
+  responseId: string,
+  isThumbsUp: boolean,
+  env: Env,
+  heliconeAuth?: string
+): Promise<Result<number, string>> {
+  const dbClient: SupabaseClient<Database> = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  if (!heliconeAuth) {
+    return { error: "Authentication required.", data: null };
+  }
+
+  const feedback = await dbClient
+    .from("feedback")
+    .upsert({
+      response_id: responseId,
+      is_thumbs_up: isThumbsUp,
+    })
+    .select("*")
+    .single();
+
+  if (feedback.error !== null) {
+    console.error("Error inserting feedback:", feedback.error);
+    return { error: feedback.error.message, data: null };
+  }
+
+  if (feedback.data === null) {
+    return { error: "Unknown error", data: null };
+  }
+
+  return { error: null, data: feedback.data.id };
 }
 
 async function isResponseLogged(
   heliconeId: string,
   env: Env,
   heliconeAuth?: string
-): Promise<string | undefined> {
+): Promise<Result<string, string>> {
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
   if (!heliconeAuth) {
-    throw new Error("Authentication required.");
+    return { error: "Authentication required.", data: null };
   }
 
   // Fetch the response with the matching heliconeId
@@ -144,165 +129,9 @@ async function isResponseLogged(
 
   if (responseError) {
     console.error("Error fetching response:", responseError.message);
-    return undefined;
+    return { error: responseError.message, data: null };
   }
 
   // Return the response.id if the response exists, otherwise return undefined
-  return response ? response.id : undefined;
-}
-
-// Assumes that the request and response for the heliconeId exists!
-export async function addFeedback(
-  heliconeId: string,
-  responseId: string,
-  name: string,
-  dataType: DataType,
-  value: any,
-  env: Env,
-  heliconeAuth?: string
-): Promise<string> {
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  if (!heliconeAuth) {
-    throw new Error("Authentication required.");
-  }
-
-  const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-  const apiKeyHash = await hash(`Bearer ${apiKey}`);
-
-  // Fetch the request with the corresponding response.request value
-  const { data: requestData, error: requestError } = await dbClient
-    .from("request")
-    .select("id, helicone_api_keys (id, api_key_hash)")
-    .eq("id", heliconeId)
-    .single();
-
-  if (requestError) {
-    console.error("Error fetching request:", requestError.message);
-    throw requestError;
-  }
-
-  let matchingApiKeyHash;
-  let matchingApiKeyId;
-  if (requestData.helicone_api_keys instanceof Array) {
-    throw new Error("Internal error.");
-  } else if (requestData.helicone_api_keys instanceof Object) {
-    matchingApiKeyHash = requestData.helicone_api_keys.api_key_hash;
-    matchingApiKeyId = requestData.helicone_api_keys.id;
-  } else {
-    throw new Error(
-      "Internal error. Make sure you're providing a valid helicone API key to authenticate your requests."
-    );
-  }
-
-  // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
-  if (!requestData || matchingApiKeyHash !== apiKeyHash) {
-    throw new Error("Not authorized to add feedback.");
-  }
-
-  // Check if the feedback_metric exists for the given name and api_key_id
-  const { data: metricData, error: metricError } = await dbClient
-    .from("feedback_metrics")
-    .select("id, data_type")
-    .eq("name", name)
-    .eq("helicone_api_key_id", matchingApiKeyId)
-    .single();
-
-  let metricId;
-  if (metricError || !metricData) {
-    // Create a new feedback_metric if it doesn't exist
-    const { data, error: newMetricError } = await dbClient
-      .from("feedback_metrics")
-      .insert({
-        helicone_api_key_id: matchingApiKeyId,
-        name,
-        data_type: dataType,
-      })
-      .select("id")
-      .single();
-
-    if (newMetricError) {
-      console.error("Error creating feedback metric:", newMetricError.message);
-      throw newMetricError;
-    }
-
-    metricId = data.id;
-  } else {
-    // Validate the data type before inserting the feedback
-    if (
-      !(metricData.data_type == "categorical" && dataType == "string") &&
-      metricData.data_type !== dataType
-    ) {
-      throw new Error(
-        `Data type of this feedback request "${dataType}" does not match the data type of the created feedback metric "${metricData.data_type}".}`
-      );
-    }
-
-    metricId = metricData.id;
-  }
-
-  // Prepare feedback data
-  const feedbackData: {
-    response_id: any;
-    feedback_metric_id: any;
-    created_by: string;
-    [key: string]: boolean | number | string;
-  } = {
-    response_id: responseId,
-    feedback_metric_id: metricId,
-    created_by: "API",
-  };
-
-  switch (dataType) {
-    case "boolean":
-      if (typeof value !== "boolean") {
-        throw new Error("Invalid value type for boolean data type.");
-      }
-      feedbackData.boolean_value = value;
-      break;
-    case "numerical":
-      if (typeof value !== "number") {
-        throw new Error("Invalid value type for numerical data type.");
-      }
-      feedbackData.float_value = value;
-      break;
-    case "string":
-      if (typeof value !== "string") {
-        throw new Error("Invalid value type for string data type.");
-      }
-      feedbackData.string_value = value;
-      break;
-    case "categorical":
-      if (typeof value !== "string") {
-        throw new Error("Invalid value type for categorical data type.");
-      }
-      feedbackData.categorical_value = value;
-      break;
-  }
-
-  // Execute the transaction
-  const { data, error: insertError } = await dbClient.rpc(
-    "insert_feedback_and_update_response",
-    {
-      response_id: feedbackData.response_id,
-      feedback_metric_id: feedbackData.feedback_metric_id,
-      boolean_value: feedbackData.boolean_value || null,
-      numerical_value: feedbackData.float_value || null,
-      categorical_value: feedbackData.categorical_value || null,
-      string_value: feedbackData.string_value || null,
-      created_by: feedbackData.created_by,
-      name: name,
-    }
-  );
-
-  // Handle error
-  if (insertError) {
-    console.error("Error inserting feedback:", insertError.message);
-    throw insertError;
-  } else {
-    return data.id;
-  }
+  return { error: null, data: response?.id };
 }

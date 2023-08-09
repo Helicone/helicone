@@ -1,11 +1,11 @@
 import { Route, RouterType } from "itty-router";
 import { Env } from "..";
-import { handleFeedbackEndpoint } from "../feedback";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { handleLoggingEndpoint } from "../properties";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
+import { handleFeedback } from "../feedback";
 
 type BaseRouter = RouterType<
   Route,
@@ -23,7 +23,6 @@ const WORKER_MAP: {
 export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
   const router = WORKER_MAP[provider]();
   console.log("provider", provider);
-  // console.log("router", router);
 
   //TODO remove this
   router.post(
@@ -47,7 +46,7 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      return await handleFeedbackEndpoint(requestWrapper, env);
+      return await handleFeedback(requestWrapper, env);
     }
   );
 

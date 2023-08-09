@@ -67,45 +67,24 @@ export interface Database {
       }
       feedback: {
         Row: {
-          boolean_value: boolean | null
-          categorical_value: string | null
           created_at: string | null
-          created_by: string
-          feedback_metric_id: number
-          float_value: number | null
           id: number
+          is_thumbs_up: boolean
           response_id: string
-          string_value: string | null
         }
         Insert: {
-          boolean_value?: boolean | null
-          categorical_value?: string | null
           created_at?: string | null
-          created_by: string
-          feedback_metric_id: number
-          float_value?: number | null
           id?: number
+          is_thumbs_up: boolean
           response_id: string
-          string_value?: string | null
         }
         Update: {
-          boolean_value?: boolean | null
-          categorical_value?: string | null
           created_at?: string | null
-          created_by?: string
-          feedback_metric_id?: number
-          float_value?: number | null
           id?: number
+          is_thumbs_up?: boolean
           response_id?: string
-          string_value?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "feedback_feedback_metric_id_fkey"
-            columns: ["feedback_metric_id"]
-            referencedRelation: "feedback_metrics"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "feedback_response_id_fkey"
             columns: ["response_id"]
@@ -128,37 +107,6 @@ export interface Database {
             foreignKeyName: "feedback_response_id_fkey"
             columns: ["response_id"]
             referencedRelation: "response_rbac"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      feedback_metrics: {
-        Row: {
-          created_at: string
-          data_type: string
-          helicone_api_key_id: number
-          id: number
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          data_type: string
-          helicone_api_key_id: number
-          id?: number
-          name: string
-        }
-        Update: {
-          created_at?: string
-          data_type?: string
-          helicone_api_key_id?: number
-          id?: number
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "feedback_metrics_helicone_api_key_id_fkey"
-            columns: ["helicone_api_key_id"]
-            referencedRelation: "helicone_api_keys"
             referencedColumns: ["id"]
           }
         ]
@@ -208,6 +156,7 @@ export interface Database {
       }
       helicone_proxy_keys: {
         Row: {
+          created_at: string | null
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id: string
@@ -216,6 +165,7 @@ export interface Database {
           soft_delete: boolean
         }
         Insert: {
+          created_at?: string | null
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id?: string
@@ -224,6 +174,7 @@ export interface Database {
           soft_delete?: boolean
         }
         Update: {
+          created_at?: string | null
           helicone_proxy_key?: string
           helicone_proxy_key_name?: string
           id?: string
@@ -432,6 +383,7 @@ export interface Database {
       }
       provider_keys: {
         Row: {
+          created_at: string | null
           id: string
           org_id: string
           provider_key_name: string
@@ -440,6 +392,7 @@ export interface Database {
           vault_key_id: string
         }
         Insert: {
+          created_at?: string | null
           id?: string
           org_id: string
           provider_key_name: string
@@ -448,6 +401,7 @@ export interface Database {
           vault_key_id: string
         }
         Update: {
+          created_at?: string | null
           id?: string
           org_id?: string
           provider_key_name?: string
