@@ -293,14 +293,22 @@ const DashboardPage = (props: DashboardPageProps) => {
                   value={
                     metrics.totalCost.data?.data
                       ? `$${formatNumberString(
-                          metrics.totalCost.data?.data.toFixed(2),
+                          metrics.totalCost.data?.data < 0.02
+                            ? metrics.totalCost.data?.data.toFixed(7)
+                            : metrics.totalCost.data?.data.toFixed(2),
                           true
                         )}`
                       : "$0.00"
                   }
                   valueLabel={"cost"}
                   type="bar"
-                  labelFormatter={(value) => `$${Number(value).toFixed(2)}`}
+                  labelFormatter={(value) =>
+                    `$${
+                      Number(value) < 0.02
+                        ? Number(value).toFixed(7)
+                        : Number(value).toFixed(2)
+                    }`
+                  }
                 />
               </div>
               <div className="col-span-2 lg:col-span-4 h-full">
