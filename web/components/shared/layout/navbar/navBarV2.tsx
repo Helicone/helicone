@@ -14,11 +14,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Fragment, useState } from "react";
-import OnboardingButton from "../auth/onboardingButton";
-import { SocialMeta } from "./basePageV2";
+import OnboardingButton from "../../auth/onboardingButton";
+import { SocialMeta } from "../basePageV2";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import LoginButton from "../auth/loginButton";
-import { clsx } from "../clsx";
+import LoginButton from "../../auth/loginButton";
+import { clsx } from "../../clsx";
+import SolutionsButton from "./solutionsButton";
+import DeveloperButton from "./developerButton";
 
 interface NavBarV2Props {}
 
@@ -32,7 +34,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
   const supabaseClient = useSupabaseClient();
 
   return (
-    <header className="bg-gray-50 top-0 sticky z-50">
+    <header className="bg-gray-50 top-0 sticky z-30">
       {!mobileMenuOpen && (
         <nav
           className="mx-auto flex max-w-7xl items-center md:gap-x-8 gap-x-16 p-4 md:px-8"
@@ -51,29 +53,14 @@ const NavBarV2 = (props: NavBarV2Props) => {
               />
             </Link>
           </div>
-          <div className="hidden md:flex md:gap-x-8 lg:gap-x-16 items-center pl-4">
+          <div className="hidden md:flex md:gap-x-2 items-center">
+            <SolutionsButton />
+            <DeveloperButton />
             <Link
               href="/pricing"
-              className="text-md font-semibold text-gray-900"
+              className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
             >
               Pricing
-            </Link>
-            <Link
-              href="https://docs.helicone.ai/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-md font-semibold text-gray-900"
-            >
-              Docs
-            </Link>
-            <Link
-              href="/roadmap"
-              className="text-md font-semibold text-gray-900"
-            >
-              Roadmap
-            </Link>
-            <Link href="/blog" className="text-md font-semibold text-gray-900">
-              Blog
             </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">
@@ -132,6 +119,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
           </div>
         </nav>
       )}
+      {/* MOBILE */}
       <Dialog
         as="div"
         className="md:hidden"

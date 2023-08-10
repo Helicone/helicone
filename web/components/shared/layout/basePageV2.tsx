@@ -3,7 +3,7 @@ import { SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
 import NavBar from "./navbar";
 import Footer from "./footer";
-import NavBarV2 from "./navBarV2";
+import NavBarV2 from "./navbar/navBarV2";
 
 const meta = {
   social: [
