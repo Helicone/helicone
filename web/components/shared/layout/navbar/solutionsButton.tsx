@@ -8,6 +8,7 @@ import {
 import { ChartPieIcon, CircleStackIcon } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
 import { clsx } from "../../clsx";
+import Link from "next/link";
 
 const solutions = [
   {
@@ -106,7 +107,7 @@ export default function SolutionsButton() {
                     ))}
                   </div>
                   <div className="bg-gray-100 p-4">
-                    <a
+                    <Link
                       href="/blog"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
@@ -118,7 +119,7 @@ export default function SolutionsButton() {
                       <span className="block text-sm text-gray-500 mt-1">
                         Learn more about what is possible with our technology
                       </span>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </Popover.Panel>
