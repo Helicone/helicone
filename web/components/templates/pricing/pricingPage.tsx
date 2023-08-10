@@ -1,7 +1,7 @@
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import Footer from "../../shared/layout/footer";
-import NavBarV2 from "../../shared/layout/navBarV2";
+import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 
 const tiers = [
   {
@@ -73,7 +73,7 @@ const tiers = [
       </p>
     ),
     description:
-      "Everything in Essential, plus features needed for larger enterprises.",
+      "Everything in Pro, plus features needed for larger enterprises.",
     features: [
       "SOC-2 Compliance",
       "Self-Deployment Management",

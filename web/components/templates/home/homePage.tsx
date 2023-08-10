@@ -40,7 +40,7 @@ import {
 } from "@heroicons/react/24/solid";
 import CodeSnippet from "./codeSnippet";
 import Footer from "../../shared/layout/footer";
-import NavBarV2 from "../../shared/layout/navBarV2";
+import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 import ManageHostedButton from "./manageHostedButton";
 
 const testimonials = [
