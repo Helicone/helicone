@@ -64,7 +64,8 @@ const tiers = [
   {
     name: "Enterprise",
     id: "tier-enterprise",
-    href: "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call",
+    href: "/sales",
+    // href: "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call",
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">

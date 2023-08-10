@@ -1,8 +1,64 @@
+import { useState } from "react";
 import Footer from "../components/shared/layout/footer";
 import NavBarV2 from "../components/shared/layout/navbar/navBarV2";
 import MetaData from "../components/shared/metaData";
+import useNotification from "../components/shared/notification/useNotification";
 
 const Sales = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { setNotification } = useNotification();
+
+  const formSubmitHandler = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoading(true);
+
+    const firstName = event.currentTarget.elements.namedItem(
+      "first-name"
+    ) as HTMLInputElement;
+    const lastName = event.currentTarget.elements.namedItem(
+      "last-name"
+    ) as HTMLInputElement;
+    const email = event.currentTarget.elements.namedItem(
+      "email"
+    ) as HTMLInputElement;
+    const companyName = event.currentTarget.elements.namedItem(
+      "company-name"
+    ) as HTMLInputElement;
+    const companyDescription = event.currentTarget.elements.namedItem(
+      "company-description"
+    ) as HTMLInputElement;
+
+    fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: email.value,
+        companyName: companyName.value,
+        companyDescription: companyDescription.value,
+        tag: "contact-us",
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          setNotification(
+            "Error submitting form. Please try again later.",
+            "error"
+          );
+        } else {
+          setNotification("Form submitted successfully!", "success");
+          const formElement = event.target as HTMLFormElement;
+          formElement.reset();
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
   return (
     <MetaData title={"Contact Us"}>
       <NavBarV2 />
@@ -17,7 +73,12 @@ const Sales = () => {
             We would love to hear about your use case and how we can help you.
           </p>
           <div className="mt-16 flex w-full justify-center items-center">
-            <form className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4 w-[600px]">
+            <form
+              action="#"
+              method="POST"
+              onSubmit={formSubmitHandler}
+              className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4 w-[600px]"
+            >
               <div>
                 <label
                   htmlFor="first-name"
