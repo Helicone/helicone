@@ -1,10 +1,12 @@
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import Footer from "../components/shared/layout/footer";
-import NavBarV2 from "../components/shared/layout/navBarV2";
+import NavBarV2 from "../components/shared/layout/navbar/navBarV2";
 import MetaData from "../components/shared/metaData";
 import { clsx } from "../components/shared/clsx";
 import Image from "next/image";
 import { useState } from "react";
+import useNotification from "../components/shared/notification/useNotification";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 const featureMap = [
   {
@@ -45,6 +47,7 @@ const featureMap = [
 
 const MicrosoftForStartups = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { setNotification } = useNotification();
 
   const formSubmitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -66,10 +69,36 @@ const MicrosoftForStartups = () => {
       "company-description"
     ) as HTMLInputElement;
 
-    console.log("called");
-    // TODO: create a new supabase table for this
-
-    setIsLoading(false);
+    fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: email.value,
+        companyName: companyName.value,
+        companyDescription: companyDescription.value,
+        tag: "mfs",
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          setNotification(
+            "Error submitting form. Please try again later.",
+            "error"
+          );
+        } else {
+          setNotification("Form submitted successfully!", "success");
+          const formElement = event.target as HTMLFormElement;
+          formElement.reset();
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -137,7 +166,12 @@ const MicrosoftForStartups = () => {
                 </ul>
               </div>
               <div className="pt-16 lg:px-8 lg:pt-0 xl:px-14">
-                <form className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4">
+                <form
+                  action="#"
+                  method="POST"
+                  onSubmit={formSubmitHandler}
+                  className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4"
+                >
                   <div>
                     <label
                       htmlFor="first-name"
@@ -230,6 +264,9 @@ const MicrosoftForStartups = () => {
                     </div>
                   </div>
                   <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
+                    {isLoading && (
+                      <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                    )}
                     <button
                       type="submit"
                       className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
