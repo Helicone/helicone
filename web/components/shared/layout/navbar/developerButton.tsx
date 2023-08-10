@@ -1,4 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
+import Image from "next/image";
 import {
   ArrowPathIcon,
   BookOpenIcon,
@@ -17,6 +18,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
 import { clsx } from "../../clsx";
+import Link from "next/link";
 
 const solutions = [
   {
@@ -91,7 +93,7 @@ export default function DeveloperButton() {
               <Popover.Panel className="absolute z-10 mt-3 w-[400px] transform px-4 sm:px-0">
                 <div className="overflow-hidden rounded-lg shadow-2xl ring-1 ring-black ring-opacity-10">
                   <div className="bg-gray-50 p-4">
-                    <a
+                    <Link
                       href="https://docs.helicone.ai/introduction"
                       target="_blank"
                       rel="noreferrer noopener"
@@ -106,11 +108,11 @@ export default function DeveloperButton() {
                       <span className="block text-sm text-gray-500 mt-1">
                         Start integrating products and tools to your application
                       </span>
-                    </a>
+                    </Link>
                   </div>
                   <div className="relative grid gap-8 bg-white p-7 lg:grid-cols-2">
                     {solutions.map((item) => (
-                      <a
+                      <Link
                         key={item.name}
                         href={item.href}
                         target="_blank"
@@ -128,27 +130,30 @@ export default function DeveloperButton() {
                             {item.name}
                           </p>
                         </div>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                   <div className="bg-gray-50 p-4 flex flex-row items-center">
-                    <a
+                    <Link
                       href="https://github.com/Helicone/helicone"
                       target="_blank"
                       rel="noreferrer noopener"
                       className="flow-root w-full rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
                       <span className="flex items-center">
-                        <img
+                        <Image
                           src="/assets/landing/github-mark.png"
-                          className="h-4 w-4 text-gray-900"
+                          className="text-gray-900"
+                          width={16}
+                          height={16}
+                          alt="Github"
                         />
                         <span className="text-sm font-semibold text-gray-900 ml-1.5">
                           View Github
                         </span>
                       </span>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/roadmap"
                       className="flow-root w-full rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
@@ -158,7 +163,7 @@ export default function DeveloperButton() {
                           View Roadmap
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </Popover.Panel>

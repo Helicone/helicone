@@ -82,7 +82,7 @@ export default function SolutionsButton() {
                       Use Cases
                     </p>
                     {solutions.map((item) => (
-                      <a
+                      <Link
                         key={item.name}
                         href={item.href}
                         target="_blank"
@@ -103,7 +103,7 @@ export default function SolutionsButton() {
                             {item.description}
                           </p>
                         </div>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                   <div className="bg-gray-100 p-4">
