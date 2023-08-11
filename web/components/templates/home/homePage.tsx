@@ -754,6 +754,9 @@ export default function HomePage() {
           </div>
           <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-32 space-y-4">
             <CodeSnippet variant={"themed"} />
+            <p className="text-center italic text-gray-500">
+              Example Integration with OpenAI
+            </p>
           </div>
         </div>
       </div>
