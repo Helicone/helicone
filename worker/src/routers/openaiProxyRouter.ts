@@ -1,15 +1,10 @@
-import { IRequest, Router } from "itty-router";
 import { Env } from "..";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
+import { BaseRouter } from "./routerFactory";
 
-export const getOpenAIProxyRouter = () => {
-  const oaiRouter = Router<
-    IRequest,
-    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
-  >();
-  // Proxy only + proxy forwarder
-  oaiRouter.get(
+export const getOpenAIProxyRouter = (router: BaseRouter) => {
+  router.get(
     "/helicone/test",
     async (
       _,
@@ -34,7 +29,7 @@ export const getOpenAIProxyRouter = () => {
     }
   );
 
-  oaiRouter.all(
+  router.all(
     "*",
     async (
       _,
@@ -58,5 +53,5 @@ export const getOpenAIProxyRouter = () => {
     }
   );
 
-  return oaiRouter;
+  return router;
 };

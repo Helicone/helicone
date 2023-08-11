@@ -1,19 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
-import { IRequest, Router } from "itty-router";
 import { Env } from "..";
 import { HeliconeHeaders } from "../lib/HeliconeHeaders";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
+import { BaseRouter } from "./routerFactory";
 
-export const getAPIRouter = () => {
-  const apiRouter = Router<
-    IRequest,
-    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
-  >();
-
-  apiRouter.post(
+export const getAPIRouter = (router: BaseRouter) => {
+  router.post(
     "/oai/v1/log",
     async (
       _,
@@ -62,7 +57,7 @@ export const getAPIRouter = () => {
     }
   );
 
-  apiRouter.post(
+  router.post(
     "/anthropic/v1/log",
     async (
       _,
@@ -103,7 +98,7 @@ export const getAPIRouter = () => {
   );
 
   // Proxy only + proxy forwarder
-  apiRouter.all(
+  router.all(
     "*",
     async (
       _,
@@ -115,5 +110,5 @@ export const getAPIRouter = () => {
     }
   );
 
-  return apiRouter;
+  return router;
 };
