@@ -45,7 +45,8 @@ def normalize_data_type(data_type):
 
 def prepare_api_base(**kwargs):
     original_api_base = openai.api_base
-    kwargs["headers"].update({"Helicone-OpenAI-Api-Base": original_api_base})
+    if original_api_base != helicone_global.proxy_url:
+        kwargs["headers"].update({"Helicone-OpenAI-Api-Base": original_api_base})
 
     openai.api_base = helicone_global.proxy_url
 
