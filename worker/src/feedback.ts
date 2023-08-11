@@ -121,10 +121,13 @@ export async function insertFeedback(
 
   const feedback = await dbClient
     .from("feedback")
-    .upsert({
-      response_id: responseId,
-      is_thumbs_up: isThumbsUp,
-    })
+    .upsert(
+      {
+        response_id: responseId,
+        is_thumbs_up: isThumbsUp,
+      },
+      { onConflict: "response_id" }
+    )
     .select("*")
     .single();
 
@@ -154,7 +157,6 @@ async function isResponseLogged(
     return { error: "Authentication required.", data: null };
   }
 
-  // Fetch the response with the matching heliconeId
   const { data: response, error: responseError } = await dbClient
     .from("response")
     .select("id, request")
@@ -166,6 +168,5 @@ async function isResponseLogged(
     return { error: responseError.message, data: null };
   }
 
-  // Return the response.id if the response exists, otherwise return undefined
   return { error: null, data: response?.id };
 }
