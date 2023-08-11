@@ -14,9 +14,15 @@ import {
   CreateModerationRequest,
   CreateModerationResponse,
 } from "openai";
-import { HeliconeAsyncLogger, HeliconeAyncLogRequest, Provider, ProviderRequest } from "./HeliconeAsyncLogger";
+import {
+  HeliconeAsyncLogger,
+  HeliconeAyncLogRequest,
+  Provider,
+  ProviderRequest,
+} from "./HeliconeAsyncLogger";
 import { IHeliconeConfiguration } from "../core/IHeliconeConfiguration";
 import { PassThrough, Readable } from "stream";
+import { HeliconeFeedback } from "../core/HeliconeFeedback";
 
 export class HeliconeAsyncOpenAIApi extends OpenAIApi {
   private logger: HeliconeAsyncLogger;
@@ -28,62 +34,76 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
     this.logger = new HeliconeAsyncLogger(heliconeConfiguration);
   }
 
+  public async logFeedback(openAIResponse: AxiosResponse, isThumbsUp: boolean) {
+    HeliconeFeedback.logFeedback(
+      this.heliconeConfiguration,
+      openAIResponse,
+      isThumbsUp
+    );
+  }
+
   async createChatCompletion(
     createChatCompletionRequest: CreateChatCompletionRequest,
     options?: AxiosRequestConfig
   ): Promise<AxiosResponse<CreateChatCompletionResponse>> {
-    return this.wrapApiCall<CreateChatCompletionResponse>(super.createChatCompletion.bind(this))(
-      createChatCompletionRequest,
-      options
-    );
+    return this.wrapApiCall<CreateChatCompletionResponse>(
+      super.createChatCompletion.bind(this)
+    )(createChatCompletionRequest, options);
   }
 
   async createCompletion(
     createCompletionRequest: CreateCompletionRequest,
     options?: AxiosRequestConfig
   ): Promise<AxiosResponse<CreateCompletionResponse>> {
-    return this.wrapApiCall<CreateCompletionResponse>(super.createCompletion.bind(this))(
-      createCompletionRequest,
-      options
-    );
+    return this.wrapApiCall<CreateCompletionResponse>(
+      super.createCompletion.bind(this)
+    )(createCompletionRequest, options);
   }
 
   async createEdit(
     createEditRequest: CreateEditRequest,
     options?: AxiosRequestConfig
   ): Promise<AxiosResponse<CreateEditResponse>> {
-    return this.wrapApiCall<CreateEditResponse>(super.createEdit.bind(this))(createEditRequest, options);
+    return this.wrapApiCall<CreateEditResponse>(super.createEdit.bind(this))(
+      createEditRequest,
+      options
+    );
   }
 
   async createEmbedding(
     createEmbeddingRequest: CreateEmbeddingRequest,
     options?: AxiosRequestConfig
   ): Promise<AxiosResponse<CreateEmbeddingResponse>> {
-    return this.wrapApiCall<CreateEmbeddingResponse>(super.createEmbedding.bind(this))(createEmbeddingRequest, options);
+    return this.wrapApiCall<CreateEmbeddingResponse>(
+      super.createEmbedding.bind(this)
+    )(createEmbeddingRequest, options);
   }
 
   async createImage(
     createImageRequest: CreateImageRequest,
     options?: AxiosRequestConfig
   ): Promise<AxiosResponse<ImagesResponse>> {
-    return this.wrapApiCall<ImagesResponse>(super.createImage.bind(this))(createImageRequest, options);
+    return this.wrapApiCall<ImagesResponse>(super.createImage.bind(this))(
+      createImageRequest,
+      options
+    );
   }
 
   async createModeration(
     createModerationRequest: CreateModerationRequest,
     options?: AxiosRequestConfig
   ): Promise<AxiosResponse<CreateModerationResponse>> {
-    return this.wrapApiCall<CreateModerationResponse>(super.createModeration.bind(this))(
-      createModerationRequest,
-      options
-    );
+    return this.wrapApiCall<CreateModerationResponse>(
+      super.createModeration.bind(this)
+    )(createModerationRequest, options);
   }
 
   protected wrapApiCall<T>(
     apiCall: (...args: any[]) => Promise<AxiosResponse<T>>
   ): (...args: any[]) => Promise<AxiosResponse<T>> {
     return async (...args: any[]): Promise<AxiosResponse<T>> => {
-      if (this.heliconeConfiguration.getBaseUrl() === undefined) throw new Error("Base path is undefined");
+      if (this.heliconeConfiguration.getBaseUrl() === undefined)
+        throw new Error("Base path is undefined");
 
       const providerRequest: ProviderRequest = {
         url: this.heliconeConfiguration.getBaseUrl(),
@@ -141,7 +161,8 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
     startTime: number,
     providerRequest: ProviderRequest
   ): void {
-    if (!(result.data instanceof Readable)) throw new Error("Response data is not a readable stream");
+    if (!(result.data instanceof Readable))
+      throw new Error("Response data is not a readable stream");
 
     // Splitting stream into two
     const logStream = new PassThrough();

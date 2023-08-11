@@ -1,19 +1,35 @@
 import { Configuration } from "openai";
-import { IHeliconeConfiguration, OnHeliconeLog } from "./IHeliconeConfiguration";
+import {
+  IHeliconeConfiguration,
+  OnHeliconeFeedback,
+  OnHeliconeLog,
+} from "./IHeliconeConfiguration";
 import { IHeliconeProxyConfigurationParameters } from "./IHeliconeConfigurationParameters";
 import { HeliconeHeaderBuilder } from "./HeliconeHeaderBuilder";
 
-export class HeliconeProxyConfiguration extends Configuration implements IHeliconeConfiguration {
+export class HeliconeProxyConfiguration
+  extends Configuration
+  implements IHeliconeConfiguration
+{
   private heliconeConfigurationParameters: IHeliconeProxyConfigurationParameters;
   private heliconeHeaders: { [key: string]: string };
   private baseUrl: string;
+  private onHeliconeFeedback: OnHeliconeFeedback | undefined;
 
-  constructor(heliconeConfigParameters: IHeliconeProxyConfigurationParameters) {
+  constructor(
+    heliconeConfigParameters: IHeliconeProxyConfigurationParameters,
+    onHeliconeFeedback?: OnHeliconeFeedback
+  ) {
     super(heliconeConfigParameters);
     this.heliconeConfigurationParameters = heliconeConfigParameters;
-    this.baseUrl = heliconeConfigParameters.heliconeMeta?.baseUrl ?? "https://oai.hconeai.com/v1";
+    this.baseUrl =
+      heliconeConfigParameters.heliconeMeta?.baseUrl ??
+      "https://oai.hconeai.com/v1";
+    this.onHeliconeFeedback = onHeliconeFeedback;
 
-    this.heliconeHeaders = new HeliconeHeaderBuilder(this.heliconeConfigurationParameters.heliconeMeta)
+    this.heliconeHeaders = new HeliconeHeaderBuilder(
+      this.heliconeConfigurationParameters.heliconeMeta
+    )
       .withPropertiesHeader()
       .withCacheHeader()
       .withRetryHeader()
@@ -34,6 +50,10 @@ export class HeliconeProxyConfiguration extends Configuration implements IHelico
 
   getOnHeliconeLog(): OnHeliconeLog | undefined {
     return undefined;
+  }
+
+  getOnHeliconeFeedback(): OnHeliconeFeedback | undefined {
+    return this.onHeliconeFeedback;
   }
 
   getBaseUrl(): string {
