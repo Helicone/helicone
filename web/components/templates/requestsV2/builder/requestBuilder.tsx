@@ -57,11 +57,9 @@ const getModelFromPath = (path: string) => {
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
-  // /v1/engines/text-embedding-ada-002/embeddings
-
   let requestModel =
-    request.request_body?.model ||
     request.response_body?.model ||
+    request.request_body?.model ||
     request.response_body?.body?.model || // anthropic
     getModelFromPath(request.request_path) ||
     "";
