@@ -55,7 +55,6 @@ export async function callProvider(props: CallProps): Promise<Response> {
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
     response = await fetch(new_url.href, { ...init, signal });
   } else {
-    console.log(`New: ${new_url.href}`);
     response = await fetch(new_url.href, init);
   }
 
