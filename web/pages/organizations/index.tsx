@@ -9,6 +9,8 @@ import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
 import KeyPage from "../../components/templates/keys/keyPage";
 import OrgsPage from "../../components/templates/organizations/orgsPage";
+import OrgIdPage from "../../components/templates/organizationId/orgIdPage";
+import { useOrg } from "../../components/shared/layout/organizationContext";
 
 interface OrgProps {
   user: User;
@@ -17,11 +19,14 @@ interface OrgProps {
 const Org = (props: OrgProps) => {
   const { user } = props;
 
+  const org = useOrg();
+
   return (
     <MetaData title="Organizations">
       <AuthLayout user={user}>
         <AuthHeader title="Organizations" />
-        <OrgsPage />
+        <OrgIdPage org={org?.currentOrg!} />
+        {/* <OrgsPage /> */}
       </AuthLayout>
     </MetaData>
   );
