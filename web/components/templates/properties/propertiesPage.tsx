@@ -33,6 +33,7 @@ const PropertiesPage = (props: {}) => {
     isLoading: isPropertiesLoading,
     refetch,
   } = useGetProperties();
+
   const [selectedProperties, setSelectedProperties] = useLocalStorage<string[]>(
     "selectedProperties_PropertyPage",
     [],
