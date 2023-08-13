@@ -4,15 +4,9 @@ import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
 export class HeliconeFeedback {
   static async logFeedback(
     heliconeConfiguration: IHeliconeConfiguration,
-    openAIResponse: AxiosResponse,
+    heliconeId: string,
     isThumbsUp: boolean
   ) {
-    const heliconeId = openAIResponse.headers["helicone-id"];
-
-    if (!heliconeId) {
-      console.error("Helicone ID not found in response headers.");
-    }
-
     const options = {
       method: "POST",
       headers: {

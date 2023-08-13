@@ -11,10 +11,10 @@ export class HeliconeProxyOpenAIApi extends OpenAIApi {
     this.heliconeConfiguration = heliconeConfiguration;
   }
 
-  public async logFeedback(openAIResponse: AxiosResponse, isThumbsUp: boolean) {
+  public async logFeedback(heliconeId: string, isThumbsUp: boolean) {
     HeliconeFeedback.logFeedback(
       this.heliconeConfiguration,
-      openAIResponse,
+      heliconeId,
       isThumbsUp
     );
   }

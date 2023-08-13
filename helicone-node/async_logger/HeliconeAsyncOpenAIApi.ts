@@ -34,10 +34,10 @@ export class HeliconeAsyncOpenAIApi extends OpenAIApi {
     this.logger = new HeliconeAsyncLogger(heliconeConfiguration);
   }
 
-  public async logFeedback(openAIResponse: AxiosResponse, isThumbsUp: boolean) {
+  public async logFeedback(heliconeId: string, isThumbsUp: boolean) {
     HeliconeFeedback.logFeedback(
       this.heliconeConfiguration,
-      openAIResponse,
+      heliconeId,
       isThumbsUp
     );
   }
