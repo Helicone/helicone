@@ -1,4 +1,3 @@
-import { AxiosResponse } from "axios";
 import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
 
 export class HeliconeFeedback {

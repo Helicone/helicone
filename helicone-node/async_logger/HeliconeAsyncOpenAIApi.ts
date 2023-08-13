@@ -1,7 +1,6 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   CreateChatCompletionRequest,
-  OpenAIApi,
   CreateChatCompletionResponse,
   CreateCompletionRequest,
   CreateCompletionResponse,
@@ -22,24 +21,14 @@ import {
 } from "./HeliconeAsyncLogger";
 import { IHeliconeConfiguration } from "../core/IHeliconeConfiguration";
 import { PassThrough, Readable } from "stream";
-import { HeliconeFeedback } from "../core/HeliconeFeedback";
+import { HeliconeOpenAIApi } from "../core/HeliconeOpenAIApi";
 
-export class HeliconeAsyncOpenAIApi extends OpenAIApi {
+export class HeliconeAsyncOpenAIApi extends HeliconeOpenAIApi {
   private logger: HeliconeAsyncLogger;
-  private heliconeConfiguration: IHeliconeConfiguration;
 
   constructor(heliconeConfiguration: IHeliconeConfiguration) {
     super(heliconeConfiguration);
-    this.heliconeConfiguration = heliconeConfiguration;
     this.logger = new HeliconeAsyncLogger(heliconeConfiguration);
-  }
-
-  public async logFeedback(heliconeId: string, isThumbsUp: boolean) {
-    HeliconeFeedback.logFeedback(
-      this.heliconeConfiguration,
-      heliconeId,
-      isThumbsUp
-    );
   }
 
   async createChatCompletion(

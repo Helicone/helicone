@@ -171,6 +171,10 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/activeUsers",
     }),
+    feedback: useBackendMetricCall<Result<number, string>>({
+      params,
+      endpoint: "/api/metrics/feedback",
+    }),
   };
 
   function isLoading(x: UseQueryResult<any>) {
