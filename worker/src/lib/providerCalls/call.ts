@@ -1,4 +1,5 @@
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { azurePattern } from "../consts/Providers";
 
 export interface CallProps {
   headers: Headers;
@@ -38,9 +39,11 @@ export async function callProvider(props: CallProps): Promise<Response> {
     props;
   const apiBaseUrl = new URL(apiBase.replace(/\/$/, "")); // remove trailing slash if any
 
-  const new_url = new URL(
-    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
-  );
+  const new_url = azurePattern.test(apiBase)
+    ? apiBaseUrl
+    : new URL(
+        `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+      );
 
   const baseInit = { method, headers: removeHeliconeHeaders(headers) };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
@@ -52,6 +55,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
     response = await fetch(new_url.href, { ...init, signal });
   } else {
+    console.log(`New: ${new_url.href}`);
     response = await fetch(new_url.href, init);
   }
 
