@@ -202,8 +202,6 @@ export async function logRequest(
     const requestRow: Database["public"]["Tables"]["request"]["Row"] =
       requestData;
 
-    console.log("requestRow", JSON.stringify(requestRow, null, 2));
-
     if (error !== null) {
       return { data: null, error: error.message };
     } else {
