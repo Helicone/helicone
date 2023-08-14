@@ -44,13 +44,17 @@ export HELICONE_API_KEY=<your API key>
 import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  apiKey: "[YOUR_AZURE_OPENAI_API_KEY]",
+  basePath: "https://oai.hconeai.com/openai/deployments/[YOUR_DEPLOYMENT_PATH]",
   baseOptions: {
     headers: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Auth": `Bearer [YOUR_HELICONE_API_KEY]`,
+      "api-key": "[YOUR_AZURE_OPENAI_API_KEY]",
       "Helicone-OpenAI-Api-Base":
         "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
+    },
+    params: {
+      "api-version": "[YOUR_API_VERSION]",
     },
   },
 });
