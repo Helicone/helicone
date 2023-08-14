@@ -4,6 +4,7 @@ import {
   BuildingOffice2Icon,
   CheckIcon,
   ChevronDownIcon,
+  PlusIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useOrg } from "./organizationContext";
@@ -131,7 +132,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                           {icon && (
                             <icon.icon className="h-4 w-4 text-gray-500" />
                           )}
-
                           <p className="w-32 text-left truncate">{org.name}</p>
                         </div>
                         {org.id === orgContext?.currentOrg.id && (
@@ -145,16 +145,14 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             </div>
           )}
           <div className="p-1">
-            <Link
-              href="https://docs.helicone.ai/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
               className={clsx(
-                "block text-gray-700 hover:bg-sky-100 rounded-md text-sm pl-3 py-2 w-full truncate"
+                "flex items-center space-x-2 text-gray-700 hover:bg-sky-100 rounded-md text-sm pl-4 py-2 w-full truncate"
               )}
             >
-              Docs
-            </Link>
+              <PlusIcon className="h-4 w-4 text-gray-500" />
+              <p>Create New Org</p>
+            </button>
             <Link
               href="https://discord.gg/zsSTcH2qhG"
               target="_blank"

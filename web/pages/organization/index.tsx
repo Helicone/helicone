@@ -24,9 +24,9 @@ const Org = (props: OrgProps) => {
   return (
     <MetaData title="Organizations">
       <AuthLayout user={user}>
-        <AuthHeader title="Organizations" />
+        <AuthHeader title="Organization" />
         <OrgIdPage org={org?.currentOrg!} />
-        {/* <OrgsPage /> */}
+        <OrgsPage />
       </AuthLayout>
     </MetaData>
   );

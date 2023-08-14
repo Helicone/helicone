@@ -72,7 +72,7 @@ const ContactForm = (props: ContactFormProps) => {
       action="#"
       method="POST"
       onSubmit={formSubmitHandler}
-      className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4 w-[600px]"
+      className="border border-gray-300 bg-gray-200 shadow-xl rounded-xl p-8 h-full space-y-4 w-[600px] mt-16 lg:mt-0"
     >
       <div>
         <label
