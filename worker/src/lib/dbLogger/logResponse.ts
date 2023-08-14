@@ -199,9 +199,10 @@ export async function logRequest(
 
     const { error } = await dbClient.from("request").insert([requestData]);
 
-    const requestRow: Database["public"]["Tables"]["request"]["Row"] = {
-      ...requestData,
-    };
+    const requestRow: Database["public"]["Tables"]["request"]["Row"] =
+      requestData;
+
+    console.log("requestRow", JSON.stringify(requestRow, null, 2));
 
     if (error !== null) {
       return { data: null, error: error.message };
