@@ -127,27 +127,18 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/organization"),
     },
     {
-      name: "GraphQL",
-      href: "/graphql",
-      icon: GrGraphQl,
-      current: pathname.includes("/graphql"),
-    },
-    {
       name: "Keys",
       href: "/keys",
       icon: KeyIcon,
       current: pathname.includes("/keys"),
     },
+    {
+      name: "GraphQL",
+      href: "/graphql",
+      icon: GrGraphQl,
+      current: pathname.includes("/graphql"),
+    },
   ];
-
-  if (isVaultEnabled) {
-    accountNav.push({
-      name: "Vault",
-      href: "/vault",
-      icon: LockClosedIcon,
-      current: pathname.includes("/vault"),
-    });
-  }
 
   if (hasFlag) {
     accountNav.push({
@@ -155,6 +146,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/webhooks",
       icon: GlobeAltIcon,
       current: pathname.includes("/webhooks"),
+    });
+  }
+
+  if (isVaultEnabled) {
+    accountNav.push({
+      name: "Vault",
+      href: "/vault",
+      icon: LockClosedIcon,
+      current: pathname.includes("/vault"),
     });
   }
 
