@@ -178,28 +178,29 @@ export async function logRequest(
         truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
-    const { data, error } = await dbClient
-      .from("request")
-      .insert([
-        {
-          id: request.requestId,
-          path: request.path,
-          body: request.omitLog ? {} : requestBody,
-          auth_hash: request.providerApiKeyAuthHash,
-          user_id: request.userId,
-          prompt_id: request.promptId,
-          properties: request.properties,
-          formatted_prompt_id: formattedPromptId,
-          prompt_values: prompt_values,
-          helicone_user: heliconeApiKeyRow?.user_id,
-          helicone_api_key_id: heliconeApiKeyRow?.id,
-          helicone_org_id: heliconeApiKeyRow?.organization_id,
-          provider: request.provider,
-          helicone_proxy_key_id: request.heliconeProxyKeyId,
-        },
-      ])
-      .select("*")
-      .single();
+    const createdAt = new Date().toISOString();
+    const requestData = {
+      id: request.requestId,
+      path: request.path,
+      body: request.omitLog ? {} : requestBody,
+      auth_hash: request.providerApiKeyAuthHash,
+      user_id: request.userId ?? null,
+      prompt_id: request.promptId ?? null,
+      properties: request.properties,
+      formatted_prompt_id: formattedPromptId,
+      prompt_values: prompt_values,
+      helicone_user: heliconeApiKeyRow?.user_id ?? null,
+      helicone_api_key_id: heliconeApiKeyRow?.id ?? null,
+      helicone_org_id: heliconeApiKeyRow?.organization_id ?? null,
+      provider: request.provider,
+      helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
+      created_at: createdAt,
+    };
+
+    const { error } = await dbClient.from("request").insert([requestData]);
+
+    const requestRow: Database["public"]["Tables"]["request"]["Row"] =
+      requestData;
 
     if (error !== null) {
       return { data: null, error: error.message };
@@ -226,7 +227,7 @@ export async function logRequest(
           : [];
 
       return {
-        data: { request: data, properties: customProperties },
+        data: { request: requestRow, properties: customProperties },
         error: null,
       };
     }
