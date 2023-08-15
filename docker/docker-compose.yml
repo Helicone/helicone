@@ -17,7 +17,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+          "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})",
         ]
       timeout: 5s
       interval: 5s
@@ -70,7 +70,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:9999/health"
+          "http://localhost:9999/health",
         ]
       timeout: 5s
       interval: 5s
@@ -135,13 +135,7 @@ services:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
     healthcheck:
-      test:
-        [
-          "CMD",
-          "bash",
-          "-c",
-          "printf \\0 > /dev/tcp/localhost/4000"
-        ]
+      test: ["CMD", "bash", "-c", "printf \\0 > /dev/tcp/localhost/4000"]
       timeout: 5s
       interval: 5s
       retries: 3
@@ -153,7 +147,7 @@ services:
       DB_USER: supabase_admin
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
-      DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
       DB_ENC_KEY: supabaserealtime
       API_JWT_SECRET: ${JWT_SECRET}
       FLY_ALLOC_ID: fly123
@@ -184,7 +178,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:5000/status"
+          "http://localhost:5000/status",
         ]
       timeout: 5s
       interval: 5s
@@ -212,7 +206,7 @@ services:
     container_name: supabase-imgproxy
     image: darthsim/imgproxy:v3.13
     healthcheck:
-      test: [ "CMD", "imgproxy", "health" ]
+      test: ["CMD", "imgproxy", "health"]
       timeout: 5s
       interval: 5s
       retries: 3
@@ -313,7 +307,6 @@ services:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
 
-
   worker:
     container_name: helicone-worker
     image: helicone/worker:latest
@@ -343,6 +336,7 @@ services:
     environment:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
   supabase-migration-runner:
     container_name: supabase-migration-runner
@@ -366,7 +360,7 @@ services:
   vault:
     image: hashicorp/vault:1.9.0
     ports:
-      - '8200:8200'
+      - "8200:8200"
     cap_add:
       - IPC_LOCK
     environment:

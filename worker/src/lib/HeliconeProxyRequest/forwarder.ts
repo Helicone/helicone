@@ -12,6 +12,7 @@ import {
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
+import { DatabaseExecutor } from "../db/postgres";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -119,6 +120,7 @@ export async function proxyForwarder(
     const res = await loggable.log({
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      postgres: new DatabaseExecutor(env),
     });
     if (res.error !== null) {
       request
