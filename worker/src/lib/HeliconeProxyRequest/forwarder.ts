@@ -120,7 +120,7 @@ export async function proxyForwarder(
     const res = await loggable.log({
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      postgres: new DatabaseExecutor(env),
+      postgres: new DatabaseExecutor(env, ctx),
     });
     if (res.error !== null) {
       request

@@ -51,7 +51,7 @@ export const getAPIRouter = () => {
       const { error: logError } = await loggable.log({
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        postgres: new DatabaseExecutor(env),
+        postgres: new DatabaseExecutor(env, ctx),
       });
 
       if (logError !== null) {
@@ -92,7 +92,7 @@ export const getAPIRouter = () => {
       const { error: logError } = await loggable.log({
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        postgres: new DatabaseExecutor(env),
+        postgres: new DatabaseExecutor(env, ctx),
       });
 
       if (logError !== null) {
