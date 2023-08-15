@@ -51,7 +51,8 @@ response = openai.Completion.create(
 
 ## More resources
 
-- [Langchain integration](https://python.langchain.com/en/latest/ecosystem/helicone.html)
+- [Langchain integration](https://python.langchain.com/docs/integrations/providers/helicone)
+- [LangchainJS integration](https://js.langchain.com/docs/ecosystem/integrations/helicone)
 - [Python package](https://github.com/Helicone/helicone/tree/main/helicone-python)
 - [Node.JS support](https://docs.helicone.ai/quickstart/integrate-in-less-than-a-minute)
 - [Developer docs](https://docs.helicone.ai/quickstart/integrate-in-less-than-a-minute)
