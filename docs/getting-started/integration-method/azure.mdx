@@ -16,13 +16,19 @@ You can use Helicone with your Azure-OpenAI deployment, and it requires no addit
 ```python
 import openai
 
-openai.api_base = "https://oai.hconeai.com/v1"
-openai.Completion.create(
-  # ...other parameters
-  headers={
-    "Helicone-Auth": "Bearer HELICONE_API_KEY",
-    "Helicone-OpenAI-Api-Base": "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
-  }
+openai.api_base = "https://oai.hconeai.com"
+openai.api_key = "[AZURE_OPENAI_API_KEY]"
+openai.api_version = "[API_VERSION]"
+openai.api_type = "azure"
+
+# Create the completion request
+openai.ChatCompletion.create(
+    model="[DEPLOYMENT]",
+    messages=[{"role": "User", "content": "Say hi!"}],
+    headers={
+        "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
+        "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+    }
 )
 ```
 
@@ -44,13 +50,16 @@ export HELICONE_API_KEY=<your API key>
 import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.hconeai.com/v1",
+  apiKey: "[AZURE_OPENAI_API_KEY]",
+  basePath: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
   baseOptions: {
     headers: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-OpenAI-Api-Base":
-        "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
+      "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
+      "api-key": "[AZURE_OPENAI_API_KEY]",
+      "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+    },
+    params: {
+      "api-version": "[API_VERSION]",
     },
   },
 });
