@@ -17,6 +17,7 @@ import CreateOrgForm, {
   ORGANIZATION_ICONS,
 } from "../organizations/createOrgForm";
 import OrgMemberItem from "./orgMemberItem";
+import InviteMemberButton from "../../shared/inviteMembers";
 
 interface OrgIdPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -87,12 +88,11 @@ const OrgIdPage = (props: OrgIdPageProps) => {
               >
                 Edit
               </button>
-              <button
-                onClick={() => setAddOpen(true)}
-                className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                Invite Members
-              </button>
+              <InviteMemberButton
+                onSuccess={() => {
+                  refetch();
+                }}
+              />
             </div>
           )}
         </div>

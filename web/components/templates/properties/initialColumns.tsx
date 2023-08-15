@@ -1,5 +1,22 @@
 import { ColumnDef } from "@tanstack/react-table";
 
+function formatNumber(num: number) {
+  const numParts = num.toString().split(".");
+
+  if (numParts.length > 1) {
+    const decimalPlaces = numParts[1].length;
+    if (decimalPlaces < 2) {
+      return num.toFixed(2);
+    } else if (decimalPlaces > 6) {
+      return num.toFixed(6);
+    } else {
+      return num;
+    }
+  } else {
+    return num.toFixed(2);
+  }
+}
+
 export const INITIAL_COLUMNS: ColumnDef<{
   property_value: string;
   total_requests: number;
@@ -26,16 +43,16 @@ export const INITIAL_COLUMNS: ColumnDef<{
   {
     accessorKey: "avg_latency_per_request",
     header: "Avg Latency / Req",
-    cell: (info) => info.getValue(),
+    cell: (info) => `${formatNumber(Number(info.getValue()))}s`,
   },
   {
     accessorKey: "average_cost_per_request",
     header: "Avg Cost / Req",
-    cell: (info) => info.getValue(),
+    cell: (info) => `$${formatNumber(Number(info.getValue()))}`,
   },
   {
     accessorKey: "total_cost",
     header: "Total Cost",
-    cell: (info) => info.getValue(),
+    cell: (info) => `$${info.getValue()}`,
   },
 ];
