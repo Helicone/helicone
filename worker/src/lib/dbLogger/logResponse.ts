@@ -4,6 +4,7 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
+import { DatabaseExecutor } from "../db/postgres";
 
 const MAX_USER_ID_LENGTH = 7000;
 
@@ -114,7 +115,8 @@ async function getHeliconeApiKeyRow(
 
 export async function logRequest(
   request: DBLoggableProps["request"],
-  dbClient: SupabaseClient<Database>
+  dbClient: SupabaseClient<Database>,
+  postgres: DatabaseExecutor
 ): Promise<
   Result<
     {
@@ -197,13 +199,39 @@ export async function logRequest(
       created_at: createdAt,
     };
 
-    const { error } = await dbClient.from("request").insert([requestData]);
+    const query = `
+    INSERT INTO "public"."request"(
+      "id", "path", "body", "auth_hash", "user_id", "prompt_id", "properties", 
+      "formatted_prompt_id", "prompt_values", "helicone_user", 
+      "helicone_api_key_id", "helicone_org_id", "provider", "helicone_proxy_key_id", 
+      "created_at"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`;
+
+    const parameters = [
+      requestData.id,
+      requestData.path,
+      requestData.body,
+      requestData.auth_hash,
+      requestData.user_id,
+      requestData.prompt_id,
+      requestData.properties,
+      requestData.formatted_prompt_id,
+      requestData.prompt_values,
+      requestData.helicone_user,
+      requestData.helicone_api_key_id,
+      requestData.helicone_org_id,
+      requestData.provider,
+      requestData.helicone_proxy_key_id,
+      requestData.created_at,
+    ];
+
+    const { error } = await postgres.dbExecute(query, parameters);
 
     const requestRow: Database["public"]["Tables"]["request"]["Row"] =
       requestData;
 
     if (error !== null) {
-      return { data: null, error: error.message };
+      return { data: null, error: error };
     } else {
       // Log custom properties and then return request id
       const customPropertyRows = Object.entries(request.properties).map(
