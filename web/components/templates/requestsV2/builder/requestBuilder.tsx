@@ -13,7 +13,7 @@ export type BuilderType =
   | "ClaudeBuilder";
 
 export const getBuilderType = (model: string): BuilderType => {
-  if (/^(gpt-4|gpt-3\.5)/.test(model)) {
+  if (/^gpt-(4|3\.5|35)/.test(model)) {
     return "FunctionGPTBuilder";
   }
 
