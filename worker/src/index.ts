@@ -16,7 +16,7 @@ export interface Env {
   WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
-  DATABASE_URL: string;
+  STORAGE_URL: string;
 }
 
 export async function hash(key: string): Promise<string> {

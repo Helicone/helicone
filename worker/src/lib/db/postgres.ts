@@ -7,7 +7,7 @@ export class DatabaseExecutor {
 
   constructor(env: Env) {
     this.client = new Client({
-      connectionString: env.DATABASE_URL,
+      connectionString: env.STORAGE_URL,
     });
   }
 
