@@ -24,12 +24,7 @@ openai.api_type = "azure"
 # Create the completion request
 openai.ChatCompletion.create(
     model="[DEPLOYMENT]",
-    messages=[
-        {
-            "role": "User",
-            "content": "Say hi!"
-        }
-    ],
+    messages=[{"role": "User", "content": "Say hi!"}],
     headers={
         "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
         "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
