@@ -247,36 +247,34 @@ export default function HomePage(props: HomePageProps) {
               </div>
             )}
           </div>
-          <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
-            {microsoftForStartups ? (
-              <ContactForm contactTag={"mfs"} buttonText={"Claim Free Year"} />
-            ) : (
-              <>
-                <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
-                  <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                    <img
-                      src="/assets/landing/preview.webp"
-                      alt="App screenshot"
-                      width={2720}
-                      height={1844}
-                      className="w-[55rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-                    />
-                  </div>
+          {microsoftForStartups ? (
+            <ContactForm contactTag={"mfs"} buttonText={"Claim Free Year"} />
+          ) : (
+            <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
+              <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
+                <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
+                  <img
+                    src="/assets/landing/preview.webp"
+                    alt="App screenshot"
+                    width={2720}
+                    height={1844}
+                    className="w-[55rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+                  />
                 </div>
-                <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
-                  <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                    <img
-                      src="/assets/landing/request-preview.png"
-                      alt="App screenshot"
-                      width={556}
-                      height={916}
-                      className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-                    />
-                  </div>
+              </div>
+              <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
+                <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
+                  <img
+                    src="/assets/landing/request-preview.png"
+                    alt="App screenshot"
+                    width={556}
+                    height={916}
+                    className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+                  />
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <div className="bg-gray-50">
