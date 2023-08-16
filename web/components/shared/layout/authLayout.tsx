@@ -334,7 +334,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
                   <div className="flex flex-col">
-                    <OrgDropdown />
+                    <OrgDropdown userSettings={userSettings} />
                   </div>
                 </div>
                 <div className="mt-1 flex flex-grow flex-col">
