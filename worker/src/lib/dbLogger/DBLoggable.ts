@@ -420,7 +420,7 @@ export class DBLoggable {
       db.postgres
     );
 
-    if (requestResult.data !== null) {
+    if (requestResult.data !== null && requestResult.error === null) {
       const responseResult = await this.readAndLogResponse(db.supabase);
 
       if (responseResult.data !== null) {

@@ -156,10 +156,9 @@ export async function logRequest(
       console.error(userIdError);
     }
 
-    // TODO - once we deprecate using OpenAI API keys, we can remove this
-    // if (userIdError !== null) {
-    //   return { data: null, error: userIdError };
-    // }
+    if (!heliconeApiKeyRow?.organization_id) {
+      return { data: null, error: "Org not found" };
+    }
 
     let bodyText = request.bodyText ?? "{}";
     bodyText = bodyText.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
