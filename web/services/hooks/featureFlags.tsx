@@ -4,6 +4,7 @@ import { Database } from "../../supabase/database.types";
 
 const useFeatureFlags = (orgId: string, featureFlag: string) => {
   const supabaseClient = useSupabaseClient<Database>();
+  const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["featureFlags", orgId, featureFlag],
     queryFn: async (query) => {
@@ -18,6 +19,7 @@ const useFeatureFlags = (orgId: string, featureFlag: string) => {
       return resp;
     },
     refetchOnWindowFocus: false,
+    staleTime: oneDayInMilliseconds,
   });
 
   const hasFlag = data?.count ? data?.count > 0 : false;

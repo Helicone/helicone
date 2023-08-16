@@ -111,7 +111,7 @@ const ModelPage = (props: ModelPageProps) => {
               as="h3"
               className="text-lg font-medium leading-6 text-gray-900"
             >
-              User Information
+              Model Information
             </Dialog.Title>
             <button
               type="button"
