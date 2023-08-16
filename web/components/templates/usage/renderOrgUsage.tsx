@@ -38,13 +38,13 @@ const RenderOrgUsage = (props: RenderOrgUsageProps) => {
     representation: "date",
   });
 
-  const [timeFilter, setTimeFilter] = useState<{
+  const timeFilter: {
     start: Date;
     end: Date;
-  }>({
+  } = {
     start: new Date(startOfMonthFormatted),
     end: new Date(endOfMonthFormatted),
-  });
+  };
 
   const { data, isLoading, refetch } = useRequestsOverTime({
     timeFilter,
