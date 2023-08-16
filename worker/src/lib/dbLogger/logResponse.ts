@@ -199,39 +199,13 @@ export async function logRequest(
       created_at: createdAt,
     };
 
-    const query = `
-    INSERT INTO "public"."request"(
-      "id", "path", "body", "auth_hash", "user_id", "prompt_id", "properties", 
-      "formatted_prompt_id", "prompt_values", "helicone_user", 
-      "helicone_api_key_id", "helicone_org_id", "provider", "helicone_proxy_key_id", 
-      "created_at"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`;
-
-    const parameters = [
-      requestData.id,
-      requestData.path,
-      requestData.body,
-      requestData.auth_hash,
-      requestData.user_id,
-      requestData.prompt_id,
-      requestData.properties,
-      requestData.formatted_prompt_id,
-      requestData.prompt_values,
-      requestData.helicone_user,
-      requestData.helicone_api_key_id,
-      requestData.helicone_org_id,
-      requestData.provider,
-      requestData.helicone_proxy_key_id,
-      requestData.created_at,
-    ];
-
-    const { error } = await postgres.dbExecute(query, parameters);
+    const { error } = await dbClient.from("request").insert([requestData]);
 
     const requestRow: Database["public"]["Tables"]["request"]["Row"] =
       requestData;
 
     if (error !== null) {
-      return { data: null, error: error };
+      return { data: null, error: error.message };
     } else {
       // Log custom properties and then return request id
       const customPropertyRows = Object.entries(request.properties).map(
