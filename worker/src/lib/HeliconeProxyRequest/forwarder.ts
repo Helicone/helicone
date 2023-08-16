@@ -132,7 +132,7 @@ export async function proxyForwarder(
     }
   }
 
-  if (request.heliconeHeaders.heliconeAuth) {
+  if (request?.heliconeHeaders?.heliconeAuth) {
     ctx.waitUntil(log());
   }
 

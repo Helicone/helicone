@@ -153,7 +153,7 @@ export async function logRequest(
     const { data: heliconeApiKeyRow, error: userIdError } =
       await getHeliconeApiKeyRow(dbClient, request.heliconeApiKeyAuthHash);
     if (userIdError !== null) {
-      console.error(userIdError);
+      return { data: null, error: userIdError };
     }
 
     if (!heliconeApiKeyRow?.organization_id) {
