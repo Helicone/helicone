@@ -15,6 +15,18 @@ interface RenderOrgUsageProps {
   requestCount: number;
 }
 
+function formatNumberString(
+  numString: string,
+  minimumFractionDigits?: boolean
+) {
+  const num = parseFloat(numString);
+  if (minimumFractionDigits) {
+    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  } else {
+    return num.toLocaleString("en-US");
+  }
+}
+
 const RenderOrgUsage = (props: RenderOrgUsageProps) => {
   const { currentMonth, requestCount } = props;
 
@@ -48,15 +60,13 @@ const RenderOrgUsage = (props: RenderOrgUsageProps) => {
     time: new Date(d.time),
   }));
 
-  console.log(chartData);
-
   return (
     <MainGraph
       isLoading={isLoading}
       dataOverTime={chartData}
       timeMap={getTimeMap("day")}
       title={"Requests"}
-      value={requestCount}
+      value={formatNumberString(requestCount.toString())}
       valueLabel={"requests"}
       type="bar"
     />
