@@ -420,34 +420,37 @@ export class DBLoggable {
       db.postgres
     );
 
-    if (requestResult.data !== null && requestResult.error === null) {
-      const responseResult = await this.readAndLogResponse(db.supabase);
-
-      if (responseResult.data !== null) {
-        await logInClickhouse(
-          requestResult.data.request,
-          responseResult.data,
-          requestResult.data.properties,
-          db.clickhouse
-        );
-
-        // TODO We should probably move the webhook stuff out of dbLogger
-        const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
-          request: requestResult.data,
-          response: responseResult.data,
-        });
-        if (webhookError !== null) {
-          console.error("Error sending to webhooks", webhookError);
-          return {
-            data: null,
-            error: webhookError,
-          };
-        }
-      } else {
-        return responseResult;
-      }
-    } else {
+    // If no data or error, return
+    if (!requestResult.data || requestResult.error) {
       return requestResult;
+    }
+
+    const responseResult = await this.readAndLogResponse(db.supabase);
+
+    // If no data or error, return
+    if (!responseResult.data || responseResult.error) {
+      return responseResult;
+    }
+
+    await logInClickhouse(
+      requestResult.data.request,
+      responseResult.data,
+      requestResult.data.properties,
+      db.clickhouse
+    );
+
+    // TODO We should probably move the webhook stuff out of dbLogger
+    const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
+      request: requestResult.data,
+      response: responseResult.data,
+    });
+
+    if (webhookError !== null) {
+      console.error("Error sending to webhooks", webhookError);
+      return {
+        data: null,
+        error: webhookError,
+      };
     }
 
     return {
