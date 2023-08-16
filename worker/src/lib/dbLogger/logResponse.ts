@@ -157,7 +157,7 @@ export async function logRequest(
     }
 
     if (!heliconeApiKeyRow?.organization_id) {
-      return { data: null, error: "Org not found" };
+      return { data: null, error: "Helicone api key not found" };
     }
 
     let bodyText = request.bodyText ?? "{}";
