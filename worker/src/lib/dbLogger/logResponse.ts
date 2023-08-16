@@ -130,6 +130,11 @@ export async function logRequest(
     if (!request.providerApiKeyAuthHash) {
       return { data: null, error: "Missing providerApiKeyAuthHash" };
     }
+
+    if (!request.heliconeApiKeyAuthHash) {
+      return { data: null, error: "Missing heliconeApiKeyAuthHash" };
+    }
+
     const prompt = request.promptFormatter?.prompt;
     const formattedPromptResult =
       prompt !== undefined
