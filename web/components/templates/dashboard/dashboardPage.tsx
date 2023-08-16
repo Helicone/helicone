@@ -75,13 +75,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   });
   const [open, setOpen] = useState(false);
 
-  const sessionStorageKey =
-    typeof window !== "undefined" ? sessionStorage.getItem("currentKey") : null;
-
-  const [apiKeyFilter, setApiKeyFilter] = useState<string | null>(
-    sessionStorageKey
-  );
-
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
@@ -97,7 +90,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
     timeFilter,
     uiFilters: debouncedAdvancedFilters,
-    apiKeyFilter,
+    apiKeyFilter: null,
     timeZoneDifference,
     dbIncrement: timeIncrement,
   });
