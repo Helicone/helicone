@@ -378,6 +378,13 @@ export class DBLoggable {
       response: Database["public"]["Tables"]["response"]["Row"];
     }
   ): Promise<Result<undefined, string>> {
+    if (!payload.request?.request.helicone_org_id) {
+      return {
+        data: null,
+        error: "Org id undefined",
+      };
+    }
+
     const webhooks = await dbClient
       .from("webhooks")
       .select("*")
