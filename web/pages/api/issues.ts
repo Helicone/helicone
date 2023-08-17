@@ -12,6 +12,7 @@ async function getHeliconeIssues() {
   return octokit.request("GET /repos/{owner}/{repo}/issues", {
     owner: "Helicone",
     repo: "helicone",
+    per_page: 300,
     headers: {
       "X-GitHub-Api-Version": "2022-11-28",
     },
