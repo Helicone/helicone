@@ -1,3 +1,13 @@
+name: e2e tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 steps:
   - uses: supabase/setup-cli@v1.2.0
   - run: supabase init
