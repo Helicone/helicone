@@ -95,15 +95,13 @@ class HeliconeAsyncLogger:
             }
         )
         if (res.status_code != 200):
-            raise ValueError(
-                f"Failed to log to {url}. Status code {res.status_code}")
+            print(f"Failed to log to {url}. Status code {res.status_code}")
         return res
 
     def log(self, request: HeliconeAyncLogRequest,
             provider: Provider,
             meta: Optional[HeliconeMeta] = None
             ):
-        print("logging", request, provider)
         if provider == Provider.OPENAI:
             self._request(
                 body=dataclasses.asdict(request),
