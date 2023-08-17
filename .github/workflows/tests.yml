@@ -10,6 +10,9 @@ on:
 
 jobs:
   db-type-checks:
+    name: DB type checks
+    runs-on: ubuntu-latest
+
     steps:
       - uses: supabase/setup-cli@v1.2.0
       - run: supabase init
