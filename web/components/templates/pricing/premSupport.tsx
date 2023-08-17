@@ -19,9 +19,10 @@ export default function PremSupport() {
               Priority Support
             </h3>
             <p className="mt-6 text-base leading-7 text-gray-600">
-              Do you have Helicone deployed within your own infrastructure? We
-              offer support for self-deployed Helicone instances. This includes
-              access to our support team, as well as priority feature requests.
+              Using Helicone? Enjoy a dedicated Discord or Slack channel, an
+              easy-to-use Helm chart, priority on feature requests, and expert
+              support. We{"'"}ve got you covered for self-deployed instances and
+              offer custom ETL integrations.
             </p>
             <div className="mt-10 flex items-center gap-x-4">
               <h4 className="flex-none text-sm font-semibold leading-6 text-indigo-600">
