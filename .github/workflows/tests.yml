@@ -25,3 +25,10 @@ jobs:
             git diff
             exit 1
           fi
+
+          supabase gen types typescript --local > worker/supabase/public.types.ts
+          if ! git diff --ignore-space-at-eol --exit-code --quiet worker/supabase/public.types.ts; then
+            echo "Detected uncommitted changes after build. See status below:"
+            git diff
+            exit 1
+          fi
