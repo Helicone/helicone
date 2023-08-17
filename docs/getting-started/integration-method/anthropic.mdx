@@ -60,4 +60,27 @@ curl --request POST \
 ```
 
    </Tab>
+
+   <Tab title="Langchain">
+    **Python**
+    
+    Change the api base and add a Helicone-Auth header
+    ```python
+    anthropic = ChatAnthropic(
+      temperature=0.9,
+      model="claude-2",
+      anthropic_api_url="https://anthropic.hconeai.com/",
+      anthropic_api_key="ANTHROPIC_API_KEY",
+      model_kwargs={
+          "extra_headers":{
+              "Helicone-Auth": "Bearer HELICONE_API_KEY"
+          }
+      }
+    ) 
+    ```
+    **Typescript**
+
+    Support is coming soon, pending new langchainjs version
+
+  </Tab>
 </Tabs>
