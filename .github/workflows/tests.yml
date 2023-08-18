@@ -20,6 +20,10 @@ jobs:
       - run: supabase db lint
       - name: Print directory structure
         run: ls -R
+      - name: Print current directory
+        run: pwd
+      - name: List parent directory contents
+        run: ls ..
       - name: Verify generated types match Postgres schema
         run: |
           supabase gen types typescript --local > ../web/supabase/database.types.ts
