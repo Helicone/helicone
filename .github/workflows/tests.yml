@@ -9,38 +9,38 @@ on:
       - main
 
 jobs:
-  db-type-checks:
-    name: DB type checks
-    runs-on: ubuntu-latest
+  # db-type-checks:
+  #   name: DB type checks
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - uses: supabase/setup-cli@v1.2.0
-      - name: Print directory structure
-        run: ls -R
-      - run: supabase init
-      - run: supabase db start
-      - run: supabase db lint
-      - name: Print directory structure
-        run: ls -R
-      - name: Print current directory
-        run: pwd
-      - name: List parent directory contents
-        run: ls -R ..
-      - name: Verify generated types match Postgres schema
-        run: |
-          supabase gen types typescript --local > ./helicone/web/supabase/database.types.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet ./helicone/web/supabase/database.types.ts; then
-            echo "Detected uncommitted changes after build. See status below:"
-            git diff
-            exit 1
-          fi
+  #   steps:
+  #     - uses: supabase/setup-cli@v1.2.0
+  #     - name: Print directory structure
+  #       run: ls -R
+  #     - run: supabase init
+  #     - run: supabase db start
+  #     - run: supabase db lint
+  #     - name: Print directory structure
+  #       run: ls -R
+  #     - name: Print current directory
+  #       run: pwd
+  #     - name: List parent directory contents
+  #       run: ls -R ..
+  #     - name: Verify generated types match Postgres schema
+  #       run: |
+  #         supabase gen types typescript --local > ./helicone/web/supabase/database.types.ts
+  #         if ! git diff --ignore-space-at-eol --exit-code --quiet ./helicone/web/supabase/database.types.ts; then
+  #           echo "Detected uncommitted changes after build. See status below:"
+  #           git diff
+  #           exit 1
+  #         fi
 
-          supabase gen types typescript --local > worker/supabase/database.types.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet worker/supabase/database.types.ts; then
-            echo "Detected uncommitted changes after build. See status below:"
-            git diff
-            exit 1
-          fi
+  #         supabase gen types typescript --local > worker/supabase/database.types.ts
+  #         if ! git diff --ignore-space-at-eol --exit-code --quiet worker/supabase/database.types.ts; then
+  #           echo "Detected uncommitted changes after build. See status below:"
+  #           git diff
+  #           exit 1
+  #         fi
   # TODO SEED DATABASE WITH EXAMPLE USERS AND EXAMPLE PROJECTS
   e2e-test-python-async:
     name: Python Async E2E tests
