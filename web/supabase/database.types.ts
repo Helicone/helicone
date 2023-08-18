@@ -37,6 +37,39 @@ export interface Database {
           }
         ]
       }
+      contact_submissions: {
+        Row: {
+          company_description: string | null
+          company_name: string | null
+          created_at: string | null
+          email_address: string | null
+          first_name: string | null
+          id: number
+          last_name: string | null
+          tag: string | null
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email_address?: string | null
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          tag?: string | null
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email_address?: string | null
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          tag?: string | null
+        }
+        Relationships: []
+      }
       feature_flags: {
         Row: {
           created_at: string | null
