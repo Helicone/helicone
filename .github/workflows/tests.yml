@@ -53,8 +53,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: supabase/setup-cli@v1.2.0
-      - run: supabase init
-      - run: supabase db start
+      # - run: supabase init
+      - run: supabase start
       - name: Install dependencies
         run: |
           pip install requests pytest
