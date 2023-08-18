@@ -15,13 +15,11 @@ jobs:
 
     steps:
       - uses: supabase/setup-cli@v1.2.0
+      - name: Print directory structure
+        run: ls -R
       - run: supabase init
       - run: supabase db start
       - run: supabase db lint
-      - name: Check directories
-        run: |
-          ls -al web/supabase/
-          ls -al worker/supabase/
       - name: Print directory structure
         run: ls -R
       - name: Print current directory
