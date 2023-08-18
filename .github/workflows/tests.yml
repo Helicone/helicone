@@ -15,8 +15,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: supabase/setup-cli@v1.2.0
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 1.83.7
       - run: supabase db start
+      - run: supabase init
       - name: Verify generated types match Postgres schema
         run: |
           supabase gen types typescript --local > web/supabase/database.types.ts
