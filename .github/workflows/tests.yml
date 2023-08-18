@@ -18,6 +18,10 @@ jobs:
       - run: supabase init
       - run: supabase db start
       - run: supabase db lint
+      - name: Check directories
+        run: |
+          ls -al web/supabase/
+          ls -al worker/supabase/
       - name: Print directory structure
         run: ls -R
       - name: Print current directory
@@ -26,8 +30,8 @@ jobs:
         run: ls ..
       - name: Verify generated types match Postgres schema
         run: |
-          supabase gen types typescript --local > web/supabase/database.types.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet web/supabase/database.types.ts; then
+          supabase gen types typescript --local > ../helicone/web/supabase/database.types.ts
+          if ! git diff --ignore-space-at-eol --exit-code --quiet ../helicone/web/supabase/database.types.ts; then
             echo "Detected uncommitted changes after build. See status below:"
             git diff
             exit 1
