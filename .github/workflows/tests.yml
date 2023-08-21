@@ -57,7 +57,7 @@ jobs:
           pip install requests pytest
       - run: |
           cd worker
-          wrangler dev --local --var WORKER_TYPE:HELICONE_API > ~/.helicone/worker.log 2>&1 &
+          wrangler dev
       - name: Run integration tests
         working-directory: tests
         env:
