@@ -19,7 +19,6 @@ jobs:
         with:
           version: 1.83.7
       - run: supabase db start
-      - run: supabase init
       - name: Verify generated types match Postgres schema
         run: |
           supabase gen types typescript --local > web/supabase/database.types.ts
