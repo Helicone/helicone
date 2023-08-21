@@ -113,7 +113,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                 }}
                 className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                I Understand
+                Start Free Trial
               </button>
             </div>
           </>
