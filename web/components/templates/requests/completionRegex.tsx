@@ -1,6 +1,5 @@
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import Hover from "./hover";
-import { ChatProperties, CsvData } from "./requestsPage";
 
 interface CompletionRegexProps {
   prompt_name?: string;

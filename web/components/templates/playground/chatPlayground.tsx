@@ -4,7 +4,6 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import { Message } from "../requests/requestsPage";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
@@ -14,6 +13,11 @@ import {
 } from "openai";
 import ChatRow from "./chatRow";
 import { fetchOpenAI } from "../../../services/lib/openAI";
+
+export type Message = {
+  role: string;
+  content: string | null;
+};
 
 interface ChatPlaygroundProps {
   requestId: string;

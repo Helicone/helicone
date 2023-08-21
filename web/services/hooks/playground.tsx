@@ -1,5 +1,4 @@
 import { getUSDate } from "../../components/shared/utils/utils";
-import { Message } from "../../components/templates/requests/requestsPage";
 import useRequestsPage, {
   PromptResponsePair,
 } from "../../components/templates/requests/useRequestsPage";
