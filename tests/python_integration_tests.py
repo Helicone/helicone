@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import DictCursor
+import uuid
 
 load_dotenv()
 
@@ -44,10 +45,12 @@ def fetch(endpoint, method="GET", json=None, headers=None):
 
 def test_proxy():
     print("Running test_proxy...")
+    requestId = str(uuid.uuid4())
+    message_content = test_proxy.__name__ + requestId
     messages = [
         {
             "role": "user",
-            "content": test_proxy.__name__
+            "content": message_content
         }
     ]
     data = {
@@ -65,14 +68,14 @@ def test_proxy():
     assert response, "Response from OpenAI API is empty"
 
     org_id_filter = "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
-    query = "SELECT * FROM request WHERE helicone_org_id = %s ORDER BY created_at DESC LIMIT 1"
+    query = "SELECT * FROM request WHERE helicone_org_id = %s"
     request_data = fetch_from_db(query, (org_id_filter,))
     assert request_data, "Request data not found in the database for the given org_id"
 
     latest_request = request_data[0]
     latest_request_id = latest_request["id"]
     latest_request_body = latest_request["body"]
-    assert test_proxy.__name__ in latest_request_body["messages"][0]["content"], "Request not found in the database"
+    assert message_content in latest_request_body["messages"][0]["content"], "Request not found in the database"
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request_id,))
