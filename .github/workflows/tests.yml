@@ -20,24 +20,33 @@ jobs:
           version: 1.86.2
       - name: Print Supabase CLI Version
         run: supabase --version
-      - name: Print Differences in web/supabase/database.types.ts
-        run: git diff web/supabase/database.types.ts
-      - name: Print Differences in worker/supabase/database.types.ts
-        run: git diff worker/supabase/database.types.ts
       - run: supabase db start
       - run: supabase db lint
-      - name: Verify generated types match Postgres schema
+
+      - name: Generate types for web
+        run: supabase gen types typescript --local > web/supabase/database.types.ts
+
+      - name: Print contents of web/supabase/database.types.ts
+        run: cat web/supabase/database.types.ts
+
+      - name: Verify generated types match Postgres schema for web
         run: |
-          supabase gen types typescript --local > web/supabase/database.types.ts
           if ! git diff --ignore-space-at-eol web/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
-              echo "Detected uncommitted changes after build. See status below:"
+              echo "Detected uncommitted changes after build in web/supabase/database.types.ts. See status below:"
               git diff
               exit 1
           fi
 
-          supabase gen types typescript --local > worker/supabase/database.types.ts
+      - name: Generate types for worker
+        run: supabase gen types typescript --local > worker/supabase/database.types.ts
+
+      - name: Print contents of worker/supabase/database.types.ts
+        run: cat worker/supabase/database.types.ts
+
+      - name: Verify generated types match Postgres schema for worker
+        run: |
           if ! git diff --ignore-space-at-eol worker/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
-              echo "Detected uncommitted changes after build. See status below:"
+              echo "Detected uncommitted changes after build in worker/supabase/database.types.ts. See status below:"
               git diff
               exit 1
           fi
