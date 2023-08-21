@@ -41,9 +41,6 @@ const tiers = [
         <span className="text-5xl font-bold tracking-tight text-gray-900">
           $80
         </span>
-        <span className="text-5xl font-semibold tracking-tight text-gray-500 line-through pl-1">
-          $160
-        </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
         </span>
