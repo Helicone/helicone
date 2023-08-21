@@ -27,7 +27,7 @@ const tiers = [
       "Basic Exporting",
       "1 Organization",
     ],
-    buttonText: "Try for free",
+    buttonText: "Get Started",
     backgroundColor: "bg-sky-600",
     hoverBackgroundColor: "hover:bg-sky-500",
     textColor: "text-sky-600",
