@@ -81,7 +81,7 @@ jobs:
       - run: |
           cd worker
           npm install wrangler
-          npm
+          npm install
           wrangler dev & sleep 5
       # - name: Run worker
       #   uses: cloudflare/wrangler-action@2.0.0
