@@ -1,9 +1,9 @@
 import requests
 import pytest
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 BASE_URL = os.environ["OPENAI_API_BASE"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
@@ -24,7 +24,7 @@ def fetch_supabase(table, filters=None):
         "Authorization": f"Bearer {supabase_key}",
         "Content-Type": "application/json"
     }
-    url = f"{supabase_url}/{table}"
+    url = f"{supabase_url}/rest/v1/{table}"
     if filters:
         params = filters
     else:
