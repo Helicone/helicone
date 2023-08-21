@@ -17,18 +17,19 @@ jobs:
       - uses: actions/checkout@v2
       - uses: supabase/setup-cli@v1
         with:
-          version: 1.83.7
+          version: latest
       - run: supabase db start
+      - run: supabase db lint
       - name: Verify generated types match Postgres schema
         run: |
-          supabase gen types typescript --local --schema public > web/supabase/database.types.ts
-            if [ "$(git diff --ignore-space-at-eol web/supabase/database.types.ts | wc -l)" -gt "0" ]; then
+          supabase gen types typescript --local > web/supabase/database.types.ts
+            if ! git diff --ignore-space-at-eol --exit-code --quiet web/supabase/database.types.ts; then
               echo "Detected uncommitted changes after build. See status below:"
               git diff
               exit 1
             fi
             
-          supabase gen types typescript --local --schema public > worker/supabase/database.types.ts
+          supabase gen types typescript --local > worker/supabase/database.types.ts
           if ! git diff --ignore-space-at-eol --exit-code --quiet worker/supabase/database.types.ts; then
             echo "Detected uncommitted changes after build. See status below:"
             git diff
