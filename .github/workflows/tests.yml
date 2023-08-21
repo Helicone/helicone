@@ -55,16 +55,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "18"
-      # - name: Cache npm packages
-      #   uses: actions/cache@v2.1.7
-      #   with:
-      #     path: |
-      #       ./worker/node_modules
-      #     key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
-      # - name: Install dependencies
-      #   run: npm install --prefix ./worker
+      - name: Cache npm packages
+        uses: actions/cache@v2.1.7
+        with:
+          path: |
+            ./worker/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install dependencies
         run: |
           cd worker
@@ -76,19 +74,15 @@ jobs:
           wrangler dev &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - run: supabase db start
-      - name: Install dependencies
+      - name: Start Supabase DB
+        run: supabase db start
+      - name: Install python dependencies
         run: |
           pip install requests pytest
       - name: Run integration tests
         working-directory: tests
         env:
-          # SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
-          # SUPABASE_URL: "http://localhost:54321"
           OPENAI_API_BASE: "http://127.0.0.1:8787/v1"
-          # CLICKHOUSE_HOST: "http://clickhouse-db:8123"
-          # CLICKHOUSE_USER: default
-
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
           HELICONE_API_KEY: ${{ secrets.CI_HELICONE_API_KEY }}
