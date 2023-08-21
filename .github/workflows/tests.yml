@@ -78,11 +78,16 @@ jobs:
       #       CLICKHOUSE_HOST
       #       CLICKHOUSE_USER
       #       CLICKHOUSE_PASSWORD
-      - name: Run worker
-        uses: cloudflare/wrangler-action@2.0.0
-        with:
-          command: dev
-          workingDirectory: "worker"
+      - run: |
+          cd worker
+          npm install wrangler
+          npm
+          wrangler dev & sleep 5
+      # - name: Run worker
+      #   uses: cloudflare/wrangler-action@2.0.0
+      #   with:
+      #     command: dev
+      #     workingDirectory: "worker"
       - run: supabase db start
       - name: Install dependencies
         run: |
