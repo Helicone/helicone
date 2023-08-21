@@ -18,8 +18,8 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 1.86.2
-      - run: supabase start
-      #      - run: supabase db lint
+      - run: supabase db start
+      - run: supabase db lint
       - name: Verify generated types match Postgres schema
         run: |
           supabase gen types typescript --local > web/supabase/database.types.ts
