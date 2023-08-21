@@ -35,7 +35,7 @@ def fetch_from_db(query, params=None):
 def fetch(endpoint, method="GET", json=None, headers=None):
     url = f"{BASE_URL}/{endpoint}"
     response = requests.request(method, url, json=json, headers=headers)
-    response.raise_for_status()  # Will raise an HTTPError if an HTTP error occurs
+    response.raise_for_status()
     return response.json()
 
 # def teardown_function(function):
@@ -44,7 +44,6 @@ def fetch(endpoint, method="GET", json=None, headers=None):
 
 def test_proxy():
     print("Running test_proxy...")
-    # This setup mimics the curl example for chat completion
     messages = [
         {
             "role": "user",
