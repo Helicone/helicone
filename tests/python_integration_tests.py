@@ -8,8 +8,8 @@ import os
 BASE_URL = os.environ["OPENAI_API_BASE"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 openai_org_id = os.environ["OPENAI_ORG"]
-helicone_api_key = 'sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa'
-supabase_key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+helicone_api_key = os.environ["HELICONE_API_KEY"]
+supabase_key = os.environ["SUPABASE_KEY"]
 supabase_url = os.environ["SUPABASE_URL"]
 
 def fetch(endpoint, method="GET", json=None, headers=None):
