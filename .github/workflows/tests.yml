@@ -49,21 +49,51 @@ jobs:
         ports:
           - 8123:8123
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1.2.0
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+      - name: Cache npm packages
+        uses: actions/cache@v2.1.7
+        with:
+          path: |
+            ./worker/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm install --prefix ./worker
+      - name: Run worker
+        uses: cloudflare/wrangler-action@2.0.0
+        with:
+          command: dev
+          # apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # environment: 'production'
+          workingDirectory: "worker"
+          secrets: |
+            SUPABASE_SERVICE_ROLE_KEY
+            SUPABASE_URL
+            CLICKHOUSE_HOST
+            CLICKHOUSE_USER
+            CLICKHOUSE_PASSWORD
       - run: supabase db start
       - name: Install dependencies
         run: |
           pip install requests pytest
       - run: |
           cd worker
-          wrangler dev
+          npm
+          wrangler dev & sleep 5
       - name: Run integration tests
         working-directory: tests
         env:
-          # SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          # SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
+          SUPABASE_URL: "http://localhost:54321"
           OPENAI_API_BASE: "http://127.0.0.1:8787/v1"
+          CLICKHOUSE_HOST: "http://clickhouse-db:8123"
+          CLICKHOUSE_USER: default
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
           HELICONE_API_KEY: ${{ secrets.CI_HELICONE_API_KEY }}
