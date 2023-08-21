@@ -39,7 +39,10 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $25
+          $80
+        </span>
+        <span className="text-5xl font-semibold tracking-tight text-gray-500 line-through pl-1">
+          $160
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
@@ -57,7 +60,7 @@ const tiers = [
       "Unlimited Organizations",
       "Up to 2GB of storage",
     ],
-    buttonText: "Get started",
+    buttonText: "Start free trial",
     backgroundColor: "bg-pink-600",
     hoverBackgroundColor: "hover:bg-pink-500",
     textColor: "text-pink-600",
