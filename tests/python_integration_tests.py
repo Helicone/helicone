@@ -1,7 +1,11 @@
 import requests
 import pytest
+import os
 
-BASE_URL = "http://127.0.0.1:8787/v1"  # Assuming helicone runs on this URL
+BASE_URL = os.environ["OPENAI_API_BASE"]
+openai_api_key = os.environ["OPENAI_API_KEY"]
+openai_org_id = os.environ["OPENAI_ORG"]
+helicone_api_key = os.environ["HELICONE_API_KEY"]
 
 def fetch(endpoint, method="GET", json=None, headers=None):
     url = f"{BASE_URL}/{endpoint}"
@@ -10,17 +14,27 @@ def fetch(endpoint, method="GET", json=None, headers=None):
     return response.json()
 
 def test_proxy():
-    prompt = {
-        "prompt":  "ONLY RESPOND '{{word}}'\n",
-        "values": {
-            "word": "hi",
+    # This setup mimics the curl example for chat completion
+    messages = [
+        {
+            "role": "user",
+            "content": "Say hi!"
         }
+    ]
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": messages
     }
     headers = {
-        "Helicone-Prompt-Format": "enabled"
+        "Authorization": f"Bearer {openai_api_key}",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "OpenAI-Organization": openai_org_id
     }
-    response = fetch("completions", method="POST", json=prompt, headers=headers)
-    assert "hi" in response["choices"][0]["text"].lower()
+    response = fetch("chat/completions", method="POST", json=data, headers=headers)
+    
+    # Your assertion can be adjusted based on the structure of the response
+    # For the sake of this example, I'm assuming the response structure mimics OpenAI's API
+    assert "hi" in response["choices"][0]["message"]["content"].lower()
 
 # Add more tests similarly...
 
