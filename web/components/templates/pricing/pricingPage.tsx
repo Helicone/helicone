@@ -60,7 +60,7 @@ const tiers = [
       "Unlimited Organizations",
       "Up to 2GB of storage",
     ],
-    buttonText: "Get started",
+    buttonText: "Start free trial",
     backgroundColor: "bg-pink-600",
     hoverBackgroundColor: "hover:bg-pink-500",
     textColor: "text-pink-600",
