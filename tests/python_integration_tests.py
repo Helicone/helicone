@@ -62,13 +62,12 @@ def test_proxy():
     }
 
     response = fetch("chat/completions", method="POST", json=data, headers=headers)
-    print(response)
     assert response, "Response from OpenAI API is empty"
 
     org_id_filter = "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
     query = "SELECT * FROM request WHERE helicone_org_id = %s ORDER BY created_at DESC LIMIT 1"
     request_data = fetch_from_db(query, (org_id_filter,))
-    assert request_data, "Request data not found in the database for the given user_id"
+    assert request_data, "Request data not found in the database for the given org_id"
 
     latest_request = request_data[0]
     latest_request_id = latest_request["id"]
