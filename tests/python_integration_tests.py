@@ -1,9 +1,9 @@
 import requests
 import pytest
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 BASE_URL = os.environ["OPENAI_API_BASE"]
 openai_api_key = os.environ["OPENAI_API_KEY"]

@@ -91,7 +91,7 @@ jobs:
       - run: supabase db start
       - name: Install dependencies
         run: |
-          pip install requests pytest dotenv
+          pip install requests pytest
       # - run: |
       #     cd worker
       #     npm
