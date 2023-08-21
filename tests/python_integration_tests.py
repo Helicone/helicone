@@ -5,7 +5,7 @@ import os
 BASE_URL = os.environ["OPENAI_API_BASE"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 openai_org_id = os.environ["OPENAI_ORG"]
-helicone_api_key = os.environ["HELICONE_API_KEY"]
+helicone_api_key = 'sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa'
 
 def fetch(endpoint, method="GET", json=None, headers=None):
     url = f"{BASE_URL}/{endpoint}"
