@@ -74,6 +74,8 @@ jobs:
         run: |
           cd worker
           npx wrangler dev & sleep 5
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - run: supabase db start
       - name: Install dependencies
         run: |
