@@ -29,6 +29,7 @@ def fetch_supabase(table, filters=None):
         params = filters
     else:
         params = {}
+
     response = requests.get(url, headers=headers, params=params)
     response.raise_for_status()
     return response.json()
@@ -39,7 +40,7 @@ def test_proxy():
     messages = [
         {
             "role": "user",
-            "content": "Say hi!"
+            "content": test_proxy.__name__
         }
     ]
     data = {
@@ -53,19 +54,17 @@ def test_proxy():
     }
     response = fetch("chat/completions", method="POST", json=data, headers=headers)
 
-    user_id_filter = "f76629c5-a070-4bbc-9918-64beaea48848"
-    request_data = fetch_supabase("request", {"user_id": f"eq.{user_id_filter}"})
-    print(request_data)
+    org_id_filter = "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
+    request_data = fetch_supabase("request", {"helicone_org_id": f"eq.{org_id_filter}"})
     assert request_data, "Request data not found in the database for the given user_id"
+
+    latest_request = request_data[-1]  # assuming the latest request is at the end
+    assert test_proxy.__name__ in latest_request["body"]["messages"][0]["content"], "Request not found in the database"
+
     
     request_id = request_data[0]['id']
     response_data = fetch_supabase("response", {"request": f"eq.{request_id}"})
-    print(response_data)
     assert response_data, "Response data not found in the database for the given request ID"
-    
-    # Your assertion can be adjusted based on the structure of the response
-    # For the sake of this example, I'm assuming the response structure mimics OpenAI's API
-    assert "hi" in response["choices"][0]["message"]["content"].lower()
 
 # Add more tests similarly...
 
