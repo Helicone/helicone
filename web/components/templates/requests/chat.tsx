@@ -6,10 +6,10 @@ import {
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import { Message } from "./requestsPage";
 
 import React from "react";
 import { Tooltip } from "@mui/material";
+import { Message } from "../playground/chatPlayground";
 
 interface ChatProps {
   chatProperties: {
