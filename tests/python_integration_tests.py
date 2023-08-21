@@ -14,6 +14,7 @@ def fetch(endpoint, method="GET", json=None, headers=None):
     return response.json()
 
 def test_proxy():
+    print("Running test_proxy...")
     # This setup mimics the curl example for chat completion
     messages = [
         {
