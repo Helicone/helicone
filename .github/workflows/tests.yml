@@ -55,60 +55,29 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "18"
-      - name: Cache npm packages
-        uses: actions/cache@v2.1.7
-        with:
-          path: |
-            ./worker/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      # - name: Cache npm packages
+      #   uses: actions/cache@v2.1.7
+      #   with:
+      #     path: |
+      #       ./worker/node_modules
+      #     key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
       # - name: Install dependencies
       #   run: npm install --prefix ./worker
-      # - name: Run worker
-      #   uses: cloudflare/wrangler-action@2.0.0
-      #   with:
-      #     command: dev
-      #     # apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     # environment: 'production'
-      #     workingDirectory: "worker"
-      #     secrets: |
-      #       SUPABASE_SERVICE_ROLE_KEY
-      #       SUPABASE_URL
-      #       CLICKHOUSE_HOST
-      #       CLICKHOUSE_USER
-      #       CLICKHOUSE_PASSWORD
+      - name: Install dependencies
+        run: |
+          cd worker
+          npm install wrangler
+          npm install
       - name: Run worker
-        uses: cloudflare/wrangler-action@2.0.0
-        with:
-          command: dev
-          apiToken: ${{ secrets.CI_CLOUDFLARE_API_TOKEN }}
-          workingDirectory: "worker"
-          secrets: |
-            SUPABASE_SERVICE_ROLE_KEY
-            SUPABASE_URL
-            CLICKHOUSE_HOST
-            CLICKHOUSE_USER
-            CLICKHOUSE_PASSWORD
-
-      # - run: |
-      #     cd worker
-      #     npm install wrangler
-      #     npm install
-      #     npx wrangler dev & sleep 5
-      # - name: Run worker
-      #   uses: cloudflare/wrangler-action@2.0.0
-      #   with:
-      #     command: dev
-      #     workingDirectory: "worker"
+        run: |
+          cd worker
+          npx wrangler dev & sleep 5
       - run: supabase db start
       - name: Install dependencies
         run: |
           pip install requests pytest
-      # - run: |
-      #     cd worker
-      #     npm
-      #     wrangler dev & sleep 5
       - name: Run integration tests
         working-directory: tests
         env:
