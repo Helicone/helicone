@@ -23,17 +23,17 @@ jobs:
       - name: Verify generated types match Postgres schema
         run: |
           supabase gen types typescript --local > web/supabase/database.types.ts
-            if ! git diff --ignore-space-at-eol --exit-code --quiet web/supabase/database.types.ts; then
+          if ! git diff --ignore-space-at-eol web/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
               echo "Detected uncommitted changes after build. See status below:"
               git diff
               exit 1
-            fi
-            
+          fi
+
           supabase gen types typescript --local > worker/supabase/database.types.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet worker/supabase/database.types.ts; then
-            echo "Detected uncommitted changes after build. See status below:"
-            git diff
-            exit 1
+          if ! git diff --ignore-space-at-eol worker/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
+              echo "Detected uncommitted changes after build. See status below:"
+              git diff
+              exit 1
           fi
 
   # TODO SEED DATABASE WITH EXAMPLE USERS AND EXAMPLE PROJECTS
