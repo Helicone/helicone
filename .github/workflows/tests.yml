@@ -39,8 +39,8 @@ jobs:
               exit 1
           fi
 
-  e2e-test-python-async:
-    name: Python Async E2E tests
+  e2e-test-python:
+    name: Python E2E tests
     runs-on: ubuntu-latest
     services:
       clickhouse:
