@@ -27,7 +27,7 @@ const tiers = [
       "Basic Exporting",
       "1 Organization",
     ],
-    buttonText: "Try for free",
+    buttonText: "Get Started",
     backgroundColor: "bg-sky-600",
     hoverBackgroundColor: "hover:bg-sky-500",
     textColor: "text-sky-600",
@@ -40,9 +40,6 @@ const tiers = [
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
           $80
-        </span>
-        <span className="text-5xl font-semibold tracking-tight text-gray-500 line-through pl-1">
-          $160
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
