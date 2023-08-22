@@ -77,7 +77,7 @@ jobs:
       - name: Start async worker
         run: |
           cd worker
-          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_ASYNC &
+          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB,API
