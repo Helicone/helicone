@@ -55,14 +55,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "18"
-      # - name: Cache npm packages
-      #   uses: actions/cache@v2.1.7
-      #   with:
-      #     path: |
-      #       ./worker/node_modules
-      #     key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
+      - name: Cache npm packages
+        uses: actions/cache@v2.1.7
+        with:
+          path: |
+            ./worker/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./worker/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install dependencies
         run: |
           cd worker
@@ -89,7 +89,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
-          pytest python_integration_tests.py
+          pytest python_integration_tests.py -s
 
   # TODO Copy the same formula for async typescript and proxy as well
   # NOTE:  wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY > ~/.helicone/worker.log 2>&1 &
