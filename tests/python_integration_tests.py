@@ -69,7 +69,9 @@ def test_proxy():
 
     org_id_filter = "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
     query = "SELECT * FROM request WHERE helicone_org_id = %s"
+    print(query)
     request_data = fetch_from_db(query, (org_id_filter,))
+    print(request_data)
     assert request_data, "Request data not found in the database for the given org_id"
 
     latest_request = request_data[0]

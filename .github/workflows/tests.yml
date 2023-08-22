@@ -89,7 +89,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
-          pytest python_integration_tests.py
+          pytest python_integration_tests.py -s
 
   # TODO Copy the same formula for async typescript and proxy as well
   # NOTE:  wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY > ~/.helicone/worker.log 2>&1 &
