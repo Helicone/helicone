@@ -89,6 +89,7 @@ def test_openai_async():
     helicone_global.api_key = helicone_api_key
     helicone_global.base_url = helicone_async_url
     openai.api_key = openai_api_key
+    openai.organization = openai_org_id
     
     requestId = str(uuid.uuid4())
     print("Request ID: " + requestId)
