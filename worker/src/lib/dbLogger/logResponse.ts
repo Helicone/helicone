@@ -4,7 +4,6 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
-import { DatabaseExecutor } from "../db/postgres";
 
 const MAX_USER_ID_LENGTH = 7000;
 
@@ -115,8 +114,7 @@ async function getHeliconeApiKeyRow(
 
 export async function logRequest(
   request: DBLoggableProps["request"],
-  dbClient: SupabaseClient<Database>,
-  postgres: DatabaseExecutor
+  dbClient: SupabaseClient<Database>
 ): Promise<
   Result<
     {
