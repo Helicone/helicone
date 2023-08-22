@@ -13,7 +13,7 @@ export class HeliconeProxyConfiguration
 {
   private heliconeConfigurationParameters: IHeliconeProxyConfigurationParameters;
   private heliconeHeaders: { [key: string]: string };
-  private baseUrl: string;
+  private baseUrl: URL;
   private onHeliconeFeedback: OnHeliconeFeedback | undefined;
 
   constructor(
@@ -22,9 +22,10 @@ export class HeliconeProxyConfiguration
   ) {
     super(heliconeConfigParameters);
     this.heliconeConfigurationParameters = heliconeConfigParameters;
-    this.baseUrl =
+    this.baseUrl = new URL(
       heliconeConfigParameters.heliconeMeta?.baseUrl ??
-      "https://oai.hconeai.com/v1";
+        "https://oai.hconeai.com/v1"
+    );
     this.onHeliconeFeedback = onHeliconeFeedback;
 
     this.heliconeHeaders = new HeliconeHeaderBuilder(
@@ -45,7 +46,7 @@ export class HeliconeProxyConfiguration
       },
     };
 
-    this.basePath = this.getBaseUrl();
+    this.basePath = this.getBaseUrl().toString();
   }
 
   getOnHeliconeLog(): OnHeliconeLog | undefined {
@@ -56,7 +57,7 @@ export class HeliconeProxyConfiguration
     return this.onHeliconeFeedback;
   }
 
-  getBaseUrl(): string {
+  getBaseUrl(): URL {
     return this.baseUrl;
   }
 

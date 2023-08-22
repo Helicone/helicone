@@ -7,7 +7,7 @@ export type OnHeliconeFeedback = (result: Response) => Promise<void>;
 export interface IHeliconeConfiguration extends Configuration {
   getHeliconeHeaders(): { [key: string]: string };
   getHeliconeAuthHeader(): string;
-  getBaseUrl(): string;
+  getBaseUrl(): URL;
   getOnHeliconeLog(): OnHeliconeLog | undefined;
   getOnHeliconeFeedback(): OnHeliconeFeedback | undefined;
 }

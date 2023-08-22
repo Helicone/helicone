@@ -13,7 +13,7 @@ export class HeliconeAsyncConfiguration
 {
   private heliconeConfigParameters: IHeliconeAsyncConfigurationParameters;
   private heliconeHeaders: { [key: string]: string };
-  private baseUrl: string;
+  private baseUrl: URL;
   private onHeliconeLog: OnHeliconeLog | undefined;
   private onHeliconeFeedback: OnHeliconeFeedback | undefined;
 
@@ -24,9 +24,10 @@ export class HeliconeAsyncConfiguration
   ) {
     super(heliconeConfigParameters);
     this.heliconeConfigParameters = heliconeConfigParameters;
-    this.baseUrl =
+    this.baseUrl = new URL(
       heliconeConfigParameters.heliconeMeta?.baseUrl ??
-      "https://api.hconeai.com";
+        "https://api.hconeai.com"
+    );
     this.onHeliconeLog = onHeliconeLog;
     this.onHeliconeFeedback = onHeliconeFeedback;
 
@@ -38,7 +39,7 @@ export class HeliconeAsyncConfiguration
       .build();
   }
 
-  getBaseUrl(): string {
+  getBaseUrl(): URL {
     return this.baseUrl;
   }
 
