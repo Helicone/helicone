@@ -71,7 +71,7 @@ jobs:
       - name: Run worker
         run: |
           cd worker
-          wrangler dev > wrangler_ci.log 2>&1 &
+          wrangler dev &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB
