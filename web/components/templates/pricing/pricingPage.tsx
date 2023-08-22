@@ -27,7 +27,7 @@ const tiers = [
       "Basic Exporting",
       "1 Organization",
     ],
-    buttonText: "Try for free",
+    buttonText: "Get Started",
     backgroundColor: "bg-sky-600",
     hoverBackgroundColor: "hover:bg-sky-500",
     textColor: "text-sky-600",
@@ -39,7 +39,7 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $25
+          $80
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
@@ -57,7 +57,7 @@ const tiers = [
       "Unlimited Organizations",
       "Up to 2GB of storage",
     ],
-    buttonText: "Get started",
+    buttonText: "Start free trial",
     backgroundColor: "bg-pink-600",
     hoverBackgroundColor: "hover:bg-pink-500",
     textColor: "text-pink-600",
