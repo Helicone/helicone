@@ -9,7 +9,8 @@ import time
 
 load_dotenv()
 
-BASE_URL = os.environ["OPENAI_API_BASE"]
+helicone_proxy_url = os.environ["HELICONE_PROXY_URL"]
+helicone_async_url = os.environ["HELICONE_ASYNC_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 openai_org_id = os.environ["OPENAI_ORG"]
 helicone_api_key = os.environ["HELICONE_API_KEY"]
@@ -34,8 +35,8 @@ def fetch_from_db(query, params=None):
     conn.close()
     return results
 
-def fetch(endpoint, method="GET", json=None, headers=None):
-    url = f"{BASE_URL}/{endpoint}"
+def fetch(base_url, endpoint, method="GET", json=None, headers=None):
+    url = f"{base_url}/{endpoint}"
     response = requests.request(method, url, json=json, headers=headers)
     response.raise_for_status()
     return response.json()
@@ -63,7 +64,7 @@ def test_openai_proxy():
         "OpenAI-Organization": openai_org_id
     }
 
-    response = fetch("chat/completions", method="POST", json=data, headers=headers)
+    response = fetch(helicone_proxy_url, "chat/completions", method="POST", json=data, headers=headers)
     assert response, "Response from OpenAI API is empty"
 
     time.sleep(1) # Helicone needs time to insert request into the database
@@ -78,4 +79,3 @@ def test_openai_proxy():
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
-

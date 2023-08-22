@@ -68,10 +68,11 @@ jobs:
           cd worker
           npm install -g wrangler
           npm install
-      - name: Run worker
+      - name: Run proxy & async worker
         run: |
           cd worker
-          wrangler dev &
+          wrangler dev --port 8787 --var WORKER_TYPE:OPENAI_PROXY &
+          wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB,API
@@ -82,7 +83,8 @@ jobs:
       - name: Run integration tests
         working-directory: tests
         env:
-          OPENAI_API_BASE: "http://127.0.0.1:8787/v1"
+          HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
+          HELICONE_ASYNC_URL: "http://127.0.0.1:8788/v1"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"

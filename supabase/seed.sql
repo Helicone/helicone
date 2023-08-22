@@ -22,4 +22,3 @@ VALUES
 INSERT INTO public.helicone_api_keys (api_key_hash, api_key_name, user_id, organization_id, soft_delete) 
 VALUES 
 ('4a6ced8c61492670cfd56f31e6e4c40e7cf8c6b88b7ab0a70efc5f86c136b9c3', 'Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', 'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', FALSE);
-
