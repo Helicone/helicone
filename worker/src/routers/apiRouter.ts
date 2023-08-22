@@ -24,10 +24,7 @@ export const getAPIRouter = () => {
     ) => {
       const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
       //TODO Check to make sure auth is correct
-      if (
-        !requestWrapper.getAuthorization() ||
-        !requestWrapper.heliconeHeaders.heliconeAuth
-      ) {
+      if (!requestWrapper.getAuthorization()) {
         return new Response("Unauthorized", { status: 401 });
       }
 
@@ -77,10 +74,7 @@ export const getAPIRouter = () => {
     ) => {
       const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
 
-      if (
-        !requestWrapper.getAuthorization() ||
-        !requestWrapper.heliconeHeaders.heliconeAuth
-      ) {
+      if (!requestWrapper.getAuthorization()) {
         return new Response("Unauthorized", { status: 401 });
       }
 
