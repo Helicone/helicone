@@ -70,7 +70,7 @@ def test_proxy():
     response = fetch("chat/completions", method="POST", json=data, headers=headers)
     assert response, "Response from OpenAI API is empty"
 
-    time.sleep(5) # Helicone needs to insert request into the database
+    time.sleep(2) # Helicone needs to insert request into the database
 
     query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
     request_data = fetch_from_db(query, (requestId,))
