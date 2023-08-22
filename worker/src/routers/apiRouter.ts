@@ -6,7 +6,6 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
-import { DatabaseExecutor } from "../lib/db/postgres";
 
 export const getAPIRouter = () => {
   const apiRouter = Router<
@@ -51,7 +50,6 @@ export const getAPIRouter = () => {
       const { error: logError } = await loggable.log({
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        postgres: new DatabaseExecutor(env, ctx),
       });
 
       if (logError !== null) {
@@ -96,7 +94,6 @@ export const getAPIRouter = () => {
       const { error: logError } = await loggable.log({
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        postgres: new DatabaseExecutor(env, ctx),
       });
 
       if (logError !== null) {

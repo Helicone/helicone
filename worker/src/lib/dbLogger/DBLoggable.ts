@@ -12,7 +12,6 @@ import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { DatabaseExecutor } from "../db/postgres";
 
 export interface DBLoggableProps {
   response: {
@@ -412,13 +411,8 @@ export class DBLoggable {
   async log(db: {
     supabase: SupabaseClient<Database>;
     clickhouse: ClickhouseClientWrapper;
-    postgres: DatabaseExecutor;
   }): Promise<Result<null, string>> {
-    const requestResult = await logRequest(
-      this.request,
-      db.supabase,
-      db.postgres
-    );
+    const requestResult = await logRequest(this.request, db.supabase);
 
     // If no data or error, return
     if (!requestResult.data || requestResult.error) {
