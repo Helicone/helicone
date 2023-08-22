@@ -74,7 +74,7 @@ jobs:
           wrangler dev &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Start Supabase DB
+      - name: Start Supabase DB,API
         run: supabase start db,api
       - name: Install python dependencies
         run: |
