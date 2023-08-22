@@ -84,7 +84,7 @@ jobs:
         run: supabase start db,api
       - name: Install python dependencies
         run: |
-          pip install requests pytest psycopg2 python-dotenv
+          pip install requests pytest psycopg2 python-dotenv helicone
       - name: Run integration tests
         working-directory: tests
         env:
