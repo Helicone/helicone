@@ -44,9 +44,9 @@ def fetch(base_url, endpoint, method="GET", json=None, headers=None):
     return response.json()
 
 def test_openai_proxy():
-    print("Running test_proxy...")
+    print("\n---------Running test_proxy---------")
     requestId = str(uuid.uuid4())
-    print("Request ID: " + requestId)
+    print("Request ID: " + requestId + "")
     message_content = test_openai_proxy.__name__ + " - " + requestId
     messages = [
         {
@@ -81,9 +81,10 @@ def test_openai_proxy():
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
+    print("passed")
 
 def test_openai_async():
-    print("Running test_openai_async...")
+    print("---------Running test_openai_async---------")
     
     # Set the API key for Helicone
     helicone_global.api_key = helicone_api_key
@@ -126,3 +127,4 @@ def test_openai_async():
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
     response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
+    print("passed")
