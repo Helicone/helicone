@@ -40,13 +40,14 @@ def fetch(endpoint, method="GET", json=None, headers=None):
     return response.json()
 
 # def teardown_function(function):
-#     fetch_from_db("DELETE FROM response")
-#     fetch_from_db("DELETE FROM request")
+#     fetch_from_db("TRUNCATE response")
+#     fetch_from_db("TRUNCATE request")
 
 def test_proxy():
     print("Running test_proxy...")
     requestId = str(uuid.uuid4())
-    message_content = test_proxy.__name__ + requestId
+    print("Request ID: " + requestId)
+    message_content = test_proxy.__name__ + " - " + requestId
     messages = [
         {
             "role": "user",
@@ -61,26 +62,22 @@ def test_proxy():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Property-RequestId": requestId,
         "OpenAI-Organization": openai_org_id
     }
 
     response = fetch("chat/completions", method="POST", json=data, headers=headers)
     assert response, "Response from OpenAI API is empty"
 
-    org_id_filter = "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
-    query = "SELECT * FROM request WHERE helicone_org_id = %s"
-    print(query)
-    request_data = fetch_from_db(query, (org_id_filter,))
-    print(request_data)
-    assert request_data, "Request data not found in the database for the given org_id"
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
 
     latest_request = request_data[0]
-    latest_request_id = latest_request["id"]
-    latest_request_body = latest_request["body"]
-    assert message_content in latest_request_body["messages"][0]["content"], "Request not found in the database"
+    assert message_content in latest_request["body"]["messages"][0]["content"], "Request not found in the database"
 
     query = "SELECT * FROM response WHERE request = %s LIMIT 1"
-    response_data = fetch_from_db(query, (latest_request_id,))
+    response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
 
 # Add more tests similarly...
