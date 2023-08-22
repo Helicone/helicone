@@ -19,7 +19,7 @@ export class HeliconeFeedback {
     };
 
     const response = await fetch(
-      heliconeConfiguration.getBaseUrl() + "/feedback",
+      heliconeConfiguration.getBaseUrl() + "/v1/feedback",
       options
     );
 
