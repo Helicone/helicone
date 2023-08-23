@@ -129,7 +129,10 @@ export async function proxyForwarder(
         });
     }
   }
-  ctx.waitUntil(log());
+
+  if (request?.heliconeHeaders?.heliconeAuth) {
+    ctx.waitUntil(log());
+  }
 
   if (proxyRequest.rateLimitOptions) {
     if (!proxyRequest.providerAuthHash) {

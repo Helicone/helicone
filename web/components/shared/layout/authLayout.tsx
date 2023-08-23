@@ -121,16 +121,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/usage"),
     },
     {
-      name: "Organizations",
-      href: "/organizations",
+      name: "Organization",
+      href: "/organization",
       icon: BuildingOfficeIcon,
-      current: pathname.includes("/organizations"),
-    },
-    {
-      name: "GraphQL",
-      href: "/graphql",
-      icon: GrGraphQl,
-      current: pathname.includes("/graphql"),
+      current: pathname.includes("/organization"),
     },
     {
       name: "Keys",
@@ -138,16 +132,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: KeyIcon,
       current: pathname.includes("/keys"),
     },
+    {
+      name: "GraphQL",
+      href: "/graphql",
+      icon: GrGraphQl,
+      current: pathname.includes("/graphql"),
+    },
   ];
-
-  if (isVaultEnabled) {
-    accountNav.push({
-      name: "Vault",
-      href: "/vault",
-      icon: LockClosedIcon,
-      current: pathname.includes("/vault"),
-    });
-  }
 
   if (hasFlag) {
     accountNav.push({
@@ -155,6 +146,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/webhooks",
       icon: GlobeAltIcon,
       current: pathname.includes("/webhooks"),
+    });
+  }
+
+  if (isVaultEnabled) {
+    accountNav.push({
+      name: "Vault",
+      href: "/vault",
+      icon: LockClosedIcon,
+      current: pathname.includes("/vault"),
     });
   }
 
@@ -334,7 +334,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
                   <div className="flex flex-col">
-                    <OrgDropdown />
+                    <OrgDropdown userSettings={userSettings} />
                   </div>
                 </div>
                 <div className="mt-1 flex flex-grow flex-col">

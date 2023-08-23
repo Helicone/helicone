@@ -27,7 +27,6 @@ class HeliconeMeta:
 
         if self.user_id:
             meta["Helicone-User-Id"] = self.user_id
-        print("METAAAAA", meta)
         return meta
 
 
@@ -163,8 +162,6 @@ class OpenAIInjector:
                     ),
                     timing=Timing.from_datetimes(now, later)
                 )
-                print("logging", async_log, Provider.OPENAI)
-
                 logger.log(async_log, Provider.OPENAI)
 
             return self._result_interceptor(result,

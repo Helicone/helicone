@@ -13,7 +13,7 @@ export type BuilderType =
   | "ClaudeBuilder";
 
 export const getBuilderType = (model: string): BuilderType => {
-  if (/^(gpt-4|gpt-3\.5)/.test(model)) {
+  if (/^gpt-(4|3\.5|35)/.test(model)) {
     return "FunctionGPTBuilder";
   }
 
@@ -57,11 +57,9 @@ const getModelFromPath = (path: string) => {
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
-  // /v1/engines/text-embedding-ada-002/embeddings
-
   let requestModel =
-    request.request_body?.model ||
     request.response_body?.model ||
+    request.request_body?.model ||
     request.response_body?.body?.model || // anthropic
     getModelFromPath(request.request_path) ||
     "";

@@ -24,10 +24,12 @@ interface PropertyCardPageProps {
 
 const PropertyCard = (props: PropertyCardPageProps) => {
   const { property, timeFilter, onDelete } = props;
+
   const { keyMetrics, valueMetrics } = usePropertyCard({
     timeFilter,
     property,
   });
+
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       value: keyMetrics.totalCost.data?.data
@@ -55,6 +57,8 @@ const PropertyCard = (props: PropertyCardPageProps) => {
       isLoading: keyMetrics.averageLatency.isLoading,
     },
   ];
+
+  console.log(valueMetrics.aggregatedKeyMetrics.data?.data);
 
   return (
     <>

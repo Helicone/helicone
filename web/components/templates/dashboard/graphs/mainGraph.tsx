@@ -32,7 +32,7 @@ export default function MainGraph(props: MainGraphProps) {
   } = props;
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg px-4 pt-4 shadow-md">
+    <div className="bg-white border border-gray-300 rounded-lg px-4 pt-4">
       <div className="flex flex-col">
         <div className="flex flex-row w-full justify-between items-start">
           <div className="flex flex-col space-y-0.5">

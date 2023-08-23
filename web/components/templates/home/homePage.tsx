@@ -40,53 +40,11 @@ import {
 } from "@heroicons/react/24/solid";
 import CodeSnippet from "./codeSnippet";
 import Footer from "../../shared/layout/footer";
-import NavBarV2 from "../../shared/layout/navBarV2";
-
-const testimonials = [
-  {
-    body: `Keeping costs under control was a huge issue 2-3 weeks ago but we are now profitable per user.
-        We leveraged a mix of caching, model-swapping, fine-tuning, and product updates to get here
-        @helicone_ai has been a godsend for LLM cost analytics, especially cost/user`,
-    author: {
-      name: "Daniel Habib",
-      handle: "DannyHabibs",
-      imageUrl: "/assets/daniel-habib.png",
-    },
-  },
-
-  {
-    body: "My favourite of the new AI apps? @helicone_ai - Observability for @OpenAI is pretty bad. Hard to track bills and specific usage with native tools. I see Helicone as the next @datadoghq",
-    author: {
-      name: "John Ndege",
-      handle: "johnndege",
-      imageUrl: "/assets/john-ndege.png",
-    },
-  },
-  {
-    body: `I'm now using Helicone and it's a major QoL improvement while deving on LLMs
-
-        Add one line to your python/JS OpenAI project and get
-        - input/output logging
-        - user-level metrics
-        - caching (soon)
-        
-        Also OSS 👏`,
-    author: {
-      name: "Jay Hack",
-      handle: "mathemagic1an",
-      imageUrl: "/assets/jay-hack.png",
-    },
-  },
-  {
-    body: `As an early-stage startup, speed is everything at Trelent. Helicone helps us quickly understand user behaviour when we're iterating with OpenAI, shorten our testing cycles.`,
-    author: {
-      name: "Calum Bird",
-      handle: "calumbirdo",
-      imageUrl: "/assets/calum-bird.png",
-    },
-  },
-  // More testimonials...
-];
+import NavBarV2 from "../../shared/layout/navbar/navBarV2";
+import ManageHostedButton from "./manageHostedButton";
+import ContactForm, { ContactFormData } from "../../shared/contactForm";
+import Image from "next/image";
+import useNotification from "../../shared/notification/useNotification";
 
 const faqs = [
   {
@@ -107,7 +65,12 @@ const faqs = [
   // More questions...
 ];
 
-export default function HomePage() {
+interface HomePageProps {
+  microsoftForStartups?: boolean;
+}
+
+export default function HomePage(props: HomePageProps) {
+  const { microsoftForStartups = false } = props;
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
@@ -234,64 +197,147 @@ export default function HomePage() {
               their LLM applications. Instantly get insights into your latency,
               costs, and much more.
             </p>
-            <div className="flex flex-row gap-8 mt-10">
-              <Link
-                href="/signup"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white text-sm rounded-lg"
-              >
-                Get Started
-              </Link>
-              {demoLoading ? (
-                <button className="flex flex-row underline underline-offset-4 font-semibold text-gray-900 items-center text-sm">
-                  <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-                  Logging In...
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setDemoLoading(true);
-                    supabaseClient.auth.signOut().then(() => {
-                      supabaseClient.auth
-                        .signInWithPassword({
-                          email: DEMO_EMAIL,
-                          password: "valyrdemo",
-                        })
-                        .then((res) => {
-                          router.push("/demo").then(() => {
-                            setDemoLoading(false);
-                          });
-                        });
-                    });
-                  }}
-                  className="underline underline-offset-4 font-semibold text-gray-900 text-sm"
+            {microsoftForStartups ? (
+              <div className="flex flex-row items-center mt-16 -ml-5">
+                <div>
+                  <Image
+                    priority
+                    src={"/assets/mfs.png"}
+                    alt={"Helicone-mobile"}
+                    width={300}
+                    height={300}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-row gap-8 mt-10">
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 bg-gray-800 font-semibold text-white text-sm rounded-lg"
                 >
-                  View Demo
-                </button>
-              )}
+                  Get Started
+                </Link>
+                {demoLoading ? (
+                  <button className="flex flex-row underline underline-offset-4 font-semibold text-gray-900 items-center text-sm">
+                    <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                    Logging In...
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setDemoLoading(true);
+                      supabaseClient.auth.signOut().then(() => {
+                        supabaseClient.auth
+                          .signInWithPassword({
+                            email: DEMO_EMAIL,
+                            password: "valyrdemo",
+                          })
+                          .then((res) => {
+                            router.push("/demo").then(() => {
+                              setDemoLoading(false);
+                            });
+                          });
+                      });
+                    }}
+                    className="underline underline-offset-4 font-semibold text-gray-900 text-sm"
+                  >
+                    View Demo
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          {microsoftForStartups ? (
+            <ContactForm contactTag={"mfs"} buttonText={"Claim Free Year"} />
+          ) : (
+            <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
+              <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
+                <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
+                  <img
+                    src="/assets/landing/preview.webp"
+                    alt="App screenshot"
+                    width={2720}
+                    height={1844}
+                    className="w-[55rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+                  />
+                </div>
+              </div>
+              <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
+                <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
+                  <img
+                    src="/assets/landing/request-preview.png"
+                    alt="App screenshot"
+                    width={556}
+                    height={916}
+                    className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="bg-gray-50">
+        <div className="px-8 grid grid-cols-4 gap-16 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
+          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
+            <p className="text-5xl text-sky-500 tracking-wide font-semibold">
+              Open Source
+            </p>
+            <p className="text-xl text-gray-700 font-medium leading-8">
+              Open-Source is more than a choice—it&apos;s a commitment to
+              user-centric development, community collaboration, and absolute
+              transparency.
+            </p>
+            <div className="flex flex-row gap-8 items-center">
+              <Link
+                href="https://github.com/Helicone/helicone"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
+              >
+                Star us on GitHub
+              </Link>
+              <Link
+                href="/roadmap"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
+                View Roadmap
+              </Link>
             </div>
           </div>
-          <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
-            <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                <img
-                  src="/assets/landing/preview.webp"
-                  alt="App screenshot"
-                  width={2720}
-                  height={1844}
-                  className="w-[55rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-                />
-              </div>
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
+            <div className="flex flex-col space-y-2">
+              <CloudIcon className="h-8 w-8 inline text-sky-500" />
+              <p className="text-gray-900 font-semibold text-xl">
+                Cloud Solution
+              </p>
             </div>
-            <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
-              <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                <img
-                  src="/assets/landing/request-preview.png"
-                  alt="App screenshot"
-                  width={556}
-                  height={916}
-                  className="w-[22.5rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
-                />
-              </div>
+            <p className="text-gray-500">
+              We offer a hosted cloud solution for users that want to get up and
+              running quickly.
+            </p>
+            <div>
+              <Link
+                href="/pricing"
+                className="underline underline-offset-2 font-semibold text-gray-900"
+              >
+                View Pricing
+              </Link>
+            </div>
+          </div>
+          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
+            <div className="flex flex-col space-y-2">
+              <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
+              <p className="text-gray-900 font-semibold text-xl">
+                Manage Hosted
+              </p>
+            </div>
+            <p className="text-gray-500">
+              Deploy Helicone on your own infrastructure to maintain full
+              control over your data.
+            </p>
+            <div>
+              <ManageHostedButton />
             </div>
           </div>
         </div>
@@ -688,80 +734,13 @@ export default function HomePage() {
           </div>
           <div className="hidden md:flex flex-col col-span-4 md:col-span-2 h-full py-32 space-y-4">
             <CodeSnippet variant={"themed"} />
+            <p className="text-center italic text-gray-500">
+              Example Integration with OpenAI
+            </p>
           </div>
         </div>
       </div>
-      <div className="bg-gray-50">
-        <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
-          <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
-            <p className="text-5xl text-sky-500 tracking-wide font-semibold">
-              Open Source
-            </p>
-            <p className="text-xl text-gray-700 font-medium leading-8">
-              Open-Source is more than a choice—it&apos;s a commitment to
-              user-centric development, community collaboration, and absolute
-              transparency.
-            </p>
-            <div className="flex flex-row gap-8 items-center">
-              <Link
-                href="https://github.com/Helicone/helicone"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-800 font-semibold text-white rounded-lg"
-              >
-                Star us on GitHub
-              </Link>
-              <Link
-                href="/roadmap"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Roadmap
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
-            <div className="flex flex-col space-y-2">
-              <CloudIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-xl">
-                Cloud Solution
-              </p>
-            </div>
-            <p className="text-gray-500">
-              We offer a fully-managed cloud solution, allowing you to focus on
-              what matters most.
-            </p>
-            <div>
-              <Link
-                href="/pricing"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Pricing
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col col-span-2 md:col-span-1 h-full py-32 space-y-4">
-            <div className="flex flex-col space-y-2">
-              <CloudArrowUpIcon className="h-8 w-8 inline text-sky-500" />
-              <p className="text-gray-900 font-semibold text-xl">AWS Deploy</p>
-            </div>
-            <p className="text-gray-500">
-              Deploy your own instance of Helicone on AWS, with just a few
-              clicks.
-            </p>
-            <div>
-              <Link
-                href="https://docs.helicone.ai/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 font-semibold text-gray-900"
-              >
-                View Docs
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="bg-violet-100">
+      <div className="bg-violet-50">
         <div className="px-8 grid grid-cols-4 gap-24 h-full max-w-7xl mx-auto border-gray-300 w-full justify-center">
           <div className="col-span-4 md:col-span-2 flex flex-col space-y-8 py-32">
             <p className="text-5xl text-violet-500 tracking-wide font-semibold">

@@ -1,5 +1,5 @@
 import Footer from "../../components/shared/layout/footer";
-import NavBarV2 from "../../components/shared/layout/navBarV2";
+import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
 import BlogPage from "../../components/templates/blog/blogPage";
 

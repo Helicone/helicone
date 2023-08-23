@@ -67,6 +67,10 @@ export const getAPIRouter = (router: BaseRouter) => {
     ) => {
       const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
 
+      if (!requestWrapper.getAuthorization()) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
       const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
       const responseHeaders = new Headers(
         asyncLogModel.providerResponse.headers

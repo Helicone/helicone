@@ -18,7 +18,8 @@
   "scripts": {
     "start": "wrangler dev",
     "deploy": "wrangler publish",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx . --fix",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
+    "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix",
     "test": "jest"
   },
   "dependencies": {
@@ -35,6 +36,7 @@
     "events": "^3.3.0",
     "gpt3-tokenizer": "^1.1.5",
     "itty-router": "^4.0.13",
+    "pg": "^8.11.2",
     "prettier": "^2.8.7",
     "yarn": "^1.22.19"
   }
