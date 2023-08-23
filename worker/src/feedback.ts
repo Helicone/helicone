@@ -9,10 +9,7 @@ interface FeedbackRequestBodyV2 {
   "is-thumbs-up": boolean;
 }
 
-export async function handleFeedback(
-  request: RequestWrapper,
-  env: Env
-): Promise<Response> {
+export async function handleFeedback(request: RequestWrapper, env: Env) {
   const body = await request.getJson<FeedbackRequestBodyV2>();
   const heliconeId = body["helicone-id"];
   const isThumbsUp = body["is-thumbs-up"];
@@ -22,37 +19,62 @@ export async function handleFeedback(
     return new Response("Authentication required.", { status: 401 });
   }
 
-  let responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
+  const dbClient: SupabaseClient<Database> = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
 
-  // If response not logged, retry up to two more times
-  if (responseId === null || responseId.error) {
-    console.log("Response not logged, retrying up to two more times.");
-    for (let i = 0; i < 2; i++) {
-      console.log(`Retry ${i + 1}...`);
-      const sleepDuration = i === 0 ? 100 : 1000;
-      await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+  const { data: requestData, error: requestError } = await dbClient
+    .from("request")
+    .select("*")
+    .eq("id", heliconeId)
+    .single();
 
-      responseId = await isResponseLogged(heliconeId, env, heliconeAuth);
-
-      if (responseId !== undefined || responseId !== null) {
-        break;
-      }
-    }
+  if (requestError || !requestData) {
+    console.error("Error fetching request:", requestError.message);
+    return new Response(`Error: Request not found with id ${heliconeId}`, {
+      status: 500,
+    });
   }
 
-  if (responseId.error || responseId.data === null) {
+  const { data: apiKey, error: apiKeyError } = await dbClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("id", requestData.helicone_api_key_id)
+    .single();
+
+  if (apiKeyError || !apiKey) {
+    console.error("Error fetching api key:", apiKeyError.message);
+    return new Response(
+      `Error: Api key not found with id ${requestData.helicone_api_key_id}`,
+      { status: 500 }
+    );
+  }
+
+  const heliconeApiKey = heliconeAuth.replace("Bearer ", "").trim();
+  const heliconeApiKeyHash = await hash(`Bearer ${heliconeApiKey}`);
+
+  // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
+  if (heliconeApiKeyHash !== apiKey.api_key_hash) {
+    return { error: "Invalid authentication.", data: null };
+  }
+
+  const { data: responseData, error: responseError } = await getResponse(
+    dbClient,
+    heliconeId
+  );
+
+  if (responseError || !responseData) {
     return new Response(
       `Error: Response not found for heliconeId "${heliconeId}".`,
       { status: 500 }
     );
   }
 
-  const insertResponse = await insertFeedback(
-    heliconeId,
-    responseId.data,
+  const insertResponse = await insertFeedbackPostgres(
+    responseData?.id,
     isThumbsUp,
-    env,
-    heliconeAuth
+    dbClient
   );
 
   if (insertResponse.error || insertResponse.data === null) {
@@ -70,55 +92,11 @@ export async function handleFeedback(
   );
 }
 
-export async function insertFeedback(
-  heliconeId: string,
+export async function insertFeedbackPostgres(
   responseId: string,
   isThumbsUp: boolean,
-  env: Env,
-  heliconeAuth?: string
+  dbClient: SupabaseClient<Database>
 ): Promise<Result<number, string>> {
-  const dbClient: SupabaseClient<Database> = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  if (!heliconeAuth) {
-    return { error: "Authentication required.", data: null };
-  }
-
-  const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-  const apiKeyHash = await hash(`Bearer ${apiKey}`);
-
-  // Fetch the request with the corresponding response.request value
-  const { data: requestData, error: requestError } = await dbClient
-    .from("request")
-    .select("id, helicone_api_keys (id, api_key_hash)")
-    .eq("id", heliconeId)
-    .single();
-
-  if (requestError) {
-    console.error("Error fetching request:", requestError.message);
-    throw requestError;
-  }
-
-  let matchingApiKeyHash;
-  let matchingApiKeyId;
-  if (requestData.helicone_api_keys instanceof Array) {
-    throw new Error("Internal error.");
-  } else if (requestData.helicone_api_keys instanceof Object) {
-    matchingApiKeyHash = requestData.helicone_api_keys.api_key_hash;
-    matchingApiKeyId = requestData.helicone_api_keys.id;
-  } else {
-    throw new Error(
-      "Internal error. Make sure you're providing a valid helicone API key to authenticate your requests."
-    );
-  }
-
-  // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
-  if (!requestData || matchingApiKeyHash !== apiKeyHash) {
-    throw new Error("Not authorized to add feedback.");
-  }
-
   const feedback = await dbClient
     .from("feedback")
     .upsert(
@@ -143,30 +121,31 @@ export async function insertFeedback(
   return { error: null, data: feedback.data.id };
 }
 
-async function isResponseLogged(
-  heliconeId: string,
-  env: Env,
-  heliconeAuth?: string
-): Promise<Result<string, string>> {
-  const dbClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
+async function getResponse(
+  dbClient: SupabaseClient<Database>,
+  heliconeId: string
+): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
+  const maxRetries = 3;
 
-  if (!heliconeAuth) {
-    return { error: "Authentication required.", data: null };
+  for (let i = 0; i < maxRetries; i++) {
+    const { data: response, error: responseError } = await dbClient
+      .from("response")
+      .select("*")
+      .eq("request", heliconeId)
+      .single();
+
+    if (responseError) {
+      console.error("Error fetching response:", responseError.message);
+      return { error: responseError.message, data: null };
+    }
+
+    if (response) {
+      return { error: null, data: response };
+    }
+
+    const sleepDuration = i === 0 ? 100 : 1000;
+    await new Promise((resolve) => setTimeout(resolve, sleepDuration));
   }
 
-  const { data: response, error: responseError } = await dbClient
-    .from("response")
-    .select("id, request")
-    .eq("request", heliconeId)
-    .single();
-
-  if (responseError) {
-    console.error("Error fetching response:", responseError.message);
-    return { error: responseError.message, data: null };
-  }
-
-  return { error: null, data: response?.id };
+  return { error: "Response not found.", data: null };
 }

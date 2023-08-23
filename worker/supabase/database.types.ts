@@ -67,19 +67,19 @@ export interface Database {
       }
       feedback: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: number
           is_thumbs_up: boolean
           response_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: number
           is_thumbs_up: boolean
           response_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: number
           is_thumbs_up?: boolean
           response_id?: string

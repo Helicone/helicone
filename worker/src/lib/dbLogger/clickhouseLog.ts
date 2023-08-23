@@ -115,3 +115,31 @@ export async function logInClickhouse(
     ),
   ]);
 }
+
+export async function logFeedbackInClickhouse(
+  clickhouseDb: ClickhouseClientWrapper,
+  request: Database["public"]["Tables"]["request"]["Row"],
+  response: Database["public"]["Tables"]["response"]["Row"],
+  feedback: Database["public"]["Tables"]["feedback"]["Row"]
+) {
+  return clickhouseDb.dbInsertClickhouse("feedback", [
+    {
+      response_id: response.id,
+      response_created_at: formatTimeString(response.created_at),
+      latency: response.delay_ms,
+      status: response.status,
+      completion_tokens: response.completion_tokens,
+      prompt_tokens: response.prompt_tokens,
+      model: ((response.body as any)?.model as string) || null,
+      request_id: request.id,
+      request_created_at: formatTimeString(request.created_at),
+      auth_hash: request.auth_hash,
+      user_id: request.user_id,
+      organization_id:
+        request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      created_at: formatTimeString(feedback.created_at),
+      feedback_id: feedback.id,
+      is_thumbs_up: feedback.is_thumbs_up,
+    },
+  ]);
+}
