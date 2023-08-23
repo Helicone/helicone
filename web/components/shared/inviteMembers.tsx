@@ -3,7 +3,7 @@ import ThemedModal from "./themed/themedModal";
 import { clsx } from "./clsx";
 import { useOrg } from "./layout/organizationContext";
 import useNotification from "./notification/useNotification";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
 interface InviteMemberButtonProps {
   onSuccess?: () => void;
@@ -14,12 +14,14 @@ const InviteMemberButton = (props: InviteMemberButtonProps) => {
   const { onSuccess, variant = "primary" } = props;
 
   const [addOpen, setAddOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const org = useOrg();
   const { setNotification } = useNotification();
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const email = e.currentTarget.elements.namedItem(
       "email"
@@ -29,8 +31,6 @@ const InviteMemberButton = (props: InviteMemberButtonProps) => {
       setNotification("Failed to add member. Please try again.", "error");
       return;
     }
-
-    console.log(email.value);
 
     fetch(`/api/organization/${org?.currentOrg.id}/add_member`, {
       method: "POST",
@@ -56,6 +56,9 @@ const InviteMemberButton = (props: InviteMemberButtonProps) => {
           onSuccess && onSuccess();
           setAddOpen(false);
         }
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -117,6 +120,9 @@ const InviteMemberButton = (props: InviteMemberButtonProps) => {
               }}
               className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
+              {isLoading && (
+                <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+              )}
               Add Member
             </button>
           </div>
