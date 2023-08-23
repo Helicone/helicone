@@ -30,9 +30,17 @@ const InviteMemberButton = (props: InviteMemberButtonProps) => {
       return;
     }
 
-    fetch(
-      `/api/organization/${org?.currentOrg.id}/add_member?email=${email.value}`
-    )
+    console.log(email.value);
+
+    fetch(`/api/organization/${org?.currentOrg.id}/add_member`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email.value,
+      }),
+    })
       .then((res) => res.json())
       .then((res) => {
         if (res.error) {
