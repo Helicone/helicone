@@ -71,7 +71,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
-        <div className="flex flex-col gap-4 md:flex-row items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
           <div className="flex flex-col space-y-1">
             <h1 className="text-3xl font-semibold">{org.name}</h1>
             {org.created_at !== null && (
