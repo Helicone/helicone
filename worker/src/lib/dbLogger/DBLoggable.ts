@@ -444,6 +444,7 @@ export class DBLoggable {
     if (!heliconeApiKeyRow?.organization_id) {
       return { data: null, error: "Helicone api key not found" };
     }
+
     // Fetch the serialized list of request timestamps for this API key from the KV store
     const serializedTimestamps =
       (await rateLimitKV.get(heliconeApiKeyRow.organization_id)) || "[]";
@@ -459,6 +460,16 @@ export class DBLoggable {
 
     // If the number of recent requests is 1000 or more, deny the request
     if (recentTimestamps.length >= 1000) {
+      const rl_hits =
+        (await rateLimitKV.get(
+          `RL_HITS_${heliconeApiKeyRow.organization_id}`
+        )) || "0";
+      const rl_hits_int = parseInt(rl_hits);
+      rateLimitKV.put(
+        `RL_HITS_${heliconeApiKeyRow.organization_id}`,
+        (rl_hits_int + 1).toString()
+      );
+
       return { data: null, error: "Rate limit exceeded" };
     }
 
