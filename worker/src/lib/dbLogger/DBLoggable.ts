@@ -91,6 +91,23 @@ function getResponseBody(json: any): string {
   return JSON.stringify(json);
 }
 
+async function getHeliconeApiKeyRow(
+  dbClient: SupabaseClient<Database>,
+  heliconeApiKeyHash?: string
+) {
+  const { data, error } = await dbClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("api_key_hash", heliconeApiKeyHash)
+    .eq("soft_delete", false)
+    .single();
+
+  if (error !== null) {
+    return { data: null, error: error.message };
+  }
+  return { data: data, error: null };
+}
+
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
 
 export async function dbLoggableRequestFromAsyncLogModel(
@@ -408,11 +425,56 @@ export class DBLoggable {
     };
   }
 
-  async log(db: {
-    supabase: SupabaseClient<Database>;
-    clickhouse: ClickhouseClientWrapper;
-  }): Promise<Result<null, string>> {
-    const requestResult = await logRequest(this.request, db.supabase);
+  async log(
+    db: {
+      supabase: SupabaseClient<Database>;
+      clickhouse: ClickhouseClientWrapper;
+    },
+    rateLimitKV: KVNamespace
+  ): Promise<Result<null, string>> {
+    const { data: heliconeApiKeyRow, error: userIdError } =
+      await getHeliconeApiKeyRow(
+        db.supabase,
+        this.request.heliconeApiKeyAuthHash
+      );
+    if (userIdError !== null) {
+      return { data: null, error: userIdError };
+    }
+
+    if (!heliconeApiKeyRow?.organization_id) {
+      return { data: null, error: "Helicone api key not found" };
+    }
+    // Fetch the serialized list of request timestamps for this API key from the KV store
+    const serializedTimestamps =
+      (await rateLimitKV.get(heliconeApiKeyRow.organization_id)) || "[]";
+
+    // Deserialize the timestamps
+    const timestamps: number[] = JSON.parse(serializedTimestamps);
+
+    // Filter out timestamps older than 1 minute
+    const oneMinuteAgo = Date.now() - 60000;
+    const recentTimestamps = timestamps.filter(
+      (timestamp) => timestamp > oneMinuteAgo
+    );
+
+    // If the number of recent requests is 1000 or more, deny the request
+    if (recentTimestamps.length >= 1000) {
+      return { data: null, error: "Rate limit exceeded" };
+    }
+
+    // Otherwise, add the current timestamp to the list and store it back in the KV store
+    recentTimestamps.push(Date.now());
+    const newSerializedTimestamps = JSON.stringify(recentTimestamps);
+    await rateLimitKV.put(
+      heliconeApiKeyRow.organization_id,
+      newSerializedTimestamps
+    );
+
+    const requestResult = await logRequest(
+      this.request,
+      db.supabase,
+      heliconeApiKeyRow
+    );
 
     // If no data or error, return
     if (!requestResult.data || requestResult.error) {

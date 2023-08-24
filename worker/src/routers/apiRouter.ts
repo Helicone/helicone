@@ -47,10 +47,16 @@ export const getAPIRouter = () => {
         providerResponseHeaders: responseHeaders,
         provider: "OPENAI",
       });
-      const { error: logError } = await loggable.log({
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      });
+      const { error: logError } = await loggable.log(
+        {
+          clickhouse: new ClickhouseClientWrapper(env),
+          supabase: createClient(
+            env.SUPABASE_URL,
+            env.SUPABASE_SERVICE_ROLE_KEY
+          ),
+        },
+        env.RATE_LIMIT_KV
+      );
 
       if (logError !== null) {
         return new Response(JSON.stringify({ error: logError }), {
@@ -91,10 +97,16 @@ export const getAPIRouter = () => {
         provider: "OPENAI",
       });
 
-      const { error: logError } = await loggable.log({
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      });
+      const { error: logError } = await loggable.log(
+        {
+          clickhouse: new ClickhouseClientWrapper(env),
+          supabase: createClient(
+            env.SUPABASE_URL,
+            env.SUPABASE_SERVICE_ROLE_KEY
+          ),
+        },
+        env.RATE_LIMIT_KV
+      );
 
       if (logError !== null) {
         return new Response(JSON.stringify({ error: logError }), {
