@@ -116,10 +116,13 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
   async function log() {
-    const res = await loggable.log({
-      clickhouse: new ClickhouseClientWrapper(env),
-      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-    });
+    const res = await loggable.log(
+      {
+        clickhouse: new ClickhouseClientWrapper(env),
+        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      },
+      env.RATE_LIMIT_KV
+    );
     if (res.error !== null) {
       request
         .getHeliconeAuthHeader()
