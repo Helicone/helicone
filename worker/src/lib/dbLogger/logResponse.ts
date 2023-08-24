@@ -95,26 +95,10 @@ async function getPromptId(
   }
 }
 
-async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
-) {
-  const { data, error } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
-    .eq("soft_delete", false)
-    .single();
-
-  if (error !== null) {
-    return { data: null, error: error.message };
-  }
-  return { data: data, error: null };
-}
-
 export async function logRequest(
   request: DBLoggableProps["request"],
-  dbClient: SupabaseClient<Database>
+  dbClient: SupabaseClient<Database>,
+  heliconeApiKeyRow: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
 ): Promise<
   Result<
     {
@@ -152,12 +136,6 @@ export async function logRequest(
     const formattedPromptId =
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
-
-    const { data: heliconeApiKeyRow, error: userIdError } =
-      await getHeliconeApiKeyRow(dbClient, request.heliconeApiKeyAuthHash);
-    if (userIdError !== null) {
-      return { data: null, error: userIdError };
-    }
 
     if (!heliconeApiKeyRow?.organization_id) {
       return { data: null, error: "Helicone api key not found" };
