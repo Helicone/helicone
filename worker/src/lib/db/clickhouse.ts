@@ -1,10 +1,19 @@
-import { InsertParams as ConnectionInsertParams } from "@clickhouse/client/dist/connection";
 import { Result } from "../../results";
-import { InsertResult, TLSParams } from "@clickhouse/client/dist/connection";
-import * as http_search_params from "@clickhouse/client/dist/connection/adapter/http_search_params";
-
-import { ClickHouseSettings } from "@clickhouse/client/dist/settings";
-import { DataFormat, encodeJSON } from "@clickhouse/client/dist/data_formatter";
+import {
+  ClickHouseClient,
+  CommandParams,
+  CommandResult,
+  toSearchParams,
+  encodeJSON,
+} from "@clickhouse/client-common";
+import {
+  ClickHouseSettings,
+  DataFormat,
+  InsertResult,
+  createClient,
+  InsertParams as ConnectionInsertParams,
+} from "@clickhouse/client";
+import { TLSParams } from "@clickhouse/client/dist/connection";
 
 type InsertValues<T> = ReadonlyArray<T>;
 export interface InsertParams<T = unknown> extends BaseParams {
@@ -14,6 +23,15 @@ export interface InsertParams<T = unknown> extends BaseParams {
   values: InsertValues<T>;
   /** Format of the dataset to insert. */
   format?: DataFormat;
+}
+
+export interface UpdateParams<T = unknown> extends BaseParams {
+  /** Name of a table to insert into. */
+  table: string;
+  /** A dataset to update. */
+  values: InsertValues<T>;
+  /** Format of the dataset to insert. */
+  condition: string;
 }
 
 export interface ClickhouseEnv {
@@ -149,11 +167,49 @@ class ClickhouseClient {
     };
   }
 
+  // async command(params: CommandParams): Promise<CommandResult> {
+  //   const query_id = params.query_id || crypto.randomUUID();
+  //   const thisSearchParams = toSearchParams({
+  //     database: this.config.database,
+  //     query: params.query,
+  //     clickhouse_settings: params.clickhouse_settings,
+  //     query_params: params.query_params,
+  //     session_id: this.config.session_id,
+  //     query_id,
+  //   });
+
+  //   const xParams = {
+  //     method: "POST",
+  //     url: transformUrl({
+  //       url: this.config.url,
+  //       pathname: "/",
+  //       searchParams: thisSearchParams,
+  //     }),
+  //     abort_signal: params.abort_signal,
+  //   };
+
+  //   const response = await fetch(xParams.url.toString(), {
+  //     method: xParams.method,
+  //     headers: {
+  //       "Content-Type": "text/plain",
+  //       Authorization: `Basic ${Buffer.from(
+  //         `${this.config.username}:${this.config.password}`
+  //       ).toString("base64")}`,
+  //     },
+  //     signal: xParams.abort_signal,
+  //   });
+
+  //   // Ensure the response stream is destroyed immediately
+  //   response.body?.destroy();
+
+  //   return { query_id };
+  // }
+
   async connection_insert(
     params: ConnectionInsertParams
   ): Promise<InsertResult> {
     const query_id = params.query_id || crypto.randomUUID();
-    const thisSearchParams = http_search_params.toSearchParams({
+    const thisSearchParams = toSearchParams({
       database: this.config.database,
       clickhouse_settings: params.clickhouse_settings,
       query_params: params.query_params,
@@ -213,26 +269,75 @@ class ClickhouseClient {
       ...this.getBaseParams(params),
     });
   }
+
+  async update(params: UpdateParams): Promise<InsertResult> {
+    const query = `ALTER TABLE ${params.table.trim()} UPDATE ${
+      params.values
+    } WHERE ${params.condition}`;
+
+    return await this.command({
+      query,
+    });
+  }
 }
 
 export class ClickhouseClientWrapper {
+  private config: NormalizedConfig;
   private client: ClickhouseClient;
+  private clickHouseClient: ClickHouseClient;
+
   constructor(env: ClickhouseEnv) {
-    this.client = new ClickhouseClient({
+    this.config = normalizeConfig({
+      host: env.CLICKHOUSE_HOST,
+      username: env.CLICKHOUSE_USER,
+      password: env.CLICKHOUSE_PASSWORD,
+    });
+
+    this.client = new ClickhouseClient(this.config);
+
+    this.clickHouseClient = createClient({
       host: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
   }
 
+  /*
+  async insert<T>(params: InsertParams<T>): Promise<InsertResult> {
+    const format = params.format || "JSONCompactEachRow";
+
+    const query = `INSERT INTO ${params.table.trim()} FORMAT ${format}`;
+
+    return await this.connection_insert({
+      query,
+      values: encodeValues(params.values, format),
+      ...this.getBaseParams(params),
+    });
+  }
+
+  private getBaseParams(params: BaseParams) {
+    return {
+      clickhouse_settings: {
+        ...this.config.clickhouse_settings,
+        ...params.clickhouse_settings,
+      },
+      query_params: params.query_params,
+      abort_signal: params.abort_signal,
+      session_id: this.config.session_id,
+      query_id: params.query_id,
+    };
+  }
+  */
+
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
     values: ClickhouseDB["Tables"][T][]
   ): Promise<Result<string, string>> {
+    const format = "JSONEachRow" || "JSONCompactEachRow";
     try {
-      const queryResult = await this.client.insert({
+      const queryResult = await this.clickHouseClient.insert({
         table: table,
-        values: values,
+        values: encodeValues(values, format),
         format: "JSONEachRow",
         // Recommended for cluster usage to avoid situations
         // where a query processing error occurred after the response code
@@ -251,6 +356,13 @@ export class ClickhouseClientWrapper {
         error: JSON.stringify(err),
       };
     }
+  }
+
+  async dbUpdateClickhouse<T extends keyof ["Tables"]>(
+    table: T,
+    values: ClickhouseDB["Tables"][T][]
+  ) {
+    this.clickHouseClient.command({});
   }
 }
 
@@ -323,7 +435,7 @@ interface PropertyWithResponseV1 {
   property_value: string;
 }
 
-interface Feedback {
+interface ProviderApiLogs {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
   latency: Nullable<number>;
@@ -336,9 +448,9 @@ interface Feedback {
   auth_hash: string;
   user_id: Nullable<string>;
   organization_id: string;
-  created_at: string;
-  feedback_id: number;
-  is_thumbs_up: boolean;
+  feedback_created_at: Nullable<string>;
+  feedback_id: Nullable<number>;
+  is_thumbs_up: Nullable<boolean>;
 }
 
 export interface ClickhouseDB {
@@ -349,6 +461,6 @@ export interface ClickhouseDB {
     properties_copy_v2: PropertiesCopyV2;
     response_copy_v3: ResponseCopyV3;
     property_with_response_v1: PropertyWithResponseV1;
-    feedback: Feedback;
+    provider_api_logs: ProviderApiLogs;
   };
 }

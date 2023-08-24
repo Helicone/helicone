@@ -3,6 +3,8 @@ import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
+import { logFeedbackInClickhouse } from "./lib/dbLogger/clickhouseLog";
+import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
@@ -71,17 +73,21 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     );
   }
 
-  const insertResponse = await insertFeedbackPostgres(
-    responseData?.id,
-    isThumbsUp,
-    dbClient
-  );
+  const { data: feedbackData, error: feedbackError } =
+    await insertFeedbackPostgres(responseData?.id, isThumbsUp, dbClient);
 
-  if (insertResponse.error || insertResponse.data === null) {
-    return new Response(`Error adding feedback: ${insertResponse.error}`, {
+  if (feedbackError || !feedbackData) {
+    return new Response(`Error adding feedback: ${feedbackError}`, {
       status: 500,
     });
   }
+
+  await logFeedbackInClickhouse(
+    new ClickhouseClientWrapper(env),
+    requestData,
+    responseData,
+    feedbackData
+  );
 
   return new Response(
     JSON.stringify({
@@ -96,7 +102,7 @@ export async function insertFeedbackPostgres(
   responseId: string,
   isThumbsUp: boolean,
   dbClient: SupabaseClient<Database>
-): Promise<Result<number, string>> {
+): Promise<Result<Database["public"]["Tables"]["feedback"]["Row"], string>> {
   const feedback = await dbClient
     .from("feedback")
     .upsert(
@@ -118,7 +124,7 @@ export async function insertFeedbackPostgres(
     return { error: "Unknown error", data: null };
   }
 
-  return { error: null, data: feedback.data.id };
+  return { error: null, data: feedback.data };
 }
 
 async function getResponse(
