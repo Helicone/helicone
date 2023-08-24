@@ -7,6 +7,7 @@ export async function getTokenCount(
   tokenCalcUrl: string
 ): Promise<number> {
   if (provider === "OPENAI") {
+    if (!inputText) return 0;
     const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
     const encoded: { bpe: number[]; text: string[] } =
       tokenizer.encode(inputText);
