@@ -4,27 +4,9 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
+import { InsertQueue } from "./insertQueue";
 
 const MAX_USER_ID_LENGTH = 7000;
-
-export async function initialResponseLog(
-  { requestId }: DBLoggableProps["request"],
-  { startTime, endTime }: DBLoggableProps["timing"],
-  dbClient: SupabaseClient<Database>
-) {
-  return dbClient
-    .from("response")
-    .insert([
-      {
-        request: requestId,
-        delay_ms: (endTime ?? new Date()).getTime() - startTime.getTime(),
-        body: {},
-        status: -1,
-      },
-    ])
-    .select("*")
-    .single();
-}
 
 async function getPromptId(
   dbClient: SupabaseClient,
@@ -97,13 +79,15 @@ async function getPromptId(
 
 export async function logRequest(
   request: DBLoggableProps["request"],
+  responseId: string,
   dbClient: SupabaseClient<Database>,
+  insertQueue: InsertQueue,
   heliconeApiKeyRow: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
 ): Promise<
   Result<
     {
       request: Database["public"]["Tables"]["request"]["Row"];
-      properties: Database["public"]["Tables"]["properties"]["Row"][];
+      properties: Database["public"]["Tables"]["properties"]["Insert"][];
     },
     string
   >
@@ -117,6 +101,7 @@ export async function logRequest(
       return { data: null, error: "Missing heliconeApiKeyAuthHash" };
     }
 
+    // TODO KILL THIS ISH
     const prompt = request.promptFormatter?.prompt;
     const formattedPromptResult =
       prompt !== undefined
@@ -179,40 +164,25 @@ export async function logRequest(
       created_at: createdAt,
     };
 
-    const { error } = await dbClient.from("request").insert([requestData]);
+    const customPropertyRows = Object.entries(request.properties).map(
+      (entry) => ({
+        request_id: request.requestId,
+        auth_hash: request.providerApiKeyAuthHash ?? null,
+        user_id: null,
+        key: entry[0],
+        value: entry[1],
+        created_at: createdAt,
+      })
+    );
+    await insertQueue.addRequest(requestData, customPropertyRows, responseId);
 
-    const requestRow: Database["public"]["Tables"]["request"]["Row"] =
-      requestData;
-
-    if (error !== null) {
-      return { data: null, error: error.message };
-    } else {
-      // Log custom properties and then return request id
-      const customPropertyRows = Object.entries(request.properties).map(
-        (entry) => ({
-          request_id: request.requestId,
-          auth_hash: request.providerApiKeyAuthHash,
-          user_id: null,
-          key: entry[0],
-          value: entry[1],
-        })
-      );
-
-      const customProperties =
-        customPropertyRows.length > 0
-          ? (
-              await dbClient
-                .from("properties")
-                .insert(customPropertyRows)
-                .select("*")
-            ).data ?? []
-          : [];
-
-      return {
-        data: { request: requestRow, properties: customProperties },
-        error: null,
-      };
-    }
+    return {
+      data: {
+        request: requestData,
+        properties: customPropertyRows,
+      },
+      error: null,
+    };
   } catch (e) {
     return { data: null, error: JSON.stringify(e) };
   }

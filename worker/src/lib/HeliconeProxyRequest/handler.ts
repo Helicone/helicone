@@ -59,6 +59,7 @@ export async function handleProxyRequest(
       loggable: new DBLoggable({
         request: dbLoggableRequestFromProxyRequest(proxyRequest),
         response: {
+          responseId: crypto.randomUUID(),
           getResponseBody: async () => interceptor?.waitForChunk() ?? "",
           responseHeaders: new Headers(response.headers),
           status: response.status,

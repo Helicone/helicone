@@ -3,7 +3,7 @@ import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
-import { initialResponseLog, logRequest } from "./logResponse";
+import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
 import { Result, mapPostgrestErr } from "../../results";
@@ -12,9 +12,11 @@ import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
+import { InsertQueue } from "./insertQueue";
 
 export interface DBLoggableProps {
   response: {
+    responseId: string;
     getResponseBody: () => Promise<string>;
     status: number;
     responseHeaders: Headers;
@@ -141,6 +143,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       provider,
     },
     response: {
+      responseId: crypto.randomUUID(),
       getResponseBody: async () =>
         getResponseBody(asyncLogModel.providerResponse.json),
       responseHeaders: providerResponseHeaders,
@@ -168,6 +171,7 @@ export class DBLoggable {
   private timing: DBLoggableProps["timing"];
   private provider: Provider;
   private tokenCalcUrl: string;
+
   constructor(props: DBLoggableProps) {
     this.response = props.response;
     this.request = props.request;
@@ -275,26 +279,20 @@ export class DBLoggable {
   }
 
   async readAndLogResponse(
-    dbClient: SupabaseClient<Database>
-  ): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
+    queue: InsertQueue
+  ): Promise<
+    Result<Database["public"]["Tables"]["response"]["Insert"], string>
+  > {
     const responseBody = await this.response.getResponseBody();
-
-    // Log delay
-    const initialResponse = mapPostgrestErr(
-      await initialResponseLog(this.request, this.timing, dbClient)
-    );
-
-    if (initialResponse.error !== null) {
-      return initialResponse;
-    }
+    const delay_ms =
+      (this.timing.endTime?.getTime() ?? new Date().getTime()) -
+      this.timing.startTime.getTime();
 
     const parsedResponse = await this.parseResponse(responseBody);
 
-    if (parsedResponse.error === null) {
-      return mapPostgrestErr(
-        await dbClient
-          .from("response")
-          .update({
+    const response =
+      parsedResponse.error === null
+        ? {
             request: this.request.requestId,
             body: this.response.omitLog
               ? {
@@ -304,16 +302,9 @@ export class DBLoggable {
             status: this.response.status,
             completion_tokens: parsedResponse.data.usage?.completion_tokens,
             prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
-          })
-          .eq("id", initialResponse.data.id)
-          .select("*")
-          .single()
-      );
-    } else {
-      return mapPostgrestErr(
-        await dbClient
-          .from("response")
-          .update({
+            delay_ms,
+          }
+        : {
             request: this.request.requestId,
             body: {
               helicone_error: "error parsing response",
@@ -321,19 +312,30 @@ export class DBLoggable {
               body: this.tryJsonParse(responseBody),
             },
             status: this.response.status,
-          })
-          .eq("id", initialResponse.data.id)
-          .select("*")
-          .single()
-      );
+          };
+
+    const { error } = await queue.updateResponse(
+      this.response.responseId,
+      this.request.requestId,
+      response
+    );
+    if (error !== null) {
+      return {
+        data: null,
+        error: error,
+      };
     }
+    return {
+      data: response,
+      error: null,
+    };
   }
 
   async sendToWebhook(
     dbClient: SupabaseClient<Database>,
     payload: {
       request: UnPromise<ReturnType<typeof logRequest>>["data"];
-      response: Database["public"]["Tables"]["response"]["Row"];
+      response: Database["public"]["Tables"]["response"]["Insert"];
     },
     webhook: Database["public"]["Tables"]["webhooks"]["Row"]
   ): Promise<Result<undefined, string>> {
@@ -391,7 +393,7 @@ export class DBLoggable {
     dbClient: SupabaseClient<Database>,
     payload: {
       request: UnPromise<ReturnType<typeof logRequest>>["data"];
-      response: Database["public"]["Tables"]["response"]["Row"];
+      response: Database["public"]["Tables"]["response"]["Insert"];
     }
   ): Promise<Result<undefined, string>> {
     if (!payload.request?.request.helicone_org_id) {
@@ -429,6 +431,7 @@ export class DBLoggable {
     db: {
       supabase: SupabaseClient<Database>;
       clickhouse: ClickhouseClientWrapper;
+      queue: InsertQueue;
     },
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
@@ -489,7 +492,9 @@ export class DBLoggable {
 
     const requestResult = await logRequest(
       this.request,
+      this.response.responseId,
       db.supabase,
+      db.queue,
       heliconeApiKeyRow
     );
 
@@ -498,7 +503,7 @@ export class DBLoggable {
       return requestResult;
     }
 
-    const responseResult = await this.readAndLogResponse(db.supabase);
+    const responseResult = await this.readAndLogResponse(db.queue);
 
     // If no data or error, return
     if (!responseResult.data || responseResult.error) {
