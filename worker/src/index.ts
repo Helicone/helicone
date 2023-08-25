@@ -8,11 +8,12 @@ export type RequestBodyKV = {
   requestBody: Database["public"]["Tables"]["request"]["Row"]["body"];
 };
 
-export type RequestQueue = Queue<{
+type RequestQueueBody = {
   requestBodyKVKey: string;
   request: Database["public"]["Tables"]["request"]["Row"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
-}>;
+};
+export type RequestQueue = Queue<RequestQueueBody>;
 
 const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
 
@@ -20,11 +21,12 @@ export type ResponseBodyKV = {
   responseBody: Database["public"]["Tables"]["response"]["Insert"]["body"];
 };
 
-export type ResponseQueue = Queue<{
+type ResponseQueueBody = {
   responseBodyKVKey: string;
   function: "insert" | "update";
   response: Database["public"]["Tables"]["response"]["Insert"];
-}>;
+};
+export type ResponseQueue = Queue<ResponseQueueBody>;
 const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
 
 export interface Env {
@@ -110,14 +112,21 @@ export default {
     }
   },
 
-  async queue(batch: MessageBatch<string>, env: Env): Promise<void> {
-    if (batch.queue.includes(REQUEST_QUEUE_ID)) {
+  async queue(
+    untypedBatch: MessageBatch<RequestQueueBody | ResponseQueueBody>,
+    env: Env
+  ): Promise<void> {
+    if (untypedBatch.queue.includes(REQUEST_QUEUE_ID)) {
+      const batch = untypedBatch as MessageBatch<RequestQueueBody>;
+
       // await dbClient.from("request").insert([requestData]);
       // await dbClient
       // .from("properties")
       // .insert(customPropertyRows)
       console.log("Handling request queue");
-    } else if (batch.queue.includes(RESPONSE_QUEUE_ID)) {
+    } else if (untypedBatch.queue.includes(RESPONSE_QUEUE_ID)) {
+      const batch = untypedBatch as MessageBatch<ResponseQueueBody>;
+
       console.log("Handling response queue");
     }
   },
