@@ -3,7 +3,10 @@ import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
-import { logFeedbackInClickhouse } from "./lib/dbLogger/clickhouseLog";
+import {
+  logFeedbackInClickhouse,
+  updateFeedbackInClickhouse,
+} from "./lib/dbLogger/clickhouseLog";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 
 interface FeedbackRequestBodyV2 {
@@ -26,45 +29,26 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const { data: requestData, error: requestError } = await dbClient
+  // Retrieve request & response
+  const requestPromise = dbClient
     .from("request")
     .select("*")
     .eq("id", heliconeId)
     .single();
 
-  if (requestError || !requestData) {
-    console.error("Error fetching request:", requestError.message);
-    return new Response(`Error: Request not found with id ${heliconeId}`, {
-      status: 500,
-    });
-  }
+  const responsePromise = getResponse(dbClient, heliconeId);
 
-  const { data: apiKey, error: apiKeyError } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("id", requestData.helicone_api_key_id)
-    .single();
+  const [
+    { data: requestData, error: requestError },
+    { data: responseData, error: responseError },
+  ] = await Promise.all([requestPromise, responsePromise]);
 
-  if (apiKeyError || !apiKey) {
-    console.error("Error fetching api key:", apiKeyError.message);
+  if (requestError || !requestData || !requestData.helicone_api_key_id) {
     return new Response(
-      `Error: Api key not found with id ${requestData.helicone_api_key_id}`,
+      `Error: Request not found for heliconeId "${heliconeId}".`,
       { status: 500 }
     );
   }
-
-  const heliconeApiKey = heliconeAuth.replace("Bearer ", "").trim();
-  const heliconeApiKeyHash = await hash(`Bearer ${heliconeApiKey}`);
-
-  // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
-  if (heliconeApiKeyHash !== apiKey.api_key_hash) {
-    return { error: "Invalid authentication.", data: null };
-  }
-
-  const { data: responseData, error: responseError } = await getResponse(
-    dbClient,
-    heliconeId
-  );
 
   if (responseError || !responseData) {
     return new Response(
@@ -73,21 +57,58 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     );
   }
 
-  const { data: feedbackData, error: feedbackError } =
-    await insertFeedbackPostgres(responseData?.id, isThumbsUp, dbClient);
+  // Authenticate the request
+  const { data: isAuthenticated, error: authenticationError } =
+    await isApiKeyAuthenticated(
+      dbClient,
+      requestData.helicone_api_key_id,
+      heliconeAuth
+    );
 
-  if (feedbackError || !feedbackData) {
-    return new Response(`Error adding feedback: ${feedbackError}`, {
+  if (authenticationError || !isAuthenticated) {
+    console.error("Error authenticating request. ", authenticationError);
+    return new Response(`Error: ${authenticationError}`, { status: 401 });
+  }
+
+  const { data: feedback, error: feedbackError } = await dbClient
+    .from("feedback")
+    .select("*")
+    .eq("response_id", responseData.id)
+    .single();
+
+  if (feedbackError) {
+    console.error("Error fetching feedback:", feedbackError.message);
+    return new Response(`Error fetching feedback: ${feedbackError.message}`, {
       status: 500,
     });
   }
 
-  await logFeedbackInClickhouse(
-    new ClickhouseClientWrapper(env),
-    requestData,
-    responseData,
-    feedbackData
-  );
+  const { data: feedbackData, error: feedbackDataError } =
+    await upsertFeedbackPostgres(responseData?.id, isThumbsUp, dbClient);
+
+  if (feedbackDataError || !feedbackData) {
+    return new Response(`Error upserting feedback: ${feedbackError}`, {
+      status: 500,
+    });
+  }
+
+  // Feedback already exists, update it in clickhouse
+  if (feedback) {
+    await updateFeedbackInClickhouse(
+      new ClickhouseClientWrapper(env),
+      requestData.id,
+      feedback.id,
+      isThumbsUp
+    );
+  } else {
+    // Feedback doesn't exist, insert it in clickhouse
+    await logFeedbackInClickhouse(
+      new ClickhouseClientWrapper(env),
+      requestData,
+      responseData,
+      feedbackData
+    );
+  }
 
   return new Response(
     JSON.stringify({
@@ -98,7 +119,34 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   );
 }
 
-export async function insertFeedbackPostgres(
+export async function isApiKeyAuthenticated(
+  dbClient: SupabaseClient<Database>,
+  heliconeApiKeyId: number,
+  heliconeAuth: string
+): Promise<Result<boolean, string>> {
+  const { data: apiKey, error: apiKeyError } = await dbClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("id", heliconeApiKeyId)
+    .single();
+
+  if (apiKeyError || !apiKey) {
+    console.error("Error fetching api key:", apiKeyError.message);
+    return { error: apiKeyError.message, data: null };
+  }
+
+  const heliconeApiKey = heliconeAuth.replace("Bearer ", "").trim();
+  const heliconeApiKeyHash = await hash(`Bearer ${heliconeApiKey}`);
+
+  // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
+  if (heliconeApiKeyHash !== apiKey.api_key_hash) {
+    return { error: "Invalid authentication.", data: null };
+  }
+
+  return { error: null, data: true };
+}
+
+export async function upsertFeedbackPostgres(
   responseId: string,
   isThumbsUp: boolean,
   dbClient: SupabaseClient<Database>
@@ -115,13 +163,13 @@ export async function insertFeedbackPostgres(
     .select("*")
     .single();
 
-  if (feedback.error !== null) {
-    console.error("Error inserting feedback:", feedback.error);
+  if (feedback.error) {
+    console.error("Error upserting feedback:", feedback.error);
     return { error: feedback.error.message, data: null };
   }
 
   if (feedback.data === null) {
-    return { error: "Unknown error", data: null };
+    return { error: "Feedback failed upsert", data: null };
   }
 
   return { error: null, data: feedback.data };

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS default.provider_api_logs
+CREATE TABLE IF NOT EXISTS default.feedback
 (
    `response_id` Nullable(UUID),
    `response_created_at` Nullable(DateTime64),

@@ -122,7 +122,7 @@ export async function logFeedbackInClickhouse(
   response: Database["public"]["Tables"]["response"]["Row"],
   feedback: Database["public"]["Tables"]["feedback"]["Row"]
 ) {
-  await clickhouseDb.dbInsertClickhouse("provider_api_logs", [
+  await clickhouseDb.dbInsertClickhouse("feedback", [
     {
       auth_hash: request.auth_hash,
       user_id: request.user_id,
@@ -147,16 +147,13 @@ export async function logFeedbackInClickhouse(
 export async function updateFeedbackInClickhouse(
   clickhouseDb: ClickhouseClientWrapper,
   requestId: string,
-  feedback: Database["public"]["Tables"]["feedback"]["Row"]
+  feedback_id: number,
+  is_thumbs_up: boolean
 ) {
-  const updateSql = `
-    ALTER TABLE provider_api_logs 
-    UPDATE 
-      feedback_created_at = '${formatTimeString(feedback.created_at)}',
-      feedback_id = ${feedback.id},
-      is_thumbs_up = ${feedback.is_thumbs_up ? 1 : 0}
-    WHERE request_id = '${requestId}'
-  `;
+  const query = `ALTER TABLE feedback 
+  UPDATE is_thumbs_up = ${is_thumbs_up}
+  WHERE request_id = '${requestId}' 
+  AND feedback_id = ${feedback_id}`;
 
-  await clickhouseDb.executeQuery(updateSql);
+  await clickhouseDb.dbUpdateClickhouse(query);
 }
