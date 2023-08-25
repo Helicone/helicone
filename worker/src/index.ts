@@ -31,7 +31,7 @@ export interface Env {
   VAULT_ENABLED: string;
   STORAGE_URL: string;
   PROVIDER_LOGS_INSERT_REQUESTS_QUEUE: RequestQueue;
-  PROVIDER_LOGS_INSERT_RESPONSES_QUEUE: ResponseQueue;
+  PROVIDER_LOGS_INSERT_RESPONSE_QUEUE: ResponseQueue;
 }
 
 export async function hash(key: string): Promise<string> {
