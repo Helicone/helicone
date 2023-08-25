@@ -33,11 +33,12 @@ export default async function handler(
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
     basePath: "https://oai.hconeai.com/v1",
+
     baseOptions: {
-      header: {
+      headers: {
         "OpenAI-Organization": "",
         "Helicone-Property-Tag": "experiment",
-        "Helicone-Auth": process.env.TEST_HELICONE_API_KEY,
+        "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
         user: user.data.user?.id || "",
         "Helicone-Property-RequestId": requestId,
       },
