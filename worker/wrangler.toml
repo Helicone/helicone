@@ -25,15 +25,29 @@ TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "false"
 
-[[queues.producers]]
-queue = "provider-logs-insert-queue"
-binding = "PROVIDER_LOGS_INSERT_QUEUE"
 
+# Producers
+[[queues.producers]]
+binding = "PROVIDER_LOGS_INSERT_REQUESTS_QUEUE"
+queue = "provider-logs-insert-request-queue-dev"
+
+[[queues.producers]]
+binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE"
+queue = "provider-logs-insert-response-queue-dev"
+
+# Consumers
 [[queues.consumers]]
-queue = "provider-logs-insert-queue"
+queue = "provider-logs-insert-request-queue-dev"
 max_batch_size = 25
 max_batch_timeout = 1
 max_retries = 0
+
+[[queues.consumers]]
+queue = "provider-logs-insert-response-queue-dev"
+max_batch_size = 25
+max_batch_timeout = 1
+max_retries = 0
+
 
 [env.production]
 name = "helicone-worker-prod"
@@ -48,21 +62,23 @@ kv_namespaces = [
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 ]
 
+queues.producers = [
+	{ binding = "PROVIDER_LOGS_INSERT_REQUESTS_QUEUE", queue = "provider-logs-insert-request-queue-prod" },
+	{ binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE", queue = "provider-logs-insert-response-queue-prod" },
+]
+
+env.production.queues.consumers = [
+	{ queue = "provider-logs-insert-request-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
+	{ queue = "provider-logs-insert-response-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
+]
+
+
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "false"
 
-[[env.production.queues.consumers]]
-queue = "provider-logs-insert-queue-prod"
-max_batch_size = 25
-max_batch_timeout = 1
-max_retries = 0
-
-[[env.production.queues.producers]]
-queue = "provider-logs-insert-queue-prod"
-binding = "PROVIDER_LOGS_INSERT_QUEUE"
 
 [env.production_staging]
 name = "helicone-worker-prod-staging"
@@ -77,18 +93,18 @@ kv_namespaces = [
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 ]
 
+queues.producers = [
+	{ binding = "PROVIDER_LOGS_INSERT_REQUESTS_QUEUE", queue = "provider-logs-insert-request-queue-staging" },
+	{ binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE", queue = "provider-logs-insert-response-queue-staging" },
+]
+
+queues.consumers = [
+	{ queue = "provider-logs-insert-request-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
+	{ queue = "provider-logs-insert-response-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
+]
+
 [env.production_staging.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "false"
-
-[[env.staging.queues.producers]]
-queue = "provider-logs-insert-queue-staging"
-binding = "PROVIDER_LOGS_INSERT_QUEUE"
-
-[[env.staging.queues.consumers]]
-queue = "provider-logs-insert-queue-staging"
-max_batch_size = 25
-max_batch_timeout = 1
-max_retries = 0

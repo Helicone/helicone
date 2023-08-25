@@ -1,7 +1,31 @@
+import { Database } from "../supabase/database.types";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { buildRouter } from "./routers/routerFactory";
 
 export type Provider = "OPENAI" | "ANTHROPIC";
+
+export type RequestBodyKV = {
+  requestBody: Database["public"]["Tables"]["request"]["Row"]["body"];
+};
+
+export type RequestQueue = Queue<{
+  requestBodyKVKey: string;
+  request: Database["public"]["Tables"]["request"]["Row"];
+  properties: Database["public"]["Tables"]["properties"]["Insert"][];
+}>;
+
+const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
+
+export type ResponseBodyKV = {
+  responseBody: Database["public"]["Tables"]["response"]["Insert"]["body"];
+};
+
+export type ResponseQueue = Queue<{
+  responseBodyKVKey: string;
+  function: "insert" | "update";
+  response: Database["public"]["Tables"]["response"]["Insert"];
+}>;
+const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -18,7 +42,8 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
-  PROVIDER_LOGS_INSERT_QUEUE: Queue<string>;
+  PROVIDER_LOGS_INSERT_REQUESTS_QUEUE: RequestQueue;
+  PROVIDER_LOGS_INSERT_RESPONSES_QUEUE: ResponseQueue;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -71,7 +96,6 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     try {
-      await env.PROVIDER_LOGS_INSERT_QUEUE.send("sup");
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
         return handleError(requestWrapper.error);
@@ -85,9 +109,17 @@ export default {
       return handleError(e);
     }
   },
+
   async queue(batch: MessageBatch<string>, env: Env): Promise<void> {
-    let messages = JSON.stringify(batch.messages);
-    console.log(`consumed from our queue: ${messages}`);
+    if (batch.queue.includes(REQUEST_QUEUE_ID)) {
+      // await dbClient.from("request").insert([requestData]);
+      // await dbClient
+      // .from("properties")
+      // .insert(customPropertyRows)
+      console.log("Handling request queue");
+    } else if (batch.queue.includes(RESPONSE_QUEUE_ID)) {
+      console.log("Handling response queue");
+    }
   },
 };
 

@@ -121,7 +121,11 @@ export async function proxyForwarder(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        queue: new InsertQueue(env.INSERT_KV, env.PROVIDER_LOGS_INSERT_QUEUE),
+        queue: new InsertQueue(
+          env.INSERT_KV,
+          env.PROVIDER_LOGS_INSERT_REQUESTS_QUEUE,
+          env.PROVIDER_LOGS_INSERT_RESPONSES_QUEUE
+        ),
       },
       env.RATE_LIMIT_KV
     );

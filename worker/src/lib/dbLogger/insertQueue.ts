@@ -1,17 +1,32 @@
+import { RequestQueue, ResponseQueue } from "../..";
 import { Database } from "../../../supabase/database.types";
 
 export class InsertQueue {
-  private queue: Queue<string>;
+  private requestQueue: RequestQueue;
+  private responseQueue: ResponseQueue;
   private insertKV: KVNamespace;
 
-  constructor(insertKV: KVNamespace, queue: Queue<string>) {
+  constructor(
+    insertKV: KVNamespace,
+    requestQueue: RequestQueue,
+    responseQueue: ResponseQueue
+  ) {
     this.insertKV = insertKV;
-    this.queue = queue;
+    this.requestQueue = requestQueue;
+    this.responseQueue = responseQueue;
   }
-  addRequest(requestData: Database["public"]["Tables"]["request"]["Row"]) {
+  async addRequest(
+    requestData: Database["public"]["Tables"]["request"]["Insert"]
+  ) {
     const insertRequestQueueID = crypto.randomUUID();
     // TODO add request to queue
-    this.insertKV.put(insertRequestQueueID, JSON.stringify(requestData));
+    await this.insertKV.put(
+      insertRequestQueueID,
+      JSON.stringify(requestData.body)
+    );
+
+    await this.requestQueue.send(requestData);
+
     // await dbClient.from("request").insert([requestData]);
   }
 
@@ -21,7 +36,7 @@ export class InsertQueue {
     const insertPropertiesQueueID = crypto.randomUUID();
     // TODO add properties to queue
     this.insertKV.put(insertPropertiesQueueID, JSON.stringify(propertiesData));
-    // await env.PROVIDER_LOGS_INSERT_QUEUE.send("sup");
+    await this.queue.send("sup");
 
     // await dbClient
     // .from("properties")
