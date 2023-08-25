@@ -22,6 +22,7 @@ export type ResponseBodyKV = {
 };
 
 type ResponseQueueBody = {
+  requestBodyKVKey: string;
   responseBodyKVKey: string;
   function: "insert" | "update";
   response: Database["public"]["Tables"]["response"]["Insert"];
