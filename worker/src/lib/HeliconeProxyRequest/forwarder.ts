@@ -12,6 +12,7 @@ import {
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
+import { InsertQueue } from "../dbLogger/insertQueue";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -120,6 +121,11 @@ export async function proxyForwarder(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        queue: new InsertQueue(
+          env.INSERT_KV,
+          env.PROVIDER_LOGS_INSERT_REQUESTS_QUEUE,
+          env.PROVIDER_LOGS_INSERT_RESPONSE_QUEUE
+        ),
       },
       env.RATE_LIMIT_KV
     );

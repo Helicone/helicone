@@ -42,7 +42,6 @@ export const getOpenAIProxyRouter = () => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      console.log("requestWrapper.url.pathname", requestWrapper.url.pathname);
       if (requestWrapper.url.pathname.includes("audio")) {
         const new_url = new URL(
           `https://api.openai.com${requestWrapper.url.pathname}`

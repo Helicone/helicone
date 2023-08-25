@@ -6,6 +6,7 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
+import { InsertQueue } from "../lib/dbLogger/insertQueue";
 
 export const getAPIRouter = () => {
   const apiRouter = Router<
@@ -53,6 +54,11 @@ export const getAPIRouter = () => {
           supabase: createClient(
             env.SUPABASE_URL,
             env.SUPABASE_SERVICE_ROLE_KEY
+          ),
+          queue: new InsertQueue(
+            env.INSERT_KV,
+            env.PROVIDER_LOGS_INSERT_REQUESTS_QUEUE,
+            env.PROVIDER_LOGS_INSERT_RESPONSE_QUEUE
           ),
         },
         env.RATE_LIMIT_KV
@@ -103,6 +109,11 @@ export const getAPIRouter = () => {
           supabase: createClient(
             env.SUPABASE_URL,
             env.SUPABASE_SERVICE_ROLE_KEY
+          ),
+          queue: new InsertQueue(
+            env.INSERT_KV,
+            env.PROVIDER_LOGS_INSERT_REQUESTS_QUEUE,
+            env.PROVIDER_LOGS_INSERT_RESPONSE_QUEUE
           ),
         },
         env.RATE_LIMIT_KV

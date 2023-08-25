@@ -22,8 +22,6 @@ const WORKER_MAP: {
 
 export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
   const router = WORKER_MAP[provider]();
-  console.log("provider", provider);
-  // console.log("router", router);
 
   //TODO remove this
   router.post(
@@ -38,7 +36,6 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
     }
   );
 
-  //TODO remove this
   router.post(
     "/v1/feedback",
     async (
