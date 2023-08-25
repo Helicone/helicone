@@ -1,32 +1,17 @@
+import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { buildRouter } from "./routers/routerFactory";
+import {
+  RequestQueueBody,
+  ResponseQueueBody,
+  handleRequestQueue,
+  handleResponseQueue,
+} from "./lib/dbLogger/insertConsumer";
 
 export type Provider = "OPENAI" | "ANTHROPIC";
-
-export type RequestBodyKV = {
-  requestBody: Database["public"]["Tables"]["request"]["Row"]["body"];
-};
-
-type RequestQueueBody = {
-  requestBodyKVKey: string;
-  responseId: string;
-  request: Database["public"]["Tables"]["request"]["Insert"];
-  properties: Database["public"]["Tables"]["properties"]["Insert"][];
-};
 export type RequestQueue = Queue<RequestQueueBody>;
-
 const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
-
-export type ResponseBodyKV = {
-  responseBody: Database["public"]["Tables"]["response"]["Insert"]["body"];
-};
-
-type ResponseQueueBody = {
-  requestBodyKVKey: string;
-  responseBodyKVKey: string;
-  response: Database["public"]["Tables"]["response"]["Update"];
-};
 export type ResponseQueue = Queue<ResponseQueueBody>;
 const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
 
@@ -119,16 +104,10 @@ export default {
   ): Promise<void> {
     if (untypedBatch.queue.includes(REQUEST_QUEUE_ID)) {
       const batch = untypedBatch as MessageBatch<RequestQueueBody>;
-
-      // await dbClient.from("request").insert([requestData]);
-      // await dbClient
-      // .from("properties")
-      // .insert(customPropertyRows)
-      console.log("Handling request queue");
+      await handleRequestQueue(batch, env);
     } else if (untypedBatch.queue.includes(RESPONSE_QUEUE_ID)) {
       const batch = untypedBatch as MessageBatch<ResponseQueueBody>;
-
-      console.log("Handling response queue");
+      await handleResponseQueue(batch, env);
     }
   },
 };

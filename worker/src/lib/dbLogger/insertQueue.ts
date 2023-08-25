@@ -1,11 +1,7 @@
-import {
-  RequestBodyKV,
-  RequestQueue,
-  ResponseBodyKV,
-  ResponseQueue,
-} from "../..";
+import { RequestQueue, ResponseQueue } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
+import { RequestBodyKV, ResponseBodyKV } from "./insertConsumer";
 
 export class InsertQueue {
   private requestQueue: RequestQueue;

@@ -8,19 +8,6 @@ import { InsertQueue } from "./insertQueue";
 
 const MAX_USER_ID_LENGTH = 7000;
 
-export async function initialResponseLog(
-  { requestId }: DBLoggableProps["request"],
-  { startTime, endTime }: DBLoggableProps["timing"],
-  queue: InsertQueue
-) {
-  return await queue.addResponse({
-    request: requestId,
-    delay_ms: (endTime ?? new Date()).getTime() - startTime.getTime(),
-    body: {},
-    status: -1,
-  });
-}
-
 async function getPromptId(
   dbClient: SupabaseClient,
   prompt: Prompt | ChatPrompt,

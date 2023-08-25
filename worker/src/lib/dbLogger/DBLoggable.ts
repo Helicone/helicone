@@ -3,7 +3,7 @@ import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
-import { initialResponseLog, logRequest } from "./logResponse";
+import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
 import { Result, mapPostgrestErr } from "../../results";
