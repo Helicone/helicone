@@ -452,14 +452,14 @@ export class DBLoggable {
     // Deserialize the timestamps
     const timestamps: number[] = JSON.parse(serializedTimestamps);
 
-    // Filter out timestamps older than 1 minute
-    const oneMinuteAgo = Date.now() - 60000;
+    // Filter out timestamps older than 1 second
+    const oneSecondAgo = Date.now() - 1000;
     const recentTimestamps = timestamps.filter(
-      (timestamp) => timestamp > oneMinuteAgo
+      (timestamp) => timestamp > oneSecondAgo
     );
 
     // If the number of recent requests is 1000 or more, deny the request
-    if (recentTimestamps.length >= 1000) {
+    if (recentTimestamps.length >= 5) {
       const rl_hits =
         (await rateLimitKV.get(
           `RL_HITS_${heliconeApiKeyRow.organization_id}`
