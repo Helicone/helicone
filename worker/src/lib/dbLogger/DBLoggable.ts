@@ -467,7 +467,10 @@ export class DBLoggable {
       const rl_hits_int = parseInt(rl_hits);
       rateLimitKV.put(
         `RL_HITS_${heliconeApiKeyRow.organization_id}`,
-        (rl_hits_int + 1).toString()
+        (rl_hits_int + 1).toString(),
+        {
+          expirationTtl: 60 * 60 * 24,
+        }
       );
 
       return { data: null, error: "Rate limit exceeded" };
@@ -478,7 +481,10 @@ export class DBLoggable {
     const newSerializedTimestamps = JSON.stringify(recentTimestamps);
     await rateLimitKV.put(
       heliconeApiKeyRow.organization_id,
-      newSerializedTimestamps
+      newSerializedTimestamps,
+      {
+        expirationTtl: 60 * 60 * 24,
+      }
     );
 
     const requestResult = await logRequest(
