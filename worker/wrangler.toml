@@ -68,8 +68,8 @@ queues.producers = [
 ]
 
 env.production.queues.consumers = [
-	{ queue = "provider-logs-insert-request-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
-	{ queue = "provider-logs-insert-response-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
+	{ queue = "provider-logs-insert-request-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
+	{ queue = "provider-logs-insert-response-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
 ]
 
 
@@ -99,8 +99,8 @@ queues.producers = [
 ]
 
 queues.consumers = [
-	{ queue = "provider-logs-insert-request-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
-	{ queue = "provider-logs-insert-response-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 0 },
+	{ queue = "provider-logs-insert-request-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
+	{ queue = "provider-logs-insert-response-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
 ]
 
 [env.production_staging.vars]

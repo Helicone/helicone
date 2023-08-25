@@ -45,6 +45,7 @@ export class InsertQueue {
 
   async updateResponse(
     responseId: string,
+    requestId: string,
     response: Database["public"]["Tables"]["response"]["Insert"]
   ): Promise<Result<null, string>> {
     if (!responseId) {
@@ -63,6 +64,7 @@ export class InsertQueue {
 
     await this.responseQueue.send({
       responseId: responseId,
+      requestId: requestId,
       response: { ...response, body: null },
       responseBodyKVKey: insertResponseQueueID,
       requestBodyKVKey: response.request,

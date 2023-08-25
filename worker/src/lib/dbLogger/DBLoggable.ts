@@ -316,6 +316,7 @@ export class DBLoggable {
 
     const { error } = await queue.updateResponse(
       this.response.responseId,
+      this.request.requestId,
       response
     );
     if (error !== null) {

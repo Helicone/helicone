@@ -22,6 +22,7 @@ export type ResponseQueueBody = {
   requestBodyKVKey: string;
   responseBodyKVKey: string;
   responseId: string;
+  requestId: string;
   response: Database["public"]["Tables"]["response"]["Insert"];
 };
 
@@ -169,7 +170,7 @@ export async function handleResponseQueue(
       console.error(
         `Request has not yet been inserted for message ${message.id} and response ${message.body.responseId}`
       );
-      message.retry();
+      // message.retry(); TODO: Add FK on response.request
     }
 
     const body = await env.INSERT_KV.get(message.body.responseBodyKVKey);
@@ -195,6 +196,7 @@ export async function handleResponseQueue(
     }
 
     responseMessage.body.response.id = responseMessage.body.responseId;
+    responseMessage.body.response.request = responseMessage.body.requestId;
     responseList.push(responseMessage.body.response);
   });
 
