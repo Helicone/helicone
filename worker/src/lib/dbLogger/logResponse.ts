@@ -179,9 +179,7 @@ export async function logRequest(
     return {
       data: {
         request: requestData,
-        properties: {
-          ...customPropertyRows,
-        },
+        properties: customPropertyRows,
       },
       error: null,
     };
