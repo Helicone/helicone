@@ -67,7 +67,7 @@ queues.producers = [
 	{ binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE", queue = "provider-logs-insert-response-queue-prod" },
 ]
 
-env.production.queues.consumers = [
+queues.consumers = [
 	{ queue = "provider-logs-insert-request-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
 	{ queue = "provider-logs-insert-response-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
 ]
