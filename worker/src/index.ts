@@ -10,7 +10,8 @@ export type RequestBodyKV = {
 
 type RequestQueueBody = {
   requestBodyKVKey: string;
-  request: Database["public"]["Tables"]["request"]["Row"];
+  responseId: string;
+  request: Database["public"]["Tables"]["request"]["Insert"];
   properties: Database["public"]["Tables"]["properties"]["Insert"][];
 };
 export type RequestQueue = Queue<RequestQueueBody>;
@@ -24,8 +25,7 @@ export type ResponseBodyKV = {
 type ResponseQueueBody = {
   requestBodyKVKey: string;
   responseBodyKVKey: string;
-  function: "insert" | "update";
-  response: Database["public"]["Tables"]["response"]["Insert"];
+  response: Database["public"]["Tables"]["response"]["Update"];
 };
 export type ResponseQueue = Queue<ResponseQueueBody>;
 const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";

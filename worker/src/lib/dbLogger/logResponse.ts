@@ -11,20 +11,14 @@ const MAX_USER_ID_LENGTH = 7000;
 export async function initialResponseLog(
   { requestId }: DBLoggableProps["request"],
   { startTime, endTime }: DBLoggableProps["timing"],
-  dbClient: SupabaseClient<Database>
+  queue: InsertQueue
 ) {
-  return dbClient
-    .from("response")
-    .insert([
-      {
-        request: requestId,
-        delay_ms: (endTime ?? new Date()).getTime() - startTime.getTime(),
-        body: {},
-        status: -1,
-      },
-    ])
-    .select("*")
-    .single();
+  return await queue.addResponse({
+    request: requestId,
+    delay_ms: (endTime ?? new Date()).getTime() - startTime.getTime(),
+    body: {},
+    status: -1,
+  });
 }
 
 async function getPromptId(
@@ -98,6 +92,7 @@ async function getPromptId(
 
 export async function logRequest(
   request: DBLoggableProps["request"],
+  responseId: string,
   dbClient: SupabaseClient<Database>,
   insertQueue: InsertQueue,
   heliconeApiKeyRow: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
@@ -181,7 +176,7 @@ export async function logRequest(
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       created_at: createdAt,
     };
-    insertQueue.addRequest(requestData);
+
     const customPropertyRows = Object.entries(request.properties).map(
       (entry) => ({
         request_id: request.requestId,
@@ -192,7 +187,7 @@ export async function logRequest(
         created_at: createdAt,
       })
     );
-    insertQueue.addProperties(customPropertyRows);
+    insertQueue.addRequest(requestData, customPropertyRows, responseId);
 
     return {
       data: {

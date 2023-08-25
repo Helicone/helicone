@@ -1,5 +1,11 @@
-import { RequestQueue, ResponseQueue } from "../..";
+import {
+  RequestBodyKV,
+  RequestQueue,
+  ResponseBodyKV,
+  ResponseQueue,
+} from "../..";
 import { Database } from "../../../supabase/database.types";
+import { Result } from "../../results";
 
 export class InsertQueue {
   private requestQueue: RequestQueue;
@@ -16,30 +22,51 @@ export class InsertQueue {
     this.responseQueue = responseQueue;
   }
   async addRequest(
-    requestData: Database["public"]["Tables"]["request"]["Insert"]
-  ) {
-    const insertRequestQueueID = crypto.randomUUID();
-    // TODO add request to queue
-    await this.insertKV.put(
-      insertRequestQueueID,
-      JSON.stringify(requestData.body)
-    );
+    requestData: Database["public"]["Tables"]["request"]["Insert"],
+    propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],
+    responseId: string
+  ): Promise<Result<null, string>> {
+    if (!requestData.id) {
+      return { data: null, error: "Missing request.id" };
+    }
+    const insertRequestQueueID = requestData.id;
+    const kvBody: RequestBodyKV = {
+      requestBody: requestData.body,
+    };
+    await this.insertKV.put(insertRequestQueueID, JSON.stringify(kvBody), {
+      expirationTtl: 60 * 60 * 24 * 7,
+    });
 
-    await this.requestQueue.send(requestData);
-
-    // await dbClient.from("request").insert([requestData]);
+    await this.requestQueue.send({
+      request: requestData,
+      requestBodyKVKey: insertRequestQueueID,
+      properties: propertiesData,
+      responseId,
+    });
+    return { data: null, error: null };
   }
 
-  addProperties(
-    propertiesData: Database["public"]["Tables"]["properties"]["Insert"][]
-  ) {
-    const insertPropertiesQueueID = crypto.randomUUID();
-    // TODO add properties to queue
-    this.insertKV.put(insertPropertiesQueueID, JSON.stringify(propertiesData));
-    await this.queue.send("sup");
+  async updateResponse(
+    responseId: string,
+    response: Database["public"]["Tables"]["response"]["Update"]
+  ): Promise<Result<null, string>> {
+    if (!response.id || !response.request) {
+      return { data: null, error: "Missing response.id" };
+    }
+    const insertResponseQueueID = response.id;
+    const kvBody: ResponseBodyKV = {
+      responseBody: response.body ?? null,
+    };
+    await this.insertKV.put(response.id, JSON.stringify(kvBody), {
+      expirationTtl: 60 * 60 * 24 * 7,
+    });
 
-    // await dbClient
-    // .from("properties")
-    // .insert(customPropertyRows)
+    await this.responseQueue.send({
+      responseId: responseId,
+      response: response,
+      responseBodyKVKey: insertResponseQueueID,
+      requestBodyKVKey: response.request,
+    });
+    return { data: null, error: null };
   }
 }
