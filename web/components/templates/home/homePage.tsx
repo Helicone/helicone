@@ -45,6 +45,7 @@ import ManageHostedButton from "./manageHostedButton";
 import ContactForm, { ContactFormData } from "../../shared/contactForm";
 import Image from "next/image";
 import useNotification from "../../shared/notification/useNotification";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 
 const faqs = [
   {
@@ -192,11 +193,13 @@ export default function HomePage(props: HomePageProps) {
               </span>{" "}
               <p>for Generative AI</p>
             </h1>
+
             <p className="mt-6 text-lg leading-8 max-w-md text-gray-700 antialiased">
               Thousands of users and organizations leverage Helicone to monitor
               their LLM applications. Instantly get insights into your latency,
               costs, and much more.
             </p>
+
             {microsoftForStartups ? (
               <div className="flex flex-row items-center mt-16 -ml-5">
                 <div>
@@ -248,7 +251,7 @@ export default function HomePage(props: HomePageProps) {
             )}
           </div>
           {microsoftForStartups ? (
-            <ContactForm contactTag={"mfs"} buttonText={"Claim Free Year"} />
+            <ContactForm contactTag={"mfs"} buttonText={"Get 9 months free"} />
           ) : (
             <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
               <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
@@ -276,6 +279,54 @@ export default function HomePage(props: HomePageProps) {
             </div>
           )}
         </div>
+        {microsoftForStartups && (
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 antialiased pb-24 sm:pb-32">
+            <div className="bg-white mx-auto max-w-2xl rounded-3xl border border-gray-200 shadow-sm sm:mt-20 lg:mx-0 lg:flex lg:items-center lg:max-w-none">
+              <div className="p-8 sm:p-10 lg:flex-auto">
+                <h3 className="text-2xl font-bold tracking-tight text-gray-900">
+                  What you get
+                </h3>
+                <p className="mt-6 text-base leading-7 text-gray-600">
+                  We&apos;re excited for you to join our community. Enjoy a
+                  dedicated Discord or Slack channel, an easy-to-use Helm chart,
+                  priority on feature requests, and expert support. We{"'"}ve
+                  got you covered for self-deployed instances and offer custom
+                  ETL integrations.
+                </p>
+                <div className="mt-10 flex items-center gap-x-4">
+                  <h4 className="flex-none text-sm font-semibold leading-6 text-indigo-600">
+                    What&apos;s included
+                  </h4>
+                  <div className="h-px flex-auto bg-gray-100" />
+                </div>
+                <ul
+                  role="list"
+                  className="mt-6 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6"
+                >
+                  {[
+                    "Monitoring and Dashboards",
+                    "Custom Properties",
+                    "Unlimited Requests",
+                    "Bucket Caching",
+                    "User Management and Rate Limiting",
+                    "GraphQL API",
+                    "Request Retries",
+                    "Unlimited Organizations",
+                    "Up to 2GB of storage",
+                  ].map((feature) => (
+                    <li key={feature} className="flex gap-x-3">
+                      <CheckCircleIcon
+                        className="h-6 w-5 flex-none text-indigo-600"
+                        aria-hidden="true"
+                      />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <div className="bg-gray-50">
         <div className="px-8 grid grid-cols-4 gap-16 h-full max-w-7xl mx-auto  border-gray-300  w-full items-center justify-center">
