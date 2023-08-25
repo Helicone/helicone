@@ -22,8 +22,9 @@ import { getPropertyParams } from "../../../services/lib/propertyParams";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { Message } from "./requestsPage";
 import { useOrg } from "../../shared/layout/organizationContext";
+import { Message } from "../playground/chatPlayground";
+
 export type PromptResponsePair =
   | {
       chat: {

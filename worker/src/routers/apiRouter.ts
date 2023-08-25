@@ -6,7 +6,6 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
-import { DatabaseExecutor } from "../lib/db/postgres";
 
 export const getAPIRouter = () => {
   const apiRouter = Router<
@@ -48,11 +47,16 @@ export const getAPIRouter = () => {
         providerResponseHeaders: responseHeaders,
         provider: "OPENAI",
       });
-      const { error: logError } = await loggable.log({
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        postgres: new DatabaseExecutor(env, ctx),
-      });
+      const { error: logError } = await loggable.log(
+        {
+          clickhouse: new ClickhouseClientWrapper(env),
+          supabase: createClient(
+            env.SUPABASE_URL,
+            env.SUPABASE_SERVICE_ROLE_KEY
+          ),
+        },
+        env.RATE_LIMIT_KV
+      );
 
       if (logError !== null) {
         return new Response(JSON.stringify({ error: logError }), {
@@ -74,6 +78,10 @@ export const getAPIRouter = () => {
     ) => {
       const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
 
+      if (!requestWrapper.getAuthorization()) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
       const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
       const responseHeaders = new Headers(
         asyncLogModel.providerResponse.headers
@@ -89,11 +97,16 @@ export const getAPIRouter = () => {
         provider: "OPENAI",
       });
 
-      const { error: logError } = await loggable.log({
-        clickhouse: new ClickhouseClientWrapper(env),
-        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        postgres: new DatabaseExecutor(env, ctx),
-      });
+      const { error: logError } = await loggable.log(
+        {
+          clickhouse: new ClickhouseClientWrapper(env),
+          supabase: createClient(
+            env.SUPABASE_URL,
+            env.SUPABASE_SERVICE_ROLE_KEY
+          ),
+        },
+        env.RATE_LIMIT_KV
+      );
 
       if (logError !== null) {
         return new Response(JSON.stringify({ error: logError }), {

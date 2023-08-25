@@ -4,7 +4,6 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
-import { DatabaseExecutor } from "../db/postgres";
 
 const MAX_USER_ID_LENGTH = 7000;
 
@@ -96,27 +95,10 @@ async function getPromptId(
   }
 }
 
-async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
-) {
-  const { data, error } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
-    .eq("soft_delete", false)
-    .single();
-
-  if (error !== null) {
-    return { data: null, error: error.message };
-  }
-  return { data: data, error: null };
-}
-
 export async function logRequest(
   request: DBLoggableProps["request"],
   dbClient: SupabaseClient<Database>,
-  postgres: DatabaseExecutor
+  heliconeApiKeyRow: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
 ): Promise<
   Result<
     {
@@ -130,6 +112,11 @@ export async function logRequest(
     if (!request.providerApiKeyAuthHash) {
       return { data: null, error: "Missing providerApiKeyAuthHash" };
     }
+
+    if (!request.heliconeApiKeyAuthHash) {
+      return { data: null, error: "Missing heliconeApiKeyAuthHash" };
+    }
+
     const prompt = request.promptFormatter?.prompt;
     const formattedPromptResult =
       prompt !== undefined
@@ -150,16 +137,9 @@ export async function logRequest(
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
-    const { data: heliconeApiKeyRow, error: userIdError } =
-      await getHeliconeApiKeyRow(dbClient, request.heliconeApiKeyAuthHash);
-    if (userIdError !== null) {
-      console.error(userIdError);
+    if (!heliconeApiKeyRow?.organization_id) {
+      return { data: null, error: "Helicone api key not found" };
     }
-
-    // TODO - once we deprecate using OpenAI API keys, we can remove this
-    // if (userIdError !== null) {
-    //   return { data: null, error: userIdError };
-    // }
 
     let bodyText = request.bodyText ?? "{}";
     bodyText = bodyText.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
@@ -199,39 +179,13 @@ export async function logRequest(
       created_at: createdAt,
     };
 
-    const query = `
-    INSERT INTO "public"."request"(
-      "id", "path", "body", "auth_hash", "user_id", "prompt_id", "properties", 
-      "formatted_prompt_id", "prompt_values", "helicone_user", 
-      "helicone_api_key_id", "helicone_org_id", "provider", "helicone_proxy_key_id", 
-      "created_at"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`;
-
-    const parameters = [
-      requestData.id,
-      requestData.path,
-      requestData.body,
-      requestData.auth_hash,
-      requestData.user_id,
-      requestData.prompt_id,
-      requestData.properties,
-      requestData.formatted_prompt_id,
-      requestData.prompt_values,
-      requestData.helicone_user,
-      requestData.helicone_api_key_id,
-      requestData.helicone_org_id,
-      requestData.provider,
-      requestData.helicone_proxy_key_id,
-      requestData.created_at,
-    ];
-
-    const { error } = await postgres.dbExecute(query, parameters);
+    const { error } = await dbClient.from("request").insert([requestData]);
 
     const requestRow: Database["public"]["Tables"]["request"]["Row"] =
       requestData;
 
     if (error !== null) {
-      return { data: null, error: error };
+      return { data: null, error: error.message };
     } else {
       // Log custom properties and then return request id
       const customPropertyRows = Object.entries(request.properties).map(

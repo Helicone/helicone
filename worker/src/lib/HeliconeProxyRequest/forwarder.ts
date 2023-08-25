@@ -12,7 +12,6 @@ import {
 import { handleProxyRequest } from "./handler";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
-import { DatabaseExecutor } from "../db/postgres";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -117,11 +116,13 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
   async function log() {
-    const res = await loggable.log({
-      clickhouse: new ClickhouseClientWrapper(env),
-      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      postgres: new DatabaseExecutor(env, ctx),
-    });
+    const res = await loggable.log(
+      {
+        clickhouse: new ClickhouseClientWrapper(env),
+        supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      },
+      env.RATE_LIMIT_KV
+    );
     if (res.error !== null) {
       request
         .getHeliconeAuthHeader()
@@ -131,7 +132,10 @@ export async function proxyForwarder(
         });
     }
   }
-  ctx.waitUntil(log());
+
+  if (request?.heliconeHeaders?.heliconeAuth) {
+    ctx.waitUntil(log());
+  }
 
   if (proxyRequest.rateLimitOptions) {
     if (!proxyRequest.providerAuthHash) {

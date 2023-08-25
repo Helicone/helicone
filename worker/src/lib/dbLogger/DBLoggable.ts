@@ -12,7 +12,6 @@ import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { DatabaseExecutor } from "../db/postgres";
 
 export interface DBLoggableProps {
   response: {
@@ -90,6 +89,23 @@ function getResponseBody(json: any): string {
     return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
   }
   return JSON.stringify(json);
+}
+
+async function getHeliconeApiKeyRow(
+  dbClient: SupabaseClient<Database>,
+  heliconeApiKeyHash?: string
+) {
+  const { data, error } = await dbClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("api_key_hash", heliconeApiKeyHash)
+    .eq("soft_delete", false)
+    .single();
+
+  if (error !== null) {
+    return { data: null, error: error.message };
+  }
+  return { data: data, error: null };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -378,6 +394,13 @@ export class DBLoggable {
       response: Database["public"]["Tables"]["response"]["Row"];
     }
   ): Promise<Result<undefined, string>> {
+    if (!payload.request?.request.helicone_org_id) {
+      return {
+        data: null,
+        error: "Org id undefined",
+      };
+    }
+
     const webhooks = await dbClient
       .from("webhooks")
       .select("*")
@@ -402,45 +425,105 @@ export class DBLoggable {
     };
   }
 
-  async log(db: {
-    supabase: SupabaseClient<Database>;
-    clickhouse: ClickhouseClientWrapper;
-    postgres: DatabaseExecutor;
-  }): Promise<Result<null, string>> {
+  async log(
+    db: {
+      supabase: SupabaseClient<Database>;
+      clickhouse: ClickhouseClientWrapper;
+    },
+    rateLimitKV: KVNamespace
+  ): Promise<Result<null, string>> {
+    const { data: heliconeApiKeyRow, error: userIdError } =
+      await getHeliconeApiKeyRow(
+        db.supabase,
+        this.request.heliconeApiKeyAuthHash
+      );
+    if (userIdError !== null) {
+      return { data: null, error: userIdError };
+    }
+
+    if (!heliconeApiKeyRow?.organization_id) {
+      return { data: null, error: "Helicone api key not found" };
+    }
+
+    // Fetch the serialized list of request timestamps for this API key from the KV store
+    const serializedTimestamps =
+      (await rateLimitKV.get(heliconeApiKeyRow.organization_id)) || "[]";
+
+    // Deserialize the timestamps
+    const timestamps: number[] = JSON.parse(serializedTimestamps);
+
+    // Filter out timestamps older than 1 minute
+    const oneMinuteAgo = Date.now() - 60000;
+    const recentTimestamps = timestamps.filter(
+      (timestamp) => timestamp > oneMinuteAgo
+    );
+
+    // If the number of recent requests is 1000 or more, deny the request
+    if (recentTimestamps.length >= 1000) {
+      const rl_hits =
+        (await rateLimitKV.get(
+          `RL_HITS_${heliconeApiKeyRow.organization_id}`
+        )) || "0";
+      const rl_hits_int = parseInt(rl_hits);
+      rateLimitKV.put(
+        `RL_HITS_${heliconeApiKeyRow.organization_id}`,
+        (rl_hits_int + 1).toString(),
+        {
+          expirationTtl: 60 * 60 * 24,
+        }
+      );
+
+      return { data: null, error: "Rate limit exceeded" };
+    }
+
+    // Otherwise, add the current timestamp to the list and store it back in the KV store
+    recentTimestamps.push(Date.now());
+    const newSerializedTimestamps = JSON.stringify(recentTimestamps);
+    await rateLimitKV.put(
+      heliconeApiKeyRow.organization_id,
+      newSerializedTimestamps,
+      {
+        expirationTtl: 60 * 60 * 24,
+      }
+    );
+
     const requestResult = await logRequest(
       this.request,
       db.supabase,
-      db.postgres
+      heliconeApiKeyRow
     );
 
-    if (requestResult.data !== null) {
-      const responseResult = await this.readAndLogResponse(db.supabase);
-
-      if (responseResult.data !== null) {
-        await logInClickhouse(
-          requestResult.data.request,
-          responseResult.data,
-          requestResult.data.properties,
-          db.clickhouse
-        );
-
-        // TODO We should probably move the webhook stuff out of dbLogger
-        const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
-          request: requestResult.data,
-          response: responseResult.data,
-        });
-        if (webhookError !== null) {
-          console.error("Error sending to webhooks", webhookError);
-          return {
-            data: null,
-            error: webhookError,
-          };
-        }
-      } else {
-        return responseResult;
-      }
-    } else {
+    // If no data or error, return
+    if (!requestResult.data || requestResult.error) {
       return requestResult;
+    }
+
+    const responseResult = await this.readAndLogResponse(db.supabase);
+
+    // If no data or error, return
+    if (!responseResult.data || responseResult.error) {
+      return responseResult;
+    }
+
+    await logInClickhouse(
+      requestResult.data.request,
+      responseResult.data,
+      requestResult.data.properties,
+      db.clickhouse
+    );
+
+    // TODO We should probably move the webhook stuff out of dbLogger
+    const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
+      request: requestResult.data,
+      response: responseResult.data,
+    });
+
+    if (webhookError !== null) {
+      console.error("Error sending to webhooks", webhookError);
+      return {
+        data: null,
+        error: webhookError,
+      };
     }
 
     return {

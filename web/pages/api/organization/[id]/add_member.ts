@@ -19,13 +19,22 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<null, string>>
 ) {
+  // check if this request is a post
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+    return;
+  }
+
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  const { id, email } = req.query;
+  const { id } = req.query;
+
+  // get the email from the body
+  const { email } = req.body;
 
   let { data: userId, error: userIdError } = await getUserId(email as string);
 
@@ -34,7 +43,6 @@ export default async function handler(
     return;
   }
   if (userId?.length === 0) {
-    console.log("signing up");
     await supabaseServer.auth.signInWithOtp({
       email: email as string,
     });

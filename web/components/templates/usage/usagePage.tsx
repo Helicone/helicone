@@ -31,7 +31,7 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import UpgradeProModal from "../../shared/upgradeProModal";
-import RenderOrgItem from "./renderOrgItem";
+import RenderOrgUsage from "./renderOrgUsage";
 
 interface UsagePageProps {
   user: User;
@@ -65,8 +65,6 @@ const UsagePage = (props: UsagePageProps) => {
   }, [currentMonth, refetch]);
 
   const orgContext = useOrg();
-
-  const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -128,26 +126,12 @@ const UsagePage = (props: UsagePageProps) => {
           </div>
         </div>
       );
-    } else {
+    } else if (orgContext?.currentOrg !== undefined) {
       return (
-        <div className="flex flex-col w-full border border-gray-500 border-dashed space-y-8 p-4 rounded-lg">
-          <div className="flex flex-row gap-2 items-center">
-            <LightBulbIcon className="h-4 w-4 text-gray-700 hidden sm:inline" />
-            <p className="text-md text-gray-700">
-              Below are all of the organizations you own that are under the{" "}
-              <span className="text-gray-900 font-semibold">Pro</span> plan
-            </p>
-          </div>
-          <ul className="">
-            <li className="flex flex-row justify-between w-full border-b border-gray-300 pb-2">
-              <p className="font-semibold text-gray-900 text-md">Org Name</p>
-              <p className="text-gray-600 text-md">Requests this month</p>
-            </li>
-            {yourOrgs?.map((org, idx) => (
-              <RenderOrgItem org={org} key={idx} currentMonth={currentMonth} />
-            ))}
-          </ul>
-        </div>
+        <RenderOrgUsage
+          currentMonth={currentMonth}
+          requestCount={Number(count?.data || 0)}
+        />
       );
     }
   };

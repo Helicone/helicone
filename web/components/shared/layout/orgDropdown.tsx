@@ -23,19 +23,24 @@ import { useUserSettings } from "../../../services/hooks/userSettings";
 import useNotification from "../notification/useNotification";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 
-interface OrgDropdownProps {}
+interface OrgDropdownProps {
+  userSettings: {
+    created_at: string | null;
+    request_limit: number;
+    tier: string;
+    user: string;
+  } | null;
+}
 
 export default function OrgDropdown(props: OrgDropdownProps) {
-  const {} = props;
+  const { userSettings } = props;
   const orgContext = useOrg();
   const user = useUser();
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
-  const { userSettings, error } = useUserSettings(user?.id || "");
 
   const org = useOrg();
-  const { refetch } = useGetOrgMembers(org?.currentOrg?.id || "");
   const { setNotification } = useNotification();
   const [addOpen, setAddOpen] = useState(false);
 
@@ -78,8 +83,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             console.error(res);
           }
         } else {
-          setNotification("Member added successfully", "success");
-          refetch();
+          setNotification("Member successfully invited.", "success");
           setAddOpen(false);
         }
       });
