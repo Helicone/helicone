@@ -22,7 +22,7 @@ export type ResponseQueueBody = {
   requestBodyKVKey: string;
   responseBodyKVKey: string;
   responseId: string;
-  response: Database["public"]["Tables"]["response"]["Update"];
+  response: Database["public"]["Tables"]["response"]["Insert"];
 };
 
 export async function handleRequestQueue(

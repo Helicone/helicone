@@ -38,13 +38,14 @@ export class InsertQueue {
       requestBodyKVKey: insertRequestQueueID,
       properties: propertiesData,
       responseId,
+      requestId: requestData.id,
     });
     return { data: null, error: null };
   }
 
   async updateResponse(
     responseId: string,
-    response: Database["public"]["Tables"]["response"]["Update"]
+    response: Database["public"]["Tables"]["response"]["Insert"]
   ): Promise<Result<null, string>> {
     if (!response.id || !response.request) {
       return { data: null, error: "Missing response.id" };
