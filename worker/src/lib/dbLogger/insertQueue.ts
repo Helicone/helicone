@@ -47,14 +47,17 @@ export class InsertQueue {
     responseId: string,
     response: Database["public"]["Tables"]["response"]["Insert"]
   ): Promise<Result<null, string>> {
-    if (!response.id || !response.request) {
-      return { data: null, error: "Missing response.id" };
+    if (!responseId) {
+      return { data: null, error: "Missing responseId" };
     }
-    const insertResponseQueueID = response.id;
+    if (!response.request) {
+      return { data: null, error: "Missing response.request" };
+    }
+    const insertResponseQueueID = responseId;
     const kvBody: ResponseBodyKV = {
       responseBody: response.body ?? null,
     };
-    await this.insertKV.put(response.id, JSON.stringify(kvBody), {
+    await this.insertKV.put(responseId, JSON.stringify(kvBody), {
       expirationTtl: 60 * 60 * 24 * 7,
     });
 
