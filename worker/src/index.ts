@@ -1,7 +1,17 @@
 import { RequestWrapper } from "./lib/RequestWrapper";
+import {
+  RequestQueueBody,
+  ResponseQueueBody,
+  handleRequestQueue,
+  handleResponseQueue,
+} from "./lib/dbLogger/insertConsumer";
 import { buildRouter } from "./routers/routerFactory";
 
 export type Provider = "OPENAI" | "ANTHROPIC";
+export type RequestQueue = Queue<RequestQueueBody>;
+const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
+export type ResponseQueue = Queue<ResponseQueueBody>;
+const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -14,6 +24,7 @@ export interface Env {
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
+  INSERT_KV: KVNamespace;
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -80,6 +91,20 @@ export default {
         .catch(handleError);
     } catch (e) {
       return handleError(e);
+    }
+  },
+  async queue(
+    untypedBatch: MessageBatch<RequestQueueBody | ResponseQueueBody>,
+    env: Env
+  ): Promise<void> {
+    if (untypedBatch.queue.includes(REQUEST_QUEUE_ID)) {
+      const batch = untypedBatch as MessageBatch<RequestQueueBody>;
+      await handleRequestQueue(batch, env);
+      batch.ackAll();
+    } else if (untypedBatch.queue.includes(RESPONSE_QUEUE_ID)) {
+      const batch = untypedBatch as MessageBatch<ResponseQueueBody>;
+      await handleResponseQueue(batch, env);
+      batch.ackAll();
     }
   },
 };
