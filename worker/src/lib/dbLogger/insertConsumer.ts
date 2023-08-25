@@ -131,8 +131,6 @@ export async function handleRequestQueue(
   if (propertiesInsertResult.error) {
     console.error(`Failed to insert properties for batch.`);
   }
-
-  return batch.ackAll();
 }
 
 export async function handleResponseQueue(
@@ -219,6 +217,4 @@ export async function handleResponseQueue(
   });
 
   await Promise.all([deleteResponseBodyKvPromises]);
-
-  return batch.ackAll();
 }

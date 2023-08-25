@@ -105,9 +105,11 @@ export default {
     if (untypedBatch.queue.includes(REQUEST_QUEUE_ID)) {
       const batch = untypedBatch as MessageBatch<RequestQueueBody>;
       await handleRequestQueue(batch, env);
+      batch.ackAll();
     } else if (untypedBatch.queue.includes(RESPONSE_QUEUE_ID)) {
       const batch = untypedBatch as MessageBatch<ResponseQueueBody>;
       await handleResponseQueue(batch, env);
+      batch.ackAll();
     }
   },
 };
