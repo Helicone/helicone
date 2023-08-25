@@ -1,14 +1,12 @@
 import { Database } from "../../../supabase/database.types";
 
 export class InsertQueue {
-  private queue: Database["public"]["Tables"]["request"]["Row"][] = [];
+  private queue: Queue<string>;
   private insertKV: KVNamespace;
 
-  constructor(
-    insertKV: KVNamespace
-    // TODO pass in queue from KV
-  ) {
+  constructor(insertKV: KVNamespace, queue: Queue<string>) {
     this.insertKV = insertKV;
+    this.queue = queue;
   }
   addRequest(requestData: Database["public"]["Tables"]["request"]["Row"]) {
     const insertRequestQueueID = crypto.randomUUID();
@@ -23,6 +21,8 @@ export class InsertQueue {
     const insertPropertiesQueueID = crypto.randomUUID();
     // TODO add properties to queue
     this.insertKV.put(insertPropertiesQueueID, JSON.stringify(propertiesData));
+    // await env.PROVIDER_LOGS_INSERT_QUEUE.send("sup");
+
     // await dbClient
     // .from("properties")
     // .insert(customPropertyRows)
