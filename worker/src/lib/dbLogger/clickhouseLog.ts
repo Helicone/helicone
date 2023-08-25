@@ -33,7 +33,7 @@ function buildPropertyWithResponseInserts(
 
 export async function logInClickhouse(
   request: Database["public"]["Tables"]["request"]["Row"],
-  response: Database["public"]["Tables"]["response"]["Row"],
+  response: Database["public"]["Tables"]["response"]["Insert"],
   properties: Database["public"]["Tables"]["properties"]["Row"][],
   clickhouseDb: ClickhouseClientWrapper
 ) {
