@@ -212,10 +212,6 @@ export class HeliconeProxyRequestMapper {
     if (api_base) {
       return { data: api_base, error: null };
     } else {
-      console.log(
-        "Using default API base",
-        providerBaseUrlMappings[this.provider]
-      );
       return {
         data: providerBaseUrlMappings[this.provider],
         error: null,
