@@ -430,6 +430,7 @@ export class DBLoggable {
     db: {
       supabase: SupabaseClient<Database>;
       clickhouse: ClickhouseClientWrapper;
+      queue: InsertQueue;
     },
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
@@ -491,6 +492,7 @@ export class DBLoggable {
     const requestResult = await logRequest(
       this.request,
       db.supabase,
+      db.queue,
       heliconeApiKeyRow
     );
 

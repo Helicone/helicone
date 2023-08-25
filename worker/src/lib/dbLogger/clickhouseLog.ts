@@ -32,7 +32,7 @@ function buildPropertyWithResponseInserts(
 export async function logInClickhouse(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Row"],
-  properties: Database["public"]["Tables"]["properties"]["Row"][],
+  properties: Database["public"]["Tables"]["properties"]["Insert"][],
   clickhouseDb: ClickhouseClientWrapper
 ) {
   return Promise.all([

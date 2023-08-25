@@ -3,6 +3,7 @@ import { Database } from "../../../supabase/database.types";
 export class InsertQueue {
   private queue: Database["public"]["Tables"]["request"]["Row"][] = [];
   private insertKV: KVNamespace;
+
   constructor(
     insertKV: KVNamespace
     // TODO pass in queue from KV
@@ -25,9 +26,5 @@ export class InsertQueue {
     // await dbClient
     // .from("properties")
     // .insert(customPropertyRows)
-  }
-
-  submit() {
-    // TODO submit queue
   }
 }

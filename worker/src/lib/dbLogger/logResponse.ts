@@ -105,10 +105,7 @@ export async function logRequest(
   Result<
     {
       request: Database["public"]["Tables"]["request"]["Row"];
-      properties: Omit<
-        Database["public"]["Tables"]["properties"]["Row"],
-        "id"
-      >[];
+      properties: Database["public"]["Tables"]["properties"]["Insert"][];
     },
     string
   >
