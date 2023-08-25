@@ -174,7 +174,7 @@ export async function logRequest(
         created_at: createdAt,
       })
     );
-    insertQueue.addRequest(requestData, customPropertyRows, responseId);
+    await insertQueue.addRequest(requestData, customPropertyRows, responseId);
 
     return {
       data: {
