@@ -35,14 +35,16 @@ export async function handleRequestQueue(
   );
 
   const promises = batch.messages.map(async (message) => {
-    if (!message.body.request) {
-      console.error(`Request is null for message ${message.id}`);
+    if (!message.body?.request) {
+      console.error(
+        `Request is null for RequestQueueBody message ${message.id}`
+      );
       return null;
     }
 
     if (!message.body.requestBodyKVKey) {
       console.error(
-        `Request body KV key is null for message ${message.id} and request ${message.body.request.id}`
+        `Request body KV key is null for RequestQueueBody message ${message.id} and request ${message.body.request.id}`
       );
       return null;
     }
@@ -51,7 +53,7 @@ export async function handleRequestQueue(
 
     if (!body) {
       console.error(
-        `Request body is null for message ${message.id} and request ${message.body.request.id}`
+        `Request body is null for RequestQueueBody message ${message.id} and request ${message.body.request.id}`
       );
       return null;
     }
@@ -67,7 +69,7 @@ export async function handleRequestQueue(
   const response: Database["public"]["Tables"]["response"]["Insert"][] = [];
   messages.forEach((requestMessage) => {
     if (!requestMessage || !requestMessage.body) {
-      console.error(`Request is null for message`);
+      console.error(`Request or body is null for RequestQueueBody message`);
       return;
     }
 
@@ -91,10 +93,9 @@ export async function handleRequestQueue(
     .insert(requestList);
 
   if (requestInsertResult.error) {
-    batch.retryAll();
+    return batch.retryAll();
   }
 
-  // --------------------
   const deleteRequestBodyKvPromises = messages.map(async (message) => {
     if (!message?.body?.requestBodyKVKey) {
       console.error(
@@ -103,10 +104,9 @@ export async function handleRequestQueue(
       return null;
     }
 
-    return env.INSERT_KV.delete(message?.body.requestBodyKVKey);
+    return env.INSERT_KV.delete(message.body.requestBodyKVKey);
   });
 
-  // Start the insert operations
   const responseInsertPromise = dbClient
     .from("response")
     .upsert(response, { onConflict: "id", ignoreDuplicates: true });
@@ -132,8 +132,6 @@ export async function handleRequestQueue(
   if (propertiesInsertResult.error) {
     console.error(`Failed to insert properties for batch.`);
   }
-
-  return batch.ackAll();
 }
 
 export async function handleResponseQueue(
@@ -147,7 +145,7 @@ export async function handleResponseQueue(
 
   const promises = batch.messages.map(async (message) => {
     if (!message.body.response) {
-      console.error(`Request is null for message ${message.id}`);
+      console.error(`Response is null for message ${message.id}`);
       return null;
     }
 
@@ -169,7 +167,7 @@ export async function handleResponseQueue(
 
     if (requestBody) {
       console.error(
-        `Request has not been inserted for message ${message.id} and response ${message.body.response.id}`
+        `Request has not yet been inserted for message ${message.id} and response ${message.body.response.id}`
       );
       return null;
     }
@@ -204,7 +202,7 @@ export async function handleResponseQueue(
     .upsert(responseList, { onConflict: "id", ignoreDuplicates: false });
 
   if (responseInsertResult.error) {
-    batch.retryAll();
+    return batch.retryAll();
   }
 
   const deleteResponseBodyKvPromises = messages.map(async (message) => {
@@ -220,6 +218,4 @@ export async function handleResponseQueue(
   });
 
   await Promise.all([deleteResponseBodyKvPromises]);
-
-  return batch.ackAll();
 }
