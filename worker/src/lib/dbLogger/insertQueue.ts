@@ -34,7 +34,7 @@ export class InsertQueue {
     });
 
     await this.requestQueue.send({
-      request: requestData,
+      request: { ...requestData, body: null },
       requestBodyKVKey: insertRequestQueueID,
       properties: propertiesData,
       responseId,
@@ -63,7 +63,7 @@ export class InsertQueue {
 
     await this.responseQueue.send({
       responseId: responseId,
-      response: response,
+      response: { ...response, body: null },
       responseBodyKVKey: insertResponseQueueID,
       requestBodyKVKey: response.request,
     });

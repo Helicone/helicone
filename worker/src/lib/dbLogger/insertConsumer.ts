@@ -80,7 +80,7 @@ export async function handleRequestQueue(
     }
 
     response.push({
-      request: requestMessage.body.requestId,
+      request: requestMessage.body.request.id,
       id: requestMessage.body.responseId,
       delay_ms: -1,
       body: {},
