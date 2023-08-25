@@ -287,11 +287,11 @@ export default function HomePage(props: HomePageProps) {
                   What you get
                 </h3>
                 <p className="mt-6 text-base leading-7 text-gray-600">
-                  We're excited for you to join our community. Enjoy a dedicated
-                  Discord or Slack channel, an easy-to-use Helm chart, priority
-                  on feature requests, and expert support. We{"'"}ve got you
-                  covered for self-deployed instances and offer custom ETL
-                  integrations.
+                  We&apos;re excited for you to join our community. Enjoy a
+                  dedicated Discord or Slack channel, an easy-to-use Helm chart,
+                  priority on feature requests, and expert support. We{"'"}ve
+                  got you covered for self-deployed instances and offer custom
+                  ETL integrations.
                 </p>
                 <div className="mt-10 flex items-center gap-x-4">
                   <h4 className="flex-none text-sm font-semibold leading-6 text-indigo-600">
@@ -301,7 +301,7 @@ export default function HomePage(props: HomePageProps) {
                 </div>
                 <ul
                   role="list"
-                  className="mt-6 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 sm:gap-6"
+                  className="mt-6 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6"
                 >
                   {[
                     "Monitoring and Dashboards",
