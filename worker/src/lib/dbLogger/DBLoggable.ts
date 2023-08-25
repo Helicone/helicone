@@ -12,6 +12,7 @@ import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
+import { InsertQueue } from "./insertQueue";
 
 export interface DBLoggableProps {
   response: {

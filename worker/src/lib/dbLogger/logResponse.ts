@@ -4,6 +4,7 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { DBLoggableProps } from "./DBLoggable";
+import { InsertQueue } from "./insertQueue";
 
 const MAX_USER_ID_LENGTH = 7000;
 
@@ -98,12 +99,16 @@ async function getPromptId(
 export async function logRequest(
   request: DBLoggableProps["request"],
   dbClient: SupabaseClient<Database>,
+  insertQueue: InsertQueue,
   heliconeApiKeyRow: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
 ): Promise<
   Result<
     {
       request: Database["public"]["Tables"]["request"]["Row"];
-      properties: Database["public"]["Tables"]["properties"]["Row"][];
+      properties: Omit<
+        Database["public"]["Tables"]["properties"]["Row"],
+        "id"
+      >[];
     },
     string
   >
@@ -117,6 +122,7 @@ export async function logRequest(
       return { data: null, error: "Missing heliconeApiKeyAuthHash" };
     }
 
+    // TODO KILL THIS ISH
     const prompt = request.promptFormatter?.prompt;
     const formattedPromptResult =
       prompt !== undefined
@@ -178,41 +184,28 @@ export async function logRequest(
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       created_at: createdAt,
     };
+    insertQueue.addRequest(requestData);
+    const customPropertyRows = Object.entries(request.properties).map(
+      (entry) => ({
+        request_id: request.requestId,
+        auth_hash: request.providerApiKeyAuthHash ?? null,
+        user_id: null,
+        key: entry[0],
+        value: entry[1],
+        created_at: createdAt,
+      })
+    );
+    insertQueue.addProperties(customPropertyRows);
 
-    const { error } = await dbClient.from("request").insert([requestData]);
-
-    const requestRow: Database["public"]["Tables"]["request"]["Row"] =
-      requestData;
-
-    if (error !== null) {
-      return { data: null, error: error.message };
-    } else {
-      // Log custom properties and then return request id
-      const customPropertyRows = Object.entries(request.properties).map(
-        (entry) => ({
-          request_id: request.requestId,
-          auth_hash: request.providerApiKeyAuthHash,
-          user_id: null,
-          key: entry[0],
-          value: entry[1],
-        })
-      );
-
-      const customProperties =
-        customPropertyRows.length > 0
-          ? (
-              await dbClient
-                .from("properties")
-                .insert(customPropertyRows)
-                .select("*")
-            ).data ?? []
-          : [];
-
-      return {
-        data: { request: requestRow, properties: customProperties },
-        error: null,
-      };
-    }
+    return {
+      data: {
+        request: requestData,
+        properties: {
+          ...customPropertyRows,
+        },
+      },
+      error: null,
+    };
   } catch (e) {
     return { data: null, error: JSON.stringify(e) };
   }
