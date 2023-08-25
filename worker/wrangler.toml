@@ -24,6 +24,16 @@ TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "false"
 
+[[queues.producers]]
+queue = "provider-logs-insert-queue"
+binding = "PROVIDER_LOGS_INSERT_QUEUE"
+
+[[queues.consumers]]
+queue = "provider-logs-insert-queue"
+max_batch_size = 25
+max_batch_timeout = 1
+max_retries = 0
+
 [env.production]
 name = "helicone-worker-prod"
 routes = [
@@ -42,6 +52,16 @@ CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "false"
 
+[[env.production.queues.consumers]]
+queue = "provider-logs-insert-queue-prod"
+max_batch_size = 25
+max_batch_timeout = 1
+max_retries = 0
+
+[[env.production.queues.producers]]
+queue = "provider-logs-insert-queue-prod"
+binding = "PROVIDER_LOGS_INSERT_QUEUE"
+
 [env.production_staging]
 name = "helicone-worker-prod-staging"
 routes = [
@@ -59,3 +79,13 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "false"
+
+[[env.staging.queues.producers]]
+queue = "provider-logs-insert-queue-staging"
+binding = "PROVIDER_LOGS_INSERT_QUEUE"
+
+[[env.staging.queues.consumers]]
+queue = "provider-logs-insert-queue-staging"
+max_batch_size = 25
+max_batch_timeout = 1
+max_retries = 0

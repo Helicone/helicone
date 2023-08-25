@@ -17,6 +17,7 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
+  PROVIDER_LOGS_INSERT_QUEUE: Queue<string>;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -69,6 +70,7 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     try {
+      await env.PROVIDER_LOGS_INSERT_QUEUE.send("sup");
       const requestWrapper = await RequestWrapper.create(request, env);
       if (requestWrapper.error || !requestWrapper.data) {
         return handleError(requestWrapper.error);
@@ -81,6 +83,10 @@ export default {
     } catch (e) {
       return handleError(e);
     }
+  },
+  async queue(batch: MessageBatch<string>, env: Env): Promise<void> {
+    let messages = JSON.stringify(batch.messages);
+    console.log(`consumed from our queue: ${messages}`);
   },
 };
 
