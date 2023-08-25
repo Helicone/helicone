@@ -58,7 +58,7 @@ export async function handleRequestQueue(
       return null;
     }
 
-    message.body.request.body = body;
+    message.body.request.body = JSON.parse(body)["requestBody"];
     return message;
   });
 
@@ -104,7 +104,7 @@ export async function handleRequestQueue(
       return null;
     }
 
-    return env.INSERT_KV.delete(message.body.requestBodyKVKey);
+    await env.INSERT_KV.delete(message.body.requestBodyKVKey);
   });
 
   const responseInsertPromise = dbClient
@@ -151,14 +151,14 @@ export async function handleResponseQueue(
 
     if (!message.body.requestBodyKVKey) {
       console.error(
-        `Request body KV key is null for message ${message.id} and response ${message.body.response.id}`
+        `Request body KV key is null for message ${message.id} and response ${message.body.responseId}`
       );
       return null;
     }
 
     if (!message.body.responseBodyKVKey) {
       console.error(
-        `Response body KV key is null for message ${message.id} and response ${message.body.response.id}`
+        `Response body KV key is null for message ${message.id} and response ${message.body.responseId}`
       );
       return null;
     }
@@ -167,21 +167,21 @@ export async function handleResponseQueue(
 
     if (requestBody) {
       console.error(
-        `Request has not yet been inserted for message ${message.id} and response ${message.body.response.id}`
+        `Request has not yet been inserted for message ${message.id} and response ${message.body.responseId}`
       );
-      return null;
+      message.retry();
     }
 
     const body = await env.INSERT_KV.get(message.body.responseBodyKVKey);
 
     if (!body) {
       console.error(
-        `Response body is null for message ${message.id} and response ${message.body.response.id}`
+        `Response body is null for message ${message.id} and response ${message.body.responseId}`
       );
       return null;
     }
 
-    message.body.response.body = body;
+    message.body.response.body = JSON.parse(body)["responseBody"];
     return message;
   });
 
@@ -194,6 +194,7 @@ export async function handleResponseQueue(
       return;
     }
 
+    responseMessage.body.response.id = responseMessage.body.responseId;
     responseList.push(responseMessage.body.response);
   });
 

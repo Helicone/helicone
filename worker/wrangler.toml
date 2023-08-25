@@ -40,13 +40,13 @@ queue = "provider-logs-insert-response-queue-dev"
 queue = "provider-logs-insert-request-queue-dev"
 max_batch_size = 25
 max_batch_timeout = 1
-max_retries = 0
+max_retries = 3
 
 [[queues.consumers]]
 queue = "provider-logs-insert-response-queue-dev"
 max_batch_size = 25
 max_batch_timeout = 1
-max_retries = 0
+max_retries = 3
 
 
 [env.production]

@@ -1,5 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-import { Database } from "../supabase/database.types";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { buildRouter } from "./routers/routerFactory";
 import {
