@@ -595,15 +595,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       <div>
                         We recently experienced an outage between 11:21 PM PST
                         8/25/2023 to 2:19 PM PST 8/26/2023, due to a high volume
-                        of requests.
+                        of requests. <br /> We are sorry for any of the
+                        inconvenience this may have caused. Your proxy was
+                        uneffected by this outage. However, logs will be missing
+                        from 8:00 PM PST 8/25/2023 to 2:19 PM PST 8/26/2023.
                       </div>
-                      <div>
-                        We are sorry for any of the inconvenience this may have
-                        caused. Your proxy was uneffected by this outage.
-                        However, logs will be missing from 8:00 PM PST 8/25/2023
-                        to 2:19 PM PST 8/26/2023.
-                      </div>
-
                       <Link
                         className="flex flex-row space-x-1 items-center text-gray-50"
                         href={"https://discord.gg/2TkeWdXNPQ"}
