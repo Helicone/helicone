@@ -447,49 +447,6 @@ export class DBLoggable {
     if (!heliconeApiKeyRow?.organization_id) {
       return { data: null, error: "Helicone api key not found" };
     }
-
-    // Fetch the serialized list of request timestamps for this API key from the KV store
-    const serializedTimestamps =
-      (await rateLimitKV.get(heliconeApiKeyRow.organization_id)) || "[]";
-
-    // Deserialize the timestamps
-    const timestamps: number[] = JSON.parse(serializedTimestamps);
-
-    // Filter out timestamps older than 1 second
-    const oneSecondAgo = Date.now() - 1000;
-    const recentTimestamps = timestamps.filter(
-      (timestamp) => timestamp > oneSecondAgo
-    );
-
-    // If the number of recent requests is 1000 or more, deny the request
-    if (recentTimestamps.length >= 5) {
-      const rl_hits =
-        (await rateLimitKV.get(
-          `RL_HITS_${heliconeApiKeyRow.organization_id}`
-        )) || "0";
-      const rl_hits_int = parseInt(rl_hits);
-      rateLimitKV.put(
-        `RL_HITS_${heliconeApiKeyRow.organization_id}`,
-        (rl_hits_int + 1).toString(),
-        {
-          expirationTtl: 60 * 60 * 24,
-        }
-      );
-
-      return { data: null, error: "Rate limit exceeded" };
-    }
-
-    // Otherwise, add the current timestamp to the list and store it back in the KV store
-    recentTimestamps.push(Date.now());
-    const newSerializedTimestamps = JSON.stringify(recentTimestamps);
-    await rateLimitKV.put(
-      heliconeApiKeyRow.organization_id,
-      newSerializedTimestamps,
-      {
-        expirationTtl: 60 * 60 * 24,
-      }
-    );
-
     const requestResult = await logRequest(
       this.request,
       this.response.responseId,
