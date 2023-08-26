@@ -593,13 +593,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   <div className="px-4 md:px-8 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
                     <div className="flex  flex-col space-x-4 md:space-x-8 items-center text-gray-50">
                       <div>
-                        We experienced an outage from 11:00 PM PST 8/26/2023,
-                        due to a high volume of requests.
+                        We recently experienced an outage between 11:21 PM PST
+                        8/25/2023 to 2:19 PM PST 8/26/2023, due to a high volume
+                        of requests.
                       </div>
                       <div>
                         We are sorry for any of the inconvenience this may have
-                        caused. We have taken steps to ensure this does not
-                        happen again.
+                        caused. Your proxy was uneffected by this outage.
+                        However, logs will be missing from 8:00 PM PST 8/25/2023
+                        to 2:19 PM PST 8/26/2023.
                       </div>
 
                       <Link

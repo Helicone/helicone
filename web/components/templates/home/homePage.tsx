@@ -135,37 +135,6 @@ export default function HomePage(props: HomePageProps) {
 
   return (
     <div className="flex-col w-full antialiased">
-      <div className="bg-orange-400">
-        <div className="px-4 md:px-8 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
-          <div className="flex  flex-col space-x-4 md:space-x-8 items-center text-gray-50">
-            <div>Dashboard and logins are failing ❌</div>
-            <div>Proxy is still working ✅</div>
-            <div>
-              We are experiencing an outage starting at 11:12 PM PST 8/25/2023,
-              due to a high volume of requests.
-            </div>
-            <div>
-              We are sorry for any of the inconvenience this may have caused. We
-              have taken steps to ensure this does not happen again.
-            </div>
-            <div>
-              Our ETA for service to be restored is 5:00 PM PST 8/26/2023.
-            </div>
-
-            <Link
-              className="flex flex-row space-x-1 items-center text-gray-50"
-              href={"https://discord.gg/2TkeWdXNPQ"}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <p className="underline hidden lg:block">
-                Join our discord for updates
-              </p>
-              <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
-            </Link>
-          </div>
-        </div>
-      </div>
       <NavBarV2 />
       <div className="relative isolate overflow-hidden bg-white">
         <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-32  border-gray-300">
