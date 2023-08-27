@@ -92,6 +92,9 @@ export default {
       return handleError(e);
     }
   },
+  async queue(batch: MessageBatch<string>, env: Env): Promise<void> {
+    return;
+  },
 };
 
 function handleError(e: any): Response {
