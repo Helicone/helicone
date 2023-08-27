@@ -20,7 +20,6 @@ export interface Env {
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
-  INSERT_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
@@ -28,8 +27,6 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
-  PROVIDER_LOGS_INSERT_REQUESTS_QUEUE: RequestQueue;
-  PROVIDER_LOGS_INSERT_RESPONSE_QUEUE: ResponseQueue;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -93,21 +90,6 @@ export default {
         .catch(handleError);
     } catch (e) {
       return handleError(e);
-    }
-  },
-
-  async queue(
-    untypedBatch: MessageBatch<RequestQueueBody | ResponseQueueBody>,
-    env: Env
-  ): Promise<void> {
-    if (untypedBatch.queue.includes(REQUEST_QUEUE_ID)) {
-      const batch = untypedBatch as MessageBatch<RequestQueueBody>;
-      await handleRequestQueue(batch, env);
-      batch.ackAll();
-    } else if (untypedBatch.queue.includes(RESPONSE_QUEUE_ID)) {
-      const batch = untypedBatch as MessageBatch<ResponseQueueBody>;
-      await handleResponseQueue(batch, env);
-      batch.ackAll();
     }
   },
 };

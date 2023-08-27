@@ -26,29 +26,6 @@ WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "false"
 
 
-# Producers
-[[queues.producers]]
-binding = "PROVIDER_LOGS_INSERT_REQUESTS_QUEUE"
-queue = "provider-logs-insert-request-queue-dev"
-
-[[queues.producers]]
-binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE"
-queue = "provider-logs-insert-response-queue-dev"
-
-# Consumers
-[[queues.consumers]]
-queue = "provider-logs-insert-request-queue-dev"
-max_batch_size = 25
-max_batch_timeout = 1
-max_retries = 3
-
-[[queues.consumers]]
-queue = "provider-logs-insert-response-queue-dev"
-max_batch_size = 25
-max_batch_timeout = 1
-max_retries = 3
-
-
 [env.production]
 name = "helicone-worker-prod"
 routes = [
@@ -61,17 +38,6 @@ kv_namespaces = [
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 ]
-
-queues.producers = [
-	{ binding = "PROVIDER_LOGS_INSERT_REQUESTS_QUEUE", queue = "provider-logs-insert-request-queue-prod" },
-	{ binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE", queue = "provider-logs-insert-response-queue-prod" },
-]
-
-queues.consumers = [
-	{ queue = "provider-logs-insert-request-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
-	{ queue = "provider-logs-insert-response-queue-prod", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
-]
-
 
 [env.production.vars]
 SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
@@ -91,16 +57,6 @@ kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
-]
-
-queues.producers = [
-	{ binding = "PROVIDER_LOGS_INSERT_REQUESTS_QUEUE", queue = "provider-logs-insert-request-queue-staging" },
-	{ binding = "PROVIDER_LOGS_INSERT_RESPONSE_QUEUE", queue = "provider-logs-insert-response-queue-staging" },
-]
-
-queues.consumers = [
-	{ queue = "provider-logs-insert-request-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
-	{ queue = "provider-logs-insert-response-queue-staging", max_batch_size = 25, max_batch_timeout = 1, max_retries = 3 },
 ]
 
 [env.production_staging.vars]

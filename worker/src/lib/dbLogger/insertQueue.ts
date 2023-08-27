@@ -1,21 +1,14 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { RequestQueue, ResponseQueue } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { RequestBodyKV, ResponseBodyKV } from "./insertConsumer";
 
 export class InsertQueue {
-  private requestQueue: RequestQueue;
-  private responseQueue: ResponseQueue;
-  private insertKV: KVNamespace;
+  private database: SupabaseClient<Database>;
 
-  constructor(
-    insertKV: KVNamespace,
-    requestQueue: RequestQueue,
-    responseQueue: ResponseQueue
-  ) {
-    this.insertKV = insertKV;
-    this.requestQueue = requestQueue;
-    this.responseQueue = responseQueue;
+  constructor(database: SupabaseClient<Database>) {
+    this.database = database;
   }
   async addRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"],
@@ -25,21 +18,38 @@ export class InsertQueue {
     if (!requestData.id) {
       return { data: null, error: "Missing request.id" };
     }
-    const insertRequestQueueID = requestData.id;
-    const kvBody: RequestBodyKV = {
-      requestBody: requestData.body,
-    };
-    await this.insertKV.put(insertRequestQueueID, JSON.stringify(kvBody), {
-      expirationTtl: 60 * 60 * 24 * 7,
-    });
 
-    await this.requestQueue.send({
-      request: { ...requestData, body: null },
-      requestBodyKVKey: insertRequestQueueID,
-      properties: propertiesData,
-      responseId,
-      requestId: requestData.id,
-    });
+    const requestInsertResult = await this.database
+      .from("request")
+      .insert([requestData]);
+
+    const responseInsertResult = await this.database.from("response").insert([
+      {
+        request: requestData.id,
+        id: responseId,
+        delay_ms: -1,
+        body: {},
+        status: -1,
+      },
+    ]);
+    const propertiesInsertResult = await this.database
+      .from("properties")
+      .insert(propertiesData);
+
+    if (
+      requestInsertResult.error ||
+      responseInsertResult.error ||
+      propertiesInsertResult.error
+    ) {
+      return {
+        data: null,
+        error: JSON.stringify({
+          requestError: requestInsertResult.error,
+          responseError: responseInsertResult.error,
+          propertiesError: propertiesInsertResult.error,
+        }),
+      };
+    }
     return { data: null, error: null };
   }
 
@@ -51,24 +61,13 @@ export class InsertQueue {
     if (!responseId) {
       return { data: null, error: "Missing responseId" };
     }
-    if (!response.request) {
-      return { data: null, error: "Missing response.request" };
+    const updateResponseResult = await this.database
+      .from("response")
+      .update(response)
+      .match({ id: responseId, request: requestId });
+    if (updateResponseResult.error) {
+      return { data: null, error: updateResponseResult.error.message };
     }
-    const insertResponseQueueID = responseId;
-    const kvBody: ResponseBodyKV = {
-      responseBody: response.body ?? null,
-    };
-    await this.insertKV.put(responseId, JSON.stringify(kvBody), {
-      expirationTtl: 60 * 60 * 24 * 7,
-    });
-
-    await this.responseQueue.send({
-      responseId: responseId,
-      requestId: requestId,
-      response: { ...response, body: null },
-      responseBodyKVKey: insertResponseQueueID,
-      requestBodyKVKey: response.request,
-    });
     return { data: null, error: null };
   }
 }
