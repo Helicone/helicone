@@ -78,7 +78,10 @@ export class HeliconeAsyncLogger {
     try {
       result = await axios(options);
     } catch (error: any) {
-      console.error("Error making axios request:", error.message);
+      console.error(
+        "Error making request to Helicone log endpoint:",
+        error.message
+      );
 
       if (error.isAxiosError && error.response) {
         result = error.response;
