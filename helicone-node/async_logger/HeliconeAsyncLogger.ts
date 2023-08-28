@@ -74,12 +74,22 @@ export class HeliconeAsyncLogger {
       throw new Error("Invalid provider");
     }
 
-    let result;
+    let result: AxiosResponse<any, any>;
     try {
       result = await axios(options);
     } catch (error: any) {
-      if (error.response) {
+      console.error("Error making axios request:", error.message);
+
+      if (error.isAxiosError && error.response) {
         result = error.response;
+      } else {
+        result = {
+          data: null,
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: {},
+          config: {},
+        };
       }
     }
 
