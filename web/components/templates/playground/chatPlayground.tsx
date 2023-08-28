@@ -13,11 +13,7 @@ import {
 } from "openai";
 import ChatRow from "./chatRow";
 import { fetchOpenAI } from "../../../services/lib/openAI";
-
-export type Message = {
-  role: string;
-  content: string | null;
-};
+import { Message } from "../requests/chat";
 
 interface ChatPlaygroundProps {
   requestId: string;

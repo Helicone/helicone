@@ -5,11 +5,19 @@ import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";
 
-class FunctionGPTBuilder extends AbstractRequestBuilder {
+class ChatGPTBuilder extends AbstractRequestBuilder {
+  // private checkHasFunctionCall = () => {
+  //   const hasFunction = this.response.request_body.functions !== undefined;
+  //   return hasFunction;
+  // };
+
+  // hasFunctionCall = this.checkHasFunctionCall();
+
   protected buildSpecific(): SpecificFields {
     const hasNoContent = this.response.response_body?.choices
       ? this.response.response_body?.choices[0].message.content === null
       : true;
+
     const getRequestText = () => {
       const messages = this.response.request_body.messages;
       if (messages) {
@@ -22,6 +30,7 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
         return "";
       }
     };
+
     const getResponseText = () => {
       const statusCode = this.response.response_status;
       if (statusCode === 200) {
@@ -49,6 +58,7 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
         return this.response.response_body?.error?.message || "network error";
       }
     };
+
     return {
       requestText: getRequestText(),
       responseText: getResponseText(),
@@ -58,32 +68,31 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Chat
-            chatProperties={{
-              request: this.response.request_body.messages,
-              response: {
-                role: "assistant",
-                content: hasNoContent
-                  ? JSON.stringify(
-                      this.response.response_body?.choices
-                        ? this.response.response_body?.choices[0]?.message
-                            .function_call
-                        : "An error occured",
-                      null,
-                      2
-                    )
-                  : this.response.response_body?.choices[0].message.content,
-              },
-            }}
+            request={this.response.request_body.messages}
+            response={
+              this.response.response_body?.choices[0].message
+              //   {
+              //   role: "assistant",
+              //   content: hasNoContent
+              //     ? JSON.stringify(
+              //         this.response.response_body?.choices
+              //           ? this.response.response_body?.choices[0]?.message
+              //               .function_call
+              //           : "An error occured",
+              //         null,
+              //         2
+              //       )
+              //     : this.response.response_body?.choices[0].message.content,
+              // }
+            }
             status={this.response.response_status}
           />
         ) : (
           <div className="w-full flex flex-col text-left space-y-8 text-sm">
             {this.response.request_body.messages && (
               <Chat
-                chatProperties={{
-                  request: this.response.request_body.messages,
-                  response: null,
-                }}
+                request={this.response.request_body.messages}
+                response={null}
                 status={this.response.response_status}
               />
             )}
@@ -99,4 +108,4 @@ class FunctionGPTBuilder extends AbstractRequestBuilder {
   }
 }
 
-export default FunctionGPTBuilder;
+export default ChatGPTBuilder;

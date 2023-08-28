@@ -23,7 +23,7 @@ import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { useOrg } from "../../shared/layout/organizationContext";
-import { Message } from "../playground/chatPlayground";
+import { Message } from "./chat";
 
 export type PromptResponsePair =
   | {
