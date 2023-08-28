@@ -1,12 +1,12 @@
 import { HeliconeRequest } from "../../../../lib/api/request/request";
 import ClaudeBuilder from "./claudeBuilder";
 import EmbeddingBuilder from "./embeddingBuilder";
-import FunctionGPTBuilder from "./functionGPTBuilder";
+import ChatGPTBuilder from "./chatGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
 
 export type BuilderType =
-  | "FunctionGPTBuilder"
+  | "ChatGPTBuilder"
   | "GPT3Builder"
   | "ModerationBuilder"
   | "EmbeddingBuilder"
@@ -14,7 +14,7 @@ export type BuilderType =
 
 export const getBuilderType = (model: string): BuilderType => {
   if (/^gpt-(4|3\.5|35)/.test(model)) {
-    return "FunctionGPTBuilder";
+    return "ChatGPTBuilder";
   }
 
   if (/^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model)) {
@@ -37,7 +37,7 @@ export const getBuilderType = (model: string): BuilderType => {
 };
 
 let builders = {
-  FunctionGPTBuilder: FunctionGPTBuilder,
+  ChatGPTBuilder: ChatGPTBuilder,
   GPT3Builder: GPT3Builder,
   ModerationBuilder: ModerationBuilder,
   EmbeddingBuilder: EmbeddingBuilder,
@@ -51,21 +51,20 @@ const getModelFromPath = (path: string) => {
   if (match && match[1]) {
     return match[1];
   } else {
-    console.log("No match found");
     return undefined;
   }
 };
 
 const getRequestBuilder = (request: HeliconeRequest) => {
-  let requestModel =
+  let model =
     request.response_body?.model ||
     request.request_body?.model ||
     request.response_body?.body?.model || // anthropic
     getModelFromPath(request.request_path) ||
     "";
-  const builderType = getBuilderType(requestModel);
+  const builderType = getBuilderType(model);
   let builder = builders[builderType];
-  return new builder(request, requestModel);
+  return new builder(request, model);
 };
 
 export default getRequestBuilder;
