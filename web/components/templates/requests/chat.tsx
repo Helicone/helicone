@@ -57,9 +57,24 @@ export const SingleChat = (props: {
   const possiblyTruncated = checkShouldTruncate(formattedMessageContent);
   const needsTruncation = possiblyTruncated && !expanded;
 
+  console.log("pre", formattedMessageContent);
+
   if (needsTruncation) {
-    formattedMessageContent = formattedMessageContent.slice(0, MAX_LENGTH);
+    formattedMessageContent = `${formattedMessageContent.slice(
+      0,
+      MAX_LENGTH
+    )}...`;
   }
+
+  console.log("post", formattedMessageContent);
+
+  console.log(
+    isSystem,
+    isAssistant,
+    isFunction,
+    hasFunctionCall,
+    formattedMessageContent
+  );
 
   const getBgColor = () => {
     if (isAssistant || isSystem) {
@@ -109,14 +124,20 @@ export const SingleChat = (props: {
           </div>
         ) : hasFunctionCall ? (
           <div className="flex flex-col space-y-2">
-            {formattedMessageContent !== "" && (
-              <p className="text-sm whitespace-pre-wrap">
-                {formattedMessageContent}
-              </p>
+            {formattedMessageContent !== "" ? (
+              <>
+                <p className="text-sm whitespace-pre-wrap">
+                  {formattedMessageContent}
+                </p>
+                <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+                  {`${message.function_call?.name}(${message.function_call?.arguments})`}
+                </pre>
+              </>
+            ) : (
+              <pre className="text-xs whitespace-pre-wrap py-1 font-semibold">
+                {`${message.function_call?.name}(${message.function_call?.arguments})`}
+              </pre>
             )}
-            <pre className="text-xs whitespace-pre-wrap py-1 font-semibold">
-              {`${message.function_call?.name}(${message.function_call?.arguments})`}
-            </pre>
           </div>
         ) : (
           <p className="text-sm whitespace-pre-wrap">
@@ -130,7 +151,7 @@ export const SingleChat = (props: {
               <div
                 className={clsx(
                   getBgColor(),
-                  "absolute inset-0 bg-gradient-to-b from-transparent pointer-events-none flex flex-col justify-end items-center"
+                  "inset-0 bg-gradient-to-b from-transparent pointer-events-none flex flex-col justify-end items-center"
                 )}
               ></div>
               <button
