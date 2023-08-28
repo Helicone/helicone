@@ -116,7 +116,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               const normalizedRequest = getRequestBuilder(data[0]).build();
               setSelectedData(normalizedRequest);
               setOpen(true);
-              console.log(normalizedRequest);
             }
           });
       };

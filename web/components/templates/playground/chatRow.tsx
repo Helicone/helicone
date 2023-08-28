@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import ResizeTextArea from "./resizeTextArea";
 import { ChatCompletionRequestMessage } from "openai";
-import { Message } from "./chatPlayground";
+import { Message } from "../requests/chat";
 
 interface ChatRowProps {
   index: number;
