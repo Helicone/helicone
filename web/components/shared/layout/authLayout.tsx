@@ -590,40 +590,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
               )}
               <OrgContext.Provider value={org}>
-                {new Date().getTime() < 1693523682199 && !dismissWarning && (
-                  <div className="bg-orange-400">
-                    <div className="px-4 md:px-8 py-4 h-full min-h-[3rem] flex flex-col md:flex-row max-w-7xl gap-4 mx-auto w-full items-center justify-between">
-                      <div className="flex  flex-col space-x-4 md:space-x-8 items-center text-gray-50">
-                        <div>
-                          We recently experienced an outage between 11:21 PM PST
-                          8/25/2023 to 2:19 PM PST 8/26/2023, due to a high
-                          volume of requests. <br /> We are sorry for any of the
-                          inconvenience this may have caused. Your proxy was
-                          uneffected by this outage. However, logs will be
-                          missing from 8:00 PM PST 8/25/2023 to 2:19 PM PST
-                          8/26/2023.
-                        </div>
-                        <Link
-                          className="flex flex-row space-x-1 items-center text-gray-50"
-                          href={"https://discord.gg/2TkeWdXNPQ"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <p className="underline hidden lg:block">
-                            Join our discord for updates
-                          </p>
-                          <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-block" />
-                        </Link>
-                        <button
-                          onClick={() => setDismissWarning(true)}
-                          className="text-gray-50 underline p-3"
-                        >
-                          Dismiss
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <div className="py-4 sm:py-8" key={org?.renderKey}>
                   {children}
                 </div>
