@@ -100,15 +100,24 @@ export const SingleChat = (props: {
       <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
         {isFunction ? (
           <div className="flex flex-col space-y-2">
-            <p className="text-sm whitespace-pre-wrap font-semibold">
+            <code className="text-xs whitespace-pre-wrap font-semibold">
               {message.name}
-            </p>
+            </code>
             <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
               {JSON.stringify(JSON.parse(formattedMessageContent), null, 2)}
             </pre>
           </div>
         ) : hasFunctionCall ? (
-          <div>{`${message.function_call?.name}(${message.function_call?.arguments})`}</div>
+          <div className="flex flex-col space-y-2">
+            {formattedMessageContent !== "" && (
+              <p className="text-sm whitespace-pre-wrap">
+                {formattedMessageContent}
+              </p>
+            )}
+            <pre className="text-xs whitespace-pre-wrap py-1 font-semibold">
+              {`${message.function_call?.name}(${message.function_call?.arguments})`}
+            </pre>
+          </div>
         ) : (
           <p className="text-sm whitespace-pre-wrap">
             {formattedMessageContent}
@@ -165,7 +174,11 @@ interface ChatProps {
     | null;
   response: {
     role: string;
-    content: string;
+    content: string | null;
+    function_call?: {
+      name: string;
+      arguments: string;
+    };
   } | null;
   status: number;
 }
