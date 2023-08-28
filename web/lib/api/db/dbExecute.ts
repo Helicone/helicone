@@ -74,11 +74,12 @@ export async function dbExecute<T>(
   query: string,
   parameters: any[]
 ): Promise<Result<T[], string>> {
-  // console.log("Executing query: ", query, parameters);
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    // Need to add ssl
-    // ssl: process.env.NODE_ENV === "production",
+    ssl: {
+      rejectUnauthorized: process.env.VERCEL_ENV !== "development",
+      ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
+    },
   });
   try {
     // Let's print out the time it takes to execute the query
