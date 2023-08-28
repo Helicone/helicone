@@ -11,7 +11,7 @@ const ModelPill = (props: ModelPillProps) => {
   const builderType = getBuilderType(model);
 
   let modelMapping = {
-    FunctionGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
+    ChatGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
     GPT3Builder: "bg-green-50 text-green-700 ring-green-200",
     ModerationBuilder: "bg-teal-50 text-teal-700 ring-teal-200",
     EmbeddingBuilder: "bg-blue-50 text-blue-700 ring-blue-200",

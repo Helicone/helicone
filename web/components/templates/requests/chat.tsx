@@ -1,7 +1,9 @@
 import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
+  CodeBracketIcon,
   UserCircleIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
@@ -9,35 +11,16 @@ import { removeLeadingWhitespace } from "../../shared/utils/utils";
 
 import React from "react";
 import { Tooltip } from "@mui/material";
-import { Message } from "../playground/chatPlayground";
 
-interface ChatProps {
-  chatProperties: {
-    request:
-      | {
-          role: string;
-          content: string;
-        }[]
-      | null;
-    response: {
-      role: string;
-      content: string;
-    } | null;
+export type Message = {
+  role: string;
+  content: string | null;
+  function_call?: {
+    name: string;
+    arguments: string;
   };
-  status: number;
-  prompt_regex?: string;
-  [keys: string]: any;
-}
-
-// export interface Prompt {
-//   prompt: string;
-//   values: { [key: string]: string };
-// }
-
-// export interface PromptResult {
-//   data: JSX.Element;
-//   error: string | null;
-// }
+  name?: string;
+};
 
 export const SingleChat = (props: {
   message: Message;
@@ -56,6 +39,8 @@ export const SingleChat = (props: {
   } = props;
   const isAssistant = message.role === "assistant";
   const isSystem = message.role === "system";
+  const isFunction = message.role === "function";
+  const hasFunctionCall = message.function_call;
 
   let formattedMessageContent = removeLeadingWhitespace(
     message?.content?.toString() || ""
@@ -72,18 +57,43 @@ export const SingleChat = (props: {
   const possiblyTruncated = checkShouldTruncate(formattedMessageContent);
   const needsTruncation = possiblyTruncated && !expanded;
 
+  console.log("pre", formattedMessageContent);
+
   if (needsTruncation) {
-    formattedMessageContent = formattedMessageContent.slice(0, MAX_LENGTH);
+    formattedMessageContent = `${formattedMessageContent.slice(
+      0,
+      MAX_LENGTH
+    )}...`;
   }
-  const bgColor = isAssistant || isSystem ? "gray-100" : "white";
+
+  console.log("post", formattedMessageContent);
+
+  console.log(
+    isSystem,
+    isAssistant,
+    isFunction,
+    hasFunctionCall,
+    formattedMessageContent
+  );
+
+  const getBgColor = () => {
+    if (isAssistant || isSystem) {
+      return "bg-gray-100";
+    } else if (isFunction) {
+      return "bg-gray-200";
+    } else {
+      return "bg-white";
+    }
+  };
+
   return (
     <div
       className={clsx(
-        `bg-${bgColor}`,
+        getBgColor(),
         "items-start p-4 text-left grid grid-cols-12 space-x-2",
-        isSystem ? "font-semibold" : "",
-        index === 0 ? "rounded-t-md" : "",
-        isLast ? "rounded-b-md" : ""
+        isSystem && "font-semibold",
+        index === 0 && "rounded-t-md",
+        isLast && "rounded-b-md"
       )}
       key={index}
     >
@@ -96,20 +106,59 @@ export const SingleChat = (props: {
             width={30}
             alt="ChatGPT Logo"
           />
+        ) : isFunction ? (
+          <CodeBracketIcon className="h-6 w-6 rounded-full border bg-white text-black border-black p-1" />
         ) : (
-          <UserCircleIcon className="h-6 w-6 bg-white rounded-full" />
+          <UserIcon className="h-6 w-6 bg-white rounded-full p-1 border border-black text-black" />
         )}
       </div>
       <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
-        <p className="text-sm whitespace-pre-wrap">{formattedMessageContent}</p>
+        {isFunction ? (
+          <div className="flex flex-col space-y-2">
+            <code className="text-xs whitespace-pre-wrap font-semibold">
+              {message.name}
+            </code>
+            <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+              {JSON.stringify(JSON.parse(formattedMessageContent), null, 2)}
+            </pre>
+          </div>
+        ) : hasFunctionCall ? (
+          <div className="flex flex-col space-y-2">
+            {formattedMessageContent !== "" ? (
+              <>
+                <p className="text-sm whitespace-pre-wrap">
+                  {formattedMessageContent}
+                </p>
+                <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+                  {`${message.function_call?.name}(${message.function_call?.arguments})`}
+                </pre>
+              </>
+            ) : (
+              <pre className="text-xs whitespace-pre-wrap py-1 font-semibold">
+                {`${message.function_call?.name}(${message.function_call?.arguments})`}
+              </pre>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm whitespace-pre-wrap">
+            {formattedMessageContent}
+          </p>
+        )}
+
         {possiblyTruncated &&
           (needsTruncation ? (
             <>
               <div
-                className={`absolute inset-0 bg-gradient-to-b from-transparent to-${bgColor} pointer-events-none flex flex-col justify-end items-center`}
+                className={clsx(
+                  getBgColor(),
+                  "inset-0 bg-gradient-to-b from-transparent pointer-events-none flex flex-col justify-end items-center"
+                )}
               ></div>
               <button
-                className={`text-xs text-gray-500 bg-${bgColor}  opacity-50 py-2 font-semibold px-2 w-full`}
+                className={clsx(
+                  getBgColor(),
+                  "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
+                )}
                 onClick={() => {
                   setExpanded(true);
                 }}
@@ -120,7 +169,10 @@ export const SingleChat = (props: {
           ) : (
             <>
               <button
-                className={`text-xs text-gray-500 bg-${bgColor}  opacity-50 py-2 font-semibold px-2 w-full`}
+                className={clsx(
+                  getBgColor(),
+                  "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
+                )}
                 onClick={() => {
                   setExpanded(false);
                 }}
@@ -134,8 +186,27 @@ export const SingleChat = (props: {
   );
 };
 
+interface ChatProps {
+  request:
+    | {
+        role: string;
+        content: string;
+      }[]
+    | null;
+  response: {
+    role: string;
+    content: string | null;
+    function_call?: {
+      name: string;
+      arguments: string;
+    };
+  } | null;
+  status: number;
+}
+
 export const Chat = (props: ChatProps) => {
-  const { request, response } = props.chatProperties;
+  const { request, response } = props;
+
   const [expanedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
@@ -143,6 +214,7 @@ export const Chat = (props: ChatProps) => {
       Array.from({ length: (request || []).length }, (_, i) => [i, false])
     )
   );
+
   const allExpanded = Object.values(expanedChildren).every(
     (value) => value === true
   );
