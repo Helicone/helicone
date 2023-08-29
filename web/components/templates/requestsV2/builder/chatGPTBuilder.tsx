@@ -6,13 +6,6 @@ import AbstractRequestBuilder, {
 } from "./abstractRequestBuilder";
 
 class ChatGPTBuilder extends AbstractRequestBuilder {
-  // private checkHasFunctionCall = () => {
-  //   const hasFunction = this.response.request_body.functions !== undefined;
-  //   return hasFunction;
-  // };
-
-  // hasFunctionCall = this.checkHasFunctionCall();
-
   protected buildSpecific(): SpecificFields {
     const hasNoContent = this.response.response_body?.choices
       ? this.response.response_body?.choices[0].message.content === null
@@ -69,22 +62,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         ) : this.response.response_status === 200 ? (
           <Chat
             request={this.response.request_body.messages}
-            response={
-              this.response.response_body?.choices[0].message
-              //   {
-              //   role: "assistant",
-              //   content: hasNoContent
-              //     ? JSON.stringify(
-              //         this.response.response_body?.choices
-              //           ? this.response.response_body?.choices[0]?.message
-              //               .function_call
-              //           : "An error occured",
-              //         null,
-              //         2
-              //       )
-              //     : this.response.response_body?.choices[0].message.content,
-              // }
-            }
+            response={this.response.response_body?.choices[0].message}
             status={this.response.response_status}
           />
         ) : (
