@@ -3,21 +3,18 @@ import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
-import {
-  logFeedbackInClickhouse,
-  updateFeedbackInClickhouse,
-} from "./lib/dbLogger/clickhouseLog";
+import { updateFeedbackInClickhouse } from "./lib/dbLogger/clickhouseLog";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
-  "is-thumbs-up": boolean;
+  rating: boolean;
 }
 
 export async function handleFeedback(request: RequestWrapper, env: Env) {
   const body = await request.getJson<FeedbackRequestBodyV2>();
   const heliconeId = body["helicone-id"];
-  const isThumbsUp = body["is-thumbs-up"];
+  const rating = body["rating"];
 
   const heliconeAuth = request.heliconeHeaders.heliconeAuth;
   if (!heliconeAuth) {
@@ -70,47 +67,22 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     return new Response(`Error: ${authenticationError}`, { status: 401 });
   }
 
-  const { data: feedback, error: feedbackError } = await dbClient
-    .from("feedback")
-    .select("*")
-    .eq("response_id", responseData.id);
-
-  if (feedbackError) {
-    console.error(
-      "Error fetching feedback:",
-      JSON.stringify(feedbackError.message)
-    );
-    return new Response(`Error fetching feedback: ${feedbackError.message}`, {
-      status: 500,
-    });
-  }
-
   const { data: feedbackData, error: feedbackDataError } =
-    await upsertFeedbackPostgres(responseData?.id, isThumbsUp, dbClient);
+    await upsertFeedbackPostgres(responseData?.id, rating, dbClient);
 
   if (feedbackDataError || !feedbackData) {
-    return new Response(`Error upserting feedback: ${feedbackError}`, {
+    return new Response(`Error upserting feedback: ${feedbackDataError}`, {
       status: 500,
     });
   }
 
-  // Feedback already exists, update it in clickhouse
-  if (feedback?.length > 0) {
-    await updateFeedbackInClickhouse(
-      new ClickhouseClientWrapper(env),
-      requestData.id,
-      feedback[0].id,
-      isThumbsUp
-    );
-  } else {
-    // Feedback doesn't exist, insert it in clickhouse
-    await logFeedbackInClickhouse(
-      new ClickhouseClientWrapper(env),
-      requestData,
-      responseData,
-      feedbackData
-    );
-  }
+  await updateFeedbackInClickhouse(
+    new ClickhouseClientWrapper(env),
+    requestData.id,
+    feedbackData.id,
+    rating,
+    feedbackData.created_at
+  );
 
   return new Response(
     JSON.stringify({
@@ -150,7 +122,7 @@ export async function isApiKeyAuthenticated(
 
 export async function upsertFeedbackPostgres(
   responseId: string,
-  isThumbsUp: boolean,
+  rating: boolean,
   dbClient: SupabaseClient<Database>
 ): Promise<Result<Database["public"]["Tables"]["feedback"]["Row"], string>> {
   const feedback = await dbClient
@@ -158,7 +130,8 @@ export async function upsertFeedbackPostgres(
     .upsert(
       {
         response_id: responseId,
-        is_thumbs_up: isThumbsUp,
+        rating: rating,
+        created_at: new Date().toISOString(),
       },
       { onConflict: "response_id" }
     )

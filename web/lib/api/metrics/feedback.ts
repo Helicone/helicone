@@ -18,21 +18,21 @@ export async function getTotalFeedback(
     {
       org_id,
       filter: {
-        left: timeFilterToFilterNode(timeFilter, "feedback"),
+        left: timeFilterToFilterNode(timeFilter, "response_copy_v3"),
         right: filter,
         operator: "and",
       },
       argsAcc: [],
-    },
-    "feedback"
+    }
   );
 
   const query = `
       WITH total_count AS (
         SELECT count(*) as count
-        FROM feedback
+        FROM response_copy_v3
         WHERE (
           (${filterString})
+          AND rating IS NOT NULL
         )
       )
       SELECT coalesce(sum(count), 0) as count

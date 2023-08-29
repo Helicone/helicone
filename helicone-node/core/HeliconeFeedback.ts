@@ -4,7 +4,7 @@ export class HeliconeFeedback {
   static async logFeedback(
     heliconeConfiguration: IHeliconeConfiguration,
     heliconeId: string,
-    isThumbsUp: boolean
+    rating: boolean
   ) {
     const options = {
       method: "POST",
@@ -14,7 +14,7 @@ export class HeliconeFeedback {
       },
       body: JSON.stringify({
         "helicone-id": heliconeId,
-        "is-thumbs-up": isThumbsUp,
+        rating: rating,
       }),
     };
 

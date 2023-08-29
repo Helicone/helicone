@@ -12,13 +12,7 @@ export async function getFeedbackOverTime(
 ): Promise<Result<FeedbackOverTime[], string>> {
   const res = await getXOverTime<{
     feedback: number;
-  }>(
-    data,
-    "count(is_thumbs_up) as feedback",
-    undefined,
-    "feedback",
-    "response_created_at"
-  );
+  }>(data, "count(rating) as feedback");
 
   return resultMap(res, (resData) =>
     resData.map((d) => ({

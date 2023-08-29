@@ -154,7 +154,7 @@ interface Feedback {
   organization_id: string;
   feedback_created_at: Nullable<string>;
   feedback_id: Nullable<number>;
-  is_thumbs_up: Nullable<boolean>;
+  rating: Nullable<boolean>;
 }
 
 export interface ClickhouseDB {

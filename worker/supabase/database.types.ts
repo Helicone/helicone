@@ -102,19 +102,19 @@ export interface Database {
         Row: {
           created_at: string
           id: number
-          is_thumbs_up: boolean
+          rating: boolean
           response_id: string
         }
         Insert: {
           created_at?: string
           id?: number
-          is_thumbs_up: boolean
+          rating: boolean
           response_id: string
         }
         Update: {
           created_at?: string
           id?: number
-          is_thumbs_up?: boolean
+          rating?: boolean
           response_id?: string
         }
         Relationships: [

@@ -76,23 +76,13 @@ const numberOperators: Operator<keyof NumberOperators>[] = [
 
 const booleanOperators: Operator<keyof BooleanOperators>[] = [
   {
-    value: "is-true",
-    label: "IS TRUE",
+    value: "IS",
+    label: "=",
     type: "bool",
   },
   {
-    value: "is-false",
-    label: "IS FALSE",
-    type: "bool",
-  },
-  {
-    value: "is-not-true",
-    label: "IS NOT TRUE",
-    type: "bool",
-  },
-  {
-    value: "is-not-false",
-    label: "IS NOT FALSE",
+    value: "IS",
+    label: "=",
     type: "bool",
   },
 ];
@@ -124,7 +114,7 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
-  SingleFilterDef<"feedback">
+  SingleFilterDef<"response_copy_v3">
 ] = [
   {
     label: "Model",
@@ -158,8 +148,8 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
     label: "Feedback",
     operators: booleanOperators,
     category: "feedback",
-    table: "feedback",
-    column: "is_thumbs_up",
+    table: "response_copy_v3",
+    column: "rating",
   },
 ];
 export const REQUEST_TABLE_FILTERS: [

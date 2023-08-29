@@ -297,7 +297,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                         )}`
                       : "0"
                   }
-                  valueLabel={"thumbs up"}
+                  valueLabel={"ratings"}
                   type="double-line"
                 />
               </div>

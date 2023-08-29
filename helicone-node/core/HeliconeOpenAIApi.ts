@@ -11,11 +11,11 @@ export class HeliconeOpenAIApi extends OpenAIApi {
   }
 
   public helicone = {
-    logFeedback: async (heliconeId: string, isThumbsUp: boolean) => {
+    logFeedback: async (heliconeId: string, rating: boolean) => {
       HeliconeFeedback.logFeedback(
         this.heliconeConfiguration,
         heliconeId,
-        isThumbsUp
+        rating
       );
     },
   };
