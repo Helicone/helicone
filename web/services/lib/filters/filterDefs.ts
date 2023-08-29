@@ -19,6 +19,11 @@ export type NumberOperators = Record<
   number
 >;
 
+export type BooleanOperators = Record<
+  "is-true" | "is-false" | "is-not-true" | "is-not-false",
+  boolean
+>;
+
 export type TimestampOperators = Record<"gte" | "lte", string>;
 
 export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
@@ -76,6 +81,7 @@ type ResponseCopyV1ToOperators = {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
   auth_hash: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   user_id: SingleKey<TextOperators>;
@@ -116,11 +122,14 @@ type UserViewToOperators = {
 
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 
-type PropertiesCopyV1ToOperators = {
-  auth_hash: SingleKey<TextOperators>;
-  key: SingleKey<TextOperators>;
-  value: SingleKey<TextOperators>;
-};
+interface FeedbackViewToOperators extends ResponseCopyV2ToOperators {
+  is_thumbs_up: SingleKey<BooleanOperators>;
+  feedback_created_at: SingleKey<TimestampOperatorsTyped>;
+  feedback_id: SingleKey<NumberOperators>;
+  created_at: SingleKey<TimestampOperatorsTyped>;
+}
+
+export type FilterLeafFeedbackView = SingleKey<FeedbackViewToOperators>;
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -143,6 +152,7 @@ export type TablesAndViews = {
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
+  feedback: FilterLeafFeedbackView;
 };
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
@@ -207,6 +217,24 @@ export function timeFilterToFilterNode(
       right: {
         property_with_response_v1: {
           request_created_at: {
+            lte: filter.end,
+          },
+        },
+      },
+      operator: "and",
+    };
+  } else if (table === "feedback") {
+    return {
+      left: {
+        feedback: {
+          response_created_at: {
+            gte: filter.start,
+          },
+        },
+      },
+      right: {
+        feedback: {
+          response_created_at: {
             lte: filter.end,
           },
         },

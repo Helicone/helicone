@@ -47,7 +47,10 @@ export class HeliconeAsyncLogger {
     this.heliconeConfiguration = heliconeConfiguration;
   }
 
-  async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<AxiosResponse<any, any>> {
+  async log(
+    asyncLogModel: HeliconeAyncLogRequest,
+    provider: Provider
+  ): Promise<AxiosResponse<any, any>> {
     const options: AxiosRequestConfig = {
       method: "POST",
       data: asyncLogModel,
@@ -71,7 +74,27 @@ export class HeliconeAsyncLogger {
       throw new Error("Invalid provider");
     }
 
-    const result = await axios(options);
+    let result: AxiosResponse<any, any>;
+    try {
+      result = await axios(options);
+    } catch (error: any) {
+      console.error(
+        "Error making request to Helicone log endpoint:",
+        error.message
+      );
+
+      if (error.isAxiosError && error.response) {
+        result = error.response;
+      } else {
+        result = {
+          data: null,
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: {},
+          config: {},
+        };
+      }
+    }
 
     const onHeliconeLog = this.heliconeConfiguration.getOnHeliconeLog();
     if (onHeliconeLog) onHeliconeLog(result);

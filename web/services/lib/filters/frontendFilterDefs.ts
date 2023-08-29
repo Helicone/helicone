@@ -1,10 +1,6 @@
 import {
-  FilterLeaf,
-  FilterLeafRequest,
-  FilterLeafResponse,
-  FilterLeafUserMetrics,
+  BooleanOperators,
   NumberOperators,
-  RequestTableToOperators,
   TablesAndViews,
   TextOperators,
   TimestampOperators,
@@ -14,7 +10,8 @@ export type ColumnType =
   | "text"
   | "timestamp"
   | "number"
-  | "text-with-suggestions";
+  | "text-with-suggestions"
+  | "bool";
 
 export type InputParam = {
   key: string;
@@ -77,6 +74,29 @@ const numberOperators: Operator<keyof NumberOperators>[] = [
   },
 ];
 
+const booleanOperators: Operator<keyof BooleanOperators>[] = [
+  {
+    value: "is-true",
+    label: "IS TRUE",
+    type: "bool",
+  },
+  {
+    value: "is-false",
+    label: "IS FALSE",
+    type: "bool",
+  },
+  {
+    value: "is-not-true",
+    label: "IS NOT TRUE",
+    type: "bool",
+  },
+  {
+    value: "is-not-false",
+    label: "IS NOT FALSE",
+    type: "bool",
+  },
+];
+
 const timestampOperators: Operator<keyof TimestampOperators>[] = [
   {
     value: "gte",
@@ -103,7 +123,8 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
-  SingleFilterDef<"response_copy_v3">
+  SingleFilterDef<"response_copy_v3">,
+  SingleFilterDef<"feedback">
 ] = [
   {
     label: "Model",
@@ -132,6 +153,13 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
     category: "request",
     table: "response_copy_v3",
     column: "user_id",
+  },
+  {
+    label: "Feedback",
+    operators: booleanOperators,
+    category: "feedback",
+    table: "feedback",
+    column: "is_thumbs_up",
   },
 ];
 export const REQUEST_TABLE_FILTERS: [

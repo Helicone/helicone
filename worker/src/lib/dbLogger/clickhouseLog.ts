@@ -123,3 +123,45 @@ export async function logInClickhouse(
     ),
   ]);
 }
+
+export async function logFeedbackInClickhouse(
+  clickhouseDb: ClickhouseClientWrapper,
+  request: Database["public"]["Tables"]["request"]["Row"],
+  response: Database["public"]["Tables"]["response"]["Row"],
+  feedback: Database["public"]["Tables"]["feedback"]["Row"]
+) {
+  await clickhouseDb.dbInsertClickhouse("feedback", [
+    {
+      auth_hash: request.auth_hash,
+      user_id: request.user_id,
+      request_id: request.id,
+      completion_tokens: response.completion_tokens,
+      latency: response.delay_ms,
+      model: ((response.body as any)?.model as string) || null,
+      prompt_tokens: response.prompt_tokens,
+      request_created_at: formatTimeString(request.created_at),
+      response_created_at: formatTimeString(response.created_at),
+      response_id: response.id,
+      status: response.status,
+      organization_id:
+        request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      feedback_created_at: formatTimeString(feedback.created_at),
+      feedback_id: feedback.id,
+      is_thumbs_up: feedback.is_thumbs_up,
+    },
+  ]);
+}
+
+export async function updateFeedbackInClickhouse(
+  clickhouseDb: ClickhouseClientWrapper,
+  requestId: string,
+  feedback_id: number,
+  is_thumbs_up: boolean
+) {
+  const query = `ALTER TABLE feedback 
+  UPDATE is_thumbs_up = ${is_thumbs_up}
+  WHERE request_id = '${requestId}' 
+  AND feedback_id = ${feedback_id}`;
+
+  await clickhouseDb.dbUpdateClickhouse(query);
+}

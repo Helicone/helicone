@@ -62,7 +62,9 @@ export async function getXOverTime<T>(
     timeZoneDifference,
   }: DataOverTimeRequest,
   countColumn: string,
-  printQuery = false
+  printQuery = false,
+  table: string = "response_copy_v3",
+  created_at_column: string = "request_created_at"
 ): Promise<
   Result<
     (T & {
@@ -75,26 +77,27 @@ export async function getXOverTime<T>(
   const endDate = new Date(timeFilter.end);
   const timeFilterNode: FilterNode = {
     left: {
-      response_copy_v3: {
-        request_created_at: {
+      [table]: {
+        [created_at_column]: {
           gte: startDate,
         },
       },
     },
     right: {
-      response_copy_v3: {
-        request_created_at: {
+      [table]: {
+        [created_at_column]: {
           lte: endDate,
         },
       },
     },
     operator: "and",
   };
-  const filter: FilterNode = {
+  let filter: FilterNode = {
     left: timeFilterNode,
     right: userFilter,
     operator: "and",
   };
+
   if (!isValidTimeFilter(timeFilter)) {
     return { data: null, error: "Invalid time filter" };
   }
@@ -105,11 +108,14 @@ export async function getXOverTime<T>(
     return { data: null, error: "Invalid time zone difference" };
   }
   const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
-    await buildFilterWithAuthClickHouse({
-      org_id: orgId,
-      filter,
-      argsAcc: [],
-    });
+    await buildFilterWithAuthClickHouse(
+      {
+        org_id: orgId,
+        filter,
+        argsAcc: [],
+      },
+      table
+    );
   const { fill, argsAcc } = buildFill(
     startDate,
     endDate,
@@ -120,13 +126,13 @@ export async function getXOverTime<T>(
   const dateTrunc = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
-    "request_created_at"
+    created_at_column
   );
   const query = `
 SELECT
   ${dateTrunc} as created_at_trunc,
   ${countColumn}
-FROM response_copy_v3
+FROM ${table}
 WHERE (
   ${builtFilter}
 )
