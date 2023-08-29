@@ -6,7 +6,7 @@ export interface FeedbackOverTime {
   time: Date;
   count: number;
 }
-3;
+
 export async function getFeedbackOverTime(
   data: DataOverTimeRequest
 ): Promise<Result<FeedbackOverTime[], string>> {
