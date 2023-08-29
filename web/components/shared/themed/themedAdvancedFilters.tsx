@@ -152,8 +152,8 @@ function AdvancedFilterInput({
           onChange={(e) => onChange(e.target.value)}
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         >
-          <option value="true">Positive</option>
-          <option value="false">Negative</option>
+          <option value="1">Positive</option>
+          <option value="0">Negative</option>
         </select>
       );
   }

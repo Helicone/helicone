@@ -73,6 +73,7 @@ export const useDashboardPage = ({
   dbIncrement,
 }: DashboardPageData) => {
   const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
+
   const userFilters =
     apiKeyFilter !== null
       ? filterUIToFilterLeafs(filterMap, uiFilters).concat([

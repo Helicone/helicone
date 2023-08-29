@@ -19,7 +19,7 @@ export type NumberOperators = Record<
   number
 >;
 
-export type BooleanOperators = Record<"IS" | "IS", boolean>;
+export type BooleanOperators = Record<"equals", boolean>;
 
 export type TimestampOperators = Record<"gte" | "lte", string>;
 

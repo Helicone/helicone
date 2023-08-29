@@ -76,12 +76,12 @@ const numberOperators: Operator<keyof NumberOperators>[] = [
 
 const booleanOperators: Operator<keyof BooleanOperators>[] = [
   {
-    value: "IS",
+    value: "equals",
     label: "=",
     type: "bool",
   },
   {
-    value: "IS",
+    value: "equals",
     label: "=",
     type: "bool",
   },

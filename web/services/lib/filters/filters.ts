@@ -74,9 +74,9 @@ const whereKeyMappings: KeyMappings = {
     user_id: "response_copy_v3.user_id",
     status: "response_copy_v3.status",
     organization_id: "response_copy_v3.organization_id",
-    rating: "feedback.rating",
-    feedback_id: "feedback.feedback_id",
-    feedback_created_at: "feedback.feedback_created_at",
+    rating: "response_copy_v3.rating",
+    feedback_id: "response_copy_v3.feedback_id",
+    feedback_created_at: "response_copy_v3.feedback_created_at",
   },
   users_view: {},
   properties_copy_v1: {
