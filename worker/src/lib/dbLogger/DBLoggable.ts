@@ -13,6 +13,7 @@ import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { InsertQueue } from "./insertQueue";
+import { SupabaseWrapper } from "../db/supabase";
 
 export interface DBLoggableProps {
   response: {
@@ -91,23 +92,6 @@ function getResponseBody(json: any): string {
     return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
   }
   return JSON.stringify(json);
-}
-
-async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
-) {
-  const { data, error } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
-    .eq("soft_delete", false)
-    .single();
-
-  if (error !== null) {
-    return { data: null, error: error.message };
-  }
-  return { data: data, error: null };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -429,15 +413,14 @@ export class DBLoggable {
 
   async log(
     db: {
-      supabase: SupabaseClient<Database>;
+      supabase: SupabaseWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
     const { data: heliconeApiKeyRow, error: userIdError } =
-      await getHeliconeApiKeyRow(
-        db.supabase,
+      await db.supabase.getHeliconeApiKeyRow(
         this.request.heliconeApiKeyAuthHash
       );
     if (userIdError !== null) {
@@ -450,7 +433,7 @@ export class DBLoggable {
     const requestResult = await logRequest(
       this.request,
       this.response.responseId,
-      db.supabase,
+      db.supabase.client,
       db.queue,
       heliconeApiKeyRow
     );
@@ -475,10 +458,13 @@ export class DBLoggable {
     );
 
     // TODO We should probably move the webhook stuff out of dbLogger
-    const { error: webhookError } = await this.sendToWebhooks(db.supabase, {
-      request: requestResult.data,
-      response: responseResult.data,
-    });
+    const { error: webhookError } = await this.sendToWebhooks(
+      db.supabase.client,
+      {
+        request: requestResult.data,
+        response: responseResult.data,
+      }
+    );
 
     if (webhookError !== null) {
       console.error("Error sending to webhooks", webhookError);

@@ -7,6 +7,7 @@ import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
+import { SupabaseWrapper } from "../lib/db/supabase";
 
 export const getAPIRouter = () => {
   const apiRouter = Router<
@@ -51,7 +52,7 @@ export const getAPIRouter = () => {
       const { error: logError } = await loggable.log(
         {
           clickhouse: new ClickhouseClientWrapper(env),
-          supabase: createClient(
+          supabase: new SupabaseWrapper(
             env.SUPABASE_URL,
             env.SUPABASE_SERVICE_ROLE_KEY
           ),
@@ -104,7 +105,7 @@ export const getAPIRouter = () => {
       const { error: logError } = await loggable.log(
         {
           clickhouse: new ClickhouseClientWrapper(env),
-          supabase: createClient(
+          supabase: new SupabaseWrapper(
             env.SUPABASE_URL,
             env.SUPABASE_SERVICE_ROLE_KEY
           ),
