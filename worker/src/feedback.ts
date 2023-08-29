@@ -73,11 +73,13 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   const { data: feedback, error: feedbackError } = await dbClient
     .from("feedback")
     .select("*")
-    .eq("response_id", responseData.id)
-    .single();
+    .eq("response_id", responseData.id);
 
   if (feedbackError) {
-    console.error("Error fetching feedback:", feedbackError.message);
+    console.error(
+      "Error fetching feedback:",
+      JSON.stringify(feedbackError.message)
+    );
     return new Response(`Error fetching feedback: ${feedbackError.message}`, {
       status: 500,
     });
@@ -93,11 +95,11 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   }
 
   // Feedback already exists, update it in clickhouse
-  if (feedback) {
+  if (feedback?.length > 0) {
     await updateFeedbackInClickhouse(
       new ClickhouseClientWrapper(env),
       requestData.id,
-      feedback.id,
+      feedback[0].id,
       isThumbsUp
     );
   } else {

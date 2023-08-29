@@ -1,64 +1,47 @@
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
-import { Result } from "../../result";
+import { dbQueryClickhouse } from "../db/dbExecute";
+import { Result, resultMap } from "../../result";
 import {
-  isValidTimeIncrement,
-  isValidTimeZoneDifference,
-} from "../../sql/timeHelpers";
-import { dbExecute } from "../db/dbExecute";
-import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
+  FilterNode,
+  timeFilterToFilterNode,
+} from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 
-export interface FeedbackOverTime {
-  created_at_trunc: Date;
-  count: number;
-  is_thumbs_up: boolean;
-}
-
-export async function getFeedbackOverTime({
-  timeFilter,
-  userFilter,
-  orgId,
-  dbIncrement,
-  timeZoneDifference,
-}: DataOverTimeRequest): Promise<Result<FeedbackOverTime[], string>> {
-  if (!isValidTimeIncrement(dbIncrement)) {
-    return { data: null, error: "Invalid time increment" };
-  }
-  if (!isValidTimeZoneDifference(timeZoneDifference)) {
-    return { data: null, error: "Invalid time zone difference" };
-  }
-  const builtFilter = await buildFilterWithAuth({
-    filter: userFilter,
-    argsAcc: [],
-    org_id: orgId,
-  });
-  const dateTrunc = `DATE_TRUNC('${dbIncrement}', feedback.created_at + INTERVAL '${timeZoneDifference} minutes')`;
-  const query = `
-  SELECT
-    feedback.is_thumbs_up,
-    ${dateTrunc} as created_at_trunc,
-    COUNT(feedback.id) AS count
-  FROM public.feedback
-  WHERE (
-    feedback.created_at IS NOT NULL
-    AND (${builtFilter.filter})
-  )
-  GROUP BY feedback.is_thumbs_up, ${dateTrunc}
-  ORDER BY ${dateTrunc}
-  `;
-  const { data, error } = await dbExecute<FeedbackOverTime>(
-    query,
-    builtFilter.argsAcc
+export async function getTotalFeedback(
+  filter: FilterNode,
+  timeFilter: {
+    start: Date;
+    end: Date;
+  },
+  org_id: string
+): Promise<Result<number, string>> {
+  const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
+    {
+      org_id,
+      filter: {
+        left: timeFilterToFilterNode(timeFilter, "feedback"),
+        right: filter,
+        operator: "and",
+      },
+      argsAcc: [],
+    },
+    "feedback"
   );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return {
-    data: data.map((d) => ({
-      ...d,
-      created_at_trunc: new Date(
-        d.created_at_trunc.getTime() - timeZoneDifference * 60 * 1000
-      ),
-    })),
-    error: null,
-  };
+
+  const query = `
+      WITH total_count AS (
+        SELECT count(*) as count
+        FROM feedback
+        WHERE (
+          (${filterString})
+        )
+      )
+      SELECT coalesce(sum(count), 0) as count
+      FROM total_count
+    `;
+
+  const res = await dbQueryClickhouse<{
+    count: number;
+  }>(query, argsAcc);
+
+  return resultMap(res, (d) => +d[0].count);
 }

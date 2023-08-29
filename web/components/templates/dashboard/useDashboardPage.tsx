@@ -9,7 +9,6 @@ import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
-import { getErrorCodes } from "../../../lib/api/metrics/errorCodes";
 import { UnPromise } from "../../../lib/tsxHelpers";
 import {
   BackendMetricsCall,
@@ -17,7 +16,6 @@ import {
 } from "../../../services/hooks/useBackendFunction";
 import {
   FilterLeaf,
-  filterListToTree,
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
 import {
@@ -26,8 +24,8 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
-import { DailyActiveUsers } from "../../../pages/api/request_users/dau";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
+import { FeedbackOverTime } from "../../../lib/api/metrics/getPositiveFeedbackOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -140,6 +138,16 @@ export const useDashboardPage = ({
       params,
       endpoint: "/api/metrics/usersOverTime",
       key: "usersOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+        );
+      },
+    }),
+    positiveFeedback: useBackendMetricCall<Result<FeedbackOverTime[], string>>({
+      params,
+      endpoint: "/api/metrics/feedbackOverTime",
+      key: "feedbackOverTime",
       postProcess: (data) => {
         return resultMap(data, (d) =>
           d.map((d) => ({ count: +d.count, time: new Date(d.time) }))

@@ -1,7 +1,6 @@
 import { Result } from "../../results";
-import { ClickHouseClient } from "@clickhouse/client-common";
-import { createClient } from "@clickhouse/client";
-
+import { createClient } from "@clickhouse/client-web";
+import { WebClickHouseClient } from "@clickhouse/client-web/dist/client";
 export interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
@@ -9,7 +8,7 @@ export interface ClickhouseEnv {
 }
 
 export class ClickhouseClientWrapper {
-  private clickHouseClient: ClickHouseClient;
+  private clickHouseClient: WebClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
