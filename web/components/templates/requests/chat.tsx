@@ -86,6 +86,17 @@ export const SingleChat = (props: {
     }
   };
 
+  const isJSON = (content: string): boolean => {
+    let parsedData;
+    let isJSON = true;
+    try {
+      parsedData = JSON.parse(content);
+    } catch (error) {
+      isJSON = false;
+    }
+    return isJSON;
+  };
+
   return (
     <div
       className={clsx(
@@ -119,7 +130,9 @@ export const SingleChat = (props: {
               {message.name}
             </code>
             <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
-              {JSON.stringify(JSON.parse(formattedMessageContent), null, 2)}
+              {isJSON(formattedMessageContent)
+                ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                : formattedMessageContent}
             </pre>
           </div>
         ) : hasFunctionCall ? (
