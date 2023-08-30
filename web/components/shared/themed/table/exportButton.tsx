@@ -2,10 +2,10 @@ import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Papa from "papaparse";
 import { useState } from "react";
-import { clsx } from "../../shared/clsx";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedModal from "../../shared/themed/themedModal";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import { clsx } from "../../clsx";
+import useNotification from "../../notification/useNotification";
+import ThemedModal from "../themedModal";
+import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 
 interface ExportButtonProps<T> {
   rows: T[];
@@ -21,7 +21,6 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
 
   const csvDownload = () => {
     setDownloadingCSV(true);
-
     // Convert JSON data to CSV
     const csv = Papa.unparse(rows);
     // Create a blob with the CSV data
