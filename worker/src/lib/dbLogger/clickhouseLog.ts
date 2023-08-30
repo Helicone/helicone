@@ -93,6 +93,28 @@ export async function logInClickhouse(
           request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
       },
     ]),
+    clickhouseDb.dbInsertClickhouse("provider_log", [
+      {
+        auth_hash: request.auth_hash,
+        user_id: request.user_id,
+        request_id: request.id,
+        completion_tokens: response.completion_tokens ?? null,
+        latency: response.delay_ms ?? null,
+        model: ((response.body as any)?.model as string) || null,
+        prompt_tokens: response.prompt_tokens ?? null,
+        request_created_at: formatTimeString(request.created_at),
+        response_created_at: response.created_at
+          ? formatTimeString(response.created_at)
+          : null,
+        response_id: response.id ?? null,
+        status: response.status ?? null,
+        organization_id:
+          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+        feedback_id: null,
+        feedback_created_at: null,
+        rating: null,
+      },
+    ]),
     clickhouseDb.dbInsertClickhouse(
       "properties_copy_v1",
       properties.map((p) => ({
@@ -105,38 +127,35 @@ export async function logInClickhouse(
         id: p.id ?? 0,
       }))
     ),
-    clickhouseDb.dbInsertClickhouse(
-      "properties_copy_v2",
-      properties.map((p) => ({
-        id: p.id!,
-        created_at: formatTimeString(p.created_at),
-        request_id: request.id,
-        key: p.key,
-        value: p.value,
-        organization_id:
-          request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
-      }))
-    ),
-    clickhouseDb.dbInsertClickhouse(
-      "property_with_response_v1",
-      buildPropertyWithResponseInserts(request, response, properties)
-    ),
   ]);
 }
 
-export async function updateFeedbackInClickhouse(
+export async function insertProviderInClickHouse(
   clickhouseDb: ClickhouseClientWrapper,
-  requestId: string,
-  feedbackId: number,
-  rating: boolean,
-  feedbackCreatedAt: string
+  request: Database["public"]["Tables"]["request"]["Row"],
+  response: Database["public"]["Tables"]["response"]["Insert"],
+  feedback: Database["public"]["Tables"]["feedback"]["Row"]
 ) {
-  const query = `
-  ALTER TABLE response_copy_v3 
-  UPDATE rating = ${rating}, 
-         feedback_created_at = '${formatTimeString(feedbackCreatedAt)}', 
-         feedback_id = '${feedbackId}'
-  WHERE request_id = '${requestId}'`;
-
-  await clickhouseDb.dbUpdateClickhouse(query);
+  await clickhouseDb.dbInsertClickhouse("provider_log", [
+    {
+      auth_hash: request.auth_hash,
+      user_id: request.user_id,
+      request_id: request.id,
+      completion_tokens: response.completion_tokens ?? null,
+      latency: response.delay_ms ?? null,
+      model: ((response.body as any)?.model as string) || null,
+      prompt_tokens: response.prompt_tokens ?? null,
+      request_created_at: formatTimeString(request.created_at),
+      response_created_at: response.created_at
+        ? formatTimeString(response.created_at)
+        : null,
+      response_id: response.id ?? null,
+      status: response.status ?? null,
+      organization_id:
+        request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+      feedback_id: feedback.id,
+      feedback_created_at: formatTimeString(feedback.created_at),
+      rating: feedback.rating,
+    },
+  ]);
 }

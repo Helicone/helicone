@@ -56,7 +56,6 @@ export class ClickhouseClientWrapper {
         // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
         clickhouse_settings: {
           wait_end_of_query: 1,
-          alter_sync: "0",
         },
       });
 
@@ -140,7 +139,7 @@ interface PropertyWithResponseV1 {
   property_value: string;
 }
 
-interface Feedback {
+interface ProviderLog {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
   latency: Nullable<number>;
@@ -166,6 +165,6 @@ export interface ClickhouseDB {
     properties_copy_v2: PropertiesCopyV2;
     response_copy_v3: ResponseCopyV3;
     property_with_response_v1: PropertyWithResponseV1;
-    feedback: Feedback;
+    provider_log: ProviderLog;
   };
 }
