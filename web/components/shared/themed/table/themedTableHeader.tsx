@@ -13,7 +13,7 @@ import { clsx } from "../../clsx";
 import { AdvancedFilters, UIFilterRow } from "../themedAdvancedFilters";
 import { ThemedPill } from "../themedPill";
 import ThemedTimeFilter from "../themedTimeFilter";
-import ExportButton from "../../../templates/requestsV2/exportButton";
+import ExportButton from "./exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
 import { Toggle } from "../themedToggle";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
