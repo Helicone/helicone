@@ -57,24 +57,12 @@ export const SingleChat = (props: {
   const possiblyTruncated = checkShouldTruncate(formattedMessageContent);
   const needsTruncation = possiblyTruncated && !expanded;
 
-  console.log("pre", formattedMessageContent);
-
   if (needsTruncation) {
     formattedMessageContent = `${formattedMessageContent.slice(
       0,
       MAX_LENGTH
     )}...`;
   }
-
-  console.log("post", formattedMessageContent);
-
-  console.log(
-    isSystem,
-    isAssistant,
-    isFunction,
-    hasFunctionCall,
-    formattedMessageContent
-  );
 
   const getBgColor = () => {
     if (isAssistant || isSystem) {
@@ -129,7 +117,7 @@ export const SingleChat = (props: {
             <code className="text-xs whitespace-pre-wrap font-semibold">
               {message.name}
             </code>
-            <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+            <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg overflow-auto">
               {isJSON(formattedMessageContent)
                 ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                 : formattedMessageContent}
@@ -147,13 +135,13 @@ export const SingleChat = (props: {
                 </pre>
               </>
             ) : (
-              <pre className="text-xs whitespace-pre-wrap py-1 font-semibold">
+              <pre className="text-xs whitespace-pre-wrap py-1 font-semibold break-words">
                 {`${message.function_call?.name}(${message.function_call?.arguments})`}
               </pre>
             )}
           </div>
         ) : (
-          <p className="text-sm whitespace-pre-wrap">
+          <p className="text-sm whitespace-pre-wrap break-words">
             {formattedMessageContent}
           </p>
         )}
