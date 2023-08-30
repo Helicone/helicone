@@ -13,10 +13,9 @@ all_schemas = [
 all_schemas.sort()
 
 container_name = 'helicone-clickhouse-server'
-port = '18123'
 
 
-def create_migration_table():
+def create_migration_table(host, port):
     query = '''
     CREATE TABLE IF NOT EXISTS helicone_migrations (
         migration_name String,
@@ -24,7 +23,7 @@ def create_migration_table():
     ) ENGINE = MergeTree() ORDER BY migration_name;
     '''
     res = subprocess.run(f'''
-echo "{query}" | curl 'http://localhost:{port}/' --data-binary @-
+echo "{query}" | curl 'http://{host}:{port}/' --data-binary @-
     ''', shell=True)
     if res.returncode != 0:
         print('Failed to create helicone_migrations table')
@@ -33,37 +32,37 @@ echo "{query}" | curl 'http://localhost:{port}/' --data-binary @-
         print('Created helicone_migrations table')
 
 
-def is_migration_applied(migration_name):
+def is_migration_applied(migration_name, host, port):
     query = f'''
     SELECT count(*) FROM helicone_migrations WHERE migration_name = '{migration_name}';
     '''
     res = subprocess.run(f'''
-echo "{query}" | curl 'http://localhost:{port}/' --data-binary @-
+echo "{query}" | curl 'http://{host}:{port}/' --data-binary @-
     ''', shell=True, capture_output=True, text=True)
     return int(res.stdout.strip()) > 0
 
 
-def mark_migration_as_applied(migration_name):
+def mark_migration_as_applied(migration_name, host, port):
     query = f'''
     INSERT INTO helicone_migrations (migration_name) VALUES ('{migration_name}');
     '''
     subprocess.run(f'''
-echo "{query}" | curl 'http://localhost:{port}/' --data-binary @-
+echo "{query}" | curl 'http://{host}:{port}/' --data-binary @-
     ''', shell=True)
 
 
-def run_migrations(retries=5):
+def run_migrations(host, port, retries=5):
     print('Running migrations')
     time.sleep(1)
     for schema_path in all_schemas:
         migration_name = os.path.basename(schema_path)
-        if is_migration_applied(migration_name):
+        if is_migration_applied(migration_name, host, port):
             print(f'Skipping already applied migration: {migration_name}')
             continue
 
         print(f'Running {schema_path}')
         res = subprocess.run(f'''
-cat {schema_path} | curl 'http://localhost:{port}/' --data-binary @-
+cat {schema_path} | curl 'http://{host}:{port}/' --data-binary @-
         ''', shell=True)
         if res.returncode != 0:
             print(f'Failed to run {schema_path}')
@@ -71,10 +70,10 @@ cat {schema_path} | curl 'http://localhost:{port}/' --data-binary @-
             if retries > 0:
                 time.sleep(1)
                 print('Retrying')
-                run_migrations(retries)
+                run_migrations(host, port, retries)
             break
         else:
-            mark_migration_as_applied(migration_name)
+            mark_migration_as_applied(migration_name, host, port)
 
     print('Finished running migrations')
 
@@ -94,23 +93,27 @@ def main():
                         help='Restart services')
     parser.add_argument('--upgrade', action='store_true',
                         help='Apply all migrations')
+    parser.add_argument('--host', default="localhost",
+                        help='ClickHouse server host')
+    parser.add_argument('--port', default='18123',
+                        help='ClickHouse server port')
 
     args = parser.parse_args()
 
     if args.start:
         print('Starting services')
         res = subprocess.run(f'''
-docker run -d -p {port}:8123 -p19000:9000 --name {container_name} --ulimit nofile=262144:262144 clickhouse/clickhouse-server
+docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} --ulimit nofile=262144:262144 clickhouse/clickhouse-server
         ''', shell=True)
         time.sleep(1)
         if res.returncode != 0:
             print('Failed to start services')
         else:
-            create_migration_table()
-            run_migrations()
+            create_migration_table(args.host, args.port)
+            run_migrations(args.host, args.port)
             print(f'''
 Test query by running:
-echo 'SELECT 1' | curl 'http://localhost:{port}/' --data-binary @-
+echo 'SELECT 1' | curl 'http://{args.host}:{args.port}/' --data-binary @-
             ''')
 
     elif args.stop:
@@ -125,20 +128,20 @@ docker rm {container_name}
         subprocess.run(f'''
 docker stop {container_name}
 docker rm {container_name}
-docker run -d -p {port}:8123 -p19000:9000 --name {container_name} --ulimit nofile=262144:262144 clickhouse/clickhouse-server
+docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} --ulimit nofile=262144:262144 clickhouse/clickhouse-server
         ''', shell=True)
         time.sleep(1)
-        create_migration_table()
-        run_migrations()
+        create_migration_table(args.host, args.port)
+        run_migrations(args.host, args.port)
         print(f'''
 Test query by running:
-echo 'SELECT 1' | curl 'http://localhost:{port}/' --data-binary @-
+echo 'SELECT 1' | curl 'http://{args.host}:{args.port}/' --data-binary @-
         ''')
 
     elif args.upgrade:
         print('Applying all migrations')
-        create_migration_table()
-        run_migrations()
+        create_migration_table(args.host, args.port)
+        run_migrations(args.host, args.port)
 
     else:
         print('No action specified')
