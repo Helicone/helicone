@@ -18,10 +18,19 @@ export class HeliconeFeedback {
       }),
     };
 
-    const response = await fetch(
-      heliconeConfiguration.getBaseUrl().origin + "/v1/feedback",
-      options
-    );
+    let response: Response;
+    try {
+      response = await fetch(
+        heliconeConfiguration.getBaseUrl().origin + "/v1/feedback",
+        options
+      );
+    } catch (error: any) {
+      console.error(
+        "Error making request to Helicone feedback endpoint:",
+        error.message
+      );
+      return;
+    }
 
     if (!response.ok) {
       console.error("Error logging feedback: ", response.statusText);

@@ -56,6 +56,7 @@ export class ClickhouseClientWrapper {
         // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
         clickhouse_settings: {
           wait_end_of_query: 1,
+          alter_sync: "0",
         },
       });
 

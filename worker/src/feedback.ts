@@ -26,13 +26,7 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // Retrieve request & response
-  const requestPromise = dbClient
-    .from("request")
-    .select("*")
-    .eq("id", heliconeId)
-    .single();
-
+  const requestPromise = getRequest(dbClient, heliconeId);
   const responsePromise = getResponse(dbClient, heliconeId);
 
   const [
@@ -150,6 +144,34 @@ export async function upsertFeedbackPostgres(
   return { error: null, data: feedback.data };
 }
 
+async function getRequest(
+  dbClient: SupabaseClient<Database>,
+  heliconeId: string
+): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
+  const maxRetries = 3;
+
+  for (let i = 0; i < maxRetries; i++) {
+    const { data: request, error: requestError } = await dbClient
+      .from("request")
+      .select("*")
+      .eq("id", heliconeId);
+
+    if (requestError) {
+      console.error("Error fetching request:", requestError.message);
+      return { error: requestError.message, data: null };
+    }
+
+    if (request && request.length > 0) {
+      return { error: null, data: request[0] };
+    }
+
+    const sleepDuration = i === 0 ? 100 : 1000;
+    await new Promise((resolve) => setTimeout(resolve, sleepDuration));
+  }
+
+  return { error: "Request not found.", data: null };
+}
+
 async function getResponse(
   dbClient: SupabaseClient<Database>,
   heliconeId: string
@@ -160,16 +182,15 @@ async function getResponse(
     const { data: response, error: responseError } = await dbClient
       .from("response")
       .select("*")
-      .eq("request", heliconeId)
-      .single();
+      .eq("request", heliconeId);
 
     if (responseError) {
       console.error("Error fetching response:", responseError.message);
       return { error: responseError.message, data: null };
     }
 
-    if (response) {
-      return { error: null, data: response };
+    if (response && response.length > 0) {
+      return { error: null, data: response[0] };
     }
 
     const sleepDuration = i === 0 ? 100 : 1000;
