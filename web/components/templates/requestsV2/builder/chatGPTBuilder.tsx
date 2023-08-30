@@ -8,7 +8,8 @@ import AbstractRequestBuilder, {
 class ChatGPTBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const hasNoContent = this.response.response_body?.choices
-      ? this.response.response_body?.choices[0].message.content === null
+      ? this.response.response_body?.choices[0].message.content === null ||
+        this.response.response_body?.choices[0].message.content === undefined
       : true;
 
     const getRequestText = () => {
