@@ -1,12 +1,12 @@
+import { dbQueryClickhouse } from "../db/dbExecute";
+import { Result, resultMap } from "../../result";
 import {
   FilterNode,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
-import { Result, resultMap } from "../../result";
-import { dbQueryClickhouse } from "../db/dbExecute";
 
-export async function getActiveUsers(
+export async function getTotalFeedback(
   filter: FilterNode,
   timeFilter: {
     start: Date;
@@ -25,18 +25,23 @@ export async function getActiveUsers(
       argsAcc: [],
     }
   );
+
   const query = `
-    SELECT 
-        count(DISTINCT response_copy_v3.user_id) AS users
-    FROM response_copy_v3
-    WHERE (
-        ${filterString}
-    )
-  `;
+      WITH total_count AS (
+        SELECT count(*) as count
+        FROM response_copy_v3
+        WHERE (
+          (${filterString})
+          AND rating IS NOT NULL
+        )
+      )
+      SELECT coalesce(sum(count), 0) as count
+      FROM total_count
+    `;
 
   const res = await dbQueryClickhouse<{
-    users: number;
+    count: number;
   }>(query, argsAcc);
 
-  return resultMap(res, (d) => +d[0].users);
+  return resultMap(res, (d) => +d[0].count);
 }

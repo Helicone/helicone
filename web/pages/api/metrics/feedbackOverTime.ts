@@ -2,17 +2,15 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getUsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
+import {
+  FeedbackOverTime,
+  getFeedbackOverTime,
+} from "../../../lib/api/metrics/getPositiveFeedbackOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
-export interface UsersOverTime {
-  count: number;
-  time: Date;
-}
-
 async function handler(
-  options: HandlerWrapperOptions<Result<UsersOverTime[], string>>
+  options: HandlerWrapperOptions<Result<FeedbackOverTime[], string>>
 ) {
   const {
     res,
@@ -27,7 +25,7 @@ async function handler(
   } = options.req.body as MetricsBackendBody;
 
   res.status(200).json(
-    await getUsersOverTime({
+    await getFeedbackOverTime({
       timeFilter,
       userFilter: userFilters,
       orgId,

@@ -98,7 +98,7 @@ export async function logInClickhouse(
       properties.map((p) => ({
         key: p.key,
         value: p.value,
-        user_id: p.user_id,
+        user_id: p.user_id ?? null,
         auth_hash: request.auth_hash ?? null,
         request_id: request.id ?? null,
         created_at: p.created_at ? formatTimeString(p.created_at) : null,
@@ -108,7 +108,7 @@ export async function logInClickhouse(
     clickhouseDb.dbInsertClickhouse(
       "properties_copy_v2",
       properties.map((p) => ({
-        id: p.id,
+        id: p.id!,
         created_at: formatTimeString(p.created_at),
         request_id: request.id,
         key: p.key,
@@ -122,4 +122,21 @@ export async function logInClickhouse(
       buildPropertyWithResponseInserts(request, response, properties)
     ),
   ]);
+}
+
+export async function updateFeedbackInClickhouse(
+  clickhouseDb: ClickhouseClientWrapper,
+  requestId: string,
+  feedbackId: number,
+  rating: boolean,
+  feedbackCreatedAt: string
+) {
+  const query = `
+  ALTER TABLE response_copy_v3 
+  UPDATE rating = ${rating}, 
+         feedback_created_at = '${formatTimeString(feedbackCreatedAt)}', 
+         feedback_id = '${feedbackId}'
+  WHERE request_id = '${requestId}'`;
+
+  await clickhouseDb.dbUpdateClickhouse(query);
 }

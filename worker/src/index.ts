@@ -1,17 +1,5 @@
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { buildRouter } from "./routers/routerFactory";
-import {
-  RequestQueueBody,
-  ResponseQueueBody,
-  handleRequestQueue,
-  handleResponseQueue,
-} from "./lib/dbLogger/insertConsumer";
-
-export type Provider = "OPENAI" | "ANTHROPIC";
-export type RequestQueue = Queue<RequestQueueBody>;
-const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
-export type ResponseQueue = Queue<ResponseQueueBody>;
-const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;

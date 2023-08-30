@@ -90,11 +90,12 @@ export async function getXOverTime<T>(
     },
     operator: "and",
   };
-  const filter: FilterNode = {
+  let filter: FilterNode = {
     left: timeFilterNode,
     right: userFilter,
     operator: "and",
   };
+
   if (!isValidTimeFilter(timeFilter)) {
     return { data: null, error: "Invalid time filter" };
   }

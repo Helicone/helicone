@@ -272,6 +272,35 @@ const DashboardPage = (props: DashboardPageProps) => {
                   type="double-line"
                 />
               </div>{" "}
+              <div className="col-span-2 lg:col-span-12 h-full">
+                <MainGraph
+                  isLoading={overTimeData.positiveFeedback.isLoading}
+                  dataOverTime={
+                    overTimeData.positiveFeedback.data?.data?.map((r) => ({
+                      ...r,
+                      value: r.count,
+                    })) ?? []
+                  }
+                  doubleLineOverTime={overTimeData.positiveFeedback.data?.data?.map(
+                    (feedback) => ({
+                      time: feedback.time,
+                      value1: feedback.count,
+                      value2: feedback.count,
+                    })
+                  )}
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Feedback"}
+                  value={
+                    metrics.feedback?.data?.data
+                      ? `${formatNumberString(
+                          metrics.feedback?.data?.data.toFixed(2)
+                        )}`
+                      : "0"
+                  }
+                  valueLabel={"ratings"}
+                  type="double-line"
+                />
+              </div>
               <div className="col-span-2 lg:col-span-4 h-full">
                 <MainGraph
                   isLoading={overTimeData.costs.isLoading}

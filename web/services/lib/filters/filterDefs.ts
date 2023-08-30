@@ -19,6 +19,8 @@ export type NumberOperators = Record<
   number
 >;
 
+export type BooleanOperators = Record<"equals", boolean>;
+
 export type TimestampOperators = Record<"gte" | "lte", string>;
 
 export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
@@ -76,6 +78,7 @@ type ResponseCopyV1ToOperators = {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
   auth_hash: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   user_id: SingleKey<TextOperators>;
@@ -86,6 +89,14 @@ interface ResponseCopyV2ToOperators extends ResponseCopyV1ToOperators {
 }
 
 export type FilterLeafResponseCopyV2 = SingleKey<ResponseCopyV2ToOperators>;
+
+interface ResponseCopyV3ToOperators extends ResponseCopyV2ToOperators {
+  rating: SingleKey<BooleanOperators>;
+  feedback_created_at: SingleKey<TimestampOperatorsTyped>;
+  feedback_id: SingleKey<NumberOperators>;
+}
+
+export type FilterLeafResponseCopyV3 = SingleKey<ResponseCopyV3ToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -116,12 +127,6 @@ type UserViewToOperators = {
 
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 
-type PropertiesCopyV1ToOperators = {
-  auth_hash: SingleKey<TextOperators>;
-  key: SingleKey<TextOperators>;
-  value: SingleKey<TextOperators>;
-};
-
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
   user_api_keys: FilterLeafUserApiKeys;
@@ -138,7 +143,7 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   response_copy_v1: FilterLeafResponseCopyV1;
   response_copy_v2: FilterLeafResponseCopyV2;
-  response_copy_v3: FilterLeafResponseCopyV2;
+  response_copy_v3: FilterLeafResponseCopyV3;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
