@@ -81,19 +81,19 @@ openai.Completion.create(
     const openai = new OpenAIApi(configuration);
     ```
 
-  **OpenAI V4+**
-  ```javascript
-  import OpenAI from 'openai';
+**OpenAI V4+**
 
-  const openai = new OpenAI({
-        apiKey: request.env.OPENAI_API_KEY,
-        baseURL: 'https://oai.hconeai.com/v1',
-        defaultHeaders: {
-            'Helicone-Auth': `Bearer ${request.env.HELICONE_API_KEY}`
-        },
-    });
+```javascript
+import OpenAI from "openai";
 
-  ```
+const openai = new OpenAI({
+  apiKey: request.env.OPENAI_API_KEY,
+  baseURL: "https://oai.hconeai.com/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
+  },
+});
+```
 
   </Tab>
   <Tab title="Node.js (w/ package)">
@@ -120,26 +120,26 @@ openai.Completion.create(
     const { HeliconeProxyConfiguration as Configuration, HeliconeProxyOpenAIApi as OpenAIApi } = require("helicone");
     ```
 
-    **More Complex Example**
+    **Example**
     ```typescript
     const configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
       heliconeMeta: {
         apiKey: process.env.HELICONE_API_KEY,
-      },
-    });
-    const openai = new OpenAIApi(configuration);
-
-    const chatCompletion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: "Hello world" }],
-      heliconeMeta: {
         properties: {
           customId: "1234",
         },
         user: "test-user",
       },
     });
+
+    const openai = new OpenAIApi(configuration);
+
+    const chatCompletion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: "Hello world" }],
+    });
+
     console.log(chatCompletion.data.choices[0].message);
     ```
 
