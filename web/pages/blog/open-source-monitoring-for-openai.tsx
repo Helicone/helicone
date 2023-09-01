@@ -42,9 +42,9 @@ const MonitoringForOpenAIBlog = (props: MonitoringForOpenAIBlogProps) => {
                 OpenAI has revolutionized how we think about machine learning
                 and AI with their cutting-edge large language models (LLMs). But
                 innovation at this scale often comes with complexities that can
-                hinder optimal usage. That's where Helicone enters the picture,
-                making your interaction with these advanced models as seamless
-                as using your smartphone.
+                hinder optimal usage. That&apos;s where Helicone enters the
+                picture, making your interaction with these advanced models as
+                seamless as using your smartphone.
               </p>
               <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
                 <li className="flex gap-x-3">
