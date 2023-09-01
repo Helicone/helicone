@@ -50,7 +50,7 @@ export function RequestView(props: {
         <li className="flex flex-row justify-between items-center py-2 gap-4">
           <p className="font-semibold text-gray-900">Created At</p>
           <p className="text-gray-700 truncate">
-            {getUSDate(request.createdAt)}
+            {new Date(request.createdAt).toLocaleString("en-US")}
           </p>
         </li>
         <li className="flex flex-row justify-between items-center py-2 gap-4">
