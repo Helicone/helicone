@@ -27,7 +27,7 @@ const Reset = (props: ResetProps) => {
 
           if (error) {
             setNotification(
-              "Error resetting password. Please try again.",
+              "Error resetting password. Please try again!",
               "error"
             );
             console.error(error);
