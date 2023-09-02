@@ -8,6 +8,7 @@ import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
+import crypto from "crypto";
 
 type HashedPasswordRow = {
   hashed_password: string;
