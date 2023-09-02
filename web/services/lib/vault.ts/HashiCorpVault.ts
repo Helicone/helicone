@@ -17,7 +17,6 @@ class HashiCorpVault implements IVault {
     keyValue: string
   ): Promise<Result<null, string>> {
     const namespaceResult = await this.ensureNamespaceExists(orgId);
-    console.log("namespaceResult", namespaceResult);
     if (namespaceResult.error) {
       return namespaceResult;
     }
