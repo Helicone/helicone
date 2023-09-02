@@ -1,6 +1,8 @@
+import { cp } from "fs";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import {
   AllOperators,
+  AnyOperator,
   FilterBranch,
   FilterLeaf,
   filterListToTree,
@@ -8,55 +10,146 @@ import {
   TablesAndViews,
 } from "./filterDefs";
 
+type KeyMapper<T> = (filter: T) => {
+  column: string;
+  operator: AllOperators;
+  value: string;
+};
+
 type KeyMappings = {
-  [key in keyof TablesAndViews]:
-    | {
-        [key2 in keyof TablesAndViews[key]]: string;
-      }
-    | ((x: string) => string);
+  [key in keyof TablesAndViews]: KeyMapper<TablesAndViews[key]>;
+};
+
+const extractOperatorAndValueFromAnOperator = (
+  operator: AnyOperator
+): { operator: AllOperators; value: any } => {
+  for (const key in operator) {
+    return {
+      operator: key as AllOperators,
+      value: operator[key as keyof typeof operator],
+    };
+  }
+  throw new Error(`Invalid operator${operator}`);
+};
+
+function easyKeyMappings<T extends keyof TablesAndViews>(keyMappings: {
+  [key in keyof TablesAndViews[T]]: string;
+}): (key: {
+  [key in keyof TablesAndViews[T]]: AnyOperator;
+}) => { column: string; operator: AllOperators; value: string } {
+  return (key: {
+    [key in keyof TablesAndViews[T]]: AnyOperator;
+  }) => {
+    const column = Object.keys(key)[0] as keyof typeof keyMappings;
+    const columnFromMapping = keyMappings[column];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      key[column as keyof typeof keyMappings]
+    );
+
+    return {
+      column: `${columnFromMapping}`,
+      operator: operator,
+      value: value,
+    };
+  };
+}
+
+function easyKeyMappingsWithTable<T extends keyof TablesAndViews>(
+  keyMappings: {
+    [key in keyof TablesAndViews[T]]: string;
+  },
+  table: T
+): (key: {
+  [key in keyof TablesAndViews[T]]: AnyOperator;
+}) => { column: string; operator: AllOperators; value: string } {
+  return (key: {
+    [key in keyof TablesAndViews[T]]: AnyOperator;
+  }) => {
+    const column = keyMappings[key as keyof typeof keyMappings];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      key[column as keyof typeof keyMappings]
+    );
+
+    return {
+      column: `${table}.${column}`,
+      operator: operator,
+      value: value,
+    };
+  };
+}
+
+const NOT_IMPLEMENTED = () => {
+  throw new Error("Not implemented");
 };
 
 const whereKeyMappings: KeyMappings = {
-  user_metrics: {
-    user_id: "request.user_id",
+  user_metrics: easyKeyMappingsWithTable(
+    {
+      user_id: "user_id",
+      last_active: "last_active",
+      total_requests: "total_requests",
+    },
+    "user_metrics"
+  ),
+  user_api_keys: easyKeyMappingsWithTable(
+    {
+      api_key_hash: "api_key_hash",
+      api_key_name: "api_key_name",
+    },
+    "user_api_keys"
+  ),
+  properties: (filter) => {
+    const key = Object.keys(filter)[0];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      filter.property
+    );
+    return {
+      column: `properties ->> '${key}'`,
+      operator: operator,
+      value: value,
+    };
   },
-  user_api_keys: {
-    api_key_hash: "user_api_keys.api_key_hash",
-    api_key_name: "user_api_keys.api_key_name",
+  values: (filter) => {
+    const key = Object.keys(filter)[0];
+    const { operator, value } = extractOperatorAndValueFromAnOperator(
+      filter.value
+    );
+    return {
+      column: `prompt_values ->> '${key}'`,
+      operator: operator,
+      value: value,
+    };
   },
-  properties: (key) => `properties ->> '${key}'`,
-  request: {
-    // TODO: We need to be able to handle multiple messages
-    prompt:
-      "(coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text",
+  request: easyKeyMappings<"request">({
+    prompt: `coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content')`,
     created_at: "request.created_at",
     user_id: "request.user_id",
     auth_hash: "request.auth_hash",
     org_id: "request.helicone_org_id",
     id: "request.id",
-  },
-  response: {
+  }),
+  response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model: "request.body ->> 'model'",
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
-  },
-  values: (key) => `prompt_values ->> '${key}'`,
-  properties_table: {
+  }),
+  properties_table: easyKeyMappings<"properties_table">({
     auth_hash: "properties.auth_hash",
     key: "properties.key",
     value: "properties.value",
-  },
-  response_copy_v1: {
+  }),
+
+  response_copy_v1: easyKeyMappings<"response_copy_v1">({
     auth_hash: "response_copy_v1.auth_hash",
     model: "response_copy_v1.model",
     request_created_at: "response_copy_v1.request_created_at",
     latency: "response_copy_v1.latency",
     user_id: "response_copy_v1.user_id",
     status: "response_copy_v1.status",
-  },
-  response_copy_v2: {
+  }),
+  response_copy_v2: easyKeyMappings<"response_copy_v2">({
     auth_hash: "response_copy_v2.auth_hash",
     model: "response_copy_v2.model",
     request_created_at: "response_copy_v2.request_created_at",
@@ -64,56 +157,113 @@ const whereKeyMappings: KeyMappings = {
     user_id: "response_copy_v2.user_id",
     status: "response_copy_v2.status",
     organization_id: "response_copy_v2.organization_id",
+  }),
+  response_copy_v3: (filter) => {
+    return easyKeyMappings<"response_copy_v3">({
+      auth_hash: "response_copy_v3.auth_hash",
+      model: "response_copy_v3.model",
+      request_created_at: "response_copy_v3.request_created_at",
+      latency: "response_copy_v3.latency",
+      user_id: "response_copy_v3.user_id",
+      status: "response_copy_v3.status",
+      organization_id: "response_copy_v3.organization_id",
+    })(filter);
   },
-
-  response_copy_v3: {
-    auth_hash: "response_copy_v3.auth_hash",
-    model: "response_copy_v3.model",
-    request_created_at: "response_copy_v3.request_created_at",
-    latency: "response_copy_v3.latency",
-    user_id: "response_copy_v3.user_id",
-    status: "response_copy_v3.status",
-    organization_id: "response_copy_v3.organization_id",
-  },
-  users_view: {},
-  properties_copy_v1: {
+  users_view: NOT_IMPLEMENTED,
+  properties_copy_v1: easyKeyMappings<"properties_copy_v1">({
     key: "properties_copy_v1.key",
     value: "properties_copy_v1.value",
     auth_hash: "properties_copy_v1.auth_hash",
-  },
-  properties_copy_v2: {
+  }),
+
+  properties_copy_v2: easyKeyMappings<"properties_copy_v2">({
     key: "properties_copy_v2.key",
     value: "properties_copy_v2.value",
     organization_id: "properties_copy_v2.organization_id",
-  },
-  property_with_response_v1: {
+  }),
+  property_with_response_v1: easyKeyMappings<"property_with_response_v1">({
     property_key: "property_with_response_v1.property_key",
     property_value: "property_with_response_v1.property_value",
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
+  }),
+  run: (filter) => {
+    if ("custom_properties" in filter && filter.custom_properties) {
+      const key = Object.keys(filter.custom_properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.custom_properties[key as keyof typeof filter.custom_properties]
+      );
+      return {
+        column: `custom_properties ->> '${key}'`,
+        operator: operator,
+        value: value,
+      };
+    }
+    return easyKeyMappings<"run">({
+      created_at: "run.created_at",
+      org_id: "run.org_id",
+      id: "run.id",
+      description: "run.description",
+      name: "run.name",
+      status: "run.status",
+      timeout_seconds: "run.timeout_seconds",
+      updated_at: "run.updated_at",
+    })(filter);
+  },
+  task: (filter) => {
+    if ("custom_properties" in filter && filter.custom_properties) {
+      console.log("customer_properties", filter.custom_properties);
+      const key = Object.keys(filter.custom_properties)[0];
+      console.log("key", key);
+
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.custom_properties[key as keyof typeof filter.custom_properties]
+      );
+      console.log("operator", operator);
+      console.log("value", value);
+      return {
+        column: `custom_properties ->> '${key}'`,
+        operator: operator,
+        value: value,
+      };
+    }
+    return easyKeyMappings<"task">({
+      created_at: "task.created_at",
+      id: "task.id",
+      name: "task.name",
+      description: "task.description",
+      parent_task: "task.parent_task",
+      timeout_seconds: "task.timeout_seconds",
+      org_id: "task.org_id",
+      run_id: "task.run_id",
+      status: "task.status",
+      updated_at: "task.updated_at",
+    })(filter);
   },
 };
 
 const havingKeyMappings: KeyMappings = {
-  user_metrics: {
+  user_metrics: easyKeyMappings<"user_metrics">({
     last_active: "max(request.created_at)",
     total_requests: "count(request.id)",
-  },
-  user_api_keys: {},
-  properties: {},
-  request: {},
-  response: {},
-  values: {},
-  properties_table: {},
-  response_copy_v1: {},
-  properties_copy_v1: {},
-  users_view: {
+  }),
+  users_view: easyKeyMappings<"users_view">({
     cost: "cost",
-  },
-  response_copy_v2: {},
-  response_copy_v3: {},
-  properties_copy_v2: {},
-  property_with_response_v1: {},
+  }),
+  user_api_keys: NOT_IMPLEMENTED,
+  properties: NOT_IMPLEMENTED,
+  request: NOT_IMPLEMENTED,
+  response: NOT_IMPLEMENTED,
+  values: NOT_IMPLEMENTED,
+  properties_table: NOT_IMPLEMENTED,
+  response_copy_v1: NOT_IMPLEMENTED,
+  properties_copy_v1: NOT_IMPLEMENTED,
+  response_copy_v2: NOT_IMPLEMENTED,
+  response_copy_v3: NOT_IMPLEMENTED,
+  properties_copy_v2: NOT_IMPLEMENTED,
+  property_with_response_v1: NOT_IMPLEMENTED,
+  run: NOT_IMPLEMENTED,
+  task: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -127,63 +277,36 @@ export function buildFilterLeaf(
 } {
   const filters: string[] = [];
 
-  for (const tableKey in filter) {
-    const table = filter[tableKey as keyof FilterLeaf];
+  for (const _tableKey in filter) {
+    const tableKey = _tableKey as keyof typeof filter;
+    const table = filter[tableKey];
+    const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
+    const { column, operator: operatorKey, value } = mapper(table);
 
-    for (const columnKey in table) {
-      const column = table[columnKey as keyof typeof table] as Record<
-        AllOperators,
-        any
-      >;
+    const sqlOperator =
+      operatorKey === "equals"
+        ? "="
+        : operatorKey === "like"
+        ? "LIKE"
+        : operatorKey === "ilike"
+        ? "ILIKE"
+        : operatorKey === "gte"
+        ? ">="
+        : operatorKey === "lte"
+        ? "<="
+        : operatorKey === "not-equals"
+        ? "!="
+        : operatorKey === "contains"
+        ? "ILIKE"
+        : undefined;
 
-      for (const operatorKey in column) {
-        const value = column[operatorKey as AllOperators];
-
-        const whereKey = keyMappings[tableKey as keyof FilterLeaf];
-        if (whereKey !== undefined) {
-          const columnName =
-            typeof whereKey === "function"
-              ? whereKey(columnKey)
-              : whereKey[columnKey as keyof typeof whereKey];
-
-          const sqlOperator =
-            operatorKey === "equals"
-              ? "="
-              : operatorKey === "like"
-              ? "LIKE"
-              : operatorKey === "ilike"
-              ? "ILIKE"
-              : operatorKey === "gte"
-              ? ">="
-              : operatorKey === "lte"
-              ? "<="
-              : operatorKey === "not-equals"
-              ? "!="
-              : operatorKey === "contains"
-              ? "ILIKE"
-              : undefined;
-
-          if (sqlOperator && columnName) {
-            filters.push(
-              `${columnName} ${sqlOperator} ${argPlaceHolder(
-                argsAcc.length,
-                value
-              )}`
-            );
-            if (operatorKey === "contains") {
-              argsAcc.push(`%${value}%`);
-            } else {
-              argsAcc.push(value);
-            }
-          } else {
-            throw new Error(`Invalid filter: ${tableKey}.${columnKey}`);
-          }
-        } else {
-          throw new Error(
-            `Invalid filter, whereKey undefined: ${tableKey}.${columnKey}`
-          );
-        }
-      }
+    filters.push(
+      `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
+    );
+    if (operatorKey === "contains") {
+      argsAcc.push(`%${value}%`);
+    } else {
+      argsAcc.push(value);
     }
   }
 
@@ -357,6 +480,30 @@ export async function buildFilterWithAuthClickHouseProperties(
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     properties_copy_v2: {
       organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthRunsTable(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "postgres", (orgId) => ({
+    run: {
+      org_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthTasksTable(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "postgres", (orgId) => ({
+    task: {
+      org_id: {
         equals: orgId,
       },
     },

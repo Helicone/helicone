@@ -1,11 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
+// import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { HeliconeRequestFilter } from "../../lib/api/graphql/schema/types/graphql";
+import { useQuery } from "@apollo/client";
+import { gql } from "../../lib/api/graphql/client";
 
-const useGetRequest = (requestId: string) => {
+const GET_RUNS = gql(/* GraphQL */ `
+  query heliconeTask() {
+    name
+  }
+  `);
+
+const useGetRun = (requestId: string) => {
+  const { loading, data } = useQuery(
+    GET_RUNS,
+    // variables are also typed!
+    { variables: { year: 2019 } }
+  );
   const { data, isLoading } = useQuery({
     queryKey: ["requestData", requestId],
     queryFn: async (query) => {
@@ -37,10 +51,10 @@ const useGetRequest = (requestId: string) => {
   };
 };
 
-const useGetRequests = (
+const useGetRuns = (
   currentPage: number,
   currentPageSize: number,
-  advancedFilter: FilterNode,
+  advancedFilter: HeliconeRequestFilter,
   sortLeaf: SortLeafRequest,
   isCached: boolean = false,
   isLive: boolean = false
@@ -48,7 +62,7 @@ const useGetRequests = (
   return {
     requests: useQuery({
       queryKey: [
-        "requestsData",
+        "runsData",
         currentPage,
         currentPageSize,
         advancedFilter,
@@ -58,9 +72,9 @@ const useGetRequests = (
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
         const currentPageSize = query.queryKey[2] as number;
-        const advancedFilter = query.queryKey[3];
-        const sortLeaf = query.queryKey[4];
-        const isCached = query.queryKey[5];
+        const advancedFilter = query.queryKey[3] as HeliconeRequestFilter;
+        const sortLeaf = query.queryKey[4] as SortLeafRequest;
+        const isCached = query.queryKey[5] as boolean;
         return await fetch("/api/request", {
           method: "POST",
           headers: {
@@ -83,7 +97,7 @@ const useGetRequests = (
     }),
     count: useQuery({
       queryKey: [
-        "requestsCount",
+        "runCount",
         currentPage,
         currentPageSize,
         advancedFilter,

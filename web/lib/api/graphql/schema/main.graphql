@@ -10,6 +10,43 @@ type Query {
   aggregatedHeliconeRequest(
     properties: [PropertyFilter!]
   ): AggregatedHeliconeRequest
+  heliconeRun(
+    id: String
+    limit: Int
+    offset: Int
+    filters: [HeliconeRunFilter!]
+  ): [HeliconeRun]
+  heliconeTask(
+    id: String
+    limit: Int
+    offset: Int
+    run_id: String
+    filters: [HeliconeTaskFilter!]
+  ): [HeliconeTask]
+}
+
+type HeliconeRun {
+  id: String!
+  name: String!
+  description: String
+  status: String!
+  created_at: String!
+  updated_at: String!
+  timeout_seconds: Int!
+  task_count: Int!
+  request_count: Int!
+  properties: [Property]
+}
+
+type HeliconeTask {
+  id: String!
+  name: String!
+  description: String
+  created_at: String!
+  updated_at: String!
+  run_id: String!
+  parent_id: String
+  properties: [Property]
 }
 
 type AggregatedHeliconeRequest {
@@ -56,6 +93,24 @@ input HeliconeRequestFilter {
 input PropertyFilter {
   name: String!
   value: TextOperators!
+}
+
+input HeliconeRunFilter {
+  id: TextOperators
+  name: TextOperators
+  description: TextOperators
+  created_at: DateOperators
+  updated_at: DateOperators
+  property: PropertyFilter
+}
+
+input HeliconeTaskFilter {
+  id: TextOperators
+  name: TextOperators
+  description: TextOperators
+  created_at: DateOperators
+  updated_at: DateOperators
+  property: PropertyFilter
 }
 
 input ValueFilter {

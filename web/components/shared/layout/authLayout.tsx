@@ -37,7 +37,7 @@ import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
 import { GrGraphQl } from "react-icons/gr";
-import { BsTags, BsTagsFill } from "react-icons/bs";
+import { BsBriefcase, BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import ThemedModal from "../themed/themedModal";
@@ -81,6 +81,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/requests",
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
+    },
+    {
+      name: "Runs",
+      href: "/runs",
+      icon: BsBriefcase,
+      current: pathname.includes("/runs"),
     },
     {
       name: "Users",

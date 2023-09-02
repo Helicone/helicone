@@ -24,8 +24,8 @@ import { modelCost } from "../../metrics/costCalc";
 export function convertTextOperators(
   op: GQLTextOperators
 ): SingleKey<TextOperators> {
-  if (op.not_equals) {
-    return { "not-equals": op.not_equals };
+  if (op.not_equals !== undefined) {
+    return { "not-equals": op.not_equals ?? "" };
   } else {
     return { ...op } as SingleKey<TextOperators>;
   }

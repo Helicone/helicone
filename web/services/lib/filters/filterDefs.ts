@@ -23,6 +23,11 @@ export type TimestampOperators = Record<"gte" | "lte", string>;
 
 export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
 
+export type AnyOperator =
+  | SingleKey<TextOperators>
+  | SingleKey<NumberOperators>
+  | SingleKey<TimestampOperators>
+  | SingleKey<TimestampOperatorsTyped>;
 export type SingleKey<T> = {
   [K in keyof T]: Partial<{
     [P in keyof T]: P extends K ? T[P] : never;
@@ -116,11 +121,39 @@ type UserViewToOperators = {
 
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 
-type PropertiesCopyV1ToOperators = {
-  auth_hash: SingleKey<TextOperators>;
-  key: SingleKey<TextOperators>;
-  value: SingleKey<TextOperators>;
+type RunToOperators = {
+  id: SingleKey<TextOperators>;
+  name: SingleKey<TextOperators>;
+  description: SingleKey<TextOperators>;
+  status: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperators>;
+  updated_at: SingleKey<TimestampOperators>;
+  timeout_seconds: SingleKey<NumberOperators>;
+  custom_properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  org_id: SingleKey<TextOperators>;
 };
+
+export type FilterLeafRun = SingleKey<RunToOperators>;
+
+type TasksToOperators = {
+  id: SingleKey<TextOperators>;
+  name: SingleKey<TextOperators>;
+  description: SingleKey<TextOperators>;
+  run_id: SingleKey<TextOperators>;
+  parent_task: SingleKey<TextOperators>;
+  status: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperators>;
+  updated_at: SingleKey<TimestampOperators>;
+  timeout_seconds: SingleKey<NumberOperators>;
+  custom_properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  org_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafTask = SingleKey<TasksToOperators>;
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -128,12 +161,6 @@ export type TablesAndViews = {
   response: FilterLeafResponse;
   request: FilterLeafRequest;
   properties_table: FilterLeafPropertiesTable;
-  properties: {
-    [key: string]: SingleKey<TextOperators>;
-  };
-  values: {
-    [key: string]: SingleKey<TextOperators>;
-  };
 
   // CLICKHOUSE TABLES
   response_copy_v1: FilterLeafResponseCopyV1;
@@ -143,6 +170,15 @@ export type TablesAndViews = {
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
+  run: FilterLeafRun;
+  task: FilterLeafTask;
+
+  properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  values: {
+    [key: string]: SingleKey<TextOperators>;
+  };
 };
 
 export type FilterLeaf = SingleKey<TablesAndViews>;
