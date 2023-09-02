@@ -6,6 +6,7 @@ import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
+import crypto from "crypto";
 
 async function handler({
   req,
