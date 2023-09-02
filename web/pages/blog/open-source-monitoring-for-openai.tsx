@@ -35,18 +35,18 @@ export default function OpenSourceMonitoringForOpenAI() {
             Helicone: The Next Evolution in OpenAI Monitoring and Optimization
           </h1>
           <p className="mt-6 text-xl leading-8">
-            How Helicone Fills the Monitoring and Optimization Gap in OpenAI's
-            Ecosystem so developers and businesses can make the most of their
-            OpenAI usage.
+            How Helicone Fills the Monitoring and Optimization Gap in
+            OpenAI&apos;s Ecosystem so developers and businesses can make the
+            most of their OpenAI usage.
           </p>
           <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
             OpenAI and the Future of AI
           </h2>
           <p className="mt-6">
-            OpenAI's suite of APIs has fundamentally altered the playing field
-            for natural language processing and machine learning. Yet, while the
-            focus has largely been on leveraging GPT-3, GPT-4, and other OpenAI
-            models for application development, an equally critical
+            OpenAI&apos;s suite of APIs has fundamentally altered the playing
+            field for natural language processing and machine learning. Yet,
+            while the focus has largely been on leveraging GPT-3, GPT-4, and
+            other OpenAI models for application development, an equally critical
             area—monitoring and optimization—has not been given its due. Here we
             introduce how Helicone revolutionizes this space:
           </p>
@@ -64,7 +64,7 @@ export default function OpenSourceMonitoringForOpenAI() {
               -
               <span>
                 <strong className="font-semibold text-sky-500">
-                  Helicone: Beyond Monitoring, Toward Mastery
+                  Fully unlock the potential of our OpenAI usage
                 </strong>
               </span>
             </li>{" "}
@@ -72,8 +72,7 @@ export default function OpenSourceMonitoringForOpenAI() {
               -
               <span>
                 <strong className="font-semibold text-sky-500">
-                  Helicone's Technical Edge: Features You Won't Find Anywhere
-                  Else
+                  Industry Leading Features purpose-built for LLM&apos;s
                 </strong>
               </span>
             </li>{" "}
@@ -81,7 +80,7 @@ export default function OpenSourceMonitoringForOpenAI() {
               -
               <span>
                 <strong className="font-semibold text-sky-500">
-                  Making the Future-Proof Choice with Helicone
+                  Trailblazing the Future of development with OpenAI
                 </strong>
               </span>
             </li>
@@ -92,10 +91,10 @@ export default function OpenSourceMonitoringForOpenAI() {
           <p className="mt-6">
             Traditional monitoring solutions, while serviceable, were designed
             for linear and time-based data. They are not equipped to handle the
-            complexities of OpenAI's token-based system. As a result, they fail
-            to provide the insights necessary to optimize OpenAI usage. Below is
-            a table detailing some differences between traditional observability
-            compared to LLM-observability:
+            complexities of OpenAI&apos;s token-based system. As a result, they
+            fail to provide the insights necessary to optimize OpenAI usage.
+            Below is a table detailing some differences between traditional
+            observability compared to LLM-observability:
           </p>
           <div className="mt-10 flex flex-row divide-x w-full justify-center divide-gray-300">
             <div className="flex flex-col w-full divide-y divide-gray-300 text-gray-500">
@@ -151,14 +150,14 @@ export default function OpenSourceMonitoringForOpenAI() {
             Fully unlock the potential of our OpenAI usage
           </h2>
           <p className="mt-6">
-            Helicone's dashboard serves as your command center for driving
-            operational efficiency in the use of OpenAI's large language models.
-            By consolidating key metrics like requests over time, associated
-            costs, and latency into a single interface, Helicone offers an
-            unparalleled, real-time overview that enables rapid, data-driven
-            decisions. No more guesswork; just actionable insights that identify
-            trends, isolate inefficiencies, and highlight opportunities for
-            cost-saving and performance improvements.
+            Helicone&apos;s dashboard serves as your command center for driving
+            operational efficiency in the use of OpenAI&apos;s large language
+            models. By consolidating key metrics like requests over time,
+            associated costs, and latency into a single interface, Helicone
+            offers an unparalleled, real-time overview that enables rapid,
+            data-driven decisions. No more guesswork; just actionable insights
+            that identify trends, isolate inefficiencies, and highlight
+            opportunities for cost-saving and performance improvements.
           </p>
           <figure className="mt-16">
             <div className="w-full rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
@@ -194,22 +193,22 @@ export default function OpenSourceMonitoringForOpenAI() {
             </figcaption>
           </figure>
           <p className="mt-16">
-            When you're juggling a myriad of variables such as model selection,
-            token consumption, and request latency, Helicone streamlines the
-            complexity into digestible, easy-to-analyze data points. With
-            features like active user tracking and model-specific metrics, you
-            gain not only a snapshot of current usage but also predictive
-            analytics that guide future optimization strategies. It's not just
-            about understanding where your resources are going; it's about
-            ensuring they are aligned most effectively with your business goals
-            and performance expectations.
+            When you&apos;re juggling a myriad of variables such as model
+            selection, token consumption, and request latency, Helicone
+            streamlines the complexity into digestible, easy-to-analyze data
+            points. With features like active user tracking and model-specific
+            metrics, you gain not only a snapshot of current usage but also
+            predictive analytics that guide future optimization strategies.
+            It&apos;s not just about understanding where your resources are
+            going; it&apos;s about ensuring they are aligned most effectively
+            with your business goals and performance expectations.
           </p>
           {/*  */}
           <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
             Industry Leading Features purpose-built for LLM&apos;s
           </h2>
           <p className="mt-6">
-            Navigating the complex landscape of OpenAI's API is a technical
+            Navigating the complex landscape of OpenAI&apos;s API is a technical
             challenge that requires more than rudimentary monitoring. Helicone
             offers an array of unique features designed with the precision and
             scalability that advanced users demand. From leveraging machine
@@ -245,8 +244,9 @@ export default function OpenSourceMonitoringForOpenAI() {
                   Bucket Cache Feature.
                 </strong>{" "}
                 Instead of repetitively hitting the LLM-endpoint for similar
-                requests, you can cache any 'n' amount of responses using our
-                new bucket cache feature, saving on costs and improving latency.
+                requests, you can cache any &apos;n&apos; amount of responses
+                using our new bucket cache feature, saving on costs and
+                improving latency.
               </span>
             </li>
             <li className="flex gap-x-3">
@@ -286,7 +286,7 @@ export default function OpenSourceMonitoringForOpenAI() {
             Trailblazing the Future of development with OpenAI
           </h2>
           <p className="mt-6">
-            Selecting Helicone is not merely a choice; it's a decisive move
+            Selecting Helicone is not merely a choice; it&apos;s a decisive move
             toward operational excellence and insightful management of your
             OpenAI Large Language Models (LLMs). As the market evolves, so do
             we, continually innovating to bring you unparalleled features and
@@ -302,9 +302,9 @@ export default function OpenSourceMonitoringForOpenAI() {
           </p>
           <p className="mt-6">
             In conclusion, the choice of Helicone as your OpenAI management tool
-            is more than an operational decision; it's a commitment to staying
-            ahead, embracing efficiency, and unlocking the full potential of
-            your OpenAI resources.
+            is more than an operational decision; it&apos;s a commitment to
+            staying ahead, embracing efficiency, and unlocking the full
+            potential of your OpenAI resources.
           </p>
 
           {/*  */}
