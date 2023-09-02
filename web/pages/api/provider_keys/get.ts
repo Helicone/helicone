@@ -38,7 +38,7 @@ async function handler({
     vault.readProviderKey(userData.orgId, vaultKeyId)
   );
 
-  const keys: Result<string, string>[] = await Promise.all(promises);
+  const keys: Result<string | null, string>[] = await Promise.all(promises);
 
   let errors: string[] = [];
   for (const key of keys) {
