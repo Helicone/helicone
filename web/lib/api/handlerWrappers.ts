@@ -113,7 +113,7 @@ export function withAuth<T>(
     }
 
     let vault: IVault | null = null;
-    if ((process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "") === "true") {
+    if (true) {
       vault = new HashiCorpVault();
     }
 
