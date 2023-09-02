@@ -1,17 +1,7 @@
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { buildRouter } from "./routers/routerFactory";
-import {
-  RequestQueueBody,
-  ResponseQueueBody,
-  handleRequestQueue,
-  handleResponseQueue,
-} from "./lib/dbLogger/insertConsumer";
 
 export type Provider = "OPENAI" | "ANTHROPIC";
-export type RequestQueue = Queue<RequestQueueBody>;
-const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
-export type ResponseQueue = Queue<ResponseQueueBody>;
-const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -20,11 +10,14 @@ export interface Env {
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
+  VAULT_NAMESPACE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
   TOKEN_CALC_URL: string;
+  VAULT_ADDR: string;
+  VAULT_TOKEN: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
 }

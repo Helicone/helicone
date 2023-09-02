@@ -81,7 +81,7 @@ export class RequestWrapper {
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
     const requestWrapper = new RequestWrapper(request, env);
-    const authorization = await requestWrapper.setAuthorization();
+    const authorization = await requestWrapper.setAuthorization(env);
 
     if (authorization.error) {
       return { data: null, error: authorization.error };
@@ -168,9 +168,9 @@ export class RequestWrapper {
     return this.authorization || undefined;
   }
 
-  private async setAuthorization(): Promise<
-    Result<string | undefined, string>
-  > {
+  private async setAuthorization(
+    env: Env
+  ): Promise<Result<string | undefined, string>> {
     if (this.authorization) {
       return { data: this.authorization, error: null };
     }
@@ -186,7 +186,7 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      const providerKey = await this.getProviderKeyFromProxy(authKey);
+      const providerKey = await this.getProviderKeyFromProxy(authKey, env);
 
       if (providerKey.error || !providerKey.data) {
         return {
@@ -208,7 +208,8 @@ export class RequestWrapper {
   }
 
   private async getProviderKeyFromProxy(
-    authKey: string
+    authKey: string,
+    env: Env
   ): Promise<Result<string | undefined, string>> {
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
@@ -270,7 +271,11 @@ export class RequestWrapper {
       };
     }
 
-    const vault = new HashiCorpVault();
+    const vault = new HashiCorpVault(
+      env.VAULT_NAMESPACE_KV,
+      env.VAULT_ADDR,
+      env.VAULT_TOKEN
+    );
     const vaultProviderKey = await vault.readProviderKey(
       storedProxyKey.data.org_id,
       providerKey.data.vault_key_id
