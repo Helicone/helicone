@@ -11,7 +11,6 @@ const Blog = (props: BlogProps) => {
   return (
     <MetaData title="Blog">
       <NavBarV2 />
-
       <BlogPageV2 />
       <Footer />
     </MetaData>

@@ -20,18 +20,18 @@ type blogStructure = {
 
 const blogContent: blogStructure[] = [
   {
-    title: "How to monitor your OpenAI API usage with Helicone",
+    title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
     description:
-      "Helicone provides an open-source solution for monitoring your OpenAI API usage. Improve your LLM efficiency and get valuable insights into costs, token usage, and performance.",
+      "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
     badgeText: "Education",
     badgeColor: "bg-sky-50 text-sky-700 ring-sky-600/10",
     date: "Sep 1, 2023",
     href: "/blog/open-source-monitoring-for-openai",
-    imageUrl: "/assets/blog/openai.jpg",
+    imageUrl: "/assets/blog/openai.webp",
     authors: [
       {
         name: "Scott Nguyen",
-        imageUrl: "/assets/blog/scottnguyen-headshot.jpeg",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
       },
     ],
   },
