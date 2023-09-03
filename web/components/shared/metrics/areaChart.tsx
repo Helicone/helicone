@@ -14,7 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import { ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { getUSDate, getUSDateShort } from "../utils/utils";
+import { getUSDateFromString, getUSDateShort } from "../utils/utils";
 import { clsx } from "../clsx";
 
 export interface AreaChartData {

@@ -14,6 +14,7 @@ import {
   AggregatedHeliconeRequest,
   HeliconeRun,
   HeliconeRunFilter,
+  Property,
   QueryAggregatedHeliconeRequestArgs,
   QueryHeliconeRunArgs,
 } from "../schema/types/graphql";
@@ -127,16 +128,25 @@ export async function heliconeRun(
   if (error !== null) {
     throw new ApolloError(error, "INTERNAL_SERVER_ERROR");
   }
-  return data.map((r) => ({
-    id: r.id,
-    status: r.status,
-    name: r.name,
-    description: r.description,
-    created_at: r.created_at,
-    updated_at: r.updated_at,
-    timeout_seconds: r.timeout_seconds,
-    custom_properties: r.custom_properties,
-    request_count: r.request_count,
-    task_count: r.task_count,
-  }));
+
+  return data.map((r) => {
+    const custom_properties: Property[] = Object.entries(
+      r.custom_properties
+    ).map(([key, value]) => ({
+      name: key,
+      value,
+    }));
+    return {
+      id: r.id,
+      status: r.status,
+      name: r.name,
+      description: r.description,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      timeout_seconds: r.timeout_seconds,
+      properties: custom_properties,
+      request_count: r.request_count,
+      task_count: r.task_count,
+    };
+  });
 }

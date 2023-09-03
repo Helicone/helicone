@@ -16,27 +16,24 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { useGetRuns } from "../../../services/hooks/runs";
+import { gql } from "../../../lib/api/graphql/client";
+import { useQuery } from "@apollo/client";
+import { GET_TASKS } from "../../../services/hooks/tasks";
 
-export const useRunPage = (
-  currentPage: number,
-  currentPageSize: number,
-  isLive: boolean
-) => {
+export const useSingleRunPage = (runId: string, isLive: boolean) => {
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
-  const { runs } = useGetRuns({
-    currentPage,
-    currentPageSize,
-    advancedFilter: [],
-    sortLeaf: undefined,
-    isLive,
+  const tasks = useQuery(GET_TASKS, {
+    variables: {
+      limit: 100,
+      offset: 0,
+      filters: [],
+      runId: runId,
+    },
+    pollInterval: isLive ? 2_000 : undefined,
   });
 
   return {
-    runs: runs,
-    count: 100,
-    loading: runs.loading || isPropertiesLoading,
-    properties,
-    refetch: runs.refetch,
+    tasks,
   };
 };

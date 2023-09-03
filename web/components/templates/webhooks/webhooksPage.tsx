@@ -7,7 +7,7 @@ import ThemedTable from "../../shared/themed/themedTable";
 import { useState } from "react";
 import { Result } from "../../../lib/result";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
-import { getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import ModelPill from "../requestsV2/modelPill";
 import AuthHeader from "../../shared/authHeader";
 import { PlusIcon } from "@heroicons/react/20/solid";
@@ -71,7 +71,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
             ]}
             rows={webhooks?.data?.map((webhook) => {
               return {
-                created_at: getUSDate(webhook.created_at!),
+                created_at: getUSDateFromString(webhook.created_at!),
                 is_verified: webhook.is_verified ? (
                   <span
                     className={`inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20`}

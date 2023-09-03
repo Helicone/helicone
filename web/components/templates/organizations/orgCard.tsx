@@ -17,7 +17,7 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "./createOrgForm";
 
 interface OrgCardProps {
@@ -85,7 +85,7 @@ const OrgCard = (props: OrgCardProps) => {
               <div className="py-3 flex flex-row justify-between">
                 <p className="text-gray-500">Created At</p>
                 <p className="text-gray-700">
-                  {getUSDate(org.created_at as string)}
+                  {getUSDateFromString(org.created_at as string)}
                 </p>
               </div>
             ) : (

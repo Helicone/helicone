@@ -28,6 +28,9 @@ import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "../requestsV2/RequestView";
+import { useRunPage } from "./useRunPage";
+import { HeliconeRun } from "../../../lib/api/graphql/client/graphql";
+import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 
 interface RunsPageProps {
   currentPage: number;
@@ -129,59 +132,13 @@ const RunsPage = (props: RunsPageProps) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  const [timeFilter, setTimeFilter] = useState<FilterNode>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo("24h").toISOString(),
-      },
-    },
-  });
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const router = useRouter();
-
-  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
-
-  const sortLeaf: SortLeafRequest = getSortLeaf(
-    sort.sortKey,
-    sort.sortDirection,
-    sort.isCustomProperty,
-    isCached
-  );
-
-  const {
-    count,
-    isDataLoading,
-    isCountLoading,
-    requests,
-    properties,
-    refetch,
-    filterMap,
-    searchPropertyFilters,
-  } = useRequestsPageV2(
+  const { count, runs, properties, refetch, loading } = useRunPage(
     page,
     currentPageSize,
-    debouncedAdvancedFilter,
-    {
-      left: timeFilter,
-      operator: "and",
-      right: "all",
-    },
-    sortLeaf,
-    isCached,
     isLive
   );
-
-  useEffect(() => {
-    if (router.query.page) {
-      setPage(1);
-      router.replace({
-        pathname: router.pathname,
-        query: { ...router.query, page: 1 },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedAdvancedFilter]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -193,43 +150,13 @@ const RunsPage = (props: RunsPageProps) => {
     refetch();
   };
 
-  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    if (key === "custom") {
-      const [start, end] = value.split("_");
-      const filter: FilterNode = {
-        left: {
-          request: {
-            created_at: {
-              gte: new Date(start).toISOString(),
-            },
-          },
-        },
-        operator: "and",
-        right: {
-          request: {
-            created_at: {
-              lte: new Date(end).toISOString(),
-            },
-          },
-        },
-      };
-      setTimeFilter(filter);
-      return;
-    }
-    setTimeFilter({
-      request: {
-        created_at: {
-          gte: getTimeIntervalAgo(key).toISOString(),
-        },
-      },
-    });
-  };
-
-  const columnsWithProperties = [...getInitialColumns(isCached)].concat(
+  const columnsWithProperties = [...getInitialColumns()].concat(
     properties.map((property) => {
       return {
         accessorFn: (row) =>
-          row.customProperties ? row.customProperties[property] : "",
+          row.properties
+            ? row.properties.find((p) => p?.name === property)?.value
+            : null,
         id: `Custom - ${property}`,
         header: property,
         cell: (info) => info.getValue(),
@@ -266,103 +193,37 @@ const RunsPage = (props: RunsPageProps) => {
             >
               <ArrowPathIcon
                 className={clsx(
-                  isDataLoading ? "animate-spin" : "",
+                  loading ? "animate-spin" : "",
                   "h-5 w-5 inline"
                 )}
               />
             </button>
-            THIS IS IN BETA
+            <i>
+              {"In ~beta~, please use with caution and sorry for any bugs :)"}
+            </i>
           </div>
         }
         actions={
           <>
-            <Switch.Group
-              as="div"
-              className="flex items-center space-x-3 hover:cursor-pointer"
-            >
-              <Switch.Label as="span" className="text-sm">
-                <span className="font-semibold text-gray-700">Live</span>
-              </Switch.Label>
-              <Switch
-                checked={isLive}
-                onChange={setIsLive}
-                className={clsx(
-                  isLive ? "bg-emerald-500" : "bg-gray-200",
-                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                )}
-              >
-                <span className="sr-only">Use setting</span>
-                <span
-                  className={clsx(
-                    isLive ? "translate-x-5" : "translate-x-0",
-                    "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                  )}
-                >
-                  <span
-                    className={clsx(
-                      isLive
-                        ? "opacity-0 duration-100 ease-out"
-                        : "opacity-100 duration-200 ease-in",
-                      "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
-                    )}
-                    aria-hidden="true"
-                  >
-                    <BoltSlashIcon className="h-3 w-3 text-gray-400" />
-                  </span>
-                  <span
-                    className={clsx(
-                      isLive
-                        ? "opacity-100 duration-200 ease-in"
-                        : "opacity-0 duration-100 ease-out",
-                      "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
-                    )}
-                    aria-hidden="true"
-                  >
-                    <BoltIcon className="h-3 w-3 text-emerald-500" />
-                  </span>
-                </span>
-              </Switch>
-            </Switch.Group>
+            <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
           </>
         }
       />
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
-          defaultData={requests || []}
+          defaultData={(runs.data?.heliconeRun || []) as HeliconeRun[]}
           defaultColumns={columnsWithProperties}
           tableKey="requestsColumnVisibility"
-          dataLoading={isDataLoading}
+          dataLoading={loading}
           sortable={sort}
-          advancedFilters={{
-            filterMap: filterMap,
-            filters: advancedFilters,
-            setAdvancedFilters: setAdvancedFilters,
-            searchPropertyFilters: searchPropertyFilters,
-          }}
-          timeFilter={{
-            defaultValue: "24h",
-            onTimeSelectHandler: onTimeSelectHandler,
-          }}
           onRowSelect={(row) => {
-            onRowSelectHandler(row);
-          }}
-          expandedRow={(row) => {
-            return (
-              <div className="flex flex-col space-y-2 border-2 p-2 my-2">
-                <RequestView
-                  request={row}
-                  properties={[]}
-                  open={true}
-                  wFull={true}
-                />
-              </div>
-            );
+            router.push(`/runs/${row.id}`, undefined, { shallow: true });
           }}
         />
         <TableFooter
           currentPage={currentPage}
           pageSize={pageSize}
-          isCountLoading={isCountLoading}
+          isCountLoading={loading}
           count={count || 0}
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}

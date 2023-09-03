@@ -23,7 +23,7 @@ import { CodegenConfig } from "@graphql-codegen/cli";
 const config: CodegenConfig = {
   overwrite: true,
   schema: "http://localhost:3000/api/graphql",
-
+  documents: "./**/*.tsx",
   generates: {
     "lib/api/graphql/schema/types/graphql.tsx": {
       plugins: [
@@ -32,7 +32,6 @@ const config: CodegenConfig = {
         "typescript-react-apollo",
       ],
     },
-    documents: ["src/**/*.tsx"],
 
     "./graphql.schema.json": {
       plugins: ["introspection"],

@@ -1,3 +1,4 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { RunStatus } from "../../../lib/sql/runs";
 
 interface StatusBadgeProps {
@@ -17,8 +18,8 @@ const StatusBadge = (props: StatusBadgeProps) => {
       );
     case "FAILED":
       return (
-        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
-          {`${errorCode} Error`}
+        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+          {`Error`}
         </span>
       );
     case "CANCELLED":
@@ -27,10 +28,11 @@ const StatusBadge = (props: StatusBadgeProps) => {
           {`${errorCode} Cancelled`}
         </span>
       );
-    case "RUNNING":
+    case "PENDING":
       return (
-        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+        <span className="gap-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-blue-600/20">
           Running
+          <ArrowPathIcon className={"animate-spin h-3 w-3 inline"} />
         </span>
       );
     default:

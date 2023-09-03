@@ -11,6 +11,7 @@ import "../styles/index.css";
 
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/shared/layout/organizationContext";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 
 if (
   typeof window !== "undefined" &&
@@ -25,11 +26,21 @@ if (
 
 export default function MyApp({
   Component,
+  router,
   pageProps,
 }: AppProps<{
   initialSession: Session;
 }>) {
   const queryClient = new QueryClient();
+  const apolloClient = new ApolloClient({
+    uri: `/api/graphql`,
+    cache: new InMemoryCache(),
+    credentials: "include",
+    headers: {
+      "use-cookies": "true",
+    },
+  });
+
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
   if (typeof window !== "undefined") {
@@ -42,14 +53,16 @@ export default function MyApp({
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <QueryClientProvider client={queryClient}>
-          <NotificationProvider>
-            <OrgContextProvider>
-              <Component {...pageProps} />
-            </OrgContextProvider>
-            <Notification />
-          </NotificationProvider>
-        </QueryClientProvider>
+        <ApolloProvider client={apolloClient}>
+          <QueryClientProvider client={queryClient}>
+            <NotificationProvider>
+              <OrgContextProvider>
+                <Component {...pageProps} />
+              </OrgContextProvider>
+              <Notification />
+            </NotificationProvider>
+          </QueryClientProvider>
+        </ApolloProvider>
       </SessionContextProvider>
       <Analytics />
     </>

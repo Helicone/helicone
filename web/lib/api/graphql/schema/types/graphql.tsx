@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -6,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -210,3 +212,129 @@ export type ValueFilter = {
   name: Scalars['String']['input'];
   value: TextOperators;
 };
+
+export type FetchRunsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  filters?: InputMaybe<Array<HeliconeRunFilter> | HeliconeRunFilter>;
+}>;
+
+
+export type FetchRunsQuery = { __typename?: 'Query', heliconeRun?: Array<{ __typename?: 'HeliconeRun', id: string, name: string, description?: string | null, status: string, created_at: string, updated_at: string, timeout_seconds: number, task_count: number, request_count: number, properties?: Array<{ __typename?: 'Property', value?: string | null, name?: string | null } | null> | null } | null> | null };
+
+export type FetchTasksQueryVariables = Exact<{
+  heliconeTaskId?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  runId?: InputMaybe<Scalars['String']>;
+  filters?: InputMaybe<Array<HeliconeTaskFilter> | HeliconeTaskFilter>;
+}>;
+
+
+export type FetchTasksQuery = { __typename?: 'Query', heliconeTask?: Array<{ __typename?: 'HeliconeTask', id: string, name: string, description?: string | null, created_at: string, updated_at: string, run_id: string, parent_id?: string | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
+
+
+export const FetchRunsDocument = gql`
+    query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeRunFilter!]) {
+  heliconeRun(filters: $filters, offset: $offset, limit: $limit) {
+    id
+    name
+    description
+    status
+    created_at
+    updated_at
+    timeout_seconds
+    task_count
+    request_count
+    properties {
+      value
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useFetchRunsQuery__
+ *
+ * To run a query within a React component, call `useFetchRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFetchRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFetchRunsQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *      filters: // value for 'filters'
+ *   },
+ * });
+ */
+export function useFetchRunsQuery(baseOptions?: Apollo.QueryHookOptions<FetchRunsQuery, FetchRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FetchRunsQuery, FetchRunsQueryVariables>(FetchRunsDocument, options);
+      }
+export function useFetchRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FetchRunsQuery, FetchRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FetchRunsQuery, FetchRunsQueryVariables>(FetchRunsDocument, options);
+        }
+export type FetchRunsQueryHookResult = ReturnType<typeof useFetchRunsQuery>;
+export type FetchRunsLazyQueryHookResult = ReturnType<typeof useFetchRunsLazyQuery>;
+export type FetchRunsQueryResult = Apollo.QueryResult<FetchRunsQuery, FetchRunsQueryVariables>;
+export const FetchTasksDocument = gql`
+    query FetchTasks($heliconeTaskId: String, $limit: Int, $offset: Int, $runId: String, $filters: [HeliconeTaskFilter!]) {
+  heliconeTask(
+    id: $heliconeTaskId
+    limit: $limit
+    offset: $offset
+    run_id: $runId
+    filters: $filters
+  ) {
+    id
+    name
+    description
+    created_at
+    updated_at
+    run_id
+    parent_id
+    properties {
+      name
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useFetchTasksQuery__
+ *
+ * To run a query within a React component, call `useFetchTasksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFetchTasksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFetchTasksQuery({
+ *   variables: {
+ *      heliconeTaskId: // value for 'heliconeTaskId'
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *      runId: // value for 'runId'
+ *      filters: // value for 'filters'
+ *   },
+ * });
+ */
+export function useFetchTasksQuery(baseOptions?: Apollo.QueryHookOptions<FetchTasksQuery, FetchTasksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FetchTasksQuery, FetchTasksQueryVariables>(FetchTasksDocument, options);
+      }
+export function useFetchTasksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FetchTasksQuery, FetchTasksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FetchTasksQuery, FetchTasksQueryVariables>(FetchTasksDocument, options);
+        }
+export type FetchTasksQueryHookResult = ReturnType<typeof useFetchTasksQuery>;
+export type FetchTasksLazyQueryHookResult = ReturnType<typeof useFetchTasksLazyQuery>;
+export type FetchTasksQueryResult = Apollo.QueryResult<FetchTasksQuery, FetchTasksQueryVariables>;

@@ -235,7 +235,7 @@ const whereKeyMappings: KeyMappings = {
       parent_task: "task.parent_task",
       timeout_seconds: "task.timeout_seconds",
       org_id: "task.org_id",
-      run_id: "task.run_id",
+      run_id: "task.run",
       status: "task.status",
       updated_at: "task.updated_at",
     })(filter);

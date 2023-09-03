@@ -1,9 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { getUSDate } from "../../shared/utils/utils";
+import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import StatusBadge from "./statusBadge";
 import { HeliconeRun } from "../../../lib/api/graphql/schema/types/graphql";
 import ModelPill from "../requestsV2/modelPill";
 import { RocketLaunchIcon } from "@heroicons/react/24/outline";
+import { RunStatus } from "../../../lib/sql/runs";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -22,109 +23,58 @@ function formatNumber(num: number) {
   }
 }
 
-export const getInitialColumns: (
-  isCached?: boolean
-) => ColumnDef<HeliconeRun>[] = (isCached = false) => [
+export const getInitialColumns: () => ColumnDef<HeliconeRun>[] = (
+  isCached = false
+) => [
   {
     accessorKey: "created_at",
     header: "Created At",
     cell: (info) => (
       <span className="text-gray-900 font-medium">
-        {getUSDate(info.getValue() as string)}
+        {getUSDate(new Date(+(info.getValue() as number)))}
       </span>
     ),
-    meta: {
-      sortKey: "created_at",
-    },
+    size: 200,
+  },
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: (info) => info.getValue(),
+    size: 200,
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+    cell: (info) => info.getValue(),
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: (info) => {
-      const { code, statusType } =
-        info.getValue() as NormalizedRequest["status"];
-      return (
-        <StatusBadge
-          statusType={isCached ? "cached" : statusType}
-          errorCode={code}
-        />
-      );
-    },
-    size: 100,
-  },
-  {
-    accessorKey: "requestText",
-    header: "Request",
-    cell: (info) => info.getValue(),
-    meta: {
-      sortKey: "request_prompt",
-    },
-  },
-  {
-    accessorKey: "responseText",
-    header: "Response",
-    cell: (info) => info.getValue(),
+    cell: (info) => (
+      <>
+        <StatusBadge statusType={info.getValue() as RunStatus} />
+      </>
+    ),
     meta: {
       sortKey: "response_text",
     },
   },
   {
-    accessorKey: "model",
-    header: "Model",
-    cell: (info) => <ModelPill model={info.getValue() as string} />,
-    meta: {
-      sortKey: "body_model",
-    },
-    minSize: 200,
+    accessorKey: "timeout_seconds",
+    header: "Timeout",
+    cell: (info) => <span>{Number(info.getValue())}s</span>,
   },
   {
-    accessorKey: "totalTokens",
-    header: "Total Tokens",
+    accessorKey: "task_count",
+    header: "Tasks",
     cell: (info) => info.getValue(),
-    meta: {
-      sortKey: "total_tokens",
-    },
-  },
-  {
-    accessorKey: "promptTokens",
-    header: "Prompt Tokens",
-    cell: (info) => info.getValue(),
-    meta: {
-      sortKey: "prompt_tokens",
-    },
-  },
-  {
-    accessorKey: "completionTokens",
-    header: "Completion Tokens",
-    cell: (info) => info.getValue(),
-    meta: {
-      sortKey: "completion_tokens",
-    },
-    size: 175,
-  },
-  {
-    accessorKey: "latency",
-    header: "Latency",
-    cell: (info) => (
-      <span>{isCached ? 0 : Number(info.getValue()) / 1000}s</span>
-    ),
     meta: {
       sortKey: "latency",
     },
   },
   {
-    accessorKey: "user",
-    header: "User",
-    cell: (info) => info.getValue(),
-    meta: {
-      sortKey: "user_id",
-    },
-  },
-  {
     accessorKey: "cost",
     header: "Cost",
-    cell: (info) => (
-      <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
-    ),
+    cell: (info) => <span>Coming soon</span>,
   },
 ];

@@ -110,15 +110,30 @@ export async function heliconeTask(
   info: any
 ): Promise<HeliconeTask[]> {
   const orgId = await context.getOrgIdOrThrow();
-  const { limit, offset, filters } = {
+  const { limit, offset, filters, runId } = {
     limit: args.limit ?? 100,
     offset: args.offset ?? 0,
     filters: args.filters ?? [],
+    runId: args.run_id ?? undefined,
   };
   const convertedFilters: FilterNode[] = filters.map((f) =>
     convertFilterInputToFilterLeaf(f)
   );
-  const filter = filterListToTree(convertedFilters, "and");
+
+  let filter = filterListToTree(convertedFilters, "and");
+  if (runId !== undefined) {
+    filter = {
+      left: {
+        task: {
+          run_id: {
+            equals: runId,
+          },
+        },
+      },
+      right: filter,
+      operator: "and",
+    };
+  }
 
   const { data, error } = await getTasks(orgId, filter, offset, limit);
 

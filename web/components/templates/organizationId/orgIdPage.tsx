@@ -11,7 +11,7 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
@@ -76,7 +76,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
             <h1 className="text-3xl font-semibold">{org.name}</h1>
             {org.created_at !== null && (
               <p className="text-gray-500 font-light">
-                Created at: {getUSDate(org.created_at)}
+                Created at: {getUSDateFromString(org.created_at)}
               </p>
             )}
           </div>

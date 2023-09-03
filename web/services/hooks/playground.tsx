@@ -1,4 +1,4 @@
-import { getUSDate } from "../../components/shared/utils/utils";
+import { getUSDateFromString } from "../../components/shared/utils/utils";
 import useRequestsPage, {
   PromptResponsePair,
 } from "../../components/templates/requests/useRequestsPage";
@@ -24,7 +24,7 @@ export const usePlaygroundPage = (requestId: string) => {
       label: "Created At",
       value:
         request.requests.data && request.requests.data.length > 0
-          ? getUSDate(request.requests.data[0].requestCreatedAt)
+          ? getUSDateFromString(request.requests.data[0].requestCreatedAt)
           : "",
     },
     {

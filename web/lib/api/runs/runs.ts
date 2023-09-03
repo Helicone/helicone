@@ -29,7 +29,9 @@ export interface HeliconeRun {
   created_at: string;
   updated_at: string;
   timeout_seconds: number;
-  custom_properties: Json;
+  custom_properties: {
+    [key: string]: string;
+  };
 }
 
 export async function getRuns(
