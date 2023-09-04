@@ -67,7 +67,12 @@ export default function OpenSourceMonitoringForOpenAI() {
         alt={""}
         className="w-full"
       />
-      <div className="bg-gray-50 px-6 py-32 lg:px-8 antialiased">
+      <div
+        className="bg-gray-50 px-6 py-32 lg:px-8 antialiased"
+        style={{
+          scrollBehavior: "smooth",
+        }}
+      >
         <div className="mx-auto max-w-3xl text-base leading-7 text-gray-700">
           <div className="flex flex-row divide-x divide-gray-200 gap-4 items-center">
             <div className={clsx("flex items-center space-x-3 bottom-0")}>
@@ -111,38 +116,41 @@ export default function OpenSourceMonitoringForOpenAI() {
           <ul role="list" className="mt-6 max-w-xl space-y-4 text-gray-600">
             <li className="flex gap-x-3">
               -
-              <span>
+              <Link href="#introduction">
                 <strong className="font-semibold text-sky-500">
                   Why Traditional Monitoring Falls Short
                 </strong>
-              </span>
+              </Link>
             </li>
             <li className="flex gap-x-3">
               -
-              <span>
+              <Link href="#about">
                 <strong className="font-semibold text-sky-500">
                   Fully unlock the potential of our OpenAI usage
                 </strong>
-              </span>
+              </Link>
             </li>{" "}
             <li className="flex gap-x-3">
               -
-              <span>
+              <Link href="#features">
                 <strong className="font-semibold text-sky-500">
                   Industry Leading Features purpose-built for LLM&apos;s
                 </strong>
-              </span>
+              </Link>
             </li>{" "}
             <li className="flex gap-x-3">
               -
-              <span>
+              <Link href="#future">
                 <strong className="font-semibold text-sky-500">
                   Trailblazing the Future of development with OpenAI
                 </strong>
-              </span>
+              </Link>
             </li>
           </ul>
-          <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
+          <h2
+            id="introduction"
+            className="pt-20 text-2xl font-bold tracking-tight text-gray-900"
+          >
             Why Traditional Monitoring Falls Short
           </h2>
           <p className="mt-6">
@@ -203,7 +211,10 @@ export default function OpenSourceMonitoringForOpenAI() {
           </div>
 
           {/*  */}
-          <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
+          <h2
+            id="about"
+            className="mt-16 text-2xl font-bold tracking-tight text-gray-900"
+          >
             Fully unlock the potential of our OpenAI usage
           </h2>
           <p className="mt-6">
@@ -261,7 +272,10 @@ export default function OpenSourceMonitoringForOpenAI() {
             with your business goals and performance expectations.
           </p>
           {/*  */}
-          <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
+          <h2
+            id="features"
+            className="mt-16 text-2xl font-bold tracking-tight text-gray-900"
+          >
             Industry Leading Features purpose-built for LLM&apos;s
           </h2>
           <p className="mt-6">
@@ -339,7 +353,10 @@ export default function OpenSourceMonitoringForOpenAI() {
             </figcaption>
           </figure>
           {/*  */}
-          <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
+          <h2
+            id="future"
+            className="mt-16 text-2xl font-bold tracking-tight text-gray-900"
+          >
             Trailblazing the Future of development with OpenAI
           </h2>
           <p className="mt-6">
