@@ -53,7 +53,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
               />
             </Link>
           </div>
-          <div className="hidden md:flex md:gap-x-2 items-center">
+          <div className="hidden md:flex md:gap-x-4 items-center">
             <SolutionsButton />
             <DeveloperButton />
             <Link
@@ -61,6 +61,12 @@ const NavBarV2 = (props: NavBarV2Props) => {
               className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
             >
               Pricing
+            </Link>
+            <Link
+              href="/blog"
+              className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
+            >
+              Blog
             </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-4">

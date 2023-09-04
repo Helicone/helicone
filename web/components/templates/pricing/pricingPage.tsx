@@ -109,7 +109,7 @@ export default function PricingPage() {
               simple
             </span>
           </h1>
-          <p className="mt-6 w-full text-xl leading-8 text-gray-700">
+          <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
             No need to build or maintain expensive infrastructure. Helicone
             makes monitoring Large-Language Models easy.
           </p>
