@@ -42,7 +42,7 @@ export default function OpenSourceMonitoringForOpenAI() {
 
         <meta
           property="og:title"
-          content="Unlocking Efficient OpenAI Monitoring with Helicone"
+          content="The Next Evolution in OpenAI Monitoring and Optimization"
         />
         <meta
           property="og:description"
