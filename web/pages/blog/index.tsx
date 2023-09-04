@@ -1,7 +1,7 @@
 import Footer from "../../components/shared/layout/footer";
 import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
-import BlogPage from "../../components/templates/blog/blogPage";
+import BlogPageV2 from "../../components/templates/blog/blogPageV2";
 
 interface BlogProps {}
 
@@ -11,7 +11,7 @@ const Blog = (props: BlogProps) => {
   return (
     <MetaData title="Blog">
       <NavBarV2 />
-      <BlogPage />
+      <BlogPageV2 />
       <Footer />
     </MetaData>
   );
