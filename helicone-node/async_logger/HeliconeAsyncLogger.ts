@@ -83,7 +83,7 @@ export class HeliconeAsyncLogger {
         error.message
       );
 
-      if (error.isAxiosError && error.response) {
+      if (axios.isAxiosError(error) && error.response) {
         result = error.response;
       } else {
         result = {
