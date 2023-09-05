@@ -41,6 +41,7 @@ export type RequestTableToOperators = {
   auth_hash: SingleKey<TextOperators>;
   org_id: SingleKey<TextOperators>;
   id: SingleKey<TextOperators>;
+  task_id: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;

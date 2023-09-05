@@ -54,6 +54,7 @@ interface ThemedTableV5Props<T> {
   onRowSelect?: (row: T) => void;
   chart?: React.ReactNode;
   expandedRow?: (row: T) => React.ReactNode;
+  hideView?: boolean;
 }
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
@@ -69,6 +70,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     onRowSelect,
     expandedRow,
     chart,
+    hideView,
   } = props;
 
   const router = useRouter();
@@ -116,11 +118,15 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
               }
             : undefined
         }
-        columnsFilter={{
-          columns: table.getAllColumns(),
-          onSelectAll: table.toggleAllColumnsVisible,
-          visibleColumns: table.getVisibleLeafColumns().length,
-        }}
+        columnsFilter={
+          hideView
+            ? undefined
+            : {
+                columns: table.getAllColumns(),
+                onSelectAll: table.toggleAllColumnsVisible,
+                visibleColumns: table.getVisibleLeafColumns().length,
+              }
+        }
         timeFilter={
           timeFilter
             ? {

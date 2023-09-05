@@ -4,7 +4,7 @@ import { gql } from "../../lib/api/graphql/client";
 import { HeliconeRunFilter } from "../../lib/api/graphql/schema/types/graphql";
 import { SortLeafRun } from "../lib/sorts/requests/sorts";
 
-const GET_RUNS = gql(/* GraphQL */ `
+export const GET_RUNS = gql(/* GraphQL */ `
   query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeRunFilter!]) {
     heliconeRun(filters: $filters, offset: $offset, limit: $limit) {
       id

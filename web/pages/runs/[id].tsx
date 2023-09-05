@@ -14,7 +14,7 @@ import {
   SortLeafRequest,
 } from "../../services/lib/sorts/requests/sorts";
 import RunsPage from "../../components/templates/runs/runsPage";
-import SingleRunPage from "../../components/templates/runs/singleRunsPage";
+import SingleRunPage from "../../components/templates/runs/single/singleRunsPage";
 
 interface SingleRunPageProps {
   user: User;

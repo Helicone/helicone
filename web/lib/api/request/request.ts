@@ -47,6 +47,7 @@ export interface HeliconeRequest {
   prompt_tokens: number | null;
   completion_tokens: number | null;
   provider: Provider;
+  task_id: string | null;
 }
 
 export async function getRequestsCached(
@@ -87,6 +88,7 @@ export async function getRequestsCached(
     response.prompt_tokens as prompt_tokens,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
+    request.task_id as task_id,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM cache_hits
@@ -185,6 +187,7 @@ export async function getRequests(
     response.prompt_tokens as prompt_tokens,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
+    request.task_id as task_id,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM request

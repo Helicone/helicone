@@ -127,6 +127,7 @@ const whereKeyMappings: KeyMappings = {
     auth_hash: "request.auth_hash",
     org_id: "request.helicone_org_id",
     id: "request.id",
+    task_id: "request.task_id",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
