@@ -90,6 +90,10 @@ export class RequestWrapper {
     return { data: requestWrapper, error: null };
   }
 
+  getTaskId(): string | null {
+    return this.heliconeHeaders.taskId;
+  }
+
   async getText(): Promise<string> {
     if (this.cachedText) {
       return this.cachedText;

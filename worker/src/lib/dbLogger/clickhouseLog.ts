@@ -91,6 +91,8 @@ export async function logInClickhouse(
         status: response.status ?? null,
         organization_id:
           request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+        run_id: request.run_id ?? null,
+        task_id: request.task_id ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(

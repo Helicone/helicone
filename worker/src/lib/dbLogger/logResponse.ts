@@ -145,6 +145,17 @@ export async function logRequest(
         truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
+    const runId = request.taskId
+      ? await dbClient
+          .from("task")
+          .select("*")
+          .eq("id", request.taskId)
+          .single()
+      : null;
+    if (runId && runId.error) {
+      return { data: null, error: `No task found for id ${request.taskId}` };
+    }
+
     const createdAt = new Date().toISOString();
     const requestData = {
       id: request.requestId,
@@ -162,6 +173,8 @@ export async function logRequest(
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       created_at: createdAt,
+      task_id: request.taskId,
+      run_id: runId?.data.run ?? null,
     };
 
     const customPropertyRows = Object.entries(request.properties).map(

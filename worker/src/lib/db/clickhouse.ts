@@ -285,7 +285,10 @@ interface ResponseCopyV2 {
   organization_id: string;
 }
 
-type ResponseCopyV3 = ResponseCopyV2;
+interface ResponseCopyV3 extends ResponseCopyV2 {
+  task_id: Nullable<string>;
+  run_id: Nullable<string>;
+}
 
 interface PropertiesCopyV1 {
   id: number;
