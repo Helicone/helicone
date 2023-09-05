@@ -3,8 +3,7 @@ import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
-import { insertProviderInClickHouse } from "./lib/dbLogger/clickhouseLog";
-import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
+import { FeedbackInsertQueue } from "./lib/dbLogger/feedbackInsertQueue";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
@@ -70,12 +69,21 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     });
   }
 
-  await insertProviderInClickHouse(
-    new ClickhouseClientWrapper(env),
-    requestData,
-    responseData,
-    feedbackData
-  );
+  const feedbackQueue = new FeedbackInsertQueue(env.FEEDBACK_INSERT_QUEUE);
+  const enqueueResponse = await feedbackQueue.addFeedback(feedbackData);
+
+  if (enqueueResponse.error) {
+    return new Response(`Error enqueuing feedback: ${enqueueResponse.error}`, {
+      status: 500,
+    });
+  }
+
+  // await insertProviderInClickHouse(
+  //   new ClickhouseClientWrapper(env),
+  //   requestData,
+  //   responseData,
+  //   feedbackData
+  // );
 
   return new Response(
     JSON.stringify({

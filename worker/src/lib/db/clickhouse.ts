@@ -60,11 +60,11 @@ export class ClickhouseClientWrapper {
       });
 
       return { data: commandResult.query_id, error: null };
-    } catch (err) {
-      console.error("dbUpdateClickhouseError", err);
+    } catch (error: any) {
+      console.error("dbUpdateClickhouseError", error);
       return {
         data: null,
-        error: JSON.stringify(err),
+        error: JSON.stringify(error),
       };
     }
   }
