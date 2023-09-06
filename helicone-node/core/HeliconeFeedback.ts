@@ -1,11 +1,16 @@
 import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
 
+export enum HeliconeFeedbackRating {
+  Positive = "positive",
+  Negative = "negative",
+}
+
 export class HeliconeFeedback {
   static async logFeedback(
     heliconeConfiguration: IHeliconeConfiguration,
     heliconeId: string,
     rating: boolean
-  ) {
+  ): Promise<void> {
     const options = {
       method: "POST",
       headers: {

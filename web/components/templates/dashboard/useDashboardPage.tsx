@@ -147,7 +147,7 @@ export const useDashboardPage = ({
     }),
     feedback: useBackendMetricCall<Result<FeedbackOverTime[], string>>({
       params,
-      endpoint: "/api/metrics/feedbackOverTime", // Keep this endpoint as is
+      endpoint: "/api/metrics/feedbackOverTime",
       key: "feedbackOverTime",
       postProcess: (data) => {
         return resultMap(data, (d) =>

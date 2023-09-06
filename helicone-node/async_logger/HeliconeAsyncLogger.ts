@@ -62,7 +62,7 @@ export class HeliconeAsyncLogger {
 
     const basePath = this.heliconeConfiguration.getBaseUrl();
     if (!basePath) {
-      console.error("Helicone base URL not set");
+      console.error("Failed to log to Helicone: Base path is undefined");
       return;
     }
 
@@ -74,7 +74,7 @@ export class HeliconeAsyncLogger {
     } else if (provider == Provider.ANTHROPIC) {
       options.url = `${basePath}/anthropic/v1/log`;
     } else {
-      console.error("Provider not supported");
+      console.error("Failed to log to Helicone: Provider not supported");
       return;
     }
 

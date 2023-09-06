@@ -1,13 +1,6 @@
 import { OpenAIApi } from "openai";
 import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
-import { HeliconeFeedback } from "./HeliconeFeedback";
-
-export enum HeliconeFeedbackRating {
-  Positive = "positive",
-  Negative = "negative",
-}
-
-export const HELICONE_ID_HEADER = "helicone-id";
+import { HeliconeFeedback, HeliconeFeedbackRating } from "./HeliconeFeedback";
 
 export class HeliconeOpenAIApi extends OpenAIApi {
   protected heliconeConfiguration: IHeliconeConfiguration;

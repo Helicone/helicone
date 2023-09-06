@@ -136,7 +136,7 @@ export const getInitialColumns: (
       const rating = feedback?.rating;
 
       if (rating === null) {
-        return <span className="text-gray-500">No Feedback</span>;
+        return <span className="text-gray-500"></span>;
       }
 
       return (

@@ -139,24 +139,6 @@ interface PropertyWithResponseV1 {
   property_value: string;
 }
 
-interface ProviderLog {
-  response_id: Nullable<string>;
-  response_created_at: Nullable<string>;
-  latency: Nullable<number>;
-  status: Nullable<number>;
-  completion_tokens: Nullable<number>;
-  prompt_tokens: Nullable<number>;
-  model: Nullable<string>;
-  request_id: string;
-  request_created_at: string;
-  auth_hash: string;
-  user_id: Nullable<string>;
-  organization_id: string;
-  feedback_created_at: Nullable<string>;
-  feedback_id: Nullable<number>;
-  rating: Nullable<boolean>;
-}
-
 export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
@@ -165,6 +147,5 @@ export interface ClickhouseDB {
     properties_copy_v2: PropertiesCopyV2;
     response_copy_v3: ResponseCopyV3;
     property_with_response_v1: PropertyWithResponseV1;
-    provider_log: ProviderLog;
   };
 }

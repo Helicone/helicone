@@ -90,7 +90,7 @@ export async function getXOverTime<T>(
     },
     operator: "and",
   };
-  let filter: FilterNode = {
+  const filter: FilterNode = {
     left: timeFilterNode,
     right: userFilter,
     operator: "and",
