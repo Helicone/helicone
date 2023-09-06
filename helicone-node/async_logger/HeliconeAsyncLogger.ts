@@ -50,7 +50,7 @@ export class HeliconeAsyncLogger {
   async log(
     asyncLogModel: HeliconeAyncLogRequest,
     provider: Provider
-  ): Promise<AxiosResponse<any, any>> {
+  ): Promise<AxiosResponse<any, any> | undefined> {
     const options: AxiosRequestConfig = {
       method: "POST",
       data: asyncLogModel,
@@ -61,7 +61,10 @@ export class HeliconeAsyncLogger {
     };
 
     const basePath = this.heliconeConfiguration.getBaseUrl();
-    if (!basePath) throw new Error("Base path not set");
+    if (!basePath) {
+      console.error("Helicone base URL not set");
+      return;
+    }
 
     // Set Helicone URL
     if (provider == Provider.OPENAI) {
@@ -71,7 +74,8 @@ export class HeliconeAsyncLogger {
     } else if (provider == Provider.ANTHROPIC) {
       options.url = `${basePath}/anthropic/v1/log`;
     } else {
-      throw new Error("Invalid provider");
+      console.error("Provider not supported");
+      return;
     }
 
     let result: AxiosResponse<any, any>;
