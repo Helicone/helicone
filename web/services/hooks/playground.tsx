@@ -1,11 +1,7 @@
-import { getUSDate } from "../../components/shared/utils/utils";
-import useRequestsPage, {
-  PromptResponsePair,
-} from "../../components/templates/requests/useRequestsPage";
-import { Json } from "../../supabase/database.types";
+import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
 
 export const usePlaygroundPage = (requestId: string) => {
-  const request = useRequestsPage(
+  const requests = useRequestsPageV2(
     1,
     1,
     [],
@@ -16,95 +12,45 @@ export const usePlaygroundPage = (requestId: string) => {
         },
       },
     },
-    {}
+    {},
+    false,
+    false
   );
 
-  const dataWithLabels = [
-    {
-      label: "Created At",
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? getUSDate(request.requests.data[0].requestCreatedAt)
-          : "",
-    },
-    {
-      label: "User ID",
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? request.requests.data[0].userId
-          : "",
-    },
-    {
-      label: "Duration",
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? `${request.requests.data[0].latency}s`
-          : "",
-    },
-    {
-      label: "Model",
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? request.requests.data[0].model
-          : "",
-    },
-    {
-      label: "Tokens",
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? request.requests.data[0].totalTokens
-          : "",
-    },
-    {
-      label: "Log Probability",
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? request.requests.data[0].logProbs
-          : "",
-    },
-  ];
+  let isChat = false;
 
-  const properties = request.properties;
+  const getChat = () => {
+    if (!requests.requests || requests.requests.length < 1) {
+      return [];
+    }
 
-  properties.forEach((property) => {
-    dataWithLabels.push({
-      label: property,
-      value:
-        request.requests.data && request.requests.data.length > 0
-          ? (request.requests.data[0][property] as string)
-          : "",
-    });
-  });
+    const sourceChat = JSON.parse(
+      JSON.stringify(requests.requests[0].requestBody)
+    );
 
-  // Get the chat from the request
-  const sourceChat =
-    request.requests.data &&
-    request.requests.data.length > 0 &&
-    request.requests.data[0].api &&
-    "chat" in request.requests.data[0].api
-      ? request.requests.data[0].api.chat.request
-      : [];
+    const sourceResponse = JSON.parse(
+      JSON.stringify(requests.requests[0].responseBody)
+    );
 
-  const sourceResponse =
-    request.requests.data &&
-    request.requests.data.length > 0 &&
-    request.requests.data[0].api &&
-    "chat" in request.requests.data[0].api
-      ? request.requests.data[0].api.chat.response
-      : "";
+    const sourcePrompt = [
+      ...sourceChat.messages,
+      sourceResponse.choices[0].message,
+    ];
 
-  const chat =
-    sourceChat && sourceResponse ? [...sourceChat, sourceResponse] : [];
+    if (sourcePrompt.length > 1) {
+      isChat = true;
+    }
+
+    return sourcePrompt;
+  };
+
+  const chat = getChat();
 
   return {
-    isLoading: request.requests.isLoading,
-    data: dataWithLabels,
+    isLoading: requests.isDataLoading,
+    data: requests.requests,
     chat,
-    hasData: request.requests.data && request.requests.data.length > 0,
-    isChat:
-      (request.requests.data &&
-        request.requests.data.length > 0 &&
-        "chat" in request.requests.data[0].api) ||
-      false,
+    hasData: requests.requests && requests.requests.length > 0,
+    isChat,
   };
 };

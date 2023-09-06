@@ -30,10 +30,11 @@ export default async function handler(
     return;
   }
 
+  console.log(process.env.OPENAI_API_KEY, process.env.TEST_HELICONE_API_KEY);
+
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
     basePath: "https://oai.hconeai.com/v1",
-
     baseOptions: {
       headers: {
         "OpenAI-Organization": "",

@@ -73,7 +73,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   }, [text]);
 
   return (
-    <ul className="w-full border border-gray-300 rounded-lg pb-[5.75rem]">
+    <ul className="w-full border border-gray-300 rounded-lg">
       {currentChat.map((c, i) => {
         const slice = currentChat.slice(0, i + 1);
 
@@ -96,16 +96,23 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       })}
       {isLoading && (
-        <li className="flex flex-row justify-between px-4 py-6">
-          <p>thinking...</p>
+        <li className="flex flex-row px-4 py-6 gap-4">
+          <Image
+            src={"/assets/chatGPT.png"}
+            className="h-6 w-6 rounded-md"
+            height={30}
+            width={30}
+            alt="ChatGPT Logo"
+          />
+          <p>...</p>
         </li>
       )}
-      <li className="w-full flex absolute bottom-0 mb-4 items-center">
+      <li className="w-full flex my-4 items-center">
         <div className="flex bg-white rounded-xl shadow-xl items-center mx-auto w-[90%] p-1.5">
           <textarea
             ref={textareaRef}
             rows={1}
-            className="flex-1 max-h-96 resize-none whitespace-pre-wrap rounded-l-lg overflow-auto leading-7 border-none text-gray-900 focus:outline-none focus:ring-0"
+            className="flex-1 resize-none whitespace-pre-wrap rounded-l-lg overflow-auto leading-7 border-none text-gray-900 focus:outline-none focus:ring-0"
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyPress={(e) => {
