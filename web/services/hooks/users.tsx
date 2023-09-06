@@ -1,6 +1,5 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { Column } from "../../components/ThemedTableV2";
 
 import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
