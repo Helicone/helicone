@@ -7,23 +7,31 @@ export enum HeliconeFeedbackRating {
   Negative = "negative",
 }
 
+export const HELICONE_ID_HEADER = "helicone-id";
+
 export class HeliconeOpenAIApi extends OpenAIApi {
   protected heliconeConfiguration: IHeliconeConfiguration;
+  public helicone: Helicone;
 
   constructor(heliconeConfiguration: IHeliconeConfiguration) {
     super(heliconeConfiguration);
     this.heliconeConfiguration = heliconeConfiguration;
+    this.helicone = new Helicone(heliconeConfiguration);
   }
+}
 
-  public helicone = {
-    logFeedback: async (heliconeId: string, rating: HeliconeFeedbackRating) => {
-      const ratingAsBool = rating === HeliconeFeedbackRating.Positive;
+class Helicone {
+  public heliconeIdHeader = "helicone-id";
 
-      HeliconeFeedback.logFeedback(
-        this.heliconeConfiguration,
-        heliconeId,
-        ratingAsBool
-      );
-    },
-  };
+  constructor(private heliconeConfiguration: IHeliconeConfiguration) {}
+
+  public async logFeedback(heliconeId: string, rating: HeliconeFeedbackRating) {
+    const ratingAsBool = rating === HeliconeFeedbackRating.Positive;
+
+    HeliconeFeedback.logFeedback(
+      this.heliconeConfiguration,
+      heliconeId,
+      ratingAsBool
+    );
+  }
 }
