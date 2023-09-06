@@ -5,7 +5,7 @@ import {
 import {
   FeedbackOverTime,
   getFeedbackOverTime,
-} from "../../../lib/api/metrics/getPositiveFeedbackOverTime";
+} from "../../../lib/api/metrics/getFeedbackOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 

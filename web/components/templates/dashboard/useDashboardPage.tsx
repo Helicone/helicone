@@ -25,7 +25,7 @@ import {
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
-import { FeedbackOverTime } from "../../../lib/api/metrics/getPositiveFeedbackOverTime";
+import { FeedbackOverTime } from "../../../lib/api/metrics/getFeedbackOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -145,13 +145,17 @@ export const useDashboardPage = ({
         );
       },
     }),
-    positiveFeedback: useBackendMetricCall<Result<FeedbackOverTime[], string>>({
+    feedback: useBackendMetricCall<Result<FeedbackOverTime[], string>>({
       params,
-      endpoint: "/api/metrics/feedbackOverTime",
+      endpoint: "/api/metrics/feedbackOverTime", // Keep this endpoint as is
       key: "feedbackOverTime",
       postProcess: (data) => {
         return resultMap(data, (d) =>
-          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+          d.map((d) => ({
+            time: new Date(d.time),
+            positiveCount: +d.positiveCount,
+            negativeCount: +d.negativeCount,
+          }))
         );
       },
     }),
