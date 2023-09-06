@@ -42,6 +42,15 @@ export type RequestTableToOperators = {
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
 
+export type FeedbackTableToOperators = {
+  id: SingleKey<NumberOperators>;
+  created_at: SingleKey<TimestampOperators>;
+  rating: SingleKey<BooleanOperators>;
+  response_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafFeedback = SingleKey<FeedbackTableToOperators>;
+
 export type PropertiesTableToOperators = {
   auth_hash: SingleKey<TextOperators>;
   key: SingleKey<TextOperators>;
@@ -132,6 +141,7 @@ export type TablesAndViews = {
   user_api_keys: FilterLeafUserApiKeys;
   response: FilterLeafResponse;
   request: FilterLeafRequest;
+  feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
   properties: {
     [key: string]: SingleKey<TextOperators>;

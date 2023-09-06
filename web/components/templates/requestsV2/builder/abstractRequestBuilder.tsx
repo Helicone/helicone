@@ -23,6 +23,11 @@ type CommonFields = {
   responseBody: JSON;
   cost: number | null;
   model: string;
+  feedback: {
+    createdAt: string | null;
+    id: number | null;
+    rating: boolean | null;
+  };
 };
 
 export type NormalizedRequest = CommonFields & {
@@ -73,6 +78,11 @@ abstract class AbstractRequestBuilder {
       status: {
         statusType: this.getStatusType(),
         code: this.response.response_status,
+      },
+      feedback: {
+        createdAt: this.response.feedback_created_at ?? null,
+        id: this.response.feedback_id ?? null,
+        rating: this.response.feedback_rating ?? null,
       },
     };
   }

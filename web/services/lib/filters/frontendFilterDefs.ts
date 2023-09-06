@@ -80,11 +80,6 @@ const booleanOperators: Operator<keyof BooleanOperators>[] = [
     label: "=",
     type: "bool",
   },
-  {
-    value: "equals",
-    label: "=",
-    type: "bool",
-  },
 ];
 
 const timestampOperators: Operator<keyof TimestampOperators>[] = [
@@ -158,7 +153,8 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
-  SingleFilterDef<"response">
+  SingleFilterDef<"response">,
+  SingleFilterDef<"feedback">
 ] = [
   {
     label: "Request",
@@ -201,6 +197,13 @@ export const REQUEST_TABLE_FILTERS: [
     category: "response",
     table: "response",
     column: "status",
+  },
+  {
+    label: "Feedback",
+    operators: booleanOperators,
+    table: "feedback",
+    column: "rating",
+    category: "feedback",
   },
 ];
 

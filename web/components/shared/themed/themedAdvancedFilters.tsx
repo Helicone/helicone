@@ -1,14 +1,5 @@
-import { Listbox, Popover, Transition } from "@headlessui/react";
-import { PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Dispatch, SetStateAction } from "react";
 import { Result } from "../../../lib/result";
 import {
   ColumnType,
@@ -97,7 +88,6 @@ function AdvancedFilterInput({
   inputParams?: string[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
-  const router = useRouter();
   // if any of the inputs below are changed, we want to set the page number back to 1
   switch (type) {
     case "text":
@@ -193,11 +183,21 @@ function AdvancedFilterRow({
         })}
         selectedValue={filter.filterMapIdx}
         onSelect={(selected) => {
-          setFilter({
-            filterMapIdx: selected,
-            operatorIdx: 0,
-            value: "",
-          });
+          const label = filterMap[selected].label;
+          if (label === "Feedback") {
+            // feedback idx
+            setFilter({
+              filterMapIdx: selected,
+              operatorIdx: 0,
+              value: "1",
+            });
+          } else {
+            setFilter({
+              filterMapIdx: selected,
+              operatorIdx: 0,
+              value: "",
+            });
+          }
         }}
         className="w-full lg:w-fit min-w-[150px]"
       />

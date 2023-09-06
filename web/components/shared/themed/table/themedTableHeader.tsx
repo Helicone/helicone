@@ -1,11 +1,6 @@
-import {
-  BoltIcon,
-  FunnelIcon,
-  ViewColumnsIcon,
-} from "@heroicons/react/24/outline";
+import { FunnelIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -15,7 +10,6 @@ import { ThemedPill } from "../themedPill";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
-import { Toggle } from "../themedToggle";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import useNotification from "../../notification/useNotification";
 
