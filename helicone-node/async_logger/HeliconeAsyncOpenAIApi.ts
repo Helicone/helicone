@@ -95,7 +95,7 @@ export class HeliconeAsyncOpenAIApi extends HeliconeOpenAIApi {
         throw new Error("Base path is undefined");
 
       const providerRequest: ProviderRequest = {
-        url: this.heliconeConfiguration.getBaseUrl(),
+        url: this.heliconeConfiguration.getBaseUrl().toString(),
         json: args[0] as [key: string],
         meta: this.heliconeConfiguration.getHeliconeHeaders(),
       };
