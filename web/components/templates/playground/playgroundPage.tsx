@@ -81,18 +81,20 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         ) : hasData && isChat && singleRequest !== null ? (
           <>
-            <div className="col-span-8 lg:col-span-8 order-3 lg:order-2 relative">
+            <div className="col-span-8">
               {isLoading ? (
                 <div className="w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
               ) : (
-                <div className="flex flex-row gap-8">
-                  <ChatPlayground
-                    requestId={requestId || ""}
-                    chat={chat}
-                    model={model}
-                    temperature={temperature}
-                  />
-                  <div className="flex flex-col space-y-8 w-full max-w-[15rem]">
+                <div className="flex flex-col sm:flex-row gap-8">
+                  <div className="order-2 sm:order-1 flex w-full">
+                    <ChatPlayground
+                      requestId={requestId || ""}
+                      chat={chat}
+                      model={model}
+                      temperature={temperature}
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-8 w-full sm:max-w-[15rem] order-1 sm:order-2">
                     <div className="flex flex-col space-y-2 w-full">
                       <p className="font-semibold text-sm text-gray-900">
                         Model:
