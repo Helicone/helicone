@@ -32,8 +32,8 @@ queue = "feedback-insert-queue-dev"
 [[queues.consumers]]
 queue = "feedback-insert-queue-dev"
 max_batch_size = 100
-max_batch_timeout = 5
-max_retries = 3
+max_batch_timeout = 30
+max_retries = 0
 
 [env.production]
 name = "helicone-worker-prod"
@@ -53,7 +53,7 @@ queues.producers = [
 ]
 
 queues.consumers = [
-	{ queue = "feedback-insert-queue-prod", max_batch_size = 100, max_batch_timeout = 5, max_retries = 3 }
+	{ queue = "feedback-insert-queue-prod", max_batch_size = 100, max_batch_timeout = 30, max_retries = 0 }
 ]
 
 [env.production.vars]
@@ -81,7 +81,7 @@ queues.producers = [
 ]
 
 queues.consumers = [
-	{ queue = "feedback-insert-queue-staging", max_batch_size = 100, max_batch_timeout = 5, max_retries = 3 }
+	{ queue = "feedback-insert-queue-staging", max_batch_size = 100, max_batch_timeout = 30, max_retries = 0 }
 ]
 
 [env.production_staging.vars]
