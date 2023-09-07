@@ -17,7 +17,7 @@ export class FeedbackInsertQueue {
     feedbackData: Database["public"]["Tables"]["feedback"]["Row"]
   ): Promise<Result<null, string>> {
     try {
-      await this.feedbackInsertQueue.send({ feedback: feedbackData }, {});
+      await this.feedbackInsertQueue.send({ feedback: feedbackData });
     } catch (error: any) {
       console.log(`Error sending feedback to queue: ${error.message}`);
       return { data: null, error: error.message };

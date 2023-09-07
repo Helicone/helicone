@@ -15,6 +15,18 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   const heliconeId = body["helicone-id"];
   const rating = body["rating"];
 
+  const guidRegex =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  if (!guidRegex.test(heliconeId)) {
+    return new Response("Invalid helicone-id format.", { status: 400 });
+  }
+
+  if (typeof rating !== "boolean") {
+    return new Response("Invalid rating format. Expected a boolean.", {
+      status: 400,
+    });
+  }
+
   const heliconeAuth = request.heliconeHeaders.heliconeAuth;
   if (!heliconeAuth) {
     return new Response("Authentication required.", { status: 401 });
