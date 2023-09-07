@@ -41,7 +41,6 @@ interface UsagePageProps {
 const UsagePage = (props: UsagePageProps) => {
   const { org } = props;
   const { setNotification } = useNotification();
-  const user = useUser();
 
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
 
@@ -56,8 +55,6 @@ const UsagePage = (props: UsagePageProps) => {
   const [open, setOpen] = useState(false);
 
   const { isLoading, userSettings } = useUserSettings(org.owner || "");
-
-  console.log("userSettings", userSettings);
 
   const {
     count,
