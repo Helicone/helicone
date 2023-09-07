@@ -11,20 +11,26 @@ import {
   getOrCreateUserSettings,
   UserSettingsResponse,
 } from "./api/user_settings";
+import { useOrg } from "../components/shared/layout/organizationContext";
 
 interface UsageProps {
   user: User;
-  userSettings: UserSettingsResponse;
 }
 
 const Usage = (props: UsageProps) => {
   const { user } = props;
 
+  const org = useOrg();
+
   return (
     <MetaData title="Usage">
       <AuthLayout user={user}>
         <AuthHeader title={"Usage"} />
-        <UsagePage user={user} />
+        {!org?.currentOrg ? (
+          <h1>Loading...</h1>
+        ) : (
+          <UsagePage org={org?.currentOrg!} />
+        )}
       </AuthLayout>
     </MetaData>
   );
