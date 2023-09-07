@@ -48,6 +48,18 @@ const SingleRunPage = (props: SingleRunsPageProps) => {
 
   // const router = useRouter();
   const { tasks, run } = useSingleRunPage(runId ?? "", isLive);
+  const [open, setOpen] = useState(false);
+  const { requests, properties } = useRequestsPageV2(
+    1,
+    25,
+    [],
+    "all",
+    {
+      created_at: "desc",
+    },
+    false,
+    false
+  );
 
   return (
     <div>
@@ -81,6 +93,20 @@ const SingleRunPage = (props: SingleRunsPageProps) => {
             <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
           </>
         }
+      />
+      <button
+        onClick={() => {
+          setOpen(true);
+        }}
+        className="absolute right-0 top-0 m-2"
+      >
+        OPENZ
+      </button>
+      <RequestDrawerV2
+        open={open}
+        setOpen={setOpen}
+        request={requests?.[0]}
+        properties={[]}
       />
 
       <Flow

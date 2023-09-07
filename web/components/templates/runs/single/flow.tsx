@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, memo } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -20,6 +20,8 @@ import { HeliconeTask } from "../../../../lib/api/graphql/client/graphql";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import FlowButton from "./buttons";
 import TaskDirectory from "./taskDirectory";
+import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
+import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
 
 const nodeTypes = {
   custom: TaskNode,
@@ -173,4 +175,4 @@ function Flow(props: FlowProps) {
   );
 }
 
-export default Flow;
+export default memo(Flow);

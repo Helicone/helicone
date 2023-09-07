@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Handle, useReactFlow, useStoreApi, Position } from "reactflow";
 import { HeliconeTask } from "../../../../lib/api/graphql/client/graphql";
 import { useGetRequests } from "../../../../services/hooks/requests";
@@ -35,8 +35,9 @@ function TaskNodeInner({ task }: { task: HeliconeTask }) {
   >(undefined);
 
   const onRowSelectHandler = (row: NormalizedRequest) => {
-    setSelectedData(row);
     setOpen(true);
+
+    setSelectedData(row);
   };
 
   return (

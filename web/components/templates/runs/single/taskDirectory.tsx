@@ -59,6 +59,7 @@ const RenderTask = (props: {
   setFilteredNodes: (nodes: string[]) => void;
   childrenHidden?: boolean;
 }) => {
+  const { fitView } = useReactFlow();
   const {
     task,
     level = 0,
@@ -140,12 +141,6 @@ const TaskDirectory: React.FC<TreeViewProps> = ({
 }) => {
   const store = useStoreApi();
   const { setCenter, fitView } = useReactFlow();
-
-  useEffect(() => {
-    setTimeout(() => {
-      fitView();
-    }, 100);
-  }, [tasks, filteredNodes, fitView]);
 
   const focusNode = (nodeId: string) => {
     const { nodeInternals } = store.getState();
