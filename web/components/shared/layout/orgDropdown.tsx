@@ -23,19 +23,12 @@ import useNotification from "../notification/useNotification";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import AddMemberModal from "../../templates/organizationId/addMemberModal";
 
-interface OrgDropdownProps {
-  userSettings: {
-    created_at: string | null;
-    request_limit: number;
-    tier: string;
-    user: string;
-  } | null;
-}
+interface OrgDropdownProps {}
 
 export default function OrgDropdown(props: OrgDropdownProps) {
-  const { userSettings } = props;
   const orgContext = useOrg();
   const user = useUser();
+  const { userSettings } = useUserSettings(user?.id || "");
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
