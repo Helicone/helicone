@@ -10,7 +10,7 @@ import {
   LightBulbIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
@@ -32,13 +32,14 @@ import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import RenderOrgUsage from "./renderOrgUsage";
+import { Database } from "../../../supabase/database.types";
 
 interface UsagePageProps {
-  user: User;
+  org: Database["public"]["Tables"]["organization"]["Row"];
 }
 
 const UsagePage = (props: UsagePageProps) => {
-  const { user } = props;
+  const { org } = props;
   const { setNotification } = useNotification();
 
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
@@ -53,18 +54,21 @@ const UsagePage = (props: UsagePageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const { isLoading, userSettings } = useUserSettings(user.id);
+  const { isLoading, userSettings } = useUserSettings(org.owner || "");
+
   const {
     count,
     isLoading: isCountLoading,
     refetch,
-  } = useGetRequestCountClickhouse(startOfMonthFormatted, endOfMonthFormatted);
+  } = useGetRequestCountClickhouse(
+    startOfMonthFormatted,
+    endOfMonthFormatted,
+    org.id
+  );
 
   useEffect(() => {
     refetch();
   }, [currentMonth, refetch]);
-
-  const orgContext = useOrg();
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -94,13 +98,7 @@ const UsagePage = (props: UsagePageProps) => {
   };
 
   const renderInfo = () => {
-    if (!userSettings) {
-      return (
-        <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
-          <p>Had an issue getting your user settings</p>
-        </div>
-      );
-    } else if (userSettings.tier === "free") {
+    if (userSettings?.tier === "free") {
       return (
         <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
           <div className="flex flex-row gap-2 w-full h-4">
@@ -126,7 +124,7 @@ const UsagePage = (props: UsagePageProps) => {
           </div>
         </div>
       );
-    } else if (orgContext?.currentOrg !== undefined) {
+    } else if (org !== undefined) {
       return (
         <RenderOrgUsage
           currentMonth={currentMonth}

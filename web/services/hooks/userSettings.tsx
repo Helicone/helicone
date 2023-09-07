@@ -4,6 +4,7 @@ import { Database } from "../../supabase/database.types";
 
 const useUserSettings = (userId: string) => {
   const client = useSupabaseClient();
+
   const { data, error, refetch, isLoading } = useQuery({
     queryKey: ["userSettings", userId],
     queryFn: async (query) => {
