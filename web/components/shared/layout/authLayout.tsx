@@ -58,9 +58,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
+
   const { userSettings, isLoading } = useUserSettings(
     org?.currentOrg.owner || ""
   );
+
   const [open, setOpen] = useState(false);
   const { hasFlag } = useFeatureFlags(org?.currentOrg.id || "", "webhook_beta");
   const isVaultFlag = process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "";
@@ -332,7 +334,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
                   <div className="flex flex-col">
-                    <OrgDropdown userSettings={userSettings} />
+                    <OrgDropdown />
                   </div>
                 </div>
                 <div className="mt-1 flex flex-grow flex-col">
