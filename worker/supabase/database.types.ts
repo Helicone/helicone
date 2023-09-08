@@ -101,19 +101,19 @@ export interface Database {
       feedback: {
         Row: {
           created_at: string
-          id: number
+          id: string
           rating: boolean
           response_id: string
         }
         Insert: {
           created_at?: string
-          id?: number
+          id?: string
           rating: boolean
           response_id: string
         }
         Update: {
           created_at?: string
-          id?: number
+          id?: string
           rating?: boolean
           response_id?: string
         }

@@ -32,7 +32,7 @@ queue = "feedback-insert-queue-dev"
 [[queues.consumers]]
 queue = "feedback-insert-queue-dev"
 max_batch_size = 100
-max_batch_timeout = 30
+max_batch_timeout = 1
 max_retries = 0
 
 [env.production]

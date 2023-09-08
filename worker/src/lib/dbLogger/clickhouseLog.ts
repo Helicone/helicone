@@ -140,7 +140,7 @@ export async function addFeedbackToResponse(
       UPDATE feedback_created_at = '${formatTimeString(
         created_at ?? new Date().toISOString()
       )}',
-          feedback_id = ${id},
+          feedback_id = '${id}',
           rating = ${rating ? "1" : "0"}
       WHERE response_id = '${response_id}'`;
 

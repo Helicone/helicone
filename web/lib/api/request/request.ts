@@ -48,7 +48,7 @@ export interface HeliconeRequest {
   completion_tokens: number | null;
   provider: Provider;
   feedback_created_at?: string | null;
-  feedback_id?: number | null;
+  feedback_id?: string | null;
   feedback_rating?: boolean | null;
 }
 

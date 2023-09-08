@@ -102,7 +102,7 @@ export type FilterLeafResponseCopyV2 = SingleKey<ResponseCopyV2ToOperators>;
 interface ResponseCopyV3ToOperators extends ResponseCopyV2ToOperators {
   rating: SingleKey<BooleanOperators>;
   feedback_created_at: SingleKey<TimestampOperatorsTyped>;
-  feedback_id: SingleKey<NumberOperators>;
+  feedback_id: SingleKey<TextOperators>;
 }
 
 export type FilterLeafResponseCopyV3 = SingleKey<ResponseCopyV3ToOperators>;

@@ -25,7 +25,7 @@ type CommonFields = {
   model: string;
   feedback: {
     createdAt: string | null;
-    id: number | null;
+    id: string | null;
     rating: boolean | null;
   };
 };
