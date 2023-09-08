@@ -1,16 +1,11 @@
-import { IRequest, Router } from "itty-router";
 import { Env } from "..";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
+import { BaseRouter } from "./routerFactory";
 
-export const getAnthropicProxyRouter = () => {
-  const anthropicRouter = Router<
-    IRequest,
-    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
-  >();
-
+export const getAnthropicProxyRouter = (router: BaseRouter) => {
   // proxy forwarder only
-  anthropicRouter.all(
+  router.all(
     "*",
     async (
       _,
@@ -22,5 +17,5 @@ export const getAnthropicProxyRouter = () => {
     }
   );
 
-  return anthropicRouter;
+  return router;
 };
