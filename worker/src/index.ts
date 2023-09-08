@@ -15,14 +15,11 @@ export interface Env {
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
-  VAULT_NAMESPACE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
   TOKEN_CALC_URL: string;
-  VAULT_ADDR: string;
-  VAULT_TOKEN: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
   FEEDBACK_INSERT_QUEUE: FeedbackQueue;
