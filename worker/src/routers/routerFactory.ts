@@ -1,19 +1,19 @@
-import { Route, RouterType } from "itty-router";
+import { IRequest, Route, Router, RouterType } from "itty-router";
 import { Env } from "..";
-import { handleFeedbackEndpoint } from "../feedback";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { handleLoggingEndpoint } from "../properties";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
+import { handleFeedback } from "../feedback";
 
-type BaseRouter = RouterType<
+export type BaseRouter = RouterType<
   Route,
   [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
 >;
 
 const WORKER_MAP: {
-  [key in Env["WORKER_TYPE"]]: () => BaseRouter;
+  [key in Env["WORKER_TYPE"]]: (router: BaseRouter) => BaseRouter;
 } = {
   ANTHROPIC_PROXY: getAnthropicProxyRouter,
   OPENAI_PROXY: getOpenAIProxyRouter,
@@ -21,7 +21,25 @@ const WORKER_MAP: {
 };
 
 export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
-  const router = WORKER_MAP[provider]();
+  const router = Router<
+    IRequest,
+    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+  >();
+
+  router.post(
+    "/v1/feedback",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await handleFeedback(requestWrapper, env);
+    }
+  );
+
+  // Call worker specific router AFTER the generic router
+  WORKER_MAP[provider](router);
 
   //TODO remove this
   router.post(
@@ -33,18 +51,6 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
       ctx: ExecutionContext
     ) => {
       return await handleLoggingEndpoint(requestWrapper, env);
-    }
-  );
-
-  router.post(
-    "/v1/feedback",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
-    ) => {
-      return await handleFeedbackEndpoint(requestWrapper, env);
     }
   );
 

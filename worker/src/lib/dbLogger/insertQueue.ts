@@ -1,8 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { RequestQueue, ResponseQueue } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
-import { RequestBodyKV, ResponseBodyKV } from "./insertConsumer";
 
 export class InsertQueue {
   private database: SupabaseClient<Database>;
@@ -10,6 +8,7 @@ export class InsertQueue {
   constructor(database: SupabaseClient<Database>) {
     this.database = database;
   }
+
   async addRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"],
     propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],

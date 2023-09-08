@@ -2,7 +2,6 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
 import { getUsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";

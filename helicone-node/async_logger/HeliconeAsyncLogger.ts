@@ -47,7 +47,10 @@ export class HeliconeAsyncLogger {
     this.heliconeConfiguration = heliconeConfiguration;
   }
 
-  async log(asyncLogModel: HeliconeAyncLogRequest, provider: Provider): Promise<AxiosResponse<any, any>> {
+  async log(
+    asyncLogModel: HeliconeAyncLogRequest,
+    provider: Provider
+  ): Promise<AxiosResponse<any, any> | undefined> {
     const options: AxiosRequestConfig = {
       method: "POST",
       data: asyncLogModel,
@@ -58,7 +61,10 @@ export class HeliconeAsyncLogger {
     };
 
     const basePath = this.heliconeConfiguration.getBaseUrl();
-    if (!basePath) throw new Error("Base path not set");
+    if (!basePath) {
+      console.error("Failed to log to Helicone: Base path is undefined");
+      return;
+    }
 
     // Set Helicone URL
     if (provider == Provider.OPENAI) {
@@ -68,10 +74,31 @@ export class HeliconeAsyncLogger {
     } else if (provider == Provider.ANTHROPIC) {
       options.url = `${basePath}/anthropic/v1/log`;
     } else {
-      throw new Error("Invalid provider");
+      console.error("Failed to log to Helicone: Provider not supported");
+      return;
     }
 
-    const result = await axios(options);
+    let result: AxiosResponse<any, any>;
+    try {
+      result = await axios(options);
+    } catch (error: any) {
+      console.error(
+        "Error making request to Helicone log endpoint:",
+        error.message
+      );
+
+      if (axios.isAxiosError(error) && error.response) {
+        result = error.response;
+      } else {
+        result = {
+          data: null,
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: {},
+          config: {},
+        };
+      }
+    }
 
     const onHeliconeLog = this.heliconeConfiguration.getOnHeliconeLog();
     if (onHeliconeLog) onHeliconeLog(result);

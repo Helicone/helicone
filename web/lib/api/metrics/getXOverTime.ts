@@ -95,6 +95,7 @@ export async function getXOverTime<T>(
     right: userFilter,
     operator: "and",
   };
+
   if (!isValidTimeFilter(timeFilter)) {
     return { data: null, error: "Invalid time filter" };
   }

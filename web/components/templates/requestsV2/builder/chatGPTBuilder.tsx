@@ -8,8 +8,8 @@ import AbstractRequestBuilder, {
 class ChatGPTBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const hasNoContent = this.response.response_body?.choices
-      ? this.response.response_body?.choices[0].message.content === null ||
-        this.response.response_body?.choices[0].message.content === undefined
+      ? this.response.response_body?.choices?.[0]?.message.content === null ||
+        this.response.response_body?.choices?.[0]?.message.content === undefined
       : true;
 
     const getRequestText = () => {
@@ -36,12 +36,12 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         if (this.response.response_body?.choices) {
           if (hasNoContent) {
             return JSON.stringify(
-              this.response.response_body?.choices[0].message.function_call,
+              this.response.response_body?.choices?.[0]?.message.function_call,
               null,
               2
             );
           } else {
-            return this.response.response_body?.choices[0].message.content;
+            return this.response.response_body?.choices?.[0]?.message.content;
           }
         }
       } else if (statusCode === 0 || statusCode === null) {
@@ -63,7 +63,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         ) : this.response.response_status === 200 ? (
           <Chat
             request={this.response.request_body.messages}
-            response={this.response.response_body?.choices[0].message}
+            response={this.response.response_body?.choices?.[0]?.message}
             status={this.response.response_status}
           />
         ) : (

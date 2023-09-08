@@ -1,13 +1,5 @@
-import {
-  ArrowPathIcon,
-  ChartBarIcon,
-  CloudArrowDownIcon,
-  CurrencyDollarIcon,
-  ExclamationCircleIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowPathIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import {
   getTimeInterval,
@@ -15,32 +7,20 @@ import {
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
-
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
-import ThemedTabs from "../../shared/themed/themedTabs";
-
-import {
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
-import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import { Toggle } from "../../shared/themed/themedToggle";
 import { useDashboardPage } from "./useDashboardPage";
 import { useRouter } from "next/router";
 import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
-import LoadingAnimation from "../../shared/loadingAnimation";
-import { RenderBarChart } from "../../shared/metrics/barChart";
 import MainGraph from "./graphs/mainGraph";
-import { DoubleAreaChartData } from "../../shared/metrics/doubleAreaChart";
 
 interface DashboardPageProps {
   user: User;
@@ -105,6 +85,15 @@ const DashboardPage = (props: DashboardPageProps) => {
           : 0,
       })
     );
+    return combinedArray;
+  };
+
+  const combinePositiveAndNegativeFeedback = () => {
+    let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
+      time: feedback.time,
+      value1: feedback.positiveCount,
+      value2: feedback.negativeCount,
+    }));
     return combinedArray;
   };
 
@@ -272,6 +261,24 @@ const DashboardPage = (props: DashboardPageProps) => {
                   type="double-line"
                 />
               </div>{" "}
+              <div className="col-span-2 lg:col-span-12 h-full">
+                <MainGraph
+                  isLoading={overTimeData.feedback.isLoading}
+                  doubleLineOverTime={combinePositiveAndNegativeFeedback()}
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Feedback"}
+                  value={
+                    metrics.feedback?.data?.data
+                      ? `${formatNumberString(
+                          metrics.feedback?.data?.data.toFixed(2)
+                        )}`
+                      : "0"
+                  }
+                  valueLabel={"Positive"}
+                  valueLabel2="Negative"
+                  type="double-line"
+                />
+              </div>
               <div className="col-span-2 lg:col-span-4 h-full">
                 <MainGraph
                   isLoading={overTimeData.costs.isLoading}
