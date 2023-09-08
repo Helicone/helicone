@@ -1,4 +1,5 @@
-create extension vault with schema vault;
+CREATE SCHEMA IF NOT EXISTS vault;
+CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
 ALTER TABLE provider_keys
 ADD COLUMN provider_key TEXT NOT NULL,
     ADD COLUMN key_id uuid NOT NULL DEFAULT (pgsodium.create_key()).id REFERENCES pgsodium.key(id),
