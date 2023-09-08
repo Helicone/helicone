@@ -8,6 +8,7 @@ import {
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
+import { Readable } from "stream";
 
 export default async function handler(
   req: NextApiRequest,
@@ -33,7 +34,6 @@ export default async function handler(
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
     basePath: "https://oai.hconeai.com/v1",
-
     baseOptions: {
       headers: {
         "OpenAI-Organization": "",
