@@ -1,17 +1,11 @@
 import { RequestWrapper } from "./lib/RequestWrapper";
+import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
+import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
+import { FeedbackQueueBody } from "./lib/dbLogger/feedbackInsertQueue";
 import { buildRouter } from "./routers/routerFactory";
-import {
-  RequestQueueBody,
-  ResponseQueueBody,
-  handleRequestQueue,
-  handleResponseQueue,
-} from "./lib/dbLogger/insertConsumer";
 
-export type Provider = "OPENAI" | "ANTHROPIC";
-export type RequestQueue = Queue<RequestQueueBody>;
-const REQUEST_QUEUE_ID = "provider-logs-insert-request-queue";
-export type ResponseQueue = Queue<ResponseQueueBody>;
-const RESPONSE_QUEUE_ID = "provider-logs-insert-response-queue";
+export type FeedbackQueue = Queue<FeedbackQueueBody>;
+const FEEDBACK_QUEUE_ID = "feedback-insert-queue";
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -27,6 +21,7 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
+  FEEDBACK_INSERT_QUEUE: FeedbackQueue;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -92,8 +87,29 @@ export default {
       return handleError(e);
     }
   },
-  async queue(batch: MessageBatch<string>, env: Env): Promise<void> {
-    return;
+  async queue(batch: MessageBatch<FeedbackQueueBody>, env: Env): Promise<void> {
+    if (batch.queue.includes(FEEDBACK_QUEUE_ID)) {
+      const feedback = batch.messages.map((message) => message.body.feedback);
+
+      const feedbackUpdateResult = await addFeedbackToResponse(
+        new ClickhouseClientWrapper({
+          CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+          CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+          CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+        }),
+        feedback
+      );
+
+      if (feedbackUpdateResult.error) {
+        console.error(`Error updating feedback: ${feedbackUpdateResult.error}`);
+        batch.retryAll();
+        return;
+      }
+
+      batch.ackAll();
+    } else {
+      console.error(`Unknown queue: ${batch.queue}`);
+    }
   },
 };
 

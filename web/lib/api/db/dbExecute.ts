@@ -1,6 +1,5 @@
-import { Client, Pool } from "pg";
+import { Client } from "pg";
 import { Result } from "../../result";
-
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import dateFormat from "dateformat";
 

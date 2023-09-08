@@ -42,6 +42,11 @@ const whereKeyMappings: KeyMappings = {
     body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
     status: "response.status",
   },
+  feedback: {
+    rating: "feedback.rating",
+    id: "feedback.id",
+    created_at: "feedback.created_at",
+  },
   values: (key) => `prompt_values ->> '${key}'`,
   properties_table: {
     auth_hash: "properties.auth_hash",
@@ -74,6 +79,9 @@ const whereKeyMappings: KeyMappings = {
     user_id: "response_copy_v3.user_id",
     status: "response_copy_v3.status",
     organization_id: "response_copy_v3.organization_id",
+    rating: "response_copy_v3.rating",
+    feedback_id: "response_copy_v3.feedback_id",
+    feedback_created_at: "response_copy_v3.feedback_created_at",
   },
   users_view: {},
   properties_copy_v1: {
@@ -103,6 +111,7 @@ const havingKeyMappings: KeyMappings = {
   properties: {},
   request: {},
   response: {},
+  feedback: {},
   values: {},
   properties_table: {},
   response_copy_v1: {},

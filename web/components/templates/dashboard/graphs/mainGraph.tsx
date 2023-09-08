@@ -8,12 +8,13 @@ import {
 
 interface MainGraphProps {
   isLoading: boolean;
-  dataOverTime: BarChartData[];
+  dataOverTime?: BarChartData[];
   doubleLineOverTime?: DoubleAreaChartData[];
   timeMap: (date: Date) => string;
   title: string;
   value: string | number;
   valueLabel: string;
+  valueLabel2?: string;
   type: "double-line" | "bar" | "area";
   labelFormatter?: (value: string) => string;
 }
@@ -27,6 +28,7 @@ export default function MainGraph(props: MainGraphProps) {
     title,
     value,
     valueLabel,
+    valueLabel2,
     type,
     labelFormatter,
   } = props;
@@ -45,14 +47,14 @@ export default function MainGraph(props: MainGraphProps) {
             <div className="h-full w-full flex-col flex p-8">
               <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
             </div>
-          ) : type === "bar" ? (
+          ) : type === "bar" && dataOverTime ? (
             <RenderBarChart
               data={dataOverTime}
               timeMap={timeMap}
               valueLabel={valueLabel}
               labelFormatter={labelFormatter}
             />
-          ) : type === "area" ? (
+          ) : type === "area" && dataOverTime ? (
             <RenderAreaChart
               data={dataOverTime}
               timeMap={timeMap}
@@ -64,7 +66,7 @@ export default function MainGraph(props: MainGraphProps) {
               data={doubleLineOverTime}
               timeMap={timeMap}
               valueLabel1={valueLabel}
-              valueLabel2={"errors"}
+              valueLabel2={valueLabel2 ?? "errors"}
               labelFormatter={labelFormatter}
             />
           ) : null}

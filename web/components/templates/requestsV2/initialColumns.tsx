@@ -3,6 +3,8 @@ import { getUSDate } from "../../shared/utils/utils";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
+import { clsx } from "../../shared/clsx";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -125,5 +127,27 @@ export const getInitialColumns: (
     cell: (info) => (
       <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
     ),
+  },
+  {
+    accessorKey: "feedback",
+    header: "Feedback",
+    cell: (info) => {
+      const feedback = info.getValue() as NormalizedRequest["feedback"];
+      const rating = feedback?.rating;
+
+      if (rating === null) {
+        return <span className="text-gray-500"></span>;
+      }
+
+      return (
+        <span className={clsx(rating ? "text-green-700" : "text-red-700")}>
+          {rating ? (
+            <HandThumbUpIcon className="h-4 w-4 inline" />
+          ) : (
+            <HandThumbDownIcon className="h-4 w-4 inline" />
+          )}
+        </span>
+      );
+    },
   },
 ];
