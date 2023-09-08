@@ -293,6 +293,8 @@ export class DBLoggable {
     const response =
       parsedResponse.error === null
         ? {
+            id: this.response.responseId,
+            created_at: new Date().toISOString(),
             request: this.request.requestId,
             body: this.response.omitLog
               ? {
@@ -305,7 +307,9 @@ export class DBLoggable {
             delay_ms,
           }
         : {
+            id: this.response.responseId,
             request: this.request.requestId,
+            created_at: new Date().toISOString(),
             body: {
               helicone_error: "error parsing response",
               parse_response_error: parsedResponse.error,

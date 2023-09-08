@@ -20,7 +20,6 @@ import { useRouter } from "next/router";
 import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
-
 import MainGraph from "./graphs/mainGraph";
 
 interface DashboardPageProps {
@@ -86,6 +85,15 @@ const DashboardPage = (props: DashboardPageProps) => {
           : 0,
       })
     );
+    return combinedArray;
+  };
+
+  const combinePositiveAndNegativeFeedback = () => {
+    let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
+      time: feedback.time,
+      value1: feedback.positiveCount,
+      value2: feedback.negativeCount,
+    }));
     return combinedArray;
   };
 
@@ -253,6 +261,24 @@ const DashboardPage = (props: DashboardPageProps) => {
                   type="double-line"
                 />
               </div>{" "}
+              <div className="col-span-2 lg:col-span-12 h-full">
+                <MainGraph
+                  isLoading={overTimeData.feedback.isLoading}
+                  doubleLineOverTime={combinePositiveAndNegativeFeedback()}
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Feedback"}
+                  value={
+                    metrics.feedback?.data?.data
+                      ? `${formatNumberString(
+                          metrics.feedback?.data?.data.toFixed(2)
+                        )}`
+                      : "0"
+                  }
+                  valueLabel={"Positive"}
+                  valueLabel2="Negative"
+                  type="double-line"
+                />
+              </div>
               <div className="col-span-2 lg:col-span-4 h-full">
                 <MainGraph
                   isLoading={overTimeData.costs.isLoading}
