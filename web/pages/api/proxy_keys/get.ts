@@ -11,15 +11,9 @@ async function handler({
   req,
   res,
   userData,
-  vault,
 }: HandlerWrapperOptions<Result<DecryptedProviderKeyMapping[], string>>) {
   if (req.method !== "GET") {
     res.status(405).json({ error: "Method not allowed", data: null });
-  }
-
-  if (vault === null) {
-    res.status(500).json({ error: "Failed to connect to vault", data: null });
-    return;
   }
 
   const query = `
@@ -32,31 +26,15 @@ async function handler({
   AND key.soft_delete = false
   `;
 
-  const keyMappings = await dbExecute<DecryptedProviderKeyMapping>(query, [
-    userData.orgId,
-  ]);
+  const { data: keyMappings, error } =
+    await dbExecute<DecryptedProviderKeyMapping>(query, [userData.orgId]);
 
-  if (keyMappings.error || !keyMappings.data) {
-    res.status(500).json({ error: keyMappings.error, data: null });
+  if (error || !keyMappings) {
+    res.status(500).json({ error: error, data: null });
     return;
   }
 
-  if (keyMappings.data.length === 0) {
-    res.status(200).json({ error: null, data: [] });
-    return;
-  }
-
-  const decryptedKeys: DecryptedProviderKeyMapping[] = keyMappings.data.map(
-    (keyData, index) => {
-      const { vault_key_id: vaultKeyId, ...keyDataWithoutVaultKeyId } = keyData;
-      return {
-        ...keyDataWithoutVaultKeyId,
-        provider_key: null,
-      };
-    }
-  );
-
-  res.status(200).json({ error: null, data: decryptedKeys });
+  res.status(200).json({ error: null, data: keyMappings });
 }
 
 export default withAuth(handler, [Permission.MANAGE_KEYS]);

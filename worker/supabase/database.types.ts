@@ -227,6 +227,12 @@ export interface Database {
             columns: ["provider_key_id"]
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
           }
         ]
       }
@@ -418,31 +424,58 @@ export interface Database {
         Row: {
           created_at: string | null
           id: string
+          key_id: string
+          nonce: string
           org_id: string
+          provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete: boolean
-          vault_key_id: string
+          vault_key_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          key_id?: string
+          nonce?: string
           org_id: string
+          provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete?: boolean
-          vault_key_id: string
+          vault_key_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          key_id?: string
+          nonce?: string
           org_id?: string
+          provider_key?: string
           provider_key_name?: string
           provider_name?: string
           soft_delete?: boolean
-          vault_key_id?: string
+          vault_key_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "provider_keys_org_id_fkey"
             columns: ["org_id"]
@@ -698,6 +731,73 @@ export interface Database {
       }
     }
     Views: {
+      decrypted_provider_keys: {
+        Row: {
+          created_at: string | null
+          decrypted_provider_key: string | null
+          id: string | null
+          key_id: string | null
+          nonce: string | null
+          org_id: string | null
+          provider_key: string | null
+          provider_key_name: string | null
+          provider_name: string | null
+          soft_delete: boolean | null
+          vault_key_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          decrypted_provider_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          decrypted_provider_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       materialized_response_and_request: {
         Row: {
           is_cached: boolean | null

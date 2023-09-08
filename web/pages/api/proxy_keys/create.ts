@@ -9,6 +9,7 @@ import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 import crypto from "crypto";
+import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -38,16 +39,16 @@ async function handler({
     return;
   }
 
-  const providerKey = await supabaseServer
-    .from("provider_keys")
-    .select("*")
-    .eq("org_id", userData.orgId)
-    .eq("id", providerKeyId)
-    .single();
+  const { data: providerKey, error } = await getDecryptedProviderKeyById(
+    supabaseServer,
+    providerKeyId
+  );
 
-  if (providerKey.error !== null || providerKey.data === null) {
-    console.error("Failed to retrieve provider key", providerKey.error);
-    res.status(500).json({ error: providerKey.error.message, data: null });
+  if (error || !providerKey?.id) {
+    console.error("Failed to retrieve provider key", error);
+    res
+      .status(500)
+      .json({ error: error ?? "Failed to retrieve provider key", data: null });
     return;
   }
 
@@ -59,11 +60,15 @@ async function handler({
   }).toString()}-${proxyKeyId}`.toLowerCase();
 
   const query = `SELECT encode(pgsodium.crypto_pwhash_str($1), 'hex') as hashed_password;`;
-  const result = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
+  const hashedResult = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
 
-  if (result.error || !result.data || result.data.length === 0) {
+  if (
+    hashedResult.error ||
+    !hashedResult.data ||
+    hashedResult.data.length === 0
+  ) {
     res.status(500).json({
-      error: result.error ?? "Failed to retrieve hashed api key",
+      error: hashedResult.error ?? "Failed to retrieve hashed api key",
       data: null,
     });
     return;
@@ -77,8 +82,8 @@ async function handler({
       id: proxyKeyId,
       org_id: userData.orgId,
       helicone_proxy_key_name: heliconeProxyKeyName,
-      helicone_proxy_key: result.data[0].hashed_password,
-      provider_key_id: providerKey.data.id,
+      helicone_proxy_key: hashedResult.data[0].hashed_password,
+      provider_key_id: providerKey.id,
     })
     .select("*")
     .single();

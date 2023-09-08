@@ -7,7 +7,6 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
-import HashiCorpVault from "./vault/HashiCorpVault";
 import { Database } from "../../supabase/database.types";
 
 export type RequestHandlerType =
@@ -227,7 +226,7 @@ export class RequestWrapper {
         error: "Proxy key id not found",
       };
     }
-    const proxyKeyId = match ? match[0] : null;
+    const proxyKeyId = match[0];
 
     const storedProxyKey = await supabaseClient
       .from("helicone_proxy_keys")
@@ -258,38 +257,21 @@ export class RequestWrapper {
     }
 
     const providerKey = await supabaseClient
-      .from("provider_keys")
-      .select("*")
+      .from("decrypted_provider_keys")
+      .select("decrypted_provider_key")
       .eq("id", storedProxyKey.data.provider_key_id)
       .eq("soft_delete", "false")
       .single();
 
-    if (providerKey.error || !providerKey.data) {
+    if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
       return {
         data: null,
         error: "Provider key not found",
       };
     }
 
-    const vault = new HashiCorpVault(
-      env.VAULT_NAMESPACE_KV,
-      env.VAULT_ADDR,
-      env.VAULT_TOKEN
-    );
-    const vaultProviderKey = await vault.readProviderKey(
-      storedProxyKey.data.org_id,
-      providerKey.data.vault_key_id
-    );
-
-    if (vaultProviderKey.error || !vaultProviderKey.data) {
-      return {
-        data: null,
-        error: "Provider key not found in vault",
-      };
-    }
-
     return {
-      data: vaultProviderKey.data,
+      data: providerKey.data.decrypted_provider_key,
       error: null,
     };
   }

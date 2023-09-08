@@ -4,6 +4,7 @@ import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import { FeedbackQueueBody } from "./lib/dbLogger/feedbackInsertQueue";
 import { buildRouter } from "./routers/routerFactory";
 
+export type Provider = "OPENAI" | "ANTHROPIC";
 export type FeedbackQueue = Queue<FeedbackQueueBody>;
 const FEEDBACK_QUEUE_ID = "feedback-insert-queue";
 
