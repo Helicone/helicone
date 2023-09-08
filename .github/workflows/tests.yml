@@ -80,7 +80,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
-        run: supabase start
+        run: supabase start -x studio,imgproxy
       - name: Install python dependencies
         run: |
           pip install requests pytest psycopg2 python-dotenv helicone
