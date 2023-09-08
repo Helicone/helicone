@@ -39,7 +39,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               {[
                 "Unlimited Requests",
                 "Bucket Caching",
-                "User Management",
+                "Unlimited Seats",
                 "Rate Limiting",
                 "GraphQL API",
                 "Request Retries",

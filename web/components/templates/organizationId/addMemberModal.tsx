@@ -3,6 +3,7 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useGetOrgMembers } from "../../../services/hooks/organizations";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -17,10 +18,28 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { setNotification } = useNotification();
+  const { data, refetch } = useGetOrgMembers(orgId);
+
+  const members = data?.data
+    ? data?.data.map((d) => {
+        return {
+          ...d,
+          isOwner: false,
+        };
+      })
+    : [];
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    if (members.length >= 9) {
+      setNotification(
+        "You have reached the maximum number of members for your plan.",
+        "error"
+      );
+      setIsLoading(false);
+      return;
+    }
 
     const email = e.currentTarget.elements.namedItem(
       "email"
