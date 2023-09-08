@@ -6,6 +6,7 @@ import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { BaseRouter } from "./routerFactory";
+import { InsertQueue } from "../lib/dbLogger/insertQueue";
 
 export const getAPIRouter = (router: BaseRouter) => {
   router.post(
