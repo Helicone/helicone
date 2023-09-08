@@ -9,5 +9,3 @@ ALTER COLUMN vault_key_id DROP NOT NULL;
 SECURITY LABEL FOR pgsodium ON COLUMN public.provider_keys.provider_key IS 'ENCRYPT WITH KEY COLUMN key_id NONCE nonce ASSOCIATED (org_id)';
 GRANT USAGE ON SCHEMA pgsodium TO service_role;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA pgsodium TO service_role;
-ALTER VIEW public.decrypted_provider_keys
-SET (security_invoker = on);
