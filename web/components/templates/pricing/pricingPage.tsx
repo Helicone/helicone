@@ -26,6 +26,7 @@ const tiers = [
       "Custom Properties",
       "Basic Exporting",
       "1 Organization",
+      "10 Seats",
     ],
     buttonText: "Get Started",
     backgroundColor: "bg-sky-600",
@@ -39,7 +40,7 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $80
+          $50
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
@@ -47,7 +48,7 @@ const tiers = [
       </p>
     ),
     description:
-      "Everything in Basic, plus essential tools for scaling up your business.",
+      "Everything in Free, plus essential tools for scaling up your business.",
     features: [
       "Unlimited Requests",
       "Bucket Caching",
@@ -56,6 +57,7 @@ const tiers = [
       "Request Retries",
       "Unlimited Organizations",
       "Up to 2GB of storage",
+      "Unlimited Seats",
     ],
     buttonText: "Start free trial",
     backgroundColor: "bg-pink-600",
@@ -63,13 +65,13 @@ const tiers = [
     textColor: "text-pink-600",
   },
   {
-    name: "Enterprise",
+    name: "Custom",
     id: "tier-enterprise",
     href: "/sales",
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          Custom
+          Enterprise
         </span>
       </p>
     ),
