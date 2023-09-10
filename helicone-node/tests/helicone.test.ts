@@ -8,6 +8,8 @@ import {
 
 const heliconeApiKey = process.env.HELICONE_API_KEY;
 
+const asyncURL = process.env.HELICONE_ASYNC_URL ?? "http://127.0.0.1:8788";
+
 if (!heliconeApiKey) {
   throw new Error("API keys must be set as environment variables.");
 }
@@ -16,8 +18,8 @@ if (!heliconeApiKey) {
 test("customModel", async () => {
   const config = new HeliconeAsyncConfiguration({
     heliconeMeta: {
-      apiKey: process.env.MY_HELICONE_API_KEY,
-      baseUrl: "http://127.0.0.1:8788",
+      apiKey: heliconeApiKey,
+      baseUrl: asyncURL,
     },
   });
 
