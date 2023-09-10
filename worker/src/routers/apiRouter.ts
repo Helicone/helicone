@@ -8,7 +8,70 @@ import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
 
+type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+
+async function logAsync(
+  requestWrapper: RequestWrapper,
+  env: Env,
+  ctx: ExecutionContext,
+  provider: Provider
+): Promise<Response> {
+  const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
+  //TODO Check to make sure auth is correct
+  if (!requestWrapper.getAuthorization()) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const [isValid, error] = validateAsyncLogModel(asyncLogModel);
+  if (!isValid) {
+    console.error("Invalid asyncLogModel", error);
+    return new Response(JSON.stringify({ error }), { status: 400 });
+  }
+
+  const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
+  const responseHeaders = new Headers(asyncLogModel.providerResponse.headers);
+  const heliconeHeaders = new HeliconeHeaders(requestHeaders);
+
+  const loggable = await dbLoggableRequestFromAsyncLogModel({
+    requestWrapper,
+    env,
+    asyncLogModel,
+    providerRequestHeaders: heliconeHeaders,
+    providerResponseHeaders: responseHeaders,
+    provider: provider,
+  });
+  const { error: logError } = await loggable.log(
+    {
+      clickhouse: new ClickhouseClientWrapper(env),
+      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      queue: new InsertQueue(
+        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+      ),
+    },
+    env.RATE_LIMIT_KV
+  );
+
+  if (logError !== null) {
+    return new Response(JSON.stringify({ error: logError }), {
+      status: 500,
+    });
+  }
+
+  return new Response("ok", { status: 200 });
+}
+
 export const getAPIRouter = (router: BaseRouter) => {
+  router.post(
+    "/custom/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await logAsync(requestWrapper, env, ctx, "CUSTOM");
+    }
+  );
   router.post(
     "/oai/v1/log",
     async (
@@ -17,53 +80,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
-      //TODO Check to make sure auth is correct
-      if (!requestWrapper.getAuthorization()) {
-        return new Response("Unauthorized", { status: 401 });
-      }
-
-      const [isValid, error] = validateAsyncLogModel(asyncLogModel);
-      if (!isValid) {
-        console.error("Invalid asyncLogModel", error);
-        return new Response(JSON.stringify({ error }), { status: 400 });
-      }
-
-      const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
-      const responseHeaders = new Headers(
-        asyncLogModel.providerResponse.headers
-      );
-      const heliconeHeaders = new HeliconeHeaders(requestHeaders);
-
-      const loggable = await dbLoggableRequestFromAsyncLogModel({
-        requestWrapper,
-        env,
-        asyncLogModel,
-        providerRequestHeaders: heliconeHeaders,
-        providerResponseHeaders: responseHeaders,
-        provider: "OPENAI",
-      });
-      const { error: logError } = await loggable.log(
-        {
-          clickhouse: new ClickhouseClientWrapper(env),
-          supabase: createClient(
-            env.SUPABASE_URL,
-            env.SUPABASE_SERVICE_ROLE_KEY
-          ),
-          queue: new InsertQueue(
-            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
-          ),
-        },
-        env.RATE_LIMIT_KV
-      );
-
-      if (logError !== null) {
-        return new Response(JSON.stringify({ error: logError }), {
-          status: 500,
-        });
-      }
-
-      return new Response("ok", { status: 200 });
+      return await logAsync(requestWrapper, env, ctx, "OPENAI");
     }
   );
 
@@ -75,48 +92,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
-
-      if (!requestWrapper.getAuthorization()) {
-        return new Response("Unauthorized", { status: 401 });
-      }
-
-      const requestHeaders = new Headers(asyncLogModel.providerRequest.meta);
-      const responseHeaders = new Headers(
-        asyncLogModel.providerResponse.headers
-      );
-      const heliconeHeaders = new HeliconeHeaders(requestHeaders);
-
-      const loggable = await dbLoggableRequestFromAsyncLogModel({
-        requestWrapper,
-        env,
-        asyncLogModel,
-        providerRequestHeaders: heliconeHeaders,
-        providerResponseHeaders: responseHeaders,
-        provider: "OPENAI",
-      });
-
-      const { error: logError } = await loggable.log(
-        {
-          clickhouse: new ClickhouseClientWrapper(env),
-          supabase: createClient(
-            env.SUPABASE_URL,
-            env.SUPABASE_SERVICE_ROLE_KEY
-          ),
-          queue: new InsertQueue(
-            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
-          ),
-        },
-        env.RATE_LIMIT_KV
-      );
-
-      if (logError !== null) {
-        return new Response(JSON.stringify({ error: logError }), {
-          status: 500,
-        });
-      }
-
-      return new Response("ok", { status: 200 });
+      return await logAsync(requestWrapper, env, ctx, "ANTHROPIC");
     }
   );
 

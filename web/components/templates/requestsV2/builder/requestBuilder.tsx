@@ -1,18 +1,28 @@
-import { HeliconeRequest } from "../../../../lib/api/request/request";
+import { HeliconeRequest, Provider } from "../../../../lib/api/request/request";
 import ClaudeBuilder from "./claudeBuilder";
 import EmbeddingBuilder from "./embeddingBuilder";
 import ChatGPTBuilder from "./chatGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
+import AbstractRequestBuilder from "./abstractRequestBuilder";
+import CustomBuilder from "./customBuilder";
 
 export type BuilderType =
   | "ChatGPTBuilder"
   | "GPT3Builder"
   | "ModerationBuilder"
   | "EmbeddingBuilder"
-  | "ClaudeBuilder";
+  | "ClaudeBuilder"
+  | "CustomBuilder";
 
-export const getBuilderType = (model: string): BuilderType => {
+export const getBuilderType = (
+  model: string,
+  provider: Provider
+): BuilderType => {
+  if (provider === "CUSTOM") {
+    return "CustomBuilder";
+  }
+
   if (/^gpt-(4|3\.5|35)/.test(model)) {
     return "ChatGPTBuilder";
   }
@@ -36,12 +46,18 @@ export const getBuilderType = (model: string): BuilderType => {
   return "GPT3Builder";
 };
 
-let builders = {
+const builders: {
+  [key in BuilderType]: new (
+    request: HeliconeRequest,
+    model: string
+  ) => AbstractRequestBuilder;
+} = {
   ChatGPTBuilder: ChatGPTBuilder,
   GPT3Builder: GPT3Builder,
   ModerationBuilder: ModerationBuilder,
   EmbeddingBuilder: EmbeddingBuilder,
   ClaudeBuilder: ClaudeBuilder,
+  CustomBuilder: CustomBuilder,
 };
 
 const getModelFromPath = (path: string) => {
@@ -62,7 +78,7 @@ const getRequestBuilder = (request: HeliconeRequest) => {
     request.response_body?.body?.model || // anthropic
     getModelFromPath(request.request_path) ||
     "";
-  const builderType = getBuilderType(model);
+  const builderType = getBuilderType(model, request.provider);
   let builder = builders[builderType];
   return new builder(request, model);
 };

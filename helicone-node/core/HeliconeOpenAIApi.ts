@@ -13,7 +13,7 @@ export class HeliconeOpenAIApi extends OpenAIApi {
   }
 }
 
-class Helicone {
+export class Helicone {
   public heliconeIdHeader = "helicone-id";
 
   constructor(private heliconeConfiguration: IHeliconeConfiguration) {}
