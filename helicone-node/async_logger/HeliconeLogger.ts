@@ -102,7 +102,7 @@ export class HeliconeLogBuilder {
         meta: this.buildMeta(),
       },
       providerResponse: {
-        json: this.response,
+        json: { ...this.response, model: this.RequestBody.model },
         status: 200,
         headers: {},
       },
