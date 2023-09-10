@@ -145,7 +145,7 @@ export async function logRequest(
         truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
-    const createdAt = new Date().toISOString();
+    const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,

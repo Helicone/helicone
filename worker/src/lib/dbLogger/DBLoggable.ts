@@ -284,9 +284,9 @@ export class DBLoggable {
     Result<Database["public"]["Tables"]["response"]["Insert"], string>
   > {
     const responseBody = await this.response.getResponseBody();
-    const delay_ms =
-      (this.timing.endTime?.getTime() ?? new Date().getTime()) -
-      this.timing.startTime.getTime();
+
+    const endTime = this.timing.endTime ?? new Date();
+    const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
 
     const parsedResponse = await this.parseResponse(responseBody);
 
@@ -294,7 +294,7 @@ export class DBLoggable {
       parsedResponse.error === null
         ? {
             id: this.response.responseId,
-            created_at: new Date().toISOString(),
+            created_at: endTime.toISOString(),
             request: this.request.requestId,
             body: this.response.omitLog
               ? {
@@ -309,7 +309,7 @@ export class DBLoggable {
         : {
             id: this.response.responseId,
             request: this.request.requestId,
-            created_at: new Date().toISOString(),
+            created_at: endTime.toISOString(),
             body: {
               helicone_error: "error parsing response",
               parse_response_error: parsedResponse.error,
