@@ -21,7 +21,9 @@ export class InsertQueue {
     const requestInsertResult = await this.database
       .from("request")
       .insert([requestData]);
-
+    const createdAt = requestData.created_at
+      ? requestData.created_at
+      : new Date().toISOString();
     const responseInsertResult = await this.database.from("response").insert([
       {
         request: requestData.id,
@@ -29,6 +31,7 @@ export class InsertQueue {
         delay_ms: -1,
         body: {},
         status: -1,
+        created_at: createdAt,
       },
     ]);
     const propertiesInsertResult = await this.database

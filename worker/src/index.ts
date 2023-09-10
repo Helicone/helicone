@@ -7,6 +7,8 @@ import { buildRouter } from "./routers/routerFactory";
 export type FeedbackQueue = Queue<FeedbackQueueBody>;
 const FEEDBACK_QUEUE_ID = "feedback-insert-queue";
 
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;

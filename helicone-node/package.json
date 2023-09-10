@@ -32,7 +32,8 @@
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/eslint-parser": "^7.21.3",
-    "@types/jest": "^29.5.1",
+    "@types/jest": "^29.5.4",
+    "@types/mocha": "^10.0.1",
     "@types/node": "^12.11.5",
     "@types/node-fetch": "^2.6.4",
     "@types/uuid": "^9.0.1",
