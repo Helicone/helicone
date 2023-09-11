@@ -138,7 +138,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                     refreshOrgs();
                   })
                   .finally(() => {
-                    router.push("/organizations");
+                    router.push("/dashboard");
                   });
               }}
             >
