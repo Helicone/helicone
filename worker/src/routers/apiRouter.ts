@@ -17,7 +17,11 @@ async function logAsync(
   provider: Provider
 ): Promise<Response> {
   const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
-  //TODO Check to make sure auth is correct
+  // if payload is larger than 10MB, return 400
+  const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024;
+  if (JSON.stringify(asyncLogModel).length > MAX_PAYLOAD_SIZE) {
+    return new Response("Payload too large", { status: 400 });
+  }
   if (!requestWrapper.getAuthorization()) {
     return new Response("Unauthorized", { status: 401 });
   }
