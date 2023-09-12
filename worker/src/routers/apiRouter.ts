@@ -59,7 +59,7 @@ async function logAsync(
 
   if (logError !== null) {
     return new Response(JSON.stringify({ error: logError }), {
-      status: 500,
+      status: 200,
     });
   }
 
