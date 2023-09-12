@@ -32,6 +32,7 @@ export interface Env {
   VAULT_ENABLED: string;
   STORAGE_URL: string;
   FEEDBACK_INSERT_QUEUE: FeedbackQueue;
+  FALLBACK_QUEUE: Queue<any>;
 }
 
 export async function hash(key: string): Promise<string> {
