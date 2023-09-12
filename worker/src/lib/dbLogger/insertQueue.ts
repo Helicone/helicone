@@ -89,7 +89,8 @@ export type RequestResponseQueuePayload =
 export class InsertQueue {
   constructor(
     private database: SupabaseClient<Database>,
-    private fallBackQueue: Queue
+    private fallBackQueue: Queue,
+    private responseAndResponseQueueKV: KVNamespace
   ) {}
 
   async addRequest(
@@ -104,7 +105,12 @@ export class InsertQueue {
     };
     const res = await insertIntoRequest(this.database, payload);
     if (res.error) {
-      this.fallBackQueue.send({ _type: "request", payload });
+      const key = crypto.randomUUID();
+      this.responseAndResponseQueueKV.put(
+        key,
+        JSON.stringify({ _type: "request", payload })
+      );
+      this.fallBackQueue.send(key);
       return res;
     }
     return { data: null, error: null };
@@ -122,7 +128,12 @@ export class InsertQueue {
     };
     const res = await insertIntoResponse(this.database, payload);
     if (res.error) {
-      this.fallBackQueue.send({ _type: "response", payload });
+      const key = crypto.randomUUID();
+      this.responseAndResponseQueueKV.put(
+        key,
+        JSON.stringify({ _type: "response", payload })
+      );
+      this.fallBackQueue.send(key);
       return res;
     }
     return { data: null, error: null };
