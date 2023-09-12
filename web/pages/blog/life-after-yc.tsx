@@ -116,7 +116,7 @@ export default function LifeAfterYC() {
             on what your startup should or shouldn&apos;t do. While external
             insights can be valuable, it&apos;s crucial to apply the focused
             mentality you cultivated during YC to your post-graduation life.
-            Here's how to maintain that focus:
+            Here&apos;s how to maintain that focus:
           </p>
           <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
@@ -187,17 +187,17 @@ export default function LifeAfterYC() {
           </h2>
           <p className="mt-6">
             The structured guidance of Y Combinator helps you maintain
-            unwavering focus on your startup's mission. But once you leave,
+            unwavering focus on your startup&apos;s mission. But once you leave,
             you&apos;re at the helm of steering the ship without the constant
             check-ins or peer reviews. This is where defining your
             company&apos;s mission and values becomes invaluable. Ensure that
             your team is on the same page regarding what you&apos;re striving to
             accomplish and why. This clarity of purpose doesn&apos;t just unite
             your team; it also acts as a compass for future decisions. If a new
-            feature, partnership, or marketing campaign doesn't align with your
-            core mission and values, it shouldn&apos;t make it to your roadmap.
-            Keep your goals front and center, and the path forward will often
-            illuminate itself.
+            feature, partnership, or marketing campaign doesn&apos;t align with
+            your core mission and values, it shouldn&apos;t make it to your
+            roadmap. Keep your goals front and center, and the path forward will
+            often illuminate itself.
           </p>
           <h2
             id="future"
