@@ -19,22 +19,22 @@ type blogStructure = {
 };
 
 const blogContent: blogStructure[] = [
-  // {
-  //   title: "Life after Y Combinator: Three Key Lessons for Startups",
-  //   description:
-  //     "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
-  //   badgeText: "Personal",
-  //   badgeColor: "bg-orange-50 text-orange-700 ring-orange-600/10",
-  //   date: "Sep 11, 2023",
-  //   href: "/blog/life-after-yc",
-  //   imageUrl: "/assets/blog/openai.webp",
-  //   authors: [
-  //     {
-  //       name: "Scott Nguyen",
-  //       imageUrl: "/assets/blog/scottnguyen-headshot.webp",
-  //     },
-  //   ],
-  // },
+  {
+    title: "Life after Y Combinator: Three Key Lessons for Startups",
+    description:
+      "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
+    badgeText: "Personal",
+    badgeColor: "bg-orange-50 text-orange-700 ring-orange-600/10",
+    date: "Sep 11, 2023",
+    href: "/blog/life-after-yc",
+    imageUrl: "/assets/blog/yc.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+  },
   {
     title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
     description:
