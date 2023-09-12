@@ -431,7 +431,7 @@ export class DBLoggable {
     };
   }
 
-  async log(
+  async _log(
     db: {
       supabase: SupabaseClient<Database>;
       clickhouse: ClickhouseClientWrapper;
@@ -496,5 +496,30 @@ export class DBLoggable {
       data: null,
       error: null,
     };
+  }
+
+  async log(
+    db: {
+      supabase: SupabaseClient<Database>;
+      clickhouse: ClickhouseClientWrapper;
+      queue: InsertQueue;
+    },
+    rateLimitKV: KVNamespace
+  ): Promise<Result<null, string>> {
+    const res = await this._log(db, rateLimitKV);
+    if (res.error !== null) {
+      console.error("Error logging", res.error);
+      const uuid = crypto.randomUUID();
+      db.queue.responseAndResponseQueueKV.put(
+        uuid,
+        JSON.stringify({
+          _type: "dbLoggable",
+          payload: JSON.stringify(this),
+        })
+      );
+
+      db.queue.fallBackQueue.send(uuid);
+    }
+    return res;
   }
 }
