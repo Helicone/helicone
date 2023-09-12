@@ -3,7 +3,70 @@ import { Env, hash } from ".";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
-import { FeedbackInsertQueue } from "./lib/dbLogger/feedbackInsertQueue";
+import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
+import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
+
+const FEEDBACK_LATEST_CREATED_AT = "feedback-latest-created-at";
+
+export async function feedbackCronHandler(env: Env) {
+  const supabaseClient: SupabaseClient<Database> = createClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  const storedDate = await env.UTILITY_KV.get(FEEDBACK_LATEST_CREATED_AT);
+  const dateOffset = storedDate
+    ? new Date(storedDate).getTime()
+    : Date.now() - 60 * 1000; // 1 minute ago if no stored date
+
+  const feedbackCreatedAt = new Date(dateOffset).toISOString();
+
+  const { data: feedback, error } = await supabaseClient
+    .from("feedback")
+    .select("*")
+    .gt("created_at", feedbackCreatedAt)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error(`Error fetching feedback: ${error}`);
+    return;
+  }
+
+  if (!feedback || feedback.length === 0) {
+    console.log("No new feedback");
+    return;
+  }
+
+  const latestFeedback = feedback[feedback.length - 1];
+  const latestFeedbackDate = new Date(latestFeedback.created_at).toISOString();
+
+  if (latestFeedbackDate === storedDate) {
+    console.log("No new feedback since last update.");
+    return;
+  }
+
+  try {
+    await env.UTILITY_KV.put(FEEDBACK_LATEST_CREATED_AT, latestFeedbackDate);
+  } catch (err) {
+    console.error("Failed to update KV:", err);
+  }
+
+  const feedbackUpdateResult = await addFeedbackToResponse(
+    new ClickhouseClientWrapper({
+      CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+      CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+      CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+    }),
+    feedback
+  );
+
+  if (feedbackUpdateResult.error) {
+    console.error(`Error updating feedback: ${feedbackUpdateResult.error}`);
+    return;
+  }
+
+  console.log(`Updated ${feedback.length} feedback rows.`);
+}
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;
@@ -80,22 +143,6 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
       status: 500,
     });
   }
-
-  const feedbackQueue = new FeedbackInsertQueue(env.FEEDBACK_INSERT_QUEUE);
-  const enqueueResponse = await feedbackQueue.addFeedback(feedbackData);
-
-  if (enqueueResponse.error) {
-    return new Response(`Error enqueuing feedback: ${enqueueResponse.error}`, {
-      status: 500,
-    });
-  }
-
-  // await insertProviderInClickHouse(
-  //   new ClickhouseClientWrapper(env),
-  //   requestData,
-  //   responseData,
-  //   feedbackData
-  // );
 
   return new Response(
     JSON.stringify({
