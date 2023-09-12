@@ -39,6 +39,7 @@ export enum Provider {
   OPENAI = "openai",
   AZURE_OPENAI = "azure-openai",
   ANTHROPIC = "anthropic",
+  CUSTOM_MODEL = "custom-model",
 }
 
 export class HeliconeAsyncLogger {
@@ -67,7 +68,11 @@ export class HeliconeAsyncLogger {
     }
 
     // Set Helicone URL
-    if (provider == Provider.OPENAI) {
+    if (provider == Provider.CUSTOM_MODEL) {
+      const url = new URL(basePath);
+      url.pathname = "/custom/v1/log";
+      options.url = url.toString();
+    } else if (provider == Provider.OPENAI) {
       options.url = `${basePath}/oai/v1/log`;
     } else if (provider == Provider.AZURE_OPENAI) {
       options.url = `${basePath}/oai/v1/log`;
@@ -84,7 +89,8 @@ export class HeliconeAsyncLogger {
     } catch (error: any) {
       console.error(
         "Error making request to Helicone log endpoint:",
-        error.message
+        error?.message,
+        error
       );
 
       if (axios.isAxiosError(error) && error.response) {
