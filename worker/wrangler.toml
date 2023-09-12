@@ -56,10 +56,7 @@ queues.producers = [
 
 queues.consumers = [
 	{ queue = "feedback-insert-queue-prod", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 },
-<<<<<<< HEAD
-	{ queue = "fallback-queue-prod", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 },
-=======
->>>>>>> main
+	{ queue = "fallback-queue-prod", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0, max_concurrency = 1 },
 ]
 
 [env.production.vars]
@@ -91,10 +88,7 @@ queues.producers = [
 
 queues.consumers = [
 	{ queue = "feedback-insert-queue-staging", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 },
-<<<<<<< HEAD
-	{ queue = "fallback-queue-staging", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 },
-=======
->>>>>>> main
+	{ queue = "fallback-queue-staging", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0, max_concurrency = 1 },
 ]
 
 [env.production_staging.vars]
