@@ -10,7 +10,6 @@ import {
 } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 
-export type Provider = "OPENAI" | "ANTHROPIC";
 export type FeedbackQueue = Queue<FeedbackQueueBody>;
 const FEEDBACK_QUEUE_ID = "feedback-insert-queue";
 const FALLBACK_QUEUE = "fallback-queue";
