@@ -135,23 +135,6 @@ export default function HomePage(props: HomePageProps) {
 
   return (
     <div className="flex-col w-full antialiased">
-      <div className="flex items-center justify-center gap-x-6 bg-gray-900 px-6 py-2.5 sm:px-3.5">
-        <p className="text-sm leading-6 text-white">
-          <a href="#">
-            <strong className="font-semibold">MAINTENANCE</strong>
-            <svg
-              viewBox="0 0 2 2"
-              className="mx-2 inline h-0.5 w-0.5 fill-current"
-              aria-hidden="true"
-            >
-              <circle cx={1} cy={1} r={1} />
-            </svg>
-            Our website will be undergoing scheduled maintenance from
-            12:01am-6:00am PST on 9/12/23. Our proxy will continue to work and
-            no data will be lost.
-          </a>
-        </p>
-      </div>
       <NavBarV2 />
       <div className="relative isolate overflow-hidden bg-white">
         <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-32  border-gray-300">
