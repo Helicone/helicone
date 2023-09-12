@@ -17,16 +17,12 @@ export async function feedbackCronHandler(env: Env) {
   const storedDate = await env.UTILITY_KV.get(FEEDBACK_LATEST_CREATED_AT);
   const feedbackCreatedAt = (
     storedDate ? new Date(storedDate) : new Date(Date.now() - 60 * 1000)
-  ).toISOString(); // 1 minute ago if no stored date
-
-  console.log(`Fetching feedback created after ${feedbackCreatedAt}`);
+  ).toISOString();
 
   const { data: feedback, error } = await supabaseClient
     .from("feedback")
     .select("*")
     .gt("created_at", feedbackCreatedAt);
-
-  console.log(`Feedback: ${JSON.stringify(feedback)}`);
 
   if (error) {
     console.error(`Error fetching feedback: ${error}`);
@@ -36,15 +32,6 @@ export async function feedbackCronHandler(env: Env) {
   if (!feedback || feedback.length === 0) {
     console.log("No new feedback");
     return;
-  }
-
-  try {
-    await env.UTILITY_KV.put(
-      FEEDBACK_LATEST_CREATED_AT,
-      new Date(Date.now() - 5 * 1000).toISOString()
-    );
-  } catch (err) {
-    console.error("Failed to update KV:", err);
   }
 
   const feedbackUpdateResult = await addFeedbackToResponse(
@@ -60,6 +47,11 @@ export async function feedbackCronHandler(env: Env) {
     console.error(`Error updating feedback: ${feedbackUpdateResult.error}`);
     return;
   }
+
+  await env.UTILITY_KV.put(
+    FEEDBACK_LATEST_CREATED_AT,
+    new Date(Date.now() - 5 * 1000).toISOString()
+  );
 
   console.log(`Updated ${feedback.length} feedback rows.`);
 }
