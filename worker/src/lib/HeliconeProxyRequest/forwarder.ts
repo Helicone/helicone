@@ -123,7 +123,7 @@ export async function proxyForwarder(
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-          env.FEEDBACK_INSERT_QUEUE,
+          env.FALLBACK_QUEUE,
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
       },
