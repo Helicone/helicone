@@ -49,11 +49,12 @@ kv_namespaces = [
 ]
 
 queues.producers = [
-	{ binding = "FEEDBACK_INSERT_QUEUE", queue = "feedback-insert-queue-prod" }
+	{ binding = "FEEDBACK_INSERT_QUEUE", queue = "feedback-insert-queue-prod" },
+	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },
 ]
 
 queues.consumers = [
-	{ queue = "feedback-insert-queue-prod", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 }
+	{ queue = "feedback-insert-queue-prod", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 },
 ]
 
 [env.production.vars]
@@ -77,11 +78,13 @@ kv_namespaces = [
 ]
 
 queues.producers = [
-	{ binding = "FEEDBACK_INSERT_QUEUE", queue = "feedback-insert-queue-staging" }
+	{ binding = "FEEDBACK_INSERT_QUEUE", queue = "feedback-insert-queue-staging" },
+	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-staging" },
+
 ]
 
 queues.consumers = [
-	{ queue = "feedback-insert-queue-staging", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 }
+	{ queue = "feedback-insert-queue-staging", max_batch_size = 100, max_batch_timeout = 60, max_retries = 0 },
 ]
 
 [env.production_staging.vars]

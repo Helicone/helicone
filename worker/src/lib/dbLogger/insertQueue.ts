@@ -2,55 +2,110 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 
-export class InsertQueue {
-  private database: SupabaseClient<Database>;
-
-  constructor(database: SupabaseClient<Database>) {
-    this.database = database;
+export interface RequestPayload {
+  request: Database["public"]["Tables"]["request"]["Insert"];
+  properties: Database["public"]["Tables"]["properties"]["Insert"][];
+  responseId: string;
+}
+export async function insertIntoRequest(
+  database: SupabaseClient<Database>,
+  requestPayload: RequestPayload
+): Promise<Result<null, string>> {
+  const { request, properties, responseId } = requestPayload;
+  if (!request.id) {
+    return { data: null, error: "Missing request.id" };
   }
+
+  const requestInsertResult = await database.from("request").insert([request]);
+  const createdAt = request.created_at
+    ? request.created_at
+    : new Date().toISOString();
+  const responseInsertResult = await database.from("response").insert([
+    {
+      request: request.id,
+      id: responseId,
+      delay_ms: -1,
+      body: {},
+      status: -1,
+      created_at: createdAt,
+    },
+  ]);
+  const propertiesInsertResult = await database
+    .from("properties")
+    .insert(properties);
+  if (
+    requestInsertResult.error ||
+    responseInsertResult.error ||
+    propertiesInsertResult.error
+  ) {
+    return {
+      data: null,
+      error: JSON.stringify({
+        requestError: requestInsertResult.error,
+        responseError: responseInsertResult.error,
+        propertiesError: propertiesInsertResult.error,
+      }),
+    };
+  }
+  return { data: null, error: null };
+}
+
+export async function insertIntoResponse(
+  database: SupabaseClient<Database>,
+  responsePayload: ResponsePayload
+): Promise<Result<null, string>> {
+  const { responseId, requestId, response } = responsePayload;
+  if (!responseId) {
+    return { data: null, error: "Missing responseId" };
+  }
+  return database
+    .from("response")
+    .update(response)
+    .match({ id: responseId, request: requestId })
+    .then((res) => {
+      if (res.error) {
+        return { data: null, error: res.error.message };
+      }
+      return { data: null, error: null };
+    });
+}
+
+export interface ResponsePayload {
+  responseId: string;
+  requestId: string;
+  response: Database["public"]["Tables"]["response"]["Insert"];
+}
+
+export type RequestResponseQueuePayload =
+  | {
+      _type: "request";
+      payload: RequestPayload;
+    }
+  | {
+      _type: "response";
+      payload: ResponsePayload;
+    };
+
+export class InsertQueue {
+  constructor(
+    private database: SupabaseClient<Database>,
+    private fallBackQueue: Queue
+  ) {}
 
   async addRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"],
     propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],
     responseId: string
   ): Promise<Result<null, string>> {
-    if (!requestData.id) {
-      return { data: null, error: "Missing request.id" };
-    }
-
-    const requestInsertResult = await this.database
-      .from("request")
-      .insert([requestData]);
-    const createdAt = requestData.created_at
-      ? requestData.created_at
-      : new Date().toISOString();
-    const responseInsertResult = await this.database.from("response").insert([
-      {
-        request: requestData.id,
-        id: responseId,
-        delay_ms: -1,
-        body: {},
-        status: -1,
-        created_at: createdAt,
-      },
-    ]);
-    const propertiesInsertResult = await this.database
-      .from("properties")
-      .insert(propertiesData);
-
-    if (
-      requestInsertResult.error ||
-      responseInsertResult.error ||
-      propertiesInsertResult.error
-    ) {
-      return {
-        data: null,
-        error: JSON.stringify({
-          requestError: requestInsertResult.error,
-          responseError: responseInsertResult.error,
-          propertiesError: propertiesInsertResult.error,
-        }),
-      };
+    const payload: RequestPayload = {
+      request: requestData,
+      properties: propertiesData,
+      responseId,
+    };
+    const res = await insertIntoRequest(this.database, payload);
+    if (res.error) {
+      this.fallBackQueue.send({ _type: "request", payload });
+      return res;
     }
     return { data: null, error: null };
   }
@@ -60,15 +115,15 @@ export class InsertQueue {
     requestId: string,
     response: Database["public"]["Tables"]["response"]["Insert"]
   ): Promise<Result<null, string>> {
-    if (!responseId) {
-      return { data: null, error: "Missing responseId" };
-    }
-    const updateResponseResult = await this.database
-      .from("response")
-      .update(response)
-      .match({ id: responseId, request: requestId });
-    if (updateResponseResult.error) {
-      return { data: null, error: updateResponseResult.error.message };
+    const payload: ResponsePayload = {
+      responseId,
+      requestId,
+      response,
+    };
+    const res = await insertIntoResponse(this.database, payload);
+    if (res.error) {
+      this.fallBackQueue.send({ _type: "response", payload });
+      return res;
     }
     return { data: null, error: null };
   }
