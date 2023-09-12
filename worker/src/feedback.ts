@@ -15,9 +15,9 @@ export async function feedbackCronHandler(env: Env) {
   );
 
   const storedDate = await env.UTILITY_KV.get(FEEDBACK_LATEST_CREATED_AT);
-  const feedbackCreatedAt = storedDate
-    ? new Date(storedDate)
-    : new Date(Date.now() - 60 * 1000); // 1 minute ago if no stored date
+  const feedbackCreatedAt = (
+    storedDate ? new Date(storedDate) : new Date(Date.now() - 60 * 1000)
+  ).toISOString(); // 1 minute ago if no stored date
 
   console.log(`Fetching feedback created after ${feedbackCreatedAt}`);
 
