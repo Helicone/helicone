@@ -1,11 +1,18 @@
+import { createClient } from "@supabase/supabase-js";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import { FeedbackQueueBody } from "./lib/dbLogger/feedbackInsertQueue";
+import {
+  RequestResponseQueuePayload,
+  insertIntoRequest,
+  insertIntoResponse,
+} from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 
 export type FeedbackQueue = Queue<FeedbackQueueBody>;
 const FEEDBACK_QUEUE_ID = "feedback-insert-queue";
+const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 
@@ -16,6 +23,7 @@ export interface Env {
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
+  REQUEST_AND_RESPONSE_QUEUE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
@@ -89,8 +97,12 @@ export default {
       return handleError(e);
     }
   },
-  async queue(batch: MessageBatch<FeedbackQueueBody>, env: Env): Promise<void> {
-    if (batch.queue.includes(FEEDBACK_QUEUE_ID)) {
+  async queue(
+    _batch: MessageBatch<FeedbackQueueBody | string>,
+    env: Env
+  ): Promise<void> {
+    if (_batch.queue.includes(FEEDBACK_QUEUE_ID)) {
+      const batch = _batch as MessageBatch<FeedbackQueueBody>;
       const feedback = batch.messages.map((message) => message.body.feedback);
 
       const feedbackUpdateResult = await addFeedbackToResponse(
@@ -109,8 +121,38 @@ export default {
       }
 
       batch.ackAll();
+    } else if (_batch.queue.includes(FALLBACK_QUEUE)) {
+      const batch = _batch as MessageBatch<string>;
+
+      let sawError = false;
+      for (const message of batch.messages) {
+        const payload =
+          await env.REQUEST_AND_RESPONSE_QUEUE_KV.get<RequestResponseQueuePayload>(
+            message.body
+          );
+        if (!payload) {
+          console.error(`No payload found for ${message.body}`);
+          sawError = true;
+          continue;
+        }
+        if (payload._type === "request") {
+          insertIntoRequest(
+            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+            payload.payload
+          );
+        } else if (payload._type === "response") {
+          insertIntoResponse(
+            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+            payload.payload
+          );
+        }
+      }
+      if (!sawError) {
+        batch.ackAll();
+        return;
+      }
     } else {
-      console.error(`Unknown queue: ${batch.queue}`);
+      console.error(`Unknown queue: ${_batch.queue}`);
     }
   },
 };
