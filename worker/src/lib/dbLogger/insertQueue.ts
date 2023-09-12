@@ -106,11 +106,11 @@ export class InsertQueue {
     const res = await insertIntoRequest(this.database, payload);
     if (res.error) {
       const key = crypto.randomUUID();
-      this.responseAndResponseQueueKV.put(
+      await this.responseAndResponseQueueKV.put(
         key,
         JSON.stringify({ _type: "request", payload })
       );
-      this.fallBackQueue.send(key);
+      await this.fallBackQueue.send(key);
       return res;
     }
     return { data: null, error: null };
@@ -129,11 +129,11 @@ export class InsertQueue {
     const res = await insertIntoResponse(this.database, payload);
     if (res.error) {
       const key = crypto.randomUUID();
-      this.responseAndResponseQueueKV.put(
+      await this.responseAndResponseQueueKV.put(
         key,
         JSON.stringify({ _type: "response", payload })
       );
-      this.fallBackQueue.send(key);
+      await this.fallBackQueue.send(key);
       return res;
     }
     return { data: null, error: null };
