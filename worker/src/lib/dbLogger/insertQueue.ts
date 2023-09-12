@@ -128,6 +128,9 @@ export class InsertQueue {
     };
     const res = await insertIntoResponse(this.database, payload);
     if (res.error) {
+      // delay the insert to the fallBackQueue to mitigate any race conditions
+
+      await new Promise((resolve) => setTimeout(resolve, 5_000)); // 5 seconds
       const key = crypto.randomUUID();
       await this.responseAndResponseQueueKV.put(
         key,
