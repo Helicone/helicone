@@ -89,8 +89,8 @@ export type RequestResponseQueuePayload =
 export class InsertQueue {
   constructor(
     private database: SupabaseClient<Database>,
-    private fallBackQueue: Queue,
-    private responseAndResponseQueueKV: KVNamespace
+    public fallBackQueue: Queue,
+    public responseAndResponseQueueKV: KVNamespace
   ) {}
 
   async addRequest(
