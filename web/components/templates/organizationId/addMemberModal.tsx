@@ -4,21 +4,27 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
+import { useUserSettings } from "../../../services/hooks/userSettings";
 
 interface AddMemberModalProps {
   orgId: string;
+  orgOwnerId: string;
   open: boolean;
   setOpen: (open: boolean) => void;
+
   onSuccess?: () => void;
 }
 
 const AddMemberModal = (props: AddMemberModalProps) => {
-  const { orgId, open, setOpen, onSuccess } = props;
+  const { orgId, orgOwnerId, open, setOpen, onSuccess } = props;
 
   const [isLoading, setIsLoading] = useState(false);
 
   const { setNotification } = useNotification();
   const { data, refetch } = useGetOrgMembers(orgId);
+
+  const { isLoading: isUserSettingsLoading, userSettings } =
+    useUserSettings(orgOwnerId);
 
   const members = data?.data
     ? data?.data.map((d) => {
@@ -32,7 +38,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    if (members.length >= 4) {
+    if (userSettings?.tier === "free" && members.length >= 4) {
       setNotification(
         "You have reached the maximum number of members for your plan.",
         "error"
