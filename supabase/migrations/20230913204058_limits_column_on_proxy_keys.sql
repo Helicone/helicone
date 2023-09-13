@@ -2,10 +2,10 @@ create table "public"."helicone_proxy_key_limits" (
     "id" uuid not null,
     "created_at" timestamp with time zone default now(),
     "provider_key" uuid not null,
-    "currency" text default 'USD'::text,
-    "cost" double precision default 200,
-    "count" bigint default 5000,
-    "timewindow_seconds" bigint default 86400
+    "currency" text,
+    "cost" double precision,
+    "count" bigint,
+    "timewindow_seconds" bigint
 );
 
 
