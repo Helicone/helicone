@@ -138,8 +138,6 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                     refreshOrgs();
                   })
                   .finally(() => {
-                    // set the org to a users org
-
                     router.push("/dashboard");
                   });
               }}
