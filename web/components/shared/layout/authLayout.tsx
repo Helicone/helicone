@@ -147,7 +147,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     });
   }
 
-  if (userSettings?.tier !== "free") {
+  if (userSettings?.tier === "pro" || userSettings?.tier === "enterprise") {
     accountNav.push({
       name: "Vault",
       href: "/vault",
