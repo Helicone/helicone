@@ -172,12 +172,15 @@ const BlogPage = (props: BlogPageProps) => {
               href={blog.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex flex-col sm:flex-row gap-8 h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
+              className="w-full flex flex-col sm:flex-row gap-8 h-full sm:h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
             >
               <div className="w-full sm:w-2/5 rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
                 <img
                   src={blog.imageUrl}
                   alt="App screenshot"
+                  style={{
+                    objectFit: "cover",
+                  }}
                   className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"
                 />
               </div>
