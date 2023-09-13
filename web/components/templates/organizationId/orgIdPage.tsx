@@ -72,6 +72,16 @@ const OrgIdPage = (props: OrgIdPageProps) => {
     isOwner ||
     orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
 
+  const onLeaveSuccess = () => {
+    const ownedOrgs = orgContext?.allOrgs.filter(
+      (org) => org.owner === user?.id
+    );
+    if (orgContext && ownedOrgs && ownedOrgs.length > 0) {
+      orgContext.refetchOrgs();
+      orgContext.setCurrentOrg(ownedOrgs[0].id);
+    }
+  };
+
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
@@ -125,7 +135,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                   orgId={org.id}
                   refetch={refetch}
                   isUserAdmin={isUserAdmin}
-                  refreshOrgs={() => orgContext && orgContext?.refetchOrgs}
+                  refreshOrgs={onLeaveSuccess}
                 />
               ))}
             </ul>
