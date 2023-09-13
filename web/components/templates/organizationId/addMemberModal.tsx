@@ -32,7 +32,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    if (members.length >= 9) {
+    if (members.length >= 4) {
       setNotification(
         "You have reached the maximum number of members for your plan.",
         "error"

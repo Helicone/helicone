@@ -65,8 +65,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [open, setOpen] = useState(false);
   const { hasFlag } = useFeatureFlags(org?.currentOrg.id || "", "webhook_beta");
-  const isVaultFlag = process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "";
-  const isVaultEnabled = isVaultFlag === "true";
 
   const navigation = [
     {
@@ -149,7 +147,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     });
   }
 
-  if (isVaultEnabled) {
+  if (userSettings?.tier !== "free") {
     accountNav.push({
       name: "Vault",
       href: "/vault",
