@@ -30,7 +30,7 @@ CHECK (
 ALTER TABLE "public"."helicone_proxy_key_limits" 
 ADD CONSTRAINT chk_timewindow_count 
 CHECK (
-    (count IS NOT NULL AND cost IS NOT NULL)
+    (count IS NOT NULL AND cost NULL)
 );
 
 ALTER TABLE "public"."helicone_proxy_key_limits" 
