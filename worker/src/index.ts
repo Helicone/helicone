@@ -21,6 +21,7 @@ export interface Env {
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
+  REQUEST_AND_RESPONSE_QUEUE_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
@@ -28,7 +29,6 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
-  FEEDBACK_INSERT_QUEUE: FeedbackQueue;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -94,31 +94,8 @@ export default {
       return handleError(e);
     }
   },
-  async queue(
-    _batch: MessageBatch<FeedbackQueueBody | string>,
-    env: Env
-  ): Promise<void> {
-    if (_batch.queue.includes(FEEDBACK_QUEUE_ID)) {
-      const batch = _batch as MessageBatch<FeedbackQueueBody>;
-      const feedback = batch.messages.map((message) => message.body.feedback);
-
-      const feedbackUpdateResult = await addFeedbackToResponse(
-        new ClickhouseClientWrapper({
-          CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
-          CLICKHOUSE_USER: env.CLICKHOUSE_USER,
-          CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
-        }),
-        feedback
-      );
-
-      if (feedbackUpdateResult.error) {
-        console.error(`Error updating feedback: ${feedbackUpdateResult.error}`);
-        batch.retryAll();
-        return;
-      }
-
-      batch.ackAll();
-    } else if (_batch.queue.includes(FALLBACK_QUEUE)) {
+  async queue(_batch: MessageBatch<string>, env: Env): Promise<void> {
+    if (_batch.queue.includes(FALLBACK_QUEUE)) {
       const batch = _batch as MessageBatch<string>;
 
       let sawError = false;
