@@ -30,7 +30,7 @@ CHECK (
 ALTER TABLE "public"."helicone_proxy_key_limits" 
 ADD CONSTRAINT chk_ensure_one_cost_or_count
 CHECK (
-    (count IS NOT NULL AND cost NULL) AND
+    (count IS NOT NULL AND cost NULL) OR
     (count IS NULL AND cost IS NOT NULL)
 );
 
