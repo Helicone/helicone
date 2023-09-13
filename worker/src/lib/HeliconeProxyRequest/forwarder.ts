@@ -139,7 +139,7 @@ export async function proxyForwarder(
     }
   }
 
-  if (request?.heliconeHeaders?.heliconeAuth) {
+  if (request?.heliconeHeaders?.heliconeAuth || request.heliconeProxyKeyId) {
     ctx.waitUntil(log());
   }
 
