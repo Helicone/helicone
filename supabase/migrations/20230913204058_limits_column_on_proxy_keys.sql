@@ -28,7 +28,7 @@ CHECK (
 );
 
 ALTER TABLE "public"."helicone_proxy_key_limits" 
-ADD CONSTRAINT chk_timewindow_count 
+ADD CONSTRAINT chk_ensure_one_cost_or_count
 CHECK (
     (count IS NOT NULL AND cost NULL)
 );
