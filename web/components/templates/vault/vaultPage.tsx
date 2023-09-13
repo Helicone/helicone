@@ -97,8 +97,13 @@ const VaultPage = () => {
             <ThemedTable
               columns={[
                 { name: "Name", key: "provider_key_name", hidden: false },
-                { name: "Key", key: "provider_key", hidden: false },
-                { name: "Provider", key: "provider_name", hidden: false },
+                {
+                  name: "Key",
+                  key: "provider_key",
+                  hidden: false,
+                  secret: true,
+                },
+                { name: "Provider", key: "provider_name", hidden: true },
               ]}
               rows={providerKeys}
               deleteHandler={(row) => {

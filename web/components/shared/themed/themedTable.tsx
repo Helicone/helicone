@@ -1,18 +1,72 @@
-import {
-  PencilIcon,
-  TrashIcon,
-  ViewfinderCircleIcon,
-} from "@heroicons/react/24/outline";
-import { middleTruncString } from "../../../lib/stringHelpers";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
+import { useState } from "react";
+import { Tooltip } from "@mui/material";
+import useNotification from "../notification/useNotification";
 
 interface ThemedTableProps {
-  columns: { name: string; subName?: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
+  columns: {
+    name: string;
+    key: string;
+    hidden: boolean;
+    secret?: boolean;
+  }[]; // hidden will hide this column on mobile
   rows?: any[];
   viewHandler?: (row: any) => void;
   editHandler?: (row: any) => void;
   deleteHandler?: (row: any) => void;
 }
+
+const SecretInput = (props: { value: string }) => {
+  const { value } = props;
+  const [show, setShow] = useState(false);
+  const { setNotification } = useNotification();
+
+  return (
+    <div className="flex flex-row items-center">
+      <button
+        className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
+        onClick={() => setShow(!show)}
+      >
+        {show ? (
+          <EyeSlashIcon className="h-5 w-5 text-gray-900" />
+        ) : (
+          <EyeIcon className="h-5 w-5 text-gray-900" />
+        )}
+      </button>
+      {show ? (
+        <Tooltip title="Click to Copy" placement="top" arrow>
+          <button
+            id="secret-key"
+            onClick={() => {
+              navigator.clipboard.writeText(value);
+              setNotification("Copied to clipboard", "success");
+            }}
+            className={clsx(
+              "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
+              "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+            )}
+          >
+            {value}
+          </button>
+        </Tooltip>
+      ) : (
+        <input
+          id="secret-key"
+          name="secret-key"
+          type={clsx(show ? "text" : "password")}
+          required
+          value={value}
+          disabled
+          className={clsx(
+            "text-md",
+            "block w-full rounded-md border-0 h-8 text-gray-900"
+          )}
+        />
+      )}
+    </div>
+  );
+};
 
 const ThemedTable = (props: ThemedTableProps) => {
   const { columns, rows, viewHandler, editHandler, deleteHandler } = props;
@@ -90,13 +144,11 @@ const ThemedTable = (props: ThemedTableProps) => {
                           "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate max-w-[150px]"
                         )}
                       >
-                        {col.key === "cost"
-                          ? Number(row[col.key]).toFixed(2)
-                          : row[col.key] || "n/a"}
-
-                        <span className="text-xs text-gray-400 pl-1">
-                          {col.subName}
-                        </span>
+                        {col.secret === true ? (
+                          <SecretInput value={row[col.key]} />
+                        ) : (
+                          <span>{row[col.key] || "n/a"}</span>
+                        )}
                       </td>
                     );
                   }
