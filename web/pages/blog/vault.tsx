@@ -1,14 +1,11 @@
 import {
   CheckCircleIcon,
   CircleStackIcon,
-  InformationCircleIcon,
   LockClosedIcon,
-  UserCircleIcon,
 } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import Image from "next/image";
 import Head from "next/head";
-import Link from "next/link";
 import { clsx } from "../../components/shared/clsx";
 import {
   BuildingStorefrontIcon,
@@ -20,7 +17,9 @@ export default function VaultFeature() {
   return (
     <>
       <Head>
-        <title>Introducing Vault: Helicone’s Key Management Solution</title>
+        <title>
+          Introducing Vault: Helicone&apos;s Key Management Solution
+        </title>
         <meta
           name="description"
           content="Helicone unveils Vault, transforming the way businesses manage and distribute API keys, ensuring enhanced security and streamlined processes."
@@ -34,7 +33,7 @@ export default function VaultFeature() {
 
         <meta
           property="og:title"
-          content="Introducing Vault: Helicone’s Key Management Solution"
+          content="Introducing Vault: Helicone's Key Management Solution"
         />
         <meta
           property="og:description"
@@ -77,7 +76,6 @@ export default function VaultFeature() {
                 alt="Cole Gottdank"
                 className="rounded-full"
               />
-
               <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                 Cole Gottdank
               </p>
@@ -103,7 +101,7 @@ export default function VaultFeature() {
           </h2>
           <p className="mt-6">
             In an evolving business landscape, managing multiple API keys can
-            become a cumbersome process. Vault, Helicone's solution to this
+            become a cumbersome process. Vault, Helicone&apos;s solution to this
             challenge, seamlessly integrates provider API keys like OpenAI and
             provides an efficient way to create and manage Helicone proxy keys.
           </p>
@@ -148,7 +146,7 @@ export default function VaultFeature() {
                   Prevent Bypass:
                 </strong>{" "}
                 Avoid direct distribution of provider API keys, ensuring users
-                benefit from Helicone's logging and monitoring.
+                benefit from Helicone&apos;s logging and monitoring.
               </span>
             </li>
           </ul>
@@ -258,8 +256,8 @@ export default function VaultFeature() {
             Future Roadmap
           </h2>
           <p className="mt-6">
-            As we continue to refine and expand Vault, here's a glimpse into the
-            future additions we're excited about:
+            As we continue to refine and expand Vault, here&apos;s a glimpse
+            into the future additions we&apos;re excited about:
           </p>
           <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
@@ -297,9 +295,9 @@ export default function VaultFeature() {
             As businesses grow and adapt, so do their needs. Helicone is
             committed to innovating and providing solutions like Vault to meet
             these demands. We believe in simplifying processes while maximizing
-            security and efficiency. With Vault, we’re one step closer to that
-            vision. We're excited to see how Vault empowers your business and
-            are always here to support your journey.
+            security and efficiency. With Vault, we&apos;re one step closer to
+            that vision. We&apos;re excited to see how Vault empowers your
+            business and are always here to support your journey.
           </p>
         </div>
       </div>
