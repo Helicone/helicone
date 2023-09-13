@@ -95,6 +95,7 @@
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",
+        "features/advanced-usage/vault",
         "features/advanced-usage/templated-prompts",
         "features/advanced-usage/caching",
         "features/advanced-usage/retries",
