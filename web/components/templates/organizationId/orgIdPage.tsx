@@ -170,6 +170,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
       </ThemedModal>
       <AddMemberModal
         orgId={org.id}
+        orgOwnerId={org.owner}
         open={addOpen}
         setOpen={setAddOpen}
         onSuccess={() => {
