@@ -11,8 +11,6 @@ import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
-import { IVault } from "../../services/lib/vault.ts/IVault";
-import HashiCorpVault from "../../services/lib/vault.ts/HashiCorpVault";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -66,7 +64,6 @@ export class RequestBodyParser {
 export interface HandlerWrapperOptions<RetVal>
   extends HandlerWrapperNext<RetVal> {
   supabaseClient: SupabaseServerWrapper<RetVal>;
-  vault: IVault | null;
   userData: {
     userId: string;
     orgId: string;
@@ -112,17 +109,11 @@ export function withAuth<T>(
       return;
     }
 
-    let vault: IVault | null = null;
-    if ((process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "") === "true") {
-      vault = new HashiCorpVault();
-    }
-
     await handler({
       req,
       res,
       supabaseClient,
       userData: data,
-      vault,
       body: new RequestBodyParser(req),
     });
   };

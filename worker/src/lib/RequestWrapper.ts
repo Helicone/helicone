@@ -7,7 +7,6 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
-import HashiCorpVault from "./vault/HashiCorpVault";
 import { Database } from "../../supabase/database.types";
 
 export type RequestHandlerType =
@@ -81,7 +80,7 @@ export class RequestWrapper {
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
     const requestWrapper = new RequestWrapper(request, env);
-    const authorization = await requestWrapper.setAuthorization();
+    const authorization = await requestWrapper.setAuthorization(env);
 
     if (authorization.error) {
       return { data: null, error: authorization.error };
@@ -168,9 +167,9 @@ export class RequestWrapper {
     return this.authorization || undefined;
   }
 
-  private async setAuthorization(): Promise<
-    Result<string | undefined, string>
-  > {
+  private async setAuthorization(
+    env: Env
+  ): Promise<Result<string | undefined, string>> {
     if (this.authorization) {
       return { data: this.authorization, error: null };
     }
@@ -186,7 +185,7 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      const providerKey = await this.getProviderKeyFromProxy(authKey);
+      const providerKey = await this.getProviderKeyFromProxy(authKey, env);
 
       if (providerKey.error || !providerKey.data) {
         return {
@@ -208,7 +207,8 @@ export class RequestWrapper {
   }
 
   private async getProviderKeyFromProxy(
-    authKey: string
+    authKey: string,
+    env: Env
   ): Promise<Result<string | undefined, string>> {
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
@@ -226,7 +226,7 @@ export class RequestWrapper {
         error: "Proxy key id not found",
       };
     }
-    const proxyKeyId = match ? match[0] : null;
+    const proxyKeyId = match[0];
 
     const storedProxyKey = await supabaseClient
       .from("helicone_proxy_keys")
@@ -257,34 +257,21 @@ export class RequestWrapper {
     }
 
     const providerKey = await supabaseClient
-      .from("provider_keys")
-      .select("*")
+      .from("decrypted_provider_keys")
+      .select("decrypted_provider_key")
       .eq("id", storedProxyKey.data.provider_key_id)
       .eq("soft_delete", "false")
       .single();
 
-    if (providerKey.error || !providerKey.data) {
+    if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
       return {
         data: null,
         error: "Provider key not found",
       };
     }
 
-    const vault = new HashiCorpVault();
-    const vaultProviderKey = await vault.readProviderKey(
-      storedProxyKey.data.org_id,
-      providerKey.data.vault_key_id
-    );
-
-    if (vaultProviderKey.error || !vaultProviderKey.data) {
-      return {
-        data: null,
-        error: "Provider key not found in vault",
-      };
-    }
-
     return {
-      data: vaultProviderKey.data,
+      data: providerKey.data.decrypted_provider_key,
       error: null,
     };
   }
