@@ -1,7 +1,7 @@
 create table "public"."helicone_proxy_key_limits" (
     "id" uuid not null,
     "created_at" timestamp with time zone default now(),
-    "provide_key" uuid not null,
+    "provider_key" uuid not null,
     "currency" text,
     "cost" double precision,
     "count" bigint,
