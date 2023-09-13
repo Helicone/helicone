@@ -48,6 +48,12 @@ export interface DBLoggableProps {
   tokenCalcUrl: string;
 }
 
+export interface AuthParams {
+  organizationId: string;
+  userId?: string;
+  heliconeApiKeyId?: number;
+}
+
 export function dbLoggableRequestFromProxyRequest(
   proxyRequest: HeliconeProxyRequest
 ): DBLoggableProps["request"] {
@@ -96,7 +102,11 @@ function getResponseBody(json: any): string {
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
   heliconeApiKeyHash?: string
-) {
+): Promise<Result<AuthParams, string>> {
+  if (!heliconeApiKeyHash) {
+    return { data: null, error: "Helicone api key not found" };
+  }
+
   const { data, error } = await dbClient
     .from("helicone_api_keys")
     .select("*")
@@ -107,7 +117,42 @@ async function getHeliconeApiKeyRow(
   if (error !== null) {
     return { data: null, error: error.message };
   }
-  return { data: data, error: null };
+  return {
+    data: {
+      organizationId: data?.organization_id,
+      userId: data?.user_id,
+      heliconeApiKeyId: data?.id,
+    },
+    error: null,
+  };
+}
+
+async function getHeliconeProxyKeyRow(
+  dbClient: SupabaseClient<Database>,
+  proxyKeyId: string
+): Promise<Result<AuthParams, string>> {
+  const result = await dbClient
+    .from("helicone_proxy_keys")
+    .select("org_id")
+    .eq("id", proxyKeyId)
+    .eq("soft_delete", false)
+    .single();
+
+  if (result.error || !result.data) {
+    return {
+      data: null,
+      error: result.error.message,
+    };
+  }
+
+  return {
+    data: {
+      organizationId: result.data.org_id,
+      userId: undefined,
+      heliconeApiKeyId: undefined,
+    },
+    error: null,
+  };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -439,24 +484,26 @@ export class DBLoggable {
     },
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
-    const { data: heliconeApiKeyRow, error: userIdError } =
-      await getHeliconeApiKeyRow(
-        db.supabase,
-        this.request.heliconeApiKeyAuthHash
-      );
-    if (userIdError !== null) {
-      return { data: null, error: userIdError };
+    const { data: authParams, error } = this.request.heliconeProxyKeyId
+      ? await getHeliconeProxyKeyRow(
+          db.supabase,
+          this.request.heliconeProxyKeyId
+        )
+      : await getHeliconeApiKeyRow(
+          db.supabase,
+          this.request.heliconeApiKeyAuthHash
+        );
+
+    if (error || !authParams?.organizationId) {
+      return { data: null, error: error ?? "Helicone organization not found" };
     }
 
-    if (!heliconeApiKeyRow?.organization_id) {
-      return { data: null, error: "Helicone api key not found" };
-    }
     const requestResult = await logRequest(
       this.request,
       this.response.responseId,
       db.supabase,
       db.queue,
-      heliconeApiKeyRow
+      authParams
     );
 
     // If no data or error, return
