@@ -187,6 +187,49 @@ export interface Database {
           }
         ]
       }
+      helicone_proxy_key_limits: {
+        Row: {
+          cost: number | null
+          count: number | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          provide_key: string
+          timewindow_seconds: number | null
+        }
+        Insert: {
+          cost?: number | null
+          count?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id: string
+          provide_key: string
+          timewindow_seconds?: number | null
+        }
+        Update: {
+          cost?: number | null
+          count?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          provide_key?: string
+          timewindow_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helicone_proxy_key_limits_provide_key_fkey"
+            columns: ["provide_key"]
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_key_limits_provide_key_fkey"
+            columns: ["provide_key"]
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       helicone_proxy_keys: {
         Row: {
           created_at: string | null
