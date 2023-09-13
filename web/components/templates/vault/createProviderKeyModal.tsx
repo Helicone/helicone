@@ -1,9 +1,10 @@
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
 import { Result } from "../../../lib/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { clsx } from "../../shared/clsx";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface CreateProviderKeyModalProps {
   open: boolean;
@@ -15,9 +16,12 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
   const { open, setOpen, onSuccess } = props;
 
   const { setNotification } = useNotification();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
+
     const keyName = event.currentTarget.elements.namedItem(
       "key-name"
     ) as HTMLInputElement;
@@ -55,7 +59,8 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
           onSuccess();
         }
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -116,6 +121,9 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
             type="submit"
             className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
+            {isLoading && (
+              <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+            )}
             Create Provider Key
           </button>
         </div>
