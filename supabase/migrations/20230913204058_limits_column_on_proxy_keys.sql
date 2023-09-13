@@ -5,7 +5,7 @@ create table "public"."helicone_proxy_key_limits" (
     "currency" text default 'USD'::text,
     "cost" double precision default 200,
     "count" bigint default 5000,
-    "timewindow_seconds" bigint
+    "timewindow_seconds" bigint default 86400
 );
 
 
