@@ -7,12 +7,13 @@ import {
   DecryptedProviderKeyMapping,
 } from "../../../services/lib/keys";
 import ThemedTable from "../../shared/themed/themedTable";
-import CreateProviderKeyButton from "./createProviderKeyButton";
 import { useVaultPage } from "./useVaultPage";
 import ThemedModal from "../../shared/themed/themedModal";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import CreateProxyKeyButton from "./createProxyKeyButton";
+import { KeyIcon } from "@heroicons/react/24/outline";
+import CreateProviderKeyModal from "./createProviderKeyModal";
+import CreateProxyKeyModal from "./createProxyKeyModal";
 
 const VaultPage = () => {
   const [deleteProviderOpen, setDeleteProviderOpen] = useState(false);
@@ -32,6 +33,9 @@ const VaultPage = () => {
     proxyKeys,
     refetchProxyKeys,
   } = useVaultPage();
+
+  const [isProviderOpen, setIsProviderOpen] = useState(false);
+  const [isProxyOpen, setIsProxyOpen] = useState(false);
 
   const deleteProviderKey = async (id: string) => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })
@@ -68,59 +72,129 @@ const VaultPage = () => {
             <h1 className="font-semibold text-2xl text-gray-900">
               Provider Keys
             </h1>
-            <CreateProviderKeyButton onSuccess={() => refetchProviderKeys()} />
+            <button
+              onClick={() => {
+                setIsProviderOpen(true);
+              }}
+              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            >
+              Add Provider Key
+            </button>
           </div>
           <p className="text-gray-600">
             These keys will be used to authenticate with your provider.
           </p>
-          <ThemedTable
-            columns={[
-              { name: "Name", key: "provider_key_name", hidden: false },
-              { name: "Key", key: "provider_key", hidden: false },
-              { name: "Provider", key: "provider_name", hidden: false },
-            ]}
-            rows={providerKeys}
-            deleteHandler={(row) => {
-              setSelectedProviderKey(row);
-              setDeleteProviderOpen(true);
-            }}
-          />
+          {isLoading ? (
+            <ul className="flex flex-col space-y-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <li
+                  key={index}
+                  className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                ></li>
+              ))}
+            </ul>
+          ) : providerKeys.length > 0 ? (
+            <ThemedTable
+              columns={[
+                { name: "Name", key: "provider_key_name", hidden: false },
+                { name: "Key", key: "provider_key", hidden: false },
+                { name: "Provider", key: "provider_name", hidden: false },
+              ]}
+              rows={providerKeys}
+              deleteHandler={(row) => {
+                setSelectedProviderKey(row);
+                setDeleteProviderOpen(true);
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setIsProviderOpen(true);
+              }}
+              className="relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              <KeyIcon className="h-8 w-8" />
+              <span className="mt-2 block text-sm font-semibold text-gray-900">
+                Add a provider key
+              </span>
+            </button>
+          )}
         </div>
         <div className="flex flex-col space-y-4 pt-12">
           <div className="flex flex-row justify-between w-full items-center">
             <h1 className="font-semibold text-2xl text-gray-900">
               Helicone Proxy Keys
             </h1>
-            <CreateProxyKeyButton
-              onSuccess={() => refetchProxyKeys()}
-              providerKeys={providerKeys}
-            />
+            <button
+              onClick={() => {
+                setIsProxyOpen(true);
+              }}
+              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            >
+              Create Proxy Key
+            </button>
           </div>
           <p className="text-gray-600">
             These keys will replace your provider keys in your application. This
             ensures that any usage will be logged in Helicone.
           </p>
-          <ThemedTable
-            columns={[
-              {
-                name: "Name",
-                key: "helicone_proxy_key_name",
-                hidden: false,
-              },
-              {
-                name: "Provider Key Name",
-                key: "provider_key_name",
-                hidden: false,
-              },
-            ]}
-            rows={proxyKeys}
-            deleteHandler={(row) => {
-              setSelectedProxyKey(row);
-              setDeleteProxyOpen(true);
-            }}
-          />
+          {isLoading ? (
+            <ul className="flex flex-col space-y-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <li
+                  key={index}
+                  className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                ></li>
+              ))}
+            </ul>
+          ) : proxyKeys.length > 0 ? (
+            <ThemedTable
+              columns={[
+                {
+                  name: "Name",
+                  key: "helicone_proxy_key_name",
+                  hidden: false,
+                },
+                {
+                  name: "Provider Key Name",
+                  key: "provider_key_name",
+                  hidden: false,
+                },
+              ]}
+              rows={proxyKeys}
+              deleteHandler={(row) => {
+                setSelectedProxyKey(row);
+                setDeleteProxyOpen(true);
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setIsProxyOpen(true);
+              }}
+              className="relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              <KeyIcon className="h-8 w-8" />
+              <span className="mt-2 block text-sm font-semibold text-gray-900">
+                Add a proxy key
+              </span>
+            </button>
+          )}
         </div>
       </div>
+      <CreateProviderKeyModal
+        open={isProviderOpen}
+        setOpen={setIsProviderOpen}
+        onSuccess={() => refetchProviderKeys()}
+      />
+      <CreateProxyKeyModal
+        providerKeys={providerKeys}
+        open={isProxyOpen}
+        setOpen={setIsProxyOpen}
+        onSuccess={() => refetchProxyKeys()}
+      />
       <ThemedModal open={deleteProviderOpen} setOpen={setDeleteProviderOpen}>
         <div className="flex flex-col gap-4 w-full">
           <p className="font-semibold text-lg">Delete Provider Key</p>

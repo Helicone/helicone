@@ -55,6 +55,7 @@ const tiers = [
       "User Management and Rate Limiting",
       "GraphQL API",
       "Request Retries",
+      "Key Vault",
       "Unlimited Organizations",
       "Up to 2GB of storage",
       "Unlimited Seats",
