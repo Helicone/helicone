@@ -21,14 +21,14 @@ const tiers = [
     ),
     description: "Everything necessary to get started.",
     features: [
-      "Up to 100,000 requests per month",
+      "Up to 1 million requests per month",
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
       "1 Organization",
-      "10 Seats",
+      "5 Seats",
     ],
-    buttonText: "Get Started",
+    buttonText: "Try for free",
     backgroundColor: "bg-sky-600",
     hoverBackgroundColor: "hover:bg-sky-500",
     textColor: "text-sky-600",
@@ -40,7 +40,7 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $50
+          $25
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
@@ -55,11 +55,12 @@ const tiers = [
       "User Management and Rate Limiting",
       "GraphQL API",
       "Request Retries",
+      "Key Vault",
       "Unlimited Organizations",
       "Up to 2GB of storage",
       "Unlimited Seats",
     ],
-    buttonText: "Start free trial",
+    buttonText: "Get Started",
     backgroundColor: "bg-pink-600",
     hoverBackgroundColor: "hover:bg-pink-500",
     textColor: "text-pink-600",

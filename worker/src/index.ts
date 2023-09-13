@@ -1,6 +1,16 @@
+import { createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
+import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
+import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
+import {
+  RequestResponseQueuePayload,
+  insertIntoRequest,
+  insertIntoResponse,
+} from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
+
+const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 
@@ -11,7 +21,6 @@ export interface Env {
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
-  UTILITY_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
@@ -19,6 +28,7 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
+  FEEDBACK_INSERT_QUEUE: FeedbackQueue;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -84,6 +94,64 @@ export default {
       return handleError(e);
     }
   },
+  async queue(
+    _batch: MessageBatch<FeedbackQueueBody | string>,
+    env: Env
+  ): Promise<void> {
+    if (_batch.queue.includes(FEEDBACK_QUEUE_ID)) {
+      const batch = _batch as MessageBatch<FeedbackQueueBody>;
+      const feedback = batch.messages.map((message) => message.body.feedback);
+
+      const feedbackUpdateResult = await addFeedbackToResponse(
+        new ClickhouseClientWrapper({
+          CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+          CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+          CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+        }),
+        feedback
+      );
+
+      if (feedbackUpdateResult.error) {
+        console.error(`Error updating feedback: ${feedbackUpdateResult.error}`);
+        batch.retryAll();
+        return;
+      }
+
+      batch.ackAll();
+    } else if (_batch.queue.includes(FALLBACK_QUEUE)) {
+      const batch = _batch as MessageBatch<string>;
+
+      let sawError = false;
+      for (const message of batch.messages) {
+        const payload =
+          await env.REQUEST_AND_RESPONSE_QUEUE_KV.get<RequestResponseQueuePayload>(
+            message.body
+          );
+        if (!payload) {
+          console.error(`No payload found for ${message.body}`);
+          sawError = true;
+          continue;
+        }
+        if (payload._type === "request") {
+          insertIntoRequest(
+            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+            payload.payload
+          );
+        } else if (payload._type === "response") {
+          insertIntoResponse(
+            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+            payload.payload
+          );
+        }
+      }
+      if (!sawError) {
+        batch.ackAll();
+        return;
+      }
+    } else {
+      console.error(`Unknown queue: ${_batch.queue}`);
+    }
+  },
   async scheduled(
     controller: ScheduledController,
     env: Env,
@@ -91,7 +159,6 @@ export default {
   ): Promise<void> {
     return await feedbackCronHandler(env);
   },
-  async queue(batch: MessageBatch<string>, env: Env): Promise<void> {},
 };
 
 function handleError(e: any): Response {
