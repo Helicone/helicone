@@ -70,11 +70,14 @@ export default function VaultFeature() {
         <div className="mx-auto max-w-3xl text-base leading-7 text-gray-700">
           <div className="flex flex-row divide-x divide-gray-200 gap-4 items-center">
             <div className={clsx("flex items-center space-x-3 bottom-0")}>
-              <img
-                className="inline-block h-8 w-8 rounded-full"
+              <Image
                 src={"/assets/blog/colegottdank-headshot.png"}
-                alt=""
+                width={32}
+                height={32}
+                alt="Cole Gottdank"
+                className="rounded-full"
               />
+
               <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                 Cole Gottdank
               </p>
