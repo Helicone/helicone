@@ -20,6 +20,23 @@ type blogStructure = {
 
 const blogContent: blogStructure[] = [
   {
+    title:
+      "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
+    description:
+      "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
+    badgeText: "Product",
+    badgeColor: "bg-blue-50 text-blue-700 ring-blue-600/10",
+    date: "Sep 13, 2023",
+    href: "/blog/vault",
+    imageUrl: "/assets/blog/vault_asset.png",
+    authors: [
+      {
+        name: "Cole Gottdank",
+        imageUrl: "/assets/blog/colegottdank-headshot.png",
+      },
+    ],
+  },
+  {
     title: "Life after Y Combinator: Three Key Lessons for Startups",
     description:
       "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
