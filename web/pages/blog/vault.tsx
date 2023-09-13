@@ -51,7 +51,7 @@ export default function VaultFeature() {
         />
       </Head>
       <NavBarV2 />
-      <div className="flex w-full justify-center bg-white-500">
+      <div className="flex w-full justify-center bg-gray-600">
         <Image
           src={"/assets/blog/vault_banner.png"}
           width={1000}
