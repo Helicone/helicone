@@ -6,7 +6,7 @@ import {
   DecryptedProviderKey,
   DecryptedProviderKeyMapping,
 } from "../../../services/lib/keys";
-import ThemedTable from "../../shared/themed/themedTable";
+import ThemedTable, { ThemedTableProps } from "../../shared/themed/themedTable";
 import { useVaultPage } from "./useVaultPage";
 import ThemedModal from "../../shared/themed/themedModal";
 import { clsx } from "../../shared/clsx";
@@ -14,6 +14,8 @@ import useNotification from "../../shared/notification/useNotification";
 import { KeyIcon } from "@heroicons/react/24/outline";
 import CreateProviderKeyModal from "./createProviderKeyModal";
 import CreateProxyKeyModal from "./createProxyKeyModal";
+import { LimitCell } from "./limitsCell";
+import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 
 const VaultPage = () => {
   const [deleteProviderOpen, setDeleteProviderOpen] = useState(false);
@@ -36,6 +38,7 @@ const VaultPage = () => {
 
   const [isProviderOpen, setIsProviderOpen] = useState(false);
   const [isProxyOpen, setIsProxyOpen] = useState(false);
+  const { hasFlag: proxyKeyLimitsFlag } = useFeatureFlags("proxy_key_limits");
 
   const deleteProviderKey = async (id: string) => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })
@@ -63,10 +66,34 @@ const VaultPage = () => {
         setDeleteProxyOpen(false);
       });
   };
+  const proxyKeyColumns: ThemedTableProps["columns"] = [
+    {
+      name: "Name",
+      key: "helicone_proxy_key_name",
+      hidden: false,
+    },
+    {
+      name: "Provider Key Name",
+      key: "provider_key_name",
+      hidden: false,
+    },
+  ];
+
+  if (proxyKeyLimitsFlag) {
+    proxyKeyColumns.push({
+      name: "Limits",
+      key: "limits",
+      hidden: false,
+      className: "max-w-[200px]",
+      render: (row) => {
+        return <LimitCell limits={row.limits} />;
+      },
+    });
+  }
 
   return (
     <>
-      <div className="flex flex-col space-y-12 divide-y divide-gray-300 max-w-2xl py-4">
+      <div className="flex flex-col space-y-12 divide-y divide-gray-300 max-w-3xl py-4">
         <div className="flex flex-col space-y-4">
           <div className="flex flex-row justify-between w-full items-center">
             <h1 className="font-semibold text-2xl text-gray-900">
@@ -155,18 +182,7 @@ const VaultPage = () => {
             </ul>
           ) : proxyKeys.length > 0 ? (
             <ThemedTable
-              columns={[
-                {
-                  name: "Name",
-                  key: "helicone_proxy_key_name",
-                  hidden: false,
-                },
-                {
-                  name: "Provider Key Name",
-                  key: "provider_key_name",
-                  hidden: false,
-                },
-              ]}
+              columns={proxyKeyColumns}
               rows={proxyKeys}
               deleteHandler={(row) => {
                 setSelectedProxyKey(row);

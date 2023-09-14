@@ -17,8 +17,19 @@ async function handler({
   }
 
   const query = `
-  SELECT map.id, map.org_id, map.helicone_proxy_key_name, map.provider_key_id,
-  key.provider_name, key.vault_key_id, key.provider_key_name
+  SELECT 
+    map.id,
+    map.org_id,
+    map.helicone_proxy_key_name,
+    map.provider_key_id,
+    key.provider_name,
+    key.vault_key_id,
+    key.provider_key_name,
+    (
+      SELECT array_agg(row_to_json(h.*))
+      FROM helicone_proxy_key_limits h
+      WHERE h.helicone_proxy_key = map.id
+    ) as limits
   FROM helicone_proxy_keys map
   INNER JOIN provider_keys key ON key.id = map.provider_key_id
   WHERE map.org_id = $1

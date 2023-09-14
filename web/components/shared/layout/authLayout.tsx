@@ -64,7 +64,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   );
 
   const [open, setOpen] = useState(false);
-  const { hasFlag } = useFeatureFlags(org?.currentOrg.id || "", "webhook_beta");
+  const { hasFlag } = useFeatureFlags("webhook_beta");
 
   const navigation = [
     {
