@@ -67,42 +67,57 @@ const SecretInput = (props: { value: string }) => {
 
   return (
     <div className="flex flex-row items-center">
-      {isUserAdmin && (
-        <button
-          className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
-          onClick={() => setShow(!show)}
-        >
-          {show ? (
-            <EyeSlashIcon className="h-5 w-5 text-gray-900" />
-          ) : (
-            <EyeIcon className="h-5 w-5 text-gray-900" />
-          )}
-        </button>
-      )}
-
-      {show ? (
-        <Tooltip title="Click to Copy" placement="top" arrow>
+      {isUserAdmin ? (
+        <>
           <button
-            id="secret-key"
-            onClick={() => {
-              navigator.clipboard.writeText(value);
-              setNotification("Copied to clipboard", "success");
-            }}
-            className={clsx(
-              "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
-              "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
-            )}
+            className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
+            onClick={() => setShow(!show)}
           >
-            {value}
+            {show ? (
+              <EyeSlashIcon className="h-5 w-5 text-gray-900" />
+            ) : (
+              <EyeIcon className="h-5 w-5 text-gray-900" />
+            )}
           </button>
-        </Tooltip>
+
+          {show ? (
+            <Tooltip title="Click to Copy" placement="top" arrow>
+              <button
+                id="secret-key"
+                onClick={() => {
+                  navigator.clipboard.writeText(value);
+                  setNotification("Copied to clipboard", "success");
+                }}
+                className={clsx(
+                  "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
+                  "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+                )}
+              >
+                {value}
+              </button>
+            </Tooltip>
+          ) : (
+            <input
+              id="secret-key"
+              name="secret-key"
+              type={clsx(show ? "text" : "password")}
+              required
+              value={value}
+              disabled
+              className={clsx(
+                "text-md",
+                "block w-full rounded-md border-0 h-8 text-gray-900"
+              )}
+            />
+          )}
+        </>
       ) : (
         <input
           id="secret-key"
           name="secret-key"
           type={clsx(show ? "text" : "password")}
           required
-          value={value}
+          value={"********"}
           disabled
           className={clsx(
             "text-md",
