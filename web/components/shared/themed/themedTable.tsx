@@ -3,6 +3,12 @@ import { clsx } from "../clsx";
 import { useState } from "react";
 import { Tooltip } from "@mui/material";
 import useNotification from "../notification/useNotification";
+import {
+  useGetOrgMembers,
+  useGetOrgOwner,
+} from "../../../services/hooks/organizations";
+import { useOrg } from "../layout/organizationContext";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface ThemedTableProps {
   columns: {
@@ -22,18 +28,58 @@ const SecretInput = (props: { value: string }) => {
   const [show, setShow] = useState(false);
   const { setNotification } = useNotification();
 
+  const user = useUser();
+
+  const org = useOrg();
+
+  const { data, isLoading, refetch } = useGetOrgMembers(
+    org?.currentOrg.id || ""
+  );
+
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    org?.currentOrg.id || ""
+  );
+
+  const isOwner = org?.currentOrg.owner === user?.id;
+
+  const members = data?.data
+    ? data?.data.map((d) => {
+        return {
+          ...d,
+          isOwner: false,
+        };
+      })
+    : [];
+
+  const orgMembers = [
+    {
+      email: orgOwner?.data?.at(0)?.email,
+      member: "",
+      isOwner: true,
+      org_role: "admin",
+    },
+    ...members,
+  ];
+
+  const isUserAdmin =
+    isOwner ||
+    orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
+
   return (
     <div className="flex flex-row items-center">
-      <button
-        className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
-        onClick={() => setShow(!show)}
-      >
-        {show ? (
-          <EyeSlashIcon className="h-5 w-5 text-gray-900" />
-        ) : (
-          <EyeIcon className="h-5 w-5 text-gray-900" />
-        )}
-      </button>
+      {isUserAdmin && (
+        <button
+          className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
+          onClick={() => setShow(!show)}
+        >
+          {show ? (
+            <EyeSlashIcon className="h-5 w-5 text-gray-900" />
+          ) : (
+            <EyeIcon className="h-5 w-5 text-gray-900" />
+          )}
+        </button>
+      )}
+
       {show ? (
         <Tooltip title="Click to Copy" placement="top" arrow>
           <button
