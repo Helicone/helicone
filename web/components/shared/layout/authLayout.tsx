@@ -3,13 +3,10 @@ import Image from "next/image";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
-  ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
-  ArrowUpCircleIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BookOpenIcon,
-  BuildingOffice2Icon,
   BuildingOfficeIcon,
   ChartBarIcon,
   CircleStackIcon,
@@ -20,7 +17,6 @@ import {
   KeyIcon,
   LockClosedIcon,
   QuestionMarkCircleIcon,
-  SparklesIcon,
   TableCellsIcon,
   UserCircleIcon,
   UsersIcon,
@@ -36,14 +32,12 @@ import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
+import { BsTags } from "react-icons/bs";
 import { GrGraphQl } from "react-icons/gr";
-import { BsTags, BsTagsFill } from "react-icons/bs";
-import Notification from "../notification/Notification";
+import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useUserSettings } from "../../../services/hooks/userSettings";
-import ThemedModal from "../themed/themedModal";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
