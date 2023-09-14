@@ -44,6 +44,7 @@ import ThemedModal from "../themed/themedModal";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
+import { useGetOrgOwner } from "../../../services/hooks/organizations";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -58,6 +59,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
+  const orgOwner = useGetOrgOwner(org?.currentOrg.id || "");
+  orgOwner.data?.data?.[0].tier;
 
   const { userSettings, isLoading } = useUserSettings(
     org?.currentOrg.owner || ""

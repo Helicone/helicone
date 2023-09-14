@@ -6,7 +6,9 @@ import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 export async function getOwner(orgId: String, userId: string) {
   const query = `
   select email from organization o 
+    us.tier as tier,
     left join auth.users u on u.id = o.owner
+    left join user_settings us on us.user_id = u.id
     where o.id = $1 AND (
       -- Auth check
       EXISTS (
@@ -22,6 +24,7 @@ export async function getOwner(orgId: String, userId: string) {
 
   return await dbExecute<{
     email: string;
+    tier: string;
   }>(query, [orgId, userId]);
 }
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
