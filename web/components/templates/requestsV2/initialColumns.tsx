@@ -27,6 +27,7 @@ export const getInitialColumns: (
   isCached?: boolean
 ) => ColumnDef<NormalizedRequest>[] = (isCached = false) => [
   {
+    id: "createdAt",
     accessorKey: "createdAt",
     header: "Created At",
     cell: (info) => (
@@ -39,6 +40,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "status",
     accessorKey: "status",
     header: "Status",
     cell: (info) => {
@@ -54,6 +56,7 @@ export const getInitialColumns: (
     size: 100,
   },
   {
+    id: "requestText",
     accessorKey: "requestText",
     header: "Request",
     cell: (info) => info.getValue(),
@@ -62,6 +65,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "responseText",
     accessorKey: "responseText",
     header: "Response",
     cell: (info) => info.getValue(),
@@ -70,6 +74,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "model",
     accessorKey: "model",
     header: "Model",
     cell: (info) => <ModelPill model={info.getValue() as string} />,
@@ -79,6 +84,7 @@ export const getInitialColumns: (
     minSize: 200,
   },
   {
+    id: "totalTokens",
     accessorKey: "totalTokens",
     header: "Total Tokens",
     cell: (info) => info.getValue(),
@@ -87,6 +93,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "promptTokens",
     accessorKey: "promptTokens",
     header: "Prompt Tokens",
     cell: (info) => info.getValue(),
@@ -95,6 +102,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "completionTokens",
     accessorKey: "completionTokens",
     header: "Completion Tokens",
     cell: (info) => info.getValue(),
@@ -104,6 +112,7 @@ export const getInitialColumns: (
     size: 175,
   },
   {
+    id: "latency",
     accessorKey: "latency",
     header: "Latency",
     cell: (info) => (
@@ -114,6 +123,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "user",
     accessorKey: "user",
     header: "User",
     cell: (info) => info.getValue(),
@@ -122,6 +132,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "cost",
     accessorKey: "cost",
     header: "Cost",
     cell: (info) => (
@@ -129,6 +140,7 @@ export const getInitialColumns: (
     ),
   },
   {
+    id: "feedback",
     accessorKey: "feedback",
     header: "Feedback",
     cell: (info) => {
