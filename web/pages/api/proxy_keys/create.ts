@@ -107,4 +107,4 @@ async function handler({
   res.status(200).json({ error: null, data: newProxyMapping.data });
 }
 
-export default withAuth(handler, [Permission.MANAGE_KEYS]);
+export default withAuth(handler);

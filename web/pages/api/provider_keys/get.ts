@@ -5,7 +5,7 @@ import {
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
-import { Permission } from "../../../services/lib/user";
+import { Role } from "../../../services/lib/user";
 import { getDecryptedProviderKeysByOrgId } from "../../../services/lib/keys";
 
 async function handler({
@@ -28,10 +28,16 @@ async function handler({
     return;
   }
 
+  if (Role.MEMBER) {
+    keys.forEach((key) => {
+      key.provider_key = "";
+    });
+  }
+
   res.status(200).json({
     data: keys,
     error: null,
   });
 }
 
-export default withAuth(handler, [Permission.MANAGE_KEYS]);
+export default withAuth(handler);
