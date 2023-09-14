@@ -53,12 +53,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
 
-  const { userSettings, isLoading } = useUserSettings(
-    org?.currentOrg.owner || ""
-  );
-
-  console.log("currentUser", user?.id);
-  console.log("orgOwner", org?.currentOrg.owner);
+  const tier = org?.currentOrg.tier;
 
   const [open, setOpen] = useState(false);
   const { hasFlag } = useFeatureFlags(org?.currentOrg.id || "", "webhook_beta");
@@ -144,7 +139,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     });
   }
 
-  if (userSettings?.tier === "pro" || userSettings?.tier === "enterprise") {
+  if (tier === "pro" || tier === "enterprise") {
     accountNav.push({
       name: "Vault",
       href: "/vault",
@@ -295,7 +290,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p>Help And Support</p>
                         </Link>
                       </div>
-                      {userSettings?.tier === "free" ? (
+                      {tier === "free" ? (
                         <div className="p-4 flex w-full justify-center">
                           <button
                             onClick={() => setOpen(true)}
@@ -409,7 +404,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>Help And Support</p>
                   </Link>
                 </div>
-                {userSettings?.tier === "free" ? (
+                {tier === "free" ? (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
