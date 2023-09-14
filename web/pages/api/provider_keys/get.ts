@@ -28,7 +28,7 @@ async function handler({
     return;
   }
 
-  if (Role.MEMBER) {
+  if (userData.role === Role.MEMBER) {
     keys.forEach((key) => {
       key.provider_key = "";
     });
