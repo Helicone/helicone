@@ -14,6 +14,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Database } from "../../../supabase/database.types";
+import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 
 interface CreateProxyKeyModalProps {
   providerKeys: DecryptedProviderKey[];
@@ -153,7 +154,10 @@ const LimitsInput = (props: {
     limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][]
   ) => void;
 }) => {
+  const { hasFlag } = useFeatureFlags("proxy_key_limits");
+
   const [limits, setLimits] = useState<LimitRow[]>([]);
+  if (!hasFlag) return null;
   return (
     <div className="flex flex-col space-y-1.5 text-sm">
       <label htmlFor="provider-key-name">Limits</label>
