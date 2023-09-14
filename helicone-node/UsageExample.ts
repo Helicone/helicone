@@ -1,4 +1,4 @@
-import { HeliconeFeedbackRating } from "./core/HeliconeOpenAIApi";
+import { HeliconeFeedbackRating } from "./core/HeliconeFeedback";
 import { HeliconeProxyConfiguration } from "./core/HeliconeProxyConfiguration";
 import { HeliconeProxyOpenAIApi } from "./proxy_logger/HeliconeProxyOpenAIApi";
 
@@ -71,7 +71,7 @@ async function main() {
   const openAi = new HeliconeProxyOpenAIApi(config);
 
   // Run 1000 async feedback operations
-  await Promise.all(Array.from({ length: 50 }).map(() => feedback(openAi)));
+  await Promise.all(Array.from({ length: 15 }).map(() => feedback(openAi)));
 
   await delay(2000);
   console.log(
