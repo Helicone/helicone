@@ -83,7 +83,7 @@ export default function DraggableColumnHeader<T>(props: {
     >
       <div className="flex flex-row items-center gap-0.5">
         <button ref={dragRef} className="flex flex-row items-center">
-          <EllipsisVerticalIcon className="h-3 w-3" />
+          <EllipsisVerticalIcon className="h-3 w-3 -ml-1" />
           <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
           {header.isPlaceholder
             ? null
