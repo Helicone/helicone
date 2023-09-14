@@ -5,10 +5,12 @@ import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export async function getOwner(orgId: String, userId: string) {
   const query = `
-  select email from organization o 
+  select 
     us.tier as tier,
+    email
+    from organization o 
     left join auth.users u on u.id = o.owner
-    left join user_settings us on us.user_id = u.id
+    left join user_settings us on us.user = u.id
     where o.id = $1 AND (
       -- Auth check
       EXISTS (
@@ -41,5 +43,7 @@ export default async function handler(
     return;
   }
   const { id } = req.query;
-  res.status(200).json(await getOwner(id as string, user.data.user.id));
+  const owner = await getOwner(id as string, user.data.user.id);
+  console.log("owner", owner);
+  res.status(200).json(owner);
 }
