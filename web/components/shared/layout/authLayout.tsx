@@ -63,6 +63,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
     org?.currentOrg.owner || ""
   );
 
+  console.log("currentUser", user?.id);
+  console.log("orgOwner", org?.currentOrg.owner);
+
   const [open, setOpen] = useState(false);
   const { hasFlag } = useFeatureFlags(org?.currentOrg.id || "", "webhook_beta");
 
