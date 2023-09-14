@@ -12,7 +12,10 @@ import { CLICKHOUSE_PRICE_CALC } from "../../../../lib/sql/constants";
 import { buildFilterWithAuthClickHouse } from "../../../../services/lib/filters/filters";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { Permission } from "../../../../services/lib/user";
-const generateSubquery = (limit, index) => {
+const generateSubquery = (
+  limit: DecryptedProviderKeyMapping["limits"][number],
+  index: number
+) => {
   const secondsVal = `val_${index * 3}`;
   const orgIdVal = `val_${index * 3 + 1}`;
   const proxyKeyIdVal = `val_${index * 3 + 2}`;

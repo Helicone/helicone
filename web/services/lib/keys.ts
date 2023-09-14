@@ -8,14 +8,15 @@ export type DecryptedProviderKey = {
   provider_key: string | null;
   provider_name: string | null;
   provider_key_name: string | null;
-  limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"][];
 };
 
 export type HeliconeProxyKeys =
   Database["public"]["Tables"]["helicone_proxy_keys"]["Row"];
 
 export type DecryptedProviderKeyMapping = DecryptedProviderKey &
-  HeliconeProxyKeys;
+  HeliconeProxyKeys & {
+    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"][];
+  };
 
 export type AddKeyObj = {
   userId: string;
