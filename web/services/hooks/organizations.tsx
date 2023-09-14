@@ -95,11 +95,13 @@ const useOrgsContextManager = () => {
     }
   }, [orgs]);
 
+  const orgOwner = useGetOrgOwner(org?.id ?? "");
+
   let orgContextValue: OrgContextValue | null = null;
   if (org && orgs) {
     orgContextValue = {
       allOrgs: orgs,
-      currentOrg: org,
+      currentOrg: { ...org, tier: orgOwner.data?.data?.[0].tier ?? "free" },
       setCurrentOrg: (orgId) => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {
