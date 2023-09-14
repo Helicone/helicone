@@ -1,11 +1,3 @@
-alter table "public"."helicone_proxy_key_limits" drop constraint "chk_cost_currency";
-
-alter table "public"."helicone_proxy_key_limits" drop constraint "chk_ensure_one_cost_or_count";
-
-alter table "public"."helicone_proxy_key_limits" drop constraint "chk_not_all_null";
-
-alter table "public"."helicone_proxy_key_limits" drop constraint "chk_timewindow_must_exist";
-
 alter table "public"."helicone_proxy_key_limits" drop constraint "helicone_proxy_key_limits_provider_key_fkey";
 
 alter table "public"."helicone_proxy_key_limits" drop column "provider_key";
