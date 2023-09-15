@@ -38,6 +38,7 @@ export const getInitialColumns: (
     meta: {
       sortKey: "created_at",
     },
+    minSize: 175,
   },
   {
     id: "status",

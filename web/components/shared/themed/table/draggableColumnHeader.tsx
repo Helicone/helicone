@@ -82,12 +82,17 @@ export default function DraggableColumnHeader<T>(props: {
       className="text-left py-2 font-semibold text-gray-900"
     >
       <div className="flex flex-row items-center gap-0.5">
-        <button ref={dragRef} className="flex flex-row items-center">
+        <button
+          ref={dragRef}
+          className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 rounded-lg"
+        >
           <EllipsisVerticalIcon className="h-3 w-3 -ml-1" />
           <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
-          {header.isPlaceholder
-            ? null
-            : flexRender(header.column.columnDef.header, header.getContext())}
+          <span className="text-gray-900">
+            {header.isPlaceholder
+              ? null
+              : flexRender(header.column.columnDef.header, header.getContext())}
+          </span>
         </button>
 
         {sortable && hasSortKey && (
@@ -150,17 +155,5 @@ export default function DraggableColumnHeader<T>(props: {
         />
       </button>
     </th>
-    // <th
-    //   ref={dropRef}
-    //   colSpan={header.colSpan}
-    //   style={{ opacity: isDragging ? 0.5 : 1 }}
-    // >
-    //   <div ref={previewRef}>
-    //     {header.isPlaceholder
-    //       ? null
-    //       : flexRender(header.column.columnDef.header, header.getContext())}
-    //     <button ref={dragRef}>🟰</button>
-    //   </div>
-    // </th>
   );
 }
