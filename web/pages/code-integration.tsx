@@ -13,7 +13,7 @@ interface CodeExamplesProps {
 
 const PAGE_TITLE = "Code Integration";
 
-const Vault = (props: CodeExamplesProps) => {
+const Page = (props: CodeExamplesProps) => {
   const { user } = props;
 
   const [providerMethod, setProviderMethod] = useState("openai-proxy");
@@ -45,4 +45,4 @@ const Vault = (props: CodeExamplesProps) => {
   );
 };
 
-export default Vault;
+export default Page;
