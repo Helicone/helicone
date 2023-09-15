@@ -1,17 +1,8 @@
 import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/20/solid";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
+import { Providers, IntegrationMethods } from "@/types";
 
-export interface Providers {
-  openai: "openai";
-  anthropic: "anthropic";
-}
-
-export interface IntegrationMethods {
-  proxy: "proxy";
-  async: "async";
-}
 interface MethodForkProps {
   nextStep: (
     provider: keyof Providers,

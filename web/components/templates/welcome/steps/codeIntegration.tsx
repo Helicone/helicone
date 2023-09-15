@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import CodeSnippet from "../../home/codeSnippet";
-import { UnionProviderMethods } from "../welcomePage";
+import { UnionProviderMethods } from "@/types";
 import AnthropicProxy from "./codeSnippets/anthropic-proxy";
 import OpenAIAsync from "./codeSnippets/openai-async";
+import { PROVIDER_METHODS } from "@/lib/constants";
 
 interface CodeIntegrationProps {
-  nextStep: () => void;
+  nextStep?: () => void;
   providerMethod?: UnionProviderMethods;
   apiKey?: string;
 }
@@ -17,6 +18,7 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
     providerMethod = "openai-proxy",
     apiKey = "<YOUR_API_KEY>",
   } = props;
+  const foundMethod = PROVIDER_METHODS.find((el) => el.val === providerMethod);
 
   const [loaded, setLoaded] = useState(false);
 
@@ -36,10 +38,7 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
       )}
     >
       <p className="text-2xl md:text-5xl font-semibold text-center">
-        {providerMethod
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ")}
+        {foundMethod?.label}
       </p>
       <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
         Choose your preferred platform and follow the directions
@@ -58,12 +57,14 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
           <AnthropicProxy apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
         )}
       </div>
-      <button
-        onClick={nextStep}
-        className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
-      >
-        Ready to go!
-      </button>
+      {nextStep && (
+        <button
+          onClick={nextStep}
+          className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+        >
+          Ready to go!
+        </button>
+      )}
     </div>
   );
 };

@@ -83,16 +83,24 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <div className="lg:hidden">Github</div>
             </Link>
             {user ? (
-              <button
-                onClick={() => {
-                  supabaseClient.auth.signOut().then(() => {
-                    router.push("/");
-                  });
-                }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              >
-                Sign Out
-              </button>
+              <>
+                <Link
+                  href="/dashboard"
+                  className="bg-transparent hover:bg-gray-900 text-gray-900 hover:text-white border border-gray-900 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    supabaseClient.auth.signOut().then(() => {
+                      router.push("/");
+                    });
+                  }}
+                  className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-lg px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                >
+                  Sign Out
+                </button>
+              </>
             ) : (
               <Link
                 href="/signin"

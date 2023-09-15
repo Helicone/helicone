@@ -21,6 +21,7 @@ import {
   UserCircleIcon,
   UsersIcon,
   XMarkIcon,
+  CodeBracketIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -404,6 +405,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   >
                     <QuestionMarkCircleIcon className="h-4 w-4" />
                     <p>Help And Support</p>
+                  </Link>
+                  <Link
+                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    href={"/code-integration"}
+                    rel="noopener noreferrer"
+                  >
+                    <CodeBracketIcon className="h-4 w-4" />
+                    <p>Code Integration</p>
                   </Link>
                 </div>
                 {userSettings?.tier === "free" ? (

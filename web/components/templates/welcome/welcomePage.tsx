@@ -11,14 +11,12 @@ import EventListen from "./steps/eventListen";
 import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
-import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
+import MethodFork from "./steps/methodFork";
+import { Providers, IntegrationMethods, UnionProviderMethods } from "@/types";
 
 interface WelcomePageProps {}
 
 export type HeliconeMethod = "proxy" | "async";
-
-export type UnionProviderMethods = `${keyof Providers &
-  string}-${keyof IntegrationMethods & string}`;
 
 const WelcomePage = (props: WelcomePageProps) => {
   const user = useUser();
