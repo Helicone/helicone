@@ -81,37 +81,38 @@ const SecretInput = (props: { value: string }) => {
               <EyeIcon className="h-5 w-5 text-gray-900" />
             )}
           </button>
-
-          {show ? (
-            <Tooltip title="Click to Copy" placement="top" arrow>
-              <button
+          <div className="flex w-full min-w-[10rem]">
+            {show ? (
+              <Tooltip title="Click to Copy" placement="top" arrow>
+                <button
+                  id="secret-key"
+                  onClick={() => {
+                    navigator.clipboard.writeText(value);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                  className={clsx(
+                    "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
+                    "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+                  )}
+                >
+                  {value}
+                </button>
+              </Tooltip>
+            ) : (
+              <input
                 id="secret-key"
-                onClick={() => {
-                  navigator.clipboard.writeText(value);
-                  setNotification("Copied to clipboard", "success");
-                }}
+                name="secret-key"
+                type={clsx(show ? "text" : "password")}
+                required
+                value={"*************************"}
+                disabled
                 className={clsx(
-                  "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
-                  "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+                  "text-md",
+                  "block w-full rounded-md border-0 h-8 text-gray-900"
                 )}
-              >
-                {value}
-              </button>
-            </Tooltip>
-          ) : (
-            <input
-              id="secret-key"
-              name="secret-key"
-              type={clsx(show ? "text" : "password")}
-              required
-              value={value}
-              disabled
-              className={clsx(
-                "text-md",
-                "block w-full rounded-md border-0 h-8 text-gray-900"
-              )}
-            />
-          )}
+              />
+            )}
+          </div>
         </>
       ) : (
         <input
@@ -119,7 +120,7 @@ const SecretInput = (props: { value: string }) => {
           name="secret-key"
           type={clsx(show ? "text" : "password")}
           required
-          value={"********"}
+          value={"*************************"}
           disabled
           className={clsx(
             "text-md",
