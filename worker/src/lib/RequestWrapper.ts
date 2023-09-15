@@ -8,6 +8,7 @@ import { Env, hash } from "..";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 import { Database } from "../../supabase/database.types";
+import { checkLimits } from "./limits/check";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -190,7 +191,7 @@ export class RequestWrapper {
       if (providerKey.error || !providerKey.data) {
         return {
           data: null,
-          error: "Proxy key not found",
+          error: `Proxy key not found. Error: ${providerKey.error}`,
         };
       }
 
@@ -228,18 +229,39 @@ export class RequestWrapper {
     }
     const proxyKeyId = match[0];
 
-    const storedProxyKey = await supabaseClient
-      .from("helicone_proxy_keys")
-      .select("*")
-      .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
-      .single();
+    //TODO figure out how to make this into one query with this syntax
+    // https://supabase.com/docs/guides/api/joins-and-nesting
+
+    const [storedProxyKey, limits] = await Promise.all([
+      supabaseClient
+        .from("helicone_proxy_keys")
+        .select("*")
+        .eq("id", proxyKeyId)
+        .eq("soft_delete", "false")
+        .single(),
+      supabaseClient
+        .from("helicone_proxy_key_limits")
+        .select("*")
+        .eq("helicone_proxy_key", proxyKeyId),
+    ]);
 
     if (storedProxyKey.error || !storedProxyKey.data) {
       return {
         data: null,
-        error: "Proxy key not found",
+        error: "Proxy key not found in storedProxyKey",
       };
+    }
+
+    if (limits.data && limits.data.length > 0) {
+      console.log("CHECKING LIMITS");
+      if (!(await checkLimits(limits.data, env))) {
+        return {
+          data: null,
+          error: "Limits are not valid",
+        };
+      }
+    } else {
+      console.log("NO LIMITS");
     }
 
     this.heliconeProxyKeyId = storedProxyKey.data.id;
