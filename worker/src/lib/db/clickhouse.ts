@@ -1,10 +1,30 @@
 import { Result } from "../../results";
 import { createClient } from "@clickhouse/client-web";
 import { WebClickHouseClient } from "@clickhouse/client-web/dist/client";
+import dateFormat from "dateformat";
+
 export interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
+}
+
+function paramsToValues(params: (number | string | boolean | Date)[]) {
+  return params
+    .map((p) => {
+      if (p instanceof Date) {
+        //ex: 2023-05-27T08:21:26
+        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
+      } else {
+        return p;
+      }
+    })
+    .reduce((acc, parameter, index) => {
+      return {
+        ...acc,
+        [`val_${index}`]: parameter,
+      };
+    }, {});
 }
 
 export class ClickhouseClientWrapper {
@@ -65,6 +85,36 @@ export class ClickhouseClientWrapper {
       return {
         data: null,
         error: JSON.stringify(error),
+      };
+    }
+  }
+
+  async dbQuery<T>(
+    query: string,
+    parameters: (number | string | boolean | Date)[]
+  ): Promise<Result<T[], string>> {
+    try {
+      const query_params = paramsToValues(parameters);
+
+      const queryResult = await this.clickHouseClient.query({
+        query,
+        query_params,
+        format: "JSONEachRow",
+        // Recommended for cluster usage to avoid situations
+        // where a query processing error occurred after the response code
+        // and HTTP headers were sent to the client.
+        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: await queryResult.json<T[]>(), error: null };
+    } catch (err) {
+      console.error("Error executing query: ", query, parameters);
+      console.error(err);
+      return {
+        data: null,
+        error: JSON.stringify(err),
       };
     }
   }
