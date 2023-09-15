@@ -1,6 +1,31 @@
+export function recursivelyConsolidateFunctionCall(
+  existingFunctionCall: any,
+  functionCallDelta: any
+): any {
+  Object.keys(functionCallDelta).forEach((key) => {
+    if (existingFunctionCall[key] === undefined) {
+      existingFunctionCall[key] = functionCallDelta[key];
+    } else if (typeof existingFunctionCall[key] === "object") {
+      recursivelyConsolidateFunctionCall(
+        existingFunctionCall[key],
+        functionCallDelta[key]
+      );
+    } else if (typeof existingFunctionCall[key] === "number") {
+      existingFunctionCall[key] += functionCallDelta[key];
+    } else if (typeof existingFunctionCall[key] === "string") {
+      existingFunctionCall[key] += functionCallDelta[key];
+    } else {
+      throw new Error("Invalid function call type");
+    }
+  });
+  return existingFunctionCall;
+}
+
 export function consolidateTextFields(responseBody: any[]): any {
   try {
+    console.log("Consolidating text fields", JSON.stringify(responseBody));
     const consolidated = responseBody.reduce((acc, cur) => {
+      console.log("Mapping", JSON.stringify(acc), JSON.stringify(cur));
       if (!cur) {
         return acc;
       } else if (acc.choices === undefined) {
@@ -21,6 +46,12 @@ export function consolidateTextFields(responseBody: any[]): any {
                   content: c.delta.content
                     ? c.delta.content + (cur.choices[i].delta.content ?? "")
                     : cur.choices[i].delta.content,
+                  function_call: c.delta.function_call
+                    ? recursivelyConsolidateFunctionCall(
+                        c.delta.function_call,
+                        cur.choices[i].delta.function_call ?? {}
+                      )
+                    : cur.choices[i].delta.function_call,
                 },
               };
             } else if (
