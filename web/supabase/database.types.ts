@@ -193,8 +193,8 @@ export interface Database {
           count: number | null
           created_at: string | null
           currency: string | null
+          helicone_proxy_key: string
           id: string
-          provide_key: string
           timewindow_seconds: number | null
         }
         Insert: {
@@ -202,8 +202,8 @@ export interface Database {
           count?: number | null
           created_at?: string | null
           currency?: string | null
+          helicone_proxy_key: string
           id: string
-          provide_key: string
           timewindow_seconds?: number | null
         }
         Update: {
@@ -211,21 +211,15 @@ export interface Database {
           count?: number | null
           created_at?: string | null
           currency?: string | null
+          helicone_proxy_key?: string
           id?: string
-          provide_key?: string
           timewindow_seconds?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "helicone_proxy_key_limits_provide_key_fkey"
-            columns: ["provide_key"]
-            referencedRelation: "provider_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "helicone_proxy_key_limits_provide_key_fkey"
-            columns: ["provide_key"]
-            referencedRelation: "decrypted_provider_keys"
+            foreignKeyName: "helicone_proxy_key_limits_helicone_proxy_key_fkey"
+            columns: ["helicone_proxy_key"]
+            referencedRelation: "helicone_proxy_keys"
             referencedColumns: ["id"]
           }
         ]

@@ -1,4 +1,4 @@
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
 import { useState } from "react";
 import { Tooltip } from "@mui/material";
@@ -10,12 +10,14 @@ import {
 import { useOrg } from "../layout/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 
-interface ThemedTableProps {
+export interface ThemedTableProps {
   columns: {
     name: string;
     key: string;
     hidden: boolean;
     secret?: boolean;
+    render?: (row: any) => JSX.Element;
+    className?: string;
   }[]; // hidden will hide this column on mobile
   rows?: any[];
   viewHandler?: (row: any) => void;
@@ -202,11 +204,15 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-gray-200",
                           col.hidden ? "hidden" : "",
-                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate max-w-[150px]"
+                          "max-w-[150px]",
+                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate",
+                          col.className
                         )}
                       >
                         {col.secret === true ? (
                           <SecretInput value={row[col.key]} />
+                        ) : col.render !== undefined ? (
+                          col.render(row)
                         ) : (
                           <span>{row[col.key] || "n/a"}</span>
                         )}

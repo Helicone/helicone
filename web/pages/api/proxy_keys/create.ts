@@ -10,6 +10,7 @@ import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 import crypto from "crypto";
 import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
+import { Database } from "../../../supabase/database.types";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -24,9 +25,10 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
-  const { providerKeyId, heliconeProxyKeyName } = req.body as {
+  const { providerKeyId, heliconeProxyKeyName, limits } = req.body as {
     providerKeyId: string;
     heliconeProxyKeyName: string;
+    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][];
   };
 
   if (providerKeyId === undefined) {
@@ -104,6 +106,34 @@ async function handler({
   }
 
   newProxyMapping.data.helicone_proxy_key = proxyKey;
+
+  if (limits.length > 0) {
+    console.log("inserting limits", limits);
+    const insertLimits = await supabaseServer
+      .from("helicone_proxy_key_limits")
+      .insert(
+        limits.map((limit) => ({
+          id: crypto.randomUUID(),
+          helicone_proxy_key: proxyKeyId,
+          timewindow_seconds: limit.timewindow_seconds,
+          count: limit.count,
+          cost: limit.cost,
+          currency: limit.currency,
+        }))
+      );
+    if (insertLimits.error) {
+      const remove = await supabaseServer
+        .from("helicone_proxy_keys")
+        .delete()
+        .eq("id", proxyKeyId);
+      console.error("Failed to insert limits, removing proxy key", remove);
+
+      console.error("Failed to insert limits", insertLimits.error);
+      res.status(500).json({ error: insertLimits.error.message, data: null });
+      return;
+    }
+  }
+
   res.status(200).json({ error: null, data: newProxyMapping.data });
 }
 
