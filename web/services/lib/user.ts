@@ -15,6 +15,7 @@ const getUserSettings = async () => {
 enum Role {
   ADMIN = "admin",
   OWNER = "owner",
+  MEMBER = "member",
 }
 
 enum Permission {
@@ -24,6 +25,7 @@ enum Permission {
 const rolePermissions: Record<Role, Permission[]> = {
   [Role.ADMIN]: [Permission.MANAGE_KEYS],
   [Role.OWNER]: [Permission.MANAGE_KEYS],
+  [Role.MEMBER]: [],
 };
 
 function hasPermission(role: Role, permission: Permission): boolean {

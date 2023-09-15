@@ -3,6 +3,12 @@ import { clsx } from "../clsx";
 import { useState } from "react";
 import { Tooltip } from "@mui/material";
 import useNotification from "../notification/useNotification";
+import {
+  useGetOrgMembers,
+  useGetOrgOwner,
+} from "../../../services/hooks/organizations";
+import { useOrg } from "../layout/organizationContext";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export interface ThemedTableProps {
   columns: {
@@ -24,41 +30,97 @@ const SecretInput = (props: { value: string }) => {
   const [show, setShow] = useState(false);
   const { setNotification } = useNotification();
 
+  const user = useUser();
+
+  const org = useOrg();
+
+  const { data, isLoading, refetch } = useGetOrgMembers(
+    org?.currentOrg.id || ""
+  );
+
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    org?.currentOrg.id || ""
+  );
+
+  const isOwner = org?.currentOrg.owner === user?.id;
+
+  const members = data?.data
+    ? data?.data.map((d) => {
+        return {
+          ...d,
+          isOwner: false,
+        };
+      })
+    : [];
+
+  const orgMembers = [
+    {
+      email: orgOwner?.data?.at(0)?.email,
+      member: "",
+      isOwner: true,
+      org_role: "admin",
+    },
+    ...members,
+  ];
+
+  const isUserAdmin =
+    isOwner ||
+    orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
+
   return (
     <div className="flex flex-row items-center">
-      <button
-        className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
-        onClick={() => setShow(!show)}
-      >
-        {show ? (
-          <EyeSlashIcon className="h-5 w-5 text-gray-900" />
-        ) : (
-          <EyeIcon className="h-5 w-5 text-gray-900" />
-        )}
-      </button>
-      {show ? (
-        <Tooltip title="Click to Copy" placement="top" arrow>
+      {isUserAdmin ? (
+        <>
           <button
-            id="secret-key"
-            onClick={() => {
-              navigator.clipboard.writeText(value);
-              setNotification("Copied to clipboard", "success");
-            }}
-            className={clsx(
-              "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
-              "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
-            )}
+            className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
+            onClick={() => setShow(!show)}
           >
-            {value}
+            {show ? (
+              <EyeSlashIcon className="h-5 w-5 text-gray-900" />
+            ) : (
+              <EyeIcon className="h-5 w-5 text-gray-900" />
+            )}
           </button>
-        </Tooltip>
+          <div className="flex w-full min-w-[10rem]">
+            {show ? (
+              <Tooltip title="Click to Copy" placement="top" arrow>
+                <button
+                  id="secret-key"
+                  onClick={() => {
+                    navigator.clipboard.writeText(value);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                  className={clsx(
+                    "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
+                    "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+                  )}
+                >
+                  {value}
+                </button>
+              </Tooltip>
+            ) : (
+              <input
+                id="secret-key"
+                name="secret-key"
+                type={clsx(show ? "text" : "password")}
+                required
+                value={"*************************"}
+                disabled
+                className={clsx(
+                  "text-md",
+                  "block w-full rounded-md border-0 h-8 text-gray-900"
+                )}
+              />
+            )}
+          </div>
+        </>
       ) : (
         <input
           id="secret-key"
           name="secret-key"
           type={clsx(show ? "text" : "password")}
           required
-          value={value}
+          value={"*************************"}
           disabled
           className={clsx(
             "text-md",
