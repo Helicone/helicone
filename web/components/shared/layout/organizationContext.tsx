@@ -1,9 +1,12 @@
 import React, { useContext } from "react";
 import { Database } from "../../../supabase/database.types";
 import { useOrgsContextManager } from "../../../services/hooks/organizations";
+import { Owner } from "../../../pages/api/organization/[id]/owner";
 
 export interface OrgContextValue {
-  currentOrg: Database["public"]["Tables"]["organization"]["Row"];
+  currentOrg: Database["public"]["Tables"]["organization"]["Row"] & {
+    tier: string;
+  };
   allOrgs: Database["public"]["Tables"]["organization"]["Row"][];
   setCurrentOrg: (
     orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]

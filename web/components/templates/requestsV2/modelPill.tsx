@@ -8,7 +8,7 @@ interface ModelPillProps {
 const ModelPill = (props: ModelPillProps) => {
   const { model } = props;
 
-  const builderType = getBuilderType(model);
+  const builderType = getBuilderType(model, "OPENAI"); //TODO move provider to props
 
   let modelMapping = {
     ChatGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
@@ -16,6 +16,7 @@ const ModelPill = (props: ModelPillProps) => {
     ModerationBuilder: "bg-teal-50 text-teal-700 ring-teal-200",
     EmbeddingBuilder: "bg-blue-50 text-blue-700 ring-blue-200",
     ClaudeBuilder: "bg-orange-50 text-orange-700 ring-orange-200",
+    CustomBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
   };
 
   // const color = modelMapping[builderType] || "gray";

@@ -1,9 +1,9 @@
-import { Env } from "../..";
+import { Provider } from "../..";
 import GPT3Tokenizer from "gpt3-tokenizer";
 
 export async function getTokenCount(
   inputText: string,
-  provider: Env["PROVIDER"],
+  provider: Provider,
   tokenCalcUrl: string
 ): Promise<number> {
   if (provider === "OPENAI") {

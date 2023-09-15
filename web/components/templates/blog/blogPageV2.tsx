@@ -20,6 +20,39 @@ type blogStructure = {
 
 const blogContent: blogStructure[] = [
   {
+    title:
+      "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
+    description:
+      "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
+    badgeText: "Product",
+    badgeColor: "bg-blue-50 text-blue-700 ring-blue-600/10",
+    date: "Sep 13, 2023",
+    href: "/blog/vault",
+    imageUrl: "/assets/blog/vault_asset.png",
+    authors: [
+      {
+        name: "Cole Gottdank",
+        imageUrl: "/assets/blog/colegottdank-headshot.png",
+      },
+    ],
+  },
+  {
+    title: "Life after Y Combinator: Three Key Lessons for Startups",
+    description:
+      "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
+    badgeText: "Personal",
+    badgeColor: "bg-orange-50 text-orange-700 ring-orange-600/10",
+    date: "Sep 11, 2023",
+    href: "/blog/life-after-yc",
+    imageUrl: "/assets/blog/yc.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+  },
+  {
     title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
     description:
       "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
@@ -139,12 +172,15 @@ const BlogPage = (props: BlogPageProps) => {
               href={blog.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex flex-col sm:flex-row gap-8 h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
+              className="w-full flex flex-col sm:flex-row gap-8 h-full sm:h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
             >
               <div className="w-full sm:w-2/5 rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
                 <img
                   src={blog.imageUrl}
                   alt="App screenshot"
+                  style={{
+                    objectFit: "cover",
+                  }}
                   className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"
                 />
               </div>

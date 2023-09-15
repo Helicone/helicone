@@ -11,6 +11,8 @@ import "../styles/index.css";
 
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/shared/layout/organizationContext";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 if (
   typeof window !== "undefined" &&
@@ -44,10 +46,12 @@ export default function MyApp({
       >
         <QueryClientProvider client={queryClient}>
           <NotificationProvider>
-            <OrgContextProvider>
-              <Component {...pageProps} />
-            </OrgContextProvider>
-            <Notification />
+            <DndProvider backend={HTML5Backend}>
+              <OrgContextProvider>
+                <Component {...pageProps} />
+              </OrgContextProvider>
+              <Notification />
+            </DndProvider>
           </NotificationProvider>
         </QueryClientProvider>
       </SessionContextProvider>

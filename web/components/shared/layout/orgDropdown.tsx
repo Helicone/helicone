@@ -240,6 +240,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
       </ThemedModal>
       <AddMemberModal
         orgId={org?.currentOrg.id || ""}
+        orgOwnerId={org?.currentOrg.owner || ""}
         open={addOpen}
         setOpen={setAddOpen}
       />

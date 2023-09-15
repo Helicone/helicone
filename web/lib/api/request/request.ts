@@ -14,7 +14,7 @@ import {
   dbQueryClickhouse,
   printRunnableQuery,
 } from "../db/dbExecute";
-export type Provider = "OPENAI" | "ANTHROPIC";
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000;
 export interface HeliconeRequest {
   response_id: string;
