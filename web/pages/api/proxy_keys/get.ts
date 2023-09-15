@@ -5,7 +5,6 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
 import { DecryptedProviderKeyMapping } from "../../../services/lib/keys";
-import { Permission } from "../../../services/lib/user";
 
 async function handler({
   req,
@@ -48,4 +47,4 @@ async function handler({
   res.status(200).json({ error: null, data: keyMappings });
 }
 
-export default withAuth(handler, [Permission.MANAGE_KEYS]);
+export default withAuth(handler);
