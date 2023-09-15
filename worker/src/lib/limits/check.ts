@@ -1,4 +1,4 @@
-import { Env } from "../..";
+import { Env, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 
@@ -51,6 +51,15 @@ export async function checkLimits(
   limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"][],
   env: Env
 ): Promise<boolean> {
+  const cacheKey = (await hash(JSON.stringify(limits))).substring(0, 32);
+  const cached = await env.CACHE_KV.get(cacheKey);
+  if (cached) {
+    console.log("Using cached limits");
+    return cached === "true";
+  } else {
+    console.log("No cached limits");
+  }
+
   const timeWindows = limits.map((_, i) => generateSubquery(i));
   const query = `SELECT [${timeWindows.join(",")}]`;
   const client = new ClickhouseClientWrapper(env);
@@ -61,6 +70,12 @@ export async function checkLimits(
       limit.helicone_proxy_key,
     ])
   );
+  if (error) {
+    console.error("Error checking limits:", error);
+    return false;
+  } else {
+    console.log("Checked limits:", keyMappings);
+  }
   const limitResults = (Object.values(keyMappings?.[0])?.[0] ?? []) as [
     number,
     number
@@ -70,19 +85,28 @@ export async function checkLimits(
     const limitId = limits[index].id;
     return { count: +count, cost: +cost, limitId };
   }, {});
-  return limits.every((limit) => {
+
+  console.log("Remapped results:", remappedResults);
+  console.log("Limits:", limits);
+  const result = limits.every((limit) => {
     const limitResult = remappedResults.find(
       (result) => result.limitId === limit.id
     );
     if (!limitResult) {
       return false;
     }
-    if (limitResult.cost !== undefined) {
+    if (limit.cost !== null) {
+      console.log("Checking cost:", limitResult.cost, limit.cost);
       return limitResult.cost <= (limit?.cost ?? 0);
-    } else if (limitResult.count !== undefined) {
+    } else if (limit.count !== null) {
+      console.log("Checking count:", limitResult.count, limit.count);
       return limitResult.count <= (limit?.count ?? 0);
     } else {
+      console.log("No cost or count limit");
       return false;
     }
   });
+
+  await env.CACHE_KV.put(cacheKey, result.toString(), { expirationTtl: 30 });
+  return result;
 }

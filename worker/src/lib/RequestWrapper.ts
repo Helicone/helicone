@@ -242,8 +242,7 @@ export class RequestWrapper {
       supabaseClient
         .from("helicone_proxy_key_limits")
         .select("*")
-        .eq("helicone_proxy_key", proxyKeyId)
-        .eq("soft_delete", "false"),
+        .eq("helicone_proxy_key", proxyKeyId),
     ]);
 
     if (storedProxyKey.error || !storedProxyKey.data) {
@@ -254,12 +253,15 @@ export class RequestWrapper {
     }
 
     if (limits.data && limits.data.length > 0) {
-      if (!checkLimits(limits.data, env)) {
+      console.log("CHECKING LIMITS");
+      if (!(await checkLimits(limits.data, env))) {
         return {
           data: null,
           error: "Limits are not valid",
         };
       }
+    } else {
+      console.log("NO LIMITS");
     }
 
     this.heliconeProxyKeyId = storedProxyKey.data.id;
