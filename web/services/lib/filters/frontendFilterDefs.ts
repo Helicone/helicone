@@ -26,27 +26,27 @@ interface Operator<T> {
 const textOperators: Operator<keyof TextOperators>[] = [
   {
     value: "equals",
-    label: "=",
+    label: "equals",
     type: "text",
   },
   {
     value: "not-equals",
-    label: "!=",
+    label: "not equals",
     type: "text",
   },
   {
     value: "contains",
-    label: "CONTAINS",
+    label: "contains",
     type: "text",
   },
   {
     value: "ilike",
-    label: "ILIKE",
+    label: "ilike",
     type: "text",
   },
   {
     value: "like",
-    label: "LIKE",
+    label: "like",
     type: "text",
   },
 ];
@@ -54,22 +54,22 @@ const textOperators: Operator<keyof TextOperators>[] = [
 const numberOperators: Operator<keyof NumberOperators>[] = [
   {
     value: "equals",
-    label: "=",
+    label: "equals",
     type: "number",
   },
   {
     value: "not-equals",
-    label: "!=",
+    label: "not equals",
     type: "text",
   },
   {
     value: "gte",
-    label: ">=",
+    label: "greater than or equal to",
     type: "number",
   },
   {
     value: "lte",
-    label: "<=",
+    label: "less than or equal to",
     type: "number",
   },
 ];
@@ -77,7 +77,7 @@ const numberOperators: Operator<keyof NumberOperators>[] = [
 const booleanOperators: Operator<keyof BooleanOperators>[] = [
   {
     value: "equals",
-    label: "=",
+    label: "equals",
     type: "bool",
   },
 ];
@@ -85,12 +85,12 @@ const booleanOperators: Operator<keyof BooleanOperators>[] = [
 const timestampOperators: Operator<keyof TimestampOperators>[] = [
   {
     value: "gte",
-    label: ">=",
+    label: "greater than or equal to",
     type: "timestamp",
   },
   {
     value: "lte",
-    label: "<=",
+    label: "less than or equal to",
     type: "timestamp",
   },
 ];
