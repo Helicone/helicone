@@ -40,7 +40,16 @@ const AddMemberModal = (props: AddMemberModalProps) => {
     setIsLoading(true);
     if (userSettings?.tier === "free" && members.length >= 4) {
       setNotification(
-        "You have reached the maximum number of members for your plan.",
+        "You have reached the maximum number of members for the free plan.",
+        "error"
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    if (userSettings?.tier === "pro" && members.length >= 9) {
+      setNotification(
+        "You have reached the maximum number of members for the pro plan.",
         "error"
       );
       setIsLoading(false);
