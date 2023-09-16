@@ -50,6 +50,28 @@ export default function OrgDropdown(props: OrgDropdownProps) {
     (icon) => icon.name === orgContext?.currentOrg.color
   );
 
+  const createNewOrgHandler = () => {
+    if (ownedOrgs === undefined) {
+      setNotification("Error creating organization.", "error");
+      return;
+    }
+    if (userSettings?.tier === "free" && ownedOrgs?.length >= 1) {
+      setNotification(
+        "You have reached the maximum number of organizations for the free plan.",
+        "error"
+      );
+      return;
+    }
+    if (userSettings?.tier === "pro" && ownedOrgs?.length >= 5) {
+      setNotification(
+        "You have reached the maximum number of organizations for the pro plan.",
+        "error"
+      );
+      return;
+    }
+    setCreateOpen(true);
+  };
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left">
@@ -187,20 +209,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 </button>
                 <button
                   onClick={() => {
-                    if (
-                      !(
-                        userSettings?.tier === "pro" ||
-                        userSettings?.tier === "enterprise"
-                      ) &&
-                      process.env.NEXT_PUBLIC_HELICONE_RESTRICT_PRO === "true"
-                    ) {
-                      setNotification(
-                        "You must be on a paid plan to create an organization.",
-                        "error"
-                      );
-                      return;
-                    }
-                    setCreateOpen(true);
+                    createNewOrgHandler();
                   }}
                   className={clsx(
                     "flex items-center text-gray-700 hover:bg-sky-100 rounded-md text-sm pl-4 py-2 w-full truncate"
