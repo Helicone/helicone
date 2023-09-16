@@ -84,6 +84,8 @@ const tiers = [
       "Dedicated Support Channel (24/7 access)",
       "Custom ETL integrations",
       "Priority Feature Requests",
+      "Up to unlimited organizations",
+      "Up to unlimited seats per organization",
     ],
     buttonText: "Contact us",
     backgroundColor: "bg-purple-600",
