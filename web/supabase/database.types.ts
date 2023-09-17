@@ -273,6 +273,49 @@ export interface Database {
           }
         ]
       }
+      job: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          name?: string
+          org_id?: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       layout: {
         Row: {
           columns: Json | null
@@ -532,11 +575,13 @@ export interface Database {
           helicone_proxy_key_id: string | null
           helicone_user: string | null
           id: string
+          job_id: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
           properties: Json | null
           provider: string
+          task_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -549,11 +594,13 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
+          job_id?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          task_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -566,11 +613,13 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
+          job_id?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
+          task_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -602,6 +651,18 @@ export interface Database {
             foreignKeyName: "request_helicone_user_fkey"
             columns: ["helicone_user"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_id_fkey"
+            columns: ["job_id"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "task"
             referencedColumns: ["id"]
           }
         ]
@@ -641,6 +702,86 @@ export interface Database {
           status?: number | null
         }
         Relationships: []
+      }
+      task: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          job: string
+          name: string
+          org_id: string
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description?: string
+          id: string
+          job: string
+          name?: string
+          org_id: string
+          status?: string
+          timeout_seconds?: number
+          updated_at: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          job?: string
+          name?: string
+          org_id?: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_job_fkey"
+            columns: ["job"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      task_parents: {
+        Row: {
+          parent_task_id: string
+          task_id: string
+        }
+        Insert: {
+          parent_task_id: string
+          task_id: string
+        }
+        Update: {
+          parent_task_id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_parents_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            referencedRelation: "task"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_parents_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "task"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_api_keys: {
         Row: {
