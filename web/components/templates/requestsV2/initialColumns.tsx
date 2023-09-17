@@ -3,6 +3,8 @@ import { getUSDateFromString } from "../../shared/utils/utils";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
+import { clsx } from "../../shared/clsx";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -25,6 +27,7 @@ export const getInitialColumns: (
   isCached?: boolean
 ) => ColumnDef<NormalizedRequest>[] = (isCached = false) => [
   {
+    id: "createdAt",
     accessorKey: "createdAt",
     header: "Created At",
     cell: (info) => (
@@ -35,8 +38,10 @@ export const getInitialColumns: (
     meta: {
       sortKey: "created_at",
     },
+    minSize: 175,
   },
   {
+    id: "status",
     accessorKey: "status",
     header: "Status",
     cell: (info) => {
@@ -52,6 +57,7 @@ export const getInitialColumns: (
     size: 100,
   },
   {
+    id: "requestText",
     accessorKey: "requestText",
     header: "Request",
     cell: (info) => info.getValue(),
@@ -60,6 +66,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "responseText",
     accessorKey: "responseText",
     header: "Response",
     cell: (info) => info.getValue(),
@@ -68,6 +75,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "model",
     accessorKey: "model",
     header: "Model",
     cell: (info) => <ModelPill model={info.getValue() as string} />,
@@ -77,6 +85,7 @@ export const getInitialColumns: (
     minSize: 200,
   },
   {
+    id: "totalTokens",
     accessorKey: "totalTokens",
     header: "Total Tokens",
     cell: (info) => info.getValue(),
@@ -85,6 +94,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "promptTokens",
     accessorKey: "promptTokens",
     header: "Prompt Tokens",
     cell: (info) => info.getValue(),
@@ -93,6 +103,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "completionTokens",
     accessorKey: "completionTokens",
     header: "Completion Tokens",
     cell: (info) => info.getValue(),
@@ -102,6 +113,7 @@ export const getInitialColumns: (
     size: 175,
   },
   {
+    id: "latency",
     accessorKey: "latency",
     header: "Latency",
     cell: (info) => (
@@ -112,6 +124,7 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "user",
     accessorKey: "user",
     header: "User",
     cell: (info) => info.getValue(),
@@ -120,10 +133,34 @@ export const getInitialColumns: (
     },
   },
   {
+    id: "cost",
     accessorKey: "cost",
     header: "Cost",
     cell: (info) => (
       <span>${isCached ? 0 : formatNumber(Number(info.getValue()))}</span>
     ),
+  },
+  {
+    id: "feedback",
+    accessorKey: "feedback",
+    header: "Feedback",
+    cell: (info) => {
+      const feedback = info.getValue() as NormalizedRequest["feedback"];
+      const rating = feedback?.rating;
+
+      if (rating === null) {
+        return <span className="text-gray-500"></span>;
+      }
+
+      return (
+        <span className={clsx(rating ? "text-green-700" : "text-red-700")}>
+          {rating ? (
+            <HandThumbUpIcon className="h-4 w-4 inline" />
+          ) : (
+            <HandThumbDownIcon className="h-4 w-4 inline" />
+          )}
+        </span>
+      );
+    },
   },
 ];

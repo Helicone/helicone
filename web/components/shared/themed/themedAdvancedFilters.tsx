@@ -1,14 +1,5 @@
-import { Listbox, Popover, Transition } from "@headlessui/react";
-import { PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Dispatch, SetStateAction } from "react";
 import { Result } from "../../../lib/result";
 import {
   ColumnType,
@@ -32,8 +23,8 @@ export function AdvancedFilters({
   ) => Promise<Result<void, string>>;
 }) {
   return (
-    <div className="flex flex-col bg-white p-4 rounded-lg border border-gray-300 border-dashed mt-8">
-      <p className="text-md text-gray-500">Filters</p>
+    <div className="flex flex-col bg-white p-4 rounded-lg border border-gray-300 mt-8">
+      <p className="text-sm text-gray-500 font-medium">Filters</p>
       <div className="flex flex-col gap-2 bg-white space-y-2 mt-4">
         {filters.map((_filter, index) => {
           return (
@@ -97,7 +88,6 @@ function AdvancedFilterInput({
   inputParams?: string[];
   onSearchHandler?: (search: string) => Promise<Result<void, string>>;
 }) {
-  const router = useRouter();
   // if any of the inputs below are changed, we want to set the page number back to 1
   switch (type) {
     case "text":
@@ -109,7 +99,7 @@ function AdvancedFilterInput({
           }}
           placeholder={"text..."}
           value={value}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
     case "number":
@@ -145,6 +135,17 @@ function AdvancedFilterInput({
           />
         </>
       );
+    case "bool":
+      return (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+        >
+          <option value="1">Positive</option>
+          <option value="0">Negative</option>
+        </select>
+      );
   }
 }
 
@@ -171,7 +172,7 @@ function AdvancedFilterRow({
   ) => Promise<Result<void, string>>;
 }) {
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center">
+    <div className="w-full flex flex-col lg:flex-row gap-3 items-left lg:items-center ml-4">
       <ThemedDropdown
         options={filterMap.map((column, i) => {
           return {
@@ -182,13 +183,23 @@ function AdvancedFilterRow({
         })}
         selectedValue={filter.filterMapIdx}
         onSelect={(selected) => {
-          setFilter({
-            filterMapIdx: selected,
-            operatorIdx: 0,
-            value: "",
-          });
+          const label = filterMap[selected].label;
+          if (label === "Feedback") {
+            // feedback idx
+            setFilter({
+              filterMapIdx: selected,
+              operatorIdx: 0,
+              value: "1",
+            });
+          } else {
+            setFilter({
+              filterMapIdx: selected,
+              operatorIdx: 0,
+              value: "",
+            });
+          }
         }}
-        className="w-full lg:w-fit min-w-[150px]"
+        className="w-full lg:w-fit"
       />
 
       <ThemedDropdown
@@ -208,10 +219,10 @@ function AdvancedFilterRow({
             value: "",
           }));
         }}
-        className="w-full lg:w-fit min-w-[75px]"
+        className="w-full lg:w-fit"
       />
 
-      <div className="w-full lg:w-fit min-w-[150px]">
+      <div className="">
         <AdvancedFilterInput
           type={
             filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx].type
@@ -238,10 +249,10 @@ function AdvancedFilterRow({
           }
         />
       </div>
-      <div className="w-full lg:w-fit">
+      <div className="w-full lg:w-fit mr-16">
         <button
           onClick={onDeleteHandler}
-          className="bg-red-500 text-white rounded-md p-2 hover:bg-red-700"
+          className="bg-red-600 text-white rounded-md p-1 hover:bg-red-700"
         >
           <TrashIcon className="h-4" />
         </button>

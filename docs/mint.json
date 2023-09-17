@@ -65,8 +65,14 @@
       "pages": [
         "getting-started/quick-start",
         "getting-started/proxy-vs-async",
+        "getting-started/open-source"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
         {
-          "group": "Proxy Integrations",
+          "group": "Proxy",
           "pages": [
             "getting-started/integration-method/openai-proxy",
             "getting-started/integration-method/anthropic",
@@ -74,10 +80,13 @@
           ]
         },
         {
-          "group": "Async Integrations",
-          "pages": ["getting-started/integration-method/openai","getting-started/integration-method/litellm"]
+          "group": "Async",
+          "pages": [
+            "getting-started/integration-method/openai",
+            "getting-started/integration-method/litellm"
+          ]
         },
-        "getting-started/open-source"
+        "getting-started/integration-method/custom"
       ]
     },
     {
@@ -85,6 +94,8 @@
       "pages": [
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/user-metrics",
+        "features/advanced-usage/feedback",
+        "features/advanced-usage/vault",
         "features/advanced-usage/templated-prompts",
         "features/advanced-usage/caching",
         "features/advanced-usage/retries",

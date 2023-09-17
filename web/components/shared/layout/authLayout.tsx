@@ -3,13 +3,10 @@ import Image from "next/image";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
-  ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
-  ArrowUpCircleIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BookOpenIcon,
-  BuildingOffice2Icon,
   BuildingOfficeIcon,
   ChartBarIcon,
   CircleStackIcon,
@@ -20,7 +17,6 @@ import {
   KeyIcon,
   LockClosedIcon,
   QuestionMarkCircleIcon,
-  SparklesIcon,
   TableCellsIcon,
   UserCircleIcon,
   UsersIcon,
@@ -39,11 +35,10 @@ import OrgContext, { useOrg } from "./organizationContext";
 import { GrGraphQl } from "react-icons/gr";
 import { BsBriefcase, BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
+import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useUserSettings } from "../../../services/hooks/userSettings";
-import ThemedModal from "../themed/themedModal";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -58,16 +53,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
-  const { userSettings, isLoading } = useUserSettings(user?.id || "");
-  const [open, setOpen] = useState(false);
-  const { hasFlag, isLoading: isFlagLoading } = useFeatureFlags(
-    org?.currentOrg.id || "",
-    "webhook_beta"
-  );
 
-  const isVaultFlag = process.env.NEXT_PUBLIC_VAULT_ENABLED ?? "";
-  const isVaultEnabled = isVaultFlag === "true";
-  const [dismissWarning, setDismissWarning] = useState(false);
+  const tier = org?.currentOrg.tier;
+
+  const [open, setOpen] = useState(false);
+  const { hasFlag } = useFeatureFlags("webhook_beta");
 
   const navigation = [
     {
@@ -156,7 +146,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     });
   }
 
-  if (isVaultEnabled) {
+  if (tier === "pro" || tier === "enterprise") {
     accountNav.push({
       name: "Vault",
       href: "/vault",
@@ -307,7 +297,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p>Help And Support</p>
                         </Link>
                       </div>
-                      {userSettings?.tier === "free" ? (
+                      {tier === "free" ? (
                         <div className="p-4 flex w-full justify-center">
                           <button
                             onClick={() => setOpen(true)}
@@ -341,7 +331,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
                   <div className="flex flex-col">
-                    <OrgDropdown userSettings={userSettings} />
+                    <OrgDropdown />
                   </div>
                 </div>
                 <div className="mt-1 flex flex-grow flex-col">
@@ -421,7 +411,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>Help And Support</p>
                   </Link>
                 </div>
-                {userSettings?.tier === "free" ? (
+                {tier === "free" ? (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}

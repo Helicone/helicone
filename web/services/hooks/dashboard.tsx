@@ -100,7 +100,8 @@ const useGetAuthorized = (userId: string) => {
   });
 
   return {
-    authorized: org.data?.data === "free" && Number(count?.data || 0) > 100_000,
+    authorized:
+      org.data?.data === "free" && Number(count?.data || 0) > 1_000_000,
     isLoading: isCountLoading || org.isLoading,
   };
 };

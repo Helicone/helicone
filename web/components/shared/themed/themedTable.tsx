@@ -1,18 +1,136 @@
-import {
-  PencilIcon,
-  TrashIcon,
-  ViewfinderCircleIcon,
-} from "@heroicons/react/24/outline";
-import { middleTruncString } from "../../../lib/stringHelpers";
+import { EyeIcon, EyeSlashIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
+import { useState } from "react";
+import { Tooltip } from "@mui/material";
+import useNotification from "../notification/useNotification";
+import {
+  useGetOrgMembers,
+  useGetOrgOwner,
+} from "../../../services/hooks/organizations";
+import { useOrg } from "../layout/organizationContext";
+import { useUser } from "@supabase/auth-helpers-react";
 
-interface ThemedTableProps {
-  columns: { name: string; subName?: string; key: string; hidden: boolean }[]; // hidden will hide this column on mobile
+export interface ThemedTableProps {
+  columns: {
+    name: string;
+    key: string;
+    hidden: boolean;
+    secret?: boolean;
+    render?: (row: any) => JSX.Element;
+    className?: string;
+  }[]; // hidden will hide this column on mobile
   rows?: any[];
   viewHandler?: (row: any) => void;
   editHandler?: (row: any) => void;
   deleteHandler?: (row: any) => void;
 }
+
+const SecretInput = (props: { value: string }) => {
+  const { value } = props;
+  const [show, setShow] = useState(false);
+  const { setNotification } = useNotification();
+
+  const user = useUser();
+
+  const org = useOrg();
+
+  const { data, isLoading, refetch } = useGetOrgMembers(
+    org?.currentOrg.id || ""
+  );
+
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    org?.currentOrg.id || ""
+  );
+
+  const isOwner = org?.currentOrg.owner === user?.id;
+
+  const members = data?.data
+    ? data?.data.map((d) => {
+        return {
+          ...d,
+          isOwner: false,
+        };
+      })
+    : [];
+
+  const orgMembers = [
+    {
+      email: orgOwner?.data?.at(0)?.email,
+      member: "",
+      isOwner: true,
+      org_role: "admin",
+    },
+    ...members,
+  ];
+
+  const isUserAdmin =
+    isOwner ||
+    orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
+
+  return (
+    <div className="flex flex-row items-center">
+      {isUserAdmin ? (
+        <>
+          <button
+            className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
+            onClick={() => setShow(!show)}
+          >
+            {show ? (
+              <EyeSlashIcon className="h-5 w-5 text-gray-900" />
+            ) : (
+              <EyeIcon className="h-5 w-5 text-gray-900" />
+            )}
+          </button>
+          <div className="flex w-full min-w-[10rem]">
+            {show ? (
+              <Tooltip title="Click to Copy" placement="top" arrow>
+                <button
+                  id="secret-key"
+                  onClick={() => {
+                    navigator.clipboard.writeText(value);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                  className={clsx(
+                    "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
+                    "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+                  )}
+                >
+                  {value}
+                </button>
+              </Tooltip>
+            ) : (
+              <input
+                id="secret-key"
+                name="secret-key"
+                type={clsx(show ? "text" : "password")}
+                required
+                value={"*************************"}
+                disabled
+                className={clsx(
+                  "text-md",
+                  "block w-full rounded-md border-0 h-8 text-gray-900"
+                )}
+              />
+            )}
+          </div>
+        </>
+      ) : (
+        <input
+          id="secret-key"
+          name="secret-key"
+          type={clsx(show ? "text" : "password")}
+          required
+          value={"*************************"}
+          disabled
+          className={clsx(
+            "text-md",
+            "block w-full rounded-md border-0 h-8 text-gray-900"
+          )}
+        />
+      )}
+    </div>
+  );
+};
 
 const ThemedTable = (props: ThemedTableProps) => {
   const { columns, rows, viewHandler, editHandler, deleteHandler } = props;
@@ -87,16 +205,18 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-gray-200",
                           col.hidden ? "hidden" : "",
-                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate max-w-[150px]"
+                          "max-w-[150px]",
+                          "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate",
+                          col.className
                         )}
                       >
-                        {col.key === "cost"
-                          ? Number(row[col.key]).toFixed(2)
-                          : row[col.key] || "n/a"}
-
-                        <span className="text-xs text-gray-400 pl-1">
-                          {col.subName}
-                        </span>
+                        {col.secret === true ? (
+                          <SecretInput value={row[col.key]} />
+                        ) : col.render !== undefined ? (
+                          col.render(row)
+                        ) : (
+                          <span>{row[col.key] || "n/a"}</span>
+                        )}
                       </td>
                     );
                   }

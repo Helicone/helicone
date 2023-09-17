@@ -1,4 +1,5 @@
 import { Database } from "../../../supabase/database.types";
+import { Result } from "../../results";
 import { ClickhouseClientWrapper, ClickhouseDB } from "../db/clickhouse";
 
 function formatTimeString(timeString: string): string {
@@ -8,7 +9,7 @@ function formatTimeString(timeString: string): string {
 function buildPropertyWithResponseInserts(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Insert"],
-  properties: Database["public"]["Tables"]["properties"]["Row"][]
+  properties: Database["public"]["Tables"]["properties"]["Insert"][]
 ): ClickhouseDB["Tables"]["property_with_response_v1"][] {
   return properties.map((p) => ({
     response_id: response.id ?? "",
@@ -93,6 +94,7 @@ export async function logInClickhouse(
           request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
         run_id: request.run_id ?? null,
         task_id: request.task_id ?? null,
+        proxy_key_id: request.helicone_proxy_key_id ?? null,
       },
     ]),
     clickhouseDb.dbInsertClickhouse(
@@ -100,7 +102,7 @@ export async function logInClickhouse(
       properties.map((p) => ({
         key: p.key,
         value: p.value,
-        user_id: p.user_id,
+        user_id: p.user_id ?? null,
         auth_hash: request.auth_hash ?? null,
         request_id: request.id ?? null,
         created_at: p.created_at ? formatTimeString(p.created_at) : null,
@@ -110,8 +112,10 @@ export async function logInClickhouse(
     clickhouseDb.dbInsertClickhouse(
       "properties_copy_v2",
       properties.map((p) => ({
-        id: p.id,
-        created_at: formatTimeString(p.created_at),
+        id: p.id ?? 0,
+        created_at: p.created_at
+          ? formatTimeString(p.created_at)
+          : formatTimeString(new Date().toISOString()),
         request_id: request.id,
         key: p.key,
         value: p.value,
@@ -124,4 +128,38 @@ export async function logInClickhouse(
       buildPropertyWithResponseInserts(request, response, properties)
     ),
   ]);
+}
+
+export async function addFeedbackToResponse(
+  clickhouseDb: ClickhouseClientWrapper,
+  feedback: Database["public"]["Tables"]["feedback"]["Insert"][]
+): Promise<Result<null, string>> {
+  const updateQueries: string[] = [];
+
+  for (const fb of feedback) {
+    const { response_id, created_at, id, rating } = fb;
+
+    const updateQuery = `
+      UPDATE feedback_created_at = '${formatTimeString(
+        created_at ?? new Date().toISOString()
+      )}',
+          feedback_id = '${id}',
+          rating = ${rating ? "1" : "0"}
+      WHERE response_id = '${response_id}'`;
+
+    updateQueries.push(updateQuery);
+  }
+
+  const batchUpdateQuery = `ALTER TABLE default.response_copy_v3 ${updateQueries.join(
+    ", "
+  )}`;
+
+  const updateResult = await clickhouseDb.dbUpdateClickhouse(batchUpdateQuery);
+
+  if (updateResult.error) {
+    console.error(`Error updating response_copy_v3: ${updateResult.error}`);
+    return { error: updateResult.error, data: null };
+  }
+
+  return { error: null, data: null };
 }

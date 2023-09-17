@@ -27,8 +27,15 @@ export function RequestView(props: {
   properties: string[];
   open?: boolean;
   wFull?: boolean;
+  displayPreview?: boolean;
 }) {
-  const { request, properties, open = true, wFull = false } = props;
+  const {
+    request,
+    properties,
+    open = true,
+    wFull = false,
+    displayPreview = true,
+  } = props;
   const [mode, setMode] = useState<"pretty" | "json">("pretty");
   const router = useRouter();
 
@@ -91,10 +98,12 @@ export function RequestView(props: {
           <p className="font-semibold text-gray-900">Path</p>
           <p className="text-gray-700 truncate">{getPathName(request.path)}</p>
         </li>
-        <li className="flex flex-row justify-between items-center py-2 gap-4">
-          <p className="font-semibold text-gray-900">ID</p>
-          <p className="text-gray-700 truncate">{request.id}</p>
-        </li>
+        {displayPreview && (
+          <li className="flex flex-row justify-between items-center py-2 gap-4">
+            <p className="font-semibold text-gray-900">ID</p>
+            <p className="text-gray-700 truncate">{request.id}</p>
+          </li>
+        )}
       </ul>
       {request.customProperties &&
         properties.length > 0 &&
@@ -125,33 +134,37 @@ export function RequestView(props: {
             </div>
           </div>
         )}
-      <div className="flex w-full justify-end">
-        <ThemedTabs
-          options={[
-            {
-              label: "Pretty",
-              icon: EyeIcon,
-            },
-            {
-              label: "JSON",
-              icon: CodeBracketIcon,
-            },
-          ]}
-          onOptionSelect={(option) =>
-            setMode(option.toLowerCase() as "pretty" | "json")
-          }
-        />
-      </div>
-      {mode === "pretty" ? (
-        <div className="flex flex-col space-y-2">{request.render}</div>
-      ) : (
-        <Completion
-          request={JSON.stringify(request.requestBody, null, 4)}
-          response={{
-            title: "Response",
-            text: JSON.stringify(request.responseBody, null, 4),
-          }}
-        />
+      {displayPreview && (
+        <>
+          <div className="flex w-full justify-end">
+            <ThemedTabs
+              options={[
+                {
+                  label: "Pretty",
+                  icon: EyeIcon,
+                },
+                {
+                  label: "JSON",
+                  icon: CodeBracketIcon,
+                },
+              ]}
+              onOptionSelect={(option) =>
+                setMode(option.toLowerCase() as "pretty" | "json")
+              }
+            />
+          </div>
+          {mode === "pretty" ? (
+            <div className="flex flex-col space-y-2">{request.render}</div>
+          ) : (
+            <Completion
+              request={JSON.stringify(request.requestBody, null, 4)}
+              response={{
+                title: "Response",
+                text: JSON.stringify(request.responseBody, null, 4),
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   );

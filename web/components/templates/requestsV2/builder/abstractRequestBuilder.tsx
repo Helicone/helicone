@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { HeliconeRequest } from "../../../../lib/api/request/request";
+import { HeliconeRequest, Provider } from "../../../../lib/api/request/request";
 import { Json } from "../../../../supabase/database.types";
 import { modelCost } from "../../../../lib/api/metrics/costCalc";
 
@@ -23,6 +23,12 @@ type CommonFields = {
   responseBody: JSON;
   cost: number | null;
   model: string;
+  feedback: {
+    createdAt: string | null;
+    id: string | null;
+    rating: boolean | null;
+  };
+  provider: Provider;
 };
 
 export type NormalizedRequest = CommonFields & {
@@ -74,6 +80,12 @@ abstract class AbstractRequestBuilder {
         statusType: this.getStatusType(),
         code: this.response.response_status,
       },
+      feedback: {
+        createdAt: this.response.feedback_created_at ?? null,
+        id: this.response.feedback_id ?? null,
+        rating: this.response.feedback_rating ?? null,
+      },
+      provider: this.response.provider,
     };
   }
 

@@ -5,6 +5,7 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
+  ColumnOrderState,
   flexRender,
   getCoreRowModel,
   OnChangeFn,
@@ -26,6 +27,7 @@ import LoadingAnimation from "../../loadingAnimation";
 import { UIFilterRow } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
+import DraggableColumnHeader from "./draggableColumnHeader";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -76,6 +78,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const router = useRouter();
 
   const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
+    defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
+  );
 
   const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
     setVisibleColumns(newState);
@@ -99,7 +104,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     getCoreRowModel: getCoreRowModel(),
     state: {
       columnVisibility: visibleColumns,
+      columnOrder: columnOrder,
     },
+    onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: onVisibilityHandler,
   });
 
@@ -175,105 +182,14 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                     key={headerGroup.id}
                     className="border-b border-gray-300 overflow-hidden"
                   >
-                    {headerGroup.headers.map((header, i) => {
-                      const meta = header.column.columnDef?.meta as any;
-                      const hasSortKey = meta?.sortKey !== undefined;
-                      return (
-                        <th
-                          key={i}
-                          {...{
-                            colSpan: header.colSpan,
-                            style: {
-                              width: header.getSize(),
-                            },
-                          }}
-                          className="text-left py-2 font-semibold text-gray-900"
-                        >
-                          <div className="flex flex-row items-center gap-1.5">
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                            {sortable && hasSortKey && (
-                              <span
-                                onClick={() => {
-                                  if (meta && sortable) {
-                                    const {
-                                      sortKey,
-                                      isCustomProperty,
-                                      sortDirection,
-                                    } = sortable;
-
-                                    if (sortKey === meta.sortKey) {
-                                      const direction =
-                                        sortDirection === "asc"
-                                          ? "desc"
-                                          : "asc";
-                                      router.query.sortDirection = direction;
-                                    } else {
-                                      router.query.sortDirection = "asc";
-                                    }
-
-                                    if (meta.isCustomProperty) {
-                                      router.query.isCustomProperty = "true";
-                                    }
-                                    router.query.sortKey = meta.sortKey;
-                                    router.push(router);
-                                  }
-                                }}
-                                className="flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
-                              >
-                                {meta.sortKey === sortable.sortKey ? (
-                                  sortable.sortDirection === "asc" ? (
-                                    <ChevronUpIcon
-                                      className="h-4 w-4 border border-yellow-500 rounded-md"
-                                      aria-hidden="true"
-                                    />
-                                  ) : (
-                                    <ChevronDownIcon
-                                      className="h-4 w-4 border border-yellow-500 rounded-md"
-                                      aria-hidden="true"
-                                    />
-                                  )
-                                ) : (
-                                  <ChevronDownIcon
-                                    className="h-4 w-4"
-                                    aria-hidden="true"
-                                  />
-                                )}
-                              </span>
-                            )}
-                          </div>
-
-                          <button
-                            onClick={() =>
-                              header.column.getToggleSortingHandler()
-                            }
-                            className={clsx(
-                              header.column.getCanSort()
-                                ? "cursor-pointer select-none"
-                                : "",
-                              "resizer pl-4 pr-2 mr-4 w-4"
-                            )}
-                            {...{
-                              onMouseDown: header.getResizeHandler(),
-                              onTouchStart: header.getResizeHandler(),
-                            }}
-                          >
-                            <div
-                              className={clsx(
-                                header.column.getIsResizing()
-                                  ? "bg-blue-700"
-                                  : "bg-gray-500",
-                                "h-full w-1"
-                              )}
-                            />
-                          </button>
-                        </th>
-                      );
-                    })}
+                    {headerGroup.headers.map((header) => (
+                      <DraggableColumnHeader
+                        key={header.id}
+                        header={header}
+                        table={table}
+                        sortable={sortable}
+                      />
+                    ))}
                   </tr>
                 ))}
               </thead>

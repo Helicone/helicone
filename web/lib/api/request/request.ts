@@ -14,7 +14,7 @@ import {
   dbQueryClickhouse,
   printRunnableQuery,
 } from "../db/dbExecute";
-export type Provider = "OPENAI" | "ANTHROPIC";
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000;
 export interface HeliconeRequest {
   response_id: string;
@@ -48,6 +48,9 @@ export interface HeliconeRequest {
   completion_tokens: number | null;
   provider: Provider;
   task_id: string | null;
+  feedback_created_at?: string | null;
+  feedback_id?: string | null;
+  feedback_rating?: boolean | null;
 }
 
 export async function getRequestsCached(
@@ -89,12 +92,16 @@ export async function getRequestsCached(
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
     request.task_id as task_id,
+    feedback.created_at AS feedback_created_at,
+    feedback.id AS feedback_id,
+    feedback.rating AS feedback_rating,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM cache_hits
     left join request on cache_hits.request_id = request.id
     left join response on request.id = response.request
     left join prompt on request.formatted_prompt_id = prompt.id
+    left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})
     AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
@@ -188,11 +195,15 @@ export async function getRequests(
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
     request.task_id as task_id,
+    feedback.created_at AS feedback_created_at,
+    feedback.id AS feedback_id,
+    feedback.rating AS feedback_rating,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM request
     left join response on request.id = response.request
     left join prompt on request.formatted_prompt_id = prompt.id
+    left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})
     AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
@@ -269,6 +280,7 @@ export async function getRequestCount(
   FROM request
     left join response on request.id = response.request
     left join prompt on request.formatted_prompt_id = prompt.id
+    left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})
   )

@@ -1,10 +1,6 @@
 import {
-  FilterLeaf,
-  FilterLeafRequest,
-  FilterLeafResponse,
-  FilterLeafUserMetrics,
+  BooleanOperators,
   NumberOperators,
-  RequestTableToOperators,
   TablesAndViews,
   TextOperators,
   TimestampOperators,
@@ -14,7 +10,8 @@ export type ColumnType =
   | "text"
   | "timestamp"
   | "number"
-  | "text-with-suggestions";
+  | "text-with-suggestions"
+  | "bool";
 
 export type InputParam = {
   key: string;
@@ -29,27 +26,27 @@ interface Operator<T> {
 const textOperators: Operator<keyof TextOperators>[] = [
   {
     value: "equals",
-    label: "=",
+    label: "equals",
     type: "text",
   },
   {
     value: "not-equals",
-    label: "!=",
+    label: "not equals",
     type: "text",
   },
   {
     value: "contains",
-    label: "CONTAINS",
+    label: "contains",
     type: "text",
   },
   {
     value: "ilike",
-    label: "ILIKE",
+    label: "ilike",
     type: "text",
   },
   {
     value: "like",
-    label: "LIKE",
+    label: "like",
     type: "text",
   },
 ];
@@ -57,35 +54,43 @@ const textOperators: Operator<keyof TextOperators>[] = [
 const numberOperators: Operator<keyof NumberOperators>[] = [
   {
     value: "equals",
-    label: "=",
+    label: "equals",
     type: "number",
   },
   {
     value: "not-equals",
-    label: "!=",
+    label: "not equals",
     type: "text",
   },
   {
     value: "gte",
-    label: ">=",
+    label: "greater than or equal to",
     type: "number",
   },
   {
     value: "lte",
-    label: "<=",
+    label: "less than or equal to",
     type: "number",
+  },
+];
+
+const booleanOperators: Operator<keyof BooleanOperators>[] = [
+  {
+    value: "equals",
+    label: "equals",
+    type: "bool",
   },
 ];
 
 const timestampOperators: Operator<keyof TimestampOperators>[] = [
   {
     value: "gte",
-    label: ">=",
+    label: "greater than or equal to",
     type: "timestamp",
   },
   {
     value: "lte",
-    label: "<=",
+    label: "less than or equal to",
     type: "timestamp",
   },
 ];
@@ -100,6 +105,7 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
 };
 
 export const DASHBOARD_PAGE_TABLE_FILTERS: [
+  SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
   SingleFilterDef<"response_copy_v3">,
@@ -133,6 +139,13 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
     table: "response_copy_v3",
     column: "user_id",
   },
+  {
+    label: "Feedback",
+    operators: booleanOperators,
+    category: "feedback",
+    table: "response_copy_v3",
+    column: "rating",
+  },
 ];
 export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request">,
@@ -140,7 +153,8 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"response">,
   SingleFilterDef<"request">,
   SingleFilterDef<"response">,
-  SingleFilterDef<"response">
+  SingleFilterDef<"response">,
+  SingleFilterDef<"feedback">
 ] = [
   {
     label: "Request",
@@ -183,6 +197,13 @@ export const REQUEST_TABLE_FILTERS: [
     category: "response",
     table: "response",
     column: "status",
+  },
+  {
+    label: "Feedback",
+    operators: booleanOperators,
+    table: "feedback",
+    column: "rating",
+    category: "feedback",
   },
 ];
 

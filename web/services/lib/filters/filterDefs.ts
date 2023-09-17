@@ -19,6 +19,8 @@ export type NumberOperators = Record<
   number
 >;
 
+export type BooleanOperators = Record<"equals", boolean>;
+
 export type TimestampOperators = Record<"gte" | "lte", string>;
 
 export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
@@ -27,7 +29,8 @@ export type AnyOperator =
   | SingleKey<TextOperators>
   | SingleKey<NumberOperators>
   | SingleKey<TimestampOperators>
-  | SingleKey<TimestampOperatorsTyped>;
+  | SingleKey<TimestampOperatorsTyped>
+  | SingleKey<BooleanOperators>;
 export type SingleKey<T> = {
   [K in keyof T]: Partial<{
     [P in keyof T]: P extends K ? T[P] : never;
@@ -45,6 +48,15 @@ export type RequestTableToOperators = {
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
+
+export type FeedbackTableToOperators = {
+  id: SingleKey<NumberOperators>;
+  created_at: SingleKey<TimestampOperators>;
+  rating: SingleKey<BooleanOperators>;
+  response_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafFeedback = SingleKey<FeedbackTableToOperators>;
 
 export type PropertiesTableToOperators = {
   auth_hash: SingleKey<TextOperators>;
@@ -82,6 +94,7 @@ type ResponseCopyV1ToOperators = {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
   auth_hash: SingleKey<TextOperators>;
   model: SingleKey<TextOperators>;
   user_id: SingleKey<TextOperators>;
@@ -92,6 +105,14 @@ interface ResponseCopyV2ToOperators extends ResponseCopyV1ToOperators {
 }
 
 export type FilterLeafResponseCopyV2 = SingleKey<ResponseCopyV2ToOperators>;
+
+interface ResponseCopyV3ToOperators extends ResponseCopyV2ToOperators {
+  rating: SingleKey<BooleanOperators>;
+  feedback_created_at: SingleKey<TimestampOperatorsTyped>;
+  feedback_id: SingleKey<TextOperators>;
+}
+
+export type FilterLeafResponseCopyV3 = SingleKey<ResponseCopyV3ToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -161,12 +182,13 @@ export type TablesAndViews = {
   user_api_keys: FilterLeafUserApiKeys;
   response: FilterLeafResponse;
   request: FilterLeafRequest;
+  feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
 
   // CLICKHOUSE TABLES
   response_copy_v1: FilterLeafResponseCopyV1;
   response_copy_v2: FilterLeafResponseCopyV2;
-  response_copy_v3: FilterLeafResponseCopyV2;
+  response_copy_v3: FilterLeafResponseCopyV3;
   users_view: FilterLeafUserView;
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;

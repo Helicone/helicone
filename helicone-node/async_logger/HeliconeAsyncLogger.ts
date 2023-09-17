@@ -39,6 +39,7 @@ export enum Provider {
   OPENAI = "openai",
   AZURE_OPENAI = "azure-openai",
   ANTHROPIC = "anthropic",
+  CUSTOM_MODEL = "custom-model",
 }
 
 export class HeliconeAsyncLogger {
@@ -50,7 +51,7 @@ export class HeliconeAsyncLogger {
   async log(
     asyncLogModel: HeliconeAyncLogRequest,
     provider: Provider
-  ): Promise<AxiosResponse<any, any>> {
+  ): Promise<AxiosResponse<any, any> | undefined> {
     const options: AxiosRequestConfig = {
       method: "POST",
       data: asyncLogModel,
@@ -61,17 +62,25 @@ export class HeliconeAsyncLogger {
     };
 
     const basePath = this.heliconeConfiguration.getBaseUrl();
-    if (!basePath) throw new Error("Base path not set");
+    if (!basePath) {
+      console.error("Failed to log to Helicone: Base path is undefined");
+      return;
+    }
 
     // Set Helicone URL
-    if (provider == Provider.OPENAI) {
+    if (provider == Provider.CUSTOM_MODEL) {
+      const url = new URL(basePath);
+      url.pathname = "/custom/v1/log";
+      options.url = url.toString();
+    } else if (provider == Provider.OPENAI) {
       options.url = `${basePath}/oai/v1/log`;
     } else if (provider == Provider.AZURE_OPENAI) {
       options.url = `${basePath}/oai/v1/log`;
     } else if (provider == Provider.ANTHROPIC) {
       options.url = `${basePath}/anthropic/v1/log`;
     } else {
-      throw new Error("Invalid provider");
+      console.error("Failed to log to Helicone: Provider not supported");
+      return;
     }
 
     let result: AxiosResponse<any, any>;
@@ -80,9 +89,21 @@ export class HeliconeAsyncLogger {
     } catch (error: any) {
       console.error(
         "Error making request to Helicone log endpoint:",
-        error.message
+        error?.message,
+        error
       );
-      return;
+
+      if (axios.isAxiosError(error) && error.response) {
+        result = error.response;
+      } else {
+        result = {
+          data: null,
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: {},
+          config: {},
+        };
+      }
     }
 
     const onHeliconeLog = this.heliconeConfiguration.getOnHeliconeLog();

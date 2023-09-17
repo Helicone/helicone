@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -13,9 +13,7 @@ import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
 import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
 
-interface WelcomePageProps {
-  user: User;
-}
+interface WelcomePageProps {}
 
 export type HeliconeMethod = "proxy" | "async";
 
@@ -23,7 +21,7 @@ export type UnionProviderMethods = `${keyof Providers &
   string}-${keyof IntegrationMethods & string}`;
 
 const WelcomePage = (props: WelcomePageProps) => {
-  const { user } = props;
+  const user = useUser();
 
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
@@ -71,7 +69,7 @@ const WelcomePage = (props: WelcomePageProps) => {
           await supabaseClient
             .from("user_settings")
             .select("*")
-            .eq("user", user.id)
+            .eq("user", user?.id)
             .single();
 
         if (userSettings === null) {
@@ -80,7 +78,7 @@ const WelcomePage = (props: WelcomePageProps) => {
             await supabaseClient
               .from("user_settings")
               .insert({
-                user: user.id,
+                user: user?.id,
                 tier: "free",
                 request_limit: 100_000,
               })
@@ -113,7 +111,7 @@ const WelcomePage = (props: WelcomePageProps) => {
               await supabaseClient
                 .from("user_settings")
                 .select("*")
-                .eq("user", user.id)
+                .eq("user", user?.id)
                 .single();
 
             if (userSettings === null) {
@@ -122,7 +120,7 @@ const WelcomePage = (props: WelcomePageProps) => {
                 await supabaseClient
                   .from("user_settings")
                   .insert({
-                    user: user.id,
+                    user: user?.id,
                     tier: "free",
                     request_limit: 100_000,
                   })

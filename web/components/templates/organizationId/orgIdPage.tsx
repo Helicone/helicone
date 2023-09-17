@@ -1,4 +1,8 @@
-import { BuildingOfficeIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  BuildingOfficeIcon,
+  TrashIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -17,7 +21,7 @@ import CreateOrgForm, {
   ORGANIZATION_ICONS,
 } from "../organizations/createOrgForm";
 import OrgMemberItem from "./orgMemberItem";
-import InviteMemberButton from "../../shared/inviteMembers";
+import AddMemberModal from "./addMemberModal";
 
 interface OrgIdPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -68,6 +72,16 @@ const OrgIdPage = (props: OrgIdPageProps) => {
     isOwner ||
     orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
 
+  const onLeaveSuccess = () => {
+    const ownedOrgs = orgContext?.allOrgs.filter(
+      (org) => org.owner === user?.id
+    );
+    if (orgContext && ownedOrgs && ownedOrgs.length > 0) {
+      orgContext.refetchOrgs();
+      orgContext.setCurrentOrg(ownedOrgs[0].id);
+    }
+  };
+
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
@@ -88,11 +102,16 @@ const OrgIdPage = (props: OrgIdPageProps) => {
               >
                 Edit
               </button>
-              <InviteMemberButton
-                onSuccess={() => {
-                  refetch();
+              <button
+                onClick={() => {
+                  setAddOpen(true);
                 }}
-              />
+                className={clsx(
+                  "items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                )}
+              >
+                Invite Members
+              </button>
             </div>
           )}
         </div>
@@ -116,7 +135,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                   orgId={org.id}
                   refetch={refetch}
                   isUserAdmin={isUserAdmin}
-                  refreshOrgs={() => orgContext && orgContext?.refetchOrgs}
+                  refreshOrgs={onLeaveSuccess}
                 />
               ))}
             </ul>
@@ -149,65 +168,15 @@ const OrgIdPage = (props: OrgIdPageProps) => {
           />
         </div>
       </ThemedModal>
-      <ThemedModal open={addOpen} setOpen={setAddOpen}>
-        <div className="flex flex-col gap-4 w-full">
-          <p className="font-semibold text-lg">Add New Member</p>
-          <div className="space-y-1.5 text-sm w-[400px]">
-            <label htmlFor="api-key">User Email</label>
-            <input
-              type="text"
-              name="api-key"
-              id="api-key"
-              value={addEmail}
-              className={clsx(
-                "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
-              )}
-              placeholder={"Enter user email"}
-              onChange={(e) => setAddEmail(e.target.value)}
-            />
-          </div>
-          <div className="w-full flex justify-end gap-4 mt-4">
-            <button
-              onClick={() => {
-                setAddOpen(false);
-              }}
-              className={clsx(
-                "relative inline-flex items-center rounded-md hover:bg-gray-50 bg-white px-4 py-2 text-sm font-medium text-gray-700"
-              )}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                fetch(
-                  `/api/organization/${org.id}/add_member?email=${addEmail}`
-                )
-                  .then((res) => res.json())
-                  .then((res) => {
-                    if (res.error) {
-                      if (res.error.length < 30) {
-                        setNotification(res.error, "error");
-                        console.error(res);
-                      } else {
-                        setNotification("Error adding member", "error");
-                        console.error(res);
-                      }
-                    } else {
-                      setNotification("Member added successfully", "success");
-                    }
-                    refetch();
-                    setAddOpen(false);
-                  });
-              }}
-              className={clsx(
-                "relative inline-flex items-center rounded-md hover:bg-sky-400 bg-sky-500 px-4 py-2 text-sm font-medium text-white"
-              )}
-            >
-              Add Member
-            </button>
-          </div>
-        </div>
-      </ThemedModal>
+      <AddMemberModal
+        orgId={org.id}
+        orgOwnerId={org.owner}
+        open={addOpen}
+        setOpen={setAddOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
       <ThemedModal open={deleteOpen} setOpen={setDeleteOpen}>
         <div className="flex flex-col gap-4 w-full">
           <p className="font-semibold text-lg">Delete Organization</p>

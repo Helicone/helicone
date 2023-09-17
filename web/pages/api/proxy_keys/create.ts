@@ -8,6 +8,9 @@ import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
+import crypto from "crypto";
+import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
+import { Database } from "../../../supabase/database.types";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -22,9 +25,10 @@ async function handler({
     res.status(405).json({ error: "Method not allowed", data: null });
   }
 
-  const { providerKeyId, heliconeProxyKeyName } = req.body as {
+  const { providerKeyId, heliconeProxyKeyName, limits } = req.body as {
     providerKeyId: string;
     heliconeProxyKeyName: string;
+    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][];
   };
 
   if (providerKeyId === undefined) {
@@ -37,16 +41,16 @@ async function handler({
     return;
   }
 
-  const providerKey = await supabaseServer
-    .from("provider_keys")
-    .select("*")
-    .eq("org_id", userData.orgId)
-    .eq("id", providerKeyId)
-    .single();
+  const { data: providerKey, error } = await getDecryptedProviderKeyById(
+    supabaseServer,
+    providerKeyId
+  );
 
-  if (providerKey.error !== null || providerKey.data === null) {
-    console.error("Failed to retrieve provider key", providerKey.error);
-    res.status(500).json({ error: providerKey.error.message, data: null });
+  if (error || !providerKey?.id) {
+    console.error("Failed to retrieve provider key", error);
+    res
+      .status(500)
+      .json({ error: error ?? "Failed to retrieve provider key", data: null });
     return;
   }
 
@@ -58,11 +62,15 @@ async function handler({
   }).toString()}-${proxyKeyId}`.toLowerCase();
 
   const query = `SELECT encode(pgsodium.crypto_pwhash_str($1), 'hex') as hashed_password;`;
-  const result = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
+  const hashedResult = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
 
-  if (result.error || !result.data || result.data.length === 0) {
+  if (
+    hashedResult.error ||
+    !hashedResult.data ||
+    hashedResult.data.length === 0
+  ) {
     res.status(500).json({
-      error: result.error ?? "Failed to retrieve hashed api key",
+      error: hashedResult.error ?? "Failed to retrieve hashed api key",
       data: null,
     });
     return;
@@ -76,8 +84,8 @@ async function handler({
       id: proxyKeyId,
       org_id: userData.orgId,
       helicone_proxy_key_name: heliconeProxyKeyName,
-      helicone_proxy_key: result.data[0].hashed_password,
-      provider_key_id: providerKey.data.id,
+      helicone_proxy_key: hashedResult.data[0].hashed_password,
+      provider_key_id: providerKey.id,
     })
     .select("*")
     .single();
@@ -98,7 +106,35 @@ async function handler({
   }
 
   newProxyMapping.data.helicone_proxy_key = proxyKey;
+
+  if (limits.length > 0) {
+    console.log("inserting limits", limits);
+    const insertLimits = await supabaseServer
+      .from("helicone_proxy_key_limits")
+      .insert(
+        limits.map((limit) => ({
+          id: crypto.randomUUID(),
+          helicone_proxy_key: proxyKeyId,
+          timewindow_seconds: limit.timewindow_seconds,
+          count: limit.count,
+          cost: limit.cost,
+          currency: limit.currency,
+        }))
+      );
+    if (insertLimits.error) {
+      const remove = await supabaseServer
+        .from("helicone_proxy_keys")
+        .delete()
+        .eq("id", proxyKeyId);
+      console.error("Failed to insert limits, removing proxy key", remove);
+
+      console.error("Failed to insert limits", insertLimits.error);
+      res.status(500).json({ error: insertLimits.error.message, data: null });
+      return;
+    }
+  }
+
   res.status(200).json({ error: null, data: newProxyMapping.data });
 }
 
-export default withAuth(handler, [Permission.MANAGE_KEYS]);
+export default withAuth(handler);

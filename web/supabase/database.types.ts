@@ -102,38 +102,24 @@ export interface Database {
       }
       feedback: {
         Row: {
-          boolean_value: boolean | null
-          categorical_value: string | null
-          created_at: string | null
-          created_by: string
-          feedback_metric_id: number
-          float_value: number | null
-          id: number
+          created_at: string
+          id: string
+          rating: boolean
           response_id: string
-          string_value: string | null
         }
         Insert: {
-          boolean_value?: boolean | null
-          categorical_value?: string | null
-          created_at?: string | null
-          created_by: string
-          feedback_metric_id: number
-          float_value?: number | null
-          id?: number
+          created_at?: string
+          id?: string
+          rating: boolean
           response_id: string
-          string_value?: string | null
         }
         Update: {
-          boolean_value?: boolean | null
-          categorical_value?: string | null
-          created_at?: string | null
-          created_by?: string
-          feedback_metric_id?: number
-          float_value?: number | null
-          id?: number
+          created_at?: string
+          id?: string
+          rating?: boolean
           response_id?: string
-          string_value?: string | null
         }
+<<<<<<< HEAD
       }
       feedback_metrics: {
         Row: {
@@ -158,6 +144,35 @@ export interface Database {
           name?: string
         }
       }
+=======
+        Relationships: [
+          {
+            foreignKeyName: "feedback_response_id_fkey"
+            columns: ["response_id"]
+            referencedRelation: "response"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_response_id_fkey"
+            columns: ["response_id"]
+            referencedRelation: "materialized_response_and_request"
+            referencedColumns: ["response_id"]
+          },
+          {
+            foreignKeyName: "feedback_response_id_fkey"
+            columns: ["response_id"]
+            referencedRelation: "response_and_request_rbac"
+            referencedColumns: ["response_id"]
+          },
+          {
+            foreignKeyName: "feedback_response_id_fkey"
+            columns: ["response_id"]
+            referencedRelation: "response_rbac"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+>>>>>>> main
       helicone_api_keys: {
         Row: {
           api_key_hash: string
@@ -187,8 +202,46 @@ export interface Database {
           user_id?: string
         }
       }
+      helicone_proxy_key_limits: {
+        Row: {
+          cost: number | null
+          count: number | null
+          created_at: string | null
+          currency: string | null
+          helicone_proxy_key: string
+          id: string
+          timewindow_seconds: number | null
+        }
+        Insert: {
+          cost?: number | null
+          count?: number | null
+          created_at?: string | null
+          currency?: string | null
+          helicone_proxy_key: string
+          id: string
+          timewindow_seconds?: number | null
+        }
+        Update: {
+          cost?: number | null
+          count?: number | null
+          created_at?: string | null
+          currency?: string | null
+          helicone_proxy_key?: string
+          id?: string
+          timewindow_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helicone_proxy_key_limits_helicone_proxy_key_fkey"
+            columns: ["helicone_proxy_key"]
+            referencedRelation: "helicone_proxy_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       helicone_proxy_keys: {
         Row: {
+          created_at: string | null
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id: string
@@ -197,6 +250,7 @@ export interface Database {
           soft_delete: boolean
         }
         Insert: {
+          created_at?: string | null
           helicone_proxy_key: string
           helicone_proxy_key_name: string
           id?: string
@@ -205,6 +259,7 @@ export interface Database {
           soft_delete?: boolean
         }
         Update: {
+          created_at?: string | null
           helicone_proxy_key?: string
           helicone_proxy_key_name?: string
           id?: string
@@ -212,6 +267,29 @@ export interface Database {
           provider_key_id?: string
           soft_delete?: boolean
         }
+<<<<<<< HEAD
+=======
+        Relationships: [
+          {
+            foreignKeyName: "helicone_proxy_keys_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+>>>>>>> main
       }
       layout: {
         Row: {
@@ -348,29 +426,70 @@ export interface Database {
       }
       provider_keys: {
         Row: {
+          created_at: string | null
           id: string
+          key_id: string
+          nonce: string
           org_id: string
+          provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete: boolean
-          vault_key_id: string
+          vault_key_id: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
+          key_id?: string
+          nonce?: string
           org_id: string
+          provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete?: boolean
-          vault_key_id: string
+          vault_key_id?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
+          key_id?: string
+          nonce?: string
           org_id?: string
+          provider_key?: string
           provider_key_name?: string
           provider_name?: string
           soft_delete?: boolean
-          vault_key_id?: string
+          vault_key_id?: string | null
         }
+<<<<<<< HEAD
+=======
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+>>>>>>> main
       }
       request: {
         Row: {
@@ -630,6 +749,105 @@ export interface Database {
       }
     }
     Views: {
+<<<<<<< HEAD
+=======
+      decrypted_provider_keys: {
+        Row: {
+          created_at: string | null
+          decrypted_provider_key: string | null
+          id: string | null
+          key_id: string | null
+          nonce: string | null
+          org_id: string | null
+          provider_key: string | null
+          provider_key_name: string | null
+          provider_name: string | null
+          soft_delete: boolean | null
+          vault_key_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          decrypted_provider_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          decrypted_provider_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      materialized_response_and_request: {
+        Row: {
+          is_cached: boolean | null
+          prompt_name: string | null
+          prompt_regex: string | null
+          request_body: Json | null
+          request_created_at: string | null
+          request_formatted_prompt_id: string | null
+          request_id: string | null
+          request_path: string | null
+          request_prompt_values: Json | null
+          request_properties: Json | null
+          request_user_id: string | null
+          response_body: Json | null
+          response_created_at: string | null
+          response_id: string | null
+          user_api_key_hash: string | null
+          user_api_key_preview: string | null
+          user_api_key_user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_api_keys_user_id_fkey"
+            columns: ["user_api_key_user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+>>>>>>> main
       metrics_rbac: {
         Row: {
           average_response_time: number | null

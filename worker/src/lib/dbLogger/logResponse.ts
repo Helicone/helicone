@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
-import { DBLoggableProps } from "./DBLoggable";
+import { AuthParams, DBLoggableProps } from "./DBLoggable";
 import { InsertQueue } from "./insertQueue";
 
 const MAX_USER_ID_LENGTH = 7000;
@@ -82,7 +82,7 @@ export async function logRequest(
   responseId: string,
   dbClient: SupabaseClient<Database>,
   insertQueue: InsertQueue,
-  heliconeApiKeyRow: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
+  authParams: AuthParams
 ): Promise<
   Result<
     {
@@ -97,8 +97,8 @@ export async function logRequest(
       return { data: null, error: "Missing providerApiKeyAuthHash" };
     }
 
-    if (!request.heliconeApiKeyAuthHash) {
-      return { data: null, error: "Missing heliconeApiKeyAuthHash" };
+    if (!request.heliconeApiKeyAuthHash && !request.heliconeProxyKeyId) {
+      return { data: null, error: "Missing helicone auth" };
     }
 
     // TODO KILL THIS ISH
@@ -122,8 +122,8 @@ export async function logRequest(
       formattedPromptResult !== null ? formattedPromptResult.data : null;
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
-    if (!heliconeApiKeyRow?.organization_id) {
-      return { data: null, error: "Helicone api key not found" };
+    if (!authParams.organizationId) {
+      return { data: null, error: "Helicone organization not found" };
     }
 
     let bodyText = request.bodyText ?? "{}";
@@ -156,7 +156,7 @@ export async function logRequest(
       return { data: null, error: `No task found for id ${request.taskId}` };
     }
 
-    const createdAt = new Date().toISOString();
+    const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,
@@ -167,9 +167,9 @@ export async function logRequest(
       properties: request.properties,
       formatted_prompt_id: formattedPromptId,
       prompt_values: prompt_values,
-      helicone_user: heliconeApiKeyRow?.user_id ?? null,
-      helicone_api_key_id: heliconeApiKeyRow?.id ?? null,
-      helicone_org_id: heliconeApiKeyRow?.organization_id ?? null,
+      helicone_user: authParams.userId ?? null,
+      helicone_api_key_id: authParams.heliconeApiKeyId ?? null,
+      helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       created_at: createdAt,

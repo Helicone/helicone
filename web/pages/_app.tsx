@@ -12,6 +12,8 @@ import "../styles/index.css";
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/shared/layout/organizationContext";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 if (
   typeof window !== "undefined" &&
@@ -56,10 +58,12 @@ export default function MyApp({
         <ApolloProvider client={apolloClient}>
           <QueryClientProvider client={queryClient}>
             <NotificationProvider>
-              <OrgContextProvider>
-                <Component {...pageProps} />
-              </OrgContextProvider>
-              <Notification />
+              <DndProvider backend={HTML5Backend}>
+                <OrgContextProvider>
+                  <Component {...pageProps} />
+                </OrgContextProvider>
+                <Notification />
+              </DndProvider>
             </NotificationProvider>
           </QueryClientProvider>
         </ApolloProvider>

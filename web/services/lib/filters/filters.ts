@@ -141,7 +141,12 @@ const whereKeyMappings: KeyMappings = {
     key: "properties.key",
     value: "properties.value",
   }),
-
+  feedback: easyKeyMappings<"feedback">({
+    rating: "feedback.rating",
+    id: "feedback.id",
+    created_at: "feedback.created_at",
+    response_id: "feedback.response_id",
+  }),
   response_copy_v1: easyKeyMappings<"response_copy_v1">({
     auth_hash: "response_copy_v1.auth_hash",
     model: "response_copy_v1.model",
@@ -168,6 +173,9 @@ const whereKeyMappings: KeyMappings = {
       user_id: "response_copy_v3.user_id",
       status: "response_copy_v3.status",
       organization_id: "response_copy_v3.organization_id",
+      rating: "response_copy_v3.rating",
+      feedback_id: "response_copy_v3.feedback_id",
+      feedback_created_at: "response_copy_v3.feedback_created_at",
     })(filter);
   },
   users_view: NOT_IMPLEMENTED,
@@ -265,6 +273,7 @@ const havingKeyMappings: KeyMappings = {
   property_with_response_v1: NOT_IMPLEMENTED,
   run: NOT_IMPLEMENTED,
   task: NOT_IMPLEMENTED,
+  feedback: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(

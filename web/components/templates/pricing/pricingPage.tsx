@@ -21,13 +21,14 @@ const tiers = [
     ),
     description: "Everything necessary to get started.",
     features: [
-      "Up to 100,000 requests per month",
+      "Up to 1 million requests per month",
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
       "1 Organization",
+      "5 Seats",
     ],
-    buttonText: "Get Started",
+    buttonText: "Try for free",
     backgroundColor: "bg-sky-600",
     hoverBackgroundColor: "hover:bg-sky-500",
     textColor: "text-sky-600",
@@ -39,7 +40,7 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $80
+          $25
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
           /month
@@ -47,29 +48,31 @@ const tiers = [
       </p>
     ),
     description:
-      "Everything in Basic, plus essential tools for scaling up your business.",
+      "Everything in Free, plus essential tools for scaling up your business.",
     features: [
       "Unlimited Requests",
       "Bucket Caching",
       "User Management and Rate Limiting",
       "GraphQL API",
       "Request Retries",
-      "Unlimited Organizations",
+      "Key Vault",
+      "5 Organizations",
+      "10 Seats per Organization",
       "Up to 2GB of storage",
     ],
-    buttonText: "Start free trial",
+    buttonText: "Get Started",
     backgroundColor: "bg-pink-600",
     hoverBackgroundColor: "hover:bg-pink-500",
     textColor: "text-pink-600",
   },
   {
-    name: "Enterprise",
+    name: "Custom",
     id: "tier-enterprise",
     href: "/sales",
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          Custom
+          Enterprise
         </span>
       </p>
     ),
@@ -109,7 +112,7 @@ export default function PricingPage() {
               simple
             </span>
           </h1>
-          <p className="mt-6 w-full text-xl leading-8 text-gray-700">
+          <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
             No need to build or maintain expensive infrastructure. Helicone
             makes monitoring Large-Language Models easy.
           </p>

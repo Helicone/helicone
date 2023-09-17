@@ -131,7 +131,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                     verticalAlign === "top"
                       ? "bottom-full mb-1.5"
                       : "top-full mt-1.5",
-                    "absolute z-30 max-h-80 w-full min-w-[250px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    "absolute z-30 max-h-96 w-full min-w-[250px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
                   {Object.keys(categories).length >= 2 && (
