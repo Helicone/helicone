@@ -32,15 +32,6 @@ CREATE TABLE "public"."task_parents" (
     PRIMARY KEY ("task_id", "parent_task_id")
 );
 
-
-ALTER TABLE "public"."task_parents" ADD CONSTRAINT "task_parents_task_id_fkey" FOREIGN KEY ("task_id") REFERENCES task(id) NOT VALID;
-
-ALTER TABLE "public"."task_parents" VALIDATE CONSTRAINT "task_parents_task_id_fkey";
-
-ALTER TABLE "public"."task_parents" ADD CONSTRAINT "task_parents_parent_task_id_fkey" FOREIGN KEY ("parent_task_id") REFERENCES task(id) NOT VALID;
-
-ALTER TABLE "public"."task_parents" VALIDATE CONSTRAINT "task_parents_parent_task_id_fkey";
-
 alter table "public"."task" enable row level security;
 
 alter table "public"."request" add column "job_id" uuid;
@@ -75,4 +66,10 @@ alter table "public"."task" add constraint "task_job_fkey" FOREIGN KEY (job) REF
 
 alter table "public"."task" validate constraint "task_job_fkey";
 
+ALTER TABLE "public"."task_parents" ADD CONSTRAINT "task_parents_task_id_fkey" FOREIGN KEY ("task_id") REFERENCES task(id) NOT VALID;
 
+ALTER TABLE "public"."task_parents" VALIDATE CONSTRAINT "task_parents_task_id_fkey";
+
+ALTER TABLE "public"."task_parents" ADD CONSTRAINT "task_parents_parent_task_id_fkey" FOREIGN KEY ("parent_task_id") REFERENCES task(id) NOT VALID;
+
+ALTER TABLE "public"."task_parents" VALIDATE CONSTRAINT "task_parents_parent_task_id_fkey";
