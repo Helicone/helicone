@@ -1,12 +1,12 @@
 create table "public"."run" (
     "id" uuid not null,
-    "status" text not null default 'pending'::text,
+    "org_id" uuid not null,
     "created_at" timestamp with time zone default now(),
+    "updated_at" timestamp with time zone not null default (now() AT TIME ZONE 'utc'::text),
+    "status" text not null default 'pending'::text,
     "name" text not null,
     "description" text not null,
     "timeout_seconds" integer not null default 60,
-    "updated_at" timestamp with time zone not null default (now() AT TIME ZONE 'utc'::text),
-    "org_id" uuid not null,
     "custom_properties" jsonb not null
 );
 
@@ -15,14 +15,16 @@ alter table "public"."run" enable row level security;
 
 create table "public"."task" (
     "id" uuid not null,
+    "org_id" uuid not null,
     "created_at" timestamp with time zone default now(),
-    "run" uuid not null,
+    "updated_at" timestamp with time zone not null,
+    "status" text not null default 'pending'::text,
     "name" text not null default ''::text,
     "description" text not null default ''::text,
-    "org_id" uuid not null,
+    "timeout_seconds" integer not null default 60,
     "custom_properties" jsonb not null,
-    "updated_at" timestamp with time zone not null,
-    "parent_task" uuid
+    "parent_task" uuid,
+    "run" uuid not null
 );
 
 
