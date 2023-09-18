@@ -316,6 +316,104 @@ export interface Database {
           }
         ]
       }
+      job_node: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          job: string
+          name: string
+          node_type: string
+          org_id: string
+          resource_data: string
+          resource_data_type: string
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description?: string
+          id: string
+          job: string
+          name?: string
+          node_type?: string
+          org_id: string
+          resource_data: string
+          resource_data_type: string
+          status?: string
+          timeout_seconds?: number
+          updated_at: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          job?: string
+          name?: string
+          node_type?: string
+          org_id?: string
+          resource_data?: string
+          resource_data_type?: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_job_fkey"
+            columns: ["job"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node_relationships: {
+        Row: {
+          job: string | null
+          parent_task_id: string
+          task_id: string
+        }
+        Insert: {
+          job?: string | null
+          parent_task_id: string
+          task_id: string
+        }
+        Update: {
+          job?: string | null
+          parent_task_id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_relationships_job_fkey"
+            columns: ["job"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_relationships_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_relationships_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       layout: {
         Row: {
           columns: Json | null
@@ -687,7 +785,7 @@ export interface Database {
           {
             foreignKeyName: "request_job_task_task_id_fkey"
             columns: ["task_id"]
-            referencedRelation: "task"
+            referencedRelation: "job_node"
             referencedColumns: ["id"]
           }
         ]
@@ -727,86 +825,6 @@ export interface Database {
           status?: number | null
         }
         Relationships: []
-      }
-      task: {
-        Row: {
-          created_at: string | null
-          custom_properties: Json
-          description: string
-          id: string
-          job: string
-          name: string
-          org_id: string
-          status: string
-          timeout_seconds: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string | null
-          custom_properties: Json
-          description?: string
-          id: string
-          job: string
-          name?: string
-          org_id: string
-          status?: string
-          timeout_seconds?: number
-          updated_at: string
-        }
-        Update: {
-          created_at?: string | null
-          custom_properties?: Json
-          description?: string
-          id?: string
-          job?: string
-          name?: string
-          org_id?: string
-          status?: string
-          timeout_seconds?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_job_fkey"
-            columns: ["job"]
-            referencedRelation: "job"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_org_id_fkey"
-            columns: ["org_id"]
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      task_parents: {
-        Row: {
-          parent_task_id: string
-          task_id: string
-        }
-        Insert: {
-          parent_task_id: string
-          task_id: string
-        }
-        Update: {
-          parent_task_id?: string
-          task_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_parents_parent_task_id_fkey"
-            columns: ["parent_task_id"]
-            referencedRelation: "task"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_parents_task_id_fkey"
-            columns: ["task_id"]
-            referencedRelation: "task"
-            referencedColumns: ["id"]
-          }
-        ]
       }
       user_api_keys: {
         Row: {
