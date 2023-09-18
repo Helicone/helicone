@@ -575,13 +575,11 @@ export interface Database {
           helicone_proxy_key_id: string | null
           helicone_user: string | null
           id: string
-          job_id: string | null
           path: string
           prompt_id: string | null
           prompt_values: Json | null
           properties: Json | null
           provider: string
-          task_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -594,13 +592,11 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
-          job_id?: string | null
           path: string
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          task_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -613,13 +609,11 @@ export interface Database {
           helicone_proxy_key_id?: string | null
           helicone_user?: string | null
           id?: string
-          job_id?: string | null
           path?: string
           prompt_id?: string | null
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          task_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -652,15 +646,46 @@ export interface Database {
             columns: ["helicone_user"]
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
+          }
+        ]
+      }
+      request_job_task: {
+        Row: {
+          job_id: string
+          request_id: string
+          task_id: string
+        }
+        Insert: {
+          job_id: string
+          request_id: string
+          task_id: string
+        }
+        Update: {
+          job_id?: string
+          request_id?: string
+          task_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "request_job_id_fkey"
+            foreignKeyName: "request_job_task_job_id_fkey"
             columns: ["job_id"]
             referencedRelation: "job"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "request_task_id_fkey"
+            foreignKeyName: "request_job_task_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_task_id_fkey"
             columns: ["task_id"]
             referencedRelation: "task"
             referencedColumns: ["id"]
