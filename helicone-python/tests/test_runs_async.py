@@ -1,5 +1,5 @@
 from helicone.globals.helicone import helicone_global
-from helicone.runs import HeliconeRun, HeliconeTaskConfig
+from helicone.runs import HeliconeJob, HeliconeTaskConfig
 from helicone.openai_async import openai, Meta
 import json
 COURSE_FUNCTIONS = [
@@ -89,7 +89,7 @@ helicone_global.proxy_url = "http://127.0.0.1:8787/v1"
 
 
 def test_run_creation():
-    generate_course = HeliconeRun(
+    generate_course = HeliconeJob(
         name="Generate Entire Course",
     )
     try:

@@ -93,6 +93,54 @@ export class InsertQueue {
     public responseAndResponseQueueKV: KVNamespace
   ) {}
 
+  async addJob(
+    run: Database["public"]["Tables"]["job"]["Insert"]
+  ): Promise<Result<null, string>> {
+    const insertResult = await this.database.from("job").insert([run]);
+    if (insertResult.error) {
+      return { data: null, error: JSON.stringify(insertResult) };
+    }
+    return { data: null, error: null };
+  }
+
+  async getJobById(
+    jobId: string
+  ): Promise<Result<Database["public"]["Tables"]["job"]["Row"], string>> {
+    const { data, error } = await this.database
+      .from("job")
+      .select("*")
+      .match({ id: jobId })
+      .single();
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
+
+  async updateRunStatus(
+    runId: string,
+    status: Database["public"]["Tables"]["run"]["Insert"]["status"]
+  ): Promise<Result<null, string>> {
+    const updateResult = await this.database
+      .from("run")
+      .update({ status, updated_at: new Date().toISOString() })
+      .match({ id: runId });
+    if (updateResult.error) {
+      return { data: null, error: updateResult.error.message };
+    }
+    return { data: null, error: null };
+  }
+
+  async addTask(
+    task: Database["public"]["Tables"]["task"]["Insert"]
+  ): Promise<Result<null, string>> {
+    const insertResult = await this.database.from("task").insert([task]);
+    if (insertResult.error) {
+      return { data: null, error: insertResult.error.message };
+    }
+    return { data: null, error: null };
+  }
+
   async addRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"],
     propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],

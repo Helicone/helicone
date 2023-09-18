@@ -9,7 +9,7 @@ function formatTimeString(timeString: string): string {
 function buildPropertyWithResponseInserts(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Insert"],
-  properties: Database["public"]["Tables"]["properties"]["Row"][]
+  properties: Database["public"]["Tables"]["properties"]["Insert"][]
 ): ClickhouseDB["Tables"]["property_with_response_v1"][] {
   return properties.map((p) => ({
     response_id: response.id ?? "",
@@ -92,6 +92,8 @@ export async function logInClickhouse(
         status: response.status ?? null,
         organization_id:
           request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+        run_id: request.run_id ?? null,
+        task_id: request.task_id ?? null,
         proxy_key_id: request.helicone_proxy_key_id ?? null,
       },
     ]),

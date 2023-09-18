@@ -40,6 +40,7 @@ export interface DBLoggableProps {
     isStream: boolean;
     omitLog: boolean;
     provider: Provider;
+    taskId: string | null;
   };
   timing: {
     startTime: Date;
@@ -78,6 +79,7 @@ export function dbLoggableRequestFromProxyRequest(
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
+    taskId: proxyRequest.taskId,
   };
 }
 
@@ -186,6 +188,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
+      taskId: requestWrapper.getTaskId(),
     },
     response: {
       responseId: crypto.randomUUID(),

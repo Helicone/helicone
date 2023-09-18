@@ -1,5 +1,5 @@
 from helicone.globals.helicone import helicone_global
-from helicone.runs import HeliconeRun, HeliconeTask, HeliconeTaskConfig
+from helicone.runs import HeliconeJob, HeliconeTask, HeliconeTaskConfig
 from helicone.openai_proxy import openai, Meta
 import json
 COURSE_FUNCTIONS = [
@@ -32,7 +32,7 @@ COURSE_FUNCTIONS = [
                         "description": "The chapters of the course",
                         "minItems": 1,
                         "maxItems": 10
-                }
+                        }
             },
             "required": ["Description", "chapters"]
         },
@@ -97,6 +97,9 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
         ],
         functions=COURSE_FUNCTIONS,
         max_tokens=512,
+        # headers= {
+        #     "Helicone-Task-Id": create_course_outline.id,
+        # }
         heliconeMeta=Meta(
             task_id=create_course_outline.id,
         ),
@@ -162,7 +165,7 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
 
 
 def test_run_creation():
-    generate_course_run = HeliconeRun(
+    my_job = HeliconeJob(
         name="Generate Entire Course",
         description="Generates an entire course",
         custom_properties={
@@ -172,7 +175,7 @@ def test_run_creation():
 
     try:
         for topic in ["Artificial Intelligence", "Machine Learning", "Deep Learning"]:
-            create_course_outline = generate_course_run.create_task(
+            create_course_outline = my_job.create_task(
                 HeliconeTaskConfig(
                     name="Create Course Outline",
                     description="Small task to create a course outline",
@@ -181,9 +184,10 @@ def test_run_creation():
                     }
                 )
             )
+
             run_creation(topic, create_course_outline)
 
     except Exception as e:
-        generate_course_run.fail()
+        my_job.fail()
         raise e
-    generate_course_run.success()
+    my_job.success()

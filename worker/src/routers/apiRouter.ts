@@ -125,7 +125,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       const client = new APIClient(env, requestWrapper);
-      if (!client.isAuthorized()) {
+      if (!(await client.isAuthorized())) {
         return new Response("Unauthorized", { status: 401 });
       }
       const run = await requestWrapper.getJson<Run>();
@@ -141,7 +141,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         });
       }
 
-      const { data, error } = await client.queue.addRun({
+      const { data, error } = await client.queue.addJob({
         custom_properties: run.customProperties ?? {},
         description: run.description ?? "",
         name: run.name ?? "",
@@ -168,11 +168,11 @@ export const getAPIRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       const client = new APIClient(env, requestWrapper);
-      if (!client.isAuthorized()) {
+      if (!(await client.isAuthorized())) {
         return new Response("Unauthorized", { status: 401 });
       }
 
-      const { data: run, error: runError } = await client.queue.getRunById(id);
+      const { data: run, error: runError } = await client.queue.getJobById(id);
 
       if (runError) {
         return new Response(JSON.stringify({ error: runError }), {
@@ -218,7 +218,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       const client = new APIClient(env, requestWrapper);
-      if (!client.isAuthorized()) {
+      if (!(await client.isAuthorized())) {
         return new Response("Unauthorized", { status: 401 });
       }
       const task = await requestWrapper.getJson<Task>();
@@ -241,10 +241,9 @@ export const getAPIRouter = (router: BaseRouter) => {
         name: task.name ?? "",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        parent_task: task.parentTaskId ?? null,
         id: task.id ?? crypto.randomUUID(),
         org_id: (await client.getHeliconeApiKeyRow()).organization_id,
-        run: task.run,
+        job: task.job,
       });
       if (error) {
         return new Response(JSON.stringify({ error }), { status: 500 });

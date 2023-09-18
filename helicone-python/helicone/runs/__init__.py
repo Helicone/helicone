@@ -16,7 +16,7 @@ class HeliconeTaskConfig:
 
 @dataclass(kw_only=True)
 class HeliconeTask(HeliconeTaskConfig):
-    run: "HeliconeRun"
+    run: "HeliconeJob"
     id: str = field(default_factory=lambda: str(uuid4()))
     requester: Requests = field(default_factory=Requests)
 
@@ -51,7 +51,7 @@ class HeliconeRunStatus(Enum):
 
 
 @dataclass
-class HeliconeRun:
+class HeliconeJob:
     name: str
     description: str = ""
     custom_properties: dict[str, str] = field(default_factory=dict)
@@ -59,7 +59,6 @@ class HeliconeRun:
     status: HeliconeRunStatus = HeliconeRunStatus.PENDING
     requester: Requests = field(default_factory=Requests)
     id: str = field(default_factory=lambda: str(uuid4()))
-    fail_on_error: bool = True
 
     def to_dict(self):
         return {
