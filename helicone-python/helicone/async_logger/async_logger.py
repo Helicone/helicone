@@ -5,8 +5,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
-
-import requests
+from helicone.requester import Requests
 
 from helicone.globals.helicone import helicone_global
 
@@ -70,52 +69,36 @@ class Provider(Enum):
 
 
 class HeliconeAsyncLogger:
-    base_url: str
+    requests: Requests
 
     def __init__(self,
                  base_url: Optional[str] = None,
                  api_key:  Optional[str] = None,
                  ) -> None:
-        self.base_url = base_url or "https://api.hconeai.com"
-        self.api_key = api_key or os.environ.get("HELICONE_API_KEY")
+        self.requests = Requests(base_url, api_key)
 
     @staticmethod
     def from_helicone_global() -> 'HeliconeAsyncLogger':
-        return HeliconeAsyncLogger(
-            base_url=helicone_global.base_url,
-            api_key=helicone_global.api_key
-        )
-
-    def _request(self, body: dict, url: str) -> requests.Response:
-        res = requests.post(
-            url=url,
-            json=body,
-            headers={
-                "Authorization": f"Bearer {self.api_key}"
-            }
-        )
-        if (res.status_code != 200):
-            print(f"Failed to log to {url}. Status code {res.status_code}")
-        return res
+        return HeliconeAsyncLogger()
 
     def log(self, request: HeliconeAyncLogRequest,
             provider: Provider,
             meta: Optional[HeliconeMeta] = None
             ):
         if provider == Provider.OPENAI:
-            self._request(
-                body=dataclasses.asdict(request),
-                url=f"{self.base_url}/oai/v1/log"
+            self.requests.post(
+                json=dataclasses.asdict(request),
+                path="/oai/v1/log"
             )
         elif provider == Provider.AZURE_OPENAI:
-            self._request(
-                url=f"{self.base_url}/oai/v1/log",
-                body=dataclasses.asdict(request),
+            self.requests.post(
+                path="/oai/v1/log",
+                json=dataclasses.asdict(request),
             )
         elif provider == Provider.ANTHROPIC:
-            self._request(
-                url=f"{self.base_url}/anthropic/v1/log",
-                body=dataclasses.asdict(request),
+            self.requests.post(
+                path="/anthropic/v1/log",
+                json=dataclasses.asdict(request),
             )
         else:
             raise ValueError(f"Unknown provider {provider}")
