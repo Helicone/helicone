@@ -40,9 +40,6 @@ CREATE TABLE "public"."request_job_task" (
 );
 
 
-
-alter table "public"."task" enable row level security;
-
 CREATE UNIQUE INDEX jobs_pkey ON public.job USING btree (id);
 
 CREATE UNIQUE INDEX tasks_pkey ON public.task USING btree (id);
@@ -84,4 +81,22 @@ ALTER TABLE "public"."request_job_task" VALIDATE CONSTRAINT "request_job_task_ta
 ALTER TABLE "public"."request_job_task"
 ADD CONSTRAINT "request_job_task_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES job(id) NOT VALID;
 
+alter table "public"."task" enable row level security;
+
 ALTER TABLE "public"."request_job_task" VALIDATE CONSTRAINT "request_job_task_job_id_fkey";
+
+alter table "public"."task_parents" enable row level security;
+
+alter table "public"."request_job_task" enable row level security;
+
+REVOKE ALL PRIVILEGES ON TABLE public.job FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.job FROM authenticated;
+
+REVOKE ALL PRIVILEGES ON TABLE public.task FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.task FROM authenticated;
+
+REVOKE ALL PRIVILEGES ON TABLE public.task_parents FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.task_parents FROM authenticated;
+
+REVOKE ALL PRIVILEGES ON TABLE public.request_job_task FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.request_job_task FROM authenticated;
