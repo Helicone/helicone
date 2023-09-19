@@ -13,6 +13,8 @@ import { clsx } from "../../components/shared/clsx";
 import {
   BuildingStorefrontIcon,
   ChatBubbleLeftRightIcon,
+  MagnifyingGlassIcon,
+  TableCellsIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
@@ -151,7 +153,7 @@ export default function AISafety() {
           </p>
           <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
-              <ChatBubbleLeftRightIcon
+              <MagnifyingGlassIcon
                 className="mt-1 h-5 w-5 flex-none text-sky-500"
                 aria-hidden="true"
               />
@@ -165,7 +167,7 @@ export default function AISafety() {
               </span>
             </li>
             <li className="flex gap-x-3">
-              <UserGroupIcon
+              <TableCellsIcon
                 className="mt-1 h-5 w-5 flex-none text-pink-500"
                 aria-hidden="true"
               />
@@ -179,7 +181,7 @@ export default function AISafety() {
               </span>
             </li>
             <li className="flex gap-x-3">
-              <BuildingStorefrontIcon
+              <CircleStackIcon
                 className="mt-1 h-5 w-5 flex-none text-violet-500"
                 aria-hidden="true"
               />
