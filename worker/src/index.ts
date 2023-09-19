@@ -22,6 +22,7 @@ export interface Env {
   RATE_LIMIT_KV: KVNamespace;
   CACHE_KV: KVNamespace;
   REQUEST_AND_RESPONSE_QUEUE_KV: KVNamespace;
+  UTILITY_KV: KVNamespace;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
