@@ -117,8 +117,9 @@ export default function AISafety() {
             accountability, and safety. Transparency is crucial because
             understanding how decisions are made by AI algorithms forms the
             basis for evaluating their fairness and biases. Without transparent
-            mechanisms, we risk deploying "black box" systems whose decisions
-            can neither be understood nor questioned by the people they impact.
+            mechanisms, we risk deploying &quot;black box&quot; systems whose
+            decisions can neither be understood nor questioned by the people
+            they impact.
           </p>
           <p className="mt-6">
             Accountability and safety are equally vital. Ensuring that
@@ -212,16 +213,17 @@ export default function AISafety() {
           </h2>
           <p className="mt-6">
             The first standout feature is our Auditing capabilities, also known
-            as "Two-Way Door" protection. Helicone&apos;s proxy is engineered to
-            act as a critical safeguard, preventing both malicious requests from
-            reaching your Large Language Models (LLMs) and malicious responses
-            from being sent to end-users. This dual-layer auditing mechanism
-            offers a configurable filter, ensuring that only legitimate queries
-            and responses pass through. In today&apos;s cybersecurity landscape,
-            this feature is more than just a convenience; it&apos;s a necessity.
-            By applying sophisticated algorithms to scan and filter requests and
-            responses, Helicone provides a powerful line of defense against
-            unauthorized or harmful activities.
+            as &quot;Two-Way Door&quot; protection. Helicone&apos;s proxy is
+            engineered to act as a critical safeguard, preventing both malicious
+            requests from reaching your Large Language Models (LLMs) and
+            malicious responses from being sent to end-users. This dual-layer
+            auditing mechanism offers a configurable filter, ensuring that only
+            legitimate queries and responses pass through. In today&apos;s
+            cybersecurity landscape, this feature is more than just a
+            convenience; it&apos;s a necessity. By applying sophisticated
+            algorithms to scan and filter requests and responses, Helicone
+            provides a powerful line of defense against unauthorized or harmful
+            activities.
           </p>
           <p className="mt-6">
             Next on the list is Segmentation and ETL (Extract, Transform, Load).
@@ -242,12 +244,13 @@ export default function AISafety() {
             or your custom solutions—is vital for ethical AI deployment. Drift
             Detection acts as an early warning system, alerting you when your
             LLMs start acting in ways that deviate from expected norms. This is
-            the first line of defense against AI "going rogue" and is invaluable
-            in preempting issues before they become critical problems. It&apos;s
-            not just about tracking performance metrics; it&apos;s about
-            understanding the ethical implications of those metrics. With Drift
-            Detection, you can gain real-time insights into potential ethical
-            drifts in your AI systems, enabling proactive interventions.
+            the first line of defense against AI &quot;going rogue&quot; and is
+            invaluable in preempting issues before they become critical
+            problems. It&apos;s not just about tracking performance metrics;
+            it&apos;s about understanding the ethical implications of those
+            metrics. With Drift Detection, you can gain real-time insights into
+            potential ethical drifts in your AI systems, enabling proactive
+            interventions.
           </p>
           <h2
             id="future"
