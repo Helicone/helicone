@@ -1,221 +1,250 @@
-/* eslint-disable @next/next/no-img-element */
-const featuredPost = {
-  title: "Helicone Partners with AutoGPT",
-  href: "/blog/autoGPT",
-  description:
-    "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development.",
-  date: "Jul 30, 2023",
-  datetime: "2023-07-30",
-  imageUrl: "/assets/autoGPTLogo.png",
+import Link from "next/link";
+import { clsx } from "../../shared/clsx";
+import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 
-  authors: [
-    {
-      name: "Justin Torre",
-      href: "https://www.linkedin.com/in/justintorre/",
-      imageUrl:
-        "https://media.licdn.com/dms/image/D5603AQG1fVqLULxCYA/profile-displayphoto-shrink_800_800/0/1673810039348?e=1696464000&v=beta&t=UTxO3PbbnF8bLmP2CosOwCnmh5yxyOJYAIG2XmV8uAM",
-    },
-  ],
-  tag: undefined,
+interface BlogPageProps {}
+
+type blogStructure = {
+  title: string;
+  description: string;
+  badgeText: string;
+  badgeColor: string;
+  date: string;
+  href: string;
+  imageUrl: string;
+  authors: {
+    name: string;
+    imageUrl: string;
+  }[];
 };
 
-const posts = [
+const blogContent: blogStructure[] = [
+  {
+    title:
+      "Why Observability is the key to ethical and safe Artificial Intelligence",
+    description:
+      "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
+    badgeText: "AI Safety",
+    badgeColor: "bg-red-50 text-red-700 ring-red-600/10",
+    date: "Sep 18, 2023",
+    href: "/blog/ai-safety",
+    imageUrl: "/assets/blog/AI.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+  },
+  {
+    title:
+      "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
+    description:
+      "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
+    badgeText: "Product",
+    badgeColor: "bg-blue-50 text-blue-700 ring-blue-600/10",
+    date: "Sep 13, 2023",
+    href: "/blog/vault",
+    imageUrl: "/assets/blog/vault_asset.png",
+    authors: [
+      {
+        name: "Cole Gottdank",
+        imageUrl: "/assets/blog/colegottdank-headshot.png",
+      },
+    ],
+  },
+  {
+    title: "Life after Y Combinator: Three Key Lessons for Startups",
+    description:
+      "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
+    badgeText: "Personal",
+    badgeColor: "bg-orange-50 text-orange-700 ring-orange-600/10",
+    date: "Sep 11, 2023",
+    href: "/blog/life-after-yc",
+    imageUrl: "/assets/blog/yc.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+  },
+  {
+    title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
+    description:
+      "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
+    badgeText: "Education",
+    badgeColor: "bg-sky-50 text-sky-700 ring-sky-600/10",
+    date: "Sep 1, 2023",
+    href: "/blog/open-source-monitoring-for-openai",
+    imageUrl: "/assets/blog/openai.webp",
+    authors: [
+      {
+        name: "Scott Nguyen",
+        imageUrl: "/assets/blog/scottnguyen-headshot.webp",
+      },
+    ],
+  },
+  {
+    title: "Helicone partners with AutoGPT",
+    description:
+      "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development.",
+    badgeText: "Partnership",
+    badgeColor: "bg-pink-50 text-pink-700 ring-pink-600/10",
+    date: "Jul 30, 2023",
+    href: "/blog/autoGPT",
+    imageUrl: "/assets/autoGPTLogo.png",
+    authors: [
+      {
+        name: "Justin Torre",
+        imageUrl:
+          "https://media.licdn.com/dms/image/D5603AQG1fVqLULxCYA/profile-displayphoto-shrink_800_800/0/1673810039348?e=1696464000&v=beta&t=UTxO3PbbnF8bLmP2CosOwCnmh5yxyOJYAIG2XmV8uAM",
+      },
+    ],
+  },
   {
     title: "Generative AI with Helicone",
-    href: "https://dailybaileyai.com/software/helicone.php",
     description:
-      "In the rapidly evolving world of generative AI, companies face the exciting challenge of building innovative solutions while effectively managing costs, result quality, and latency. Enter Helicone, an open-source observability platform specifically designed for these cutting-edge endeavors. With just one line of code, companies gain access to a powerful tool that allows them to log requests made to providers like OpenAI, thereby gaining deep insights into their AI systems' performance and resource usage.",
+      "In the rapidly evolving world of generative AI, companies face the exciting challenge of building innovative solutions while effectively managing costs, result quality, and latency. Enter Helicone, an open-source observability platform specifically designed for these cutting-edge endeavors.",
+    badgeText: "External",
+    badgeColor: "bg-violet-50 text-violet-700 ring-violet-600/10",
     date: "Jul 21, 2023",
-    datetime: "2023-07-21",
+    href: "https://dailybaileyai.com/software/helicone.php",
     imageUrl: "https://dailybaileyai.com/home_page_files/banner_image.jpg",
     authors: [
       {
         name: "George Bailey",
-        href: "https://dailybaileyai.com/index.php",
         imageUrl: "https://dailybaileyai.com/images/avatars/my_profile.png",
       },
     ],
-    tag: "External",
   },
   {
     title: "(a16z) Emerging Architectures for LLM Applications",
-    href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",
     description:
       "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it’s not always obvious how to use them.",
+    badgeText: "External",
+    badgeColor: "bg-violet-50 text-violet-700 ring-violet-600/10",
     date: "Jun 20, 2023",
-    datetime: "2023-06-20",
+    href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",
     imageUrl:
       "https://i0.wp.com/a16z.com/wp-content/uploads/2023/06/2657-Emerging-LLM-App-Stack-R2-1-of-4-2.png?w=2000&ssl=1",
-
     authors: [
       {
         name: "Matt Bornstein",
-        href: "https://a16z.com/author/matt-bornstein/",
         imageUrl:
           "https://a16z.com/wp-content/uploads/2019/07/MattBornstein-Investing-400x400.jpg",
       },
       {
         name: "Rajko Radovanovic",
-        href: "https://a16z.com/author/rajko-radovanovic/",
         imageUrl:
           "https://a16z.com/wp-content/uploads/2023/05/Rajko-Radovanovic-400x400.png",
       },
     ],
-    tag: "External",
   },
   {
     title: "(Sequoia) The New Language Model Stack",
-    href: "https://www.sequoiacap.com/article/llm-stack-perspective/",
     description: "How companies are bringing AI applications to life",
+    badgeText: "External",
+    badgeColor: "bg-violet-50 text-violet-700 ring-violet-600/10",
     date: "Jun 14, 2023",
-    datetime: "2023-06-14",
+    href: "https://www.sequoiacap.com/article/llm-stack-perspective/",
     imageUrl:
       "https://www.sequoiacap.com/wp-content/uploads/sites/6/2023/06/llm-landscape-10.png?resize=1536,1333",
-
     authors: [
       {
         name: "Michelle Fradin",
-        href: "https://www.sequoiacap.com/people/michelle-fradin/",
         imageUrl:
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2021/12/Michelle-Bailhe-profile-1.jpg?resize=880,880",
       },
       {
         name: "Lauren Reeder",
-        href: "https://www.sequoiacap.com/people/lauren-reeder/",
         imageUrl:
           "https://www.sequoiacap.com/wp-content/uploads/sites/6/2022/01/211118_clifford_sequoia-laurenreeder_DSF9377.jpg?resize=880,880",
       },
     ],
-    tag: "External",
   },
 ];
 
-export default function BlogPage() {
+const BlogPage = (props: BlogPageProps) => {
+  const {} = props;
+
   return (
-    <div className="bg-white py-24 sm:py-32 min-h-[80vh]">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-x-8 gap-y-12 px-6 sm:gap-y-16 lg:grid-cols-2 lg:px-8">
-        <article className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-lg">
-          <div className="relative w-full">
-            <a href={featuredPost.href}>
-              <img
-                src={featuredPost.imageUrl}
-                alt=""
-                className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[2/1]"
-              />
-            </a>
-          </div>
-          <div className="flex flex-row gap-2 pt-8">
-            <time
-              dateTime={featuredPost.datetime}
-              className="block text-sm leading-6 text-gray-600"
+    <div className="bg-gray-50">
+      <div className="flex flex-col mx-auto max-w-7xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+        <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          The latest{" "}
+          <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] pb-1 bg-no-repeat bg-bottom">
+            news
+          </span>
+        </h1>
+        <p className="mt-6 w-full text-xl leading-8 text-gray-700 max-w-2xl">
+          Stay up to date with the latest news and articles about Helicone and
+          learn about how we are helping build the future of AI.
+        </p>
+        <div className="border-b border-gray-200 mt-12" />
+        <section className="mt-16 flex flex-col space-y-24">
+          {blogContent.map((blog, idx) => (
+            <Link
+              key={idx}
+              href={blog.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex flex-col sm:flex-row gap-8 h-full sm:h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
             >
-              {featuredPost.date}
-            </time>
-            {featuredPost.tag && (
-              <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-700/10">
-                {featuredPost.tag}
-              </span>
-            )}
-          </div>
-          <h2
-            id="featured-post"
-            className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-          >
-            <a href={featuredPost.href}>{featuredPost.title}</a>
-          </h2>
-          <p className="mt-4 text-lg leading-8 text-gray-600">
-            {featuredPost.description}
-          </p>
-          <div className="mt-4 flex flex-col justify-between gap-6 sm:mt-8 sm:flex-row-reverse sm:gap-8 lg:mt-4 lg:flex-col">
-            <div className="flex">
-              <a
-                href={featuredPost.href}
-                className="text-sm font-semibold leading-6 text-sky-600"
-                aria-describedby="featured-post"
-              >
-                Continue reading <span aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
-            {featuredPost.authors.map((author, i) => (
-              <div
-                className="flex lg:border-t lg:border-gray-900/10 lg:pt-8"
-                key={i}
-              >
-                <a
-                  href={author.href}
-                  className="flex gap-x-2.5 text-sm font-semibold leading-6 text-gray-900"
-                >
-                  <img
-                    src={author.imageUrl}
-                    alt=""
-                    className="h-6 w-6 flex-none rounded-full bg-gray-50"
-                  />
-                  {author.name}
-                </a>
+              <div className="w-full sm:w-2/5 rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
+                <img
+                  src={blog.imageUrl}
+                  alt="App screenshot"
+                  style={{
+                    objectFit: "cover",
+                  }}
+                  className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"
+                />
               </div>
-            ))}
-          </div>
-        </article>
-        <div className="mx-auto w-full max-w-2xl border-t border-gray-900/10 pt-12 sm:pt-16 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-0">
-          <div className="-my-12 divide-y divide-gray-900/10">
-            {posts.map((post, id) => (
-              <article key={id} className="py-12">
-                <div className="relative w-full">
-                  <a href={post.href}>
-                    <img
-                      src={post.imageUrl}
-                      alt=""
-                      className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[8/3] lg:aspect-[8/3]"
-                    />
-                  </a>
+              <div className="w-full sm:w-3/5 flex flex-col justify-between py-4">
+                <div className="flex flex-col space-y-4">
+                  <span
+                    className={clsx(
+                      blog.badgeColor,
+                      "w-fit inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                    )}
+                  >
+                    {blog.badgeText}
+                  </span>
+                  <h2 className="font-semibold text-3xl">{blog.title}</h2>
+                  <p className="text-gray-700">{blog.description}</p>
                 </div>
-                <div className="group relative max-w-xl pt-8">
-                  <div className="flex flex-row gap-2">
-                    <time
-                      dateTime={post.datetime}
-                      className="block text-sm leading-6 text-gray-600"
-                    >
-                      {post.date}
-                    </time>
-                    <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-700/10">
-                      {post.tag}
-                    </span>
-                  </div>
-                  <h2 className="mt-2 text-lg font-semibold text-gray-900 group-hover:text-gray-600">
-                    <a href={`${post.href}`}>
-                      <span className="absolute inset-0" />
-                      {post.title}
-                    </a>
-                  </h2>
-                  <p className="mt-4 text-sm leading-6 text-gray-600">
-                    {post.description}
-                  </p>
-                </div>
-                <div className="flex flex-row space-x-2">
-                  {post.authors.map((author, i) => (
+                <div className="flex flex-row divide-x divide-gray-200 gap-4 items-center">
+                  {blog.authors.map((author, i) => (
                     <div
-                      className="flex lg:border-t lg:border-gray-900/10 lg:pt-8"
+                      className={clsx(
+                        "flex items-center space-x-3 bottom-0",
+                        i !== 0 && "pl-4"
+                      )}
                       key={i}
                     >
-                      <a
-                        href={author.href}
-                        className="relative flex gap-x-2.5 text-sm font-semibold leading-6 text-gray-900"
-                      >
-                        <img
-                          src={author.imageUrl}
-                          alt=""
-                          className="h-6 w-6 flex-none rounded-full bg-gray-50"
-                        />
+                      <img
+                        className="inline-block h-8 w-8 rounded-full"
+                        src={author.imageUrl}
+                        alt=""
+                      />
+                      <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                         {author.name}
-                      </a>
+                      </p>
                     </div>
                   ))}
+
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 pl-4">
+                    <time>{blog.date}</time>
+                  </p>
                 </div>
-              </article>
-            ))}
-          </div>
-        </div>
+              </div>
+            </Link>
+          ))}
+        </section>
       </div>
     </div>
   );
-}
+};
+
+export default BlogPage;
