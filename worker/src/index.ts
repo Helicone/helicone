@@ -1,14 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
-import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import {
   RequestResponseQueuePayload,
   insertIntoRequest,
   insertIntoResponse,
 } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
+import crypto from "crypto";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
