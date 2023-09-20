@@ -216,7 +216,7 @@ export default function HomePage(props: HomePageProps) {
             )}
           </div>
           {microsoftForStartups ? (
-            <ContactForm contactTag={"mfs"} buttonText={"Get 9 months free"} />
+            <ContactForm contactTag={"mfs"} buttonText={"Get 6 months free"} />
           ) : (
             <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
               <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
