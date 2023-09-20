@@ -41,7 +41,8 @@ class GPT3Builder extends AbstractRequestBuilder {
             response={{
               title: "Response",
               text: this.response.response_body?.choices
-                ? this.response.response_body?.choices[0].text
+                ? this.response.response_body?.choices[0].text ||
+                  this.response.response_body?.choices[0].message
                 : "",
             }}
           />
