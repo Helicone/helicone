@@ -7,24 +7,24 @@ from helicone.requester import Requests
 
 
 @dataclass(kw_only=True)
-class HeliconeTaskConfig:
-    parent_task_id: Optional[str] = None
+class HeliconeNodeConfig:
+    parent_job_id: Optional[str] = None
     name: Optional[str] = None
     description: str = ""
     custom_properties: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(kw_only=True)
-class HeliconeTask(HeliconeTaskConfig):
-    run: "HeliconeJob"
+class HeliconeNode(HeliconeNodeConfig):
+    job: "HeliconeJob"
     id: str = field(default_factory=lambda: str(uuid4()))
     requester: Requests = field(default_factory=Requests)
 
     def to_dict(self):
         return {
             "id": self.id,
-            "run": self.run.id,
-            "parentTaskId": self.parent_task_id,
+            "job": self.job.id,
+            "parentJobId": self.parent_job_id,
             "name": self.name,
             "description": self.description,
             "customProperties": self.custom_properties,
@@ -32,14 +32,16 @@ class HeliconeTask(HeliconeTaskConfig):
 
     def __post_init__(self):
         self.requester.post(
-            "/task",
+            "/node",
             json=self.to_dict(),
         )
 
-    def create_child_task(self, config: HeliconeTaskConfig) -> "HeliconeTask":
+    def create_child_node(self, config: HeliconeNodeConfig) -> "HeliconeNode":
         task_data = asdict(config)
-        task_data["parent_task_id"] = self.id
-        return HeliconeTask(run=self.run, **task_data)
+        task_data["parent_job_id"] = self.id
+        print("Creating child node")
+        print(task_data)
+        return HeliconeNode(job=self.job, **task_data)
 
 
 class HeliconeRunStatus(Enum):
@@ -84,10 +86,10 @@ class HeliconeJob:
             raise Exception(
                 "Cannot create a task on a run that has completed")
 
-    def create_task(self, config: HeliconeTaskConfig) -> HeliconeTask:
+    def create_node(self, config: HeliconeNodeConfig) -> HeliconeNode:
         self._error_if_completed()
         task_data = asdict(config)
-        return HeliconeTask(run=self, **task_data)
+        return HeliconeNode(job=self, **task_data)
 
     def set_status(self, status: HeliconeRunStatus):
         self._error_if_completed()

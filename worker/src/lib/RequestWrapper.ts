@@ -91,7 +91,7 @@ export class RequestWrapper {
   }
 
   getTaskId(): string | null {
-    return this.heliconeHeaders.taskId;
+    return this.heliconeHeaders.nodeId;
   }
 
   async getText(): Promise<string> {

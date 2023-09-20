@@ -77,13 +77,12 @@ alter table "public"."request_job_task" add constraint "request_job_task_task_id
 
 alter table "public"."request_job_task" validate constraint "request_job_task_task_id_fkey";
 
-
-
-
 alter table "public"."job_node" add column "node_type" text not null default 'TASK'::text;
 
-alter table "public"."job_node" add column "resource_data" text not null;
+alter table "public"."job_node" add column "resource_data" text;
 
-alter table "public"."job_node" add column "resource_data_type" text not null;
+alter table "public"."job_node" add column "resource_data_type" text;
 
-
+alter table "public"."job_node" enable row level security;
+REVOKE ALL PRIVILEGES ON TABLE public.job_node FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.job_node FROM authenticated;

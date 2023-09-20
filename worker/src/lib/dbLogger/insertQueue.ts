@@ -93,6 +93,20 @@ export class InsertQueue {
     public responseAndResponseQueueKV: KVNamespace
   ) {}
 
+  async addRequestNodeRelationship(
+    job_id: string,
+    node_id: string,
+    request_id: string
+  ): Promise<Result<null, string>> {
+    const insertResult = await this.database
+      .from("job_node_request")
+      .insert([{ job_id, node_id, request_id }]);
+    if (insertResult.error) {
+      return { data: null, error: JSON.stringify(insertResult) };
+    }
+    return { data: null, error: null };
+  }
+
   async addJob(
     run: Database["public"]["Tables"]["job"]["Insert"]
   ): Promise<Result<null, string>> {
@@ -119,25 +133,41 @@ export class InsertQueue {
 
   async updateRunStatus(
     runId: string,
-    status: Database["public"]["Tables"]["run"]["Insert"]["status"]
+    status: Database["public"]["Tables"]["job"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
     const updateResult = await this.database
-      .from("run")
+      .from("job")
       .update({ status, updated_at: new Date().toISOString() })
       .match({ id: runId });
     if (updateResult.error) {
-      return { data: null, error: updateResult.error.message };
+      return { data: null, error: JSON.stringify(updateResult.error) };
     }
     return { data: null, error: null };
   }
 
   async addTask(
-    task: Database["public"]["Tables"]["task"]["Insert"]
+    node: Database["public"]["Tables"]["job_node"]["Insert"],
+    options: { parent_job_id?: string }
   ): Promise<Result<null, string>> {
-    const insertResult = await this.database.from("task").insert([task]);
+    const insertResult = await this.database.from("job_node").insert([node]);
     if (insertResult.error) {
-      return { data: null, error: insertResult.error.message };
+      return { data: null, error: JSON.stringify(insertResult) };
     }
+    if (options.parent_job_id) {
+      const insertResult = await this.database
+        .from("job_node_relationships")
+        .insert([
+          {
+            node_id: node.id,
+            parent_node_id: options.parent_job_id,
+            job_id: node.job,
+          },
+        ]);
+      if (insertResult.error) {
+        return { data: null, error: JSON.stringify(insertResult) };
+      }
+    }
+
     return { data: null, error: null };
   }
 

@@ -40,7 +40,7 @@ export interface DBLoggableProps {
     isStream: boolean;
     omitLog: boolean;
     provider: Provider;
-    taskId: string | null;
+    nodeId: string | null;
   };
   timing: {
     startTime: Date;
@@ -79,7 +79,7 @@ export function dbLoggableRequestFromProxyRequest(
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
-    taskId: proxyRequest.taskId,
+    nodeId: proxyRequest.nodeId,
   };
 }
 
@@ -188,7 +188,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
-      taskId: requestWrapper.getTaskId(),
+      nodeId: requestWrapper.getTaskId(),
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -501,6 +501,7 @@ export class DBLoggable {
       return { data: null, error: error ?? "Helicone organization not found" };
     }
 
+    console.log("Logging request", this.request.requestId);
     const requestResult = await logRequest(
       this.request,
       this.response.responseId,
@@ -508,6 +509,7 @@ export class DBLoggable {
       db.queue,
       authParams
     );
+    console.log("Logged request", requestResult);
 
     // If no data or error, return
     if (!requestResult.data || requestResult.error) {
@@ -558,7 +560,7 @@ export class DBLoggable {
   ): Promise<Result<null, string>> {
     const res = await this._log(db, rateLimitKV);
     if (res.error !== null) {
-      console.error("Error logging", res.error);
+      console.error("Error logging", JSON.stringify(res.error));
       const uuid = crypto.randomUUID();
       db.queue.responseAndResponseQueueKV.put(
         uuid,

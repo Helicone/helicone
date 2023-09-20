@@ -11,15 +11,33 @@ import { Run, isValidStatus, validateRun } from "../lib/models/Runs";
 import { Database } from "../../supabase/database.types";
 import { SupabaseWrapper } from "../lib/db/supabase";
 import { Result } from "../results";
-import { Task, validateTask } from "../lib/models/Tasks";
+import {
+  HeliconeNode as HeliconeNode,
+  validateHeliconeNode as validateHeliconeNode,
+} from "../lib/models/Tasks";
+
+class InternalResponse {
+  constructor(private client: APIClient) {}
+
+  newError(message: string, status: number): Response {
+    console.error(`Response Error: `, message);
+    return new Response(JSON.stringify({ error: message }), { status });
+  }
+
+  unauthorized(): Response {
+    return this.newError("Unauthorized", 401);
+  }
+}
 
 // TODO Move to API middleware so that it is always constructed
 class APIClient {
   public queue: InsertQueue;
+  public response: InternalResponse;
   private supabase: SupabaseWrapper;
   private heliconeApiKeyRow?: Database["public"]["Tables"]["helicone_api_keys"]["Row"];
 
   constructor(private env: Env, private requestWrapper: RequestWrapper) {
+    this.response = new InternalResponse(this);
     this.supabase = new SupabaseWrapper(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
@@ -126,7 +144,7 @@ export const getAPIRouter = (router: BaseRouter) => {
     ) => {
       const client = new APIClient(env, requestWrapper);
       if (!(await client.isAuthorized())) {
-        return new Response("Unauthorized", { status: 401 });
+        return client.response.unauthorized();
       }
       const run = await requestWrapper.getJson<Run>();
 
@@ -136,9 +154,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       const isValidRun = validateRun(run);
 
       if (isValidRun.error) {
-        return new Response(JSON.stringify(isValidRun), {
-          status: 400,
-        });
+        return client.response.newError(isValidRun.error, 400);
       }
 
       const { data, error } = await client.queue.addJob({
@@ -153,7 +169,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         org_id: (await client.getHeliconeApiKeyRow()).organization_id,
       });
       if (error) {
-        return new Response(JSON.stringify({ error }), { status: 500 });
+        return client.response.newError(error, 500);
       }
       return new Response(JSON.stringify({ data }), { status: 200 });
     }
@@ -195,22 +211,19 @@ export const getAPIRouter = (router: BaseRouter) => {
         (await requestWrapper.getJson<{ status: string }>()).status ?? "";
 
       if (!isValidStatus(status)) {
-        console.error("Invalid status", status);
-        return new Response(JSON.stringify({ error: "Invalid status" }), {
-          status: 400,
-        });
+        return client.response.newError("Invalid status", 400);
       }
 
       const { data, error } = await client.queue.updateRunStatus(id, status);
       if (error) {
-        return new Response(JSON.stringify({ error }), { status: 500 });
+        return client.response.newError(error, 500);
       }
       return new Response(JSON.stringify({ data }), { status: 200 });
     }
   );
 
   router.post(
-    "/task",
+    "/node",
     async (
       _,
       requestWrapper: RequestWrapper,
@@ -221,32 +234,35 @@ export const getAPIRouter = (router: BaseRouter) => {
       if (!(await client.isAuthorized())) {
         return new Response("Unauthorized", { status: 401 });
       }
-      const task = await requestWrapper.getJson<Task>();
-      if (!task) {
-        console.error("Invalid task", task);
+      const node = await requestWrapper.getJson<HeliconeNode>();
+      if (!node) {
+        console.error("Content not JSON", node);
         return new Response("Invalid task", { status: 400 });
       }
-      const isValidTask = validateTask(task);
+      const isValidTask = validateHeliconeNode(node);
 
       if (isValidTask.error) {
-        console.error("Invalid task", isValidTask);
+        console.error("Invalid node Error", isValidTask);
         return new Response(JSON.stringify(isValidTask), {
           status: 400,
         });
       }
 
-      const { data, error } = await client.queue.addTask({
-        custom_properties: task.customProperties ?? {},
-        description: task.description ?? "",
-        name: task.name ?? "",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        id: task.id ?? crypto.randomUUID(),
-        org_id: (await client.getHeliconeApiKeyRow()).organization_id,
-        job: task.job,
-      });
+      const { data, error } = await client.queue.addTask(
+        {
+          custom_properties: node.customProperties ?? {},
+          description: node.description ?? "",
+          name: node.name ?? "",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          id: node.id ?? crypto.randomUUID(),
+          org_id: (await client.getHeliconeApiKeyRow()).organization_id,
+          job: node.job,
+        },
+        { parent_job_id: node.parentJobId }
+      );
       if (error) {
-        return new Response(JSON.stringify({ error }), { status: 500 });
+        return client.response.newError(error, 500);
       }
       return new Response(JSON.stringify({ data }), { status: 200 });
     }

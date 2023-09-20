@@ -1,5 +1,5 @@
 from helicone.globals.helicone import helicone_global
-from helicone.runs import HeliconeJob, HeliconeTask, HeliconeTaskConfig
+from helicone.runs import HeliconeJob, HeliconeNode, HeliconeNodeConfig
 from helicone.openai_proxy import openai, Meta
 import json
 COURSE_FUNCTIONS = [
@@ -88,7 +88,7 @@ helicone_global.api_key = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
 helicone_global.proxy_url = "http://127.0.0.1:8787/v1"
 
 
-def run_creation(topic: str, create_course_outline: HeliconeTask):
+def run_creation(topic: str, create_course_outline: HeliconeNode):
 
     _course_outline = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -101,7 +101,7 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
         #     "Helicone-Task-Id": create_course_outline.id,
         # }
         heliconeMeta=Meta(
-            task_id=create_course_outline.id,
+            node_id=create_course_outline.id,
         ),
         user="alice@bob.com"
     )
@@ -109,8 +109,8 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
     course_outline = json.loads(
         _course_outline.choices[0].message.function_call.arguments)
 
-    create_chapters = create_course_outline.create_child_task(
-        HeliconeTaskConfig(
+    create_chapters = create_course_outline.create_child_node(
+        HeliconeNodeConfig(
             name="Create Chapters",
             description="Generates each chapter from the course outline",
         )
@@ -128,7 +128,7 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
             max_tokens=512,
             user="alice@bob.com",
             heliconeMeta=Meta(
-                task_id=create_chapters.id,
+                node_id=create_chapters.id,
             ),
         )
         chapter = json.loads(
@@ -137,8 +137,8 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
         print(chapter)
     for chapter in chapters:
         print(chapter)
-        create_sections = create_chapters.create_child_task(
-            HeliconeTaskConfig(
+        create_sections = create_chapters.create_child_node(
+            HeliconeNodeConfig(
                 name=f"Create Sections for {chapter['name']}",
                 description="Generates each section from the chapter outline",
             )
@@ -155,7 +155,7 @@ def run_creation(topic: str, create_course_outline: HeliconeTask):
                 max_tokens=512,
                 user="alice@bob.com",
                 heliconeMeta=Meta(
-                    task_id=create_sections.id,
+                    node_id=create_sections.id,
                 ),
             )
             section = json.loads(
@@ -175,8 +175,8 @@ def test_run_creation():
 
     try:
         for topic in ["Artificial Intelligence", "Machine Learning", "Deep Learning"]:
-            create_course_outline = my_job.create_task(
-                HeliconeTaskConfig(
+            create_course_outline = my_job.create_node(
+                HeliconeNodeConfig(
                     name="Create Course Outline",
                     description="Small task to create a course outline",
                     custom_properties={
