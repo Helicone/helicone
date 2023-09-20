@@ -7,7 +7,6 @@ import {
   insertIntoResponse,
 } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
-import crypto from "crypto";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
