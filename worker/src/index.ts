@@ -28,6 +28,7 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
+  FALLBACK_QUEUE: Queue<any>;
 }
 
 export async function hash(key: string): Promise<string> {
