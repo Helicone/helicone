@@ -55,6 +55,10 @@ python3 clickhouse/ch_hcone.py --start
 ### Start Workers
 
 ```bash
+cd worker
+```
+
+```bash
 # Start OpenAI Proxy
 wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787
 ```
