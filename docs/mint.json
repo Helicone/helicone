@@ -65,7 +65,8 @@
       "pages": [
         "getting-started/quick-start",
         "getting-started/proxy-vs-async",
-        "getting-started/open-source"
+        "getting-started/self-deploy",
+        "getting-started/self-deploy-docker"
       ]
     },
     {
