@@ -1,8 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
-import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import {
   RequestResponseQueuePayload,
   insertIntoRequest,
@@ -31,6 +29,7 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
+  FALLBACK_QUEUE: Queue<any>;
   LOOPS_API_KEY: string;
 }
 
