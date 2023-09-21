@@ -25,6 +25,7 @@ const tiers = [
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
+      "50 mb of cache data",
       "1 Organization",
       "5 Seats",
     ],
