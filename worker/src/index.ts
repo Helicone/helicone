@@ -31,6 +31,7 @@ export interface Env {
   STORAGE_URL: string;
   FALLBACK_QUEUE: Queue<any>;
   LOOPS_API_KEY: string;
+  ENVIRONMENT: "development" | "staging" | "production";
 }
 
 export async function hash(key: string): Promise<string> {
@@ -136,8 +137,10 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    await feedbackCronHandler(env);
-    await updateLoopUsers(env);
+    if (env.ENVIRONMENT === "production") {
+      await feedbackCronHandler(env);
+      await updateLoopUsers(env);
+    }
   },
 };
 

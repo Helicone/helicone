@@ -25,6 +25,7 @@ PROVIDER = "OPENAI"
 TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "true"
+ENVIRONMENT = "development"
 
 [triggers]
 crons = ["*/1 * * * *"]
@@ -56,6 +57,7 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "true"
+ENVIRONMENT = "production"
 
 
 [env.production_staging]
@@ -85,3 +87,4 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "true"
+ENVIRONMENT = "staging"
