@@ -111,7 +111,7 @@ export async function updateLoopUsers(env: Env) {
         email: user.email,
         firstName: user.first_name,
         lastName: user.last_name,
-        "User Group": user.msft ? "mfs" : undefined,
+        userGroup: user.msft ? "mfs" : undefined,
         created_at: new Date(user.created_at ?? 0).toISOString(),
         updated_at: new Date(user.updated_at ?? 0).toISOString(),
       }),
