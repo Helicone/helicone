@@ -1,14 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
-import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import {
   RequestResponseQueuePayload,
   insertIntoRequest,
   insertIntoResponse,
 } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
+import { updateLoopUsers } from "./lib/updateLoopsUsers";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -30,6 +29,8 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
+  FALLBACK_QUEUE: Queue<any>;
+  LOOPS_API_KEY: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -135,7 +136,8 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    return await feedbackCronHandler(env);
+    await feedbackCronHandler(env);
+    await updateLoopUsers(env);
   },
 };
 
