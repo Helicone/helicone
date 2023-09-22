@@ -263,24 +263,6 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>{" "}
               <div className="col-span-2 lg:col-span-6 h-full">
                 <MainGraph
-                  isLoading={overTimeData.feedback.isLoading}
-                  doubleLineOverTime={combinePositiveAndNegativeFeedback()}
-                  timeMap={getTimeMap(timeIncrement)}
-                  title={"Feedback"}
-                  value={
-                    metrics.feedback?.data?.data
-                      ? `${formatNumberString(
-                          metrics.feedback?.data?.data.toFixed(2)
-                        )}`
-                      : "0"
-                  }
-                  valueLabel={"Positive"}
-                  valueLabel2="Negative"
-                  type="double-line"
-                />
-              </div>
-              <div className="col-span-2 lg:col-span-6 h-full">
-                <MainGraph
                   isLoading={overTimeData.costs.isLoading}
                   dataOverTime={
                     overTimeData.costs.data?.data?.map((r) => ({
@@ -344,6 +326,24 @@ const DashboardPage = (props: DashboardPageProps) => {
                   value={metrics.activeUsers.data?.data ?? 0}
                   valueLabel={" Users"}
                   type={"bar"}
+                />
+              </div>
+              <div className="col-span-2 lg:col-span-6 h-full">
+                <MainGraph
+                  isLoading={overTimeData.feedback.isLoading}
+                  doubleLineOverTime={combinePositiveAndNegativeFeedback()}
+                  timeMap={getTimeMap(timeIncrement)}
+                  title={"Feedback"}
+                  value={
+                    metrics.feedback?.data?.data
+                      ? `${formatNumberString(
+                          metrics.feedback?.data?.data.toFixed(2)
+                        )}`
+                      : "0"
+                  }
+                  valueLabel={"Positive"}
+                  valueLabel2="Negative"
+                  type="double-line"
                 />
               </div>
               {metricsData.map((m, i) => (
