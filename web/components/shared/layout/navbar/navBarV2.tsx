@@ -37,7 +37,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
     <header className="bg-white top-0 sticky z-30 border-b border-gray-200">
       {!mobileMenuOpen && (
         <nav
-          className="mx-auto flex max-w-7xl items-center md:gap-x-8 gap-x-16 p-3 md:px-8"
+          className="mx-auto flex max-w-6xl items-center md:gap-x-8 gap-x-16 p-3 md:px-8"
           aria-label="Global"
         >
           <div className="flex">
