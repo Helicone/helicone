@@ -309,7 +309,7 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}
@@ -324,7 +324,7 @@ services:
     environment:
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
       SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
-      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
@@ -365,5 +365,6 @@ services:
         condition: service_healthy
     environment:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
 
     # If you want to use logging, please run with `docker compose -f docker-compose.yml -f docker-compose-logging.yml up`
