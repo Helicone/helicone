@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Dialog } from "@headlessui/react";
+import { Dialog, Disclosure } from "@headlessui/react";
 import {
   ArrowPathIcon,
   Bars3Icon,
   CircleStackIcon,
   CodeBracketIcon,
   LockClosedIcon,
+  MinusSmallIcon,
   PencilSquareIcon,
+  PlusSmallIcon,
   RectangleStackIcon,
   TagIcon,
   UserIcon,
@@ -58,6 +60,20 @@ const features: {
     title: "GraphQL",
     icon: CodeBracketIcon,
   },
+];
+
+const faqs = [
+  {
+    question: "What's the best thing about Switzerland?",
+    answer:
+      "I don't know, but the flag is a big plus. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.",
+  },
+  {
+    question: "What's the best thing about Switzerland?",
+    answer:
+      "I don't know, but the flag is a big plus. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.",
+  },
+  // More questions...
 ];
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -261,48 +277,61 @@ export default function Example() {
       </div>
       <section
         id="features"
-        className="bg-gradient-to-b from-white to-gray-200 h-screen mt-24 antialiased"
+        className="bg-gradient-to-b from-white to-gray-200 mt-24 pb-24 antialiased"
       >
         <div className="md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
           <div className="flex flex-col space-y-4 w-full">
             <h2 className="text-5xl font-semibold">
-              Two lines of code. That's it.
+              Monitoring without the hassle.
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-normal">
               Helicone makes it easy to understand what your AI is doing and
               speeds up your development process - with the easiest integration
               in the market.
             </p>
-            <div className="flex flex-row w-full justify-between gap-4">
-              <div className="text-left w-full">
-                <DiffHighlight
-                  code={`
-import { Configuration, OpenAIApi } from "openai";
-                
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-    // Add a basePath to the Configuration
-    basePath: "${BASE_PATH}",
-    baseOptions: {
-        headers: {
-            // Add your Helicone API Key
-            "Helicone-Auth": "Bearer <YOUR_API_KEY>",
-        },
-    }
-});
-                
-const openai = new OpenAIApi(configuration);`}
-                  language="bash"
-                  newLines={[5, 9]}
-                  oldLines={[]}
-                />
+            <div className="grid grid-cols-8 gap-4 w-full py-16">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
+                <div className="flex flex-col mt-auto space-y-2">
+                  <h3 className="text-3xl font-semibold">
+                    Meaningful Insights
+                  </h3>
+                  <p className="text-md text-gray-600">
+                    See how your AI is performing in real-time.
+                  </p>
+                </div>
               </div>
-              <div className="bg-red-500 w-full h-48"></div>
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-3 rounded-2xl h-96 flex flex-col p-8">
+                <div className="flex flex-col mt-auto space-y-2">
+                  <h3 className="text-3xl font-semibold">2 lines of code</h3>
+                  <p className="text-md text-gray-600">
+                    Get integrated in seconds. Not days.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-3 rounded-2xl h-96 flex flex-col p-8">
+                <div className="flex flex-col mt-auto space-y-2">
+                  <h3 className="text-3xl font-semibold">Chat History</h3>
+                  <p className="text-md text-gray-600">
+                    Easily replay and debug chat sessions.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
+                <div className="flex flex-col mt-auto space-y-2">
+                  <h3 className="text-3xl font-semibold">Open Source</h3>
+                  <p className="text-md text-gray-600">
+                    Commited to user-centric development and transparency.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
-      <section id="features" className="bg-gray-200 h-screen pt-24 antialiased">
+      <section
+        id="features"
+        className="bg-gradient-to-b from-gray-200 to-white h-screen pt-24 antialiased"
+      >
         <div className="md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
           <div className="flex flex-col space-y-4">
             <h2 className="text-5xl font-semibold">
@@ -317,8 +346,8 @@ const openai = new OpenAIApi(configuration);`}
           <ul className="flex flex-row gap-12 justify-center">
             {features.map((f) => (
               <li className="flex flex-col gap-4 justify-start items-center">
-                <div className="h-12 w-12 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
-                  <f.icon className="h-4 w-4 text-gray-900" />
+                <div className="bg-gray-50 h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
+                  <f.icon className="h-5 w-5 text-gray-900" />
                 </div>
                 <p className="text-gray-700 text-sm max-w-[5rem] text-center">
                   {f.title}
@@ -326,11 +355,18 @@ const openai = new OpenAIApi(configuration);`}
               </li>
             ))}
           </ul>
-          <div className="grid grid-cols-2 gap-4 h-[50vh] w-full">
-            <div className="col-span-1 h-full border border-gray-200 bg-white rounded-xl flex flex-col justify-center items-center">
+          <div className="max-w-4xl h-[50vh] flex flex-col divide-y divide-gray-300 w-full bg-gray-50 rounded-xl border border-gray-300">
+            {/* <div className="col-span-1 h-full border border-gray-200 bg-white rounded-xl flex flex-col justify-center items-center">
               x1
+            </div> */}
+            <div className="flex flex-row">
+              <h3 className="text-lg font-semibold text-gray-900 px-8 py-4">
+                Custom Properties - Helicone's custom properties allow you to
+                track the performance of your AI models
+              </h3>
             </div>
-            <div className="relative isolate bg-gray-100 rounded-xl">
+
+            <div className="relative isolate bg-gray-50 h-full rounded-b-xl">
               <svg
                 className="absolute inset-0 -z-10 h-full w-full stroke-gray-200"
                 aria-hidden="true"
@@ -354,13 +390,58 @@ const openai = new OpenAIApi(configuration);`}
                   fill="url(#83fd4e5a-9d52-42fc-97b6-718e5d7ee527)"
                 />
               </svg>
-              <div className="col-span-1 h-full border border-gray-200 rounded-xl flex flex-col justify-center items-center">
-                x
-              </div>
+              <div className="h-full rounded-xl flex flex-col text-left p-8"></div>
             </div>
           </div>
         </div>
-      </section>{" "}
+      </section>
+      <section id="features" className="bg-white h-screen pt-36 antialiased">
+        <div className="mx-auto max-w-4xl divide-y divide-gray-900/10">
+          {/* <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">
+            Frequently asked questions
+          </h2> */}
+          <div className="flex flex-col space-y-4 text-center">
+            <h2 className="text-5xl font-semibold">
+              Frequently asked questions
+            </h2>
+          </div>
+          <dl className="mt-10 space-y-6 divide-y divide-gray-900/10">
+            {faqs.map((faq) => (
+              <Disclosure as="div" key={faq.question} className="pt-6">
+                {({ open }) => (
+                  <>
+                    <dt>
+                      <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-900">
+                        <span className="text-base font-semibold leading-7">
+                          {faq.question}
+                        </span>
+                        <span className="ml-6 flex h-7 items-center">
+                          {open ? (
+                            <MinusSmallIcon
+                              className="h-6 w-6"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <PlusSmallIcon
+                              className="h-6 w-6"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </span>
+                      </Disclosure.Button>
+                    </dt>
+                    <Disclosure.Panel as="dd" className="mt-2 pr-12">
+                      <p className="text-base leading-7 text-gray-600">
+                        {faq.answer}
+                      </p>
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
+            ))}
+          </dl>
+        </div>
+      </section>
     </div>
   );
 }
