@@ -304,7 +304,7 @@ services:
       # Pass down internal port because it's set dynamically by other services
       - 3000:3000
     environment:
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:${KONG_HTTP_PORT}
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
       SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
@@ -312,6 +312,7 @@ services:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      VERCEL_ENV: ${VERCEL_ENV}
 
 
   worker:
