@@ -313,14 +313,31 @@ services:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
 
-  worker:
-    container_name: helicone-worker
+  worker-openai-proxy:
+    container_name: helicone-worker-openai-proxy
     image: helicone/worker:latest
     restart: unless-stopped
     ports:
       # Pass down internal port because it's set dynamically by other services
       - 8787:8787
+    environment:
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      STORAGE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${PGBOUNCER_PORT}/${POSTGRES_DB}
+
+  worker-helicone-api:
+    container_name: helicone-worker-helicone-api
+    image: helicone/worker:latest
+    restart: unless-stopped
+    ports:
+      # Pass down internal port because it's set dynamically by other services
+      - 8788:8788
     environment:
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
       SUPABASE_URL: http://kong:${KONG_HTTP_PORT}
