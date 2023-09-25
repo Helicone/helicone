@@ -314,7 +314,6 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       VERCEL_ENV: ${VERCEL_ENV}
 
-
   worker:
     container_name: helicone-worker
     image: helicone/worker:latest
@@ -340,6 +339,8 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    ports:
+      - ${CLICKHOUSE_PORT}:8123/tcp
     volumes:
       - ./volumes/clickhouse:/var/lib/clickhouse:z
     environment:
