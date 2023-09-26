@@ -5,7 +5,6 @@ RUN apt install curl git -y
 RUN apt install python3 python3-pip -y
 
 
-COPY . /app/helicone
 WORKDIR /app
 
 

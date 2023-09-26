@@ -25,11 +25,11 @@ DATE="v$DATE"
 
 # Docker images to build and push
 declare -a docker_images=( \
-#      "helicone/supabase-migration-runner" \
-#      "helicone/worker-helicone-api" \
-#      "helicone/worker-openai-proxy" \
+      "helicone/supabase-migration-runner" \
+      "helicone/worker-helicone-api" \
+      "helicone/worker-openai-proxy" \
       "helicone/web" \
-#      "helicone/clickhouse-migration-runner" \
+      "helicone/clickhouse-migration-runner" \
 )
 
 
