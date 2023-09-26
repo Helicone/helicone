@@ -2,8 +2,9 @@ FROM node:18.11.0
 
 WORKDIR /app
 
-RUN git clone https://github.com/Helicone/helicone.git
-COPY . /app
+RUN mkdir /app
+COPY . /app/helicone
+
 WORKDIR /app/helicone/web
 RUN yarn
 
