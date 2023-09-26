@@ -25,11 +25,11 @@ DATE="v$DATE"
 
 # Docker images to build and push
 declare -a docker_images=( \
-      "helicone/supabase-migration-runner" \
-      "helicone/worker-helicone-api" \
-      "helicone/worker-openai-proxy" \
+#      "helicone/supabase-migration-runner" \
+#      "helicone/worker-helicone-api" \
+#      "helicone/worker-openai-proxy" \
       "helicone/web" \
-      "helicone/clickhouse-migration-runner" \
+#      "helicone/clickhouse-migration-runner" \
 )
 
 
@@ -57,7 +57,7 @@ for image in "${docker_images[@]}"; do
   # Replace dash "-" with underscore "_" in Dockerfile name
   dockerfile_name=$(basename $image | tr '-' '_')
 
-  run_or_echo docker build --platform linux/amd64 -t ${image}:$tag -f dockerfiles/dockerfile_${dockerfile_name} .
+  run_or_echo docker build --platform linux/amd64 -t ${image}:$tag -f dockerfiles/dockerfile_${dockerfile_name} ..
   run_or_echo docker push ${image}:$tag
   run_or_echo docker tag ${image}:$tag ${image}:latest
   run_or_echo docker push ${image}:latest
