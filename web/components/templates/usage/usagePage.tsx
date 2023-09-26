@@ -54,8 +54,6 @@ const UsagePage = (props: UsagePageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const { isLoading, userSettings } = useUserSettings(org.owner || "");
-
   const {
     count,
     isLoading: isCountLoading,
@@ -98,7 +96,7 @@ const UsagePage = (props: UsagePageProps) => {
   };
 
   const renderInfo = () => {
-    if (userSettings?.tier === "free") {
+    if (org.tier === "free") {
       return (
         <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
           <div className="flex flex-row gap-2 w-full h-4">
@@ -113,7 +111,7 @@ const UsagePage = (props: UsagePageProps) => {
             <div className="flex-1 w-full whitespace-nowrap">
               <p>
                 {Number(count?.data || 0).toLocaleString()} /{" "}
-                {userSettings.request_limit.toLocaleString()}
+                {org.tier === "free" ? 1_000_000 : "Unlimited"}
               </p>
             </div>
           </div>
@@ -166,24 +164,17 @@ const UsagePage = (props: UsagePageProps) => {
             to view the different features of each plan.
           </p>
         </div>
-        {isLoading ? (
-          <div className="h-24 w-full bg-gray-300 animate-pulse rounded-md"></div>
-        ) : (
-          renderInfo()
-        )}
-
+        {renderInfo()}
         <div className="flex flex-col sm:flex-row sm:space-x-4">
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
             <dt className="text-sm font-medium leading-6 text-gray-700">
               Your Plan
             </dt>
             <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-              {isLoading
-                ? "Loading..."
-                : capitalizeHelper(userSettings?.tier || "")}
+              {capitalizeHelper(org.tier || "")}
             </dd>
           </div>
-          {userSettings?.tier === "free" && (
+          {org.tier === "free" && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
               <dt className="text-sm font-medium leading-6 text-gray-700">
                 Requests
@@ -200,7 +191,7 @@ const UsagePage = (props: UsagePageProps) => {
           role="list"
           className="mt-6 grid grid-cols-1 gap-8 border-t border-gray-200 py-6 sm:grid-cols-2"
         >
-          {userSettings?.tier === "free" && (
+          {org.tier === "free" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div
@@ -232,7 +223,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           )}
-          {userSettings?.tier !== "free" && (
+          {org.tier !== "free" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div
@@ -274,7 +265,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           )}
-          {userSettings?.tier !== "enterprise" && (
+          {org.tier !== "enterprise" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div

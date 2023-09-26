@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useOrg } from "./layout/organizationContext";
 import ThemedModal from "./themed/themedModal";
+import Stripe from "stripe";
+import getStripe from "../../utlis/getStripe";
 
 interface UpgradeProModalProps {
   open: boolean;
@@ -20,6 +22,46 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   const [step, setStep] = useState(0);
   const orgContext = useOrg();
   const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
+
+  async function handleCheckout() {
+    const stripe = await getStripe();
+
+    if (!stripe) {
+      console.error("Stripe failed to initialize.");
+      return;
+    }
+
+    console.log(1);
+
+    // ONLY ADMINS CAN PAY FOR THE ORG
+
+    // Step 1: Fetch the session ID from your backend
+    const res = await fetch("/api/stripe/create_pro_subscription", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orgId: orgContext?.currentOrg.id,
+        userEmail: user?.email,
+        // Any data your backend might need, e.g., the current user or organization ID
+      }),
+    });
+
+    console.log(2);
+
+    const { sessionId } = await res.json();
+
+    // Step 2: Redirect the user to Stripe Checkout using the session ID
+
+    console.log(3);
+    const result = await stripe.redirectToCheckout({ sessionId });
+    console.log(4);
+    if (result.error) {
+      // Handle any errors that come from the redirectToCheckout call
+      console.error(result.error.message);
+    }
+  }
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
@@ -60,7 +102,8 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                 Cancel
               </button>
               <button
-                onClick={() => setStep(1)}
+                // onClick={() => setStep(1)}
+                onClick={handleCheckout}
                 className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Upgrade to Pro

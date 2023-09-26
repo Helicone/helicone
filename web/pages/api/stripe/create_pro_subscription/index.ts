@@ -3,6 +3,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { supabaseServer } from "../../../../lib/supabaseServer";
+import { resultMap } from "../../../../lib/result";
+import { dbExecute } from "../../../../lib/api/db/dbExecute";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2022-11-15",
@@ -16,7 +18,7 @@ export default async function handler(
     return res.status(405).end();
   }
 
-  // Extract organization and user data (you might pass user email or other identifiers)
+  // Extract organization and user data
   const { orgId, userEmail } = req.body;
 
   if (!orgId) {
@@ -28,11 +30,22 @@ export default async function handler(
 
   try {
     // Fetch organization from Supabase
-    const { data: org } = await supabaseServer
-      .from("organizations")
-      .select("*")
-      .eq("id", orgId)
-      .single();
+    // get the user id
+    console.log("orgId", orgId);
+    const { data: org, error: orgError } = resultMap(
+      await dbExecute<{
+        stripe_customer_id: string;
+      }>("SELECT * FROM organization WHERE id = $1", [orgId]),
+      (d) => d[0]
+    );
+
+    if (orgError !== null) {
+      console.error(orgError);
+      res.status(400).send(`Unable to find org: ${orgError}`);
+      return;
+    }
+
+    console.log("orgStripeID:::", org.stripe_customer_id);
 
     let customerId = org.stripe_customer_id;
 
@@ -46,31 +59,33 @@ export default async function handler(
 
       // Save the Stripe customer ID in Supabase
       await supabaseServer
-        .from("organizations")
+        .from("organization")
         .update({ stripe_customer_id: customerId })
         .eq("id", orgId);
     }
 
-    // Create a subscription for the customer
-    const subscription = await stripe.subscriptions.create({
+    // Create a Checkout Session instead of creating a subscription directly
+    const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      items: [{ price: process.env.STRIPE_PRO_PRICE_ID }],
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: process.env.STRIPE_PRO_PRICE_ID,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: "http://localhost:3000/dashboard", // Replace with your success URL
+      cancel_url: "http://localhost:3000/dashboard", // Replace with your cancel/failure URL
+      metadata: {
+        orgId: orgId, // Assuming `orgId` is the variable containing the organization's ID
+      },
     });
 
-    // Save subscription details in Supabase
-    await supabaseServer
-      .from("organizations")
-      .update({
-        stripe_subscription_id: subscription.id,
-        subscription_status: "active",
-        subscription_type: "pro",
-      })
-      .eq("id", orgId);
-
-    // Respond with a success message or any other relevant data
-    res.status(200).json({ success: true, subscriptionId: subscription.id });
-  } catch (error) {
-    console.error("Subscription error:", error);
-    res.status(500).json({ error: "Failed to create subscription." });
+    // Respond with the session ID
+    res.status(200).json({ sessionId: session.id });
+  } catch (e) {
+    console.log("Checkout Session creation error:", e);
+    res.status(500).json({ error: "Failed to create checkout session." + e });
   }
 }
