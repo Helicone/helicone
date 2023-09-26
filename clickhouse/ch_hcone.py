@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+import sys
 import time
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
@@ -97,6 +98,15 @@ def main():
                         help='ClickHouse server host')
     parser.add_argument('--port', default='18123',
                         help='ClickHouse server port')
+
+    print(f'''
+    Running:
+    {parser.prog} {' '.join(sys.argv[1:])}
+
+    Args collected:
+    {parser.parse_args()}
+            
+          ''')
 
     args = parser.parse_args()
 

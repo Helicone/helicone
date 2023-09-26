@@ -13,7 +13,8 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
 RUN brew install supabase/tap/supabase
 
-RUN git clone https://github.com/Helicone/helicone.git
+COPY . /app/helicone
+
 WORKDIR /app/helicone
 
 # CMD [ "supabase", "db", "push", "--db-url", ${DATABASE_URL} ]
