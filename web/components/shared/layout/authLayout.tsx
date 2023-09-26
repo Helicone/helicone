@@ -105,12 +105,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const accountNav = [
     {
-      name: "Usage",
-      href: "/usage",
-      icon: ChartBarIcon,
-      current: pathname.includes("/usage"),
-    },
-    {
       name: "Organization",
       href: "/organization",
       icon: BuildingOfficeIcon,

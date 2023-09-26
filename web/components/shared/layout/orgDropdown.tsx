@@ -15,13 +15,13 @@ import { useRouter } from "next/router";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../../templates/organizations/createOrgForm";
+} from "../../templates/organization/createOrgForm";
 import Link from "next/link";
 import ThemedModal from "../themed/themedModal";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import useNotification from "../notification/useNotification";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
-import AddMemberModal from "../../templates/organizationId/addMemberModal";
+import AddMemberModal from "../../templates/organization/addMemberModal";
 
 interface OrgDropdownProps {}
 

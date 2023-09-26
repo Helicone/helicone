@@ -1,5 +1,7 @@
 import {
   BuildingOfficeIcon,
+  CloudArrowUpIcon,
+  PencilIcon,
   TrashIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
@@ -19,9 +21,12 @@ import { getUSDate } from "../../shared/utils/utils";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../organizations/createOrgForm";
+} from "./createOrgForm";
 import OrgMemberItem from "./orgMemberItem";
 import AddMemberModal from "./addMemberModal";
+import { useGetRequestCountClickhouse } from "../../../services/hooks/requests";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import UpgradeProModal from "../../shared/upgradeProModal";
 
 interface OrgIdPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -37,15 +42,34 @@ const OrgIdPage = (props: OrgIdPageProps) => {
     org.id
   );
 
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+
+  const startOfMonthFormatted = formatISO(currentMonth, {
+    representation: "date",
+  });
+  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
+    representation: "date",
+  });
+
+  const {
+    count,
+    isLoading: isCountLoading,
+    refetch: refetchCount,
+  } = useGetRequestCountClickhouse(
+    startOfMonthFormatted,
+    endOfMonthFormatted,
+    org.id
+  );
+
   const user = useUser();
   const router = useRouter();
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient();
 
   const [addOpen, setAddOpen] = useState(false);
-  const [addEmail, setAddEmail] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [openUpgradeModal, setOpenUpgradeModal] = useState(false);
 
   const isOwner = org.owner === user?.id;
 
@@ -72,6 +96,12 @@ const OrgIdPage = (props: OrgIdPageProps) => {
     isOwner ||
     orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
 
+  const currentIcon = ORGANIZATION_ICONS.find((icon) => icon.name === org.icon);
+
+  const currentColor = ORGANIZATION_COLORS.find(
+    (icon) => icon.name === org.color
+  );
+
   const onLeaveSuccess = () => {
     const ownedOrgs = orgContext?.allOrgs.filter(
       (org) => org.owner === user?.id
@@ -82,40 +112,97 @@ const OrgIdPage = (props: OrgIdPageProps) => {
     }
   };
 
+  const capitalizeHelper = (str: string) => {
+    const words = str.split("_");
+    const capitalizedWords = words.map(
+      (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    );
+    return capitalizedWords.join(" ");
+  };
+
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 max-w-2xl space-y-8">
+      <div className="py-4 flex flex-col text-gray-900 w-full space-y-4 max-w-3xl">
         <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
           <div className="flex flex-col space-y-1">
-            <h1 className="text-3xl font-semibold">{org.name}</h1>
+            <div className="flex flex-row items-center gap-2">
+              {currentIcon && (
+                <currentIcon.icon
+                  className={clsx(`text-${currentColor?.name}-500`, "h-8 w-8")}
+                />
+              )}
+              <h1 className="text-3xl font-semibold">{org.name}</h1>
+              {isUserAdmin && (
+                <button
+                  onClick={() => setEditOpen(true)}
+                  className="ml-4 flex flex-row items-center rounded-md bg-gray-50 p-1.5 text-sm font-semibold border border-gray-300 hover:bg-gray-200 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                >
+                  <PencilIcon className="h-4 w-4 inline" />
+                </button>
+              )}
+            </div>
             {org.created_at !== null && (
-              <p className="text-gray-500 font-light">
+              <p className="text-gray-700 text-sm leading-6">
                 Created at: {getUSDate(org.created_at)}
               </p>
             )}
           </div>
-          {isUserAdmin && (
-            <div className="flex flex-row space-x-4">
-              <button
-                onClick={() => setEditOpen(true)}
-                className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => {
-                  setAddOpen(true);
-                }}
-                className={clsx(
-                  "items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        </div>
+        <div className="flex flex-col sm:flex-row sm:space-x-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
+            <dt className="text-sm leading-6 text-gray-700 flex flex-row gap-1 items-center">
+              Your Plan
+              {org.tier === "free" && (
+                <button
+                  onClick={() => setOpenUpgradeModal(true)}
+                  className="bg-white border border-gray-300 hover:bg-gray-50 rounded-md px-2 py-1 text-xs ml-1 flex flex-row items-center gap-1"
+                >
+                  <CloudArrowUpIcon className="h-4 w-4 inline" />
+                  Upgrade
+                </button>
+              )}
+            </dt>
+            <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
+              {capitalizeHelper(org.tier || "")}
+            </dd>
+          </div>
+          {org.tier === "free" && (
+            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
+              <dt className="text-sm leading-6 text-gray-700">Requests</dt>
+              <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
+                {org.tier === "free" ? (
+                  <div className="flex flex-row gap-1.5 items-center">
+                    <span>{`${Number(count?.data).toLocaleString()}`}</span>
+                    <span className="text-gray-400 text-sm">/</span>
+                    <span className="text-sm text-gray-400">{`${Number(
+                      1_000_000
+                    ).toLocaleString()}`}</span>
+                  </div>
+                ) : (
+                  `${Number(count?.data).toLocaleString()}`
                 )}
-              >
-                Invite Members
-              </button>
+              </dd>
             </div>
           )}
         </div>
-        <div className="flex flex-col h-full space-y-4 w-full">
+        <div className="flex flex-col h-full space-y-4 w-full pt-16">
+          <div className="flex flex-row justify-between items-center">
+            <h3 className="text-lg font-semibold">Members</h3>
+            {isUserAdmin && (
+              <div className="flex flex-row space-x-4">
+                <button
+                  onClick={() => {
+                    setAddOpen(true);
+                  }}
+                  className={clsx(
+                    "items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  )}
+                >
+                  Invite Members
+                </button>
+              </div>
+            )}
+          </div>
           {isLoading || isOrgOwnerLoading ? (
             <ul className="flex flex-col space-y-6">
               {Array.from({ length: 3 }).map((_, index) => (
@@ -155,6 +242,8 @@ const OrgIdPage = (props: OrgIdPageProps) => {
           </div>
         )}
       </div>
+      <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
+
       <ThemedModal open={editOpen} setOpen={setEditOpen}>
         <div className="w-[400px]">
           <CreateOrgForm
