@@ -66,6 +66,7 @@
         "getting-started/quick-start",
         "getting-started/proxy-vs-async",
         "getting-started/self-deploy",
+        "getting-started/self-deploy-cloud",
         "getting-started/self-deploy-docker"
       ]
     },
