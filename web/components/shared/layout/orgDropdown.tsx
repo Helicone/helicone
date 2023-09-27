@@ -51,24 +51,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   );
 
   const createNewOrgHandler = () => {
-    if (ownedOrgs === undefined) {
-      setNotification("Error creating organization.", "error");
-      return;
-    }
-    if (userSettings?.tier === "free" && ownedOrgs?.length >= 1) {
-      setNotification(
-        "You have reached the maximum number of organizations for the free plan.",
-        "error"
-      );
-      return;
-    }
-    if (userSettings?.tier === "pro" && ownedOrgs?.length >= 5) {
-      setNotification(
-        "You have reached the maximum number of organizations for the pro plan.",
-        "error"
-      );
-      return;
-    }
     setCreateOpen(true);
   };
 
