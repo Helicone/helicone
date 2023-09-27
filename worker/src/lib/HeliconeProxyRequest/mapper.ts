@@ -188,7 +188,7 @@ export class HeliconeProxyRequestMapper {
       /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net)(\/.*)?$/;
     const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
     const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
-    const amdbartekPattern = /^https:\/\/helicone\.amdbartek\.dev\/v\d+\/?$/;
+    const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev\/v\d+\/?$/;
 
     return (
       api_base === undefined ||
