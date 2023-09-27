@@ -165,7 +165,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                   <CloudArrowUpIcon className="h-4 w-4 inline" />
                   Upgrade
                 </button>
-              ) : (
+              ) : isUserAdmin ? (
                 <button
                   onClick={async () => {
                     const x = await fetch(
@@ -182,6 +182,8 @@ const OrgIdPage = (props: OrgIdPageProps) => {
                 >
                   Manage
                 </button>
+              ) : (
+                <></>
               )}
             </dt>
             <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
