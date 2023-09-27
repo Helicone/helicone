@@ -254,7 +254,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
                             Account
                           </p>
-                          {accountNav.map((item) => {
+                          {accountNav.map((item, i) => {
                             if (!item.children) {
                               return (
                                 <Link
@@ -281,13 +281,57 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               );
                             } else {
                               return (
-                                <Disclosure>
-                                  <Disclosure.Button className="py-2">
-                                    Is team pricing available?
+                                <Disclosure defaultOpen={item.current} key={i}>
+                                  <Disclosure.Button
+                                    className={clsx(
+                                      "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                      "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full"
+                                    )}
+                                  >
+                                    {({ open }) => (
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center">
+                                          <item.icon
+                                            className={clsx(
+                                              item.current
+                                                ? "text-black"
+                                                : "text-gray-600 group-hover:text-gray-900",
+                                              "mr-3 flex-shrink-0 h-5 w-5"
+                                            )}
+                                            aria-hidden="true"
+                                          />
+                                          {item.name}
+                                        </div>
+                                        <ChevronRightIcon
+                                          className={clsx(
+                                            open ? "rotate-90 transform" : "",
+                                            "h-4 w-4"
+                                          )}
+                                        />
+                                      </div>
+                                    )}
                                   </Disclosure.Button>
-                                  <Disclosure.Panel className="text-gray-500">
-                                    Yes! You can purchase a license that you can
-                                    share with your entire team.
+                                  <Disclosure.Panel>
+                                    <ul className="pl-4 space-y-0.5 flex flex-col">
+                                      {item.children.map((subItem, idx) => {
+                                        return (
+                                          <li key={idx}>
+                                            <Link
+                                              key={subItem.name}
+                                              href={subItem.href}
+                                              className={clsx(
+                                                subItem.current
+                                                  ? "bg-gray-200 text-black"
+                                                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                                "pl-4 group flex items-center pr-2 py-2 text-md font-medium rounded-md"
+                                              )}
+                                            >
+                                              {subItem.name}
+                                            </Link>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
                                   </Disclosure.Panel>
                                 </Disclosure>
                               );
@@ -382,7 +426,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
                       Account
                     </p>
-                    {accountNav.map((item) => {
+                    {accountNav.map((item, i) => {
                       if (!item.children) {
                         return (
                           <Link
@@ -409,7 +453,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         );
                       } else {
                         return (
-                          <Disclosure defaultOpen={item.current}>
+                          <Disclosure defaultOpen={item.current} key={i}>
                             <Disclosure.Button
                               className={clsx(
                                 "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
@@ -441,9 +485,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             </Disclosure.Button>
                             <Disclosure.Panel>
                               <ul className="pl-4 space-y-0.5 flex flex-col">
-                                {item.children.map((subItem) => {
+                                {item.children.map((subItem, idx) => {
                                   return (
-                                    <li>
+                                    <li key={idx}>
                                       <Link
                                         key={subItem.name}
                                         href={subItem.href}

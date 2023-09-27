@@ -26,7 +26,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 w-full max-w-2xl">
-        <div className="text-sm pb-8 w-[450px]">
+        <div className="text-sm pb-8 max-w-[450px] w-full">
           <label
             htmlFor="org-id"
             className="block text-sm font-medium leading-6 text-gray-900"
@@ -45,7 +45,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             disabled
           />
         </div>
-        <div className="w-[450px]">
+        <div className="max-w-[450px] w-full">
           <CreateOrgForm
             initialValues={{
               id: org.id,
