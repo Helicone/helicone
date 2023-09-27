@@ -195,7 +195,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
             <dt className="text-sm leading-6 text-gray-700">Requests</dt>
             <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
               {isCountLoading ? (
-                <li className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md w-4"></li>
+                <li className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md w-16"></li>
               ) : org.tier === "free" ? (
                 <div className="flex flex-row gap-1.5 items-center">
                   <span>{`${Number(count?.data).toLocaleString()}`}</span>
