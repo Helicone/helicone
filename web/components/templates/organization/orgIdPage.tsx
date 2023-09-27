@@ -157,13 +157,30 @@ const OrgIdPage = (props: OrgIdPageProps) => {
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
             <dt className="text-sm leading-6 text-gray-700 flex flex-row gap-1 items-center">
               Your Plan
-              {org.tier === "free" && (
+              {org.tier === "free" ? (
                 <button
                   onClick={() => setOpenUpgradeModal(true)}
                   className="bg-white border border-gray-300 hover:bg-gray-50 rounded-md px-2 py-1 text-xs ml-1 flex flex-row items-center gap-1"
                 >
                   <CloudArrowUpIcon className="h-4 w-4 inline" />
                   Upgrade
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    const x = await fetch(
+                      "/api/subscription/get_portal_link"
+                    ).then((res) => res.json());
+                    if (!x.data) {
+                      setNotification("Error getting link", "error");
+                      return;
+                    }
+
+                    window.open(x.data, "_blank");
+                  }}
+                  className="bg-white border border-gray-300 hover:bg-gray-50 rounded-md px-2 py-1 text-xs ml-1 flex flex-row items-center gap-1"
+                >
+                  Manage
                 </button>
               )}
             </dt>
