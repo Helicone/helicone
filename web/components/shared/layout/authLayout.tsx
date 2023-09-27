@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Dialog, Menu, Transition } from "@headlessui/react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BookOpenIcon,
   BuildingOfficeIcon,
-  ChartBarIcon,
   CircleStackIcon,
   CloudArrowUpIcon,
   CubeTransparentIcon,
@@ -38,6 +37,7 @@ import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -109,6 +109,23 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/organization",
       icon: BuildingOfficeIcon,
       current: pathname.includes("/organization"),
+      children: [
+        {
+          name: "Settings",
+          href: "/organization/settings",
+          current: pathname.includes("/settings"),
+        },
+        {
+          name: "Usage",
+          href: "#",
+          current: pathname.includes("/usage"),
+        },
+        {
+          name: "Members",
+          href: "#",
+          current: pathname.includes("/members"),
+        },
+      ],
     },
     {
       name: "Keys",
@@ -238,29 +255,43 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             Account
                           </p>
                           {accountNav.map((item) => {
-                            return (
-                              <Link
-                                key={item.name}
-                                href={item.href}
-                                className={clsx(
-                                  item.current
-                                    ? "bg-gray-200 text-black"
-                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md"
-                                )}
-                              >
-                                <item.icon
+                            if (!item.children) {
+                              return (
+                                <Link
+                                  key={item.name}
+                                  href={item.href}
                                   className={clsx(
                                     item.current
-                                      ? "text-black"
-                                      : "text-gray-600 group-hover:text-gray-900",
-                                    "mr-3 flex-shrink-0 h-5 w-5"
+                                      ? "bg-gray-200 text-black"
+                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md"
                                   )}
-                                  aria-hidden="true"
-                                />
-                                {item.name}
-                              </Link>
-                            );
+                                >
+                                  <item.icon
+                                    className={clsx(
+                                      item.current
+                                        ? "text-black"
+                                        : "text-gray-600 group-hover:text-gray-900",
+                                      "mr-3 flex-shrink-0 h-5 w-5"
+                                    )}
+                                    aria-hidden="true"
+                                  />
+                                  {item.name}
+                                </Link>
+                              );
+                            } else {
+                              return (
+                                <Disclosure>
+                                  <Disclosure.Button className="py-2">
+                                    Is team pricing available?
+                                  </Disclosure.Button>
+                                  <Disclosure.Panel className="text-gray-500">
+                                    Yes! You can purchase a license that you can
+                                    share with your entire team.
+                                  </Disclosure.Panel>
+                                </Disclosure>
+                              );
+                            }
                           })}
                         </nav>
                       </div>
@@ -352,29 +383,87 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       Account
                     </p>
                     {accountNav.map((item) => {
-                      return (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={clsx(
-                            item.current
-                              ? "bg-gray-200 text-black"
-                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                            "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                          )}
-                        >
-                          <item.icon
+                      if (!item.children) {
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
                             className={clsx(
                               item.current
-                                ? "text-black"
-                                : "text-gray-600 group-hover:text-gray-900",
-                              "mr-3 flex-shrink-0 h-5 w-5"
+                                ? "bg-gray-200 text-black"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                              "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                             )}
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </Link>
-                      );
+                          >
+                            <item.icon
+                              className={clsx(
+                                item.current
+                                  ? "text-black"
+                                  : "text-gray-600 group-hover:text-gray-900",
+                                "mr-3 flex-shrink-0 h-5 w-5"
+                              )}
+                              aria-hidden="true"
+                            />
+                            {item.name}
+                          </Link>
+                        );
+                      } else {
+                        return (
+                          <Disclosure defaultOpen={item.current}>
+                            <Disclosure.Button
+                              className={clsx(
+                                "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
+                              )}
+                            >
+                              {({ open }) => (
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center">
+                                    <item.icon
+                                      className={clsx(
+                                        item.current
+                                          ? "text-black"
+                                          : "text-gray-600 group-hover:text-gray-900",
+                                        "mr-3 flex-shrink-0 h-5 w-5"
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    {item.name}
+                                  </div>
+                                  <ChevronRightIcon
+                                    className={clsx(
+                                      open ? "rotate-90 transform" : "",
+                                      "h-4 w-4"
+                                    )}
+                                  />
+                                </div>
+                              )}
+                            </Disclosure.Button>
+                            <Disclosure.Panel>
+                              <ul className="pl-4">
+                                {item.children.map((subItem) => {
+                                  return (
+                                    <li>
+                                      <Link
+                                        key={subItem.name}
+                                        href={subItem.href}
+                                        className={clsx(
+                                          subItem.current
+                                            ? "bg-gray-200 text-black"
+                                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                          "group flex items-center pr-2 pl-4 py-2 text-sm font-medium rounded-md"
+                                        )}
+                                      >
+                                        {subItem.name}
+                                      </Link>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </Disclosure.Panel>
+                          </Disclosure>
+                        );
+                      }
                     })}
                   </nav>
                 </div>

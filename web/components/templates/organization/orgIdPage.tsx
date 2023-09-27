@@ -122,7 +122,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
 
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 w-full space-y-4 max-w-2xl">
+      <div className="py-4 flex flex-col text-gray-900 w-full max-w-2xl">
         <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between w-full">
           <div className="flex flex-row justify-between items-center w-full">
             <div className="flex flex-col space-y-1 w-full">
@@ -153,7 +153,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
             )}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:space-x-8">
+        <div className="flex flex-col sm:flex-row sm:space-x-8 mt-4">
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
             <dt className="text-sm leading-6 text-gray-700 flex flex-row gap-1 items-center">
               Your Plan
@@ -210,7 +210,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
             </dd>
           </div>
         </div>
-        <div className="flex flex-col h-full space-y-4 w-full pt-16">
+        <div className="flex flex-col h-full space-y-4 w-full mt-16 p-6 bg-white border border-gray-300 rounded-lg">
           <div className="flex flex-row justify-between items-center">
             <h3 className="text-lg font-semibold">Members</h3>
             {isUserAdmin && (
