@@ -192,7 +192,9 @@ const OrgIdPage = (props: OrgIdPageProps) => {
           <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
             <dt className="text-sm leading-6 text-gray-700">Requests</dt>
             <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-              {org.tier === "free" ? (
+              {isCountLoading ? (
+                <li className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md w-4"></li>
+              ) : org.tier === "free" ? (
                 <div className="flex flex-row gap-1.5 items-center">
                   <span>{`${Number(count?.data).toLocaleString()}`}</span>
                   <span className="text-gray-400 text-sm">/</span>
