@@ -31,6 +31,8 @@ export interface Env {
   STORAGE_URL: string;
   FALLBACK_QUEUE: Queue<any>;
   LOOPS_API_KEY: string;
+  REQUEST_CACHE_KEY: string;
+  SECURE_CACHE: KVNamespace;
 }
 
 export async function hash(key: string): Promise<string> {
