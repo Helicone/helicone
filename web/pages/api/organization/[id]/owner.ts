@@ -44,6 +44,6 @@ export default async function handler(
   }
   const { id } = req.query;
   const owner = await getOwner(id as string, user.data.user.id);
-  console.log("owner", owner);
+
   res.status(200).json(owner);
 }
