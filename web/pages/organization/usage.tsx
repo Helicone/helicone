@@ -1,45 +1,40 @@
-import {
-  createServerSupabaseClient,
-  User,
-} from "@supabase/auth-helpers-nextjs";
-
-import { GetServerSidePropsContext } from "next";
-import AuthHeader from "../../components/shared/authHeader";
-import AuthLayout from "../../components/shared/layout/authLayout";
-import MetaData from "../../components/shared/metaData";
-import OrgIdPage from "../../components/templates/organization/orgIdPage";
+import { User } from "@supabase/auth-helpers-nextjs";
 import { useOrg } from "../../components/shared/layout/organizationContext";
-import { getOrCreateUserSettings } from "../api/user_settings";
-import OrgSettingsPage from "../../components/templates/organization/settings/orgSettingsPage";
+import AuthLayout from "../../components/shared/layout/authLayout";
+import AuthHeader from "../../components/shared/authHeader";
+import MetaData from "../../components/shared/metaData";
+import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
+import { GetServerSidePropsContext } from "next";
+import OrgUsagePage from "../../components/templates/organization/usage/orgUsagePage";
 
-interface SettingsProps {
+interface UsageProps {
   user: User;
 }
 
-const Settings = (props: SettingsProps) => {
+const Usage = (props: UsageProps) => {
   const { user } = props;
 
   const org = useOrg();
 
   return (
-    <MetaData title="Settings">
+    <MetaData title="Usage">
       <AuthLayout user={user}>
-        <AuthHeader title="Organization Settings" />
+        <AuthHeader title={"Organization Usage"} />
         {!org?.currentOrg ? (
           <h1>Loading...</h1>
         ) : (
-          <OrgSettingsPage org={org?.currentOrg!} />
+          <OrgUsagePage org={org?.currentOrg!} />
         )}
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Settings;
+export default Usage;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
-  const supabase = createServerSupabaseClient(ctx);
+  const supabase = new SupabaseServerWrapper(ctx).getClient();
   // Check if we have a session
   const {
     data: { session },

@@ -117,12 +117,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
         },
         {
           name: "Usage",
-          href: "#",
+          href: "/organization/usage",
           current: pathname.includes("/usage"),
         },
         {
           name: "Members",
-          href: "#",
+          href: "/organization/members",
           current: pathname.includes("/members"),
         },
       ],
@@ -440,7 +440,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               )}
                             </Disclosure.Button>
                             <Disclosure.Panel>
-                              <ul className="pl-4">
+                              <ul className="pl-4 space-y-0.5 flex flex-col">
                                 {item.children.map((subItem) => {
                                   return (
                                     <li>
