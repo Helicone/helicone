@@ -83,6 +83,7 @@ export default async function handler(
       metadata: {
         orgId: orgId, // Assuming `orgId` is the variable containing the organization's ID
       },
+      allow_promotion_codes: true,
     });
 
     // Respond with the session ID
