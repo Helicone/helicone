@@ -91,7 +91,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
             "GraphQL API",
             "Request Retries",
             "Key Vault",
-            "10 Seats per Organization",
+            "10 Seats",
             "Up to 2GB of storage",
           ].map((item, i) => (
             <div key={i} className="text-sm flex flex-row items-center">
