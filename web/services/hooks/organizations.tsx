@@ -101,7 +101,7 @@ const useOrgsContextManager = () => {
   if (org && orgs) {
     orgContextValue = {
       allOrgs: orgs,
-      currentOrg: { ...org, tier: orgOwner.data?.data?.[0].tier ?? "free" },
+      currentOrg: org,
       setCurrentOrg: (orgId) => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {

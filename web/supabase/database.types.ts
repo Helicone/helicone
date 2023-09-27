@@ -459,6 +459,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete: boolean
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          tier: string | null
         }
         Insert: {
           color?: string
@@ -470,6 +474,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Update: {
           color?: string
@@ -481,6 +489,10 @@ export interface Database {
           name?: string
           owner?: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Relationships: [
           {
