@@ -63,6 +63,9 @@ export default async function handler(
         .update({ stripe_customer_id: customerId })
         .eq("id", orgId);
     }
+    const protocol = req.headers["x-forwarded-proto"] || "http";
+    const host = req.headers.host;
+    const origin = `${protocol}://${host}`;
 
     // Create a Checkout Session instead of creating a subscription directly
     const session = await stripe.checkout.sessions.create({
@@ -75,8 +78,8 @@ export default async function handler(
         },
       ],
       mode: "subscription",
-      success_url: `${window.location.origin}/dashboard`, // Replace with your success URL
-      cancel_url: `${window.location.origin}/dashboard`, // Replace with your cancel/failure URL
+      success_url: `${origin}/dashboard`, // Replace with your success URL
+      cancel_url: `${origin}/dashboard`, // Replace with your cancel/failure URL
       metadata: {
         orgId: orgId, // Assuming `orgId` is the variable containing the organization's ID
       },
