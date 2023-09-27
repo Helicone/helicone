@@ -188,24 +188,23 @@ const OrgIdPage = (props: OrgIdPageProps) => {
               {capitalizeHelper(org.tier || "")}
             </dd>
           </div>
-          {org.tier === "free" && (
-            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
-              <dt className="text-sm leading-6 text-gray-700">Requests</dt>
-              <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                {org.tier === "free" ? (
-                  <div className="flex flex-row gap-1.5 items-center">
-                    <span>{`${Number(count?.data).toLocaleString()}`}</span>
-                    <span className="text-gray-400 text-sm">/</span>
-                    <span className="text-sm text-gray-400">{`${Number(
-                      1_000_000
-                    ).toLocaleString()}`}</span>
-                  </div>
-                ) : (
-                  `${Number(count?.data).toLocaleString()}`
-                )}
-              </dd>
-            </div>
-          )}
+
+          <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
+            <dt className="text-sm leading-6 text-gray-700">Requests</dt>
+            <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
+              {org.tier === "free" ? (
+                <div className="flex flex-row gap-1.5 items-center">
+                  <span>{`${Number(count?.data).toLocaleString()}`}</span>
+                  <span className="text-gray-400 text-sm">/</span>
+                  <span className="text-sm text-gray-400">{`${Number(
+                    1_000_000
+                  ).toLocaleString()}`}</span>
+                </div>
+              ) : (
+                `${Number(count?.data).toLocaleString()}`
+              )}
+            </dd>
+          </div>
         </div>
         <div className="flex flex-col h-full space-y-4 w-full pt-16">
           <div className="flex flex-row justify-between items-center">
