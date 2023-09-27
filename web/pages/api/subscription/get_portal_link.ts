@@ -20,7 +20,7 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
 
   const { data, error } = await supabaseServer
     .from("organization")
-    .select("stripe_customer_id")
+    .select("stripe_customer_id, subscription_status")
     .eq("id", orgId)
     .single();
 
@@ -29,15 +29,30 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
     return;
   }
 
-  if (data.stripe_customer_id === null) {
-    res.status(400).json({ error: "No customer ID found", data: null });
+  let customer_id = data.stripe_customer_id;
+
+  if (data.subscription_status === "legacy") {
+    const customer = await getStripeCustomer(user.email ?? "");
+    customer_id = customer.data?.id ?? "";
+  }
+
+  if (customer_id) {
+    const portal = await stripeServer.billingPortal.sessions.create({
+      customer: customer_id,
+    });
+
+    res.status(200).json({ error: null, data: portal.url });
     return;
   }
 
-  const portal = await stripeServer.billingPortal.sessions.create({
-    customer: data.stripe_customer_id,
-  });
-  res.status(200).json({ error: null, data: portal.url });
+  console.log(
+    "customer_id",
+    customer_id,
+    data.subscription_status,
+    data.stripe_customer_id
+  );
+
+  res.status(500).json({ error: "No customer found", data: null });
 }
 
 export default withAuth(handler);
