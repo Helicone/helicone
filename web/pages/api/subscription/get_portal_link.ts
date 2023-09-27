@@ -7,6 +7,7 @@ import {
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 import { supabaseServer } from "../../../lib/supabaseServer";
+import { getOwner } from "../organization/[id]/owner";
 
 async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
   const {
@@ -32,7 +33,8 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
   let customer_id = data.stripe_customer_id;
 
   if (data.subscription_status === "legacy") {
-    const customer = await getStripeCustomer(user.email ?? "");
+    const orgOwner = await getOwner(orgId, user.id);
+    const customer = await getStripeCustomer(orgOwner.data?.[0].email ?? "");
     customer_id = customer.data?.id ?? "";
   }
 
@@ -44,13 +46,6 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
     res.status(200).json({ error: null, data: portal.url });
     return;
   }
-
-  console.log(
-    "customer_id",
-    customer_id,
-    data.subscription_status,
-    data.stripe_customer_id
-  );
 
   res.status(500).json({ error: "No customer found", data: null });
 }
