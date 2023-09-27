@@ -187,6 +187,43 @@ export interface Database {
           }
         ]
       }
+      helicone_proxy_key_limits: {
+        Row: {
+          cost: number | null
+          count: number | null
+          created_at: string | null
+          currency: string | null
+          helicone_proxy_key: string
+          id: string
+          timewindow_seconds: number | null
+        }
+        Insert: {
+          cost?: number | null
+          count?: number | null
+          created_at?: string | null
+          currency?: string | null
+          helicone_proxy_key: string
+          id: string
+          timewindow_seconds?: number | null
+        }
+        Update: {
+          cost?: number | null
+          count?: number | null
+          created_at?: string | null
+          currency?: string | null
+          helicone_proxy_key?: string
+          id?: string
+          timewindow_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helicone_proxy_key_limits_helicone_proxy_key_fkey"
+            columns: ["helicone_proxy_key"]
+            referencedRelation: "helicone_proxy_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       helicone_proxy_keys: {
         Row: {
           created_at: string | null
@@ -226,6 +263,153 @@ export interface Database {
             foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
             columns: ["provider_key_id"]
             referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          name?: string
+          org_id?: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          job: string
+          name: string
+          node_type: string
+          org_id: string
+          resource_data: string
+          resource_data_type: string
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description?: string
+          id: string
+          job: string
+          name?: string
+          node_type?: string
+          org_id: string
+          resource_data: string
+          resource_data_type: string
+          status?: string
+          timeout_seconds?: number
+          updated_at: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          job?: string
+          name?: string
+          node_type?: string
+          org_id?: string
+          resource_data?: string
+          resource_data_type?: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_job_fkey"
+            columns: ["job"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node_relationships: {
+        Row: {
+          job: string | null
+          parent_task_id: string
+          task_id: string
+        }
+        Insert: {
+          job?: string | null
+          parent_task_id: string
+          task_id: string
+        }
+        Update: {
+          job?: string | null
+          parent_task_id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_relationships_job_fkey"
+            columns: ["job"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_relationships_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_relationships_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "job_node"
             referencedColumns: ["id"]
           }
         ]
@@ -275,6 +459,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete: boolean
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          tier: string | null
         }
         Insert: {
           color?: string
@@ -286,6 +474,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Update: {
           color?: string
@@ -297,6 +489,10 @@ export interface Database {
           name?: string
           owner?: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Relationships: [
           {
@@ -418,31 +614,58 @@ export interface Database {
         Row: {
           created_at: string | null
           id: string
+          key_id: string
+          nonce: string
           org_id: string
+          provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete: boolean
-          vault_key_id: string
+          vault_key_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          key_id?: string
+          nonce?: string
           org_id: string
+          provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete?: boolean
-          vault_key_id: string
+          vault_key_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          key_id?: string
+          nonce?: string
           org_id?: string
+          provider_key?: string
           provider_key_name?: string
           provider_name?: string
           soft_delete?: boolean
-          vault_key_id?: string
+          vault_key_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "provider_keys_org_id_fkey"
             columns: ["org_id"]
@@ -532,6 +755,49 @@ export interface Database {
             foreignKeyName: "request_helicone_user_fkey"
             columns: ["helicone_user"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      request_job_task: {
+        Row: {
+          job_id: string
+          request_id: string
+          task_id: string
+        }
+        Insert: {
+          job_id: string
+          request_id: string
+          task_id: string
+        }
+        Update: {
+          job_id?: string
+          request_id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_job_task_job_id_fkey"
+            columns: ["job_id"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "job_node"
             referencedColumns: ["id"]
           }
         ]
@@ -698,6 +964,73 @@ export interface Database {
       }
     }
     Views: {
+      decrypted_provider_keys: {
+        Row: {
+          created_at: string | null
+          decrypted_provider_key: string | null
+          id: string | null
+          key_id: string | null
+          nonce: string | null
+          org_id: string | null
+          provider_key: string | null
+          provider_key_name: string | null
+          provider_name: string | null
+          soft_delete: boolean | null
+          vault_key_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          decrypted_provider_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          decrypted_provider_key?: never
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       materialized_response_and_request: {
         Row: {
           is_cached: boolean | null

@@ -7,8 +7,9 @@ import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../../components/shared/authHeader";
 import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
-import OrgIdPage from "../../components/templates/organizationId/orgIdPage";
+import OrgIdPage from "../../components/templates/organization/orgIdPage";
 import { useOrg } from "../../components/shared/layout/organizationContext";
+import { getOrCreateUserSettings } from "../api/user_settings";
 
 interface OrgProps {
   user: User;
@@ -50,6 +51,8 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         permanent: false,
       },
     };
+
+  await getOrCreateUserSettings(session.user);
 
   return {
     props: {
