@@ -9,6 +9,7 @@ import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 import { Database } from "../../supabase/database.types";
 import { checkLimits } from "./limits/check";
+import { getFromCache, storeInCache } from "./secureCache";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -186,18 +187,26 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      const providerKey = await this.getProviderKeyFromProxy(authKey, env);
+      let providerKey = await getFromCache(authKey, env);
+      if (!providerKey) {
+        const { data, error } = await this.getProviderKeyFromProxy(
+          authKey,
+          env
+        );
 
-      if (providerKey.error || !providerKey.data) {
-        return {
-          data: null,
-          error: `Proxy key not found. Error: ${providerKey.error}`,
-        };
+        if (error || !data) {
+          return {
+            data: null,
+            error: `Proxy key not found. Error: ${error}`,
+          };
+        }
+        providerKey = data;
+        await storeInCache(authKey, providerKey, this.env);
       }
 
-      this.authorization = providerKey.data;
+      this.authorization = providerKey;
       const headers = new Headers(this.headers);
-      headers.set("Authorization", `Bearer ${providerKey.data}`);
+      headers.set("Authorization", `Bearer ${providerKey}`);
       this.headers = headers;
     } else {
       this.authorization = authKey;
