@@ -63,6 +63,9 @@ export default async function handler(
         .update({ stripe_customer_id: customerId })
         .eq("id", orgId);
     }
+    const protocol = req.headers["x-forwarded-proto"] || "http";
+    const host = req.headers.host;
+    const origin = `${protocol}://${host}`;
 
     // Create a Checkout Session instead of creating a subscription directly
     const session = await stripe.checkout.sessions.create({

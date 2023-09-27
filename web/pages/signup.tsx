@@ -28,6 +28,8 @@ const SignUp = (props: SignUpProps) => {
     <>
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
+          const origin = new URL(router.asPath, router.basePath).origin;
+
           const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
