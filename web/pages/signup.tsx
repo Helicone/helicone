@@ -32,7 +32,7 @@ const SignUp = (props: SignUpProps) => {
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `https://${origin}/welcome`,
+              emailRedirectTo: `${window.location.origin}/welcome`,
             },
           });
 

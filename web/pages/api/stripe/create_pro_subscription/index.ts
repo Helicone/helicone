@@ -75,8 +75,8 @@ export default async function handler(
         },
       ],
       mode: "subscription",
-      success_url: "http://localhost:3000/dashboard", // Replace with your success URL
-      cancel_url: "http://localhost:3000/dashboard", // Replace with your cancel/failure URL
+      success_url: `${window.location.origin}/dashboard`, // Replace with your success URL
+      cancel_url: `${window.location.origin}/dashboard`, // Replace with your cancel/failure URL
       metadata: {
         orgId: orgId, // Assuming `orgId` is the variable containing the organization's ID
       },
