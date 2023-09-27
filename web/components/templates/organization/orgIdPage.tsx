@@ -122,7 +122,7 @@ const OrgIdPage = (props: OrgIdPageProps) => {
 
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 w-full space-y-4 max-w-3xl">
+      <div className="py-4 flex flex-col text-gray-900 w-full space-y-4 max-w-2xl">
         <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between w-full">
           <div className="flex flex-row justify-between items-center w-full">
             <div className="flex flex-col space-y-1 w-full">
