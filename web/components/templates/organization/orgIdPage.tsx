@@ -123,28 +123,33 @@ const OrgIdPage = (props: OrgIdPageProps) => {
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 w-full space-y-4 max-w-3xl">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
-          <div className="flex flex-col space-y-1">
-            <div className="flex flex-row items-center gap-2">
-              {currentIcon && (
-                <currentIcon.icon
-                  className={clsx(`text-${currentColor?.name}-500`, "h-8 w-8")}
-                />
-              )}
-              <h1 className="text-3xl font-semibold">{org.name}</h1>
-              {isUserAdmin && (
-                <button
-                  onClick={() => setEditOpen(true)}
-                  className="ml-4 flex flex-row items-center rounded-md bg-gray-50 p-1.5 text-sm font-semibold border border-gray-300 hover:bg-gray-200 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-                >
-                  <PencilIcon className="h-4 w-4 inline" />
-                </button>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between w-full">
+          <div className="flex flex-row justify-between items-center w-full">
+            <div className="flex flex-col space-y-1 w-full">
+              <div className="flex flex-row items-center gap-3">
+                {currentIcon && (
+                  <currentIcon.icon
+                    className={clsx(
+                      `text-${currentColor?.name}-500`,
+                      "h-8 w-8"
+                    )}
+                  />
+                )}
+                <h1 className="text-3xl font-semibold">{org.name}</h1>
+              </div>
+              {org.created_at !== null && (
+                <p className="text-gray-700 text-sm leading-6">
+                  Created at: {getUSDate(org.created_at)}
+                </p>
               )}
             </div>
-            {org.created_at !== null && (
-              <p className="text-gray-700 text-sm leading-6">
-                Created at: {getUSDate(org.created_at)}
-              </p>
+            {isUserAdmin && (
+              <button
+                onClick={() => setEditOpen(true)}
+                className="ml-4 flex flex-row items-center rounded-md bg-gray-50 px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-200 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              >
+                Edit
+              </button>
             )}
           </div>
         </div>

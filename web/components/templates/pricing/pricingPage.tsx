@@ -56,7 +56,6 @@ const tiers = [
       "GraphQL API",
       "Request Retries",
       "Key Vault",
-      "5 Organizations",
       "10 Seats per Organization",
       "Up to 2GB of storage",
     ],
