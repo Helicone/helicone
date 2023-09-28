@@ -1,14 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, formatISO } from "date-fns";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
-import { getTimeInterval } from "../../../lib/timeCalculations/time";
-import { Result, resultMap } from "../../../lib/result";
-import { filterListToTree } from "../../../services/lib/filters/filterDefs";
-import MainGraph from "../dashboard/graphs/mainGraph";
-import { getTimeMap } from "../../../lib/timeCalculations/constants";
-import { useEffect, useState } from "react";
-import { RenderBarChart } from "../../shared/metrics/barChart";
+import { useEffect } from "react";
+import MainGraph from "../../dashboard/graphs/mainGraph";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
+import { getTimeInterval } from "../../../../lib/timeCalculations/time";
+import { filterListToTree } from "../../../../services/lib/filters/filterDefs";
 
 interface RenderOrgUsageProps {
   currentMonth: Date;

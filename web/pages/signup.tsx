@@ -28,11 +28,13 @@ const SignUp = (props: SignUpProps) => {
     <>
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
+          const origin = window.location.origin;
+
           const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `https://${origin}/welcome`,
+              emailRedirectTo: `${origin}/welcome`,
             },
           });
 

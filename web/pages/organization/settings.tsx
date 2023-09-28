@@ -7,33 +7,34 @@ import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../../components/shared/authHeader";
 import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
-import OrgIdPage from "../../components/templates/organizationId/orgIdPage";
 import { useOrg } from "../../components/shared/layout/organizationContext";
+import { getOrCreateUserSettings } from "../api/user_settings";
+import OrgSettingsPage from "../../components/templates/organization/settings/orgSettingsPage";
 
-interface OrgProps {
+interface SettingsProps {
   user: User;
 }
 
-const Org = (props: OrgProps) => {
+const Settings = (props: SettingsProps) => {
   const { user } = props;
 
   const org = useOrg();
 
   return (
-    <MetaData title="Organizations">
+    <MetaData title="Settings">
       <AuthLayout user={user}>
-        <AuthHeader title="Organization" />
+        <AuthHeader title="Organization Settings" />
         {!org?.currentOrg ? (
           <h1>Loading...</h1>
         ) : (
-          <OrgIdPage org={org?.currentOrg!} />
+          <OrgSettingsPage org={org?.currentOrg!} />
         )}
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Org;
+export default Settings;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client

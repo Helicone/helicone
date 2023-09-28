@@ -12,6 +12,7 @@ import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
 import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
+import MfsCoupon from "./steps/mfsCoupon";
 
 interface WelcomePageProps {}
 
@@ -34,9 +35,16 @@ const WelcomePage = (props: WelcomePageProps) => {
     setStep(step + 1);
   };
 
+  // check for the localStorage mfs item
+  let isMfs = false;
+
+  if (typeof window !== "undefined") {
+    const mfsEmail = window.localStorage.getItem("mfs-email");
+    isMfs = mfsEmail !== null;
+  }
+
   const stepArray = [
     <GetStarted key={0} nextStep={nextStep} />,
-    // <Features key={1} nextStep={nextStep} />,
     <GenerateAPIKey
       key={2}
       nextStep={nextStep}
@@ -90,6 +98,15 @@ const WelcomePage = (props: WelcomePageProps) => {
       }}
     />,
   ];
+
+  // if the user is from mfs, insert the mfsCoupon component into the second to last spot in the array
+  if (isMfs) {
+    stepArray.splice(
+      stepArray.length - 1,
+      0,
+      <MfsCoupon key={6} nextStep={nextStep} />
+    );
+  }
 
   return (
     <div className="bg-gray-200 h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 relative">

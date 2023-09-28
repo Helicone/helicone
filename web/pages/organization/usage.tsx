@@ -1,17 +1,11 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-
+import { useOrg } from "../../components/shared/layout/organizationContext";
+import AuthLayout from "../../components/shared/layout/authLayout";
+import AuthHeader from "../../components/shared/authHeader";
+import MetaData from "../../components/shared/metaData";
+import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { GetServerSidePropsContext } from "next";
-import AuthHeader from "../components/shared/authHeader";
-import AuthLayout from "../components/shared/layout/authLayout";
-import MetaData from "../components/shared/metaData";
-import UsagePage from "../components/templates/usage/usagePage";
-import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { stripeServer } from "../utlis/stripeServer";
-import {
-  getOrCreateUserSettings,
-  UserSettingsResponse,
-} from "./api/user_settings";
-import { useOrg } from "../components/shared/layout/organizationContext";
+import OrgUsagePage from "../../components/templates/organization/usage/orgUsagePage";
 
 interface UsageProps {
   user: User;
@@ -25,11 +19,11 @@ const Usage = (props: UsageProps) => {
   return (
     <MetaData title="Usage">
       <AuthLayout user={user}>
-        <AuthHeader title={"Usage"} />
+        <AuthHeader title={"Organization Usage"} />
         {!org?.currentOrg ? (
           <h1>Loading...</h1>
         ) : (
-          <UsagePage org={org?.currentOrg!} />
+          <OrgUsagePage org={org?.currentOrg!} />
         )}
       </AuthLayout>
     </MetaData>
@@ -53,8 +47,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         permanent: false,
       },
     };
-
-  await getOrCreateUserSettings(session.user);
 
   return {
     props: {

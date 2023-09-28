@@ -21,24 +21,20 @@ import {
   formatISO,
   isAfter,
 } from "date-fns";
-import Link from "next/link";
+import { Database } from "../../../../supabase/database.types";
+import useNotification from "../../../shared/notification/useNotification";
 import { useEffect, useState } from "react";
-import { Result } from "../../../lib/result";
-import { useGetRequestCountClickhouse } from "../../../services/hooks/requests";
-import { useUserSettings } from "../../../services/hooks/userSettings";
-import { stripeServer } from "../../../utlis/stripeServer";
-import { clsx } from "../../shared/clsx";
-import { useOrg } from "../../shared/layout/organizationContext";
-import useNotification from "../../shared/notification/useNotification";
-import UpgradeProModal from "../../shared/upgradeProModal";
+import { useGetRequestCountClickhouse } from "../../../../services/hooks/requests";
+import Link from "next/link";
 import RenderOrgUsage from "./renderOrgUsage";
-import { Database } from "../../../supabase/database.types";
+import { clsx } from "../../../shared/clsx";
+import UpgradeProModal from "../../../shared/upgradeProModal";
 
-interface UsagePageProps {
+interface OrgUsagePageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
 }
 
-const UsagePage = (props: UsagePageProps) => {
+const OrgUsagePage = (props: OrgUsagePageProps) => {
   const { org } = props;
   const { setNotification } = useNotification();
 
@@ -53,8 +49,6 @@ const UsagePage = (props: UsagePageProps) => {
   const isNextMonthDisabled = isAfter(addMonths(currentMonth, 1), new Date());
 
   const [open, setOpen] = useState(false);
-
-  const { isLoading, userSettings } = useUserSettings(org.owner || "");
 
   const {
     count,
@@ -98,7 +92,7 @@ const UsagePage = (props: UsagePageProps) => {
   };
 
   const renderInfo = () => {
-    if (userSettings?.tier === "free") {
+    if (org.tier === "free") {
       return (
         <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
           <div className="flex flex-row gap-2 w-full h-4">
@@ -111,10 +105,13 @@ const UsagePage = (props: UsagePageProps) => {
               ></div>
             </div>
             <div className="flex-1 w-full whitespace-nowrap">
-              <p>
-                {Number(count?.data || 0).toLocaleString()} /{" "}
-                {userSettings.request_limit.toLocaleString()}
-              </p>
+              <div className="flex flex-row gap-1.5 items-center text-black">
+                <span>{`${Number(count?.data).toLocaleString()}`}</span>
+                <span className="text-gray-400 text-sm">/</span>
+                <span className="text-sm text-gray-400">{`${Number(
+                  1_000_000
+                ).toLocaleString()}`}</span>
+              </div>
             </div>
           </div>
           <div className="flex flex-row items-center text-gray-600 w-fit gap-4">
@@ -166,7 +163,7 @@ const UsagePage = (props: UsagePageProps) => {
             to view the different features of each plan.
           </p>
         </div>
-        {isLoading ? (
+        {isCountLoading ? (
           <div className="h-24 w-full bg-gray-300 animate-pulse rounded-md"></div>
         ) : (
           renderInfo()
@@ -178,12 +175,10 @@ const UsagePage = (props: UsagePageProps) => {
               Your Plan
             </dt>
             <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-              {isLoading
-                ? "Loading..."
-                : capitalizeHelper(userSettings?.tier || "")}
+              {capitalizeHelper(org.tier || "")}
             </dd>
           </div>
-          {userSettings?.tier === "free" && (
+          {org.tier === "free" && (
             <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
               <dt className="text-sm font-medium leading-6 text-gray-700">
                 Requests
@@ -200,7 +195,7 @@ const UsagePage = (props: UsagePageProps) => {
           role="list"
           className="mt-6 grid grid-cols-1 gap-8 border-t border-gray-200 py-6 sm:grid-cols-2"
         >
-          {userSettings?.tier === "free" && (
+          {org.tier === "free" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div
@@ -232,7 +227,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           )}
-          {userSettings?.tier !== "free" && (
+          {org.tier !== "free" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div
@@ -274,7 +269,7 @@ const UsagePage = (props: UsagePageProps) => {
               </div>
             </li>
           )}
-          {userSettings?.tier !== "enterprise" && (
+          {org.tier !== "enterprise" && (
             <li className="flow-root">
               <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
                 <div
@@ -315,4 +310,4 @@ const UsagePage = (props: UsagePageProps) => {
   );
 };
 
-export default UsagePage;
+export default OrgUsagePage;

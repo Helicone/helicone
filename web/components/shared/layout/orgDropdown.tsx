@@ -15,13 +15,13 @@ import { useRouter } from "next/router";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-} from "../../templates/organizations/createOrgForm";
+} from "../../templates/organization/createOrgForm";
 import Link from "next/link";
 import ThemedModal from "../themed/themedModal";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import useNotification from "../notification/useNotification";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
-import AddMemberModal from "../../templates/organizationId/addMemberModal";
+import AddMemberModal from "../../templates/organization/addMemberModal";
 
 interface OrgDropdownProps {}
 
@@ -51,24 +51,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   );
 
   const createNewOrgHandler = () => {
-    if (ownedOrgs === undefined) {
-      setNotification("Error creating organization.", "error");
-      return;
-    }
-    if (userSettings?.tier === "free" && ownedOrgs?.length >= 1) {
-      setNotification(
-        "You have reached the maximum number of organizations for the free plan.",
-        "error"
-      );
-      return;
-    }
-    if (userSettings?.tier === "pro" && ownedOrgs?.length >= 5) {
-      setNotification(
-        "You have reached the maximum number of organizations for the pro plan.",
-        "error"
-      );
-      return;
-    }
     setCreateOpen(true);
   };
 

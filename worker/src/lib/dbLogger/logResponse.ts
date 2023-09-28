@@ -161,7 +161,7 @@ export async function logRequest(
       helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
-      created_at: createdAt,
+      created_at: createdAt.toISOString(),
     };
 
     const customPropertyRows = Object.entries(request.properties).map(
@@ -171,9 +171,10 @@ export async function logRequest(
         user_id: null,
         key: entry[0],
         value: entry[1],
-        created_at: createdAt,
+        created_at: createdAt.toISOString(),
       })
     );
+
     await insertQueue.addRequest(requestData, customPropertyRows, responseId);
 
     return {
