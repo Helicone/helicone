@@ -214,60 +214,60 @@ export default function Example() {
             <h2 className="text-center text-lg font-medium text-gray-900">
               Modern startups and enterprises use Helicone.
             </h2>
-            <div className="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
+            <div className="w-full mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
               <img
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-                alt="Transistor"
+                className="col-span-2 max-h-32 w-full object-contain lg:col-span-1"
+                src="/assets/home/upenn.png"
+                alt="upenn"
+                width={400}
+                height={100}
+              />
+              <img
+                className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
+                src="/assets/home/carta.png"
+                alt="carta"
+                width={400}
+                height={100}
+              />
+              <img
+                className="col-span-2 col-start-2 max-h-16 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="/assets/home/lex.svg"
+                alt="lex"
                 width={158}
                 height={48}
               />
               <img
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/reform-logo-gray-900.svg"
-                alt="Reform"
-                width={158}
-                height={48}
-              />
-              <img
-                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/tuple-logo-gray-900.svg"
-                alt="Tuple"
+                className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="assets/home/particl.png"
+                alt="particle"
                 width={158}
                 height={48}
               />
               <img
                 className="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/savvycal-logo-gray-900.svg"
-                alt="SavvyCal"
-                width={158}
+                src="/assets/home/commandbar.svg"
+                alt="commandbar"
+                width={100}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
-                alt="Statamic"
-                width={158}
+                className="col-span-2 col-start-2 max-h-10 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="/assets/home/mintlify.svg"
+                alt="mintlify"
+                width={125}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
-                alt="Statamic"
-                width={158}
-                height={48}
+                className="col-span-2 col-start-2 max-h-48 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="/assets/home/onboard.png"
+                alt="onboard"
+                width={300}
+                height={100}
               />
               <img
-                className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
-                alt="Statamic"
-                width={158}
-                height={48}
-              />
-              <img
-                className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
-                alt="Statamic"
+                className="col-span-2 max-h-20 w-full object-contain lg:col-span-1"
+                src="/assets/home/autogpt.png"
+                alt="autogpt"
                 width={158}
                 height={48}
               />
@@ -356,9 +356,6 @@ export default function Example() {
             ))}
           </ul>
           <div className="max-w-4xl h-[50vh] flex flex-col divide-y divide-gray-300 w-full bg-gray-50 rounded-xl border border-gray-300">
-            {/* <div className="col-span-1 h-full border border-gray-200 bg-white rounded-xl flex flex-col justify-center items-center">
-              x1
-            </div> */}
             <div className="flex flex-row">
               <h3 className="text-lg font-semibold text-gray-900 px-8 py-4">
                 Custom Properties - Helicone's custom properties allow you to
@@ -396,10 +393,18 @@ export default function Example() {
         </div>
       </section>
       <section id="features" className="bg-white h-screen pt-36 antialiased">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="flex flex-col space-y-4">
+            <h2 className="text-5xl font-semibold">Production Ready</h2>
+            <p className="text-xl text-gray-600 max-w-xl mx-auto">
+              Helicone is ready for your use case today. Take a look at how
+              organizations are using Helicone to monitor their AI applications:
+            </p>
+          </div>
+        </div>
+      </section>
+      <section id="features" className="bg-white h-screen pt-36 antialiased">
         <div className="mx-auto max-w-4xl divide-y divide-gray-900/10">
-          {/* <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">
-            Frequently asked questions
-          </h2> */}
           <div className="flex flex-col space-y-4 text-center">
             <h2 className="text-5xl font-semibold">
               Frequently asked questions
