@@ -39,7 +39,8 @@ const WelcomePage = (props: WelcomePageProps) => {
   let isMfs = false;
 
   if (typeof window !== "undefined") {
-    isMfs = window.localStorage.getItem("mfs") === "true";
+    const mfsEmail = window.localStorage.getItem("mfs-email");
+    isMfs = mfsEmail !== null;
   }
 
   const stepArray = [
