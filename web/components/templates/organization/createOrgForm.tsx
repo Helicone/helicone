@@ -122,7 +122,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   return (
     <div className="flex flex-col gap-4 w-full space-y-4">
       {initialValues ? (
-        <p className="font-semibold text-lg">Update Organization</p>
+        <></>
       ) : (
         <p className="font-semibold text-lg">Create New Organization</p>
       )}
