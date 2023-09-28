@@ -68,6 +68,8 @@ const ContactForm = (props: ContactFormProps) => {
           // if the contact tag is mfs, take them to the sign up page
           if (contactTag === "mfs") {
             setTimeout(() => {
+              // Set the MFS local storage
+              localStorage.setItem("mfs", "true");
               setNotification("Form submitted successfully!", "success");
               setIsLoading(false);
               router.push("/signup");
