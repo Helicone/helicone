@@ -7,12 +7,17 @@ import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
 import { Result, mapPostgrestErr } from "../../results";
-import { consolidateTextFields, getUsage } from "./responseParserHelpers";
+import {
+  consolidateTextFields,
+  getUsage,
+} from "./parsers/responseParserHelpers";
 import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { InsertQueue } from "./insertQueue";
+import { parseOpenAIStream } from "./parsers/openAIStreamParser";
+import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 
 export interface DBLoggableProps {
   response: {
@@ -239,22 +244,9 @@ export class DBLoggable {
     const responseStatus = this.response.status;
     const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
-    if (isStream && this.provider === "ANTHROPIC") {
-      return {
-        error: null,
-        data: {
-          error: "Streaming not supported for anthropic yet",
-          streamed_data: result,
-        },
-      };
-    }
 
     try {
-      if (
-        this.provider === "ANTHROPIC" &&
-        responseStatus === 200 &&
-        requestBody
-      ) {
+      if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
@@ -278,31 +270,15 @@ export class DBLoggable {
           data: JSON.parse(result),
           error: null,
         };
+      } else if (isStream && this.provider === "ANTHROPIC") {
+        return anthropicAIStream(result, tokenCounter, requestBody);
+      } else if (isStream) {
+        return parseOpenAIStream(result, tokenCounter, requestBody);
       } else {
-        const lines = result.split("\n").filter((line) => line !== "");
-        const data = lines.map((line, i) => {
-          if (i === lines.length - 1) return {};
-          return JSON.parse(line.replace("data:", ""));
-        });
-
-        try {
-          return {
-            data: {
-              ...consolidateTextFields(data),
-              streamed_data: data,
-              usage: await getUsage(data, requestBody, tokenCounter),
-            },
-            error: null,
-          };
-        } catch (e) {
-          console.error("Error parsing response", e);
-          return {
-            data: {
-              streamed_data: data,
-            },
-            error: null,
-          };
-        }
+        return {
+          data: null,
+          error: "Unknown error parsing response",
+        };
       }
     } catch (e) {
       console.log("Error parsing response", e);
