@@ -69,7 +69,7 @@ const ContactForm = (props: ContactFormProps) => {
           if (contactTag === "mfs") {
             setTimeout(() => {
               // Set the MFS local storage
-              localStorage.setItem("mfs", "true");
+              localStorage.setItem("mfs-email", email.value);
               setNotification("Form submitted successfully!", "success");
               setIsLoading(false);
               router.push("/signup");
