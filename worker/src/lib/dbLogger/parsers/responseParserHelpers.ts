@@ -23,9 +23,7 @@ export function recursivelyConsolidateFunctionCall(
 
 export function consolidateTextFields(responseBody: any[]): any {
   try {
-    console.log("Consolidating text fields", JSON.stringify(responseBody));
     const consolidated = responseBody.reduce((acc, cur) => {
-      console.log("Mapping", JSON.stringify(acc), JSON.stringify(cur));
       if (!cur) {
         return acc;
       } else if (acc.choices === undefined) {
