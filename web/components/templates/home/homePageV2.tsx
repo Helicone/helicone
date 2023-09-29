@@ -20,6 +20,10 @@ import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 import CodeSnippet from "./codeSnippet";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import Footer from "../../shared/layout/footer";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { DEMO_EMAIL } from "../../../lib/constants";
 
 const features: {
   title: string;
@@ -100,7 +104,15 @@ const faqs = [
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export default function Example() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const router = useRouter();
+  const user = useUser();
+
+  const supabaseClient = useSupabaseClient();
+  if (!demoLoading && user?.email === DEMO_EMAIL) {
+    supabaseClient.auth.signOut();
+  }
 
   return (
     <div className="bg-white">
@@ -144,12 +156,14 @@ export default function Example() {
           </p>
 
           <div className="flex flex-row gap-8 pt-8">
-            <button className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+            <button
+              onClick={() => {
+                router.push("/signup");
+              }}
+              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            >
               Get Started
             </button>
-            {/* <button className="bg-gray-100 hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-lg font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
-              View Demo
-            </button> */}
           </div>
 
           <a
@@ -315,6 +329,36 @@ export default function Example() {
               speeds up your development process - with the easiest integration
               in the market.
             </p>
+            <div className="flex flex-row gap-6 pt-4 w-full justify-center">
+              <button
+                onClick={() => {
+                  router.push("/signup");
+                }}
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                Get Started
+              </button>
+              <button
+                onClick={() => {
+                  setDemoLoading(true);
+                  supabaseClient.auth.signOut().then(() => {
+                    supabaseClient.auth
+                      .signInWithPassword({
+                        email: DEMO_EMAIL,
+                        password: "valyrdemo",
+                      })
+                      .then((res) => {
+                        router.push("/demo").then(() => {
+                          setDemoLoading(false);
+                        });
+                      });
+                  });
+                }}
+                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                View Demo
+              </button>
+            </div>
             <div className="grid grid-cols-8 gap-4 w-full py-16">
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex relative mb-8 justify-center">
@@ -427,6 +471,24 @@ export default function Example() {
               Everything you need to build, deploy, and scale your LLM-powered
               application
             </p>
+            <div className="flex flex-row gap-6 pt-4 w-full justify-center">
+              <Link
+                href="https://docs.helicone.ai/introduction"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                View Docs
+              </Link>
+              <Link
+                href="https://discord.gg/zsSTcH2qhG"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                Join Discord
+              </Link>
+            </div>
           </div>
           <div className="flex flex-col divide-y divide-gray-300 w-full">
             <div className="h-full rounded-xl flex flex-col text-left p-2 md:p-12">
@@ -436,7 +498,7 @@ export default function Example() {
                     key={idx}
                     className="flex flex-row gap-4 justify-start items-start pt-6"
                   >
-                    <div className="relative isolate bg-gray-50 h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
+                    <div className="relative isolate bg-white h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
                       <svg
                         className="absolute inset-0 -z-10 h-full w-full"
                         aria-hidden="true"
