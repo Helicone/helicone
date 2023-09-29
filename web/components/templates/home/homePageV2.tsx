@@ -235,7 +235,7 @@ export default function Example() {
           </div>
           <div className="mx-auto px-6 lg:px-8 pt-32">
             <h2 className="text-center text-lg font-medium text-gray-600">
-              Unlocking the full potential of LLM's.
+              Unlocking the full potential of LLM&apos;s.
             </h2>
             <h2 className="text-center text-lg font-medium text-gray-900">
               Modern startups and enterprises use Helicone.
@@ -432,7 +432,10 @@ export default function Example() {
             <div className="h-full rounded-xl flex flex-col text-left p-2 md:p-12">
               <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 md:justify-center -mt-2 ">
                 {features.map((f, idx) => (
-                  <li className="flex flex-row gap-4 justify-start items-start pt-6">
+                  <li
+                    key={idx}
+                    className="flex flex-row gap-4 justify-start items-start pt-6"
+                  >
                     <div className="relative isolate bg-gray-50 h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
                       <svg
                         className="absolute inset-0 -z-10 h-full w-full"
@@ -485,7 +488,7 @@ export default function Example() {
             {faqs.map((faq) => (
               <Disclosure as="div" key={faq.question} className="pt-6">
                 {({ open }) => (
-                  <>
+                  <div>
                     <dt>
                       <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-900">
                         <span className="text-base font-semibold leading-7">
@@ -511,7 +514,7 @@ export default function Example() {
                         {faq.answer}
                       </p>
                     </Disclosure.Panel>
-                  </>
+                  </div>
                 )}
               </Disclosure>
             ))}
