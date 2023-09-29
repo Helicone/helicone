@@ -216,57 +216,57 @@ export default function Example() {
             </h2>
             <div className="w-full mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
               <img
-                className="col-span-2 max-h-32 w-full object-contain lg:col-span-1"
-                src="/assets/home/upenn.png"
+                className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
+                src="/assets/home/logos/upenn.png"
                 alt="upenn"
                 width={400}
                 height={100}
               />
               <img
-                className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
-                src="/assets/home/carta.png"
+                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
+                src="/assets/home/logos/carta.png"
                 alt="carta"
                 width={400}
                 height={100}
               />
               <img
-                className="col-span-2 col-start-2 max-h-16 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="/assets/home/lex.svg"
+                className="col-span-2 col-start-2 max-h-14 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="/assets/home/logos/lex.svg"
                 alt="lex"
                 width={158}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="assets/home/particl.png"
+                className="col-span-2 col-start-2 max-h-10 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="assets/home/logos/particl.png"
                 alt="particle"
                 width={158}
                 height={48}
               />
               <img
-                className="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1"
-                src="/assets/home/commandbar.svg"
+                className="col-span-2 max-h-10 w-full object-contain sm:col-start-2 lg:col-span-1"
+                src="/assets/home/logos/commandbar.svg"
                 alt="commandbar"
                 width={100}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-10 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="/assets/home/mintlify.svg"
+                className="col-span-2 col-start-2 max-h-8 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="/assets/home/logos/mintlify.svg"
                 alt="mintlify"
                 width={125}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-48 w-full object-contain sm:col-start-auto lg:col-span-1"
-                src="/assets/home/onboard.png"
+                className="col-span-2 col-start-2 max-h-32 w-full object-contain sm:col-start-auto lg:col-span-1"
+                src="/assets/home/logos/onboard.png"
                 alt="onboard"
                 width={300}
                 height={100}
               />
               <img
-                className="col-span-2 max-h-20 w-full object-contain lg:col-span-1"
-                src="/assets/home/autogpt.png"
+                className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
+                src="/assets/home/logos/autogpt.png"
                 alt="autogpt"
                 width={158}
                 height={48}
@@ -291,6 +291,29 @@ export default function Example() {
             </p>
             <div className="grid grid-cols-8 gap-4 w-full py-16">
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
+                <div className="w-full h-full flex relative mb-8 justify-center">
+                  <img
+                    className="z-50 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
+                    src="/assets/home/bento/requests.png"
+                    alt="requests"
+                    width={158}
+                    height={48}
+                  />
+                  <img
+                    className="absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
+                    src="/assets/home/bento/latency.png"
+                    alt="requests"
+                    width={158}
+                    height={48}
+                  />
+                  <img
+                    className="absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
+                    src="/assets/home/bento/costs.png"
+                    alt="requests"
+                    width={158}
+                    height={48}
+                  />
+                </div>
                 <div className="flex flex-col mt-auto space-y-2">
                   <h3 className="text-3xl font-semibold">
                     Meaningful Insights
@@ -302,6 +325,25 @@ export default function Example() {
               </div>
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-3 rounded-2xl h-96 flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
+                  <div className="w-full h-full flex flex-col space-y-12 mb-8 justify-center">
+                    <div className="flex flex-row gap-4 mx-auto">
+                      <div className="text-6xl text-green-500 flex gap-0.5">
+                        <span>+</span>
+                        <span>2</span>
+                      </div>
+                      <div className="text-6xl text-red-500 flex gap-0.5">
+                        <span>-</span>
+                        <span>2</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-2 mx-auto">
+                      <div className="h-6 w-6 border border-gray-200 bg-green-500" />
+                      <div className="h-6 w-6 border border-gray-200 bg-green-500" />
+                      <div className="h-6 w-6 border border-gray-200 bg-red-500" />
+                      <div className="h-6 w-6 border border-gray-200 bg-red-500" />
+                      <div className="h-6 w-6 border border-gray-200 bg-gray-100" />
+                    </div>
+                  </div>
                   <h3 className="text-3xl font-semibold">2 lines of code</h3>
                   <p className="text-md text-gray-600">
                     Get integrated in seconds. Not days.
@@ -309,18 +351,36 @@ export default function Example() {
                 </div>
               </div>
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-3 rounded-2xl h-96 flex flex-col p-8">
+                <div className="w-full h-full flex justify-center items-center">
+                  <img
+                    src="/assets/landing/helicone-mobile.webp"
+                    width={125}
+                    height={125}
+                    alt="Helicone Logo"
+                    className="rounded-xl"
+                  />
+                </div>
                 <div className="flex flex-col mt-auto space-y-2">
-                  <h3 className="text-3xl font-semibold">Chat History</h3>
+                  <h3 className="text-3xl font-semibold">Open Source</h3>
                   <p className="text-md text-gray-600">
-                    Easily replay and debug chat sessions.
+                    Commited to user-centric development and transparency.
                   </p>
                 </div>
               </div>
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
-                  <h3 className="text-3xl font-semibold">Open Source</h3>
+                  <div className="w-full h-full flex relative mb-4 justify-center">
+                    <img
+                      className="z-50 absolute bottom-0 shadow-md rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
+                      src="/assets/home/bento/history.png"
+                      alt="requests"
+                      width={300}
+                      height={300}
+                    />
+                  </div>
+                  <h3 className="text-3xl font-semibold">Chat History</h3>
                   <p className="text-md text-gray-600">
-                    Commited to user-centric development and transparency.
+                    Easily replay, debug, and edit chat sessions.
                   </p>
                 </div>
               </div>
