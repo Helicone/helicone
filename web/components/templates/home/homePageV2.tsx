@@ -3,6 +3,7 @@ import { Dialog, Disclosure } from "@headlessui/react";
 import {
   ArrowPathIcon,
   Bars3Icon,
+  BellAlertIcon,
   CircleStackIcon,
   CodeBracketIcon,
   LockClosedIcon,
@@ -18,9 +19,11 @@ import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 import CodeSnippet from "./codeSnippet";
 import { DiffHighlight } from "../welcome/diffHighlight";
+import Footer from "../../shared/layout/footer";
 
 const features: {
   title: string;
+  description: string;
   icon: React.ForwardRefExoticComponent<
     React.SVGProps<SVGSVGElement> & {
       title?: string | undefined;
@@ -30,48 +33,66 @@ const features: {
 }[] = [
   {
     title: "Custom Properties",
+    description: "Easily segment requests.",
     icon: TagIcon,
   },
   {
     title: "Caching",
+    description: "Save time and money.",
     icon: CircleStackIcon,
   },
   {
     title: "Rate Limiting",
+    description: "Protect your models from abuse.",
     icon: UserIcon,
   },
   {
     title: "Retries",
+    description: "Retry failed or rate-limited requests.",
     icon: ArrowPathIcon,
   },
   {
     title: "Feedback",
+    description: "Identify good and bad requests.",
     icon: PencilSquareIcon,
   },
   {
     title: "Vault",
+    description: "Securely map your provider keys.",
     icon: LockClosedIcon,
   },
   {
     title: "Jobs",
+    description: "Visualize chains of requests.",
     icon: RectangleStackIcon,
   },
   {
     title: "GraphQL",
+    description: "ETL your data to your favorite apps.",
     icon: CodeBracketIcon,
+  },
+  {
+    title: "Alerts",
+    description: "Get notified on important events.",
+    icon: BellAlertIcon,
   },
 ];
 
 const faqs = [
   {
-    question: "What's the best thing about Switzerland?",
+    question: "Is their a latency impact to my requests with Helicone's Proxy?",
     answer:
-      "I don't know, but the flag is a big plus. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.",
+      "Helicone leverages Cloudflare’s global network of servers as proxies for efficient web traffic routing. Cloudflare workers maintain extremely low latency through their worldwide distribution. This results in a fast and reliable proxy for your LLM requests with less than a fraction of a millisecond of latency impact.",
   },
   {
-    question: "What's the best thing about Switzerland?",
+    question: "Do you offer a self-hosted or manage-hosted solution?",
     answer:
-      "I don't know, but the flag is a big plus. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.",
+      "Our recommended solution is to use our cloud service, but we do offer a dedicated manage-hosted solution for enterprise customers. Please contact us at sales@helicone.ai for more information.",
+  },
+  {
+    question: "I do not want to use the proxy, can I still use Helicone?",
+    answer:
+      "Yes, you can use Helicone without the proxy. We have packages for Python and Node.js that you can use to send data to Helicone. Visit our documentation page to learn more.",
   },
   // More questions...
 ];
@@ -91,7 +112,7 @@ export default function Example() {
         >
           <defs>
             <pattern
-              id="83fd4e5a-9d52-42fc-97b6-718e5d7ee527"
+              id="abc"
               width={25}
               height={25}
               x="50%"
@@ -100,25 +121,30 @@ export default function Example() {
             >
               <path d="M25 200V.5M.5 .5H200" fill="none" />
             </pattern>
+            <defs>
+              <pattern
+                id="123"
+                width="12.5"
+                height="12.5"
+                patternUnits="userSpaceOnUse"
+              >
+                <path d="M12.5 0V12.5M0 12.5H12.5" fill="none" />
+              </pattern>
+            </defs>
           </defs>
-          <rect
-            width="100%"
-            height="100%"
-            strokeWidth={0}
-            fill="url(#83fd4e5a-9d52-42fc-97b6-718e5d7ee527)"
-          />
+          <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
         </svg>
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-8 sm:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
           <h1 className="text-4xl sm:text-6xl font-semibold sm:leading-tight max-w-4xl">
             Helicone is the smartest way to monitor your LLM applications.
           </h1>
-          <p className="text-lg sm:text-2xl text-gray-600 sm:leading-relaxed max-w-3xl">
+          <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-3xl">
             Meet your all-in-one platform for AI observability. Get monitoring,
             logging, and tracing for your LLM applications out of the box.
           </p>
 
           <div className="flex flex-row gap-8 pt-8">
-            <button className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+            <button className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
               Get Started
             </button>
             {/* <button className="bg-gray-100 hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-lg font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
@@ -230,35 +256,35 @@ export default function Example() {
                 height={100}
               />
               <img
-                className="col-span-2 col-start-2 max-h-14 w-full object-contain sm:col-start-auto lg:col-span-1"
+                className="col-span-2 max-h-14 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/lex.svg"
                 alt="lex"
                 width={158}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-10 w-full object-contain sm:col-start-auto lg:col-span-1"
+                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
                 src="assets/home/logos/particl.png"
                 alt="particle"
                 width={158}
                 height={48}
               />
               <img
-                className="col-span-2 max-h-10 w-full object-contain sm:col-start-2 lg:col-span-1"
+                className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/commandbar.svg"
                 alt="commandbar"
                 width={100}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-8 w-full object-contain sm:col-start-auto lg:col-span-1"
+                className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/mintlify.svg"
                 alt="mintlify"
                 width={125}
                 height={48}
               />
               <img
-                className="col-span-2 col-start-2 max-h-32 w-full object-contain sm:col-start-auto lg:col-span-1"
+                className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/onboard.png"
                 alt="onboard"
                 width={300}
@@ -279,18 +305,18 @@ export default function Example() {
         id="features"
         className="bg-gradient-to-b from-white to-gray-200 mt-24 pb-24 antialiased"
       >
-        <div className="md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
           <div className="flex flex-col space-y-4 w-full">
-            <h2 className="text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold">
               Monitoring without the hassle.
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-normal">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-normal">
               Helicone makes it easy to understand what your AI is doing and
               speeds up your development process - with the easiest integration
               in the market.
             </p>
             <div className="grid grid-cols-8 gap-4 w-full py-16">
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex relative mb-8 justify-center">
                   <img
                     className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
@@ -300,14 +326,14 @@ export default function Example() {
                     height={48}
                   />
                   <img
-                    className="absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
+                    className="hidden md:block absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/latency.png"
                     alt="requests"
                     width={158}
                     height={48}
                   />
                   <img
-                    className="absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
+                    className="hidden md:block absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/costs.png"
                     alt="requests"
                     width={158}
@@ -323,7 +349,7 @@ export default function Example() {
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-3 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-2xl h-96 flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex flex-col space-y-12 mb-8 justify-center">
                     <div className="flex flex-row gap-4 mx-auto">
@@ -350,7 +376,7 @@ export default function Example() {
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-3 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex justify-center items-center">
                   <img
                     src="/assets/landing/helicone-mobile.webp"
@@ -367,7 +393,7 @@ export default function Example() {
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex relative mb-4 justify-center">
                     <img
@@ -390,70 +416,54 @@ export default function Example() {
       </section>
       <section
         id="features"
-        className="bg-gradient-to-b from-gray-200 to-white h-screen pt-24 antialiased"
+        className="bg-gradient-to-b from-gray-200 to-white py-24 antialiased"
       >
-        <div className="md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
           <div className="flex flex-col space-y-4">
-            <h2 className="text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold">
               Purpose-built for LLM developers.
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg md:text-xl text-gray-600">
               Everything you need to build, deploy, and scale your LLM-powered
               application
             </p>
           </div>
-
-          <ul className="flex flex-row gap-12 justify-center">
-            {features.map((f) => (
-              <li className="flex flex-col gap-4 justify-start items-center">
-                <div className="bg-gray-50 h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
-                  <f.icon className="h-5 w-5 text-gray-900" />
-                </div>
-                <p className="text-gray-700 text-sm max-w-[5rem] text-center">
-                  {f.title}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <div className="max-w-4xl h-[50vh] flex flex-col divide-y divide-gray-300 w-full bg-gray-50 rounded-xl border border-gray-300">
-            <div className="flex flex-row">
-              <h3 className="text-lg font-semibold text-gray-900 px-8 py-4">
-                Custom Properties - Helicone's custom properties allow you to
-                track the performance of your AI models
-              </h3>
-            </div>
-
-            <div className="relative isolate bg-gray-50 h-full rounded-b-xl">
-              <svg
-                className="absolute inset-0 -z-10 h-full w-full stroke-gray-200"
-                aria-hidden="true"
-              >
-                <defs>
-                  <pattern
-                    id="83fd4e5a-9d52-42fc-97b6-718e5d7ee527"
-                    width={25}
-                    height={25}
-                    x="50%"
-                    y={-1}
-                    patternUnits="userSpaceOnUse"
-                  >
-                    <path d="M25 200V.5M.5 .5H200" fill="none" />
-                  </pattern>
-                </defs>
-                <rect
-                  width="100%"
-                  height="100%"
-                  strokeWidth={0}
-                  fill="url(#83fd4e5a-9d52-42fc-97b6-718e5d7ee527)"
-                />
-              </svg>
-              <div className="h-full rounded-xl flex flex-col text-left p-8"></div>
+          <div className="flex flex-col divide-y divide-gray-300 w-full">
+            <div className="h-full rounded-xl flex flex-col text-left p-2 md:p-12">
+              <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 md:justify-center -mt-2 ">
+                {features.map((f, idx) => (
+                  <li className="flex flex-row gap-4 justify-start items-start pt-6">
+                    <div className="relative isolate bg-gray-50 h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
+                      <svg
+                        className="absolute inset-0 -z-10 h-full w-full"
+                        aria-hidden="true"
+                      >
+                        <rect
+                          width="100%"
+                          height="100%"
+                          strokeWidth={0}
+                          fill="url(#123)"
+                        />
+                      </svg>
+                      <f.icon className="h-5 w-5 text-gray-900" />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-black font-semibold text-md w-[10rem] text-left">
+                        {f.title}
+                      </p>
+                      <p className="text-gray-700 text-sm text-left">
+                        {f.description}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </section>
-      <section id="features" className="bg-white h-screen pt-36 antialiased">
-        <div className="mx-auto max-w-4xl text-center">
+      {/* <section id="features" className="bg-white h-screen pt-36 antialiased">
+        <div className="md:px-8 mx-auto max-w-6xl text-center">
           <div className="flex flex-col space-y-4">
             <h2 className="text-5xl font-semibold">Production Ready</h2>
             <p className="text-xl text-gray-600 max-w-xl mx-auto">
@@ -461,12 +471,13 @@ export default function Example() {
               organizations are using Helicone to monitor their AI applications:
             </p>
           </div>
+          <div className="mx-auto mt-16 grid auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3"></div>
         </div>
-      </section>
-      <section id="features" className="bg-white h-screen pt-36 antialiased">
-        <div className="mx-auto max-w-4xl divide-y divide-gray-900/10">
+      </section> */}
+      <section id="features" className="bg-white py-36 antialiased">
+        <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10">
           <div className="flex flex-col space-y-4 text-center">
-            <h2 className="text-5xl font-semibold">
+            <h2 className="text-4xl md:text-5xl font-semibold">
               Frequently asked questions
             </h2>
           </div>
@@ -507,6 +518,7 @@ export default function Example() {
           </dl>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
