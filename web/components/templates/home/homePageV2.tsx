@@ -293,7 +293,7 @@ export default function Example() {
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex relative mb-8 justify-center">
                   <img
-                    className="z-50 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
+                    className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/requests.png"
                     alt="requests"
                     width={158}
@@ -371,7 +371,7 @@ export default function Example() {
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex relative mb-4 justify-center">
                     <img
-                      className="z-50 absolute bottom-0 shadow-md rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
+                      className="z-20 absolute bottom-0 shadow-md rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
                       src="/assets/home/bento/history.png"
                       alt="requests"
                       width={300}
