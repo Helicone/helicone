@@ -26,6 +26,28 @@ title: "Anthropic"
     )
     ```
   </Tab>
+
+   <Tab title="Node (TS)">
+    **Node (TS)**
+    
+    Change the api base and add a Helicone-Auth header
+    ```typescript
+  const anthropic = new Anthropic({
+    baseURL: "https://anthropic.hconeai.com/v1",
+    apiKey: "my api key",
+    defaultHeaders: {
+      "Helicone-Auth": "Bearer <HELICONE_API_KEY>",
+    },
+  });
+
+  const stream = await anthropic.completions.create({
+    prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
+    model: "claude-2",
+    stream: true,
+    max_tokens_to_sample: 300,
+  });
+    ```
+  </Tab>
   <Tab title="cURL">
     **Replace the Anthropic Base url with Helicone's**
    ```
