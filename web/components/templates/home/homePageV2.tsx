@@ -356,6 +356,7 @@ export default function Example() {
                 }}
                 className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
+                {demoLoading && <ArrowPathIcon className="h-4 w-4 inline" />}
                 View Demo
               </button>
             </div>
