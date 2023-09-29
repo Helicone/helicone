@@ -474,7 +474,7 @@ export default function Example() {
           <div className="mx-auto mt-16 grid auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3"></div>
         </div>
       </section> */}
-      <section id="features" className="bg-white py-36 antialiased">
+      <section id="features" className="bg-white pt-36 pb-48 antialiased">
         <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10">
           <div className="flex flex-col space-y-4 text-center">
             <h2 className="text-4xl md:text-5xl font-semibold">
