@@ -532,16 +532,6 @@ export class DBLoggable {
     const res = await this._log(db, rateLimitKV);
     if (res.error !== null) {
       console.error("Error logging", res.error);
-      const uuid = crypto.randomUUID();
-      db.queue.responseAndResponseQueueKV.put(
-        uuid,
-        JSON.stringify({
-          _type: "dbLoggable",
-          payload: JSON.stringify(this),
-        })
-      );
-
-      db.queue.fallBackQueue.send(uuid);
     }
     return res;
   }
