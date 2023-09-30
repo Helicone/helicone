@@ -7,6 +7,7 @@ import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
+import { DBWrapper } from "../db/DBWrapper";
 
 type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 
@@ -48,6 +49,7 @@ async function logAsync(
     {
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      dbWrapper: new DBWrapper(env, loggable.auth()),
       queue: new InsertQueue(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
         env.FALLBACK_QUEUE,
