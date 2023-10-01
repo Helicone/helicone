@@ -12,7 +12,6 @@ export class AtomicRateLimiter {
   constructor(private state: DurableObjectState, env: Env) {}
 
   async fetch(request: Request) {
-    console.log("HELLO FROM DURATION");
     const { windowSizeSeconds, maxCount } = await request.json<{
       windowSizeSeconds: number;
       maxCount: number;
