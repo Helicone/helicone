@@ -14,12 +14,11 @@ class ClaudeBuilder extends AbstractRequestBuilder {
         }
         // successful response, check for choices
 
-        return (
-          this.response.response_body?.body ??
-          this.response.response_body?.body?.completion ??
-          this.response.response_body?.completion ??
-          ""
-        );
+        return this.response.response_body?.body
+          ? this.response.response_body?.body?.completion ??
+              this.response.response_body?.completion ??
+              ""
+          : "";
       } else if (statusCode === 0 || statusCode === null) {
         // pending response
         return "";
