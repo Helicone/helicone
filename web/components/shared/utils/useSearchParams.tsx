@@ -30,7 +30,14 @@ class SearchParams {
   }
 
   set(key: string, value: string) {
-    this.router.push({ query: { ...this.query, [key]: value } });
+    this.router.replace(
+      {
+        pathname: "/requests",
+        query: { ...this.router.query, [key]: value },
+      },
+      undefined,
+      { shallow: true }
+    );
   }
 
   getAll() {

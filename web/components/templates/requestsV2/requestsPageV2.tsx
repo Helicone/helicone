@@ -328,14 +328,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const onRowSelectHandler = (row: NormalizedRequest) => {
     setSelectedData(row);
     setOpen(true);
-    router.replace(
-      {
-        pathname: "/requests",
-        query: { ...router.query, requestId: row.id },
-      },
-      undefined,
-      { shallow: true }
-    );
+    searchParams.set("requestId", row.id);
   };
 
   return (
