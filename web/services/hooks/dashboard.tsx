@@ -6,6 +6,7 @@ import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import { useUserSettings } from "./userSettings";
 import { Tier } from "../../pages/api/organization/tier";
+import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetTopUsers = (
   currentPage: number,
@@ -70,7 +71,7 @@ const useGetAuthorized = (userId: string) => {
     const firstDateOfMonth = format(today, "yyyy-MM-01");
     return firstDateOfMonth;
   }
-  const org = useOrgTier();
+  const org = useOrg();
 
   const { data: count, isLoading: isCountLoading } = useQuery({
     queryKey: [`requestCount`],
@@ -100,8 +101,9 @@ const useGetAuthorized = (userId: string) => {
   });
 
   return {
-    authorized: org.data?.data === "free" && Number(count?.data || 0) > 100_000,
-    isLoading: isCountLoading || org.isLoading,
+    authorized:
+      org?.currentOrg.tier === "free" && Number(count?.data || 0) > 100_000,
+    isLoading: isCountLoading,
   };
 };
 
