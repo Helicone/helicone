@@ -109,7 +109,7 @@ const OrgUsagePage = (props: OrgUsagePageProps) => {
                 <span>{`${Number(count?.data).toLocaleString()}`}</span>
                 <span className="text-gray-400 text-sm">/</span>
                 <span className="text-sm text-gray-400">{`${Number(
-                  1_000_000
+                  100_000
                 ).toLocaleString()}`}</span>
               </div>
             </div>
