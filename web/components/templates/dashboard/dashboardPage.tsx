@@ -56,16 +56,38 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
   };
 
+  const getTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+    let range: {
+      start: Date;
+      end: Date;
+    };
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const start = currentTimeFilter.split("_")[1]
+        ? new Date(currentTimeFilter.split("_")[1])
+        : getTimeIntervalAgo("24h");
+      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
+      range = {
+        start,
+        end,
+      };
+    } else {
+      range = {
+        start: getTimeIntervalAgo(currentTimeFilter as TimeInterval),
+        end: new Date(),
+      };
+    }
+    return range;
+  };
+
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
   );
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
-  }>({
-    start: getTimeIntervalAgo(interval),
-    end: new Date(),
-  });
+  }>(getTimeFilter());
   const [open, setOpen] = useState(false);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
