@@ -28,6 +28,7 @@ import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "./RequestView";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -129,13 +130,46 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  const [timeFilter, setTimeFilter] = useState<FilterNode>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo("24h").toISOString(),
-      },
-    },
-  });
+  const searchParams = useSearchParams();
+
+  const initialTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const [_, start, end] = currentTimeFilter.split("_");
+
+      const filter: FilterNode = {
+        left: {
+          request: {
+            created_at: {
+              gte: new Date(start).toISOString(),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request: {
+            created_at: {
+              lte: new Date(end).toISOString(),
+            },
+          },
+        },
+      };
+      return filter;
+    } else {
+      return {
+        request: {
+          created_at: {
+            gte: getTimeIntervalAgo(
+              (searchParams.get("t") as TimeInterval) || "24h"
+            ).toISOString(),
+          },
+        },
+      };
+    }
+  };
+
+  const [timeFilter, setTimeFilter] = useState<FilterNode>(initialTimeFilter());
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const router = useRouter();

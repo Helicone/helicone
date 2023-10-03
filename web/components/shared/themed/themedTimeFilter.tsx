@@ -3,6 +3,7 @@ import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { Fragment, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
+import useSearchParams from "../utils/useSearchParams";
 
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
@@ -21,6 +22,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     custom = false,
   } = props;
   const { setNotification } = useNotification();
+  const searchParams = useSearchParams();
   const [active, setActive] = useState<string>(defaultValue);
 
   const [startDate, setStartDate] = useState<string>();
@@ -138,6 +140,10 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                           }
                           const start = new Date(startDate as string);
                           const end = new Date(endDate as string);
+                          searchParams.set(
+                            "t",
+                            `custom_${start.toISOString()}_${end.toISOString()}`
+                          );
                           setActive("custom");
                           onSelect(
                             "custom",
@@ -164,8 +170,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
           type="button"
           disabled={isFetching}
           onClick={() => {
-            console.log(1);
-            console.log(option.key);
+            searchParams.set("t", option.key);
             setActive(option.key);
             onSelect(option.key, option.value);
           }}

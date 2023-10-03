@@ -12,6 +12,8 @@ import ExportButton from "./exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import useNotification from "../../notification/useNotification";
+import { useRouter } from "next/router";
+import useSearchParams from "../../utils/useSearchParams";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -43,7 +45,10 @@ interface ThemedTableHeaderProps<T> {
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { setNotification } = useNotification();
+
   const { rows, columnsFilter, timeFilter, advancedFilters } = props;
+
+  const searchParams = useSearchParams();
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -56,7 +61,16 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     setShowFilters(!showFilters);
     window.localStorage.setItem("showFilters", JSON.stringify(!showFilters));
   };
-  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+
+  const getDefaultValue = () => {
+    const currentTimeFilter = searchParams.get("t");
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
 
   return (
     <div className="flex flex-col space-y-4">
@@ -74,7 +88,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               timeFilter.onTimeSelectHandler(key as TimeInterval, value);
             }}
             isFetching={false}
-            defaultValue={"24h"}
+            defaultValue={getDefaultValue()}
             custom={true}
           />
         ) : (
