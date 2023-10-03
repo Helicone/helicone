@@ -132,7 +132,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   >(undefined);
   const searchParams = useSearchParams();
 
-  const initialTimeFilter = () => {
+  const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
@@ -169,7 +169,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
-  const [timeFilter, setTimeFilter] = useState<FilterNode>(initialTimeFilter());
+  const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
 
   const router = useRouter();

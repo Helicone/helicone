@@ -21,6 +21,7 @@ import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import MainGraph from "./graphs/mainGraph";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface DashboardPageProps {
   user: User;
@@ -44,8 +45,20 @@ export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user } = props;
-  const router = useRouter();
-  const [interval, setInterval] = useState<TimeInterval>("24h");
+  const searchParams = useSearchParams();
+
+  const getInterval = () => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter;
+    }
+  };
+
+  const [interval, setInterval] = useState<TimeInterval>(
+    getInterval() as TimeInterval
+  );
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
@@ -59,10 +72,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
-  const [mode, setMode] = useState<DashboardMode>("requests");
-  const [timeZoneDifference, setTimeZoneDifference] = useState<number>(
-    new Date().getTimezoneOffset()
-  );
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { authorized } = useGetAuthorized(user.id);
@@ -71,7 +80,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeFilter,
     uiFilters: debouncedAdvancedFilters,
     apiKeyFilter: null,
-    timeZoneDifference,
+    timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
 
@@ -207,6 +216,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               ],
               defaultTimeFilter: interval,
               onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                console.log(key, value);
                 if ((key as string) === "custom") {
                   value = value.replace("custom:", "");
                   const start = new Date(value.split("_")[0]);
