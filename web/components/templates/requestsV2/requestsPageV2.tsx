@@ -340,9 +340,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   );
 
   const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
-    // console.log(filters);
-    const currentAdvancedFilters = encodeURIComponent(JSON.stringify(filters));
-    searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+    if (filters.length > 0) {
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(filters)
+      );
+      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+    } else {
+      searchParams.delete("filters");
+    }
+
     setAdvancedFilters(filters);
   };
 

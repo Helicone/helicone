@@ -32,8 +32,18 @@ class SearchParams {
   set(key: string, value: string) {
     this.router.replace(
       {
-        pathname: "/requests",
         query: { ...this.router.query, [key]: value },
+      },
+      undefined,
+      { shallow: true }
+    );
+  }
+
+  delete(key: string) {
+    const { [key]: _, ...rest } = this.query;
+    this.router.replace(
+      {
+        query: rest,
       },
       undefined,
       { shallow: true }
