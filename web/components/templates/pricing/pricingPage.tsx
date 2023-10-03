@@ -21,7 +21,7 @@ const tiers = [
     ),
     description: "Everything necessary to get started.",
     features: [
-      "Up to 1 million requests per month",
+      "Up to 100,000 requests per month",
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
