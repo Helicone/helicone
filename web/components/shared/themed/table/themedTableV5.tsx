@@ -37,7 +37,7 @@ interface ThemedTableV5Props<T> {
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
-    setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+    setAdvancedFilters: (filters: UIFilterRow[]) => void;
     searchPropertyFilters: (
       property: string,
       search: string

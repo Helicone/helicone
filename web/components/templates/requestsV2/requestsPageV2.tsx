@@ -169,8 +169,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
+  const getAdvancedFilters = () => {
+    const currentAdvancedFilters = searchParams.get("filters");
+    if (currentAdvancedFilters) {
+      const filters = JSON.parse(
+        decodeURIComponent(currentAdvancedFilters || "").slice(1, -1)
+      ) as UIFilterRow[];
+      return filters;
+    }
+    return [];
+  };
+
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
+    getAdvancedFilters()
+  );
 
   const router = useRouter();
 
@@ -217,55 +231,55 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedAdvancedFilter]);
 
-  useEffect(() => {
-    if (isDataLoading || !router.query.propertyFilters) {
-      return;
-    }
-    try {
-      const queryFilters = JSON.parse(
-        router.query.propertyFilters as string
-      ) as {
-        key: string;
-        value: string;
-      }[];
-      if (queryFilters) {
-        const newFilters: UIFilterRow[] = queryFilters
-          .filter(
-            (filter) =>
-              filterMap.findIndex((f) => f.column === filter.key) !== -1
-          )
-          .map((filter) => {
-            const filterMapIdx = filterMap.findIndex(
-              (f) => f.column === filter.key
-            );
-            return {
-              filterMapIdx: filterMapIdx,
-              operatorIdx: 0,
-              value: filter.value,
-            };
-          });
+  // useEffect(() => {
+  //   if (isDataLoading || !router.query.propertyFilters) {
+  //     return;
+  //   }
+  //   try {
+  //     const queryFilters = JSON.parse(
+  //       router.query.propertyFilters as string
+  //     ) as {
+  //       key: string;
+  //       value: string;
+  //     }[];
+  //     if (queryFilters) {
+  //       const newFilters: UIFilterRow[] = queryFilters
+  //         .filter(
+  //           (filter) =>
+  //             filterMap.findIndex((f) => f.column === filter.key) !== -1
+  //         )
+  //         .map((filter) => {
+  //           const filterMapIdx = filterMap.findIndex(
+  //             (f) => f.column === filter.key
+  //           );
+  //           return {
+  //             filterMapIdx: filterMapIdx,
+  //             operatorIdx: 0,
+  //             value: filter.value,
+  //           };
+  //         });
 
-        if (!advancedFilters || advancedFilters.length === 0) {
-          setAdvancedFilters(newFilters);
-          const newQuery = {
-            ...router.query,
-          };
-          delete newQuery.propertyFilters;
+  //       if (!advancedFilters || advancedFilters.length === 0) {
+  //         setAdvancedFilters(newFilters);
+  //         const newQuery = {
+  //           ...router.query,
+  //         };
+  //         delete newQuery.propertyFilters;
 
-          router.replace(
-            {
-              pathname: "/requests",
-              query: newQuery,
-            },
-            undefined,
-            {}
-          );
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [router, isDataLoading, filterMap, advancedFilters]);
+  //         router.replace(
+  //           {
+  //             pathname: "/requests",
+  //             query: newQuery,
+  //           },
+  //           undefined,
+  //           {}
+  //         );
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // }, [router, isDataLoading, filterMap, advancedFilters]);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -324,6 +338,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
     })
   );
+
+  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
+    // console.log(filters);
+    const currentAdvancedFilters = encodeURIComponent(JSON.stringify(filters));
+    searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+    setAdvancedFilters(filters);
+  };
 
   const onRowSelectHandler = (row: NormalizedRequest) => {
     setSelectedData(row);
@@ -412,7 +433,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           advancedFilters={{
             filterMap: filterMap,
             filters: advancedFilters,
-            setAdvancedFilters: setAdvancedFilters,
+            setAdvancedFilters: onSetAdvancedFilters,
             searchPropertyFilters: searchPropertyFilters,
           }}
           exportData={requests.map((request) => {

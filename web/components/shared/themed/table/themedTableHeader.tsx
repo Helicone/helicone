@@ -22,7 +22,7 @@ interface ThemedTableHeaderProps<T> {
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
-    setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+    setAdvancedFilters: (filters: UIFilterRow[]) => void;
     searchPropertyFilters: (
       property: string,
       search: string
@@ -142,11 +142,9 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     ].label
                   } ${_filter.value}`}
                   onDelete={() => {
-                    advancedFilters.setAdvancedFilters((prev) => {
-                      const newFilters = [...prev];
-                      newFilters.splice(index, 1);
-                      return newFilters;
-                    });
+                    const prev = [...advancedFilters.filters];
+                    prev.splice(index, 1);
+                    advancedFilters.setAdvancedFilters(prev);
                   }}
                 />
               );
