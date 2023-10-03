@@ -177,43 +177,6 @@ export default function DraggableColumnHeader<T>(props: {
               </Transition>
             </Menu>
           </div>
-          // <span
-          // onClick={() => {
-          //   if (meta && sortable) {
-          //     const { sortKey, isCustomProperty, sortDirection } = sortable;
-
-          //     if (sortKey === meta.sortKey) {
-          //       const direction = sortDirection === "asc" ? "desc" : "asc";
-          //       router.query.sortDirection = direction;
-          //     } else {
-          //       router.query.sortDirection = "asc";
-          //     }
-
-          //     if (meta.isCustomProperty) {
-          //       router.query.isCustomProperty = "true";
-          //     }
-          //     router.query.sortKey = meta.sortKey;
-          //     router.push(router);
-          //   }
-          // }}
-          //   className="ml-1 flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
-          // >
-          //   {meta.sortKey === sortable.sortKey ? (
-          //     sortable.sortDirection === "asc" ? (
-          // <ChevronUpIcon
-          //   className="h-4 w-4 border border-yellow-500 rounded-md"
-          //   aria-hidden="true"
-          // />
-          //     ) : (
-          //       <ChevronDownIcon
-          //         className="h-4 w-4 border border-yellow-500 rounded-md"
-          //         aria-hidden="true"
-          //       />
-          //     )
-          //   ) : (
-          //     <ChevronDownIcon className="h-4 w-4" aria-hidden="true" />
-          //   )}
-          // </span>
         )}
       </div>
 
