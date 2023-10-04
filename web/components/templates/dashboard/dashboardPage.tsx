@@ -83,6 +83,25 @@ const DashboardPage = (props: DashboardPageProps) => {
     return range;
   };
 
+  const getAdvancedFilters = (): UIFilterRow[] => {
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.log("Error decoding advanced filters:", error);
+    }
+    return [];
+  };
+
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
   );
@@ -90,7 +109,9 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [open, setOpen] = useState(false);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
+    getAdvancedFilters()
+  );
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
@@ -105,6 +126,42 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
+
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
+      filter.value
+    )}`;
+  }
+
+  function decodeFilter(encoded: string): UIFilterRow | null {
+    try {
+      const parts = encoded.split(":");
+      if (parts.length !== 3) return null;
+      const filterMapIdx = parseInt(parts[0], 10);
+      const operatorIdx = parseInt(parts[1], 10);
+      const value = decodeURIComponent(parts[2]);
+
+      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+      return { filterMapIdx, operatorIdx, value };
+    } catch (error) {
+      console.log("Error decoding filter:", error);
+      return null;
+    }
+  }
+
+  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
+    if (filters.length > 0) {
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(filters.map(encodeFilter).join("|"))
+      );
+      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+    } else {
+      searchParams.delete("filters");
+    }
+
+    setAdvancedFilters(filters);
+  };
 
   const combineRequestsAndErrors = () => {
     let combinedArray = overTimeData.requests.data?.data?.map(
@@ -259,7 +316,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: setAdvancedFilters,
+              onAdvancedFilter: onSetAdvancedFilters,
               filters: advancedFilters,
               searchPropertyFilters: () => {
                 throw new Error("not implemented");

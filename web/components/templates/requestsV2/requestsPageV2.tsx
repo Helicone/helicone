@@ -176,7 +176,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
       if (currentAdvancedFilters) {
         const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
-        console.log("filters", filters);
         const decodedFilters = filters
           .split("|")
           .map(decodeFilter)
@@ -274,7 +273,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     try {
       const parts = encoded.split(":");
       if (parts.length !== 3) return null;
-      console.log("parts", parts);
       const filterMapIdx = parseInt(parts[0], 10);
       const operatorIdx = parseInt(parts[1], 10);
       const value = decodeURIComponent(parts[2]);

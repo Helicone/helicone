@@ -77,7 +77,7 @@ interface ThemedHeaderProps {
   };
   advancedFilter?: {
     filterMap: SingleFilterDef<any>[];
-    onAdvancedFilter: Dispatch<SetStateAction<UIFilterRow[]>>;
+    onAdvancedFilter: (filters: UIFilterRow[]) => void;
     filters: UIFilterRow[];
     searchPropertyFilters: (
       property: string,
@@ -221,11 +221,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                               ?.operators[_filter.operatorIdx].label
                           } ${_filter.value}`}
                           onDelete={() => {
-                            advancedFilter.onAdvancedFilter((prev) => {
-                              const newFilters = [...prev];
-                              newFilters.splice(index, 1);
-                              return newFilters;
-                            });
+                            const prev = [...advancedFilter.filters];
+                            prev.splice(index, 1);
+                            advancedFilter.onAdvancedFilter(prev);
                           }}
                         />
                       );
