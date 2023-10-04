@@ -72,22 +72,6 @@ function getSortLeaf(
   }
 }
 
-// type EncodedKeys = "fmi" | "v" | "oi";
-// type EncodedObject = {
-//   [K in EncodedKeys]?: UIFilterRow[keyof UIFilterRow];
-// };
-
-// const keyMapping: Record<keyof UIFilterRow, EncodedKeys> = {
-//   filterMapIdx: "fmi",
-//   value: "v",
-//   operatorIdx: "oi",
-// };
-
-// const reverseKeyMapping: Record<EncodedKeys, keyof UIFilterRow> =
-//   Object.fromEntries(
-//     Object.entries(keyMapping).map(([key, value]) => [value, key])
-//   ) as any;
-
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     currentPage,
@@ -190,7 +174,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       const currentAdvancedFilters = searchParams.get("filters");
 
       if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).slice(1, -1);
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        console.log("filters", filters);
         const decodedFilters = filters
           .split("|")
           .map(decodeFilter)
@@ -199,7 +184,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         return decodedFilters;
       }
     } catch (error) {
-      console.error("Error decoding advanced filters:", error);
+      console.log("Error decoding advanced filters:", error);
     }
     return [];
   };
@@ -265,7 +250,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     try {
       const parts = encoded.split(":");
       if (parts.length !== 3) return null;
-
+      console.log("parts", parts);
       const filterMapIdx = parseInt(parts[0], 10);
       const operatorIdx = parseInt(parts[1], 10);
       const value = decodeURIComponent(parts[2]);
@@ -274,7 +259,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
       return { filterMapIdx, operatorIdx, value };
     } catch (error) {
-      console.error("Error decoding filter:", error);
+      console.log("Error decoding filter:", error);
       return null;
     }
   }
