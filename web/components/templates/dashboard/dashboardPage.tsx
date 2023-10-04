@@ -21,10 +21,16 @@ import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import MainGraph from "./graphs/mainGraph";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface DashboardPageProps {
   user: User;
 }
+
+export type TimeFilter = {
+  start: Date;
+  end: Date;
+};
 
 function formatNumberString(
   numString: string,
@@ -44,25 +50,71 @@ export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user } = props;
-  const router = useRouter();
-  const [interval, setInterval] = useState<TimeInterval>("24h");
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
-    start: getTimeIntervalAgo(interval),
-    end: new Date(),
-  });
+  const searchParams = useSearchParams();
+
+  const getInterval = () => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
+
+  const getTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+    let range: TimeFilter;
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const start = currentTimeFilter.split("_")[1]
+        ? new Date(currentTimeFilter.split("_")[1])
+        : getTimeIntervalAgo("24h");
+      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
+      range = {
+        start,
+        end,
+      };
+    } else {
+      range = {
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        end: new Date(),
+      };
+    }
+    return range;
+  };
+
+  const getAdvancedFilters = (): UIFilterRow[] => {
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.log("Error decoding advanced filters:", error);
+    }
+    return [];
+  };
+
+  const [interval, setInterval] = useState<TimeInterval>(
+    getInterval() as TimeInterval
+  );
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+
   const [open, setOpen] = useState(false);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
+    getAdvancedFilters()
+  );
 
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 500);
 
-  const [mode, setMode] = useState<DashboardMode>("requests");
-  const [timeZoneDifference, setTimeZoneDifference] = useState<number>(
-    new Date().getTimezoneOffset()
-  );
   const timeIncrement = getTimeInterval(timeFilter);
 
   const { authorized } = useGetAuthorized(user.id);
@@ -71,9 +123,45 @@ const DashboardPage = (props: DashboardPageProps) => {
     timeFilter,
     uiFilters: debouncedAdvancedFilters,
     apiKeyFilter: null,
-    timeZoneDifference,
+    timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
   });
+
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
+      filter.value
+    )}`;
+  }
+
+  function decodeFilter(encoded: string): UIFilterRow | null {
+    try {
+      const parts = encoded.split(":");
+      if (parts.length !== 3) return null;
+      const filterMapIdx = parseInt(parts[0], 10);
+      const operatorIdx = parseInt(parts[1], 10);
+      const value = decodeURIComponent(parts[2]);
+
+      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+      return { filterMapIdx, operatorIdx, value };
+    } catch (error) {
+      console.log("Error decoding filter:", error);
+      return null;
+    }
+  }
+
+  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
+    if (filters.length > 0) {
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(filters.map(encodeFilter).join("|"))
+      );
+      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+    } else {
+      searchParams.delete("filters");
+    }
+
+    setAdvancedFilters(filters);
+  };
 
   const combineRequestsAndErrors = () => {
     let combinedArray = overTimeData.requests.data?.data?.map(
@@ -198,6 +286,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           <ThemedTableHeader
             isFetching={isAnyLoading}
             timeFilter={{
+              currentTimeFilter: timeFilter,
               customTimeFilter: true,
               timeFilterOptions: [
                 { key: "24h", value: "24H" },
@@ -227,7 +316,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             }}
             advancedFilter={{
               filterMap,
-              onAdvancedFilter: setAdvancedFilters,
+              onAdvancedFilter: onSetAdvancedFilters,
               filters: advancedFilters,
               searchPropertyFilters: () => {
                 throw new Error("not implemented");
