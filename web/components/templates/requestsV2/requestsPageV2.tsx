@@ -72,6 +72,22 @@ function getSortLeaf(
   }
 }
 
+type EncodedKeys = "fmi" | "v" | "oi";
+type EncodedObject = {
+  [K in EncodedKeys]?: UIFilterRow[keyof UIFilterRow];
+};
+
+const keyMapping: Record<keyof UIFilterRow, EncodedKeys> = {
+  filterMapIdx: "fmi",
+  value: "v",
+  operatorIdx: "oi",
+};
+
+const reverseKeyMapping: Record<EncodedKeys, keyof UIFilterRow> =
+  Object.fromEntries(
+    Object.entries(keyMapping).map(([key, value]) => [value, key])
+  ) as any;
+
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     currentPage,
@@ -174,8 +190,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     if (currentAdvancedFilters) {
       const filters = JSON.parse(
         decodeURIComponent(currentAdvancedFilters || "").slice(1, -1)
-      ) as UIFilterRow[];
-      return filters;
+      ) as EncodedObject[];
+      const decodedFilters = filters.map((filter) => decodeObject(filter));
+      return decodedFilters;
     }
     return [];
   };
@@ -231,55 +248,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedAdvancedFilter]);
 
-  // useEffect(() => {
-  //   if (isDataLoading || !router.query.propertyFilters) {
-  //     return;
-  //   }
-  //   try {
-  //     const queryFilters = JSON.parse(
-  //       router.query.propertyFilters as string
-  //     ) as {
-  //       key: string;
-  //       value: string;
-  //     }[];
-  //     if (queryFilters) {
-  //       const newFilters: UIFilterRow[] = queryFilters
-  //         .filter(
-  //           (filter) =>
-  //             filterMap.findIndex((f) => f.column === filter.key) !== -1
-  //         )
-  //         .map((filter) => {
-  //           const filterMapIdx = filterMap.findIndex(
-  //             (f) => f.column === filter.key
-  //           );
-  //           return {
-  //             filterMapIdx: filterMapIdx,
-  //             operatorIdx: 0,
-  //             value: filter.value,
-  //           };
-  //         });
+  function encodeObject(obj: UIFilterRow): EncodedObject {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        keyMapping[key as keyof UIFilterRow],
+        value,
+      ])
+    ) as EncodedObject;
+  }
 
-  //       if (!advancedFilters || advancedFilters.length === 0) {
-  //         setAdvancedFilters(newFilters);
-  //         const newQuery = {
-  //           ...router.query,
-  //         };
-  //         delete newQuery.propertyFilters;
-
-  //         router.replace(
-  //           {
-  //             pathname: "/requests",
-  //             query: newQuery,
-  //           },
-  //           undefined,
-  //           {}
-  //         );
-  //       }
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // }, [router, isDataLoading, filterMap, advancedFilters]);
+  function decodeObject(obj: EncodedObject): UIFilterRow {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        reverseKeyMapping[key as EncodedKeys],
+        value,
+      ])
+    ) as UIFilterRow;
+  }
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -342,7 +327,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
     if (filters.length > 0) {
       const currentAdvancedFilters = encodeURIComponent(
-        JSON.stringify(filters)
+        JSON.stringify(filters.map((filter) => encodeObject(filter)))
       );
       searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
     } else {
