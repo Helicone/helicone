@@ -28,6 +28,7 @@ import { UIFilterRow } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
+import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -44,6 +45,7 @@ interface ThemedTableV5Props<T> {
     ) => Promise<Result<void, string>>;
   };
   timeFilter?: {
+    currentTimeFilter: TimeFilter;
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
@@ -133,6 +135,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             ? {
                 defaultValue: timeFilter.defaultValue,
                 onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                currentTimeFilter: timeFilter.currentTimeFilter,
               }
             : undefined
         }

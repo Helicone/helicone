@@ -29,6 +29,7 @@ import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "./RequestView";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import { TimeFilter } from "../dashboard/dashboardPage";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -189,7 +190,30 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return [];
   };
 
+  const getTimeRange = () => {
+    const currentTimeFilter = searchParams.get("t");
+    let range: TimeFilter;
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const start = currentTimeFilter.split("_")[1]
+        ? new Date(currentTimeFilter.split("_")[1])
+        : getTimeIntervalAgo("24h");
+      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
+      range = {
+        start,
+        end,
+      };
+    } else {
+      range = {
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        end: new Date(),
+      };
+    }
+    return range;
+  };
+
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
+  const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
     getAdvancedFilters()
@@ -446,6 +470,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             return flattenedRequest;
           })}
           timeFilter={{
+            currentTimeFilter: timeRange,
             defaultValue: "24h",
             onTimeSelectHandler: onTimeSelectHandler,
           }}

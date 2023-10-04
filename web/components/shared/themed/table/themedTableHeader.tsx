@@ -14,6 +14,7 @@ import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import useNotification from "../../notification/useNotification";
 import { useRouter } from "next/router";
 import useSearchParams from "../../utils/useSearchParams";
+import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -38,6 +39,7 @@ interface ThemedTableHeaderProps<T> {
 
   // define this if you want the time filter
   timeFilter?: {
+    currentTimeFilter: TimeFilter;
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
@@ -77,6 +79,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
       <div className="flex flex-col gap-3 lg:flex-row justify-between ">
         {timeFilter !== undefined ? (
           <ThemedTimeFilter
+            currentTimeFilter={timeFilter.currentTimeFilter}
             timeFilterOptions={[
               { key: "24h", value: "24H" },
               { key: "7d", value: "7D" },
