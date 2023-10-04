@@ -4,13 +4,28 @@ import { Fragment, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
 import useSearchParams from "../utils/useSearchParams";
+import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
   onSelect: (key: string, value: string) => void;
   isFetching: boolean;
   defaultValue: string;
+  currentTimeFilter: TimeFilter;
   custom?: boolean;
+}
+
+function formatDateToInputString(date: Date): string {
+  if (!date) {
+    return "";
+  }
+  const YYYY = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-11 in JavaScript
+  const DD = String(date.getDate()).padStart(2, "0");
+  const HH = String(date.getHours()).padStart(2, "0");
+  const MI = String(date.getMinutes()).padStart(2, "0");
+
+  return `${YYYY}-${MM}-${DD}T${HH}:${MI}`;
 }
 
 const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
@@ -19,14 +34,19 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     onSelect,
     defaultValue,
     isFetching,
+    currentTimeFilter,
     custom = false,
   } = props;
   const { setNotification } = useNotification();
   const searchParams = useSearchParams();
   const [active, setActive] = useState<string>(defaultValue);
 
-  const [startDate, setStartDate] = useState<string>();
-  const [endDate, setEndDate] = useState<string>();
+  const [startDate, setStartDate] = useState<string | undefined>(
+    formatDateToInputString(currentTimeFilter?.start) || undefined
+  );
+  const [endDate, setEndDate] = useState<string | undefined>(
+    formatDateToInputString(currentTimeFilter?.end) || undefined
+  );
 
   const isActive = (key: string) => {
     return active === key;

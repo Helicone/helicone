@@ -27,6 +27,11 @@ interface DashboardPageProps {
   user: User;
 }
 
+export type TimeFilter = {
+  start: Date;
+  end: Date;
+};
+
 function formatNumberString(
   numString: string,
   minimumFractionDigits?: boolean
@@ -58,10 +63,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
-    let range: {
-      start: Date;
-      end: Date;
-    };
+    let range: TimeFilter;
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const start = currentTimeFilter.split("_")[1]
@@ -84,10 +86,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval
   );
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>(getTimeFilter());
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+
   const [open, setOpen] = useState(false);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
@@ -229,6 +229,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           <ThemedTableHeader
             isFetching={isAnyLoading}
             timeFilter={{
+              currentTimeFilter: timeFilter,
               customTimeFilter: true,
               timeFilterOptions: [
                 { key: "24h", value: "24H" },
@@ -238,7 +239,6 @@ const DashboardPage = (props: DashboardPageProps) => {
               ],
               defaultTimeFilter: interval,
               onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                console.log(key, value);
                 if ((key as string) === "custom") {
                   value = value.replace("custom:", "");
                   const start = new Date(value.split("_")[0]);
