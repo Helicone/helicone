@@ -57,7 +57,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       return "custom";
     } else {
-      return currentTimeFilter;
+      return currentTimeFilter || "24h";
     }
   };
 
@@ -76,7 +76,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo(currentTimeFilter as TimeInterval),
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
         end: new Date(),
       };
     }
