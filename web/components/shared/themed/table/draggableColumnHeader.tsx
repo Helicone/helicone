@@ -1,4 +1,6 @@
 import {
+  BarsArrowDownIcon,
+  BarsArrowUpIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   EllipsisVerticalIcon,
@@ -12,9 +14,10 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { FC } from "react";
+import { FC, Fragment } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { clsx } from "../../clsx";
+import { Menu, Transition } from "@headlessui/react";
 
 export default function DraggableColumnHeader<T>(props: {
   header: Header<T, unknown>;
@@ -96,43 +99,84 @@ export default function DraggableColumnHeader<T>(props: {
         </button>
 
         {sortable && hasSortKey && (
-          <span
-            onClick={() => {
-              if (meta && sortable) {
-                const { sortKey, isCustomProperty, sortDirection } = sortable;
-
-                if (sortKey === meta.sortKey) {
-                  const direction = sortDirection === "asc" ? "desc" : "asc";
-                  router.query.sortDirection = direction;
-                } else {
-                  router.query.sortDirection = "asc";
-                }
-
-                if (meta.isCustomProperty) {
-                  router.query.isCustomProperty = "true";
-                }
-                router.query.sortKey = meta.sortKey;
-                router.push(router);
-              }
-            }}
-            className="ml-1 flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200 hover:cursor-pointer"
-          >
-            {meta.sortKey === sortable.sortKey ? (
-              sortable.sortDirection === "asc" ? (
-                <ChevronUpIcon
-                  className="h-4 w-4 border border-yellow-500 rounded-md"
-                  aria-hidden="true"
-                />
-              ) : (
-                <ChevronDownIcon
-                  className="h-4 w-4 border border-yellow-500 rounded-md"
-                  aria-hidden="true"
-                />
-              )
-            ) : (
-              <ChevronDownIcon className="h-4 w-4" aria-hidden="true" />
-            )}
-          </span>
+          <div className="text-right items-center">
+            <Menu as="div" className="relative text-left pl-1">
+              <div className="flex items-center">
+                <Menu.Button className="hover:bg-gray-100 rounded-md p-1 -m-0.5">
+                  {meta.sortKey === sortable.sortKey ? (
+                    sortable.sortDirection === "asc" ? (
+                      <BarsArrowUpIcon
+                        className="h-4 w-4 text-sky-500"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <BarsArrowDownIcon
+                        className="h-4 w-4 text-sky-500"
+                        aria-hidden="true"
+                      />
+                    )
+                  ) : (
+                    <BarsArrowDownIcon className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </Menu.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute right-0 mt-2 w-24 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="px-1 py-1">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          className={`${
+                            active ? "bg-sky-500 text-white" : "text-gray-900"
+                          } group flex w-full items-center justify-between rounded-md px-2 py-2 text-xs`}
+                          onClick={() => {
+                            if (meta && sortable) {
+                              router.query.sortDirection = "asc";
+                              router.query.sortKey = meta.sortKey;
+                              router.push(router);
+                            }
+                          }}
+                        >
+                          <BarsArrowUpIcon
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          ASC
+                        </button>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          className={`${
+                            active ? "bg-sky-500 text-white" : "text-gray-900"
+                          } group flex w-full items-center justify-between rounded-md px-2 py-2 text-xs`}
+                          onClick={() => {
+                            if (meta && sortable) {
+                              router.query.sortDirection = "desc";
+                              router.query.sortKey = meta.sortKey;
+                              router.push(router);
+                            }
+                          }}
+                        >
+                          <BarsArrowDownIcon className="h-4 w-4" />
+                          DESC
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
+          </div>
         )}
       </div>
 

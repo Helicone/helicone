@@ -16,7 +16,7 @@ export function AdvancedFilters({
 }: {
   filterMap: SingleFilterDef<any>[];
   filters: UIFilterRow[];
-  setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+  setAdvancedFilters: (filters: UIFilterRow[]) => void;
   searchPropertyFilters: (
     property: string,
     search: string
@@ -24,7 +24,18 @@ export function AdvancedFilters({
 }) {
   return (
     <div className="flex flex-col bg-white p-4 rounded-lg border border-gray-300 mt-8">
-      <p className="text-sm text-gray-500 font-medium">Filters</p>
+      <div className="w-full flex flex-col sm:flex-row justify-between items-center">
+        <p className="text-sm text-gray-500 font-medium">Filters</p>
+        <button
+          onClick={() => {
+            setAdvancedFilters([]);
+          }}
+          className="text-xs text-gray-500 font-medium py-1 px-2 rounded-md hover:bg-gray-200"
+        >
+          Clear All
+        </button>
+      </div>
+
       <div className="flex flex-col gap-2 bg-white space-y-2 mt-4">
         {filters.map((_filter, index) => {
           return (
@@ -33,23 +44,19 @@ export function AdvancedFilters({
                 filterMap={filterMap}
                 filter={_filter}
                 setFilter={(filter) => {
-                  setAdvancedFilters((prev) => {
-                    if (typeof filter === "function") {
-                      filter = filter(prev[index]);
-                    }
+                  const prev = [...filters];
+                  if (typeof filter === "function") {
+                    // filter = filter(prev[index]);
+                  }
 
-                    const newFilters = [...prev];
-                    newFilters[index] = filter;
-                    return newFilters;
-                  });
+                  const newFilters = [...prev];
+                  newFilters[index] = filter[0];
+                  setAdvancedFilters(newFilters);
                 }}
                 onDeleteHandler={() => {
-                  setAdvancedFilters((prev) => {
-                    const newFilters = [...prev];
-                    newFilters.splice(index, 1);
-
-                    return newFilters;
-                  });
+                  const prev = [...filters];
+                  prev.splice(index, 1);
+                  setAdvancedFilters(prev);
                 }}
                 onSearchHandler={searchPropertyFilters}
               />
@@ -58,9 +65,12 @@ export function AdvancedFilters({
         })}
         <button
           onClick={() => {
-            setAdvancedFilters((prev) => {
-              return [...prev, { filterMapIdx: 0, value: "", operatorIdx: 0 }];
-            });
+            const prev = [...filters];
+
+            setAdvancedFilters([
+              ...prev,
+              { filterMapIdx: 0, value: "", operatorIdx: 0 },
+            ]);
           }}
           className="bg-white ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
         >
@@ -164,7 +174,7 @@ function AdvancedFilterRow({
 }: {
   filterMap: SingleFilterDef<any>[];
   filter: UIFilterRow;
-  setFilter: Dispatch<SetStateAction<UIFilterRow>>;
+  setFilter: (filters: UIFilterRow[]) => void;
   onDeleteHandler: () => void;
   onSearchHandler: (
     property: string,
@@ -186,17 +196,22 @@ function AdvancedFilterRow({
           const label = filterMap[selected].label;
           if (label === "Feedback") {
             // feedback idx
-            setFilter({
-              filterMapIdx: selected,
-              operatorIdx: 0,
-              value: "1",
-            });
+
+            setFilter([
+              {
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "1",
+              },
+            ]);
           } else {
-            setFilter({
-              filterMapIdx: selected,
-              operatorIdx: 0,
-              value: "",
-            });
+            setFilter([
+              {
+                filterMapIdx: selected,
+                operatorIdx: 0,
+                value: "",
+              },
+            ]);
           }
         }}
         className="w-full lg:w-fit"
@@ -213,11 +228,13 @@ function AdvancedFilterRow({
         )}
         selectedValue={filter.operatorIdx}
         onSelect={(selected) => {
-          setFilter((f) => ({
-            ...f,
-            operatorIdx: selected,
-            value: "",
-          }));
+          setFilter([
+            {
+              filterMapIdx: filter.filterMapIdx,
+              operatorIdx: selected,
+              value: "",
+            },
+          ]);
         }}
         className="w-full lg:w-fit"
       />
@@ -236,10 +253,18 @@ function AdvancedFilterRow({
             )
             .map((param) => param.param)}
           onChange={(value) => {
-            setFilter((f) => ({
-              ...f,
-              value: value ?? "",
-            }));
+            setFilter([
+              {
+                filterMapIdx: filter.filterMapIdx,
+                operatorIdx: filter.operatorIdx,
+                value: value ?? "",
+              },
+            ]);
+
+            // setFilter((f) => ({
+            //   ...f,
+            //   value: value ?? "",
+            // }));
           }}
           onSearchHandler={(search: string) =>
             onSearchHandler(

@@ -21,11 +21,26 @@ import {
 } from "@heroicons/react/24/outline";
 import { Dialog } from "@headlessui/react";
 import useNotification from "../../shared/notification/useNotification";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface ModelPageProps {}
 
 const ModelPage = (props: ModelPageProps) => {
-  const [interval, setInterval] = useState<TimeInterval>("all");
+  const searchParams = useSearchParams();
+
+  const getInterval = () => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
+
+  const [interval, setInterval] = useState<TimeInterval>(
+    getInterval() as TimeInterval
+  );
+
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
@@ -70,6 +85,7 @@ const ModelPage = (props: ModelPageProps) => {
           setSelectedModel(row);
         }}
         timeFilter={{
+          currentTimeFilter: timeFilter,
           defaultValue: "all",
           onTimeSelectHandler: (key: TimeInterval, value: string) => {
             if ((key as string) === "custom") {
