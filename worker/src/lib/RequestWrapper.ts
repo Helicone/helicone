@@ -187,26 +187,31 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      let providerKey = await getFromCache(authKey, env);
-      if (!providerKey) {
+      let providerKeyRow: {
+        providerKey?: string;
+        proxyKeyId?: string;
+      } | null = await getFromCache(authKey, env).then((x) =>
+        x ? JSON.parse(x) : null
+      );
+      if (!providerKeyRow) {
         const { data, error } = await this.getProviderKeyFromProxy(
           authKey,
           env
         );
-
-        if (error || !data) {
+        if (error || !data || !data.providerKey || !data.proxyKeyId) {
           return {
             data: null,
             error: `Proxy key not found. Error: ${error}`,
           };
         }
-        providerKey = data;
-        await storeInCache(authKey, providerKey, this.env);
+        providerKeyRow = data;
+        await storeInCache(authKey, JSON.stringify(providerKeyRow), this.env);
       }
 
-      this.authorization = providerKey;
+      this.heliconeProxyKeyId = providerKeyRow.proxyKeyId;
+      this.authorization = providerKeyRow.providerKey;
       const headers = new Headers(this.headers);
-      headers.set("Authorization", `Bearer ${providerKey}`);
+      headers.set("Authorization", `Bearer ${this.authorization}`);
       this.headers = headers;
     } else {
       this.authorization = authKey;
@@ -219,7 +224,15 @@ export class RequestWrapper {
   private async getProviderKeyFromProxy(
     authKey: string,
     env: Env
-  ): Promise<Result<string | undefined, string>> {
+  ): Promise<
+    Result<
+      {
+        providerKey?: string;
+        proxyKeyId?: string;
+      },
+      string
+    >
+  > {
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
       this.env.SUPABASE_SERVICE_ROLE_KEY
@@ -273,8 +286,6 @@ export class RequestWrapper {
       console.log("NO LIMITS");
     }
 
-    this.heliconeProxyKeyId = storedProxyKey.data.id;
-
     const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
       api_key: proxyKey,
       stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
@@ -302,7 +313,10 @@ export class RequestWrapper {
     }
 
     return {
-      data: providerKey.data.decrypted_provider_key,
+      data: {
+        providerKey: providerKey.data.decrypted_provider_key,
+        proxyKeyId: storedProxyKey.data.id,
+      },
       error: null,
     };
   }
