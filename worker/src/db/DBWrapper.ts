@@ -139,4 +139,10 @@ export class DBWrapper {
     }
     return authParams;
   }
+
+  async recordRateLimitHit(orgId: string): Promise<void> {
+    await this.supabaseClient.from("org_rate_limit_tracker").insert({
+      org_id: orgId,
+    });
+  }
 }

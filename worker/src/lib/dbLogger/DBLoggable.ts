@@ -6,7 +6,7 @@ import { logInClickhouse } from "./clickhouseLog";
 import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
-import { Result, mapPostgrestErr } from "../../results";
+import { Result, err, mapPostgrestErr } from "../../results";
 import {
   consolidateTextFields,
   getUsage,
@@ -419,7 +419,10 @@ export class DBLoggable {
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
-    // TODO Check the Org tier
+    if (error || !authParams?.organizationId) {
+      return { data: null, error: error ?? "Helicone organization not found" };
+    }
+
     const rateLimiter = await db.dbWrapper.getRateLimiter();
     if (rateLimiter.error !== null) {
       return rateLimiter;
@@ -427,14 +430,11 @@ export class DBLoggable {
     const rateLimit = await rateLimiter.data.checkRateLimit();
 
     if (rateLimit.isRateLimited) {
-      return {
-        data: null,
-        error: "Rate limited",
-      };
+      return err("Rate limited");
     }
 
-    if (error || !authParams?.organizationId) {
-      return { data: null, error: error ?? "Helicone organization not found" };
+    if (rateLimit.shouldLogInDB) {
+      await db.dbWrapper.recordRateLimitHit(authParams.organizationId);
     }
 
     const requestResult = await logRequest(

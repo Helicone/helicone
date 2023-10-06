@@ -326,8 +326,8 @@ export interface Database {
           name: string
           node_type: string
           org_id: string
-          resource_data: string
-          resource_data_type: string
+          resource_data: string | null
+          resource_data_type: string | null
           status: string
           timeout_seconds: number
           updated_at: string
@@ -341,8 +341,8 @@ export interface Database {
           name?: string
           node_type?: string
           org_id: string
-          resource_data: string
-          resource_data_type: string
+          resource_data?: string | null
+          resource_data_type?: string | null
           status?: string
           timeout_seconds?: number
           updated_at: string
@@ -356,8 +356,8 @@ export interface Database {
           name?: string
           node_type?: string
           org_id?: string
-          resource_data?: string
-          resource_data_type?: string
+          resource_data?: string | null
+          resource_data_type?: string | null
           status?: string
           timeout_seconds?: number
           updated_at?: string
@@ -379,37 +379,83 @@ export interface Database {
       }
       job_node_relationships: {
         Row: {
-          job: string | null
-          parent_task_id: string
-          task_id: string
+          job_id: string | null
+          node_id: string
+          parent_node_id: string
         }
         Insert: {
-          job?: string | null
-          parent_task_id: string
-          task_id: string
+          job_id?: string | null
+          node_id: string
+          parent_node_id: string
         }
         Update: {
-          job?: string | null
-          parent_task_id?: string
-          task_id?: string
+          job_id?: string | null
+          node_id?: string
+          parent_node_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "job_node_relationships_job_fkey"
-            columns: ["job"]
+            foreignKeyName: "job_node_relationships_job_id_fkey"
+            columns: ["job_id"]
             referencedRelation: "job"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "job_node_relationships_parent_task_id_fkey"
-            columns: ["parent_task_id"]
+            foreignKeyName: "job_node_relationships_node_id_fkey"
+            columns: ["node_id"]
             referencedRelation: "job_node"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "job_node_relationships_task_id_fkey"
-            columns: ["task_id"]
+            foreignKeyName: "job_node_relationships_parent_node_id_fkey"
+            columns: ["parent_node_id"]
             referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node_request: {
+        Row: {
+          created_at: string
+          job_id: string
+          node_id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          job_id: string
+          node_id: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          job_id?: string
+          node_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_request_job_id_fkey"
+            columns: ["job_id"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_request_node_id_fkey"
+            columns: ["node_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_request_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_request_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
             referencedColumns: ["id"]
           }
         ]
@@ -448,6 +494,31 @@ export interface Database {
           }
         ]
       }
+      org_rate_limit_tracker: {
+        Row: {
+          created_at: string | null
+          id: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_rate_limit_tracker_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       organization: {
         Row: {
           color: string
@@ -459,10 +530,6 @@ export interface Database {
           name: string
           owner: string
           soft_delete: boolean
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          subscription_status: string | null
-          tier: string | null
         }
         Insert: {
           color?: string
@@ -474,10 +541,6 @@ export interface Database {
           name: string
           owner: string
           soft_delete?: boolean
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          subscription_status?: string | null
-          tier?: string | null
         }
         Update: {
           color?: string
@@ -489,10 +552,6 @@ export interface Database {
           name?: string
           owner?: string
           soft_delete?: boolean
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          subscription_status?: string | null
-          tier?: string | null
         }
         Relationships: [
           {
