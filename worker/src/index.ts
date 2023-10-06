@@ -1,13 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import {
-  RequestResponseQueuePayload,
   insertIntoRequest,
   insertIntoResponse,
 } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
+
+import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -33,6 +34,7 @@ export interface Env {
   LOOPS_API_KEY: string;
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
+  RATE_LIMITER: DurableObjectNamespace;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -162,3 +164,4 @@ function handleError(e: any): Response {
     }
   );
 }
+export { AtomicRateLimiter };

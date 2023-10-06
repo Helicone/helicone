@@ -1,6 +1,11 @@
 import { Env, hash } from "..";
 
-async function getCacheKey(env: Env): Promise<CryptoKey> {
+export interface SecureCacheEnv {
+  SECURE_CACHE: Env["SECURE_CACHE"];
+  REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
+}
+
+async function getCacheKey(env: SecureCacheEnv): Promise<CryptoKey> {
   // Convert the hexadecimal key to a byte array
   const keyBytes = Buffer.from(env.REQUEST_CACHE_KEY, "hex");
 
@@ -12,7 +17,7 @@ async function getCacheKey(env: Env): Promise<CryptoKey> {
 
 export async function encrypt(
   text: string,
-  env: Env
+  env: SecureCacheEnv
 ): Promise<{ iv: string; content: string }> {
   const key = getCacheKey(env);
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -38,7 +43,7 @@ export async function decrypt(
     iv: string;
     content: string;
   },
-  env: Env
+  env: SecureCacheEnv
 ): Promise<string> {
   const key = getCacheKey(env);
   const iv = Buffer.from(encrypted.iv, "hex");
@@ -59,7 +64,7 @@ export async function decrypt(
 export async function storeInCache(
   key: string,
   value: string,
-  env: Env
+  env: SecureCacheEnv
 ): Promise<void> {
   const encrypted = await encrypt(value, env);
   await env.SECURE_CACHE.put(await hash(key), JSON.stringify(encrypted), {
@@ -69,11 +74,12 @@ export async function storeInCache(
 
 export async function getFromCache(
   key: string,
-  env: Env
+  env: SecureCacheEnv
 ): Promise<string | null> {
   const encrypted = await env.SECURE_CACHE.get(await hash(key));
   if (!encrypted) {
     return null;
   }
+
   return decrypt(JSON.parse(encrypted), env);
 }
