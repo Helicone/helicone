@@ -327,7 +327,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           <>
             <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-12 text-gray-900 gap-4">
               {/* Combine the requests and error into one graph */}
-              <div className="col-span-2 lg:col-span-12 h-full">
+              <div className="col-span-2 lg:col-span-6 h-full">
                 <MainGraph
                   isLoading={overTimeData.requests.isLoading}
                   dataOverTime={
@@ -382,7 +382,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   }
                 />
               </div>
-              <div className="col-span-2 lg:col-span-6 h-full">
+              <div className="col-span-2 lg:col-span-4 h-full">
                 <MainGraph
                   isLoading={overTimeData.latency.isLoading}
                   dataOverTime={
@@ -401,7 +401,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   labelFormatter={(value) => `${parseInt(value).toFixed(0)} ms`}
                 />
               </div>
-              <div className="col-span-2 lg:col-span-6 h-full">
+              <div className="col-span-2 lg:col-span-4 h-full">
                 <MainGraph
                   isLoading={overTimeData.users.isLoading}
                   dataOverTime={
@@ -417,7 +417,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   type={"bar"}
                 />
               </div>
-              <div className="col-span-2 lg:col-span-6 h-full">
+              <div className="col-span-2 lg:col-span-4 h-full">
                 <MainGraph
                   isLoading={overTimeData.feedback.isLoading}
                   doubleLineOverTime={combinePositiveAndNegativeFeedback()}
