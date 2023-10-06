@@ -9,9 +9,12 @@
  *
  */
 export class AtomicRateLimiter {
-  constructor(private state: DurableObjectState, env: Env) {}
+  constructor(private state: DurableObjectState) {
+    console.log("AtomicRateLimiter created");
+  }
 
   async fetch(request: Request) {
+    return new Response("Hello world");
     const { windowSizeSeconds, maxCount } = await request.json<{
       windowSizeSeconds: number;
       maxCount: number;

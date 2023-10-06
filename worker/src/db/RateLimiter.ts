@@ -8,10 +8,20 @@ export class RateLimiter {
   ) {}
 
   async checkRateLimit() {
-    const rateLimiterId = this.rateLimiter.idFromName(
+    console.log(
+      "Checking rate limit",
+      this.rateLimiter,
       this.authParams.organizationId
     );
+    const rateLimiterId = this.rateLimiter.idFromName("hello");
+    console.log("Rate limiter id", rateLimiterId);
     const rateLimiter = this.rateLimiter.get(rateLimiterId);
+    console.log(
+      "Rate limiterz",
+      rateLimiter,
+      rateLimiter.name,
+      rateLimiter.id.name
+    );
 
     const rateLimitRes = await rateLimiter.fetch("/", {
       method: "POST",

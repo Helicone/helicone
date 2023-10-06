@@ -129,6 +129,8 @@ export class DBWrapper {
           this.supabaseClient,
           this.auth.heliconeApiKeyAuthHash
         );
+
+    console.log("Auth params", authParams);
     if (authParams.error === null) {
       await storeInCache(
         cacheKey,

@@ -8,8 +8,9 @@ compatibility_flags = [
 logpush = true
 node_compat = true
 
-[durable_objects]
-bindings = [{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }]
+durable_objects.bindings = [
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
+]
 
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },

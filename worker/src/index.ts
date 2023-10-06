@@ -9,7 +9,6 @@ import { buildRouter } from "./routers/routerFactory";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
-export { AtomicRateLimiter };
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -165,3 +164,4 @@ function handleError(e: any): Response {
     }
   );
 }
+export { AtomicRateLimiter };

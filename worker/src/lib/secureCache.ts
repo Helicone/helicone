@@ -80,5 +80,6 @@ export async function getFromCache(
   if (!encrypted) {
     return null;
   }
+
   return decrypt(JSON.parse(encrypted), env);
 }
