@@ -28,13 +28,11 @@ interface OrgDropdownProps {}
 export default function OrgDropdown(props: OrgDropdownProps) {
   const orgContext = useOrg();
   const user = useUser();
-  const { userSettings } = useUserSettings(user?.id || "");
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
 
   const org = useOrg();
-  const { setNotification } = useNotification();
   const [addOpen, setAddOpen] = useState(false);
 
   const ownedOrgs = orgContext?.allOrgs.filter((org) => org.owner === user?.id);
@@ -93,7 +91,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 mt-2 w-56 z-40 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-200 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute left-0 mt-2 w-[17rem] z-50 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-300 shadow-2xl">
             <p className="text-gray-900 text-sm p-3 w-full truncate">
               {user?.email}
             </p>
@@ -123,10 +121,14 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                             {icon && (
                               <icon.icon className="h-4 w-4 text-gray-500" />
                             )}
-
-                            <p className="w-32 text-left truncate">
-                              {org.name}
-                            </p>
+                            <div className="flex flex-row space-x-1">
+                              <p className="w-full max-w-[10rem] text-left truncate">
+                                {org.name}
+                              </p>
+                              <span className="text-sky-500">
+                                {org.tier === "pro" && "(Pro)"}
+                              </span>
+                            </div>
                           </div>
                           {org.id === orgContext?.currentOrg.id && (
                             <CheckIcon className="h-4 w-4 text-sky-500" />
