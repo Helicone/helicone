@@ -21,6 +21,8 @@ import {
 } from "@heroicons/react/24/solid";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import Cookies from "js-cookie";
+import { updateRequestFeedback } from "../../../services/lib/requests";
+import useNotification from "../../shared/notification/useNotification";
 
 function getPathName(url: string) {
   try {
@@ -47,7 +49,7 @@ export function RequestView(props: {
     displayPreview = true,
   } = props;
   const [mode, setMode] = useState<"pretty" | "json">("pretty");
-
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [requestFeedback, setRequestFeedback] = useState<{
     createdAt: string | null;
     id: string | null;
@@ -55,6 +57,7 @@ export function RequestView(props: {
   }>(request.feedback);
 
   const router = useRouter();
+  const { setNotification } = useNotification();
 
   // set the mode to pretty if the drawer closes, also clear the requestId
   useEffect(() => {
@@ -63,7 +66,26 @@ export function RequestView(props: {
     }
   }, [open, router]);
 
-  console.log("basePath", BASE_PATH);
+  const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
+    setIsFeedbackLoading(true);
+    updateRequestFeedback(requestId, rating)
+      .then((res) => {
+        if (res && res.status === 200) {
+          setRequestFeedback({
+            ...requestFeedback,
+            rating: rating,
+          });
+          setNotification("Feedback submitted", "success");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setNotification("Error submitting feedback", "error");
+      })
+      .finally(() => {
+        setIsFeedbackLoading(false);
+      });
+  };
 
   return (
     <div className="flex flex-col h-full space-y-8">
@@ -185,34 +207,7 @@ export function RequestView(props: {
                     return;
                   }
 
-                  // get the cookie
-                  const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-                  if (!authFromCookie) {
-                    console.error("No auth token found in cookie");
-                    return;
-                  }
-                  const decodedCookie = decodeURIComponent(authFromCookie);
-                  const parsedCookie = JSON.parse(decodedCookie);
-                  const jwtToken = parsedCookie[0];
-
-                  fetch(`${BASE_PATH}/feedback`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      "helicone-jwt": jwtToken,
-                    },
-                    body: JSON.stringify({
-                      "helicone-id": request.id,
-                      rating: true,
-                    }),
-                  }).then((res) => {
-                    if (res.status === 200) {
-                      setRequestFeedback({
-                        ...requestFeedback,
-                        rating: true,
-                      });
-                    }
-                  });
+                  updateFeedbackHandler(request.id, true);
                 }}
               >
                 {requestFeedback.rating === true ? (
@@ -226,7 +221,8 @@ export function RequestView(props: {
                   if (requestFeedback.rating === false) {
                     return;
                   }
-                  // Send feedback and update the rating to false
+
+                  updateFeedbackHandler(request.id, false);
                 }}
               >
                 {requestFeedback.rating === false ? (
