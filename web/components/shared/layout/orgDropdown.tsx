@@ -166,9 +166,14 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                             {icon && (
                               <icon.icon className="h-4 w-4 text-gray-500" />
                             )}
-                            <p className="w-32 text-left truncate">
-                              {org.name}
-                            </p>
+                            <div className="flex flex-row space-x-1">
+                              <p className="w-full max-w-[10rem] text-left truncate">
+                                {org.name}
+                              </p>
+                              <span className="text-sky-500">
+                                {org.tier === "pro" && "(Pro)"}
+                              </span>
+                            </div>
                           </div>
                           {org.id === orgContext?.currentOrg.id && (
                             <CheckIcon className="h-4 w-4 text-sky-500" />
