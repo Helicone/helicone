@@ -448,6 +448,34 @@ export interface Database {
           }
         ]
       }
+      org_rate_limit_tracker: {
+        Row: {
+          created_at: string | null
+          id: string
+          org_id: string
+          total_count: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          org_id: string
+          total_count?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          org_id?: string
+          total_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_rate_limit_tracker_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       organization: {
         Row: {
           color: string
@@ -459,6 +487,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete: boolean
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          tier: string | null
         }
         Insert: {
           color?: string
@@ -470,6 +502,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Update: {
           color?: string
@@ -481,6 +517,10 @@ export interface Database {
           name?: string
           owner?: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Relationships: [
           {
