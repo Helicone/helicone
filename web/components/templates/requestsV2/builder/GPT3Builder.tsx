@@ -17,7 +17,10 @@ class GPT3Builder extends AbstractRequestBuilder {
         }
         // successful response, check for choices
         if (this.response.response_body?.choices) {
-          return this.response.response_body?.choices[0].text;
+          return this.response.response_body?.choices &&
+            this.response.response_body?.choices[0]
+            ? this.response.response_body?.choices[0].text
+            : "";
         }
       } else if (statusCode === 0 || statusCode === null) {
         // pending response
@@ -29,7 +32,7 @@ class GPT3Builder extends AbstractRequestBuilder {
     };
 
     return {
-      requestText: this.response.request_body.prompt || "Invalid Prompt",
+      requestText: this.response.request_body.prompt || "",
       responseText: getResponseText(),
       render:
         this.response.response_status === 0 ||
@@ -40,9 +43,12 @@ class GPT3Builder extends AbstractRequestBuilder {
             request={this.response.request_body.prompt}
             response={{
               title: "Response",
-              text: this.response.response_body?.choices
-                ? this.response.response_body?.choices[0].text
-                : "",
+              text:
+                this.response.response_body?.choices &&
+                this.response.response_body?.choices[0]
+                  ? this.response.response_body?.choices[0].text ||
+                    this.response.response_body?.choices[0].message
+                  : "",
             }}
           />
         ) : (

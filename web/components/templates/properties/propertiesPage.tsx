@@ -17,9 +17,23 @@ import PropertyCard from "./propertyCard";
 import { ArrowPathIcon, TagIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 const PropertiesPage = (props: {}) => {
-  const [interval, setInterval] = useState<TimeInterval>("all");
+  const searchParams = useSearchParams();
+
+  const getInterval = () => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
+
+  const [interval, setInterval] = useState<TimeInterval>(
+    getInterval() as TimeInterval
+  );
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
@@ -70,6 +84,7 @@ const PropertiesPage = (props: {}) => {
           <ThemedTableHeader
             isFetching={false}
             timeFilter={{
+              currentTimeFilter: timeFilter,
               customTimeFilter: true,
               timeFilterOptions: [
                 { key: "24h", value: "Today" },

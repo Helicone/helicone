@@ -44,11 +44,21 @@ export type DateOperators = {
   lte?: InputMaybe<Scalars["String"]>;
 };
 
+export type Feedback = {
+  __typename?: "Feedback";
+  rating: Scalars["Boolean"];
+};
+
+export type FeedbackFilter = {
+  rating?: InputMaybe<Scalars["Boolean"]>;
+};
+
 export type HeliconeRequest = {
   __typename?: "HeliconeRequest";
   cacheHits?: Maybe<Scalars["Int"]>;
   costUSD: Scalars["Float"];
   createdAt: Scalars["String"];
+  feedback?: Maybe<Feedback>;
   id: Scalars["ID"];
   latency?: Maybe<Scalars["Float"]>;
   model: Scalars["String"];
@@ -63,6 +73,7 @@ export type HeliconeRequest = {
 
 export type HeliconeRequestFilter = {
   createdAt?: InputMaybe<DateOperators>;
+  feedback?: InputMaybe<FeedbackFilter>;
   id?: InputMaybe<NumberOperators>;
   prompt?: InputMaybe<TextOperators>;
   property?: InputMaybe<PropertyFilter>;

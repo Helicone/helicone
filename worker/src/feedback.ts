@@ -5,6 +5,7 @@ import { Database } from "../supabase/database.types";
 import { Result } from "./results";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
+import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 
 const FEEDBACK_LATEST_CREATED_AT = "feedback-latest-created-at";
 
@@ -78,7 +79,7 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     });
   }
 
-  const heliconeAuth = request.heliconeHeaders.heliconeAuth;
+  const heliconeAuth = request.heliconeHeaders.heliconeAuthV2;
   if (!heliconeAuth) {
     return new Response("Authentication required.", { status: 401 });
   }
@@ -114,7 +115,7 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
   const { data: isAuthenticated, error: authenticationError } =
     await isApiKeyAuthenticated(
       dbClient,
-      requestData.helicone_api_key_id,
+      requestData.helicone_org_id ?? "",
       heliconeAuth
     );
 
@@ -137,35 +138,73 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
       message: "Feedback added successfully.",
       helicone_id: heliconeId,
     }),
-    { status: 200 }
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      },
+    }
   );
 }
 
 export async function isApiKeyAuthenticated(
   dbClient: SupabaseClient<Database>,
-  heliconeApiKeyId: number,
-  heliconeAuth: string
+  orgId: string,
+  heliconeAuth: IHeliconeHeaders["heliconeAuthV2"]
 ): Promise<Result<boolean, string>> {
-  const { data: apiKey, error: apiKeyError } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("id", heliconeApiKeyId)
-    .single();
+  if (heliconeAuth?._type === "bearer") {
+    const heliconeApiKeyHash = await hash(`Bearer ${heliconeAuth.token}`);
+    const { data: apiKey, error: apiKeyError } = await dbClient
+      .from("helicone_api_keys")
+      .select("*")
+      .eq("organization_id", orgId)
+      .eq("api_key_hash", heliconeApiKeyHash);
 
-  if (apiKeyError || !apiKey) {
-    console.error("Error fetching api key:", apiKeyError.message);
-    return { error: apiKeyError.message, data: null };
+    if (apiKeyError || !apiKey) {
+      console.error("Error fetching api key:", apiKeyError.message);
+      return { error: apiKeyError.message, data: null };
+    }
+
+    if (apiKey.length === 0) {
+      return { error: "Invalid authentication.", data: null };
+    }
+
+    return { error: null, data: true };
+  } else if (heliconeAuth?._type === "jwt") {
+    const user = await dbClient.auth.getUser(heliconeAuth.token);
+    if (user.error) {
+      console.error("Error fetching user:", user.error.message);
+      return { error: user.error.message, data: null };
+    }
+    const isOwner = await dbClient
+      .from("organization")
+      .select("*")
+      .eq("id", orgId)
+      .eq("owner", user.data.user.id);
+    if (isOwner.error) {
+      console.error("Error fetching user:", isOwner.error.message);
+      return { error: isOwner.error.message, data: null };
+    }
+    if (isOwner.data.length > 0) {
+      return { error: null, data: true };
+    }
+    const isMemeber = await dbClient
+      .from("organization_member")
+      .select("*")
+      .eq("member", user.data.user.id)
+      .eq("organization", orgId);
+    if (isMemeber.error) {
+      console.error("Error fetching user:", isMemeber.error.message);
+      return { error: isMemeber.error.message, data: null };
+    }
+    if (isMemeber.data.length > 0) {
+      return { error: null, data: true };
+    }
   }
 
-  const heliconeApiKey = heliconeAuth.replace("Bearer ", "").trim();
-  const heliconeApiKeyHash = await hash(`Bearer ${heliconeApiKey}`);
-
-  // Check if the apiKeyHash matches the helicone_api_key_id's api_key_hash
-  if (heliconeApiKeyHash !== apiKey.api_key_hash) {
-    return { error: "Invalid authentication.", data: null };
-  }
-
-  return { error: null, data: true };
+  return { error: "Invalid authentication.", data: null };
 }
 
 export async function upsertFeedbackPostgres(

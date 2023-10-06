@@ -1,0 +1,118 @@
+---
+title: "Self Deploy"
+description: "A quick start guide to get you up and running with a self-hosted instance of Helicone."
+---
+
+At Helicone we believe that open-source software makes the world a better place. We are committed to open-source and we made a guide to make it easy for you to deploy your own instance of Helicone.
+
+## Running locally
+
+Running Helicone locally should be super easy. Just a few scripts.
+
+Please clone our Repo and follow the instructions below.
+
+```bash
+git clone git@github.com:Helicone/helicone.git
+cd helicone
+```
+
+## Step 1 - Install all the things
+
+Requirements
+
+- Docker
+
+### Install [Supabase](https://supabase.com/docs/guides/cli)
+
+```bash
+brew install supabase/tap/supabase
+```
+
+### Install Wrangler and Yarn
+
+```bash
+nvm install 18.11.0
+nvm use 18.11.0
+npm install -g wrangler
+npm install -g yarn
+```
+
+## Step 2 - Start all the services
+
+### Start Supabase
+
+```bash
+supabase start
+```
+
+### Start Clickhouse
+
+```bash
+# This will start clickhouse locally
+python3 clickhouse/ch_hcone.py --start
+```
+
+### Start Workers
+
+```bash
+# Install worker dependencies
+cd worker
+yarn
+```
+
+```bash
+# Start OpenAI Proxy
+wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787
+```
+
+```bash
+# Start API Service
+wrangler dev --local --var WORKER_TYPE:HELICONE_API --port 8788
+```
+
+```bash
+# We have a cron job that runs every 1 minute that is required for feedback
+# to work. This cron job is not started by default. We will add a service
+# for this soon. Please contact us if you want to us Feedback on self deploy
+```
+
+### Start Web
+
+```bash
+cd web
+yarn
+yarn dev
+```
+
+## Step 3 - Setup your instance
+
+You are done!
+
+```bash
+curl --request POST \
+  --url http://127.0.0.1:8787/v1/chat/completions \
+  --header 'Authorization: Bearer <OPENAI_KEY>' \
+  --header 'Helicone-Auth: Bearer sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa' \
+  --header 'Content-Type: application/json' \
+  --header 'OpenAI-Organization: ' \
+  --header 'helicone-property-hello: world' \
+  --data '{
+    "model": "gpt-3.5-turbo-0613",
+    "messages": [
+        {
+            "role": "system",
+            "content": "generate a prompt for stable diffusion using this article.\n The prompt should instruct the image generation model to generate a image that would be suitable for the main image of the article.\n Therefore, the image should be relevant to the article, while being photorealistic, and safe for work.\n Only include the prompt, and do not include a introduction to the prompt. The entire prompt should be 90 characters or less. Make it as relevant to the image as possible, but do not include people or faces in the prompt."
+        }
+    ]
+}'
+```
+
+You can login to Helicone at http://localhost:3000
+with the following credentials:
+
+User: `test@helicone.ai`
+Password: `password`
+
+Change the Org to `Organization for Test` and then you should be able to see your requests!
+
+Please do not hesitate to reach out on discord if you have any questions.

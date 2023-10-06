@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Dialog, Menu, Transition } from "@headlessui/react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   BookOpenIcon,
   BuildingOfficeIcon,
-  ChartBarIcon,
   CircleStackIcon,
   CloudArrowUpIcon,
   CubeTransparentIcon,
@@ -38,6 +37,7 @@ import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -56,7 +56,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const tier = org?.currentOrg.tier;
 
   const [open, setOpen] = useState(false);
-  const { hasFlag } = useFeatureFlags("webhook_beta");
+  const { hasFlag } = useFeatureFlags("webhook_beta", org?.currentOrg.id || "");
 
   const navigation = [
     {
@@ -105,16 +105,27 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const accountNav = [
     {
-      name: "Usage",
-      href: "/usage",
-      icon: ChartBarIcon,
-      current: pathname.includes("/usage"),
-    },
-    {
       name: "Organization",
       href: "/organization",
       icon: BuildingOfficeIcon,
       current: pathname.includes("/organization"),
+      children: [
+        {
+          name: "Settings",
+          href: "/organization/settings",
+          current: pathname.includes("/settings"),
+        },
+        {
+          name: "Usage",
+          href: "/organization/usage",
+          current: pathname.includes("/usage"),
+        },
+        {
+          name: "Members",
+          href: "/organization/members",
+          current: pathname.includes("/members"),
+        },
+      ],
     },
     {
       name: "Keys",
@@ -243,30 +254,88 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
                             Account
                           </p>
-                          {accountNav.map((item) => {
-                            return (
-                              <Link
-                                key={item.name}
-                                href={item.href}
-                                className={clsx(
-                                  item.current
-                                    ? "bg-gray-200 text-black"
-                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md"
-                                )}
-                              >
-                                <item.icon
+                          {accountNav.map((item, i) => {
+                            if (!item.children) {
+                              return (
+                                <Link
+                                  key={item.name}
+                                  href={item.href}
                                   className={clsx(
                                     item.current
-                                      ? "text-black"
-                                      : "text-gray-600 group-hover:text-gray-900",
-                                    "mr-3 flex-shrink-0 h-5 w-5"
+                                      ? "bg-gray-200 text-black"
+                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md"
                                   )}
-                                  aria-hidden="true"
-                                />
-                                {item.name}
-                              </Link>
-                            );
+                                >
+                                  <item.icon
+                                    className={clsx(
+                                      item.current
+                                        ? "text-black"
+                                        : "text-gray-600 group-hover:text-gray-900",
+                                      "mr-3 flex-shrink-0 h-5 w-5"
+                                    )}
+                                    aria-hidden="true"
+                                  />
+                                  {item.name}
+                                </Link>
+                              );
+                            } else {
+                              return (
+                                <Disclosure defaultOpen={item.current} key={i}>
+                                  <Disclosure.Button
+                                    className={clsx(
+                                      "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                      "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full"
+                                    )}
+                                  >
+                                    {({ open }) => (
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center">
+                                          <item.icon
+                                            className={clsx(
+                                              item.current
+                                                ? "text-black"
+                                                : "text-gray-600 group-hover:text-gray-900",
+                                              "mr-3 flex-shrink-0 h-5 w-5"
+                                            )}
+                                            aria-hidden="true"
+                                          />
+                                          {item.name}
+                                        </div>
+                                        <ChevronRightIcon
+                                          className={clsx(
+                                            open ? "rotate-90 transform" : "",
+                                            "h-4 w-4"
+                                          )}
+                                        />
+                                      </div>
+                                    )}
+                                  </Disclosure.Button>
+                                  <Disclosure.Panel>
+                                    <ul className="pl-4 space-y-0.5 flex flex-col">
+                                      {item.children.map((subItem, idx) => {
+                                        return (
+                                          <li key={idx}>
+                                            <Link
+                                              key={subItem.name}
+                                              href={subItem.href}
+                                              className={clsx(
+                                                subItem.current
+                                                  ? "bg-gray-200 text-black"
+                                                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                                "pl-4 group flex items-center pr-2 py-2 text-md font-medium rounded-md"
+                                              )}
+                                            >
+                                              {subItem.name}
+                                            </Link>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  </Disclosure.Panel>
+                                </Disclosure>
+                              );
+                            }
                           })}
                         </nav>
                       </div>
@@ -319,11 +388,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </Transition.Root>
 
             {/* Static sidebar for desktop */}
-            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col">
+            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col z-10">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
-                  <div className="flex flex-col">
+                  <div className="flex flex-col absolute">
                     <OrgDropdown />
                   </div>
                 </div>
@@ -357,30 +426,88 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
                       Account
                     </p>
-                    {accountNav.map((item) => {
-                      return (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={clsx(
-                            item.current
-                              ? "bg-gray-200 text-black"
-                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                            "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                          )}
-                        >
-                          <item.icon
+                    {accountNav.map((item, i) => {
+                      if (!item.children) {
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
                             className={clsx(
                               item.current
-                                ? "text-black"
-                                : "text-gray-600 group-hover:text-gray-900",
-                              "mr-3 flex-shrink-0 h-5 w-5"
+                                ? "bg-gray-200 text-black"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                              "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                             )}
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </Link>
-                      );
+                          >
+                            <item.icon
+                              className={clsx(
+                                item.current
+                                  ? "text-black"
+                                  : "text-gray-600 group-hover:text-gray-900",
+                                "mr-3 flex-shrink-0 h-5 w-5"
+                              )}
+                              aria-hidden="true"
+                            />
+                            {item.name}
+                          </Link>
+                        );
+                      } else {
+                        return (
+                          <Disclosure defaultOpen={item.current} key={i}>
+                            <Disclosure.Button
+                              className={clsx(
+                                "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
+                              )}
+                            >
+                              {({ open }) => (
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center">
+                                    <item.icon
+                                      className={clsx(
+                                        item.current
+                                          ? "text-black"
+                                          : "text-gray-600 group-hover:text-gray-900",
+                                        "mr-3 flex-shrink-0 h-5 w-5"
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    {item.name}
+                                  </div>
+                                  <ChevronRightIcon
+                                    className={clsx(
+                                      open ? "rotate-90 transform" : "",
+                                      "h-4 w-4"
+                                    )}
+                                  />
+                                </div>
+                              )}
+                            </Disclosure.Button>
+                            <Disclosure.Panel>
+                              <ul className="pl-4 space-y-0.5 flex flex-col">
+                                {item.children.map((subItem, idx) => {
+                                  return (
+                                    <li key={idx}>
+                                      <Link
+                                        key={subItem.name}
+                                        href={subItem.href}
+                                        className={clsx(
+                                          subItem.current
+                                            ? "bg-gray-200 text-black"
+                                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                          "group flex items-center pr-2 pl-4 py-2 text-sm font-medium rounded-md"
+                                        )}
+                                      >
+                                        {subItem.name}
+                                      </Link>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </Disclosure.Panel>
+                          </Disclosure>
+                        );
+                      }
                     })}
                   </nav>
                 </div>

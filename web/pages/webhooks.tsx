@@ -4,7 +4,6 @@ import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import UsagePage from "../components/templates/usage/usagePage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { stripeServer } from "../utlis/stripeServer";
 import {

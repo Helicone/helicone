@@ -2,6 +2,10 @@ type Nullable<T> = T | null;
 
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
+  heliconeAuthV2: Nullable<{
+    _type: "jwt" | "bearer";
+    token: string;
+  }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: {
     streamForceFormat: boolean;
@@ -30,6 +34,10 @@ export interface IHeliconeHeaders {
 export class HeliconeHeaders implements IHeliconeHeaders {
   heliconeProperties: Record<string, string>;
   heliconeAuth: Nullable<string>;
+  heliconeAuthV2: Nullable<{
+    _type: "jwt" | "bearer";
+    token: string;
+  }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
   retryHeaders: Nullable<{
@@ -51,6 +59,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
     this.heliconeAuth = heliconeHeaders.heliconeAuth;
+    this.heliconeAuthV2 = heliconeHeaders.heliconeAuthV2;
     this.rateLimitPolicy = heliconeHeaders.rateLimitPolicy;
     this.featureFlags = heliconeHeaders.featureFlags;
     this.retryHeaders = heliconeHeaders.retryHeaders;
@@ -65,9 +74,31 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.nodeId = heliconeHeaders.nodeId;
   }
 
+  private getHeliconeAuthV2(): Nullable<{
+    _type: "jwt" | "bearer";
+    token: string;
+  }> {
+    const heliconeAuth = this.headers.get("helicone-auth");
+    const heliconeAuthJWT = this.headers.get("helicone-jwt");
+    if (heliconeAuth) {
+      return {
+        _type: "bearer",
+        token: heliconeAuth.replace("Bearer ", ""),
+      };
+    }
+    if (heliconeAuthJWT) {
+      return {
+        _type: "jwt",
+        token: heliconeAuthJWT,
+      };
+    }
+    return null;
+  }
+
   private getHeliconeHeaders(): IHeliconeHeaders {
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
+      heliconeAuthV2: this.getHeliconeAuthV2(),
       featureFlags: this.getHeliconeFeatureFlags(),
       rateLimitPolicy: this.headers.get("Helicone-RateLimit-Policy") ?? null,
       openaiBaseUrl: this.headers.get("Helicone-OpenAI-Api-Base") ?? null,

@@ -27,6 +27,22 @@ const filterInputToFilterLeaf: {
     filter: HeliconeRequestFilter[key]
   ) => FilterLeaf | undefined;
 } = {
+  feedback: (feedback) => {
+    if (
+      feedback === undefined ||
+      feedback === null ||
+      feedback.rating === null
+    ) {
+      return undefined;
+    }
+    return {
+      feedback: {
+        rating: {
+          equals: feedback.rating,
+        },
+      },
+    };
+  },
   requestId: (requestId) => {
     if (requestId === undefined || requestId === null) {
       return undefined;
@@ -164,5 +180,10 @@ export async function heliconeRequest(
     requestBody: r.request_body,
     responseBody: r.response_body,
     latency: r.delay_ms,
+    feedback: r.feedback_rating
+      ? {
+          rating: r.feedback_rating,
+        }
+      : undefined,
   }));
 }

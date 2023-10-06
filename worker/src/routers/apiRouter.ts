@@ -11,6 +11,7 @@ import { Run, isValidStatus, validateRun } from "../lib/models/Runs";
 import { Database } from "../../supabase/database.types";
 import { SupabaseWrapper } from "../lib/db/supabase";
 import { Result } from "../results";
+import { DBWrapper } from "../db/DBWrapper";
 import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
@@ -115,6 +116,7 @@ async function logAsync(
     {
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      dbWrapper: new DBWrapper(env, loggable.auth()),
       queue: new InsertQueue(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
         env.FALLBACK_QUEUE,

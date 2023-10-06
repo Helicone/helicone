@@ -76,16 +76,6 @@ export interface ResponsePayload {
   response: Database["public"]["Tables"]["response"]["Insert"];
 }
 
-export type RequestResponseQueuePayload =
-  | {
-      _type: "request";
-      payload: RequestPayload;
-    }
-  | {
-      _type: "response";
-      payload: ResponsePayload;
-    };
-
 export class InsertQueue {
   constructor(
     private database: SupabaseClient<Database>,

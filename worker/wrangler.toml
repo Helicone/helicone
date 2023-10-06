@@ -8,16 +8,16 @@ compatibility_flags = [
 logpush = true
 node_compat = true
 
+durable_objects.bindings = [
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
+]
+
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
-	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
-]
-
-queues.producers = [
-	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },
+	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
 ]
 
 [vars]
@@ -30,6 +30,7 @@ PROVIDER = "OPENAI"
 TOKEN_COUNT_URL = "https://tokens.helicone.ai/anthropic/count_tokens"
 WORKER_TYPE = "OPENAI_PROXY"
 VAULT_ENABLED = "true"
+REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 
 [triggers]
 crons = ["*/1 * * * *"]
@@ -41,12 +42,18 @@ routes = [
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
+
+durable_objects.bindings = [
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
+]
+
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
+	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
 ]
 
 [env.production.triggers]
@@ -70,12 +77,18 @@ routes = [
 	{ pattern = "anthropic_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
+
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
+	{ binding = "SECURE_CACHE", id = "23d7b3cb44254e0eb0b824a310abe155" },
+]
+
+durable_objects.bindings = [
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
 ]
 
 [env.production_staging.triggers]
@@ -90,3 +103,8 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 CLICKHOUSE_USER = "default"
 VAULT_ENABLED = "true"
+
+
+[[migrations]]
+tag = "v1"
+new_classes = ["AtomicRateLimiter"]

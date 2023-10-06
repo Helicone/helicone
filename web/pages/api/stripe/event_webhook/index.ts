@@ -2,17 +2,8 @@ import { Database } from "./../../../../../supabase/database.types";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
-import { IncomingMessage } from "http";
-import { supabaseServer } from "../../../../lib/supabaseServer";
-import { dbExecute } from "../../../../lib/api/db/dbExecute";
-import { resultMap } from "../../../../lib/result";
 
-// This is necessary to handle Stripe webhook event types
-interface StripeWebhookEvent extends Stripe.Event {
-  data: {
-    object: Stripe.Subscription;
-  };
-}
+import { supabaseServer } from "../../../../lib/supabaseServer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2022-11-15",
@@ -23,78 +14,84 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const buf = await buffer(req);
     const sig = req.headers["stripe-signature"]!;
 
-    let event: StripeWebhookEvent;
+    let event: Stripe.Event;
 
     try {
       event = stripe.webhooks.constructEvent(
         buf.toString(),
         sig,
         process.env.STRIPE_WEBHOOK_SECRET!
-      ) as StripeWebhookEvent;
+      ) as Stripe.Event;
     } catch (err) {
       console.log(`❌ Error message: ${err}`);
       res.status(400).send(`Webhook Error: ${err}`);
       return;
     }
 
-    console.log("✅ Success:", event.id);
+    // Handle the event
+    switch (event.type) {
+      case "checkout.session.completed":
+        // The user has completed the checkout process and has been charged.
 
-    if (
-      event.type === "customer.subscription.updated" ||
-      event.type === "customer.subscription.created"
-    ) {
-      const subscription = event.data.object;
+        const checkoutCompleted = event.data.object as Stripe.Checkout.Session;
 
-      console.log("subscription", subscription);
+        const session = await stripe.checkout.sessions.retrieve(
+          checkoutCompleted.id
+        );
 
-      // Fetch the customer
-      const customer = await stripe.customers.retrieve(
-        subscription.customer as string
-      );
+        // Assuming you passed the organization's ID in the `metadata` when creating the checkout session:
+        const orgId = session.metadata?.orgId;
 
-      console.log("customer", customer);
+        const { data, error } = await supabaseServer
+          .from("organization")
+          .update({
+            subscription_status: "active",
+            stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
+            tier: "pro",
+          })
+          .eq("id", orgId);
 
-      // Now you have the customer's email address
-      const castedCustomer = customer as any;
-      const email = castedCustomer.email ? castedCustomer.email : null;
+        break;
 
-      console.log("email", email);
+      case "customer.subscription.updated":
+        // Subscription details, like billing details or status, have changed.
+        const subscriptionUpdated = event.data.object as Stripe.Subscription;
 
-      // get the user id
-      const { data: idData, error: idError } = resultMap(
-        await dbExecute<{
-          id: string;
-        }>("SELECT id FROM auth.users WHERE email = $1", [email]),
-        (d) => d[0].id
-      );
+        // check to see if the sub is active
+        let status = false;
 
-      if (idError !== null) {
-        console.error(idError);
-        res.status(400).send(`Unable to find user: ${idError}`);
-        return;
-      }
+        // TODO: double check to see if this is the best way to do things
+        if (subscriptionUpdated.cancel_at === null) {
+          status = true;
+        }
 
-      // check to see if the sub is active
-      let active = false;
-      if (subscription.items.data.length > 0) {
-        active = subscription.items.data[0].plan.active;
-      }
+        // Update the organization's status based on Stripe's subscription status.
+        await supabaseServer
+          .from("organization")
+          .update({ subscription_status: status ? "active" : "pending-cancel" })
+          .eq("stripe_subscription_id", subscriptionUpdated.id);
+        break;
 
-      // make the update
-      const { error: userSettingsError } = await supabaseServer
-        .from("user_settings")
-        .update({
-          tier: active ? "pro" : "free",
-        })
-        .eq("user", idData);
+      case "customer.subscription.deleted":
+        // Subscription has been deleted, either due to non-payment or being manually canceled.
+        const subscriptionDeleted = event.data.object as Stripe.Subscription;
 
-      if (userSettingsError) {
-        console.error(userSettingsError);
-        res.status(400).send(`Unable to update user settings: ${idError}`);
-        return;
-      }
+        await supabaseServer
+          .from("organization")
+          .update({ tier: "free" })
+          .eq("stripe_subscription_id", subscriptionDeleted.id);
+
+        // Set the organization's status to 'inactive' or a similar status to indicate the subscription has ended.
+        await supabaseServer
+          .from("organization")
+          .update({ subscription_status: "inactive" })
+          .eq("stripe_subscription_id", subscriptionDeleted.id);
+        break;
+
+      default:
+        // Unexpected event type
+        return res.status(400).end();
     }
-
     res.json({ received: true });
   } else {
     res.setHeader("Allow", "POST");

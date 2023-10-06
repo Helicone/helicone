@@ -41,6 +41,11 @@ type HeliconeRequest {
   responseBody: JSON
   requestBody: JSON
   latency: Float
+  feedback: Feedback
+}
+
+type Feedback {
+  rating: Boolean!
 }
 
 input HeliconeRequestFilter {
@@ -51,6 +56,11 @@ input HeliconeRequestFilter {
   user: TextOperators
   property: PropertyFilter
   createdAt: DateOperators
+  feedback: FeedbackFilter
+}
+
+input FeedbackFilter {
+  rating: Boolean
 }
 
 input PropertyFilter {
