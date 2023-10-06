@@ -388,11 +388,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </Transition.Root>
 
             {/* Static sidebar for desktop */}
-            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col">
+            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col z-10">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
                 <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
-                  <div className="flex flex-col">
+                  <div className="flex flex-col absolute">
                     <OrgDropdown />
                   </div>
                 </div>
