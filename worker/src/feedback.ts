@@ -138,7 +138,15 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
       message: "Feedback added successfully.",
       helicone_id: heliconeId,
     }),
-    { status: 200 }
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+      },
+    }
   );
 }
 
