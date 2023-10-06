@@ -6,7 +6,7 @@ import { logInClickhouse } from "./clickhouseLog";
 import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
-import { Result, mapPostgrestErr } from "../../results";
+import { Result, err, mapPostgrestErr } from "../../results";
 import {
   consolidateTextFields,
   getUsage,
@@ -18,6 +18,7 @@ import { AsyncLogModel } from "../models/AsyncLog";
 import { InsertQueue } from "./insertQueue";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
+import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
 
 export interface DBLoggableProps {
   response: {
@@ -102,62 +103,6 @@ function getResponseBody(json: any): string {
     return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
   }
   return JSON.stringify(json);
-}
-
-async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
-): Promise<Result<AuthParams, string>> {
-  if (!heliconeApiKeyHash) {
-    return { data: null, error: "Helicone api key not found" };
-  }
-
-  const { data, error } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
-    .eq("soft_delete", false)
-    .single();
-
-  if (error !== null) {
-    return { data: null, error: error.message };
-  }
-  return {
-    data: {
-      organizationId: data?.organization_id,
-      userId: data?.user_id,
-      heliconeApiKeyId: data?.id,
-    },
-    error: null,
-  };
-}
-
-async function getHeliconeProxyKeyRow(
-  dbClient: SupabaseClient<Database>,
-  proxyKeyId: string
-): Promise<Result<AuthParams, string>> {
-  const result = await dbClient
-    .from("helicone_proxy_keys")
-    .select("org_id")
-    .eq("id", proxyKeyId)
-    .eq("soft_delete", false)
-    .single();
-
-  if (result.error || !result.data) {
-    return {
-      data: null,
-      error: result.error.message,
-    };
-  }
-
-  return {
-    data: {
-      organizationId: result.data.org_id,
-      userId: undefined,
-      heliconeApiKeyId: undefined,
-    },
-    error: null,
-  };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -452,26 +397,55 @@ export class DBLoggable {
     };
   }
 
-  async _log(
+  auth(): HeliconeAuth {
+    return this.request.heliconeProxyKeyId
+      ? {
+          heliconeProxyKeyId: this.request.heliconeProxyKeyId,
+          heliconeApiKeyAuthHash: undefined,
+        }
+      : {
+          heliconeApiKeyAuthHash: this.request.heliconeApiKeyAuthHash ?? "",
+          heliconeProxyKeyId: undefined,
+        };
+  }
+
+  async log(
     db: {
-      supabase: SupabaseClient<Database>;
+      supabase: SupabaseClient<Database>; // TODO : Deprecate
+      dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
-    const { data: authParams, error } = this.request.heliconeProxyKeyId
-      ? await getHeliconeProxyKeyRow(
-          db.supabase,
-          this.request.heliconeProxyKeyId
-        )
-      : await getHeliconeApiKeyRow(
-          db.supabase,
-          this.request.heliconeApiKeyAuthHash
-        );
-
+    const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return { data: null, error: error ?? "Helicone organization not found" };
+    }
+
+    const rateLimiter = await db.dbWrapper.getRateLimiter();
+    if (rateLimiter.error !== null) {
+      return rateLimiter;
+    }
+    const tier = await db.dbWrapper.getTier();
+
+    if (tier.error !== null) {
+      return err(tier.error);
+    }
+
+    const rateLimit = await rateLimiter.data.checkRateLimit(tier.data);
+
+    if (rateLimit.shouldLogInDB) {
+      console.log("LOGGING RATE LIMIT IN DB");
+      await db.dbWrapper.recordRateLimitHit(
+        authParams.organizationId,
+        rateLimit.rlIncrementDB
+      );
+    }
+
+    if (rateLimit.isRateLimited) {
+      console.log("RATE LIMITED");
+      return err("Rate limited");
     }
 
     const requestResult = await logRequest(
@@ -519,30 +493,5 @@ export class DBLoggable {
       data: null,
       error: null,
     };
-  }
-
-  async log(
-    db: {
-      supabase: SupabaseClient<Database>;
-      clickhouse: ClickhouseClientWrapper;
-      queue: InsertQueue;
-    },
-    rateLimitKV: KVNamespace
-  ): Promise<Result<null, string>> {
-    const res = await this._log(db, rateLimitKV);
-    if (res.error !== null) {
-      console.error("Error logging", res.error);
-      const uuid = crypto.randomUUID();
-      db.queue.responseAndResponseQueueKV.put(
-        uuid,
-        JSON.stringify({
-          _type: "dbLoggable",
-          payload: JSON.stringify(this),
-        })
-      );
-
-      db.queue.fallBackQueue.send(uuid);
-    }
-    return res;
   }
 }
