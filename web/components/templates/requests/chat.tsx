@@ -2,6 +2,8 @@ import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
   CodeBracketIcon,
+  EyeIcon,
+  EyeSlashIcon,
   UserCircleIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
@@ -240,12 +242,12 @@ export const Chat = (props: ChatProps) => {
                 )
               );
             }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+            className="hover:bg-gray-200 rounded-md -m-1 p-1 text-gray-500"
           >
             {allExpanded ? (
-              <ArrowsPointingInIcon className="h-5 w-5" />
+              <EyeSlashIcon className="h-5 w-5" />
             ) : (
-              <ArrowsPointingOutIcon className="h-5 w-5" />
+              <EyeIcon className="h-5 w-5" />
             )}
           </button>
         </Tooltip>
