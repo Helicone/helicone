@@ -42,7 +42,7 @@ export default function MainGraph(props: MainGraphProps) {
             <h3 className="text-xl font-semibold text-gray-900">{value}</h3>
           </div>
         </div>
-        <div className="h-40">
+        <div className="h-[20vh]">
           {isLoading ? (
             <div className="h-full w-full flex-col flex p-8">
               <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
