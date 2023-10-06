@@ -56,7 +56,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const tier = org?.currentOrg.tier;
 
   const [open, setOpen] = useState(false);
-  const { hasFlag } = useFeatureFlags("webhook_beta");
+  const { hasFlag } = useFeatureFlags("webhook_beta", org?.currentOrg.id || "");
 
   const navigation = [
     {

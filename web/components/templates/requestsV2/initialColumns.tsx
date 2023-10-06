@@ -153,11 +153,11 @@ export const getInitialColumns: (
       }
 
       return (
-        <span className={clsx(rating ? "text-green-700" : "text-red-700")}>
+        <span className={clsx(rating ? "text-green-500" : "text-red-500")}>
           {rating ? (
-            <HandThumbUpIcon className="h-4 w-4 inline" />
+            <HandThumbUpIcon className="h-5 w-5 inline" />
           ) : (
-            <HandThumbDownIcon className="h-4 w-4 inline" />
+            <HandThumbDownIcon className="h-5 w-5 inline" />
           )}
         </span>
       );
