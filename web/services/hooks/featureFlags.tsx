@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 
-const useFeatureFlags = (featureFlag: string) => {
+const useFeatureFlags = (featureFlag: string, orgId: string) => {
   const supabaseClient = useSupabaseClient<Database>();
   const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
-  const org = useOrg();
+
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["featureFlags", featureFlag, org?.currentOrg.id],
+    queryKey: ["featureFlags", featureFlag, orgId],
     queryFn: async (query) => {
       const currentFeatureFlag = query.queryKey[1];
       const currentOrgId = query.queryKey[2];

@@ -1,4 +1,6 @@
+import Cookies from "js-cookie";
 import { Database } from "../../supabase/database.types";
+import { SUPABASE_AUTH_TOKEN } from "../../lib/constants";
 
 export type ResponseAndRequest = Omit<
   Database["public"]["Views"]["response_and_request_rbac"]["Row"],
@@ -28,4 +30,32 @@ export type ResponseAndRequest = Omit<
     model: string;
     temperature: number;
   } | null;
+};
+
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+export const updateRequestFeedback = async (
+  requestId: string,
+  rating: boolean
+) => {
+  const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
+  if (!authFromCookie) {
+    console.error("No auth token found in cookie");
+    return;
+  }
+  const decodedCookie = decodeURIComponent(authFromCookie);
+  const parsedCookie = JSON.parse(decodedCookie);
+  const jwtToken = parsedCookie[0];
+
+  return fetch(`${BASE_PATH}/feedback`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "helicone-jwt": jwtToken,
+    },
+    body: JSON.stringify({
+      "helicone-id": requestId,
+      rating: rating,
+    }),
+  });
 };

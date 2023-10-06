@@ -38,6 +38,24 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
     }
   );
 
+  router.options(
+    "/v1/feedback",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST",
+          "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
+        },
+      });
+    }
+  );
+
   // Call worker specific router AFTER the generic router
   WORKER_MAP[provider](router);
 

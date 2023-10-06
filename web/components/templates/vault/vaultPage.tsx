@@ -16,6 +16,7 @@ import CreateProviderKeyModal from "./createProviderKeyModal";
 import CreateProxyKeyModal from "./createProxyKeyModal";
 import { LimitCell } from "./limitsCell";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 const VaultPage = () => {
   const [deleteProviderOpen, setDeleteProviderOpen] = useState(false);
@@ -38,7 +39,11 @@ const VaultPage = () => {
 
   const [isProviderOpen, setIsProviderOpen] = useState(false);
   const [isProxyOpen, setIsProxyOpen] = useState(false);
-  const { hasFlag: proxyKeyLimitsFlag } = useFeatureFlags("proxy_key_limits");
+  const org = useOrg();
+  const { hasFlag: proxyKeyLimitsFlag } = useFeatureFlags(
+    "proxy_key_limits",
+    org?.currentOrg.id || ""
+  );
 
   const deleteProviderKey = async (id: string) => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })
