@@ -34,7 +34,9 @@ export class RateLimiter {
   }
 
   async checkRateLimit(tier: string) {
-    const rateLimiterId = this.rateLimiter.idFromName("hello");
+    const rateLimiterId = this.rateLimiter.idFromName(
+      this.authParams.organizationId
+    );
 
     const rateLimiter = this.rateLimiter.get(rateLimiterId);
 
