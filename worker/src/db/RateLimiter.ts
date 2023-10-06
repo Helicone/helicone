@@ -8,22 +8,29 @@ export class RateLimiter {
   ) {}
 
   private getRateLimitParams(tier: string) {
-    if (tier === "pro") {
-      return {
+    const rateLimitParams: Record<
+      string,
+      {
+        windowSizeSeconds: number;
+        maxCount: number;
+      }
+    > = {
+      pro: {
         windowSizeSeconds: 60,
         maxCount: 10_000,
-      };
-    } else if (tier === "enterprise") {
-      return {
+      },
+      enterprise: {
         windowSizeSeconds: 60,
         maxCount: 100_000,
-      };
-    } else {
-      return {
+      },
+      free: {
         windowSizeSeconds: 60,
         maxCount: 1_000,
-      };
-    }
+      },
+    };
+    tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
+
+    return rateLimitParams[tier];
   }
 
   async checkRateLimit(tier: string) {
