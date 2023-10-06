@@ -78,6 +78,7 @@ export class DBWrapper {
   private atomicRateLimiter: DurableObjectNamespace;
   private rateLimiter?: RateLimiter;
   private authParams?: AuthParams;
+  private tier?: string;
 
   constructor(env: Env, private auth: HeliconeAuth) {
     this.supabaseClient = createClient(
@@ -142,9 +143,48 @@ export class DBWrapper {
     return authParams;
   }
 
-  async recordRateLimitHit(orgId: string): Promise<void> {
+  async getTier(): Promise<Result<string, string>> {
+    if (this.tier !== undefined) {
+      return ok(this.tier);
+    }
+    const authParams = await this.getAuthParams();
+    if (authParams.error !== null) {
+      return err(authParams.error);
+    }
+    const cachedTier = await getFromCache(
+      `tier-${authParams.data.organizationId}`,
+      this.secureCacheEnv
+    );
+
+    if (cachedTier !== null) {
+      this.tier = cachedTier;
+      return ok(this.tier);
+    }
+
+    const { data, error } = await this.supabaseClient
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.data.organizationId)
+      .single();
+
+    if (error !== null) {
+      return err(error.message);
+    }
+    this.tier = data?.tier ?? "free";
+
+    await storeInCache(
+      `tier-${authParams.data.organizationId}`,
+      this.tier,
+      this.secureCacheEnv
+    );
+
+    return ok(this.tier);
+  }
+
+  async recordRateLimitHit(orgId: string, totalCount: number): Promise<void> {
     await this.supabaseClient.from("org_rate_limit_tracker").insert({
       org_id: orgId,
+      total_count: totalCount,
     });
   }
 }

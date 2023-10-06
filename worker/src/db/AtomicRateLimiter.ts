@@ -14,7 +14,6 @@ export class AtomicRateLimiter {
   }
 
   async fetch(request: Request) {
-    return new Response("Hello world");
     const { windowSizeSeconds, maxCount } = await request.json<{
       windowSizeSeconds: number;
       maxCount: number;
@@ -71,6 +70,7 @@ export class AtomicRateLimiter {
       );
     }
     let shouldLogInDB = false;
+    let rlIncrementDB = 0;
     await this.state.storage.transaction(async (txn) => {
       let transactions = (await txn.get<number[]>("transactions")) || [];
 
@@ -81,18 +81,42 @@ export class AtomicRateLimiter {
         await txn.put("transactions", transactions.concat([Date.now()]));
       } else {
         const rlCount = (await txn.get<number>("rlCount")) || 0;
-        if ((rlCount + 1) % 100 === 0) {
+
+        // log every 10 times we hit the rate limit
+        if (rlCount % 10 === 0) {
+          console.log(
+            `Rate limited ${rlCount} requests in the last ${windowSizeSeconds} seconds`
+          );
+          console.log("Rate limit count", rlCount);
           shouldLogInDB = true;
+          rlIncrementDB = rlCount + 1;
         }
+
+        // if we want to log on exponential
+
+        // const rlCountLog = Math.log(rlCount);
+        // const prevRlCountLog = Math.log(rlCount - 1);
+        // const rlCountLogFloor = Math.floor(rlCountLog);
+        // const prevRlCountLogFloor = Math.floor(prevRlCountLog);
+        // console.log("floor", rlCountLogFloor);
+        // if (rlCountLogFloor !== prevRlCountLogFloor) {
+        //   console.log("Rate limit log", rlCountLogFloor + 1);
+        //   console.log("Rate limit count", rlCount);
+        //   shouldLogInDB = true;
+        //   rlIncrementDB = rlCount + 1;
+        // }
         await txn.put<number>("rlCount", rlCount + 1);
-        isRateLimited = true;
+        // isRateLimited = true;
       }
     });
 
-    return new Response(JSON.stringify({ isRateLimited, shouldLogInDB }), {
-      headers: {
-        "content-type": "application/json;charset=UTF-8",
-      },
-    });
+    return new Response(
+      JSON.stringify({ isRateLimited, shouldLogInDB, rlIncrementDB }),
+      {
+        headers: {
+          "content-type": "application/json;charset=UTF-8",
+        },
+      }
+    );
   }
 }

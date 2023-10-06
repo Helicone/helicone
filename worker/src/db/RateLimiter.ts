@@ -7,28 +7,35 @@ export class RateLimiter {
     private authParams: AuthParams
   ) {}
 
-  async checkRateLimit() {
-    console.log(
-      "Checking rate limit",
-      this.rateLimiter,
-      this.authParams.organizationId
-    );
-    const rateLimiterId = this.rateLimiter.idFromName("hello");
-    console.log("Rate limiter id", rateLimiterId);
-    const rateLimiter = this.rateLimiter.get(rateLimiterId);
-    console.log(
-      "Rate limiterz",
-      rateLimiter,
-      rateLimiter.name,
-      rateLimiter.id.name
-    );
-
-    const rateLimitRes = await rateLimiter.fetch("/", {
-      method: "POST",
-      body: JSON.stringify({
+  private getRateLimitParams(tier: string) {
+    if (tier === "pro") {
+      return {
+        windowSizeSeconds: 60,
+        maxCount: 10_000,
+      };
+    } else if (tier === "enterprise") {
+      return {
+        windowSizeSeconds: 60,
+        maxCount: 100_000,
+      };
+    } else {
+      return {
         windowSizeSeconds: 60,
         maxCount: 10,
-      }),
+      };
+    }
+  }
+
+  async checkRateLimit(tier: string) {
+    const rateLimiterId = this.rateLimiter.idFromName("hello");
+
+    const rateLimiter = this.rateLimiter.get(rateLimiterId);
+
+    const params = this.getRateLimitParams(tier);
+
+    const rateLimitRes = await rateLimiter.fetch("https://www.google.com", {
+      method: "POST",
+      body: JSON.stringify(params),
       headers: {
         "content-type": "application/json",
       },
@@ -37,6 +44,7 @@ export class RateLimiter {
     return await rateLimitRes.json<{
       isRateLimited: boolean;
       shouldLogInDB: boolean;
+      rlIncrementDB: number;
     }>();
   }
 }
