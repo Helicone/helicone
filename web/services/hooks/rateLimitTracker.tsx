@@ -24,7 +24,6 @@ const useRateLimitTracker = () => {
         .order("created_at", { ascending: false })
         .limit(1)
         .single();
-      console.log("rateLimit", rateLimit);
 
       return rateLimit;
     },
