@@ -40,13 +40,16 @@ export class RateLimiter {
 
     const params = this.getRateLimitParams(tier);
 
-    const rateLimitRes = await rateLimiter.fetch("https://www.google.com", {
-      method: "POST",
-      body: JSON.stringify(params),
-      headers: {
-        "content-type": "application/json",
-      },
-    });
+    const rateLimitRes = await rateLimiter.fetch(
+      "https://www.this_does_matter.helicone.ai",
+      {
+        method: "POST",
+        body: JSON.stringify(params),
+        headers: {
+          "content-type": "application/json",
+        },
+      }
+    );
 
     return await rateLimitRes.json<{
       isRateLimited: boolean;
