@@ -144,7 +144,6 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
       },
     }
   );
