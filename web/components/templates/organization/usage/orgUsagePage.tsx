@@ -29,6 +29,7 @@ import Link from "next/link";
 import RenderOrgUsage from "./renderOrgUsage";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
+import { useRateLimitTracker } from "../../../../services/hooks/rateLimitTracker";
 
 interface OrgUsagePageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -63,6 +64,7 @@ const OrgUsagePage = (props: OrgUsagePageProps) => {
   useEffect(() => {
     refetch();
   }, [currentMonth, refetch]);
+  const rateLimitTracker = useRateLimitTracker();
 
   const capitalizeHelper = (str: string) => {
     const words = str.split("_");
@@ -187,6 +189,25 @@ const OrgUsagePage = (props: OrgUsagePageProps) => {
                 {isCountLoading
                   ? "Loading..."
                   : Number(count?.data || 0).toLocaleString()}
+              </dd>
+            </div>
+          )}
+          {rateLimitTracker.request && (
+            <div className="flex flex-wrap items-baseline justify-between gap-y-2 pt-8 min-w-[200px]">
+              <dt className="text-sm font-medium leading-6 text-red-700">
+                Rate Limited
+              </dt>
+
+              <dd className="w-full flex-row gap-2 text-3xl font-medium leading-10 tracking-tight text-red-900">
+                {isCountLoading
+                  ? "Loading..."
+                  : Number(
+                      Math.floor(rateLimitTracker.request.total_count / 10) * 10
+                    )}
+                +<span className="pl-1 text-sm font-light">times</span>
+              </dd>
+              <dd className="text-sm">
+                Please contact us to increase your rate limit
               </dd>
             </div>
           )}

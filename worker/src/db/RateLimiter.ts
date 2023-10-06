@@ -21,7 +21,7 @@ export class RateLimiter {
     } else {
       return {
         windowSizeSeconds: 60,
-        maxCount: 10,
+        maxCount: 1_000,
       };
     }
   }

@@ -106,7 +106,7 @@ export class AtomicRateLimiter {
         //   rlIncrementDB = rlCount + 1;
         // }
         await txn.put<number>("rlCount", rlCount + 1);
-        // isRateLimited = true;
+        isRateLimited = true;
       }
     });
 
