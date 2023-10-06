@@ -46,6 +46,7 @@ import { Result } from "../../../lib/result";
 import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import { Toggle } from "./themedToggle";
+import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
@@ -68,6 +69,7 @@ interface ThemedHeaderProps {
     setOpenExport: (open: boolean) => void;
   };
   timeFilter?: {
+    currentTimeFilter: TimeFilter;
     timeFilterOptions: { key: string; value: string }[];
     customTimeFilter: boolean;
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
@@ -75,7 +77,7 @@ interface ThemedHeaderProps {
   };
   advancedFilter?: {
     filterMap: SingleFilterDef<any>[];
-    onAdvancedFilter: Dispatch<SetStateAction<UIFilterRow[]>>;
+    onAdvancedFilter: (filters: UIFilterRow[]) => void;
     filters: UIFilterRow[];
     searchPropertyFilters: (
       property: string,
@@ -95,12 +97,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
-  const [openLayout, setOpenLayout] = useState(false);
-  const [name, setName] = useState("");
-  const [openDelete, setOpenDelete] = useState(false);
-
-  const supabaseClient = useSupabaseClient();
-  const { setNotification } = useNotification();
 
   return (
     <>
@@ -119,6 +115,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                   timeFilter.onTimeSelectHandler(key as TimeInterval, value)
                 }
                 defaultValue={timeFilter.defaultTimeFilter ?? "all"}
+                currentTimeFilter={timeFilter.currentTimeFilter}
                 custom={timeFilter.customTimeFilter}
               />
             )}
@@ -224,11 +221,9 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
                               ?.operators[_filter.operatorIdx].label
                           } ${_filter.value}`}
                           onDelete={() => {
-                            advancedFilter.onAdvancedFilter((prev) => {
-                              const newFilters = [...prev];
-                              newFilters.splice(index, 1);
-                              return newFilters;
-                            });
+                            const prev = [...advancedFilter.filters];
+                            prev.splice(index, 1);
+                            advancedFilter.onAdvancedFilter(prev);
                           }}
                         />
                       );

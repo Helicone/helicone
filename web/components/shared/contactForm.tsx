@@ -1,4 +1,7 @@
+import { useRouter } from "next/router";
 import useNotification from "./notification/useNotification";
+import { useState } from "react";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export type ContactFormData = {
   firstName: string;
@@ -11,17 +14,19 @@ export type ContactFormData = {
 
 interface ContactFormProps {
   contactTag: string;
-
   buttonText: string;
 }
 
 const ContactForm = (props: ContactFormProps) => {
   const { contactTag, buttonText } = props;
 
+  const router = useRouter();
   const { setNotification } = useNotification();
+  const [isLoading, setIsLoading] = useState(false);
 
   const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
     const firstName = event.currentTarget.elements.namedItem(
       "first-name"
     ) as HTMLInputElement;
@@ -60,9 +65,21 @@ const ContactForm = (props: ContactFormProps) => {
             "error"
           );
         } else {
-          setNotification("Form submitted successfully!", "success");
-          const formElement = event.target as HTMLFormElement;
-          formElement.reset();
+          // if the contact tag is mfs, take them to the sign up page
+          if (contactTag === "mfs") {
+            setTimeout(() => {
+              // Set the MFS local storage
+              localStorage.setItem("mfs-email", email.value);
+              setNotification("Form submitted successfully!", "success");
+              setIsLoading(false);
+              router.push("/signup");
+            }, 1500);
+          } else {
+            const formElement = event.target as HTMLFormElement;
+            formElement.reset();
+            setIsLoading(false);
+            setNotification("Form submitted successfully!", "success");
+          }
         }
       });
   };
@@ -165,6 +182,9 @@ const ContactForm = (props: ContactFormProps) => {
           type="submit"
           className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
+          {isLoading && (
+            <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+          )}
           {buttonText}
         </button>
       </div>

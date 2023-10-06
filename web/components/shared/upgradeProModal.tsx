@@ -15,6 +15,9 @@ import {
   ORGANIZATION_ICONS,
 } from "../templates/organization/createOrgForm";
 import { clsx } from "./clsx";
+import { useGetRequestCountClickhouse } from "../../services/hooks/requests";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { Database } from "../../supabase/database.types";
 
 interface UpgradeProModalProps {
   open: boolean;
@@ -24,9 +27,22 @@ interface UpgradeProModalProps {
 const UpgradeProModal = (props: UpgradeProModalProps) => {
   const { open, setOpen } = props;
   const user = useUser();
-  const [step, setStep] = useState(0);
   const orgContext = useOrg();
-  const yourOrgs = orgContext?.allOrgs.filter((d) => d.owner === user?.id);
+
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+
+  const startOfMonthFormatted = formatISO(currentMonth, {
+    representation: "date",
+  });
+  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
+    representation: "date",
+  });
+
+  const { count, isLoading: isCountLoading } = useGetRequestCountClickhouse(
+    startOfMonthFormatted,
+    endOfMonthFormatted,
+    orgContext?.currentOrg.id
+  );
 
   const currentIcon = ORGANIZATION_ICONS.find(
     (icon) => icon.name === orgContext?.currentOrg.icon
@@ -35,6 +51,12 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   const currentColor = ORGANIZATION_COLORS.find(
     (icon) => icon.name === orgContext?.currentOrg.color
   );
+
+  const getProgress = (count: number) => {
+    const cappedCount = Math.min(count, 100000);
+    const percentage = (cappedCount / 100000) * 100;
+    return percentage;
+  };
 
   async function handleCheckout() {
     const stripe = await getStripe();
@@ -67,7 +89,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       <div className="flex flex-col w-[450px] space-y-8">
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-6">
           <div className="flex flex-row items-center gap-2">
             {currentIcon && (
               <currentIcon.icon
@@ -78,7 +100,31 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               {orgContext?.currentOrg.name}
             </h1>
           </div>
-          <h1 className="text-md text-gray-900">
+          <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
+            <div>
+              <p>Your Free Plan Limit</p>
+            </div>
+            <div className="flex flex-row gap-2 w-full h-4">
+              <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
+                <div
+                  className="aboslute h-full bg-purple-500 rounded-md"
+                  style={{
+                    width: `${getProgress(count?.data || 0)}%`,
+                  }}
+                ></div>
+              </div>
+              <div className="flex-1 w-full whitespace-nowrap">
+                <div className="flex flex-row gap-1.5 items-center text-black">
+                  <span>{`${Number(count?.data).toLocaleString()}`}</span>
+                  <span className="text-gray-400 text-sm">/</span>
+                  <span className="text-sm text-gray-400">{`${Number(
+                    100_000
+                  ).toLocaleString()}`}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h1 className="text-sm text-gray-700">
             This organization is on the free plan. Upgrade to remove request
             limits and unlock the features below:
           </h1>
