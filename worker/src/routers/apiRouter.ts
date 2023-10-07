@@ -9,7 +9,6 @@ import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
 import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
 import { Database } from "../../supabase/database.types";
-import { SupabaseWrapper } from "../lib/db/supabase";
 import { Result, isErr } from "../results";
 import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import {
@@ -47,7 +46,6 @@ async function createAPIClient(env: Env, requestWrapper: RequestWrapper) {
 class APIClient {
   public queue: InsertQueue;
   public response: InternalResponse;
-  private supabase: SupabaseWrapper;
   db: DBWrapper;
   private heliconeApiKeyRow?: Database["public"]["Tables"]["helicone_api_keys"]["Row"];
 
@@ -57,13 +55,9 @@ class APIClient {
     auth: HeliconeAuth
   ) {
     this.response = new InternalResponse(this);
-    this.supabase = new SupabaseWrapper(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
     this.db = new DBWrapper(env, auth);
     this.queue = new InsertQueue(
-      this.supabase.client,
+      createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
       env.FALLBACK_QUEUE,
       env.REQUEST_AND_RESPONSE_QUEUE_KV
     );
