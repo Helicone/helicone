@@ -186,4 +186,54 @@ export class DBWrapper {
       total_count: totalCount,
     });
   }
+
+  async isAuthorized(): Promise<boolean> {
+    try {
+      const params = await this.getAuthParams();
+      if (params.error !== null || params.data.organizationId === undefined) {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
+
+  async orgId(): Promise<string> {
+    return (await this.getAuthParams()).data?.organizationId ?? "";
+  }
+
+  async getJobById(
+    jobId: string
+  ): Promise<Result<Database["public"]["Tables"]["job"]["Row"], string>> {
+    const { data, error } = await this.supabaseClient
+      .from("job")
+      .select("*")
+      .match({
+        id: jobId,
+      })
+      .eq("org_id", await this.orgId())
+      .single();
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
+
+  async getNodeById(
+    nodeId: string
+  ): Promise<Result<Database["public"]["Tables"]["job_node"]["Row"], string>> {
+    const { data, error } = await this.supabaseClient
+      .from("job_node")
+      .select("*")
+      .match({
+        id: nodeId,
+      })
+      .eq("org_id", await this.orgId())
+      .single();
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
 }

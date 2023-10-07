@@ -46,6 +46,7 @@ export interface DBLoggableProps {
     isStream: boolean;
     omitLog: boolean;
     provider: Provider;
+    nodeId: string | null;
   };
   timing: {
     startTime: Date;
@@ -84,6 +85,7 @@ export function dbLoggableRequestFromProxyRequest(
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
+    nodeId: proxyRequest.nodeId,
   };
 }
 
@@ -136,6 +138,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
+      nodeId: requestWrapper.getNodeId(),
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -472,6 +475,7 @@ export class DBLoggable {
       requestResult.data.request,
       responseResult.data,
       requestResult.data.properties,
+      requestResult.data.node,
       db.clickhouse
     );
 
