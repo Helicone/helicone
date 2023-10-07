@@ -48,8 +48,6 @@ class HeliconeNode(HeliconeNodeConfig):
     def create_child_node(self, config: HeliconeNodeConfig) -> "HeliconeNode":
         task_data = asdict(config)
         task_data["parent_job_id"] = self.id
-        print("Creating child node")
-        print(task_data)
         return HeliconeNode(job=self.job, **task_data)
 
     def _is_completed(self) -> bool:
