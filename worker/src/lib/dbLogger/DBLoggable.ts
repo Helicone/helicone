@@ -426,7 +426,6 @@ export class DBLoggable {
       return { data: null, error: error ?? "Helicone organization not found" };
     }
 
-    console.log("Logging request", this.request.requestId);
     const rateLimiter = await db.dbWrapper.getRateLimiter();
     if (rateLimiter.error !== null) {
       return rateLimiter;

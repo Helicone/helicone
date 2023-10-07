@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "helicone"
-version = "1.0.9"
+version = "1.0.10"
 description = "A Python wrapper for the OpenAI API that logs all requests to Helicone."
 license = "Apache-2.0"
 authors = ["Helicone, Inc. <help@helicone.ai>"]
@@ -15,4 +15,3 @@ pyhumps = "^3.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
-
