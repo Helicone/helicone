@@ -12,15 +12,27 @@ class HeliconeGlobal:
     _api_key: Optional[str]
     _base_url: Optional[str]
     _proxy_url: Optional[str]
+    _fail_on_error: bool = False
 
     def __init__(self,
                  api_key: Optional[str] = None,
                  base_url: Optional[str] = None,
-                 proxy_url: Optional[str] = None
+                 proxy_url: Optional[str] = None,
+                 fail_on_error: Optional[bool] = None
                  ):
         self._api_key = api_key
         self._base_url = base_url
         self._proxy_url = proxy_url
+        if (fail_on_error is not None):
+            self._fail_on_error = fail_on_error
+
+    @property
+    def fail_on_error(self) -> bool:
+        return self._fail_on_error
+
+    @fail_on_error.setter
+    def fail_on_error(self, value: bool):
+        self._fail_on_error = value
 
     @property
     def api_key(self) -> Optional[str]:

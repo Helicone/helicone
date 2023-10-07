@@ -88,6 +88,10 @@ export async function logRequest(
     {
       request: Database["public"]["Tables"]["request"]["Row"];
       properties: Database["public"]["Tables"]["properties"]["Insert"][];
+      node: {
+        id: string | null;
+        job: string | null;
+      };
     },
     string
   >
@@ -145,6 +149,17 @@ export async function logRequest(
         truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
+    const jobNode = request.nodeId
+      ? await dbClient
+          .from("job_node")
+          .select("*")
+          .eq("id", request.nodeId)
+          .single()
+      : null;
+    if (jobNode && jobNode.error) {
+      return { data: null, error: `No task found for id ${request.nodeId}` };
+    }
+
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
@@ -175,12 +190,36 @@ export async function logRequest(
       })
     );
 
-    await insertQueue.addRequest(requestData, customPropertyRows, responseId);
+    const requestResult = await insertQueue.addRequest(
+      requestData,
+      customPropertyRows,
+      responseId
+    );
+    if (requestResult.error) {
+      return { data: null, error: requestResult.error };
+    }
+    if (jobNode && jobNode.data) {
+      const jobNodeResult = await insertQueue.addRequestNodeRelationship(
+        jobNode.data.job,
+        jobNode.data.id,
+        request.requestId
+      );
+      if (jobNodeResult.error) {
+        return {
+          data: null,
+          error: `Node Relationship error: ${jobNodeResult.error}`,
+        };
+      }
+    }
 
     return {
       data: {
         request: requestData,
         properties: customPropertyRows,
+        node: {
+          id: jobNode?.data.id ?? null,
+          job: jobNode?.data.job ?? null,
+        },
       },
       error: null,
     };
