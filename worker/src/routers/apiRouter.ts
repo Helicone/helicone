@@ -7,11 +7,11 @@ import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
 import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
-import { Run, isValidStatus, validateRun } from "../lib/models/Runs";
+import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
 import { Database } from "../../supabase/database.types";
 import { SupabaseWrapper } from "../lib/db/supabase";
-import { Result } from "../results";
-import { DBWrapper } from "../db/DBWrapper";
+import { Result, isErr } from "../results";
+import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
@@ -31,48 +31,33 @@ class InternalResponse {
 }
 
 // TODO Move to API middleware so that it is always constructed
+
+async function createAPIClient(env: Env, requestWrapper: RequestWrapper) {
+  return new APIClient(env, requestWrapper, await requestWrapper.auth());
+}
 class APIClient {
   public queue: InsertQueue;
   public response: InternalResponse;
   private supabase: SupabaseWrapper;
+  db: DBWrapper;
   private heliconeApiKeyRow?: Database["public"]["Tables"]["helicone_api_keys"]["Row"];
 
-  constructor(private env: Env, private requestWrapper: RequestWrapper) {
+  constructor(
+    private env: Env,
+    private requestWrapper: RequestWrapper,
+    auth: HeliconeAuth
+  ) {
     this.response = new InternalResponse(this);
     this.supabase = new SupabaseWrapper(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
+    this.db = new DBWrapper(env, auth);
     this.queue = new InsertQueue(
       this.supabase.client,
       env.FALLBACK_QUEUE,
       env.REQUEST_AND_RESPONSE_QUEUE_KV
     );
-  }
-
-  async getHeliconeApiKeyRow(): Promise<
-    Database["public"]["Tables"]["helicone_api_keys"]["Row"]
-  > {
-    if (this.heliconeApiKeyRow) {
-      return this.heliconeApiKeyRow;
-    }
-    const { data, error } = await this.supabase.getHeliconeApiKeyRow(
-      await this.requestWrapper.getProviderAuthHeader()
-    );
-    if (error || !data) {
-      throw new Error("Could not get helicone api key row");
-    }
-
-    return data;
-  }
-
-  async isAuthorized(): Promise<boolean> {
-    try {
-      await this.getHeliconeApiKeyRow();
-    } catch (e) {
-      return false;
-    }
-    return true;
   }
 }
 
@@ -137,38 +122,39 @@ async function logAsync(
 
 export const getAPIRouter = (router: BaseRouter) => {
   router.post(
-    "/run",
+    "/job",
     async (
       _,
       requestWrapper: RequestWrapper,
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const client = new APIClient(env, requestWrapper);
-      if (!(await client.isAuthorized())) {
+      const client = await createAPIClient(env, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
         return client.response.unauthorized();
       }
-      const run = await requestWrapper.getJson<Run>();
+      const job = await requestWrapper.getJson<Job>();
 
-      if (!run) {
+      if (!job) {
         return new Response("Invalid run", { status: 400 });
       }
-      const isValidRun = validateRun(run);
+      const isValidRun = validateRun(job);
 
       if (isValidRun.error) {
         return client.response.newError(isValidRun.error, 400);
       }
 
       const { data, error } = await client.queue.addJob({
-        custom_properties: run.customProperties ?? {},
-        description: run.description ?? "",
-        name: run.name ?? "",
-        timeout_seconds: run.timeoutSeconds ?? 60,
+        custom_properties: job.customProperties ?? {},
+        description: job.description ?? "",
+        name: job.name ?? "",
+        timeout_seconds: job.timeoutSeconds ?? 60,
         status: "PENDING",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        id: run.id ?? crypto.randomUUID(),
-        org_id: (await client.getHeliconeApiKeyRow()).organization_id,
+        id: job.id ?? crypto.randomUUID(),
+        org_id: authParams.data?.organizationId,
       });
       if (error) {
         return client.response.newError(error, 500);
@@ -178,35 +164,34 @@ export const getAPIRouter = (router: BaseRouter) => {
   );
 
   router.patch(
-    "/run/:id/status",
+    "/job/:id/status",
     async (
       { params: { id } },
       requestWrapper: RequestWrapper,
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const client = new APIClient(env, requestWrapper);
-      if (!(await client.isAuthorized())) {
-        return new Response("Unauthorized", { status: 401 });
+      const client = await createAPIClient(env, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
       }
 
-      const { data: run, error: runError } = await client.queue.getJobById(id);
+      const { data: job, error: jobError } = await client.queue.getJobById(id);
 
-      if (runError) {
-        return new Response(JSON.stringify({ error: runError }), {
+      if (jobError) {
+        return new Response(JSON.stringify({ error: jobError }), {
           status: 500,
         });
       }
-      if (!run) {
+      if (!job) {
         console.error("Run not found", id);
         return new Response(JSON.stringify({ error: "Run not found" }), {
           status: 404,
         });
       }
 
-      if (
-        run?.org_id !== (await client.getHeliconeApiKeyRow()).organization_id
-      ) {
+      if (job?.org_id !== authParams.data.organizationId) {
         return new Response("Unauthorized", { status: 401 });
       }
       const status =
@@ -232,10 +217,12 @@ export const getAPIRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const client = new APIClient(env, requestWrapper);
-      if (!(await client.isAuthorized())) {
-        return new Response("Unauthorized", { status: 401 });
+      const client = await createAPIClient(env, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
       }
+
       const node = await requestWrapper.getJson<HeliconeNode>();
       if (!node) {
         console.error("Content not JSON", node);
@@ -258,11 +245,57 @@ export const getAPIRouter = (router: BaseRouter) => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           id: node.id ?? crypto.randomUUID(),
-          org_id: (await client.getHeliconeApiKeyRow()).organization_id,
+          org_id: authParams.data.organizationId,
           job: node.job,
         },
         { parent_job_id: node.parentJobId }
       );
+      if (error) {
+        return client.response.newError(error, 500);
+      }
+      return new Response(JSON.stringify({ data }), { status: 200 });
+    }
+  );
+
+  router.patch(
+    "/node/:id/status",
+    async (
+      { params: { id } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
+      }
+
+      const { data: job, error: jobError } = await client.queue.getJobById(id);
+
+      if (jobError) {
+        return new Response(JSON.stringify({ error: jobError }), {
+          status: 500,
+        });
+      }
+      if (!job) {
+        console.error("Run not found", id);
+        return new Response(JSON.stringify({ error: "Run not found" }), {
+          status: 404,
+        });
+      }
+
+      if (job?.org_id !== authParams.data.organizationId) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      const status =
+        (await requestWrapper.getJson<{ status: string }>()).status ?? "";
+
+      if (!isValidStatus(status)) {
+        return client.response.newError("Invalid status", 400);
+      }
+
+      const { data, error } = await client.queue.updateRunStatus(id, status);
       if (error) {
         return client.response.newError(error, 500);
       }

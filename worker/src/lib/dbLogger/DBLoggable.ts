@@ -138,7 +138,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
-      nodeId: requestWrapper.getTaskId(),
+      nodeId: requestWrapper.getNodeId(),
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -459,7 +459,6 @@ export class DBLoggable {
       db.queue,
       authParams
     );
-    console.log("Logged request", requestResult);
 
     // If no data or error, return
     if (!requestResult.data || requestResult.error) {
@@ -477,6 +476,7 @@ export class DBLoggable {
       requestResult.data.request,
       responseResult.data,
       requestResult.data.properties,
+      requestResult.data.node,
       db.clickhouse
     );
 

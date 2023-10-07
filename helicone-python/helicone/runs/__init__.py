@@ -6,6 +6,14 @@ from typing import Optional
 from helicone.requester import Requests
 
 
+class HeliconeStatus(Enum):
+    PENDING = auto()
+    RUNNING = auto()
+    SUCCESS = auto()
+    FAILED = auto()
+    CANCELLED = auto()
+
+
 @dataclass(kw_only=True)
 class HeliconeNodeConfig:
     parent_job_id: Optional[str] = None
@@ -18,6 +26,7 @@ class HeliconeNodeConfig:
 class HeliconeNode(HeliconeNodeConfig):
     job: "HeliconeJob"
     id: str = field(default_factory=lambda: str(uuid4()))
+    status: HeliconeStatus = HeliconeStatus.PENDING
     requester: Requests = field(default_factory=Requests)
 
     def to_dict(self):
@@ -43,13 +52,26 @@ class HeliconeNode(HeliconeNodeConfig):
         print(task_data)
         return HeliconeNode(job=self.job, **task_data)
 
+    def _is_completed(self) -> bool:
+        return self.status == HeliconeStatus.SUCCESS or self.status == HeliconeStatus.FAILED
 
-class HeliconeRunStatus(Enum):
-    PENDING = auto()
-    RUNNING = auto()
-    SUCCESS = auto()
-    FAILED = auto()
-    CANCELLED = auto()
+    def set_status(self, status: HeliconeNodeConfig):
+        self.requester.patch(
+            f"/node/{self.id}/status",
+            json={
+                "status": status.name
+            }
+        )
+        self.status = status
+
+    def success(self):
+        self.set_status(HeliconeStatus.SUCCESS)
+
+    def fail(self):
+        self.set_status(HeliconeStatus.FAILED)
+
+    def cancel(self):
+        self.set_status(HeliconeStatus.CANCELLED)
 
 
 @dataclass
@@ -58,7 +80,7 @@ class HeliconeJob:
     description: str = ""
     custom_properties: dict[str, str] = field(default_factory=dict)
     timeout_seconds: int = 60
-    status: HeliconeRunStatus = HeliconeRunStatus.PENDING
+    status: HeliconeStatus = HeliconeStatus.PENDING
     requester: Requests = field(default_factory=Requests)
     id: str = field(default_factory=lambda: str(uuid4()))
 
@@ -74,27 +96,20 @@ class HeliconeJob:
 
     def __post_init__(self):
         self.requester.post(
-            "/run",
+            "/job",
             json=self.to_dict()
         )
 
     def _is_completed(self) -> bool:
-        return self.status == HeliconeRunStatus.SUCCESS or self.status == HeliconeRunStatus.FAILED
-
-    def _error_if_completed(self):
-        if (self._is_completed()):
-            raise Exception(
-                "Cannot create a task on a run that has completed")
+        return self.status == HeliconeStatus.SUCCESS or self.status == HeliconeStatus.FAILED
 
     def create_node(self, config: HeliconeNodeConfig) -> HeliconeNode:
-        self._error_if_completed()
         task_data = asdict(config)
         return HeliconeNode(job=self, **task_data)
 
-    def set_status(self, status: HeliconeRunStatus):
-        self._error_if_completed()
+    def set_status(self, status: HeliconeStatus):
         self.requester.patch(
-            f"/run/{self.id}/status",
+            f"/job/{self.id}/status",
             json={
                 "status": status.name
             }
@@ -102,10 +117,10 @@ class HeliconeJob:
         self.status = status
 
     def success(self):
-        self.set_status(HeliconeRunStatus.SUCCESS)
+        self.set_status(HeliconeStatus.SUCCESS)
 
     def fail(self):
-        self.set_status(HeliconeRunStatus.FAILED)
+        self.set_status(HeliconeStatus.FAILED)
 
     def cancel(self):
-        self.set_status(HeliconeRunStatus.CANCELLED)
+        self.set_status(HeliconeStatus.CANCELLED)

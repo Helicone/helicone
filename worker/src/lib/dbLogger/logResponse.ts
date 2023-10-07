@@ -88,6 +88,10 @@ export async function logRequest(
     {
       request: Database["public"]["Tables"]["request"]["Row"];
       properties: Database["public"]["Tables"]["properties"]["Insert"][];
+      node: {
+        id: string | null;
+        job: string | null;
+      };
     },
     string
   >
@@ -212,6 +216,10 @@ export async function logRequest(
       data: {
         request: requestData,
         properties: customPropertyRows,
+        node: {
+          id: jobNode?.data.id ?? null,
+          job: jobNode?.data.job ?? null,
+        },
       },
       error: null,
     };

@@ -107,6 +107,20 @@ export class InsertQueue {
     return { data: null, error: null };
   }
 
+  async getNodeId(
+    jobId: string
+  ): Promise<Result<Database["public"]["Tables"]["job"]["Row"], string>> {
+    const { data, error } = await this.database
+      .from("job")
+      .select("*")
+      .match({ id: jobId })
+      .single();
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
+
   async getJobById(
     jobId: string
   ): Promise<Result<Database["public"]["Tables"]["job"]["Row"], string>> {

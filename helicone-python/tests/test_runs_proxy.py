@@ -32,7 +32,7 @@ COURSE_FUNCTIONS = [
                         "description": "The chapters of the course",
                         "minItems": 1,
                         "maxItems": 10
-                        }
+                    }
             },
             "required": ["Description", "chapters"]
         },
@@ -143,25 +143,29 @@ def run_creation(topic: str, create_course_outline: HeliconeNode):
                 description="Generates each section from the chapter outline",
             )
         )
-        sections = []
-        for section in chapter["sections"]:
-            _section = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "user",
-                        "content": f"Generate a section outline on {section['name']}, with description {section['description']}"}
-                ],
-                functions=CHAPTER_FUNCTIONS,
-                max_tokens=512,
-                user="alice@bob.com",
-                heliconeMeta=Meta(
-                    node_id=create_sections.id,
-                ),
-            )
-            section = json.loads(
-                _section.choices[0].message.function_call.arguments)
-            sections.append(section)
-            print(section)
+        try:
+            sections = []
+            for section in chapter["sections"]:
+                _section = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "user",
+                            "content": f"Generate a section outline on {section['name']}, with description {section['description']}"}
+                    ],
+                    functions=CHAPTER_FUNCTIONS,
+                    max_tokens=512,
+                    user="alice@bob.com",
+                    heliconeMeta=Meta(
+                        node_id=create_sections.id,
+                    ),
+                )
+                section = json.loads(
+                    _section.choices[0].message.function_call.arguments)
+                sections.append(section)
+                print(section)
+        except Exception as e:
+            create_sections.fail()
+            raise e
 
 
 def test_run_creation():
@@ -184,10 +188,10 @@ def test_run_creation():
                     }
                 )
             )
-
-            run_creation(topic, create_course_outline)
-
+            try:
+                run_creation(topic, create_course_outline)
+            except Exception as e:
+                create_course_outline.fail()
     except Exception as e:
         my_job.fail()
-        raise e
     my_job.success()

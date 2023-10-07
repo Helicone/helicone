@@ -186,4 +186,16 @@ export class DBWrapper {
       total_count: totalCount,
     });
   }
+
+  async isAuthorized(): Promise<boolean> {
+    try {
+      const params = await this.getAuthParams();
+      if (params.error !== null || params.data.organizationId === undefined) {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
 }
