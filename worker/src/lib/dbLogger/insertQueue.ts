@@ -121,6 +121,20 @@ export class InsertQueue {
     return { data: data, error: null };
   }
 
+  async updateJobStatus(
+    jobId: string,
+    status: Database["public"]["Tables"]["job"]["Insert"]["status"]
+  ): Promise<Result<null, string>> {
+    const updateResult = await this.database
+      .from("job")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", jobId);
+
+    if (updateResult.error) {
+      return { data: null, error: JSON.stringify(updateResult.error) };
+    }
+    return { data: null, error: null };
+  }
   async updateNodeStatus(
     nodeId: string,
     status: Database["public"]["Tables"]["job_node"]["Insert"]["status"]
@@ -128,7 +142,7 @@ export class InsertQueue {
     const updateResult = await this.database
       .from("job_node")
       .update({ status, updated_at: new Date().toISOString() })
-      .match({ id: nodeId });
+      .eq("id", nodeId);
     if (updateResult.error) {
       return { data: null, error: JSON.stringify(updateResult.error) };
     }

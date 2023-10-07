@@ -207,7 +207,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError("Invalid status", 400);
       }
 
-      const { data, error } = await client.queue.updateNodeStatus(id, status);
+      const { data, error } = await client.queue.updateJobStatus(id, status);
       if (error) {
         return client.response.newError(error, 500);
       }
