@@ -124,4 +124,5 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
           poetry run pytest -s tests/test_runs_proxy.py
