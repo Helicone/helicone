@@ -10,6 +10,7 @@ import { HeliconeHeaders } from "./HeliconeHeaders";
 import { Database } from "../../supabase/database.types";
 import { checkLimits } from "./limits/check";
 import { getFromCache, storeInCache } from "./secureCache";
+import { HeliconeAuth } from "../db/DBWrapper";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -89,6 +90,22 @@ export class RequestWrapper {
     }
 
     return { data: requestWrapper, error: null };
+  }
+
+  getNodeId(): string | null {
+    return this.heliconeHeaders.nodeId;
+  }
+
+  async auth(): Promise<HeliconeAuth> {
+    return this.heliconeProxyKeyId
+      ? {
+          heliconeProxyKeyId: this.heliconeProxyKeyId,
+          heliconeApiKeyAuthHash: undefined,
+        }
+      : {
+          heliconeApiKeyAuthHash: (await this.getProviderAuthHeader()) ?? "",
+          heliconeProxyKeyId: undefined,
+        };
   }
 
   async getText(): Promise<string> {

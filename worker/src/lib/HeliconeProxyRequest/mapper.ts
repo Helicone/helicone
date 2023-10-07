@@ -49,11 +49,13 @@ export interface HeliconeProxyRequest {
   url: URL;
   requestWrapper: RequestWrapper;
   requestId: string;
+  nodeId: string | null;
 }
 
 const providerBaseUrlMappings: Record<Provider, string> = {
   OPENAI: "https://api.openai.com",
   ANTHROPIC: "https://api.anthropic.com",
+  CUSTOM: "",
 };
 
 // Helps map a RequestWrapper -> HeliconProxyRequest
@@ -161,6 +163,7 @@ export class HeliconeProxyRequestMapper {
         requestId:
           this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
         requestWrapper: this.request,
+        nodeId: this.request.heliconeHeaders.nodeId ?? null,
       },
       error: null,
     };

@@ -151,9 +151,11 @@ interface ResponseCopyV2 {
   organization_id: string;
 }
 
-type ResponseCopyV3 = ResponseCopyV2 & {
+interface ResponseCopyV3 extends ResponseCopyV2 {
+  node_id: Nullable<string>;
+  job_id: Nullable<string>;
   proxy_key_id: Nullable<string>;
-};
+}
 
 interface PropertiesCopyV1 {
   id: number;
