@@ -25,6 +25,15 @@ class InternalResponse {
     return new Response(JSON.stringify({ error: message }), { status });
   }
 
+  successJSON(data: any): Response {
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        "content-type": "application/json;charset=UTF-8",
+      },
+    });
+  }
+
   unauthorized(): Response {
     return this.newError("Unauthorized", 401);
   }
@@ -137,7 +146,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       const job = await requestWrapper.getJson<Job>();
 
       if (!job) {
-        return new Response("Invalid run", { status: 400 });
+        return client.response.newError("Invalid run", 400);
       }
       const isValidRun = validateRun(job);
 
@@ -159,7 +168,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       if (error) {
         return client.response.newError(error, 500);
       }
-      return new Response(JSON.stringify({ data }), { status: 200 });
+      return client.response.successJSON({ data });
     }
   );
 
@@ -177,23 +186,20 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.unauthorized();
       }
 
-      const { data: job, error: jobError } = await client.queue.getJobById(id);
+      const { data: job, error: jobError } = await client.db.getJobById(id);
 
       if (jobError) {
-        return new Response(JSON.stringify({ error: jobError }), {
-          status: 500,
-        });
+        return client.response.newError(jobError, 500);
       }
+
       if (!job) {
-        console.error("Run not found", id);
-        return new Response(JSON.stringify({ error: "Run not found" }), {
-          status: 404,
-        });
+        return client.response.newError("Job not found", 404);
       }
 
       if (job?.org_id !== authParams.data.organizationId) {
-        return new Response("Unauthorized", { status: 401 });
+        return client.response.unauthorized();
       }
+
       const status =
         (await requestWrapper.getJson<{ status: string }>()).status ?? "";
 
@@ -201,11 +207,12 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError("Invalid status", 400);
       }
 
-      const { data, error } = await client.queue.updateRunStatus(id, status);
+      const { data, error } = await client.queue.updateNodeStatus(id, status);
       if (error) {
         return client.response.newError(error, 500);
       }
-      return new Response(JSON.stringify({ data }), { status: 200 });
+
+      return client.response.successJSON({ data });
     }
   );
 
@@ -225,19 +232,16 @@ export const getAPIRouter = (router: BaseRouter) => {
 
       const node = await requestWrapper.getJson<HeliconeNode>();
       if (!node) {
-        console.error("Content not JSON", node);
-        return new Response("Invalid task", { status: 400 });
+        return client.response.newError("Invalid task", 400);
       }
+
       const isValidTask = validateHeliconeNode(node);
 
       if (isValidTask.error) {
-        console.error("Invalid node Error", isValidTask);
-        return new Response(JSON.stringify(isValidTask), {
-          status: 400,
-        });
+        return client.response.newError(isValidTask.error, 400);
       }
 
-      const { data, error } = await client.queue.addTask(
+      const { data, error } = await client.queue.addNode(
         {
           custom_properties: node.customProperties ?? {},
           description: node.description ?? "",
@@ -253,7 +257,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       if (error) {
         return client.response.newError(error, 500);
       }
-      return new Response(JSON.stringify({ data }), { status: 200 });
+      return client.response.successJSON({ data });
     }
   );
 
@@ -271,23 +275,20 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.unauthorized();
       }
 
-      const { data: job, error: jobError } = await client.queue.getJobById(id);
+      const { data: job, error: jobError } = await client.db.getNodeById(id);
 
       if (jobError) {
-        return new Response(JSON.stringify({ error: jobError }), {
-          status: 500,
-        });
+        return client.response.newError(jobError, 500);
       }
+
       if (!job) {
-        console.error("Run not found", id);
-        return new Response(JSON.stringify({ error: "Run not found" }), {
-          status: 404,
-        });
+        return client.response.newError("Node not found", 404);
       }
 
       if (job?.org_id !== authParams.data.organizationId) {
-        return new Response("Unauthorized", { status: 401 });
+        return client.response.unauthorized();
       }
+
       const status =
         (await requestWrapper.getJson<{ status: string }>()).status ?? "";
 
@@ -295,11 +296,12 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError("Invalid status", 400);
       }
 
-      const { data, error } = await client.queue.updateRunStatus(id, status);
+      const { data, error } = await client.queue.updateNodeStatus(id, status);
       if (error) {
         return client.response.newError(error, 500);
       }
-      return new Response(JSON.stringify({ data }), { status: 200 });
+
+      return client.response.successJSON({ data });
     }
   );
 

@@ -121,35 +121,21 @@ export class InsertQueue {
     return { data: data, error: null };
   }
 
-  async getJobById(
-    jobId: string
-  ): Promise<Result<Database["public"]["Tables"]["job"]["Row"], string>> {
-    const { data, error } = await this.database
-      .from("job")
-      .select("*")
-      .match({ id: jobId })
-      .single();
-    if (error) {
-      return { data: null, error: error.message };
-    }
-    return { data: data, error: null };
-  }
-
-  async updateRunStatus(
-    runId: string,
-    status: Database["public"]["Tables"]["job"]["Insert"]["status"]
+  async updateNodeStatus(
+    nodeId: string,
+    status: Database["public"]["Tables"]["job_node"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
     const updateResult = await this.database
-      .from("job")
+      .from("job_node")
       .update({ status, updated_at: new Date().toISOString() })
-      .match({ id: runId });
+      .match({ id: nodeId });
     if (updateResult.error) {
       return { data: null, error: JSON.stringify(updateResult.error) };
     }
     return { data: null, error: null };
   }
 
-  async addTask(
+  async addNode(
     node: Database["public"]["Tables"]["job_node"]["Insert"],
     options: { parent_job_id?: string }
   ): Promise<Result<null, string>> {

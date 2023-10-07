@@ -167,6 +167,10 @@ def run_creation(topic: str, create_course_outline: HeliconeNode):
             create_sections.fail()
             raise e
 
+        create_sections.success()
+
+    create_chapters.success()
+
 
 def test_run_creation():
     my_job = HeliconeJob(
@@ -192,6 +196,8 @@ def test_run_creation():
                 run_creation(topic, create_course_outline)
             except Exception as e:
                 create_course_outline.fail()
+
+            create_course_outline.success()
     except Exception as e:
         my_job.fail()
     my_job.success()
