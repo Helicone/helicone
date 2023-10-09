@@ -31,8 +31,9 @@ import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
-import { BsTags } from "react-icons/bs";
 import { GrGraphQl } from "react-icons/gr";
+import { BsBriefcase, BsTags, BsTagsFill } from "react-icons/bs";
+import Notification from "../notification/Notification";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useUserSettings } from "../../../services/hooks/userSettings";
 import UpgradeProModal from "../upgradeProModal";
@@ -70,6 +71,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/requests",
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
+    },
+    {
+      name: "Jobs (beta)",
+      href: "/jobs",
+      icon: BsBriefcase,
+      current: pathname.includes("/jobs"),
     },
     {
       name: "Users",

@@ -1,5 +1,5 @@
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+/* eslint-disable */
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -7,7 +7,6 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
-const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -15,6 +14,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
 };
 
@@ -225,8 +225,8 @@ export type ValueFilter = {
 };
 
 export type FetchRunsQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
   filters?: InputMaybe<Array<HeliconeJobFilter> | HeliconeJobFilter>;
 }>;
 
@@ -234,10 +234,10 @@ export type FetchRunsQueryVariables = Exact<{
 export type FetchRunsQuery = { __typename?: 'Query', heliconeJob?: Array<{ __typename?: 'HeliconeJob', id: string, name: string, description?: string | null, status: string, created_at: string, updated_at: string, timeout_seconds: number, node_count: number, request_count: number, properties?: Array<{ __typename?: 'Property', value?: string | null, name?: string | null } | null> | null } | null> | null };
 
 export type FetchTasksQueryVariables = Exact<{
-  heliconeNodeId?: InputMaybe<Scalars['String']>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  jobId?: InputMaybe<Scalars['String']>;
+  heliconeNodeId?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  jobId?: InputMaybe<Scalars['String']['input']>;
   filters?: InputMaybe<Array<HeliconeNodeFilter> | HeliconeNodeFilter>;
 }>;
 
@@ -245,107 +245,5 @@ export type FetchTasksQueryVariables = Exact<{
 export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
 
 
-export const FetchRunsDocument = gql`
-    query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeJobFilter!]) {
-  heliconeJob(filters: $filters, offset: $offset, limit: $limit) {
-    id
-    name
-    description
-    status
-    created_at
-    updated_at
-    timeout_seconds
-    node_count
-    request_count
-    properties {
-      value
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useFetchRunsQuery__
- *
- * To run a query within a React component, call `useFetchRunsQuery` and pass it any options that fit your needs.
- * When your component renders, `useFetchRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useFetchRunsQuery({
- *   variables: {
- *      limit: // value for 'limit'
- *      offset: // value for 'offset'
- *      filters: // value for 'filters'
- *   },
- * });
- */
-export function useFetchRunsQuery(baseOptions?: Apollo.QueryHookOptions<FetchRunsQuery, FetchRunsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FetchRunsQuery, FetchRunsQueryVariables>(FetchRunsDocument, options);
-      }
-export function useFetchRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FetchRunsQuery, FetchRunsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FetchRunsQuery, FetchRunsQueryVariables>(FetchRunsDocument, options);
-        }
-export type FetchRunsQueryHookResult = ReturnType<typeof useFetchRunsQuery>;
-export type FetchRunsLazyQueryHookResult = ReturnType<typeof useFetchRunsLazyQuery>;
-export type FetchRunsQueryResult = Apollo.QueryResult<FetchRunsQuery, FetchRunsQueryVariables>;
-export const FetchTasksDocument = gql`
-    query FetchTasks($heliconeNodeId: String, $limit: Int, $offset: Int, $jobId: String, $filters: [HeliconeNodeFilter!]) {
-  heliconeNode(
-    id: $heliconeNodeId
-    limit: $limit
-    offset: $offset
-    job_id: $jobId
-    filters: $filters
-  ) {
-    id
-    name
-    description
-    created_at
-    updated_at
-    job_id
-    parent_node_ids
-    properties {
-      name
-      value
-    }
-  }
-}
-    `;
-
-/**
- * __useFetchTasksQuery__
- *
- * To run a query within a React component, call `useFetchTasksQuery` and pass it any options that fit your needs.
- * When your component renders, `useFetchTasksQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useFetchTasksQuery({
- *   variables: {
- *      heliconeNodeId: // value for 'heliconeNodeId'
- *      limit: // value for 'limit'
- *      offset: // value for 'offset'
- *      jobId: // value for 'jobId'
- *      filters: // value for 'filters'
- *   },
- * });
- */
-export function useFetchTasksQuery(baseOptions?: Apollo.QueryHookOptions<FetchTasksQuery, FetchTasksQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FetchTasksQuery, FetchTasksQueryVariables>(FetchTasksDocument, options);
-      }
-export function useFetchTasksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FetchTasksQuery, FetchTasksQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FetchTasksQuery, FetchTasksQueryVariables>(FetchTasksDocument, options);
-        }
-export type FetchTasksQueryHookResult = ReturnType<typeof useFetchTasksQuery>;
-export type FetchTasksLazyQueryHookResult = ReturnType<typeof useFetchTasksLazyQuery>;
-export type FetchTasksQueryResult = Apollo.QueryResult<FetchTasksQuery, FetchTasksQueryVariables>;
+export const FetchRunsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchRuns"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeJobFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeJob"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"timeout_seconds"}},{"kind":"Field","name":{"kind":"Name","value":"node_count"}},{"kind":"Field","name":{"kind":"Name","value":"request_count"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<FetchRunsQuery, FetchRunsQueryVariables>;
+export const FetchTasksDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchTasks"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"heliconeNodeId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"jobId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeNodeFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"heliconeNodeId"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"job_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"jobId"}}},{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"job_id"}},{"kind":"Field","name":{"kind":"Name","value":"parent_node_ids"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]} as unknown as DocumentNode<FetchTasksQuery, FetchTasksQueryVariables>;

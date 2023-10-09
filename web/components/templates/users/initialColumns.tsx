@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
-import { getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -40,7 +40,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "last_active",
     header: "Last Active",
-    cell: (info) => getUSDate(info.getValue() as string),
+    cell: (info) => getUSDateFromString(info.getValue() as string),
     meta: {
       sortKey: "last_active",
     },
