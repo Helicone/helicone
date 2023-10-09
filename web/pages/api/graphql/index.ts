@@ -18,6 +18,8 @@ import { queryUser } from "../../../lib/api/graphql/query/user";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import { DEFAULT_EXAMPLE_QUERY } from "../../../components/templates/graphql/graphqlPage";
 import { aggregatedHeliconeRequest } from "../../../lib/api/graphql/query/aggregatedHeliconeRequest";
+import { heliconeJob } from "../../../lib/api/graphql/query/heliconeJob";
+import { heliconeNode } from "../../../lib/api/graphql/query/heliconeNode";
 
 const resolvers = {
   JSON: GraphQLJSON,
@@ -26,6 +28,8 @@ const resolvers = {
     heliconeRequest: heliconeRequest,
     aggregatedHeliconeRequest: aggregatedHeliconeRequest,
     user: queryUser,
+    heliconeJob: heliconeJob,
+    heliconeNode: heliconeNode,
   },
   // Mutation: {
   //   // requestNewPrompt,

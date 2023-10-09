@@ -1,6 +1,6 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { getUSDate } from "../../components/shared/utils/utils";
+import { getUSDateFromString } from "../../components/shared/utils/utils";
 import { Database } from "../../supabase/database.types";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 
@@ -24,7 +24,9 @@ export const useHeliconeKeys = () => {
       if (key.api_key_name === null) {
         key.api_key_name = "n/a";
       }
-      key.created_at = getUSDate(new Date(key.created_at).toLocaleString());
+      key.created_at = getUSDateFromString(
+        new Date(key.created_at).toLocaleString()
+      );
     });
   }
 
