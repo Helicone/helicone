@@ -28,6 +28,7 @@ import { UIFilterRow } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
+import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -37,13 +38,14 @@ interface ThemedTableV5Props<T> {
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
-    setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+    setAdvancedFilters: (filters: UIFilterRow[]) => void;
     searchPropertyFilters: (
       property: string,
       search: string
     ) => Promise<Result<void, string>>;
   };
   timeFilter?: {
+    currentTimeFilter: TimeFilter;
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
@@ -139,6 +141,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             ? {
                 defaultValue: timeFilter.defaultValue,
                 onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                currentTimeFilter: timeFilter.currentTimeFilter,
               }
             : undefined
         }
@@ -168,7 +171,14 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
-          <div className="overflow-x-auto text-sm">
+          <div
+            className="text-sm"
+            style={{
+              boxSizing: "border-box",
+              overflowX: "auto",
+              overflowY: "visible",
+            }}
+          >
             <table
               {...{
                 style: {
@@ -178,10 +188,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             >
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr
-                    key={headerGroup.id}
-                    className="border-b border-gray-300 overflow-hidden"
-                  >
+                  <tr key={headerGroup.id} className="border-b border-gray-300">
                     {headerGroup.headers.map((header) => (
                       <DraggableColumnHeader
                         key={header.id}

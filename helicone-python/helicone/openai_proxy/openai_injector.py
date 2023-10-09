@@ -71,7 +71,7 @@ class HeliconeRetryProps:
 
 @dataclass
 class HeliconeProxyMeta:
-    task_id: Optional[str] = None
+    node_id: Optional[str] = None
     retry: Optional[Union[HeliconeRetryProps, bool]] = False
     cache: Optional[bool] = False
     rate_limit_policy: Optional[str] = None
@@ -134,8 +134,8 @@ class OpenAIInjector:
                 headers.update(self._get_retry_headers(meta.retry))
         if (meta.rate_limit_policy):
             headers["Helicone-RateLimit-Policy"] = meta.rate_limit_policy
-        if (meta.task_id):
-            headers["Helicone-Task-Id"] = meta.task_id
+        if (meta.node_id):
+            headers["Helicone-Node-Id"] = meta.node_id
         return headers
 
     def _prepare_headers(self, **kwargs):

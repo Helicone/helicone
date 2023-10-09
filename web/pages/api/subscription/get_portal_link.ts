@@ -6,6 +6,8 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
+import { supabaseServer } from "../../../lib/supabaseServer";
+import { getOwner } from "../organization/[id]/owner";
 
 async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
   const {
@@ -17,15 +19,35 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
     return;
   }
 
-  const customer = await getStripeCustomer(user.email ?? "");
-  if (customer.error !== null) {
-    res.status(500).json({ error: customer.error, data: null });
+  const { data, error } = await supabaseServer
+    .from("organization")
+    .select("stripe_customer_id, subscription_status")
+    .eq("id", orgId)
+    .single();
+
+  if (error !== null) {
+    res.status(500).json({ error: error.message, data: null });
     return;
   }
-  const portal = await stripeServer.billingPortal.sessions.create({
-    customer: customer.data?.id,
-  });
-  res.status(200).json({ error: null, data: portal.url });
+
+  let customer_id = data.stripe_customer_id;
+
+  if (data.subscription_status === "legacy") {
+    const orgOwner = await getOwner(orgId, user.id);
+    const customer = await getStripeCustomer(orgOwner.data?.[0].email ?? "");
+    customer_id = customer.data?.id ?? "";
+  }
+
+  if (customer_id) {
+    const portal = await stripeServer.billingPortal.sessions.create({
+      customer: customer_id,
+    });
+
+    res.status(200).json({ error: null, data: portal.url });
+    return;
+  }
+
+  res.status(500).json({ error: "No customer found", data: null });
 }
 
 export default withAuth(handler);

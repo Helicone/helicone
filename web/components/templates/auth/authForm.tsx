@@ -36,6 +36,14 @@ const AuthForm = (props: AuthFormProps) => {
     setIsLoading(false);
   };
 
+  // check for the localStorage mfs item
+  let mfsEmail: string | null = null;
+
+  if (typeof window !== "undefined") {
+    const mfs = window.localStorage.getItem("mfs-email");
+    mfsEmail = mfs;
+  }
+
   return (
     <>
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 w-full">
@@ -150,6 +158,7 @@ const AuthForm = (props: AuthFormProps) => {
                           type="email"
                           autoComplete="email"
                           required
+                          placeholder={mfsEmail !== null ? mfsEmail : ""}
                           className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                         />
                       </div>

@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Database } from "../../../supabase/database.types";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface CreateProxyKeyModalProps {
   providerKeys: DecryptedProviderKey[];
@@ -154,7 +155,11 @@ const LimitsInput = (props: {
     limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][]
   ) => void;
 }) => {
-  const { hasFlag } = useFeatureFlags("proxy_key_limits");
+  const org = useOrg();
+  const { hasFlag } = useFeatureFlags(
+    "proxy_key_limits",
+    org?.currentOrg.id || ""
+  );
 
   const [limits, setLimits] = useState<LimitRow[]>([]);
   if (!hasFlag) return null;

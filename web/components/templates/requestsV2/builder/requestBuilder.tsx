@@ -23,12 +23,17 @@ export const getBuilderType = (
     return "CustomBuilder";
   }
 
-  if (/^gpt-(4|3\.5|35)/.test(model)) {
-    return "ChatGPTBuilder";
+  if (
+    // GPT-3 (deprecated)
+    /^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model) ||
+    // InstructGPT
+    /instruct$/.test(model)
+  ) {
+    return "GPT3Builder";
   }
 
-  if (/^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model)) {
-    return "GPT3Builder";
+  if (/^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?$/.test(model)) {
+    return "ChatGPTBuilder";
   }
 
   if (/^text-moderation(-\[\w+\]|-\d+)?$/.test(model)) {

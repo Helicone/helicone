@@ -76,16 +76,6 @@ export interface ResponsePayload {
   response: Database["public"]["Tables"]["response"]["Insert"];
 }
 
-export type RequestResponseQueuePayload =
-  | {
-      _type: "request";
-      payload: RequestPayload;
-    }
-  | {
-      _type: "response";
-      payload: ResponsePayload;
-    };
-
 export class InsertQueue {
   constructor(
     private database: SupabaseClient<Database>,
@@ -93,51 +83,81 @@ export class InsertQueue {
     public responseAndResponseQueueKV: KVNamespace
   ) {}
 
-  async addRun(
-    run: Database["public"]["Tables"]["run"]["Insert"]
+  async addRequestNodeRelationship(
+    job_id: string,
+    node_id: string,
+    request_id: string
   ): Promise<Result<null, string>> {
-    const insertResult = await this.database.from("run").insert([run]);
+    const insertResult = await this.database
+      .from("job_node_request")
+      .insert([{ job_id, node_id, request_id }]);
     if (insertResult.error) {
-      return { data: null, error: insertResult.error.message };
+      return { data: null, error: JSON.stringify(insertResult) };
     }
     return { data: null, error: null };
   }
 
-  async getRunById(
-    runId: string
-  ): Promise<Result<Database["public"]["Tables"]["run"]["Row"], string>> {
-    const { data, error } = await this.database
-      .from("run")
-      .select("*")
-      .match({ id: runId })
-      .single();
-    if (error) {
-      return { data: null, error: error.message };
+  async addJob(
+    run: Database["public"]["Tables"]["job"]["Insert"]
+  ): Promise<Result<null, string>> {
+    const insertResult = await this.database.from("job").insert([run]);
+    if (insertResult.error) {
+      return { data: null, error: JSON.stringify(insertResult) };
     }
-    return { data: data, error: null };
+    return { data: null, error: null };
   }
 
-  async updateRunStatus(
-    runId: string,
-    status: Database["public"]["Tables"]["run"]["Insert"]["status"]
+  async updateJobStatus(
+    jobId: string,
+    status: Database["public"]["Tables"]["job"]["Insert"]["status"]
   ): Promise<Result<null, string>> {
     const updateResult = await this.database
-      .from("run")
+      .from("job")
       .update({ status, updated_at: new Date().toISOString() })
-      .match({ id: runId });
+      .eq("id", jobId);
+
     if (updateResult.error) {
-      return { data: null, error: updateResult.error.message };
+      return { data: null, error: JSON.stringify(updateResult.error) };
+    }
+    return { data: null, error: null };
+  }
+  async updateNodeStatus(
+    nodeId: string,
+    status: Database["public"]["Tables"]["job_node"]["Insert"]["status"]
+  ): Promise<Result<null, string>> {
+    const updateResult = await this.database
+      .from("job_node")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", nodeId);
+    if (updateResult.error) {
+      return { data: null, error: JSON.stringify(updateResult.error) };
     }
     return { data: null, error: null };
   }
 
-  async addTask(
-    task: Database["public"]["Tables"]["task"]["Insert"]
+  async addNode(
+    node: Database["public"]["Tables"]["job_node"]["Insert"],
+    options: { parent_job_id?: string }
   ): Promise<Result<null, string>> {
-    const insertResult = await this.database.from("task").insert([task]);
+    const insertResult = await this.database.from("job_node").insert([node]);
     if (insertResult.error) {
-      return { data: null, error: insertResult.error.message };
+      return { data: null, error: JSON.stringify(insertResult) };
     }
+    if (options.parent_job_id) {
+      const insertResult = await this.database
+        .from("job_node_relationships")
+        .insert([
+          {
+            node_id: node.id,
+            parent_node_id: options.parent_job_id,
+            job_id: node.job,
+          },
+        ]);
+      if (insertResult.error) {
+        return { data: null, error: JSON.stringify(insertResult) };
+      }
+    }
+
     return { data: null, error: null };
   }
 

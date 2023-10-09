@@ -4,9 +4,7 @@ import { useOrgsContextManager } from "../../../services/hooks/organizations";
 import { Owner } from "../../../pages/api/organization/[id]/owner";
 
 export interface OrgContextValue {
-  currentOrg: Database["public"]["Tables"]["organization"]["Row"] & {
-    tier: string;
-  };
+  currentOrg: Database["public"]["Tables"]["organization"]["Row"];
   allOrgs: Database["public"]["Tables"]["organization"]["Row"][];
   setCurrentOrg: (
     orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]

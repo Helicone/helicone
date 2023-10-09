@@ -1,46 +1,46 @@
 import { Result } from "../../results";
 
-export interface Task {
+export interface HeliconeNode {
   name: string;
   description?: string;
   id?: string;
   customProperties?: Record<string, string>;
-  parentTaskId?: string;
-  run: string;
+  parentJobId?: string;
+  job: string;
 }
 
-export function validateTask(task: Task): Result<true, string> {
-  if (!task.name) {
+export function validateHeliconeNode(node: HeliconeNode): Result<true, string> {
+  if (!node.name) {
     return { data: null, error: "Missing run.name" };
   }
 
-  if (typeof task.name !== "string") {
+  if (typeof node.name !== "string") {
     return { data: null, error: "run.name must be a string" };
   }
 
-  if (task.description && typeof task.description !== "string") {
+  if (node.description && typeof node.description !== "string") {
     return { data: null, error: "run.description must be a string" };
   }
 
-  if (task.id && typeof task.id !== "string") {
+  if (node.id && typeof node.id !== "string") {
     return { data: null, error: "run.id must be a string" };
   }
 
-  if (task.customProperties && typeof task.customProperties !== "object") {
+  if (node.customProperties && typeof node.customProperties !== "object") {
     return {
       data: null,
       error: "run.customProperties must be an object",
     };
   }
 
-  if (task.parentTaskId && typeof task.parentTaskId !== "string") {
+  if (node.parentJobId && typeof node.parentJobId !== "string") {
     return {
       data: null,
       error: "run.parentTaskId must be a string",
     };
   }
 
-  if (typeof task.run !== "string") {
+  if (typeof node.job !== "string") {
     return {
       data: null,
       error: "run.run must be a string",

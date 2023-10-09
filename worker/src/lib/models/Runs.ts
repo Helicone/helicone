@@ -6,7 +6,7 @@ export function isValidStatus(status: string): boolean {
   return VALID_STATUS.includes(status);
 }
 
-export interface Run {
+export interface Job {
   name: string;
   description?: string;
   id?: string;
@@ -14,7 +14,7 @@ export interface Run {
   timeoutSeconds?: number;
 }
 
-export function validateRun(run: Run): Result<true, string> {
+export function validateRun(run: Job): Result<true, string> {
   if (!run.name) {
     return { data: null, error: "Missing run.name" };
   }

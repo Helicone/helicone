@@ -3,35 +3,10 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json }
+  | { [key: string]: Json | undefined }
   | Json[]
 
 export interface Database {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       cache_hits: {
@@ -47,6 +22,20 @@ export interface Database {
           created_at?: string
           request_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "cache_hits_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cache_hits_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       contact_submissions: {
         Row: {
@@ -79,6 +68,7 @@ export interface Database {
           last_name?: string | null
           tag?: string | null
         }
+        Relationships: []
       }
       feature_flags: {
         Row: {
@@ -99,6 +89,14 @@ export interface Database {
           id?: number
           org_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flags_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       feedback: {
         Row: {
@@ -119,32 +117,6 @@ export interface Database {
           rating?: boolean
           response_id?: string
         }
-<<<<<<< HEAD
-      }
-      feedback_metrics: {
-        Row: {
-          created_at: string
-          data_type: string
-          helicone_api_key_id: number
-          id: number
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          data_type: string
-          helicone_api_key_id: number
-          id?: number
-          name: string
-        }
-        Update: {
-          created_at?: string
-          data_type?: string
-          helicone_api_key_id?: number
-          id?: number
-          name?: string
-        }
-      }
-=======
         Relationships: [
           {
             foreignKeyName: "feedback_response_id_fkey"
@@ -172,7 +144,6 @@ export interface Database {
           }
         ]
       }
->>>>>>> main
       helicone_api_keys: {
         Row: {
           api_key_hash: string
@@ -201,6 +172,20 @@ export interface Database {
           soft_delete?: boolean
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "helicone_api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       helicone_proxy_key_limits: {
         Row: {
@@ -267,8 +252,6 @@ export interface Database {
           provider_key_id?: string
           soft_delete?: boolean
         }
-<<<<<<< HEAD
-=======
         Relationships: [
           {
             foreignKeyName: "helicone_proxy_keys_org_id_fkey"
@@ -289,7 +272,193 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
->>>>>>> main
+      }
+      job: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          name: string
+          org_id: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          name?: string
+          org_id?: string
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node: {
+        Row: {
+          created_at: string | null
+          custom_properties: Json
+          description: string
+          id: string
+          job: string
+          name: string
+          node_type: string
+          org_id: string
+          resource_data: string | null
+          resource_data_type: string | null
+          status: string
+          timeout_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_properties: Json
+          description?: string
+          id: string
+          job: string
+          name?: string
+          node_type?: string
+          org_id: string
+          resource_data?: string | null
+          resource_data_type?: string | null
+          status?: string
+          timeout_seconds?: number
+          updated_at: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_properties?: Json
+          description?: string
+          id?: string
+          job?: string
+          name?: string
+          node_type?: string
+          org_id?: string
+          resource_data?: string | null
+          resource_data_type?: string | null
+          status?: string
+          timeout_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_job_fkey"
+            columns: ["job"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node_relationships: {
+        Row: {
+          job_id: string | null
+          node_id: string
+          parent_node_id: string
+        }
+        Insert: {
+          job_id?: string | null
+          node_id: string
+          parent_node_id: string
+        }
+        Update: {
+          job_id?: string | null
+          node_id?: string
+          parent_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_relationships_job_id_fkey"
+            columns: ["job_id"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_relationships_node_id_fkey"
+            columns: ["node_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_relationships_parent_node_id_fkey"
+            columns: ["parent_node_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      job_node_request: {
+        Row: {
+          created_at: string
+          job_id: string
+          node_id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          job_id: string
+          node_id: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          job_id?: string
+          node_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_node_request_job_id_fkey"
+            columns: ["job_id"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_request_node_id_fkey"
+            columns: ["node_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_request_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_node_request_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       layout: {
         Row: {
@@ -316,6 +485,42 @@ export interface Database {
           name?: string
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "layout_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      org_rate_limit_tracker: {
+        Row: {
+          created_at: string | null
+          id: string
+          org_id: string
+          total_count: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          org_id: string
+          total_count?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          org_id?: string
+          total_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_rate_limit_tracker_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       organization: {
         Row: {
@@ -328,6 +533,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete: boolean
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          tier: string | null
         }
         Insert: {
           color?: string
@@ -339,6 +548,10 @@ export interface Database {
           name: string
           owner: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
         Update: {
           color?: string
@@ -350,7 +563,19 @@ export interface Database {
           name?: string
           owner?: string
           soft_delete?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          tier?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "organization_owner_fkey"
+            columns: ["owner"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       organization_member: {
         Row: {
@@ -371,6 +596,20 @@ export interface Database {
           org_role?: string
           organization?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "organization_member_member_fkey"
+            columns: ["member"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_member_organization_fkey"
+            columns: ["organization"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       prompt: {
         Row: {
@@ -394,6 +633,7 @@ export interface Database {
           name?: string
           prompt?: string
         }
+        Relationships: []
       }
       properties: {
         Row: {
@@ -423,6 +663,26 @@ export interface Database {
           user_id?: string | null
           value?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "properties_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       provider_keys: {
         Row: {
@@ -461,8 +721,6 @@ export interface Database {
           soft_delete?: boolean
           vault_key_id?: string | null
         }
-<<<<<<< HEAD
-=======
         Relationships: [
           {
             foreignKeyName: "provider_keys_key_id_fkey"
@@ -489,7 +747,6 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
->>>>>>> main
       }
       request: {
         Row: {
@@ -507,8 +764,6 @@ export interface Database {
           prompt_values: Json | null
           properties: Json | null
           provider: string
-          run_id: string | null
-          task_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -526,8 +781,6 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          run_id?: string | null
-          task_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -545,10 +798,83 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          run_id?: string | null
-          task_id?: string | null
           user_id?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "request_formatted_prompt_id_fkey"
+            columns: ["formatted_prompt_id"]
+            referencedRelation: "prompt"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_api_key_id_fkey"
+            columns: ["helicone_api_key_id"]
+            referencedRelation: "helicone_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_org_id_fkey"
+            columns: ["helicone_org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_proxy_key_id_fkey"
+            columns: ["helicone_proxy_key_id"]
+            referencedRelation: "helicone_proxy_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_user_fkey"
+            columns: ["helicone_user"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      request_job_task: {
+        Row: {
+          job_id: string
+          request_id: string
+          task_id: string
+        }
+        Insert: {
+          job_id: string
+          request_id: string
+          task_id: string
+        }
+        Update: {
+          job_id?: string
+          request_id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_job_task_job_id_fkey"
+            columns: ["job_id"]
+            referencedRelation: "job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_request_id_fkey"
+            columns: ["request_id"]
+            referencedRelation: "request_rbac"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_job_task_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "job_node"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       response: {
         Row: {
@@ -584,76 +910,7 @@ export interface Database {
           request?: string
           status?: number | null
         }
-      }
-      run: {
-        Row: {
-          created_at: string | null
-          custom_properties: Json
-          description: string
-          id: string
-          name: string
-          org_id: string
-          status: string
-          timeout_seconds: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string | null
-          custom_properties: Json
-          description: string
-          id: string
-          name: string
-          org_id: string
-          status?: string
-          timeout_seconds?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string | null
-          custom_properties?: Json
-          description?: string
-          id?: string
-          name?: string
-          org_id?: string
-          status?: string
-          timeout_seconds?: number
-          updated_at?: string
-        }
-      }
-      task: {
-        Row: {
-          created_at: string | null
-          custom_properties: Json
-          description: string
-          id: string
-          name: string
-          org_id: string
-          parent_task: string | null
-          run: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string | null
-          custom_properties: Json
-          description?: string
-          id: string
-          name?: string
-          org_id: string
-          parent_task?: string | null
-          run: string
-          updated_at: string
-        }
-        Update: {
-          created_at?: string | null
-          custom_properties?: Json
-          description?: string
-          id?: string
-          name?: string
-          org_id?: string
-          parent_task?: string | null
-          run?: string
-          updated_at?: string
-        }
+        Relationships: []
       }
       user_api_keys: {
         Row: {
@@ -677,6 +934,14 @@ export interface Database {
           key_name?: string | null
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_settings: {
         Row: {
@@ -697,6 +962,14 @@ export interface Database {
           tier?: string
           user?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_fkey"
+            columns: ["user"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       webhook_subscriptions: {
         Row: {
@@ -720,6 +993,14 @@ export interface Database {
           payload_type?: Json
           webhook_id?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_subscriptions_webhook_id_fkey"
+            columns: ["webhook_id"]
+            referencedRelation: "webhooks"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       webhooks: {
         Row: {
@@ -746,11 +1027,17 @@ export interface Database {
           org_id?: string
           txt_record?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "webhooks_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
-<<<<<<< HEAD
-=======
       decrypted_provider_keys: {
         Row: {
           created_at: string | null
@@ -847,12 +1134,12 @@ export interface Database {
           }
         ]
       }
->>>>>>> main
       metrics_rbac: {
         Row: {
           average_response_time: number | null
           average_tokens_per_response: number | null
         }
+        Relationships: []
       }
       model_metrics: {
         Row: {
@@ -862,6 +1149,7 @@ export interface Database {
           sum_prompt_tokens: number | null
           sum_tokens: number | null
         }
+        Relationships: []
       }
       request_cache_rbac: {
         Row: {
@@ -877,6 +1165,7 @@ export interface Database {
           properties: Json | null
           user_id: string | null
         }
+        Relationships: []
       }
       request_rbac: {
         Row: {
@@ -888,6 +1177,7 @@ export interface Database {
           properties: Json | null
           user_id: string | null
         }
+        Relationships: []
       }
       response_and_request_rbac: {
         Row: {
@@ -908,6 +1198,14 @@ export interface Database {
           response_id: string | null
           user_id: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       response_rbac: {
         Row: {
@@ -916,6 +1214,7 @@ export interface Database {
           id: string | null
           request: string | null
         }
+        Relationships: []
       }
       user_metrics_rbac: {
         Row: {
@@ -926,6 +1225,7 @@ export interface Database {
           total_requests: number | null
           user_id: string | null
         }
+        Relationships: []
       }
     }
     Functions: {
@@ -940,13 +1240,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
@@ -1038,6 +1338,14 @@ export interface Database {
           public?: boolean | null
           updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "buckets_owner_fkey"
+            columns: ["owner"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       migrations: {
         Row: {
@@ -1058,6 +1366,7 @@ export interface Database {
           id?: number
           name?: string
         }
+        Relationships: []
       }
       objects: {
         Row: {
@@ -1096,6 +1405,14 @@ export interface Database {
           updated_at?: string | null
           version?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "objects_bucketId_fkey"
+            columns: ["bucket_id"]
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -1127,7 +1444,7 @@ export interface Database {
         Args: {
           name: string
         }
-        Returns: string[]
+        Returns: unknown
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>

@@ -19,7 +19,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         if (messages.length > 0) {
           return messages.at(-1).content;
         } else {
-          return messages;
+          return JSON.stringify(messages);
         }
       } else {
         return "";

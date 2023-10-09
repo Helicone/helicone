@@ -21,12 +21,13 @@ const tiers = [
     ),
     description: "Everything necessary to get started.",
     features: [
-      "Up to 1 million requests per month",
+      "Up to 100,000 requests per month",
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
-      "1 Organization",
       "5 Seats",
+      "Unlimited Proxy Requests per minute",
+      "1,000 logs per minute",
     ],
     buttonText: "Try for free",
     backgroundColor: "bg-sky-600",
@@ -56,9 +57,10 @@ const tiers = [
       "GraphQL API",
       "Request Retries",
       "Key Vault",
-      "5 Organizations",
-      "10 Seats per Organization",
+      "10 Seats",
       "Up to 2GB of storage",
+      "Unlimited Proxy Requests per minute",
+      "10,000 logs per minute",
     ],
     buttonText: "Get Started",
     backgroundColor: "bg-pink-600",
@@ -84,6 +86,7 @@ const tiers = [
       "Dedicated Support Channel (24/7 access)",
       "Custom ETL integrations",
       "Priority Feature Requests",
+      "Higher Rate Limits",
     ],
     buttonText: "Contact us",
     backgroundColor: "bg-purple-600",
@@ -105,7 +108,7 @@ export default function PricingPage() {
     <>
       <NavBarV2 />
       <div className="bg-gray-50">
-        <div className="flex flex-col mx-auto max-w-7xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
+        <div className="flex flex-col mx-auto max-w-6xl p-4 md:px-8 pb-24 pt-10 sm:pb-32 lg:flex lg:py-24 antialiased">
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
             Pricing thats{" "}
             <span className="bg-gradient-to-r from-sky-500 via-pink-500 to-violet-500 bg-[length:100%_4px] pb-1 bg-no-repeat bg-bottom">

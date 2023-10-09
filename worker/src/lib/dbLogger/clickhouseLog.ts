@@ -36,6 +36,10 @@ export async function logInClickhouse(
   request: Database["public"]["Tables"]["request"]["Row"],
   response: Database["public"]["Tables"]["response"]["Insert"],
   properties: Database["public"]["Tables"]["properties"]["Insert"][],
+  node: {
+    id: string | null;
+    job: string | null;
+  },
   clickhouseDb: ClickhouseClientWrapper
 ) {
   return Promise.all([
@@ -92,8 +96,8 @@ export async function logInClickhouse(
         status: response.status ?? null,
         organization_id:
           request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
-        run_id: request.run_id ?? null,
-        task_id: request.task_id ?? null,
+        job_id: node.job,
+        node_id: node.id,
         proxy_key_id: request.helicone_proxy_key_id ?? null,
       },
     ]),

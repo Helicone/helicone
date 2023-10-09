@@ -107,6 +107,6 @@ export async function checkLimits(
     }
   });
 
-  await env.CACHE_KV.put(cacheKey, result.toString(), { expirationTtl: 30 });
+  await env.CACHE_KV.put(cacheKey, result.toString(), { expirationTtl: 60 });
   return result;
 }

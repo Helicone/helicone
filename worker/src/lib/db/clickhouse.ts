@@ -152,8 +152,8 @@ interface ResponseCopyV2 {
 }
 
 interface ResponseCopyV3 extends ResponseCopyV2 {
-  task_id: Nullable<string>;
-  run_id: Nullable<string>;
+  node_id: Nullable<string>;
+  job_id: Nullable<string>;
   proxy_key_id: Nullable<string>;
 }
 

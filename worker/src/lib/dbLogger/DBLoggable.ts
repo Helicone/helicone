@@ -6,13 +6,19 @@ import { logInClickhouse } from "./clickhouseLog";
 import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
-import { Result, mapPostgrestErr } from "../../results";
-import { consolidateTextFields, getUsage } from "./responseParserHelpers";
+import { Result, err, mapPostgrestErr } from "../../results";
+import {
+  consolidateTextFields,
+  getUsage,
+} from "./parsers/responseParserHelpers";
 import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { AsyncLogModel } from "../models/AsyncLog";
 import { InsertQueue } from "./insertQueue";
+import { parseOpenAIStream } from "./parsers/openAIStreamParser";
+import { anthropicAIStream } from "./parsers/anthropicStreamParser";
+import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
 
 export interface DBLoggableProps {
   response: {
@@ -40,7 +46,7 @@ export interface DBLoggableProps {
     isStream: boolean;
     omitLog: boolean;
     provider: Provider;
-    taskId: string | null;
+    nodeId: string | null;
   };
   timing: {
     startTime: Date;
@@ -79,7 +85,7 @@ export function dbLoggableRequestFromProxyRequest(
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
-    taskId: proxyRequest.taskId,
+    nodeId: proxyRequest.nodeId,
   };
 }
 
@@ -99,62 +105,6 @@ function getResponseBody(json: any): string {
     return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
   }
   return JSON.stringify(json);
-}
-
-async function getHeliconeApiKeyRow(
-  dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
-): Promise<Result<AuthParams, string>> {
-  if (!heliconeApiKeyHash) {
-    return { data: null, error: "Helicone api key not found" };
-  }
-
-  const { data, error } = await dbClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
-    .eq("soft_delete", false)
-    .single();
-
-  if (error !== null) {
-    return { data: null, error: error.message };
-  }
-  return {
-    data: {
-      organizationId: data?.organization_id,
-      userId: data?.user_id,
-      heliconeApiKeyId: data?.id,
-    },
-    error: null,
-  };
-}
-
-async function getHeliconeProxyKeyRow(
-  dbClient: SupabaseClient<Database>,
-  proxyKeyId: string
-): Promise<Result<AuthParams, string>> {
-  const result = await dbClient
-    .from("helicone_proxy_keys")
-    .select("org_id")
-    .eq("id", proxyKeyId)
-    .eq("soft_delete", false)
-    .single();
-
-  if (result.error || !result.data) {
-    return {
-      data: null,
-      error: result.error.message,
-    };
-  }
-
-  return {
-    data: {
-      organizationId: result.data.org_id,
-      userId: undefined,
-      heliconeApiKeyId: undefined,
-    },
-    error: null,
-  };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -188,7 +138,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
       omitLog: false,
       provider,
-      taskId: requestWrapper.getTaskId(),
+      nodeId: requestWrapper.getNodeId(),
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -242,22 +192,9 @@ export class DBLoggable {
     const responseStatus = this.response.status;
     const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
-    if (isStream && this.provider === "ANTHROPIC") {
-      return {
-        error: null,
-        data: {
-          error: "Streaming not supported for anthropic yet",
-          streamed_data: result,
-        },
-      };
-    }
 
     try {
-      if (
-        this.provider === "ANTHROPIC" &&
-        responseStatus === 200 &&
-        requestBody
-      ) {
+      if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
@@ -281,31 +218,15 @@ export class DBLoggable {
           data: JSON.parse(result),
           error: null,
         };
+      } else if (isStream && this.provider === "ANTHROPIC") {
+        return anthropicAIStream(result, tokenCounter, requestBody);
+      } else if (isStream) {
+        return parseOpenAIStream(result, tokenCounter, requestBody);
       } else {
-        const lines = result.split("\n").filter((line) => line !== "");
-        const data = lines.map((line, i) => {
-          if (i === lines.length - 1) return {};
-          return JSON.parse(line.replace("data:", ""));
-        });
-
-        try {
-          return {
-            data: {
-              ...consolidateTextFields(data),
-              streamed_data: data,
-              usage: await getUsage(data, requestBody, tokenCounter),
-            },
-            error: null,
-          };
-        } catch (e) {
-          console.error("Error parsing response", e);
-          return {
-            data: {
-              streamed_data: data,
-            },
-            error: null,
-          };
-        }
+        return {
+          data: null,
+          error: "Unknown error parsing response",
+        };
       }
     } catch (e) {
       console.log("Error parsing response", e);
@@ -479,26 +400,55 @@ export class DBLoggable {
     };
   }
 
-  async _log(
+  auth(): HeliconeAuth {
+    return this.request.heliconeProxyKeyId
+      ? {
+          heliconeProxyKeyId: this.request.heliconeProxyKeyId,
+          heliconeApiKeyAuthHash: undefined,
+        }
+      : {
+          heliconeApiKeyAuthHash: this.request.heliconeApiKeyAuthHash ?? "",
+          heliconeProxyKeyId: undefined,
+        };
+  }
+
+  async log(
     db: {
-      supabase: SupabaseClient<Database>;
+      supabase: SupabaseClient<Database>; // TODO : Deprecate
+      dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
     rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
-    const { data: authParams, error } = this.request.heliconeProxyKeyId
-      ? await getHeliconeProxyKeyRow(
-          db.supabase,
-          this.request.heliconeProxyKeyId
-        )
-      : await getHeliconeApiKeyRow(
-          db.supabase,
-          this.request.heliconeApiKeyAuthHash
-        );
-
+    const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return { data: null, error: error ?? "Helicone organization not found" };
+    }
+
+    const rateLimiter = await db.dbWrapper.getRateLimiter();
+    if (rateLimiter.error !== null) {
+      return rateLimiter;
+    }
+    const tier = await db.dbWrapper.getTier();
+
+    if (tier.error !== null) {
+      return err(tier.error);
+    }
+
+    const rateLimit = await rateLimiter.data.checkRateLimit(tier.data);
+
+    if (rateLimit.shouldLogInDB) {
+      console.log("LOGGING RATE LIMIT IN DB");
+      await db.dbWrapper.recordRateLimitHit(
+        authParams.organizationId,
+        rateLimit.rlIncrementDB
+      );
+    }
+
+    if (rateLimit.isRateLimited) {
+      console.log("RATE LIMITED");
+      return err("Rate limited");
     }
 
     const requestResult = await logRequest(
@@ -525,6 +475,7 @@ export class DBLoggable {
       requestResult.data.request,
       responseResult.data,
       requestResult.data.properties,
+      requestResult.data.node,
       db.clickhouse
     );
 
@@ -546,30 +497,5 @@ export class DBLoggable {
       data: null,
       error: null,
     };
-  }
-
-  async log(
-    db: {
-      supabase: SupabaseClient<Database>;
-      clickhouse: ClickhouseClientWrapper;
-      queue: InsertQueue;
-    },
-    rateLimitKV: KVNamespace
-  ): Promise<Result<null, string>> {
-    const res = await this._log(db, rateLimitKV);
-    if (res.error !== null) {
-      console.error("Error logging", res.error);
-      const uuid = crypto.randomUUID();
-      db.queue.responseAndResponseQueueKV.put(
-        uuid,
-        JSON.stringify({
-          _type: "dbLoggable",
-          payload: JSON.stringify(this),
-        })
-      );
-
-      db.queue.fallBackQueue.send(uuid);
-    }
-    return res;
   }
 }

@@ -29,6 +29,8 @@ import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "./RequestView";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
+import useSearchParams from "../../shared/utils/useSearchParams";
+import { TimeFilter } from "../dashboard/dashboardPage";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -130,14 +132,92 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
-  const [timeFilter, setTimeFilter] = useState<FilterNode>({
-    request: {
-      created_at: {
-        gte: getTimeIntervalAgo("24h").toISOString(),
-      },
-    },
-  });
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
+  const searchParams = useSearchParams();
+
+  const getTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const [_, start, end] = currentTimeFilter.split("_");
+
+      const filter: FilterNode = {
+        left: {
+          request: {
+            created_at: {
+              gte: new Date(start).toISOString(),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request: {
+            created_at: {
+              lte: new Date(end).toISOString(),
+            },
+          },
+        },
+      };
+      return filter;
+    } else {
+      return {
+        request: {
+          created_at: {
+            gte: getTimeIntervalAgo(
+              (searchParams.get("t") as TimeInterval) || "24h"
+            ).toISOString(),
+          },
+        },
+      };
+    }
+  };
+
+  const getAdvancedFilters = (): UIFilterRow[] => {
+    try {
+      const currentAdvancedFilters = searchParams.get("filters");
+
+      if (currentAdvancedFilters) {
+        const filters = decodeURIComponent(currentAdvancedFilters).slice(2, -2);
+        const decodedFilters = filters
+          .split("|")
+          .map(decodeFilter)
+          .filter((filter) => filter !== null) as UIFilterRow[];
+
+        return decodedFilters;
+      }
+    } catch (error) {
+      console.log("Error decoding advanced filters:", error);
+    }
+    return [];
+  };
+
+  const getTimeRange = () => {
+    const currentTimeFilter = searchParams.get("t");
+    let range: TimeFilter;
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const start = currentTimeFilter.split("_")[1]
+        ? new Date(currentTimeFilter.split("_")[1])
+        : getTimeIntervalAgo("24h");
+      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
+      range = {
+        start,
+        end,
+      };
+    } else {
+      range = {
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+        end: new Date(),
+      };
+    }
+    return range;
+  };
+
+  const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
+  const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
+
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>(
+    getAdvancedFilters()
+  );
 
   const router = useRouter();
 
@@ -184,55 +264,28 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedAdvancedFilter]);
 
-  useEffect(() => {
-    if (isDataLoading || !router.query.propertyFilters) {
-      return;
-    }
+  function encodeFilter(filter: UIFilterRow): string {
+    return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
+      filter.value
+    )}`;
+  }
+
+  function decodeFilter(encoded: string): UIFilterRow | null {
     try {
-      const queryFilters = JSON.parse(
-        router.query.propertyFilters as string
-      ) as {
-        key: string;
-        value: string;
-      }[];
-      if (queryFilters) {
-        const newFilters: UIFilterRow[] = queryFilters
-          .filter(
-            (filter) =>
-              filterMap.findIndex((f) => f.column === filter.key) !== -1
-          )
-          .map((filter) => {
-            const filterMapIdx = filterMap.findIndex(
-              (f) => f.column === filter.key
-            );
-            return {
-              filterMapIdx: filterMapIdx,
-              operatorIdx: 0,
-              value: filter.value,
-            };
-          });
+      const parts = encoded.split(":");
+      if (parts.length !== 3) return null;
+      const filterMapIdx = parseInt(parts[0], 10);
+      const operatorIdx = parseInt(parts[1], 10);
+      const value = decodeURIComponent(parts[2]);
 
-        if (!advancedFilters || advancedFilters.length === 0) {
-          setAdvancedFilters(newFilters);
-          const newQuery = {
-            ...router.query,
-          };
-          delete newQuery.propertyFilters;
+      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
 
-          router.replace(
-            {
-              pathname: "/requests",
-              query: newQuery,
-            },
-            undefined,
-            {}
-          );
-        }
-      }
-    } catch (e) {
-      console.error(e);
+      return { filterMapIdx, operatorIdx, value };
+    } catch (error) {
+      console.log("Error decoding filter:", error);
+      return null;
     }
-  }, [router, isDataLoading, filterMap, advancedFilters]);
+  }
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -292,17 +345,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     })
   );
 
+  const onSetAdvancedFilters = (filters: UIFilterRow[]) => {
+    if (filters.length > 0) {
+      const currentAdvancedFilters = encodeURIComponent(
+        JSON.stringify(filters.map(encodeFilter).join("|"))
+      );
+      searchParams.set("filters", JSON.stringify(currentAdvancedFilters));
+    } else {
+      searchParams.delete("filters");
+    }
+
+    setAdvancedFilters(filters);
+  };
+
   const onRowSelectHandler = (row: NormalizedRequest) => {
     setSelectedData(row);
     setOpen(true);
-    router.push(
-      {
-        pathname: "/requests",
-        query: { ...router.query, requestId: row.id },
-      },
-      undefined,
-      {}
-    );
+    searchParams.set("requestId", row.id);
   };
 
   return (
@@ -340,7 +399,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           advancedFilters={{
             filterMap: filterMap,
             filters: advancedFilters,
-            setAdvancedFilters: setAdvancedFilters,
+            setAdvancedFilters: onSetAdvancedFilters,
             searchPropertyFilters: searchPropertyFilters,
           }}
           exportData={requests.map((request) => {
@@ -364,6 +423,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             return flattenedRequest;
           })}
           timeFilter={{
+            currentTimeFilter: timeRange,
             defaultValue: "24h",
             onTimeSelectHandler: onTimeSelectHandler,
           }}

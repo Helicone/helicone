@@ -1,11 +1,11 @@
-
 FROM ubuntu:20.04
 
 RUN apt update -y
 RUN apt install curl git -y
 RUN apt install python3 python3-pip -y
 
-WORKDIR /app
-RUN git clone https://github.com/Helicone/helicone.git
 
-CMD python3 clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT}
+WORKDIR /app
+
+
+CMD python3 helicone/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT}

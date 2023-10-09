@@ -12,6 +12,9 @@ import ExportButton from "./exportButton";
 import ViewColumns from "../../../templates/requestsV2/viewColumns";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import useNotification from "../../notification/useNotification";
+import { useRouter } from "next/router";
+import useSearchParams from "../../utils/useSearchParams";
+import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -20,7 +23,7 @@ interface ThemedTableHeaderProps<T> {
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRow[];
-    setAdvancedFilters: Dispatch<SetStateAction<UIFilterRow[]>>;
+    setAdvancedFilters: (filters: UIFilterRow[]) => void;
     searchPropertyFilters: (
       property: string,
       search: string
@@ -36,6 +39,7 @@ interface ThemedTableHeaderProps<T> {
 
   // define this if you want the time filter
   timeFilter?: {
+    currentTimeFilter: TimeFilter;
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
@@ -43,7 +47,10 @@ interface ThemedTableHeaderProps<T> {
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { setNotification } = useNotification();
+
   const { rows, columnsFilter, timeFilter, advancedFilters } = props;
+
+  const searchParams = useSearchParams();
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -56,13 +63,23 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     setShowFilters(!showFilters);
     window.localStorage.setItem("showFilters", JSON.stringify(!showFilters));
   };
-  const [isLive, setIsLive] = useLocalStorage("isLive", false);
+
+  const getDefaultValue = () => {
+    const currentTimeFilter = searchParams.get("t");
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
 
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row justify-between ">
         {timeFilter !== undefined ? (
           <ThemedTimeFilter
+            currentTimeFilter={timeFilter.currentTimeFilter}
             timeFilterOptions={[
               { key: "24h", value: "24H" },
               { key: "7d", value: "7D" },
@@ -74,7 +91,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               timeFilter.onTimeSelectHandler(key as TimeInterval, value);
             }}
             isFetching={false}
-            defaultValue={"24h"}
+            defaultValue={getDefaultValue()}
             custom={true}
           />
         ) : (
@@ -128,11 +145,9 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     ].label
                   } ${_filter.value}`}
                   onDelete={() => {
-                    advancedFilters.setAdvancedFilters((prev) => {
-                      const newFilters = [...prev];
-                      newFilters.splice(index, 1);
-                      return newFilters;
-                    });
+                    const prev = [...advancedFilters.filters];
+                    prev.splice(index, 1);
+                    advancedFilters.setAdvancedFilters(prev);
                   }}
                 />
               );

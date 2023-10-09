@@ -88,6 +88,10 @@ export async function logRequest(
     {
       request: Database["public"]["Tables"]["request"]["Row"];
       properties: Database["public"]["Tables"]["properties"]["Insert"][];
+      node: {
+        id: string | null;
+        job: string | null;
+      };
     },
     string
   >
@@ -145,15 +149,15 @@ export async function logRequest(
         truncatedUserId.substring(0, MAX_USER_ID_LENGTH) + "...";
     }
 
-    const runId = request.taskId
+    const jobNode = request.nodeId
       ? await dbClient
-          .from("task")
+          .from("job_node")
           .select("*")
-          .eq("id", request.taskId)
+          .eq("id", request.nodeId)
           .single()
       : null;
-    if (runId && runId.error) {
-      return { data: null, error: `No task found for id ${request.taskId}` };
+    if (jobNode && jobNode.error) {
+      return { data: null, error: `No task found for id ${request.nodeId}` };
     }
 
     const createdAt = request.startTime ?? new Date();
@@ -172,9 +176,7 @@ export async function logRequest(
       helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
-      created_at: createdAt,
-      task_id: request.taskId,
-      run_id: runId?.data.run ?? null,
+      created_at: createdAt.toISOString(),
     };
 
     const customPropertyRows = Object.entries(request.properties).map(
@@ -184,15 +186,40 @@ export async function logRequest(
         user_id: null,
         key: entry[0],
         value: entry[1],
-        created_at: createdAt,
+        created_at: createdAt.toISOString(),
       })
     );
-    await insertQueue.addRequest(requestData, customPropertyRows, responseId);
+
+    const requestResult = await insertQueue.addRequest(
+      requestData,
+      customPropertyRows,
+      responseId
+    );
+    if (requestResult.error) {
+      return { data: null, error: requestResult.error };
+    }
+    if (jobNode && jobNode.data) {
+      const jobNodeResult = await insertQueue.addRequestNodeRelationship(
+        jobNode.data.job,
+        jobNode.data.id,
+        request.requestId
+      );
+      if (jobNodeResult.error) {
+        return {
+          data: null,
+          error: `Node Relationship error: ${jobNodeResult.error}`,
+        };
+      }
+    }
 
     return {
       data: {
         request: requestData,
         properties: customPropertyRows,
+        node: {
+          id: jobNode?.data.id ?? null,
+          job: jobNode?.data.job ?? null,
+        },
       },
       error: null,
     };

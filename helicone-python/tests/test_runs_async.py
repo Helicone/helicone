@@ -1,5 +1,5 @@
 from helicone.globals.helicone import helicone_global
-from helicone.runs import HeliconeRun, HeliconeTaskConfig
+from helicone.runs import HeliconeJob, HeliconeNodeConfig
 from helicone.openai_async import openai, Meta
 import json
 COURSE_FUNCTIONS = [
@@ -89,15 +89,15 @@ helicone_global.proxy_url = "http://127.0.0.1:8787/v1"
 
 
 def test_run_creation():
-    generate_course = HeliconeRun(
+    generate_course = HeliconeJob(
         name="Generate Entire Course",
     )
     try:
 
         TOPIC = "Artificial Intelligence"
 
-        create_course_outline = generate_course.create_task(
-            HeliconeTaskConfig(
+        create_course_outline = generate_course.create_node(
+            HeliconeNodeConfig(
                 name="Create Course Outline",
                 description="Small task to create a course outline",
             )
@@ -121,8 +121,8 @@ def test_run_creation():
         course_outline = json.loads(
             _course_outline.choices[0].message.function_call.arguments)
 
-        create_chapters = create_course_outline.create_child_task(
-            HeliconeTaskConfig(
+        create_chapters = create_course_outline.create_child_node(
+            HeliconeNodeConfig(
                 name="Create Chapters",
                 description="Generates each chapter from the course outline",
             )
