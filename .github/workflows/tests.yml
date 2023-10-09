@@ -112,18 +112,18 @@ jobs:
           npm install
           npm test
 
-      # This test takes too long. make it slow with cache or something :)
-      # - name: Run python tests tests
-      #   working-directory: helicone-python
-      #   env:
-      #     HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
-      #     HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
-      #     SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
-      #     SUPABASE_URL: "http://localhost:54321"
-      #     HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
-      #     OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
-      #     OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
-      #   run: |
-      #     curl -sSL https://install.python-poetry.org | python3 -
-      #     poetry install
-      #     poetry run pytest -s tests/test_runs_proxy.py
+      This test takes too long. make it slow with cache or something :)
+      - name: Run python tests tests
+        working-directory: helicone-python
+        env:
+          HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
+          HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+          SUPABASE_URL: "http://localhost:54321"
+          HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
+          OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
+          OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
+          poetry run pytest -s tests/test_async.py

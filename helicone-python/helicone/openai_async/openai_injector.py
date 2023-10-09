@@ -122,6 +122,7 @@ class OpenAIInjector:
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            print("HELLOZ")
             logger = HeliconeAsyncLogger.from_helicone_global()
 
             arg_extractor = CreateArgsExtractor(*args, **kwargs)
@@ -132,6 +133,7 @@ class OpenAIInjector:
                 json=arg_extractor.get_body(),
                 meta=arg_extractor.get_helicone_meta()
             )
+            print("providerRequest", providerRequest)
             try:
                 result = func(**arg_extractor.get_args())
             except Exception as e:
