@@ -1,12 +1,12 @@
 // import { useQuery } from "@tanstack/react-query";
 import { useQuery } from "@apollo/client";
 import { gql } from "../../lib/api/graphql/client";
-import { HeliconeRunFilter } from "../../lib/api/graphql/schema/types/graphql";
-import { SortLeafRun } from "../lib/sorts/requests/sorts";
+import { HeliconeJobFilter } from "../../lib/api/graphql/schema/types/graphql";
+import { SortLeafJob } from "../lib/sorts/requests/sorts";
 
 export const GET_RUNS = gql(/* GraphQL */ `
-  query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeRunFilter!]) {
-    heliconeRun(filters: $filters, offset: $offset, limit: $limit) {
+  query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeJobFilter!]) {
+    heliconeJob(filters: $filters, offset: $offset, limit: $limit) {
       id
       name
       description
@@ -14,7 +14,7 @@ export const GET_RUNS = gql(/* GraphQL */ `
       created_at
       updated_at
       timeout_seconds
-      task_count
+      node_count
       request_count
       properties {
         value
@@ -27,8 +27,8 @@ export const GET_RUNS = gql(/* GraphQL */ `
 export const useGetRuns = (props: {
   currentPage: number;
   currentPageSize: number;
-  advancedFilter: HeliconeRunFilter[];
-  sortLeaf?: SortLeafRun;
+  advancedFilter: HeliconeJobFilter[];
+  sortLeaf?: SortLeafJob;
   isLive: boolean;
 }) => {
   const { currentPage, currentPageSize, advancedFilter, sortLeaf, isLive } =

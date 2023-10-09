@@ -29,7 +29,7 @@ import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "../requestsV2/RequestView";
 import { useRunPage } from "./useRunPage";
-import { HeliconeRun } from "../../../lib/api/graphql/client/graphql";
+import { HeliconeJob } from "../../../lib/api/graphql/client/graphql";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 
 interface RunsPageProps {
@@ -211,7 +211,7 @@ const RunsPage = (props: RunsPageProps) => {
       />
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
-          defaultData={(runs.data?.heliconeRun || []) as HeliconeRun[]}
+          defaultData={(runs.data?.heliconeJob || []) as HeliconeJob[]}
           defaultColumns={columnsWithProperties}
           tableKey="requestsColumnVisibility"
           dataLoading={loading}

@@ -49,6 +49,50 @@ export type FeedbackFilter = {
   rating?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type HeliconeJob = {
+  __typename?: 'HeliconeJob';
+  created_at: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  node_count: Scalars['Int']['output'];
+  properties?: Maybe<Array<Maybe<Property>>>;
+  request_count: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  timeout_seconds: Scalars['Int']['output'];
+  updated_at: Scalars['String']['output'];
+};
+
+export type HeliconeJobFilter = {
+  created_at?: InputMaybe<DateOperators>;
+  description?: InputMaybe<TextOperators>;
+  id?: InputMaybe<TextOperators>;
+  name?: InputMaybe<TextOperators>;
+  property?: InputMaybe<PropertyFilter>;
+  updated_at?: InputMaybe<DateOperators>;
+};
+
+export type HeliconeNode = {
+  __typename?: 'HeliconeNode';
+  created_at: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  job_id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  parent_node_ids?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  properties?: Maybe<Array<Maybe<Property>>>;
+  updated_at: Scalars['String']['output'];
+};
+
+export type HeliconeNodeFilter = {
+  created_at?: InputMaybe<DateOperators>;
+  description?: InputMaybe<TextOperators>;
+  id?: InputMaybe<TextOperators>;
+  name?: InputMaybe<TextOperators>;
+  property?: InputMaybe<PropertyFilter>;
+  updated_at?: InputMaybe<DateOperators>;
+};
+
 export type HeliconeRequest = {
   __typename?: 'HeliconeRequest';
   cacheHits?: Maybe<Scalars['Int']['output']>;
@@ -76,50 +120,6 @@ export type HeliconeRequestFilter = {
   requestId?: InputMaybe<TextOperators>;
   response?: InputMaybe<TextOperators>;
   user?: InputMaybe<TextOperators>;
-};
-
-export type HeliconeRun = {
-  __typename?: 'HeliconeRun';
-  created_at: Scalars['String']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  properties?: Maybe<Array<Maybe<Property>>>;
-  request_count: Scalars['Int']['output'];
-  status: Scalars['String']['output'];
-  task_count: Scalars['Int']['output'];
-  timeout_seconds: Scalars['Int']['output'];
-  updated_at: Scalars['String']['output'];
-};
-
-export type HeliconeRunFilter = {
-  created_at?: InputMaybe<DateOperators>;
-  description?: InputMaybe<TextOperators>;
-  id?: InputMaybe<TextOperators>;
-  name?: InputMaybe<TextOperators>;
-  property?: InputMaybe<PropertyFilter>;
-  updated_at?: InputMaybe<DateOperators>;
-};
-
-export type HeliconeTask = {
-  __typename?: 'HeliconeTask';
-  created_at: Scalars['String']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  parent_id?: Maybe<Scalars['String']['output']>;
-  properties?: Maybe<Array<Maybe<Property>>>;
-  run_id: Scalars['String']['output'];
-  updated_at: Scalars['String']['output'];
-};
-
-export type HeliconeTaskFilter = {
-  created_at?: InputMaybe<DateOperators>;
-  description?: InputMaybe<TextOperators>;
-  id?: InputMaybe<TextOperators>;
-  name?: InputMaybe<TextOperators>;
-  property?: InputMaybe<PropertyFilter>;
-  updated_at?: InputMaybe<DateOperators>;
 };
 
 export type Model = {
@@ -153,9 +153,9 @@ export type PropertyFilter = {
 export type Query = {
   __typename?: 'Query';
   aggregatedHeliconeRequest?: Maybe<AggregatedHeliconeRequest>;
+  heliconeJob?: Maybe<Array<Maybe<HeliconeJob>>>;
+  heliconeNode?: Maybe<Array<Maybe<HeliconeNode>>>;
   heliconeRequest?: Maybe<Array<Maybe<HeliconeRequest>>>;
-  heliconeRun?: Maybe<Array<Maybe<HeliconeRun>>>;
-  heliconeTask?: Maybe<Array<Maybe<HeliconeTask>>>;
   user?: Maybe<Array<Maybe<User>>>;
 };
 
@@ -165,27 +165,27 @@ export type QueryAggregatedHeliconeRequestArgs = {
 };
 
 
+export type QueryHeliconeJobArgs = {
+  filters?: InputMaybe<Array<HeliconeJobFilter>>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryHeliconeNodeArgs = {
+  filters?: InputMaybe<Array<HeliconeNodeFilter>>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  job_id?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryHeliconeRequestArgs = {
   filters?: InputMaybe<Array<HeliconeRequestFilter>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryHeliconeRunArgs = {
-  filters?: InputMaybe<Array<HeliconeRunFilter>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryHeliconeTaskArgs = {
-  filters?: InputMaybe<Array<HeliconeTaskFilter>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  run_id?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -227,23 +227,23 @@ export type ValueFilter = {
 export type FetchRunsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  filters?: InputMaybe<Array<HeliconeRunFilter> | HeliconeRunFilter>;
+  filters?: InputMaybe<Array<HeliconeJobFilter> | HeliconeJobFilter>;
 }>;
 
 
-export type FetchRunsQuery = { __typename?: 'Query', heliconeRun?: Array<{ __typename?: 'HeliconeRun', id: string, name: string, description?: string | null, status: string, created_at: string, updated_at: string, timeout_seconds: number, task_count: number, request_count: number, properties?: Array<{ __typename?: 'Property', value?: string | null, name?: string | null } | null> | null } | null> | null };
+export type FetchRunsQuery = { __typename?: 'Query', heliconeJob?: Array<{ __typename?: 'HeliconeJob', id: string, name: string, description?: string | null, status: string, created_at: string, updated_at: string, timeout_seconds: number, node_count: number, request_count: number, properties?: Array<{ __typename?: 'Property', value?: string | null, name?: string | null } | null> | null } | null> | null };
 
 export type FetchTasksQueryVariables = Exact<{
-  heliconeTaskId?: InputMaybe<Scalars['String']['input']>;
+  heliconeNodeId?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  runId?: InputMaybe<Scalars['String']['input']>;
-  filters?: InputMaybe<Array<HeliconeTaskFilter> | HeliconeTaskFilter>;
+  jobId?: InputMaybe<Scalars['String']['input']>;
+  filters?: InputMaybe<Array<HeliconeNodeFilter> | HeliconeNodeFilter>;
 }>;
 
 
-export type FetchTasksQuery = { __typename?: 'Query', heliconeTask?: Array<{ __typename?: 'HeliconeTask', id: string, name: string, description?: string | null, created_at: string, updated_at: string, run_id: string, parent_id?: string | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
+export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string | null> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
 
 
-export const FetchRunsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchRuns"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeRunFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeRun"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"timeout_seconds"}},{"kind":"Field","name":{"kind":"Name","value":"task_count"}},{"kind":"Field","name":{"kind":"Name","value":"request_count"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<FetchRunsQuery, FetchRunsQueryVariables>;
-export const FetchTasksDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchTasks"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"heliconeTaskId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"runId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeTaskFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeTask"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"heliconeTaskId"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"run_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"runId"}}},{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"run_id"}},{"kind":"Field","name":{"kind":"Name","value":"parent_id"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]} as unknown as DocumentNode<FetchTasksQuery, FetchTasksQueryVariables>;
+export const FetchRunsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchRuns"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeJobFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeJob"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"timeout_seconds"}},{"kind":"Field","name":{"kind":"Name","value":"node_count"}},{"kind":"Field","name":{"kind":"Name","value":"request_count"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<FetchRunsQuery, FetchRunsQueryVariables>;
+export const FetchTasksDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchTasks"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"heliconeNodeId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"jobId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeNodeFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeNode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"heliconeNodeId"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"job_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"jobId"}}},{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"job_id"}},{"kind":"Field","name":{"kind":"Name","value":"parent_node_ids"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]} as unknown as DocumentNode<FetchTasksQuery, FetchTasksQueryVariables>;

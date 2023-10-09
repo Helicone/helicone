@@ -196,7 +196,7 @@ const whereKeyMappings: KeyMappings = {
     request_created_at: "property_with_response_v1.request_created_at",
     organization_id: "property_with_response_v1.organization_id",
   }),
-  run: (filter) => {
+  job: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
       const key = Object.keys(filter.custom_properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
@@ -208,18 +208,18 @@ const whereKeyMappings: KeyMappings = {
         value: value,
       };
     }
-    return easyKeyMappings<"run">({
-      created_at: "run.created_at",
-      org_id: "run.org_id",
-      id: "run.id",
-      description: "run.description",
-      name: "run.name",
-      status: "run.status",
-      timeout_seconds: "run.timeout_seconds",
-      updated_at: "run.updated_at",
+    return easyKeyMappings<"job">({
+      created_at: "job.created_at",
+      org_id: "job.org_id",
+      id: "job.id",
+      description: "job.description",
+      name: "job.name",
+      status: "job.status",
+      timeout_seconds: "job.timeout_seconds",
+      updated_at: "job.updated_at",
     })(filter);
   },
-  task: (filter) => {
+  job_node: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
       console.log("customer_properties", filter.custom_properties);
       const key = Object.keys(filter.custom_properties)[0];
@@ -236,17 +236,17 @@ const whereKeyMappings: KeyMappings = {
         value: value,
       };
     }
-    return easyKeyMappings<"task">({
-      created_at: "task.created_at",
-      id: "task.id",
-      name: "task.name",
-      description: "task.description",
-      parent_task: "task.parent_task",
-      timeout_seconds: "task.timeout_seconds",
-      org_id: "task.org_id",
-      run_id: "task.run",
-      status: "task.status",
-      updated_at: "task.updated_at",
+    return easyKeyMappings<"job_node">({
+      created_at: "job_node.created_at",
+      id: "job_node.id",
+      name: "job_node.name",
+      description: "job_node.description",
+      parent_task: "job_node.parent_task",
+      timeout_seconds: "job_node.timeout_seconds",
+      org_id: "job_node.org_id",
+      job_id: "job_node.job",
+      status: "job_node.status",
+      updated_at: "job_node.updated_at",
     })(filter);
   },
 };
@@ -271,8 +271,8 @@ const havingKeyMappings: KeyMappings = {
   response_copy_v3: NOT_IMPLEMENTED,
   properties_copy_v2: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
-  run: NOT_IMPLEMENTED,
-  task: NOT_IMPLEMENTED,
+  job: NOT_IMPLEMENTED,
+  job_node: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
 };
 
@@ -496,11 +496,11 @@ export async function buildFilterWithAuthClickHouseProperties(
   }));
 }
 
-export async function buildFilterWithAuthRunsTable(
+export async function buildFilterWithAuthJobsTable(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "postgres", (orgId) => ({
-    run: {
+    job: {
       org_id: {
         equals: orgId,
       },
@@ -512,7 +512,7 @@ export async function buildFilterWithAuthTasksTable(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "postgres", (orgId) => ({
-    task: {
+    job_node: {
       org_id: {
         equals: orgId,
       },

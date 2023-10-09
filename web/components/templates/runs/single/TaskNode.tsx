@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from "react";
 import { Handle, useReactFlow, useStoreApi, Position } from "reactflow";
-import { HeliconeTask } from "../../../../lib/api/graphql/client/graphql";
+import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import ThemedTableV5 from "../../../shared/themed/table/themedTableV5";
 import { getInitialColumns } from "./initialColumns";
@@ -9,7 +9,7 @@ import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
 import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
 import { NormalizedRequest } from "../../requestsV2/builder/abstractRequestBuilder";
 
-function TaskNodeInner({ task }: { task: HeliconeTask }) {
+function TaskNodeInner({ task }: { task: HeliconeNode }) {
   const { requests, properties } = useRequestsPageV2(
     1,
     25,
@@ -69,7 +69,7 @@ function TaskNode({
 }: {
   id: string;
   data: {
-    task: HeliconeTask;
+    task: HeliconeNode;
   };
   isConnectable?: boolean;
 }) {

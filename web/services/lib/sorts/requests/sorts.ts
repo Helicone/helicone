@@ -102,7 +102,7 @@ export function buildRequestSort(sort: SortLeafRequest) {
   }
 }
 
-export interface SortLeafRun {
+export interface SortLeafJob {
   created_at?: SortDirection;
   updated_at?: SortDirection;
   timeout_seconds?: SortDirection;
@@ -110,49 +110,49 @@ export interface SortLeafRun {
   description?: SortDirection;
   status?: SortDirection;
   org_id?: SortDirection;
-  run_id?: SortDirection;
+  job_id?: SortDirection;
   task_id?: SortDirection;
   custom_properties?: {
     [key: string]: SortDirection;
   };
 }
 
-export function buildRunSort(sort: SortLeafRun): string {
+export function buildJobSort(sort: SortLeafJob): string {
   if (sort.created_at) {
     assertValidSortDirection(sort.created_at);
-    return `run.created_at ${sort.created_at}`;
+    return `job.created_at ${sort.created_at}`;
   }
   if (sort.updated_at) {
     assertValidSortDirection(sort.updated_at);
-    return `run.updated_at ${sort.updated_at}`;
+    return `job.updated_at ${sort.updated_at}`;
   }
   if (sort.timeout_seconds) {
     assertValidSortDirection(sort.timeout_seconds);
-    return `run.timeout_seconds ${sort.timeout_seconds}`;
+    return `job.timeout_seconds ${sort.timeout_seconds}`;
   }
   if (sort.name) {
     assertValidSortDirection(sort.name);
-    return `run.name ${sort.name}`;
+    return `job.name ${sort.name}`;
   }
   if (sort.description) {
     assertValidSortDirection(sort.description);
-    return `run.description ${sort.description}`;
+    return `job.description ${sort.description}`;
   }
   if (sort.status) {
     assertValidSortDirection(sort.status);
-    return `run.status ${sort.status}`;
+    return `job.status ${sort.status}`;
   }
   if (sort.org_id) {
     assertValidSortDirection(sort.org_id);
-    return `run.organization_id ${sort.org_id}`;
+    return `job.organization_id ${sort.org_id}`;
   }
-  if (sort.run_id) {
-    assertValidSortDirection(sort.run_id);
-    return `run.run_id ${sort.run_id}`;
+  if (sort.job_id) {
+    assertValidSortDirection(sort.job_id);
+    return `job.job_id ${sort.job_id}`;
   }
   if (sort.task_id) {
     assertValidSortDirection(sort.task_id);
-    return `run.task_id ${sort.task_id}`;
+    return `job.task_id ${sort.task_id}`;
   }
 
   if (sort.custom_properties) {
@@ -162,7 +162,7 @@ export function buildRunSort(sort: SortLeafRun): string {
       if (!key.match(/^[a-zA-Z0-9_]+$/)) {
         throw new Error(`Invalid property key: ${key}`);
       }
-      return `(run.custom_properties ->> '${key}')::text ${sort.custom_properties[key]}`;
+      return `(job.custom_properties ->> '${key}')::text ${sort.custom_properties[key]}`;
     }
   }
 

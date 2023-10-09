@@ -2,14 +2,14 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
-  buildFilterWithAuthRunsTable,
+  buildFilterWithAuthJobsTable,
   buildFilterWithAuthTasksTable,
 } from "../../../services/lib/filters/filters";
 import {
   SortLeafRequest,
-  SortLeafRun,
+  SortLeafJob,
   buildRequestSort,
-  buildRunSort,
+  buildJobSort,
 } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { Result, resultMap } from "../../result";
@@ -20,13 +20,13 @@ import {
   printRunnableQuery,
 } from "../db/dbExecute";
 
-export interface HeliconeTask {
+export interface HeliconeNode {
   id: string;
   name: string;
   description: string;
   created_at: string;
   updated_at: string;
-  run_id: string;
+  job_id: string;
   parent_id: string;
   properties: {
     [key: string]: string;
@@ -38,7 +38,7 @@ export async function getTasks(
   filter: FilterNode,
   offset: number,
   limit: number
-): Promise<Result<HeliconeTask[], string>> {
+): Promise<Result<HeliconeNode[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -49,15 +49,19 @@ export async function getTasks(
   });
   const query = `
   SELECT 
-    task.id,
-    task.name,
-    task.description,
-    task.created_at,
-    task.updated_at,
-    task.run as run_id,
-    task.parent_task as parent_id,
-    task.custom_properties as properties
-  FROM task
+    job_node.id,
+    job_node.name,
+    job_node.description,
+    job_node.created_at,
+    job_node.updated_at,
+    job_node.job as job_id,
+    (
+      SELECT array_agg(job_node_relationships.parent_node_id)
+      FROM job_node_relationships
+      WHERE job_node_relationships.node_id = job_node.id
+    ) as parent_node_ids,
+    job_node.custom_properties as properties
+  FROM job_node
   WHERE (
     ${builtFilter.filter}
   )
@@ -67,5 +71,5 @@ export async function getTasks(
 `;
   // printRunnableQuery(query, builtFilter.argsAcc);
 
-  return await dbExecute<HeliconeTask>(query, builtFilter.argsAcc);
+  return await dbExecute<HeliconeNode>(query, builtFilter.argsAcc);
 }

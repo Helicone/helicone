@@ -12,7 +12,7 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import {
   SortLeafRequest,
-  SortLeafRun,
+  SortLeafJob,
 } from "../../../services/lib/sorts/requests/sorts";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { useGetRuns } from "../../../services/hooks/runs";

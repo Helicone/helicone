@@ -11,16 +11,16 @@ import { modelCost } from "../../metrics/costCalc";
 import { getTotalCostProperties } from "../../property/totalCosts";
 import { getRequestCount, getRequestsDateRange } from "../../request/request";
 import {
-  QueryHeliconeTaskArgs,
-  HeliconeTask,
-  HeliconeTaskFilter,
+  QueryHeliconeNodeArgs,
+  HeliconeNode,
+  HeliconeNodeFilter,
 } from "../schema/types/graphql";
 import { convertTextOperators, convertTimeOperators } from "./helper";
 import { getTasks } from "../../tasks/tasks";
 
 const filterInputToFilterLeaf: {
-  [key in keyof HeliconeTaskFilter]: (
-    filter: HeliconeTaskFilter[key]
+  [key in keyof HeliconeNodeFilter]: (
+    filter: HeliconeNodeFilter[key]
   ) => FilterLeaf | undefined;
 } = {
   id: (id) => {
@@ -28,7 +28,7 @@ const filterInputToFilterLeaf: {
       return undefined;
     }
     return {
-      task: {
+      job_node: {
         id: convertTextOperators(id),
       },
     };
@@ -38,7 +38,7 @@ const filterInputToFilterLeaf: {
       return undefined;
     }
     return {
-      task: {
+      job_node: {
         custom_properties: {
           [property.name]: convertTextOperators(property.value),
         },
@@ -50,7 +50,7 @@ const filterInputToFilterLeaf: {
       return undefined;
     }
     return {
-      task: {
+      job_node: {
         name: convertTextOperators(name),
       },
     };
@@ -60,7 +60,7 @@ const filterInputToFilterLeaf: {
       return undefined;
     }
     return {
-      task: {
+      job_node: {
         description: convertTextOperators(description),
       },
     };
@@ -70,7 +70,7 @@ const filterInputToFilterLeaf: {
       return undefined;
     }
     return {
-      task: {
+      job_node: {
         updated_at: convertTimeOperators(updatedAt),
       },
     };
@@ -80,7 +80,7 @@ const filterInputToFilterLeaf: {
       return undefined;
     }
     return {
-      task: {
+      job_node: {
         created_at: convertTimeOperators(createdAt),
       },
     };
@@ -88,9 +88,9 @@ const filterInputToFilterLeaf: {
 };
 
 function convertFilterInputToFilterLeaf(
-  filter: HeliconeTaskFilter
+  filter: HeliconeNodeFilter
 ): FilterNode {
-  const keys = Object.keys(filter) as (keyof HeliconeTaskFilter)[];
+  const keys = Object.keys(filter) as (keyof HeliconeNodeFilter)[];
   const convertedFilters = keys
     .map((key) => {
       const toLeaf = filterInputToFilterLeaf[key];
@@ -103,30 +103,30 @@ function convertFilterInputToFilterLeaf(
   return filterListToTree(convertedFilters, "and");
 }
 
-export async function heliconeTask(
+export async function heliconeNode(
   root: any,
-  args: QueryHeliconeTaskArgs,
+  args: QueryHeliconeNodeArgs,
   context: Context,
   info: any
-): Promise<HeliconeTask[]> {
+): Promise<HeliconeNode[]> {
   const orgId = await context.getOrgIdOrThrow();
-  const { limit, offset, filters, runId } = {
+  const { limit, offset, filters, jobId } = {
     limit: args.limit ?? 100,
     offset: args.offset ?? 0,
     filters: args.filters ?? [],
-    runId: args.run_id ?? undefined,
+    jobId: args.job_id ?? undefined,
   };
   const convertedFilters: FilterNode[] = filters.map((f) =>
     convertFilterInputToFilterLeaf(f)
   );
 
   let filter = filterListToTree(convertedFilters, "and");
-  if (runId !== undefined) {
+  if (jobId !== undefined) {
     filter = {
       left: {
-        task: {
-          run_id: {
-            equals: runId,
+        job_node: {
+          job_id: {
+            equals: jobId,
           },
         },
       },
@@ -147,7 +147,7 @@ export async function heliconeTask(
     description: task.description,
     created_at: task.created_at,
     updated_at: task.updated_at,
-    run_id: task.run_id,
+    job_id: task.job_id,
     parent_id: task.parent_id,
     properties: Object.entries(task.properties).map(([key, value]) => ({
       name: key,

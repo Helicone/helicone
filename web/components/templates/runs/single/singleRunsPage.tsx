@@ -29,7 +29,7 @@ import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "../../requestsV2/RequestView";
 import { useRunPage } from "../useRunPage";
-import { HeliconeRun } from "../../../../lib/api/graphql/client/graphql";
+import { HeliconeJob } from "../../../../lib/api/graphql/client/graphql";
 import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import { useSingleRunPage } from "../useSingleRunPage";
 import Flow from "./flow";
@@ -38,16 +38,16 @@ import StatusBadge from "../statusBadge";
 import { RunStatus } from "../../../../lib/sql/runs";
 
 interface SingleRunsPageProps {
-  runId: string | null;
+  jobId: string | null;
 }
 
 const SingleRunPage = (props: SingleRunsPageProps) => {
-  const { runId } = props;
+  const { jobId } = props;
 
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
 
   // const router = useRouter();
-  const { tasks, run } = useSingleRunPage(runId ?? "", isLive);
+  const { tasks, run } = useSingleRunPage(jobId ?? "", isLive);
   const [open, setOpen] = useState(false);
   const { requests, properties } = useRequestsPageV2(
     1,
@@ -79,11 +79,11 @@ const SingleRunPage = (props: SingleRunsPageProps) => {
               className="text-gray-400 text-sm"
               style={{ alignSelf: "center" }}
             >
-              {runId}
+              {jobId}
             </i>
             <StatusBadge
               statusType={
-                (run.data?.heliconeRun?.[0]?.status ?? "UNKNOWN") as RunStatus
+                (run.data?.heliconeJob?.[0]?.status ?? "UNKNOWN") as RunStatus
               }
             />
           </div>
@@ -102,16 +102,16 @@ const SingleRunPage = (props: SingleRunsPageProps) => {
       >
         OPENZ
       </button>
-      <RequestDrawerV2
+      {/* <RequestDrawerV2
         open={open}
         setOpen={setOpen}
         request={requests?.[0]}
         properties={[]}
-      />
+      /> */}
 
       <Flow
         taskNodes={
-          tasks.data?.heliconeTask?.map((task) => {
+          tasks.data?.heliconeNode?.map((task) => {
             return {
               id: task?.id ?? "dsafds",
               data: {

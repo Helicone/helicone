@@ -143,7 +143,7 @@ type UserViewToOperators = {
 
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 
-type RunToOperators = {
+type JobToOperators = {
   id: SingleKey<TextOperators>;
   name: SingleKey<TextOperators>;
   description: SingleKey<TextOperators>;
@@ -157,13 +157,13 @@ type RunToOperators = {
   org_id: SingleKey<TextOperators>;
 };
 
-export type FilterLeafRun = SingleKey<RunToOperators>;
+export type FilterLeafJob = SingleKey<JobToOperators>;
 
 type TasksToOperators = {
   id: SingleKey<TextOperators>;
   name: SingleKey<TextOperators>;
   description: SingleKey<TextOperators>;
-  run_id: SingleKey<TextOperators>;
+  job_id: SingleKey<TextOperators>;
   parent_task: SingleKey<TextOperators>;
   status: SingleKey<TextOperators>;
   created_at: SingleKey<TimestampOperators>;
@@ -193,8 +193,8 @@ export type TablesAndViews = {
   properties_copy_v1: FilterLeafPropertiesTable;
   properties_copy_v2: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
-  run: FilterLeafRun;
-  task: FilterLeafTask;
+  job: FilterLeafJob;
+  job_node: FilterLeafTask;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;

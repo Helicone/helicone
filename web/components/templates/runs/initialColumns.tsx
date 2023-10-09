@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import StatusBadge from "./statusBadge";
-import { HeliconeRun } from "../../../lib/api/graphql/schema/types/graphql";
+import { HeliconeJob } from "../../../lib/api/graphql/schema/types/graphql";
 import ModelPill from "../requestsV2/modelPill";
 import { RocketLaunchIcon } from "@heroicons/react/24/outline";
 import { RunStatus } from "../../../lib/sql/runs";
@@ -23,7 +23,7 @@ function formatNumber(num: number) {
   }
 }
 
-export const getInitialColumns: () => ColumnDef<HeliconeRun>[] = (
+export const getInitialColumns: () => ColumnDef<HeliconeJob>[] = (
   isCached = false
 ) => [
   {
@@ -65,7 +65,7 @@ export const getInitialColumns: () => ColumnDef<HeliconeRun>[] = (
     cell: (info) => <span>{Number(info.getValue())}s</span>,
   },
   {
-    accessorKey: "task_count",
+    accessorKey: "node_count",
     header: "Tasks",
     cell: (info) => info.getValue(),
     meta: {

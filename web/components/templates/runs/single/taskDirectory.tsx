@@ -35,8 +35,8 @@ import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "../../requestsV2/RequestView";
 import { useRunPage } from "../useRunPage";
 import {
-  HeliconeRun,
-  HeliconeTask,
+  HeliconeJob,
+  HeliconeNode,
 } from "../../../../lib/api/graphql/client/graphql";
 import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import { useSingleRunPage } from "../useSingleRunPage";
@@ -45,15 +45,15 @@ import { useReactFlow, useStoreApi } from "reactflow";
 import { Tooltip } from "@mui/material";
 
 interface TreeViewProps {
-  tasks: HeliconeTask[];
+  tasks: HeliconeNode[];
   filteredNodes: string[];
   setFilteredNodes: (nodes: string[]) => void;
 }
 
 const RenderTask = (props: {
-  task: HeliconeTask;
+  task: HeliconeNode;
   level: number;
-  allTasks: HeliconeTask[];
+  allTasks: HeliconeNode[];
   focusNode: (nodeId: string) => void;
   filteredNodes: string[];
   setFilteredNodes: (nodes: string[]) => void;

@@ -49,6 +49,50 @@ export type FeedbackFilter = {
   rating?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type HeliconeJob = {
+  __typename?: 'HeliconeJob';
+  created_at: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  node_count: Scalars['Int']['output'];
+  properties?: Maybe<Array<Maybe<Property>>>;
+  request_count: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  timeout_seconds: Scalars['Int']['output'];
+  updated_at: Scalars['String']['output'];
+};
+
+export type HeliconeJobFilter = {
+  created_at?: InputMaybe<DateOperators>;
+  description?: InputMaybe<TextOperators>;
+  id?: InputMaybe<TextOperators>;
+  name?: InputMaybe<TextOperators>;
+  property?: InputMaybe<PropertyFilter>;
+  updated_at?: InputMaybe<DateOperators>;
+};
+
+export type HeliconeNode = {
+  __typename?: 'HeliconeNode';
+  created_at: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  job_id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  parent_node_ids?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  properties?: Maybe<Array<Maybe<Property>>>;
+  updated_at: Scalars['String']['output'];
+};
+
+export type HeliconeNodeFilter = {
+  created_at?: InputMaybe<DateOperators>;
+  description?: InputMaybe<TextOperators>;
+  id?: InputMaybe<TextOperators>;
+  name?: InputMaybe<TextOperators>;
+  property?: InputMaybe<PropertyFilter>;
+  updated_at?: InputMaybe<DateOperators>;
+};
+
 export type HeliconeRequest = {
   __typename?: 'HeliconeRequest';
   cacheHits?: Maybe<Scalars['Int']['output']>;
@@ -76,50 +120,6 @@ export type HeliconeRequestFilter = {
   requestId?: InputMaybe<TextOperators>;
   response?: InputMaybe<TextOperators>;
   user?: InputMaybe<TextOperators>;
-};
-
-export type HeliconeRun = {
-  __typename?: 'HeliconeRun';
-  created_at: Scalars['String']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  properties?: Maybe<Array<Maybe<Property>>>;
-  request_count: Scalars['Int']['output'];
-  status: Scalars['String']['output'];
-  task_count: Scalars['Int']['output'];
-  timeout_seconds: Scalars['Int']['output'];
-  updated_at: Scalars['String']['output'];
-};
-
-export type HeliconeRunFilter = {
-  created_at?: InputMaybe<DateOperators>;
-  description?: InputMaybe<TextOperators>;
-  id?: InputMaybe<TextOperators>;
-  name?: InputMaybe<TextOperators>;
-  property?: InputMaybe<PropertyFilter>;
-  updated_at?: InputMaybe<DateOperators>;
-};
-
-export type HeliconeTask = {
-  __typename?: 'HeliconeTask';
-  created_at: Scalars['String']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  parent_id?: Maybe<Scalars['String']['output']>;
-  properties?: Maybe<Array<Maybe<Property>>>;
-  run_id: Scalars['String']['output'];
-  updated_at: Scalars['String']['output'];
-};
-
-export type HeliconeTaskFilter = {
-  created_at?: InputMaybe<DateOperators>;
-  description?: InputMaybe<TextOperators>;
-  id?: InputMaybe<TextOperators>;
-  name?: InputMaybe<TextOperators>;
-  property?: InputMaybe<PropertyFilter>;
-  updated_at?: InputMaybe<DateOperators>;
 };
 
 export type Model = {
@@ -153,9 +153,9 @@ export type PropertyFilter = {
 export type Query = {
   __typename?: 'Query';
   aggregatedHeliconeRequest?: Maybe<AggregatedHeliconeRequest>;
+  heliconeJob?: Maybe<Array<Maybe<HeliconeJob>>>;
+  heliconeNode?: Maybe<Array<Maybe<HeliconeNode>>>;
   heliconeRequest?: Maybe<Array<Maybe<HeliconeRequest>>>;
-  heliconeRun?: Maybe<Array<Maybe<HeliconeRun>>>;
-  heliconeTask?: Maybe<Array<Maybe<HeliconeTask>>>;
   user?: Maybe<Array<Maybe<User>>>;
 };
 
@@ -165,27 +165,27 @@ export type QueryAggregatedHeliconeRequestArgs = {
 };
 
 
+export type QueryHeliconeJobArgs = {
+  filters?: InputMaybe<Array<HeliconeJobFilter>>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryHeliconeNodeArgs = {
+  filters?: InputMaybe<Array<HeliconeNodeFilter>>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  job_id?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryHeliconeRequestArgs = {
   filters?: InputMaybe<Array<HeliconeRequestFilter>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryHeliconeRunArgs = {
-  filters?: InputMaybe<Array<HeliconeRunFilter>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryHeliconeTaskArgs = {
-  filters?: InputMaybe<Array<HeliconeTaskFilter>>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  run_id?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -227,27 +227,27 @@ export type ValueFilter = {
 export type FetchRunsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-  filters?: InputMaybe<Array<HeliconeRunFilter> | HeliconeRunFilter>;
+  filters?: InputMaybe<Array<HeliconeJobFilter> | HeliconeJobFilter>;
 }>;
 
 
-export type FetchRunsQuery = { __typename?: 'Query', heliconeRun?: Array<{ __typename?: 'HeliconeRun', id: string, name: string, description?: string | null, status: string, created_at: string, updated_at: string, timeout_seconds: number, task_count: number, request_count: number, properties?: Array<{ __typename?: 'Property', value?: string | null, name?: string | null } | null> | null } | null> | null };
+export type FetchRunsQuery = { __typename?: 'Query', heliconeJob?: Array<{ __typename?: 'HeliconeJob', id: string, name: string, description?: string | null, status: string, created_at: string, updated_at: string, timeout_seconds: number, node_count: number, request_count: number, properties?: Array<{ __typename?: 'Property', value?: string | null, name?: string | null } | null> | null } | null> | null };
 
 export type FetchTasksQueryVariables = Exact<{
-  heliconeTaskId?: InputMaybe<Scalars['String']>;
+  heliconeNodeId?: InputMaybe<Scalars['String']>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-  runId?: InputMaybe<Scalars['String']>;
-  filters?: InputMaybe<Array<HeliconeTaskFilter> | HeliconeTaskFilter>;
+  jobId?: InputMaybe<Scalars['String']>;
+  filters?: InputMaybe<Array<HeliconeNodeFilter> | HeliconeNodeFilter>;
 }>;
 
 
-export type FetchTasksQuery = { __typename?: 'Query', heliconeTask?: Array<{ __typename?: 'HeliconeTask', id: string, name: string, description?: string | null, created_at: string, updated_at: string, run_id: string, parent_id?: string | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
+export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string | null> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
 
 
 export const FetchRunsDocument = gql`
-    query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeRunFilter!]) {
-  heliconeRun(filters: $filters, offset: $offset, limit: $limit) {
+    query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeJobFilter!]) {
+  heliconeJob(filters: $filters, offset: $offset, limit: $limit) {
     id
     name
     description
@@ -255,7 +255,7 @@ export const FetchRunsDocument = gql`
     created_at
     updated_at
     timeout_seconds
-    task_count
+    node_count
     request_count
     properties {
       value
@@ -295,12 +295,12 @@ export type FetchRunsQueryHookResult = ReturnType<typeof useFetchRunsQuery>;
 export type FetchRunsLazyQueryHookResult = ReturnType<typeof useFetchRunsLazyQuery>;
 export type FetchRunsQueryResult = Apollo.QueryResult<FetchRunsQuery, FetchRunsQueryVariables>;
 export const FetchTasksDocument = gql`
-    query FetchTasks($heliconeTaskId: String, $limit: Int, $offset: Int, $runId: String, $filters: [HeliconeTaskFilter!]) {
-  heliconeTask(
-    id: $heliconeTaskId
+    query FetchTasks($heliconeNodeId: String, $limit: Int, $offset: Int, $jobId: String, $filters: [HeliconeNodeFilter!]) {
+  heliconeNode(
+    id: $heliconeNodeId
     limit: $limit
     offset: $offset
-    run_id: $runId
+    job_id: $jobId
     filters: $filters
   ) {
     id
@@ -308,8 +308,8 @@ export const FetchTasksDocument = gql`
     description
     created_at
     updated_at
-    run_id
-    parent_id
+    job_id
+    parent_node_ids
     properties {
       name
       value
@@ -330,10 +330,10 @@ export const FetchTasksDocument = gql`
  * @example
  * const { data, loading, error } = useFetchTasksQuery({
  *   variables: {
- *      heliconeTaskId: // value for 'heliconeTaskId'
+ *      heliconeNodeId: // value for 'heliconeNodeId'
  *      limit: // value for 'limit'
  *      offset: // value for 'offset'
- *      runId: // value for 'runId'
+ *      jobId: // value for 'jobId'
  *      filters: // value for 'filters'
  *   },
  * });

@@ -2,13 +2,13 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
-  buildFilterWithAuthRunsTable,
+  buildFilterWithAuthJobsTable,
 } from "../../../services/lib/filters/filters";
 import {
   SortLeafRequest,
-  SortLeafRun,
+  SortLeafJob,
   buildRequestSort,
-  buildRunSort,
+  buildJobSort,
 } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { Result, resultMap } from "../../result";
@@ -19,12 +19,12 @@ import {
   printRunnableQuery,
 } from "../db/dbExecute";
 
-export interface HeliconeRun {
+export interface HeliconeJob {
   id: string;
   status: RunStatus;
   name: string;
   description: string;
-  task_count: number;
+  job_node_count: number;
   request_count: number;
   created_at: string;
   updated_at: string;
@@ -34,43 +34,43 @@ export interface HeliconeRun {
   };
 }
 
-export async function getRuns(
+export async function getJobs(
   orgId: string,
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRun
-): Promise<Result<HeliconeRun[], string>> {
+  sort: SortLeafJob
+): Promise<Result<HeliconeJob[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuthRunsTable({
+  const builtFilter = await buildFilterWithAuthJobsTable({
     org_id: orgId,
     filter,
     argsAcc: [],
   });
-  const sortSQL = buildRunSort(sort);
+  const sortSQL = buildJobSort(sort);
   const query = `
   SELECT 
-    run.id,
-    run.status,
-    run.name,
-    run.description,
-    run.created_at,
-    run.updated_at,
-    run.timeout_seconds,
-    run.custom_properties,
+    job.id,
+    job.status,
+    job.name,
+    job.description,
+    job.created_at,
+    job.updated_at,
+    job.timeout_seconds,
+    job.custom_properties,
     (
       SELECT count(*) 
-      FROM task 
-      WHERE task.run = run.id
-    ) as task_count,
+      FROM job_node 
+      WHERE job_node.job = job.id
+    ) as job_node_count,
     (
       SELECT count(*) 
-      FROM request 
-      WHERE request.run_id = run.id
+      FROM job_node_request 
+      WHERE job_node_request.job_id = job.id
     ) as request_count
-  FROM run
+  FROM job
   WHERE (
     ${builtFilter.filter}
   )
@@ -79,5 +79,5 @@ export async function getRuns(
   OFFSET ${offset}
 `;
 
-  return await dbExecute<HeliconeRun>(query, builtFilter.argsAcc);
+  return await dbExecute<HeliconeJob>(query, builtFilter.argsAcc);
 }

@@ -734,7 +734,7 @@ export interface Database {
           prompt_values: Json | null
           properties: Json | null
           provider: string
-          run_id: string | null
+          job_id: string | null
           task_id: string | null
           user_id: string | null
         }
@@ -753,7 +753,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          run_id?: string | null
+          job_id?: string | null
           task_id?: string | null
           user_id?: string | null
         }
@@ -772,7 +772,7 @@ export interface Database {
           prompt_values?: Json | null
           properties?: Json | null
           provider?: string
-          run_id?: string | null
+          job_id?: string | null
           task_id?: string | null
           user_id?: string | null
         }

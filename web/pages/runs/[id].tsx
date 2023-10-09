@@ -18,16 +18,16 @@ import SingleRunPage from "../../components/templates/runs/single/singleRunsPage
 
 interface SingleRunPageProps {
   user: User;
-  runId: string | null;
+  jobId: string | null;
 }
 
 const SingleRun = (props: SingleRunPageProps) => {
-  const { user, runId } = props;
+  const { user, jobId } = props;
 
   return (
     <MetaData title={"Requests"}>
       <AuthLayout user={user}>
-        <SingleRunPage runId={runId} />
+        <SingleRunPage jobId={jobId} />
       </AuthLayout>
     </MetaData>
   );
@@ -52,12 +52,12 @@ export const getServerSideProps = async (
       },
     };
 
-  const runId = context.params?.id;
+  const jobId = context.params?.id;
 
   return {
     props: {
       user: user,
-      runId: runId,
+      jobId: jobId,
     },
   };
 };
