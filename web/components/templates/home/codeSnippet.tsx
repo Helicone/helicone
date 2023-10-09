@@ -7,73 +7,73 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const CODE_CONVERTS = {
   curl: (key: string) => `
-    curl --request POST \\
-    --url ${BASE_PATH}/chat/completions \\
-    --header 'Authorization: Bearer OPENAI_API_KEY' \\
-    --header 'Helicone-Auth: Bearer ${key}' \\
-    --header 'Content-Type: application/json' \\
-    --data '{
-      "model": "gpt-3.5-turbo",
-      "messages": [
-          {
-              "role": "system",
-              "content": "Say Hello!"
-          }
-      ],
-      "temperature": 1,
-      "max_tokens": 10
-  }'
+  curl --request POST \\
+  --url ${BASE_PATH}/chat/completions \\
+  --header 'Authorization: Bearer OPENAI_API_KEY' \\
+  --header 'Helicone-Auth: Bearer ${key}' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Say Hello!"
+        }
+    ],
+    "temperature": 1,
+    "max_tokens": 10
+}'
   `,
   typescript: (key: string) => `
-  import { Configuration, OpenAIApi } from "openai";
+import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  // Add a basePath to the Configuration
+  basePath: "${BASE_PATH}",
+  baseOptions: {
+    headers: {
+      // Add your Helicone API Key
+      "Helicone-Auth": "Bearer ${key}",
+    },
+  }
+});
   
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-    // Add a basePath to the Configuration
+const openai = new OpenAIApi(configuration);`,
+
+  python: (key: string) => `
+openai.api_base = "${BASE_PATH}"
+
+openai.Completion.create(
+    # ...other parameters
+    headers={
+      "Helicone-Auth": "Bearer ${key}",
+    }
+)
+`,
+
+  langchain_python: (key: string) => `
+openai.api_base = "${BASE_PATH}"
+
+llm = OpenAI(
+  temperature=0.9,
+  headers={
+    "Helicone-Auth": "Bearer ${key}"
+  }
+)
+  `,
+  langchain_typescript: (key: string) => `
+const model = new OpenAI(
+  {},
+  {
     basePath: "${BASE_PATH}",
     baseOptions: {
       headers: {
-        // Add your Helicone API Key
-        "Helicone-Auth": "Bearer ${key}",
+        "Helicone-Auth": "Bearer ${key}"
       },
-    }
-  });
-  
-  const openai = new OpenAIApi(configuration);`,
-
-  python: (key: string) => `
-  openai.api_base = "${BASE_PATH}"
-  
-  openai.Completion.create(
-      # ...other parameters
-      headers={
-        "Helicone-Auth": "Bearer ${key}",
-      }
-  )
-  `,
-
-  langchain_python: (key: string) => `
-  openai.api_base = "${BASE_PATH}"
-  
-  llm = OpenAI(
-    temperature=0.9,
-    headers={
-      "Helicone-Auth": "Bearer ${key}"
-    }
-  )
-  `,
-  langchain_typescript: (key: string) => `
-  const model = new OpenAI(
-    {},
-    {
-      basePath: "${BASE_PATH}",
-      baseOptions: {
-        headers: {
-          "Helicone-Auth": "Bearer ${key}"
-        },
-      },
-    }
-  );
+    },
+  }
+);
   `,
 };
 
