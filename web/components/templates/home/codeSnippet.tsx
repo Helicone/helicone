@@ -7,65 +7,68 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const CODE_CONVERTS = {
   curl: (key: string) => `
-    curl --request POST \\
-    --url ${BASE_PATH}/chat/completions \\
-    --header 'Authorization: Bearer OPENAI_API_KEY' \\
-    --header 'Helicone-Auth: Bearer ${key}' \\
-    --header 'Content-Type: application/json' \\
-    --data '{
-      "model": "gpt-3.5-turbo",
-      "messages": [
-          {
-              "role": "system",
-              "content": "Say Hello!"
-          }
-      ],
-      "temperature": 1,
-      "max_tokens": 10
-  }'
+  curl --request POST \\
+  --url ${BASE_PATH}/chat/completions \\
+  --header 'Authorization: Bearer OPENAI_API_KEY' \\
+  --header 'Helicone-Auth: Bearer ${key}' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Say Hello!"
+        }
+    ],
+    "temperature": 1,
+    "max_tokens": 10
+}'
   `,
   typescript: (key: string) => `
-  import OpenAI from "openai";
-  const openai = new OpenAI({
-    baseURL: 'https://oai.hconeai.com/v1',
-    defaultHeaders: {
-      'Helicone-Auth': 'Bearer ' + process.env.HELICONE_API_KEY,
-    });
-    `,
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: request.env.OPENAI_API_KEY,
+  baseURL: "https://oai.hconeai.com/v1",
+  defaultHeaders: {
+    "Helicone-Auth": "Bearer ${key}",
+  },
+});
+  `,
 
   python: (key: string) => `
-  openai.api_base = "${BASE_PATH}"
-  
-  openai.Completion.create(
-      # ...other parameters
-      headers={
-        "Helicone-Auth": "Bearer ${key}",
-      }
-  )
-  `,
+openai.api_base = "${BASE_PATH}"
+
+openai.Completion.create(
+    # ...other parameters
+    headers={
+      "Helicone-Auth": "Bearer ${key}",
+    }
+)
+`,
 
   langchain_python: (key: string) => `
-  openai.api_base = "${BASE_PATH}"
-  
-  llm = OpenAI(
-    temperature=0.9,
-    headers={
-      "Helicone-Auth": "Bearer ${key}"
-    }
-  )
-  `,
+openai.api_base = "${BASE_PATH}"
+
+llm = OpenAI(
+  temperature=0.9,
+  headers={
+    "Helicone-Auth": "Bearer ${key}"
+  }
+)
+`,
   langchain_typescript: (key: string) => `
-  const model = new OpenAI(
-    {},
-    {
-      basePath: "${BASE_PATH}",
-      baseOptions: {
-        headers: {
-          "Helicone-Auth": "Bearer ${key}"
-        },
+const model = new OpenAI(
+  {},
+  {
+    basePath: "${BASE_PATH}",
+    baseOptions: {
+      headers: {
+        "Helicone-Auth": "Bearer ${key}"
       },
-    }
-  );
+    },
+  }
+);
   `,
 };
 
@@ -74,7 +77,7 @@ type SupportedLanguages = keyof typeof CODE_CONVERTS;
 const DIFF_LINES: {
   [key in SupportedLanguages]: number[];
 } = {
-  typescript: [5, 9],
+  typescript: [4, 6],
   python: [0, 5],
   curl: [1, 3],
   langchain_python: [0, 5],
