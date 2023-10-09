@@ -109,9 +109,7 @@ const RenderNode = (props: {
           checked={!filteredNodes.includes(node.id)}
           onChange={(e) => {
             if (e.target.checked) {
-              setFilteredNodes(
-                filteredNodes.filter((node) => node !== node.id)
-              );
+              setFilteredNodes(filteredNodes.filter((n) => n !== node.id));
             } else {
               setFilteredNodes([...filteredNodes, node.id]);
             }

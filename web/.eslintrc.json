@@ -1,3 +1,9 @@
 {
-  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"]
+  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
+
+  "ignorePatterns": [
+    "lib/api/graphql/schema/types/graphql.tsx",
+    "lib/api/graphql/client/fragment-masking.ts",
+    "lib/api/graphql/client/index.ts"
+  ]
 }

@@ -34,6 +34,8 @@
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.7.5",
+    "@typescript-eslint/parser": "^6.7.5",
     "@vercel/analytics": "^0.1.5",
     "apollo-server-core": "^3.12.0",
     "apollo-server-micro": "^3.12.0",
@@ -42,7 +44,7 @@
     "dagre": "^0.8.5",
     "date-fns": "^2.30.0",
     "dateformat": "^5.0.3",
-    "eslint": "8.28.0",
+    "eslint": "8.47.0",
     "eslint-config-next": "13.0.5",
     "generate-api-key": "^1.0.2",
     "graphql": "^16.6.0",
@@ -72,7 +74,7 @@
     "reactflow": "^11.8.3",
     "recharts": "^2.1.16",
     "stripe": "^11.8.0",
-    "typescript": "^5.2.2",
+    "typescript": "5.1.6",
     "use-deep-compare-effect": "^1.8.1"
   },
   "devDependencies": {

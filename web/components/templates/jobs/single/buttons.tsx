@@ -22,6 +22,9 @@ const FlowButton = () => {
 
     if (nodes.length > 0) {
       const node = nodes[0];
+      if (!node.width || !node.height) {
+        return;
+      }
 
       const x = node.position.x + node.width / 2;
       const y = node.position.y + node.height / 2;
@@ -40,10 +43,10 @@ const FlowButton = () => {
         <button onClick={focusNode} style={buttonStyle}>
           focus node
         </button>
-        <button onClick={zoomIn} style={buttonStyle}>
+        <button onClick={() => zoomIn()} style={buttonStyle}>
           zoom in
         </button>
-        <button onClick={zoomOut} style={buttonStyle}>
+        <button onClick={() => zoomOut()} style={buttonStyle}>
           zoom out
         </button>
       </div>

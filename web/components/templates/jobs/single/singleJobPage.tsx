@@ -34,11 +34,11 @@ const SingleJobPage = (props: SingleJobPageProps) => {
   return (
     <div>
       <AuthHeader
-        title={`Job View `}
+        title={`Job View`}
         headerActions={
           <div className="flex flex-row gap-2">
             <button
-              onClick={() => refetch()}
+              onClick={() => nodes.refetch()}
               className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
             >
               <ArrowPathIcon
