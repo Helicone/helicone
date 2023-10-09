@@ -8,7 +8,6 @@
     "start": "next start",
     "build-and-start": "next build && next start",
     "lint": "next lint",
-    "graph-gen": "graphql-codegen --config codegen.yml",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
@@ -34,8 +33,6 @@
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^6.7.5",
-    "@typescript-eslint/parser": "^6.7.5",
     "@vercel/analytics": "^0.1.5",
     "apollo-server-core": "^3.12.0",
     "apollo-server-micro": "^3.12.0",

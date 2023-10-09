@@ -1,4 +1,3 @@
-import { cp } from "fs";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import {
   AllOperators,

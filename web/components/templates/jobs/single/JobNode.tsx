@@ -1,13 +1,11 @@
-import React, { memo, useEffect, useState } from "react";
-import { Handle, useReactFlow, useStoreApi, Position } from "reactflow";
+import { memo, useState } from "react";
+import { Handle, Position } from "reactflow";
 import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
-import { useGetRequests } from "../../../../services/hooks/requests";
 import ThemedTableV5 from "../../../shared/themed/table/themedTableV5";
-import { getInitialColumns } from "./initialColumns";
-import { useGetProperties } from "../../../../services/hooks/properties";
-import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
-import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
 import { NormalizedRequest } from "../../requestsV2/builder/abstractRequestBuilder";
+import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
+import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
+import { getInitialColumns } from "./initialColumns";
 
 function JobNodeInner({ task }: { task: HeliconeNode }) {
   const { requests, properties } = useRequestsPageV2(

@@ -17,19 +17,7 @@ const SingleJobPage = (props: SingleJobPageProps) => {
 
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
 
-  // const router = useRouter();
   const { nodes: nodes, job: job } = useSingleJobPage(jobId ?? "", isLive);
-  // const { requests, properties } = useRequestsPageV2(
-  //   1,
-  //   25,
-  //   [],
-  //   "all",
-  //   {
-  //     created_at: "desc",
-  //   },
-  //   false,
-  //   false
-  // );
 
   return (
     <div>

@@ -1,48 +1,13 @@
-import React, { memo, useEffect, useRef, useState } from "react";
-import ThemedTableV5 from "../../../shared/themed/table/themedTableV5";
-import AuthHeader from "../../../shared/authHeader";
-import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
-import { NormalizedRequest } from "../../requestsV2/builder/abstractRequestBuilder";
-import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
-import TableFooter from "../../requestsV2/tableFooter";
 import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../../services/lib/sorts/requests/sorts";
-import { FilterNode } from "../../../../services/lib/filters/filterDefs";
-import {
-  getTimeIntervalAgo,
-  TimeInterval,
-} from "../../../../lib/timeCalculations/time";
-import { getInitialColumns } from "../initialColumns";
-import { useDebounce } from "../../../../services/hooks/debounce";
-import { UIFilterRow } from "../../../shared/themed/themedAdvancedFilters";
-import {
-  ArrowPathIcon,
   ArrowsPointingOutIcon,
   ChevronDownIcon,
   ChevronUpIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../../../shared/clsx";
-import { useRouter } from "next/router";
-import { HeliconeRequest } from "../../../../lib/api/request/request";
-import getRequestBuilder from "../../requestsV2/builder/requestBuilder";
-import { Result } from "../../../../lib/result";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import useNotification from "../../../shared/notification/useNotification";
-import { Switch } from "@headlessui/react";
-import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { RequestView } from "../../requestsV2/RequestView";
-import { useJobPage } from "../useJobPage";
-import {
-  HeliconeJob,
-  HeliconeNode,
-} from "../../../../lib/api/graphql/client/graphql";
-import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
-import { useSingleJobPage } from "../useSingleJobPage";
-import Flow from "./flow";
-import { useReactFlow, useStoreApi } from "reactflow";
 import { Tooltip } from "@mui/material";
+import React, { memo, useState } from "react";
+import { useReactFlow, useStoreApi } from "reactflow";
+import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
+import { clsx } from "../../../shared/clsx";
 
 interface TreeViewProps {
   nodes: HeliconeNode[];
@@ -59,7 +24,6 @@ const RenderNode = (props: {
   setFilteredNodes: (nodes: string[]) => void;
   childrenHidden?: boolean;
 }) => {
-  const { fitView } = useReactFlow();
   const {
     node: node,
     level = 0,
