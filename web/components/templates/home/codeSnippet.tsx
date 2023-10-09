@@ -31,7 +31,7 @@ const openai = new OpenAI({
   apiKey: request.env.OPENAI_API_KEY,
   baseURL: "https://oai.hconeai.com/v1",
   defaultHeaders: {
-    "Helicone-Auth": ${"`"}Bearer ${key}${"`"},
+    "Helicone-Auth": "Bearer ${key}",
   },
 });
   `,
