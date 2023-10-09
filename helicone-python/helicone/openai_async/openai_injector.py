@@ -18,7 +18,7 @@ from helicone.async_logger.async_logger import (HeliconeAsyncLogger,
 class HeliconeMeta:
     custom_properties: Optional[dict] = None
     user_id: Optional[str] = None
-    task_id: Optional[str] = None
+    node_id: Optional[str] = None
 
     def build(self) -> dict:
         meta = {}
@@ -29,8 +29,8 @@ class HeliconeMeta:
         if self.user_id:
             meta["Helicone-User-Id"] = self.user_id
 
-        if self.task_id:
-            meta["Helicone-Task-Id"] = self.task_id
+        if self.node_id:
+            meta["Helicone-Node-Id"] = self.node_id
 
         return meta
 
@@ -122,6 +122,7 @@ class OpenAIInjector:
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            print("HELLOZ")
             logger = HeliconeAsyncLogger.from_helicone_global()
 
             arg_extractor = CreateArgsExtractor(*args, **kwargs)
@@ -132,6 +133,7 @@ class OpenAIInjector:
                 json=arg_extractor.get_body(),
                 meta=arg_extractor.get_helicone_meta()
             )
+            print("providerRequest", providerRequest)
             try:
                 result = func(**arg_extractor.get_args())
             except Exception as e:

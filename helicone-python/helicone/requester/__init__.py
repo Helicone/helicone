@@ -1,6 +1,6 @@
 from typing import Optional
 from helicone.globals import helicone_global
-import humps
+
 import requests
 from urllib.parse import urljoin
 
@@ -32,7 +32,7 @@ class Requests:
     def post(self, path: str, json: dict) -> requests.Response:
         res = requests.post(
             url=urljoin(self.base_url, path),
-            json=humps.camelize(json),
+            json=json,
             headers={
                 "Authorization": f"Bearer {self.api_key}"
             }
@@ -47,7 +47,7 @@ class Requests:
     def patch(self, path: str, json: dict) -> requests.Response:
         res = requests.patch(
             url=urljoin(self.base_url, path),
-            json=humps.camelize(json),
+            json=json,
             headers={
                 "Authorization": f"Bearer {self.api_key}"
             }
