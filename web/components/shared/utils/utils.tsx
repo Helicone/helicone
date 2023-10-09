@@ -20,8 +20,7 @@ const getUSDateShort = (value: string) => {
   return `${month} ${day}`;
 };
 
-const getUSDate = (value: string) => {
-  const date = new Date(value);
+const getUSDate = (date: Date) => {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
@@ -38,6 +37,11 @@ const getUSDate = (value: string) => {
     .replace(" at", "");
 
   return formattedDate;
+};
+
+const getUSDateFromString = (value: string) => {
+  const date = new Date(value);
+  return getUSDate(date);
 };
 
 const getUSDateMin = (value: string) => {
@@ -73,6 +77,7 @@ function removeLeadingWhitespace(str: string | null): string {
 }
 
 export {
+  getUSDateFromString,
   getUSDate,
   getUSDateShort,
   capitalizeWords,

@@ -11,6 +11,7 @@ import "../styles/index.css";
 
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/shared/layout/organizationContext";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -27,11 +28,21 @@ if (
 
 export default function MyApp({
   Component,
+  router,
   pageProps,
 }: AppProps<{
   initialSession: Session;
 }>) {
   const queryClient = new QueryClient();
+  const apolloClient = new ApolloClient({
+    uri: `/api/graphql`,
+    cache: new InMemoryCache(),
+    credentials: "include",
+    headers: {
+      "use-cookies": "true",
+    },
+  });
+
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
   if (typeof window !== "undefined") {
@@ -44,16 +55,18 @@ export default function MyApp({
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <QueryClientProvider client={queryClient}>
-          <NotificationProvider>
-            <DndProvider backend={HTML5Backend}>
-              <OrgContextProvider>
-                <Component {...pageProps} />
-              </OrgContextProvider>
-              <Notification />
-            </DndProvider>
-          </NotificationProvider>
-        </QueryClientProvider>
+        <ApolloProvider client={apolloClient}>
+          <QueryClientProvider client={queryClient}>
+            <NotificationProvider>
+              <DndProvider backend={HTML5Backend}>
+                <OrgContextProvider>
+                  <Component {...pageProps} />
+                </OrgContextProvider>
+                <Notification />
+              </DndProvider>
+            </NotificationProvider>
+          </QueryClientProvider>
+        </ApolloProvider>
       </SessionContextProvider>
       <Analytics />
     </>

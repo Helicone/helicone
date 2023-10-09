@@ -1,19 +1,12 @@
 import {
-  Bar,
-  BarChart,
-  CartesianAxis,
-  CartesianGrid,
-  Legend,
   Area,
   AreaChart,
+  CartesianAxis,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { getUSDate, getUSDateShort } from "../utils/utils";
-import { clsx } from "../clsx";
 
 export interface DoubleAreaChartData {
   time: Date;

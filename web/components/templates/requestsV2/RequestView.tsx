@@ -9,7 +9,7 @@ import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ThemedTabs from "../../shared/themed/themedTabs";
-import { getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import { Completion } from "../requests/completion";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";

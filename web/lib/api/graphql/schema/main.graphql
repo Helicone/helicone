@@ -10,6 +10,43 @@ type Query {
   aggregatedHeliconeRequest(
     properties: [PropertyFilter!]
   ): AggregatedHeliconeRequest
+  heliconeJob(
+    id: String
+    limit: Int
+    offset: Int
+    filters: [HeliconeJobFilter!]
+  ): [HeliconeJob]
+  heliconeNode(
+    id: String
+    limit: Int
+    offset: Int
+    job_id: String
+    filters: [HeliconeNodeFilter!]
+  ): [HeliconeNode]
+}
+
+type HeliconeJob {
+  id: String!
+  name: String!
+  description: String
+  status: String!
+  created_at: String!
+  updated_at: String!
+  timeout_seconds: Int!
+  node_count: Int!
+  request_count: Int!
+  properties: [Property]
+}
+
+type HeliconeNode {
+  id: String!
+  name: String!
+  description: String
+  created_at: String!
+  updated_at: String!
+  job_id: String!
+  parent_node_ids: [String!]
+  properties: [Property]
 }
 
 type AggregatedHeliconeRequest {
@@ -66,6 +103,24 @@ input FeedbackFilter {
 input PropertyFilter {
   name: String!
   value: TextOperators!
+}
+
+input HeliconeJobFilter {
+  id: TextOperators
+  name: TextOperators
+  description: TextOperators
+  created_at: DateOperators
+  updated_at: DateOperators
+  property: PropertyFilter
+}
+
+input HeliconeNodeFilter {
+  id: TextOperators
+  name: TextOperators
+  description: TextOperators
+  created_at: DateOperators
+  updated_at: DateOperators
+  property: PropertyFilter
 }
 
 input ValueFilter {

@@ -1,39 +1,19 @@
 import { ApolloError } from "apollo-server-errors";
 import { Context } from "../../../../pages/api/graphql";
 import {
-  FilterLeaf,
   filterListToTree,
   FilterNode,
-  SingleKey,
-  TablesAndViews,
-  TextOperators,
-  TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
+import { resultMap } from "../../../result";
+import { getCacheCount, getModelMetrics } from "../../cache/stats";
+import { modelCost } from "../../metrics/costCalc";
+import { getTotalCostProperties } from "../../property/totalCosts";
+import { getRequestCount, getRequestsDateRange } from "../../request/request";
 import {
-  getRequestCount,
-  getRequestCountClickhouse,
-  getRequests,
-  getRequestsDateRange,
-} from "../../request/request";
-import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
-import {
-  HeliconeRequest,
-  QueryHeliconeRequestArgs,
-  HeliconeRequestFilter,
-  TextOperators as GQLTextOperators,
-  PropertyFilter,
-  DateOperators,
   AggregatedHeliconeRequest,
   QueryAggregatedHeliconeRequestArgs,
 } from "../schema/types/graphql";
-import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators } from "./helper";
-import {
-  getTotalCostProperties,
-  getTotalCostRaw,
-} from "../../property/totalCosts";
-import { getCacheCount, getModelMetrics } from "../../cache/stats";
-import { resultMap, resultsAll } from "../../../result";
 
 export async function aggregatedHeliconeRequest(
   root: any,
