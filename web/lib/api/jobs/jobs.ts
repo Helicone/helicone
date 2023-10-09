@@ -1,27 +1,16 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthJobsTable } from "../../../services/lib/filters/filters";
 import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthJobsTable,
-} from "../../../services/lib/filters/filters";
-import {
-  SortLeafRequest,
   SortLeafJob,
-  buildRequestSort,
   buildJobSort,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
-import { Result, resultMap } from "../../result";
-import { RunStatus } from "../../sql/runs";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../db/dbExecute";
+import { Result } from "../../result";
+import { JobStatus } from "../../sql/jobs";
+import { dbExecute } from "../db/dbExecute";
 
 export interface HeliconeJob {
   id: string;
-  status: RunStatus;
+  status: JobStatus;
   name: string;
   description: string;
   job_node_count: number;

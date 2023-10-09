@@ -4,7 +4,7 @@ import { gql } from "../../lib/api/graphql/client";
 import { HeliconeJobFilter } from "../../lib/api/graphql/schema/types/graphql";
 import { SortLeafJob } from "../lib/sorts/requests/sorts";
 
-export const GET_RUNS = gql(/* GraphQL */ `
+export const GET_JOBS = gql(/* GraphQL */ `
   query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeJobFilter!]) {
     heliconeJob(filters: $filters, offset: $offset, limit: $limit) {
       id
@@ -24,7 +24,7 @@ export const GET_RUNS = gql(/* GraphQL */ `
   }
 `);
 
-export const useGetRuns = (props: {
+export const useGetJobs = (props: {
   currentPage: number;
   currentPageSize: number;
   advancedFilter: HeliconeJobFilter[];
@@ -37,7 +37,7 @@ export const useGetRuns = (props: {
     throw new Error("sortLeaf not implemented");
   }
   return {
-    runs: useQuery(GET_RUNS, {
+    jobs: useQuery(GET_JOBS, {
       variables: {
         limit: currentPageSize,
         offset: (currentPage - 1) * currentPageSize,

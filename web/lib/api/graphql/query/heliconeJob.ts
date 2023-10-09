@@ -5,21 +5,14 @@ import {
   filterListToTree,
   FilterNode,
 } from "../../../../services/lib/filters/filterDefs";
-import { resultMap } from "../../../result";
-import { getCacheCount, getModelMetrics } from "../../cache/stats";
-import { modelCost } from "../../metrics/costCalc";
-import { getTotalCostProperties } from "../../property/totalCosts";
-import { getRequestCount, getRequestsDateRange } from "../../request/request";
+import { getJobs } from "../../jobs/jobs";
 import {
-  AggregatedHeliconeRequest,
   HeliconeJob,
   HeliconeJobFilter,
   Property,
-  QueryAggregatedHeliconeRequestArgs,
   QueryHeliconeJobArgs,
 } from "../schema/types/graphql";
 import { convertTextOperators, convertTimeOperators } from "./helper";
-import { getJobs } from "../../runs/runs";
 
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeJobFilter]: (

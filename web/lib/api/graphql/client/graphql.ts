@@ -79,7 +79,7 @@ export type HeliconeNode = {
   id: Scalars['String']['output'];
   job_id: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  parent_node_ids?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  parent_node_ids?: Maybe<Array<Scalars['String']['output']>>;
   properties?: Maybe<Array<Maybe<Property>>>;
   updated_at: Scalars['String']['output'];
 };
@@ -242,7 +242,7 @@ export type FetchTasksQueryVariables = Exact<{
 }>;
 
 
-export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string | null> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
+export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
 
 
 export const FetchRunsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FetchRuns"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"HeliconeJobFilter"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"heliconeJob"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}},{"kind":"Field","name":{"kind":"Name","value":"updated_at"}},{"kind":"Field","name":{"kind":"Name","value":"timeout_seconds"}},{"kind":"Field","name":{"kind":"Name","value":"node_count"}},{"kind":"Field","name":{"kind":"Name","value":"request_count"}},{"kind":"Field","name":{"kind":"Name","value":"properties"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<FetchRunsQuery, FetchRunsQueryVariables>;

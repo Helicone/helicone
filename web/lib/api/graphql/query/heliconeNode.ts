@@ -16,7 +16,7 @@ import {
   HeliconeNodeFilter,
 } from "../schema/types/graphql";
 import { convertTextOperators, convertTimeOperators } from "./helper";
-import { getTasks } from "../../tasks/tasks";
+import { getNodes } from "../../nodes/nodes";
 
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeNodeFilter]: (
@@ -135,21 +135,21 @@ export async function heliconeNode(
     };
   }
 
-  const { data, error } = await getTasks(orgId, filter, offset, limit);
+  const { data, error } = await getNodes(orgId, filter, offset, limit);
 
   if (error !== null) {
     throw new ApolloError(error, "INTERNAL_SERVER_ERROR");
   }
 
-  return data.map((task) => ({
-    id: task.id,
-    name: task.name,
-    description: task.description,
-    created_at: task.created_at,
-    updated_at: task.updated_at,
-    job_id: task.job_id,
-    parent_id: task.parent_id,
-    properties: Object.entries(task.properties).map(([key, value]) => ({
+  return data.map((node) => ({
+    id: node.id,
+    name: node.name,
+    description: node.description,
+    created_at: node.created_at,
+    updated_at: node.updated_at,
+    job_id: node.job_id,
+    parent_node_ids: node.parent_node_ids ?? [],
+    properties: Object.entries(node.properties).map(([key, value]) => ({
       name: key,
       value,
     })),

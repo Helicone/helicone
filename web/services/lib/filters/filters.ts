@@ -127,7 +127,7 @@ const whereKeyMappings: KeyMappings = {
     auth_hash: "request.auth_hash",
     org_id: "request.helicone_org_id",
     id: "request.id",
-    task_id: "request.task_id",
+    node_id: "job_node_request.node_id",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
@@ -241,7 +241,6 @@ const whereKeyMappings: KeyMappings = {
       id: "job_node.id",
       name: "job_node.name",
       description: "job_node.description",
-      parent_task: "job_node.parent_task",
       timeout_seconds: "job_node.timeout_seconds",
       org_id: "job_node.org_id",
       job_id: "job_node.job",
@@ -508,7 +507,7 @@ export async function buildFilterWithAuthJobsTable(
   }));
 }
 
-export async function buildFilterWithAuthTasksTable(
+export async function buildFilterWithAuthNodesTable(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "postgres", (orgId) => ({

@@ -79,7 +79,7 @@ export type HeliconeNode = {
   id: Scalars['String']['output'];
   job_id: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  parent_node_ids?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  parent_node_ids?: Maybe<Array<Scalars['String']['output']>>;
   properties?: Maybe<Array<Maybe<Property>>>;
   updated_at: Scalars['String']['output'];
 };
@@ -242,7 +242,7 @@ export type FetchTasksQueryVariables = Exact<{
 }>;
 
 
-export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string | null> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
+export type FetchTasksQuery = { __typename?: 'Query', heliconeNode?: Array<{ __typename?: 'HeliconeNode', id: string, name: string, description?: string | null, created_at: string, updated_at: string, job_id: string, parent_node_ids?: Array<string> | null, properties?: Array<{ __typename?: 'Property', name?: string | null, value?: string | null } | null> | null } | null> | null };
 
 
 export const FetchRunsDocument = gql`

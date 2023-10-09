@@ -73,10 +73,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/requests"),
     },
     {
-      name: "Runs",
-      href: "/runs",
+      name: "Jobs",
+      href: "/jobs",
       icon: BsBriefcase,
-      current: pathname.includes("/runs"),
+      current: pathname.includes("/jobs"),
     },
     {
       name: "Users",

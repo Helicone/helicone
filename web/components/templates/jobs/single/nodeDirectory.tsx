@@ -33,27 +33,27 @@ import useNotification from "../../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "../../requestsV2/RequestView";
-import { useRunPage } from "../useRunPage";
+import { useJobPage } from "../useJobPage";
 import {
   HeliconeJob,
   HeliconeNode,
 } from "../../../../lib/api/graphql/client/graphql";
 import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
-import { useSingleRunPage } from "../useSingleRunPage";
+import { useSingleJobPage } from "../useSingleJobPage";
 import Flow from "./flow";
 import { useReactFlow, useStoreApi } from "reactflow";
 import { Tooltip } from "@mui/material";
 
 interface TreeViewProps {
-  tasks: HeliconeNode[];
+  nodes: HeliconeNode[];
   filteredNodes: string[];
   setFilteredNodes: (nodes: string[]) => void;
 }
 
-const RenderTask = (props: {
-  task: HeliconeNode;
+const RenderNode = (props: {
+  node: HeliconeNode;
   level: number;
-  allTasks: HeliconeNode[];
+  allNodes: HeliconeNode[];
   focusNode: (nodeId: string) => void;
   filteredNodes: string[];
   setFilteredNodes: (nodes: string[]) => void;
@@ -61,21 +61,21 @@ const RenderTask = (props: {
 }) => {
   const { fitView } = useReactFlow();
   const {
-    task,
+    node: node,
     level = 0,
-    allTasks,
+    allNodes: allNodes,
     focusNode,
     filteredNodes,
     setFilteredNodes,
     childrenHidden,
   } = props;
-  const children = allTasks.filter((t) => t.parent_id === task.id);
+  const children = allNodes.filter((t) => t.parent_node_ids?.includes(node.id));
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div key={task.id} className="pl-4">
+    <div key={node.id} className="pl-4">
       <div className="flex flex-row justify-start">
-        {children.length > 0 && (
+        {children.length > 0 ? (
           <button
             onClick={() => {
               setExpanded(!expanded);
@@ -88,10 +88,12 @@ const RenderTask = (props: {
               <ChevronUpIcon className="h-4 w-4 inline-block" />
             )}
           </button>
+        ) : (
+          <div className="pl-6" />
         )}
         <button
           onClick={() => {
-            focusNode(task.id);
+            focusNode(node.id);
           }}
           className={clsx(
             `py-2 px-2 ${level === 0 ? "font-bold" : ""}`,
@@ -99,19 +101,19 @@ const RenderTask = (props: {
             "hover:bg-gray-200 rounded-md "
           )}
         >
-          {task.name}
+          {node.name}
         </button>
         <input
           type="checkbox"
           className={clsx("ml-auto ", childrenHidden ? "opacity-50" : "")}
-          checked={!filteredNodes.includes(task.id)}
+          checked={!filteredNodes.includes(node.id)}
           onChange={(e) => {
             if (e.target.checked) {
               setFilteredNodes(
-                filteredNodes.filter((node) => node !== task.id)
+                filteredNodes.filter((node) => node !== node.id)
               );
             } else {
-              setFilteredNodes([...filteredNodes, task.id]);
+              setFilteredNodes([...filteredNodes, node.id]);
             }
           }}
         />
@@ -119,14 +121,14 @@ const RenderTask = (props: {
       {expanded &&
         children.map((child) => (
           <div key={`child-${child.id}`} className="pl-4">
-            <RenderTask
-              task={child}
+            <RenderNode
+              node={child}
               level={level + 1}
-              allTasks={allTasks}
+              allNodes={allNodes}
               focusNode={focusNode}
               setFilteredNodes={setFilteredNodes}
               filteredNodes={filteredNodes}
-              childrenHidden={filteredNodes.includes(task.id)}
+              childrenHidden={filteredNodes.includes(node.id)}
             />
           </div>
         ))}
@@ -134,8 +136,8 @@ const RenderTask = (props: {
   );
 };
 
-const TaskDirectory: React.FC<TreeViewProps> = ({
-  tasks,
+const NodeDirectory: React.FC<TreeViewProps> = ({
+  nodes: nodes,
   filteredNodes,
   setFilteredNodes,
 }) => {
@@ -156,22 +158,42 @@ const TaskDirectory: React.FC<TreeViewProps> = ({
       setCenter(x, y, { zoom, duration: 1000 });
     }
   };
-  const rootTasks = tasks.filter((task) => !task.parent_id);
+  const rootNodes = nodes.filter((node) => node.parent_node_ids?.length === 0);
+
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="bg-white p-4 rounded shadow">
-      {rootTasks.map((task) => (
-        <div key={`root-${task.id}`} className="pl-4 max-w-3xl">
-          <RenderTask
-            task={task}
-            level={0}
-            allTasks={tasks}
-            focusNode={focusNode}
-            filteredNodes={filteredNodes}
-            setFilteredNodes={setFilteredNodes}
-          />
-        </div>
-      ))}
+      <div className="flex flex-row justify-start">
+        <button
+          onClick={() => {
+            setExpanded(!expanded);
+          }}
+          className="pr-2"
+        >
+          {expanded ? (
+            <ChevronDownIcon className="h-4 w-4 inline-block" />
+          ) : (
+            <ChevronUpIcon className="h-4 w-4 inline-block" />
+          )}
+        </button>
+        <p className="font-bold">Nodes</p>
+      </div>
+      <div className="flex flex-col justify-start">
+        {expanded &&
+          rootNodes.map((node) => (
+            <div key={`root-${node.id}`} className="pl-4 max-w-3xl">
+              <RenderNode
+                node={node}
+                level={0}
+                allNodes={nodes}
+                focusNode={focusNode}
+                filteredNodes={filteredNodes}
+                setFilteredNodes={setFilteredNodes}
+              />
+            </div>
+          ))}
+      </div>
       <div className="flex flex-row w-full justify-end">
         <Tooltip title={"Fit View"}>
           <button
@@ -188,4 +210,4 @@ const TaskDirectory: React.FC<TreeViewProps> = ({
   );
 };
 
-export default memo(TaskDirectory);
+export default memo(NodeDirectory);

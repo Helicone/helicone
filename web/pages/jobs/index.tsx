@@ -13,7 +13,7 @@ import {
   SortDirection,
   SortLeafRequest,
 } from "../../services/lib/sorts/requests/sorts";
-import RunsPage from "../../components/templates/runs/runsPage";
+import JobsPage from "../../components/templates/jobs/jobsPage";
 
 interface RequestsV2Props {
   user: User;
@@ -33,7 +33,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
   return (
     <MetaData title={"Requests"}>
       <AuthLayout user={user}>
-        <RunsPage
+        <JobsPage
           currentPage={currentPage}
           pageSize={pageSize}
           sort={sort}

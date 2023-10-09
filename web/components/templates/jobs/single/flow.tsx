@@ -1,30 +1,25 @@
-import React, { useCallback, useState, useEffect, memo } from "react";
-import ReactFlow, {
-  MiniMap,
-  Controls,
-  Background,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Position,
-  Node,
-  Edge,
-  BackgroundVariant,
-  ReactFlowProvider,
-} from "reactflow";
 import dagre from "dagre";
+import { memo, useCallback, useEffect, useState } from "react";
+import ReactFlow, {
+  Background,
+  BackgroundVariant,
+  Edge,
+  MiniMap,
+  Node,
+  Position,
+  ReactFlowProvider,
+  addEdge,
+  useEdgesState,
+  useNodesState,
+} from "reactflow";
 
 import "reactflow/dist/style.css";
-import TaskNode from "./TaskNode";
 import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
-import { useGetRequests } from "../../../../services/hooks/requests";
-import FlowButton from "./buttons";
-import TaskDirectory from "./taskDirectory";
-import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
-import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
+import JobNode from "./JobNode";
+import NodeDirectory from "./nodeDirectory";
 
 const nodeTypes = {
-  custom: TaskNode,
+  custom: JobNode,
 };
 
 const nodeWidth = 1000;
@@ -34,7 +29,7 @@ const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 const getLayoutedElements = (
-  nodes: TaskNode[],
+  nodes: JobNode[],
   edges: Edge[],
   direction = "LR"
 ): {
@@ -80,84 +75,88 @@ const getLayoutedElements = (
   };
 };
 
-export interface TaskNode {
+export interface JobNode {
   id: string;
   data: {
-    task: HeliconeNode;
+    node: HeliconeNode;
   };
-  parentId?: string;
+  parentIds: string[];
 }
 
 export interface FlowProps {
-  taskNodes: TaskNode[];
+  jobNodes: JobNode[];
 }
 
 function checkAnyParentsAreFiltered(
-  parent: TaskNode,
+  parent: JobNode,
   filteredNodes: string[],
-  allTasks: TaskNode[]
+  allNodes: JobNode[]
 ): boolean {
   if (filteredNodes.includes(parent.id)) {
     return true;
   }
-  if (parent.parentId === undefined) {
+  // return false;
+  if (parent.parentIds.length === 0) {
     return false;
   }
-  const parentTask = allTasks.find((task) => task.id === parent.parentId);
-  if (parentTask === undefined) {
+  const firstParentNode = allNodes.find((node) =>
+    parent.parentIds.includes(node.id)
+  );
+  if (firstParentNode === undefined) {
     return false;
   }
-  return checkAnyParentsAreFiltered(parentTask, filteredNodes, allTasks);
+  return checkAnyParentsAreFiltered(firstParentNode, filteredNodes, allNodes);
 }
 
 function Flow(props: FlowProps) {
-  const { taskNodes } = props;
+  const { jobNodes: jobNodes } = props;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [filteredNodes, setFilteredNodes] = useState<string[]>([]);
 
-  // useEffect(() => {
-  //   const tempNodes = taskNodes.filter((task) => {
-  //     const hasFilteredParent = checkAnyParentsAreFiltered(
-  //       task,
-  //       filteredNodes,
-  //       taskNodes
-  //     );
-  //     return !filteredNodes.includes(task.id) && !hasFilteredParent;
-  //   });
-  //   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-  //     tempNodes,
-  //     tempNodes
-  //       .filter((task) => task.parentId !== undefined)
-  //       .map((task) => {
-  //         return {
-  //           id: `e${task.id}-${task.parentId} `,
-  //           source: task.parentId!,
-  //           target: task.id!,
-  //         };
-  //       })
-  //   );
-  //   setNodes(layoutedNodes);
-  //   setEdges(layoutedEdges);
-  // }, [taskNodes, setNodes, setEdges, filteredNodes]);
+  useEffect(() => {
+    const tempNodes = jobNodes.filter((node) => {
+      const hasFilteredParent = checkAnyParentsAreFiltered(
+        node,
+        filteredNodes,
+        jobNodes
+      );
+      return !filteredNodes.includes(node.id) && !hasFilteredParent;
+    });
+    const edges = tempNodes.flatMap((node) => {
+      return node.parentIds.map((parentId) => {
+        return {
+          id: `e${node.id}-${parentId} `,
+          source: parentId,
+          target: node.id,
+        };
+      });
+    });
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      tempNodes,
+      edges
+    );
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+  }, [jobNodes, setNodes, setEdges, filteredNodes]);
 
-  // const onConnect = useCallback(
-  //   (params: any) => setEdges((eds) => addEdge(params, eds)),
-  //   [setEdges]
-  // );
+  const onConnect = useCallback(
+    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
 
   return (
     <>
-      <div className="w-full h-[55vh] ">
+      <div className="w-full h-[85vh]">
         <ReactFlowProvider>
-          <TaskDirectory
-            tasks={taskNodes.map((task) => task.data.task)}
+          <NodeDirectory
+            nodes={jobNodes.map((node) => node.data.node)}
             filteredNodes={filteredNodes}
             setFilteredNodes={setFilteredNodes}
           />
 
-          {/* <ReactFlow
+          <ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -168,7 +167,7 @@ function Flow(props: FlowProps) {
           >
             <MiniMap />
             <Background color="#f4f4f4" variant={BackgroundVariant.Lines} />
-          </ReactFlow> */}
+          </ReactFlow>
         </ReactFlowProvider>
       </div>
     </>

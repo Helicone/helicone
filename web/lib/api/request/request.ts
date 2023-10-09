@@ -47,7 +47,7 @@ export interface HeliconeRequest {
   prompt_tokens: number | null;
   completion_tokens: number | null;
   provider: Provider;
-  task_id: string | null;
+  node_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
@@ -91,7 +91,6 @@ export async function getRequestsCached(
     response.prompt_tokens as prompt_tokens,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
-    request.task_id as task_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
@@ -194,7 +193,7 @@ export async function getRequests(
     response.prompt_tokens as prompt_tokens,
     prompt.name AS prompt_name,
     prompt.prompt AS prompt_regex,
-    request.task_id as task_id,
+    job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
@@ -204,6 +203,7 @@ export async function getRequests(
     left join response on request.id = response.request
     left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
+    left join job_node_request on request.id = job_node_request.request_id
   WHERE (
     (${builtFilter.filter})
     AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
@@ -281,6 +281,7 @@ export async function getRequestCount(
     left join response on request.id = response.request
     left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
+    left join job_node_request on request.id = job_node_request.request_id
   WHERE (
     (${builtFilter.filter})
   )

@@ -1,12 +1,12 @@
 import { useQuery } from "@apollo/client";
 import { useGetProperties } from "../../../services/hooks/properties";
-import { GET_RUNS } from "../../../services/hooks/runs";
-import { GET_TASKS as GET_NODES } from "../../../services/hooks/tasks";
+import { GET_JOBS as GET_JOBS } from "../../../services/hooks/jobs";
+import { GET_NODES as GET_NODES } from "../../../services/hooks/tasks";
 
-export const useSingleRunPage = (jobId: string, isLive: boolean) => {
+export const useSingleJobPage = (jobId: string, isLive: boolean) => {
   const { properties, isLoading: isPropertiesLoading } = useGetProperties();
 
-  const run = useQuery(GET_RUNS, {
+  const job = useQuery(GET_JOBS, {
     variables: {
       limit: 1,
       offset: 0,
@@ -32,7 +32,7 @@ export const useSingleRunPage = (jobId: string, isLive: boolean) => {
   });
 
   return {
-    tasks: nodes,
-    run,
+    nodes: nodes,
+    job: job,
   };
 };

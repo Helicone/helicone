@@ -28,11 +28,11 @@ import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { RequestView } from "../requestsV2/RequestView";
-import { useRunPage } from "./useRunPage";
+import { useJobPage } from "./useJobPage";
 import { HeliconeJob } from "../../../lib/api/graphql/client/graphql";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 
-interface RunsPageProps {
+interface JobsPageProps {
   currentPage: number;
   pageSize: number;
   sort: {
@@ -74,7 +74,7 @@ function getSortLeaf(
   }
 }
 
-const RunsPage = (props: RunsPageProps) => {
+const JobsPage = (props: JobsPageProps) => {
   const {
     currentPage,
     pageSize,
@@ -134,11 +134,13 @@ const RunsPage = (props: RunsPageProps) => {
   >(undefined);
 
   const router = useRouter();
-  const { count, runs, properties, refetch, loading } = useRunPage(
-    page,
-    currentPageSize,
-    isLive
-  );
+  const {
+    count,
+    jobs: jobs,
+    properties,
+    refetch,
+    loading,
+  } = useJobPage(page, currentPageSize, isLive);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -184,7 +186,7 @@ const RunsPage = (props: RunsPageProps) => {
   return (
     <div>
       <AuthHeader
-        title={"Runs"}
+        title={"Jobs"}
         headerActions={
           <div className="flex flex-row gap-2">
             <button
@@ -211,13 +213,13 @@ const RunsPage = (props: RunsPageProps) => {
       />
       <div className="flex flex-col space-y-4">
         <ThemedTableV5
-          defaultData={(runs.data?.heliconeJob || []) as HeliconeJob[]}
+          defaultData={(jobs.data?.heliconeJob || []) as HeliconeJob[]}
           defaultColumns={columnsWithProperties}
           tableKey="requestsColumnVisibility"
           dataLoading={loading}
           sortable={sort}
           onRowSelect={(row) => {
-            router.push(`/runs/${row.id}`, undefined, { shallow: true });
+            router.push(`/jobs/${row.id}`, undefined, { shallow: true });
           }}
         />
         <TableFooter
@@ -240,4 +242,4 @@ const RunsPage = (props: RunsPageProps) => {
   );
 };
 
-export default RunsPage;
+export default JobsPage;

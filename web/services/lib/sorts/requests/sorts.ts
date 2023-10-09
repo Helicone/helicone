@@ -111,7 +111,7 @@ export interface SortLeafJob {
   status?: SortDirection;
   org_id?: SortDirection;
   job_id?: SortDirection;
-  task_id?: SortDirection;
+  node_id?: SortDirection;
   custom_properties?: {
     [key: string]: SortDirection;
   };
@@ -150,9 +150,9 @@ export function buildJobSort(sort: SortLeafJob): string {
     assertValidSortDirection(sort.job_id);
     return `job.job_id ${sort.job_id}`;
   }
-  if (sort.task_id) {
-    assertValidSortDirection(sort.task_id);
-    return `job.task_id ${sort.task_id}`;
+  if (sort.node_id) {
+    assertValidSortDirection(sort.node_id);
+    return `job.node_id ${sort.node_id}`;
   }
 
   if (sort.custom_properties) {

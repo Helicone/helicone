@@ -1,8 +1,8 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { RunStatus } from "../../../lib/sql/runs";
+import { JobStatus } from "../../../lib/sql/jobs";
 
 interface StatusBadgeProps {
-  statusType: RunStatus;
+  statusType: JobStatus;
   errorCode?: number;
 }
 

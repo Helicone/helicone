@@ -1,10 +1,7 @@
 // import { useQuery } from "@tanstack/react-query";
-import { useQuery } from "@apollo/client";
 import { gql } from "../../lib/api/graphql/client";
-import { HeliconeJobFilter } from "../../lib/api/graphql/schema/types/graphql";
-import { SortLeafJob } from "../lib/sorts/requests/sorts";
 
-export const GET_TASKS = gql(/* GraphQL */ `
+export const GET_NODES = gql(/* GraphQL */ `
   query FetchTasks(
     $heliconeNodeId: String
     $limit: Int

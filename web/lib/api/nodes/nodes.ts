@@ -1,24 +1,7 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthJobsTable,
-  buildFilterWithAuthTasksTable,
-} from "../../../services/lib/filters/filters";
-import {
-  SortLeafRequest,
-  SortLeafJob,
-  buildRequestSort,
-  buildJobSort,
-} from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
-import { Result, resultMap } from "../../result";
-import { RunStatus } from "../../sql/runs";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../db/dbExecute";
+import { buildFilterWithAuthNodesTable } from "../../../services/lib/filters/filters";
+import { Result } from "../../result";
+import { dbExecute } from "../db/dbExecute";
 
 export interface HeliconeNode {
   id: string;
@@ -27,13 +10,13 @@ export interface HeliconeNode {
   created_at: string;
   updated_at: string;
   job_id: string;
-  parent_id: string;
+  parent_node_ids?: string[];
   properties: {
     [key: string]: string;
   };
 }
 
-export async function getTasks(
+export async function getNodes(
   orgId: string,
   filter: FilterNode,
   offset: number,
@@ -42,7 +25,7 @@ export async function getTasks(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuthTasksTable({
+  const builtFilter = await buildFilterWithAuthNodesTable({
     org_id: orgId,
     filter,
     argsAcc: [],

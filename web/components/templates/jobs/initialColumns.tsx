@@ -4,7 +4,7 @@ import StatusBadge from "./statusBadge";
 import { HeliconeJob } from "../../../lib/api/graphql/schema/types/graphql";
 import ModelPill from "../requestsV2/modelPill";
 import { RocketLaunchIcon } from "@heroicons/react/24/outline";
-import { RunStatus } from "../../../lib/sql/runs";
+import { JobStatus } from "../../../lib/sql/jobs";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -52,7 +52,7 @@ export const getInitialColumns: () => ColumnDef<HeliconeJob>[] = (
     header: "Status",
     cell: (info) => (
       <>
-        <StatusBadge statusType={info.getValue() as RunStatus} />
+        <StatusBadge statusType={info.getValue() as JobStatus} />
       </>
     ),
     meta: {
@@ -66,7 +66,7 @@ export const getInitialColumns: () => ColumnDef<HeliconeJob>[] = (
   },
   {
     accessorKey: "node_count",
-    header: "Tasks",
+    header: "Nodes",
     cell: (info) => info.getValue(),
     meta: {
       sortKey: "latency",

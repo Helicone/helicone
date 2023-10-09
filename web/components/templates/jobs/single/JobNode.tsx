@@ -9,14 +9,14 @@ import useRequestsPageV2 from "../../requestsV2/useRequestsPageV2";
 import RequestDrawerV2 from "../../requestsV2/requestDrawerV2";
 import { NormalizedRequest } from "../../requestsV2/builder/abstractRequestBuilder";
 
-function TaskNodeInner({ task }: { task: HeliconeNode }) {
+function JobNodeInner({ task }: { task: HeliconeNode }) {
   const { requests, properties } = useRequestsPageV2(
     1,
     25,
     [],
     {
       request: {
-        task_id: {
+        node_id: {
           equals: task.id,
         },
       },
@@ -62,22 +62,22 @@ function TaskNodeInner({ task }: { task: HeliconeNode }) {
   );
 }
 
-function TaskNode({
+function JobNode({
   id,
   data,
   isConnectable,
 }: {
   id: string;
   data: {
-    task: HeliconeNode;
+    node: HeliconeNode;
   };
   isConnectable?: boolean;
 }) {
   return (
     <>
       <div className="p-10 bg-white">
-        <div>{data.task.name}</div>
-        <TaskNodeInner task={data.task} />
+        <div>{data.node.name}</div>
+        <JobNodeInner task={data.node} />
       </div>
 
       <Handle
@@ -100,4 +100,4 @@ function TaskNode({
   );
 }
 
-export default memo(TaskNode);
+export default memo(JobNode);

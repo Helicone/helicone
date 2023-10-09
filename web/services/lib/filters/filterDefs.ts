@@ -44,7 +44,7 @@ export type RequestTableToOperators = {
   auth_hash: SingleKey<TextOperators>;
   org_id: SingleKey<TextOperators>;
   id: SingleKey<TextOperators>;
-  task_id: SingleKey<TextOperators>;
+  node_id: SingleKey<TextOperators>;
 };
 
 export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
@@ -159,12 +159,11 @@ type JobToOperators = {
 
 export type FilterLeafJob = SingleKey<JobToOperators>;
 
-type TasksToOperators = {
+type NodesToOperators = {
   id: SingleKey<TextOperators>;
   name: SingleKey<TextOperators>;
   description: SingleKey<TextOperators>;
   job_id: SingleKey<TextOperators>;
-  parent_task: SingleKey<TextOperators>;
   status: SingleKey<TextOperators>;
   created_at: SingleKey<TimestampOperators>;
   updated_at: SingleKey<TimestampOperators>;
@@ -175,7 +174,7 @@ type TasksToOperators = {
   org_id: SingleKey<TextOperators>;
 };
 
-export type FilterLeafTask = SingleKey<TasksToOperators>;
+export type FilterLeafNode = SingleKey<NodesToOperators>;
 
 export type TablesAndViews = {
   user_metrics: FilterLeafUserMetrics;
@@ -194,7 +193,7 @@ export type TablesAndViews = {
   properties_copy_v2: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
-  job_node: FilterLeafTask;
+  job_node: FilterLeafNode;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;
