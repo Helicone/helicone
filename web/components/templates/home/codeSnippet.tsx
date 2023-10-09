@@ -25,21 +25,16 @@ const CODE_CONVERTS = {
 }'
   `,
   typescript: (key: string) => `
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  // Add a basePath to the Configuration
-  basePath: "${BASE_PATH}",
-  baseOptions: {
-    headers: {
-      // Add your Helicone API Key
-      "Helicone-Auth": "Bearer ${key}",
-    },
-  }
+const openai = new OpenAI({
+  apiKey: request.env.OPENAI_API_KEY,
+  baseURL: "https://oai.hconeai.com/v1",
+  defaultHeaders: {
+    "Helicone-Auth": ${"`"}Bearer ${key}${"`"},
+  },
 });
-  
-const openai = new OpenAIApi(configuration);`,
+  `,
 
   python: (key: string) => `
 openai.api_base = "${BASE_PATH}"
@@ -61,7 +56,7 @@ llm = OpenAI(
     "Helicone-Auth": "Bearer ${key}"
   }
 )
-  `,
+`,
   langchain_typescript: (key: string) => `
 const model = new OpenAI(
   {},
@@ -82,7 +77,7 @@ type SupportedLanguages = keyof typeof CODE_CONVERTS;
 const DIFF_LINES: {
   [key in SupportedLanguages]: number[];
 } = {
-  typescript: [5, 9],
+  typescript: [4, 6],
   python: [0, 5],
   curl: [1, 3],
   langchain_python: [0, 5],
