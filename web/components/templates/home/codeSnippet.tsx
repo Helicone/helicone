@@ -25,21 +25,13 @@ const CODE_CONVERTS = {
   }'
   `,
   typescript: (key: string) => `
-  import { Configuration, OpenAIApi } from "openai";
-  
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-    // Add a basePath to the Configuration
-    basePath: "${BASE_PATH}",
-    baseOptions: {
-      headers: {
-        // Add your Helicone API Key
-        "Helicone-Auth": "Bearer ${key}",
-      },
-    }
-  });
-  
-  const openai = new OpenAIApi(configuration);`,
+  import OpenAI from "openai";
+  const openai = new OpenAI({
+    baseURL: 'https://oai.hconeai.com/v1',
+    defaultHeaders: {
+      'Helicone-Auth': \`Bearer ${process.env.HELICONE_API_KEY}\`,
+    });
+    `,
 
   python: (key: string) => `
   openai.api_base = "${BASE_PATH}"
