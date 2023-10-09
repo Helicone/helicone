@@ -111,7 +111,7 @@ def test_run_creation():
             functions=COURSE_FUNCTIONS,
             max_tokens=512,
             heliconeMeta=Meta(
-                task_id=create_course_outline.id,
+                node_id=create_course_outline.id,
                 retry=True,
                 cache=True,
             ),
@@ -140,7 +140,7 @@ def test_run_creation():
                 max_tokens=512,
                 user="alice@bob.com",
                 heliconeMeta=Meta(
-                    task_id=create_chapters.id,
+                    node_id=create_chapters.id,
                 ),
             )
             chapter = json.loads(

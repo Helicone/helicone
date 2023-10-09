@@ -18,7 +18,7 @@ from helicone.async_logger.async_logger import (HeliconeAsyncLogger,
 class HeliconeMeta:
     custom_properties: Optional[dict] = None
     user_id: Optional[str] = None
-    task_id: Optional[str] = None
+    node_id: Optional[str] = None
 
     def build(self) -> dict:
         meta = {}
@@ -29,8 +29,8 @@ class HeliconeMeta:
         if self.user_id:
             meta["Helicone-User-Id"] = self.user_id
 
-        if self.task_id:
-            meta["Helicone-Task-Id"] = self.task_id
+        if self.node_id:
+            meta["Helicone-Node-Id"] = self.node_id
 
         return meta
 
