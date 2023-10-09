@@ -29,7 +29,7 @@ const CODE_CONVERTS = {
   const openai = new OpenAI({
     baseURL: 'https://oai.hconeai.com/v1',
     defaultHeaders: {
-      'Helicone-Auth': \`Bearer ${process.env.HELICONE_API_KEY}\`,
+      'Helicone-Auth': 'Bearer ' + process.env.HELICONE_API_KEY,
     });
     `,
 
