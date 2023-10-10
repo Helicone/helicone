@@ -38,6 +38,10 @@ export function convertTimeOperators(
     return { gte: op.gte };
   } else if (op.lte) {
     return { lte: op.lte };
+  } else if (op.lt) {
+    return { lt: op.lt };
+  } else if (op.gt) {
+    return { gt: op.gt };
   }
   throw new Error("Invalid date operator");
 }
