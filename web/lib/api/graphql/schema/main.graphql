@@ -174,4 +174,6 @@ input NumberOperators {
 input DateOperators {
   gte: String
   lte: String
+  lt: String
+  gt: String
 }
