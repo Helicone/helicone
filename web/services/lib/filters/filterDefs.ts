@@ -7,6 +7,8 @@ export type AllOperators =
   | "ilike"
   | "gte"
   | "lte"
+  | "lt"
+  | "gt"
   | "not-equals"
   | "contains";
 export type TextOperators = Record<
@@ -15,15 +17,15 @@ export type TextOperators = Record<
 >;
 
 export type NumberOperators = Record<
-  "not-equals" | "equals" | "gte" | "lte",
+  "not-equals" | "equals" | "gte" | "lte" | "lt" | "gt",
   number
 >;
 
 export type BooleanOperators = Record<"equals", boolean>;
 
-export type TimestampOperators = Record<"gte" | "lte", string>;
+export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte", Date>;
+export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>

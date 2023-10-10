@@ -36,7 +36,9 @@ export type Cache = {
 };
 
 export type DateOperators = {
+  gt?: InputMaybe<Scalars['String']['input']>;
   gte?: InputMaybe<Scalars['String']['input']>;
+  lt?: InputMaybe<Scalars['String']['input']>;
   lte?: InputMaybe<Scalars['String']['input']>;
 };
 
