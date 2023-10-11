@@ -16,8 +16,7 @@ import sys
 import os
 
 HELICONE_API_KEY = os.environ.get('HELICONE_API_KEY')
-print("HELICONE_API_KEY", HELICONE_API_KEY)
-PAGE_SIZE = int(os.environ.get('PAGE_SIZE')) or 50
+PAGE_SIZE = int(os.environ.get('PAGE_SIZE')) if os.environ.get('PAGE_SIZE') else 50
 # Define the GraphQL endpoint (replace with your actual endpoint)
 url = os.environ.get('HELICONE_API_URL') or "https://www.helicone.ai/api/graphql"
 
