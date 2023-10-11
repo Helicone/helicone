@@ -6,7 +6,7 @@ import { logInClickhouse } from "./clickhouseLog";
 import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
-import { Result, err, mapPostgrestErr } from "../../results";
+import { Result, err, ok, mapPostgrestErr } from "../../results";
 import {
   consolidateTextFields,
   getUsage,
@@ -19,6 +19,7 @@ import { InsertQueue } from "./insertQueue";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
+import { withTimeout } from "../../helpers";
 
 export interface DBLoggableProps {
   response: {
@@ -247,11 +248,7 @@ export class DBLoggable {
     }
   }
 
-  async readAndLogResponse(
-    queue: InsertQueue
-  ): Promise<
-    Result<Database["public"]["Tables"]["response"]["Insert"], string>
-  > {
+  async getResponse() {
     const responseBody = await this.response.getResponseBody();
 
     const endTime = this.timing.endTime ?? new Date();
@@ -259,49 +256,58 @@ export class DBLoggable {
 
     const parsedResponse = await this.parseResponse(responseBody);
 
-    const response =
-      parsedResponse.error === null
-        ? {
-            id: this.response.responseId,
-            created_at: endTime.toISOString(),
-            request: this.request.requestId,
-            body: this.response.omitLog
-              ? {
-                  usage: parsedResponse.data?.usage,
-                }
-              : parsedResponse.data,
-            status: this.response.status,
-            completion_tokens: parsedResponse.data.usage?.completion_tokens,
-            prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
-            delay_ms,
-          }
-        : {
-            id: this.response.responseId,
-            request: this.request.requestId,
-            created_at: endTime.toISOString(),
-            body: {
-              helicone_error: "error parsing response",
-              parse_response_error: parsedResponse.error,
-              body: this.tryJsonParse(responseBody),
-            },
-            status: this.response.status,
-          };
+    return parsedResponse.error === null
+      ? {
+          id: this.response.responseId,
+          created_at: endTime.toISOString(),
+          request: this.request.requestId,
+          body: this.response.omitLog
+            ? {
+                usage: parsedResponse.data?.usage,
+              }
+            : parsedResponse.data,
+          status: this.response.status,
+          completion_tokens: parsedResponse.data.usage?.completion_tokens,
+          prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+          delay_ms,
+        }
+      : {
+          id: this.response.responseId,
+          request: this.request.requestId,
+          created_at: endTime.toISOString(),
+          body: {
+            helicone_error: "error parsing response",
+            parse_response_error: parsedResponse.error,
+            body: this.tryJsonParse(responseBody),
+          },
+          status: this.response.status,
+        };
+  }
 
-    const { error } = await queue.updateResponse(
-      this.response.responseId,
-      this.request.requestId,
-      response
-    );
-    if (error !== null) {
-      return {
-        data: null,
-        error: error,
-      };
+  async readAndLogResponse(
+    queue: InsertQueue
+  ): Promise<
+    Result<Database["public"]["Tables"]["response"]["Insert"], string>
+  > {
+    try {
+      const response = await withTimeout(this.getResponse(), 1000 * 60 * 30); // 30 minutes
+      return ok(response);
+    } catch (e) {
+      const { error } = await queue.updateResponse(
+        this.response.responseId,
+        this.request.requestId,
+        {
+          status: -1,
+          body: {
+            helicone_error: "error getting response, " + e,
+          },
+        }
+      );
+      if (error !== null) {
+        return err(error);
+      }
+      return err("error getting response, " + e);
     }
-    return {
-      data: response,
-      error: null,
-    };
   }
 
   async sendToWebhook(
