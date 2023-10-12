@@ -420,7 +420,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                 xs: layout,
                 xxs: layout,
               }}
-              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 360, xxs: 0 }}
+              // 768
+              breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
               cols={gridCols}
               rowHeight={72}
             >
