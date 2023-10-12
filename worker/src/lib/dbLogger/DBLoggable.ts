@@ -290,7 +290,7 @@ export class DBLoggable {
     Result<Database["public"]["Tables"]["response"]["Insert"], string>
   > {
     try {
-      const response = await withTimeout(this.getResponse(), 1000 * 60 * 15); // 30 seconds
+      const response = await withTimeout(this.getResponse(), 1000 * 60 * 30); // 30 minutes
       const { error } = await queue.updateResponse(
         this.response.responseId,
         this.request.requestId,
