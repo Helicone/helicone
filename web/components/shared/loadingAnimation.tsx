@@ -3,23 +3,30 @@ import * as chicky from "../../public/lottie/Polite Chicky.json";
 import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
 import * as dashboard from "../../public/lottie/DashboardAnimation.json";
+import * as boxbee from "../../public/lottie/boxbee.json";
 import { useEffect, useState } from "react";
 
 type Animation =
   | typeof chicky
   | typeof hamster
   | typeof plane
-  | typeof dashboard;
+  | typeof dashboard
+  | typeof boxbee;
 
 interface LoadingAnimationProps {
-  title: string;
+  title?: string;
   height?: number;
   width?: number;
   animation?: Animation;
 }
 
 const LoadingAnimation = (props: LoadingAnimationProps) => {
-  const { title, animation: defaultAnimation } = props;
+  const {
+    title,
+    animation: defaultAnimation,
+    height = 300,
+    width = 300,
+  } = props;
   const [animation, setAnimation] = useState<Animation | undefined>(
     defaultAnimation
   );
@@ -46,8 +53,8 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
             preserveAspectRatio: "xMidYMid slice",
           },
         }}
-        height={300}
-        width={300}
+        height={height}
+        width={width}
         isStopped={false}
         isPaused={false}
         style={{
@@ -56,7 +63,7 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
         }}
       />
 
-      <p className="font-medium text-lg">{title}</p>
+      {title && <p className="font-medium text-lg">{title}</p>}
     </div>
   );
 };
