@@ -32,6 +32,7 @@ const PropertyCard = (props: PropertyCardPageProps) => {
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
+      id: "totalCost",
       value: keyMetrics.totalCost.data?.data
         ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
         : "$0.00",
@@ -42,12 +43,14 @@ const PropertyCard = (props: PropertyCardPageProps) => {
       onInformationHref: "https://docs.helicone.ai/faq/how-we-calculate-cost",
     },
     {
+      id: "totalRequests",
       value: +(keyMetrics.totalRequests?.data?.data?.toFixed(2) ?? 0),
       label: "Total Requests",
       icon: TableCellsIcon,
       isLoading: keyMetrics.totalRequests.isLoading,
     },
     {
+      id: "averageLatency",
       value: keyMetrics.averageLatency.data?.data
         ? (keyMetrics.averageLatency.data.data / 1000).toFixed(2)
         : "n/a",
