@@ -147,14 +147,10 @@ export async function heliconeRequest(
   if (error !== null) {
     throw new ApolloError(error, "UNAUTHENTICATED");
   }
-  console.log(
-    "NEXT TIME STAMP",
-    new Date(data[data.length - 1].request_created_at).toISOString()
-  );
 
   return data.map((r) => ({
     id: r.request_id,
-    createdAt: new Date(r.request_created_at).toISOString(),
+    createdAt: r.request_created_at,
     model: r.response_body?.model ?? r.request_body?.model ?? null,
     costUSD: modelCost({
       model: r.response_body?.model ?? r.request_body?.model ?? null,
