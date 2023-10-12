@@ -255,7 +255,17 @@ const DashboardPage = (props: DashboardPageProps) => {
   ];
 
   const layout = [
-    { i: "a", x: 0, y: 0, w: 8, h: 4, minW: 4, maxW: 12, minH: 4, maxH: 8 },
+    {
+      i: "a",
+      x: 0,
+      y: 0,
+      w: 8,
+      h: 4,
+      minW: 4,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
+    },
     {
       i: "cost-req",
       x: 8,
@@ -316,7 +326,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   ];
 
-  const gridCols = { lg: 12, md: 12, sm: 12, xs: 6, xxs: 2 };
+  const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
 
   return (
     <>
@@ -360,42 +370,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex flex-row justify-between items-center">
-            <ThemedTimeFilter
-              timeFilterOptions={[
-                { key: "24h", value: "24H" },
-                { key: "7d", value: "7D" },
-                { key: "1m", value: "1M" },
-                { key: "3m", value: "3M" },
-              ]}
-              onSelect={(key: string, value: string) => {
-                if (key === "custom") {
-                  value = value.replace("custom:", "");
-                  const start = new Date(value.split("_")[0]);
-                  const end = new Date(value.split("_")[1]);
-                  setInterval(key);
-                  setTimeFilter({
-                    start,
-                    end,
-                  });
-                } else {
-                  setInterval(key as TimeInterval);
-                  setTimeFilter({
-                    start: getTimeIntervalAgo(key as TimeInterval),
-                    end: new Date(),
-                  });
-                }
-              }}
-              custom={true}
-              isFetching={false}
-              defaultValue={interval}
-              currentTimeFilter={timeFilter}
-            />
-            <div className="flex flex-row justify-between items-center">
-              <h1>hi</h1>
-            </div>
-          </div>
-          {/* <ThemedTableHeader
+          <ThemedTableHeader
             isFetching={isAnyLoading}
             timeFilter={{
               currentTimeFilter: timeFilter,
@@ -434,8 +409,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                 throw new Error("not implemented");
               },
             }}
-          /> */}
-          <section id="panels" className="-m-2 pb-96">
+          />
+          <section id="panels" className="-m-2">
             <ResponsiveGridLayout
               className="layout"
               layouts={{
@@ -445,7 +420,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 xs: layout,
                 xxs: layout,
               }}
-              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 360, xxs: 0 }}
               cols={gridCols}
               rowHeight={72}
             >
