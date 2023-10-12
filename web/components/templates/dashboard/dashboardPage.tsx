@@ -176,7 +176,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const combineRequestsAndErrors = () => {
     let combinedArray = overTimeData.requests.data?.data?.map(
       (request, index) => ({
-        date: getUSDateShort(request.time.toString()),
+        date: getTimeMap(timeIncrement)(request.time),
         requests: request.count,
         errors: overTimeData.errors.data?.data
           ? overTimeData.errors.data?.data[index].count > 0
@@ -190,7 +190,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const combinePositiveAndNegativeFeedback = () => {
     let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
-      date: getUSDateShort(feedback.time.toString()),
+      date: getTimeMap(timeIncrement)(feedback.time),
       positive: feedback.positiveCount > 0 ? feedback.positiveCount : null,
       negative: feedback.negativeCount > 0 ? feedback.negativeCount : null,
     }));
@@ -474,6 +474,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       categories={["requests", "errors"]}
                       colors={["green", "red"]}
                       showYAxis={false}
+                      curveType="monotone"
                     />
                   )}
                 </StyledAreaChart>
@@ -506,7 +507,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="h-[14rem]"
                       data={
                         overTimeData.costs.data?.data?.map((r) => ({
-                          date: getUSDateShort(r.time.toString()),
+                          date: getTimeMap(timeIncrement)(r.time),
                           costs: r.cost,
                         })) ?? []
                       }
@@ -537,7 +538,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="h-[14rem]"
                       data={
                         overTimeData.users.data?.data?.map((r) => ({
-                          date: getUSDateShort(r.time.toString()),
+                          date: getTimeMap(timeIncrement)(r.time),
                           users: r.count,
                         })) ?? []
                       }
@@ -592,7 +593,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="h-[14rem]"
                       data={
                         overTimeData.latency.data?.data?.map((r) => ({
-                          date: getUSDateShort(r.time.toString()),
+                          date: getTimeMap(timeIncrement)(r.time),
                           latency: r.duration,
                         })) ?? []
                       }
@@ -600,6 +601,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       categories={["latency"]}
                       colors={["cyan"]}
                       showYAxis={false}
+                      curveType="monotone"
                     />
                   )}
                 </StyledAreaChart>
