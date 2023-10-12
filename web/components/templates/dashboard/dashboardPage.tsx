@@ -22,6 +22,16 @@ import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import MainGraph from "./graphs/mainGraph";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+import { Responsive, WidthProvider } from "react-grid-layout";
+import StyledAreaChart from "./styledAreaChart";
+import { AreaChart, BarChart } from "@tremor/react";
+import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import LoadingAnimation from "../../shared/loadingAnimation";
+import * as boxbee from "../../../public/lottie/boxbee.json";
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardPageProps {
   user: User;
@@ -166,27 +176,30 @@ const DashboardPage = (props: DashboardPageProps) => {
   const combineRequestsAndErrors = () => {
     let combinedArray = overTimeData.requests.data?.data?.map(
       (request, index) => ({
-        time: request.time,
-        value1: request.count,
-        value2: overTimeData.errors.data?.data
-          ? overTimeData.errors.data?.data[index].count
-          : 0,
+        date: getUSDateShort(request.time.toString()),
+        requests: request.count,
+        errors: overTimeData.errors.data?.data
+          ? overTimeData.errors.data?.data[index].count > 0
+            ? overTimeData.errors.data?.data[index].count
+            : null
+          : null,
       })
     );
-    return combinedArray;
+    return combinedArray || [];
   };
 
   const combinePositiveAndNegativeFeedback = () => {
     let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
-      time: feedback.time,
-      value1: feedback.positiveCount,
-      value2: feedback.negativeCount,
+      date: getUSDateShort(feedback.time.toString()),
+      positive: feedback.positiveCount > 0 ? feedback.positiveCount : null,
+      negative: feedback.negativeCount > 0 ? feedback.negativeCount : null,
     }));
-    return combinedArray;
+    return combinedArray || [];
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
+      id: "cost-req",
       value:
         metrics.totalCost.data?.data && metrics.totalRequests?.data?.data
           ? `$${(
@@ -198,6 +211,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
     },
     {
+      id: "prompt-tokens",
       value:
         metrics.averageTokensPerRequest?.data?.data &&
         metrics.totalRequests?.data?.data
@@ -212,6 +226,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         metrics.totalRequests.isLoading,
     },
     {
+      id: "completion-tokens",
       value:
         metrics.averageTokensPerRequest?.data?.data &&
         metrics.totalRequests?.data?.data
@@ -226,6 +241,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         metrics.totalRequests.isLoading,
     },
     {
+      id: "total-tokens",
       value:
         metrics.averageTokensPerRequest?.data?.data &&
         metrics.totalRequests?.data?.data
@@ -240,6 +256,95 @@ const DashboardPage = (props: DashboardPageProps) => {
         metrics.totalRequests.isLoading,
     },
   ];
+
+  const initialLayout: ReactGridLayout.Layout[] = [
+    {
+      i: "requests",
+      x: 0,
+      y: 0,
+      w: 8,
+      h: 4,
+      minW: 4,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
+    },
+    {
+      i: "cost-req",
+      x: 8,
+      y: 0,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+    },
+    {
+      i: "prompt-tokens",
+      x: 10,
+      y: 0,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+    },
+    {
+      i: "completion-tokens",
+      x: 8,
+      y: 3,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+    },
+    {
+      i: "total-tokens",
+      x: 10,
+      y: 3,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+    },
+    { i: "costs", x: 0, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "users", x: 6, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    {
+      i: "feedback",
+      x: 0,
+      y: 8,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+    },
+    {
+      i: "latency",
+      x: 6,
+      y: 8,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+    },
+  ];
+
+  const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
+
+  const [currentLayout, setCurrentLayout] = useLocalStorage(
+    "dashboardLayout",
+    JSON.stringify(initialLayout)
+  );
 
   return (
     <>
@@ -323,21 +428,25 @@ const DashboardPage = (props: DashboardPageProps) => {
               },
             }}
           />
-
-          <>
-            <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-12 text-gray-900 gap-4">
-              {/* Combine the requests and error into one graph */}
-              <div className="col-span-2 lg:col-span-6 h-full">
-                <MainGraph
-                  isLoading={overTimeData.requests.isLoading}
-                  dataOverTime={
-                    overTimeData.requests.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.count,
-                    })) ?? []
-                  }
-                  doubleLineOverTime={combineRequestsAndErrors()}
-                  timeMap={getTimeMap(timeIncrement)}
+          <section id="panels" className="-m-2">
+            <ResponsiveGridLayout
+              className="layout"
+              layouts={{
+                lg: JSON.parse(currentLayout) || initialLayout,
+                md: JSON.parse(currentLayout) || initialLayout,
+                sm: JSON.parse(currentLayout) || initialLayout,
+                xs: JSON.parse(currentLayout) || initialLayout,
+                xxs: JSON.parse(currentLayout) || initialLayout,
+              }}
+              autoSize={true}
+              isBounded={true}
+              breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
+              cols={gridCols}
+              rowHeight={72}
+              onLayoutChange={(currentLayout, allLayouts) => {}}
+            >
+              <div key="requests">
+                <StyledAreaChart
                   title={"Requests"}
                   value={
                     metrics.totalRequests?.data?.data
@@ -346,20 +455,36 @@ const DashboardPage = (props: DashboardPageProps) => {
                         )}`
                       : "0"
                   }
-                  valueLabel={"requests"}
-                  type="double-line"
-                />
-              </div>{" "}
-              <div className="col-span-2 lg:col-span-6 h-full">
-                <MainGraph
-                  isLoading={overTimeData.costs.isLoading}
-                  dataOverTime={
-                    overTimeData.costs.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.cost,
-                    })) ?? []
-                  }
-                  timeMap={getTimeMap(timeIncrement)}
+                >
+                  {overTimeData.requests.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4">
+                        <LoadingAnimation
+                          animation={boxbee}
+                          height={175}
+                          width={175}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={combineRequestsAndErrors()}
+                      index="date"
+                      categories={["requests", "errors"]}
+                      colors={["green", "red"]}
+                      showYAxis={false}
+                    />
+                  )}
+                </StyledAreaChart>
+              </div>
+              {metricsData.map((m, i) => (
+                <div key={m.id}>
+                  <MetricsPanel metric={m} />
+                </div>
+              ))}
+              <div key="costs">
+                <StyledAreaChart
                   title={"Costs"}
                   value={
                     metrics.totalCost.data?.data
@@ -371,57 +496,61 @@ const DashboardPage = (props: DashboardPageProps) => {
                         )}`
                       : "$0.00"
                   }
-                  valueLabel={"cost"}
-                  type="bar"
-                  labelFormatter={(value) =>
-                    `$${
-                      Number(value) < 0.02
-                        ? Number(value).toFixed(7)
-                        : Number(value).toFixed(2)
-                    }`
-                  }
-                />
+                >
+                  {overTimeData.costs.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <BarChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.costs.data?.data?.map((r) => ({
+                          date: getUSDateShort(r.time.toString()),
+                          costs: r.cost,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["costs"]}
+                      colors={["blue"]}
+                      showYAxis={false}
+                      valueFormatter={(number: number | bigint) =>
+                        `$ ${new Intl.NumberFormat("us")
+                          .format(number)
+                          .toString()}`
+                      }
+                    />
+                  )}
+                </StyledAreaChart>
               </div>
-              <div className="col-span-2 lg:col-span-4 h-full">
-                <MainGraph
-                  isLoading={overTimeData.latency.isLoading}
-                  dataOverTime={
-                    overTimeData.latency.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.duration,
-                    })) ?? []
-                  }
-                  timeMap={getTimeMap(timeIncrement)}
-                  title={"Latency"}
-                  value={`${
-                    metrics.averageLatency.data?.data?.toFixed(0) ?? 0
-                  } ms / req`}
-                  valueLabel={"latency"}
-                  type={"area"}
-                  labelFormatter={(value) => `${parseInt(value).toFixed(0)} ms`}
-                />
-              </div>
-              <div className="col-span-2 lg:col-span-4 h-full">
-                <MainGraph
-                  isLoading={overTimeData.users.isLoading}
-                  dataOverTime={
-                    overTimeData.users.data?.data?.map((r) => ({
-                      ...r,
-                      value: r.count,
-                    })) ?? []
-                  }
-                  timeMap={getTimeMap(timeIncrement)}
-                  title={"Active Users"}
+              <div key="users">
+                <StyledAreaChart
+                  title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
-                  valueLabel={" Users"}
-                  type={"bar"}
-                />
+                >
+                  {overTimeData.users.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <BarChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.users.data?.data?.map((r) => ({
+                          date: getUSDateShort(r.time.toString()),
+                          users: r.count,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["users"]}
+                      colors={["orange"]}
+                      showYAxis={false}
+                    />
+                  )}
+                </StyledAreaChart>
               </div>
-              <div className="col-span-2 lg:col-span-4 h-full">
-                <MainGraph
-                  isLoading={overTimeData.feedback.isLoading}
-                  doubleLineOverTime={combinePositiveAndNegativeFeedback()}
-                  timeMap={getTimeMap(timeIncrement)}
+              <div key="feedback">
+                <StyledAreaChart
                   title={"Feedback"}
                   value={
                     metrics.feedback?.data?.data
@@ -430,19 +559,53 @@ const DashboardPage = (props: DashboardPageProps) => {
                         )}`
                       : "0"
                   }
-                  valueLabel={"Positive"}
-                  valueLabel2="Negative"
-                  type="double-line"
-                />
+                >
+                  {overTimeData.feedback.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={combinePositiveAndNegativeFeedback()}
+                      index="date"
+                      categories={["positive", "negative"]}
+                      colors={["green", "red"]}
+                      showYAxis={false}
+                    />
+                  )}
+                </StyledAreaChart>
               </div>
-              {metricsData.map((m, i) => (
-                <div className="col-span-2 md:col-span-1 lg:col-span-3" key={i}>
-                  <MetricsPanel metric={m} />
-                </div>
-              ))}
-            </div>
-          </>
-          {/* )} */}
+              <div key="latency">
+                <StyledAreaChart
+                  title={"Latency"}
+                  value={`${
+                    metrics.averageLatency.data?.data?.toFixed(0) ?? 0
+                  } ms / req`}
+                >
+                  {overTimeData.latency.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.latency.data?.data?.map((r) => ({
+                          date: getUSDateShort(r.time.toString()),
+                          latency: r.duration,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["latency"]}
+                      colors={["cyan"]}
+                      showYAxis={false}
+                    />
+                  )}
+                </StyledAreaChart>
+              </div>
+            </ResponsiveGridLayout>
+          </section>
         </div>
       )}
       <UpgradeProModal open={open} setOpen={setOpen} />

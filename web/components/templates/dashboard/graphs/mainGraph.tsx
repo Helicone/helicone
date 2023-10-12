@@ -34,15 +34,15 @@ export default function MainGraph(props: MainGraphProps) {
   } = props;
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg px-4 pt-4">
-      <div className="flex flex-col">
+    <div className="bg-white border border-gray-300 rounded-lg px-4 pt-4 h-full">
+      <div className="flex flex-col h-full">
         <div className="flex flex-row w-full justify-between items-start">
           <div className="flex flex-col space-y-0.5">
             <p className="text-sm text-gray-700">{title}</p>
             <h3 className="text-xl font-semibold text-gray-900">{value}</h3>
           </div>
         </div>
-        <div className="h-[20vh]">
+        <div className="h-full">
           {isLoading ? (
             <div className="h-full w-full flex-col flex p-8">
               <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
