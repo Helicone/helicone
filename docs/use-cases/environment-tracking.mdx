@@ -1,0 +1,31 @@
+---
+title: "Environment Tracking"
+description: "Easily track your environments with Helicone."
+---
+
+Many organizations utilize multiple environments, such as development, staging, and production. To distinguish between these environments, you can create a `Helicone-Property-Environment` property. In the example below, we assign the property "development" to the environment:
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-Environment": "development",
+    }
+)
+```
+
+If you are using any other libraries or packages please refer to the [Custom Properties](/features/advanced-usage/custom-properties) documentation.
+
+### Viewing Environments
+
+Within the [request page](https://www.helicone.ai/requests), you can easily view all the environments that your organization has used. You can also filter by environment to view all the requests made in that environment.
+![](/images/environment-cp/1.png)
+![](/images/environment-cp/2.png)
+
+Quickly add filters to your requests to view all the requests made in a specific environment.
+![](/images/environment-cp/3.png)
+
+Helicone also provides a dedicated page to view all the environments that your organization has used. You can also view the number of requests made in each environment.
+
+Visit the [properties page](https://www.helicone.ai/properties) to view all the environments that your organization has used.
+![](/images/environment-cp/4.png)
