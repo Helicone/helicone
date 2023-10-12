@@ -6,6 +6,7 @@ export function useLocalStorage<T>(
   onNothingStored?: (setStored: (t: T) => void) => void
 ): [T, (t: T) => void] {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
+
   const setValue = useCallback(
     (value: T) => {
       try {
@@ -36,6 +37,7 @@ export function useLocalStorage<T>(
       ) {
         return;
       }
+
       setStoredValue(val);
     } catch (error) {
       console.error(error);

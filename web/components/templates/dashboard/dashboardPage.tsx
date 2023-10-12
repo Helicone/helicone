@@ -27,6 +27,7 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import StyledAreaChart from "./styledAreaChart";
 import { AreaChart, BarChart } from "@tremor/react";
 import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -254,9 +255,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   ];
 
-  const layout = [
+  const initialLayout: ReactGridLayout.Layout[] = [
     {
-      i: "a",
+      i: "requests",
       x: 0,
       y: 0,
       w: 8,
@@ -310,9 +311,19 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 1,
       maxH: 4,
     },
-    { i: "f", x: 0, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "g", x: 6, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "h", x: 0, y: 8, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "costs", x: 0, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "users", x: 6, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    {
+      i: "feedback",
+      x: 0,
+      y: 8,
+      w: 6,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+    },
     {
       i: "latency",
       x: 6,
@@ -327,6 +338,11 @@ const DashboardPage = (props: DashboardPageProps) => {
   ];
 
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
+
+  const [currentLayout, setCurrentLayout] = useLocalStorage(
+    "dashboardLayout",
+    JSON.stringify(initialLayout)
+  );
 
   return (
     <>
@@ -414,18 +430,20 @@ const DashboardPage = (props: DashboardPageProps) => {
             <ResponsiveGridLayout
               className="layout"
               layouts={{
-                lg: layout,
-                md: layout,
-                sm: layout,
-                xs: layout,
-                xxs: layout,
+                lg: JSON.parse(currentLayout) || initialLayout,
+                md: JSON.parse(currentLayout) || initialLayout,
+                sm: JSON.parse(currentLayout) || initialLayout,
+                xs: JSON.parse(currentLayout) || initialLayout,
+                xxs: JSON.parse(currentLayout) || initialLayout,
               }}
-              // 768
+              autoSize={true}
+              isBounded={true}
               breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
               cols={gridCols}
               rowHeight={72}
+              onLayoutChange={(currentLayout, allLayouts) => {}}
             >
-              <div key="a">
+              <div key="requests">
                 <StyledAreaChart
                   title={"Requests"}
                   value={
@@ -451,7 +469,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <MetricsPanel metric={m} />
                 </div>
               ))}
-              <div key="f">
+              <div key="costs">
                 <StyledAreaChart
                   title={"Costs"}
                   value={
@@ -485,7 +503,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-              <div key="g">
+              <div key="users">
                 <StyledAreaChart
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
@@ -505,7 +523,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-              <div key="h">
+              <div key="feedback">
                 <StyledAreaChart
                   title={"Feedback"}
                   value={
