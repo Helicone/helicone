@@ -474,6 +474,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       categories={["requests", "errors"]}
                       colors={["green", "red"]}
                       showYAxis={false}
+                      curveType="monotone"
                     />
                   )}
                 </StyledAreaChart>
@@ -600,6 +601,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       categories={["latency"]}
                       colors={["cyan"]}
                       showYAxis={false}
+                      curveType="monotone"
                     />
                   )}
                 </StyledAreaChart>
