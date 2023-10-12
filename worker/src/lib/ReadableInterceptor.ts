@@ -3,9 +3,14 @@ import EventEmitter from "events";
 const CHUNK_EVENT = "done";
 const CHUNK_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
+export interface CompletedChunk {
+  body: string;
+  reason: "cancel" | "done" | "timeout";
+}
+
 export class ReadableInterceptor {
   private chunkEmitter: EventEmitter;
-  private cachedChunk: string | null = null;
+  private cachedChunk: CompletedChunk | null = null;
   private responseBody = "";
   private decoder = new TextDecoder();
   stream: ReadableStream;
@@ -19,25 +24,42 @@ export class ReadableInterceptor {
   }
 
   private interceptStream(stream: ReadableStream): ReadableStream {
-    const transform = (
-      chunk: any,
-      controller: TransformStreamDefaultController<any>
-    ) => {
-      this.responseBody += this.decoder.decode(chunk);
-      controller.enqueue(chunk);
-    };
-    const flush = () => {
-      this.chunkEmitter.emit(CHUNK_EVENT, this.responseBody);
+    const onDone = (reason: "cancel" | "done") => {
+      this.chunkEmitter.emit(CHUNK_EVENT, {
+        body: this.responseBody,
+        reason,
+      });
     };
 
-    const loggingTransformStream = new TransformStream({
-      transform,
-      flush,
+    const onChunk = (chunk: Uint8Array) => {
+      this.responseBody += this.decoder.decode(chunk);
+    };
+
+    const reader = stream.getReader();
+    const readable = new ReadableStream({
+      pull(controller) {
+        return reader.read().then(({ done, value }) => {
+          if (done) {
+            controller.close();
+            onDone("done");
+            return;
+          }
+
+          controller.enqueue(value);
+          onChunk(value as Uint8Array);
+        });
+      },
+
+      cancel(reason) {
+        console.error("Stream was canceled:", reason);
+        stream.cancel(reason); // Cancel the source
+        onDone("cancel"); // Resolve the cancellation promise
+      },
     });
-    return stream.pipeThrough(loggingTransformStream);
+    return readable;
   }
 
-  async waitForChunk(): Promise<string> {
+  async waitForChunk(): Promise<CompletedChunk> {
     // instantiate promise before emitting event
     // so that it doesn't get missed (race condition)
     const promise = this.once(CHUNK_EVENT);
@@ -52,9 +74,9 @@ export class ReadableInterceptor {
   }
 
   // waits for a chunk to be emitted
-  private once = (eventName: string): Promise<string> =>
+  private once = (eventName: string): Promise<CompletedChunk> =>
     new Promise((resolve) => {
-      const listener = (value: string) => {
+      const listener = (value: CompletedChunk) => {
         this.chunkEmitter.removeListener(eventName, listener);
         resolve(value);
       };
@@ -62,7 +84,10 @@ export class ReadableInterceptor {
 
       this.responseBodyTimeout(CHUNK_TIMEOUT).then(() => {
         this.chunkEmitter.removeListener(eventName, listener);
-        resolve("response body timeout");
+        resolve({
+          body: this.responseBody,
+          reason: "timeout",
+        });
       });
     });
 }

@@ -20,12 +20,13 @@ import { parseOpenAIStream } from "./parsers/openAIStreamParser";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
+import { INTERNAL_ERRORS } from "../constants";
 
 export interface DBLoggableProps {
   response: {
     responseId: string;
     getResponseBody: () => Promise<string>;
-    status: number;
+    status: () => Promise<number>;
     responseHeaders: Headers;
     omitLog: boolean;
   };
@@ -146,7 +147,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       getResponseBody: async () =>
         getResponseBody(asyncLogModel.providerResponse.json),
       responseHeaders: providerResponseHeaders,
-      status: asyncLogModel.providerResponse.status,
+      status: async () => asyncLogModel.providerResponse.status,
       omitLog: false,
     },
     timing: {
@@ -187,12 +188,20 @@ export class DBLoggable {
     return getTokenCount(text, this.provider, this.tokenCalcUrl);
   }
 
-  async parseResponse(responseBody: string): Promise<Result<any, string>> {
-    const result = responseBody;
+  async parseResponse(
+    responseBody: string,
+    status: number
+  ): Promise<Result<any, string>> {
+    let result = responseBody;
     const isStream = this.request.isStream;
-    const responseStatus = this.response.status;
+    const responseStatus = await this.response.status();
     const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
+
+    if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
+      // Remove last line of stream from result
+      result = result.split("\n").slice(0, -1).join("\n");
+    }
 
     try {
       if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
@@ -253,8 +262,8 @@ export class DBLoggable {
 
     const endTime = this.timing.endTime ?? new Date();
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
-
-    const parsedResponse = await this.parseResponse(responseBody);
+    const status = await this.response.status();
+    const parsedResponse = await this.parseResponse(responseBody, status);
 
     return parsedResponse.error === null
       ? {
@@ -266,7 +275,7 @@ export class DBLoggable {
                 usage: parsedResponse.data?.usage,
               }
             : parsedResponse.data,
-          status: this.response.status,
+          status: await this.response.status(),
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
           delay_ms,
@@ -280,7 +289,7 @@ export class DBLoggable {
             parse_response_error: parsedResponse.error,
             body: this.tryJsonParse(responseBody),
           },
-          status: this.response.status,
+          status: await this.response.status(),
         };
   }
 
