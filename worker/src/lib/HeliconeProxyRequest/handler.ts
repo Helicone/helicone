@@ -11,10 +11,6 @@ export type ProxyResult = {
   response: Response;
 };
 
-export const INTERNAL_ERRORS = {
-  Canceled: -3,
-};
-
 function getStatus(
   responseStatus: number,
   endReason?: CompletedChunk["reason"]
