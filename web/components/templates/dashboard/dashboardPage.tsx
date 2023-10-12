@@ -176,7 +176,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   const combineRequestsAndErrors = () => {
     let combinedArray = overTimeData.requests.data?.data?.map(
       (request, index) => ({
-        date: getUSDate(request.time),
+        date: getTimeMap(timeIncrement)(request.time),
         requests: request.count,
         errors: overTimeData.errors.data?.data
           ? overTimeData.errors.data?.data[index].count > 0
@@ -190,7 +190,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const combinePositiveAndNegativeFeedback = () => {
     let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
-      date: getUSDate(feedback.time),
+      date: getTimeMap(timeIncrement)(feedback.time),
       positive: feedback.positiveCount > 0 ? feedback.positiveCount : null,
       negative: feedback.negativeCount > 0 ? feedback.negativeCount : null,
     }));
@@ -507,7 +507,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="h-[14rem]"
                       data={
                         overTimeData.costs.data?.data?.map((r) => ({
-                          date: getUSDate(r.time),
+                          date: getTimeMap(timeIncrement)(r.time),
                           costs: r.cost,
                         })) ?? []
                       }
@@ -538,7 +538,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="h-[14rem]"
                       data={
                         overTimeData.users.data?.data?.map((r) => ({
-                          date: getUSDate(r.time),
+                          date: getTimeMap(timeIncrement)(r.time),
                           users: r.count,
                         })) ?? []
                       }
@@ -593,7 +593,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="h-[14rem]"
                       data={
                         overTimeData.latency.data?.data?.map((r) => ({
-                          date: getUSDate(r.time),
+                          date: getTimeMap(timeIncrement)(r.time),
                           latency: r.duration,
                         })) ?? []
                       }
