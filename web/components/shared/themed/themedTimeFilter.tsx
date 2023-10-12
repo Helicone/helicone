@@ -55,7 +55,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   return (
     <Menu
       as="div"
-      className="relative inline-flex text-left z-0 shadow-sm isolate rounded-lg"
+      className="relative inline-flex text-left z-10 shadow-sm isolate rounded-lg"
     >
       {custom && (
         <>
@@ -82,7 +82,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Popover.Panel className="mt-3 absolute z-10 bg-white rounded-lg shadow-xl p-2">
+              <Popover.Panel className="mt-3 absolute z-10 bg-white rounded-lg shadow-2xl p-2 border border-gray-300">
                 {({ close }) => (
                   <div className="px-4 py-2 flex flex-col space-y-4">
                     <div className="flex flex-col sm:flex-row gap-4">

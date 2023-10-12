@@ -91,7 +91,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 mt-2 w-[17rem] z-50 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-300 shadow-2xl">
+          <Menu.Items className="absolute left-0 mt-2 w-[16rem] z-50 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-300 shadow-2xl">
             <p className="text-gray-900 text-sm p-3 w-full truncate">
               {user?.email}
             </p>
