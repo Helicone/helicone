@@ -28,6 +28,8 @@ import StyledAreaChart from "./styledAreaChart";
 import { AreaChart, BarChart } from "@tremor/react";
 import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import LoadingAnimation from "../../shared/loadingAnimation";
+import * as boxbee from "../../../public/lottie/boxbee.json";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -454,14 +456,26 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "0"
                   }
                 >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={combineRequestsAndErrors()}
-                    index="date"
-                    categories={["requests", "errors"]}
-                    colors={["green", "red"]}
-                    showYAxis={false}
-                  />
+                  {overTimeData.requests.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4">
+                        <LoadingAnimation
+                          animation={boxbee}
+                          height={175}
+                          width={175}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={combineRequestsAndErrors()}
+                      index="date"
+                      categories={["requests", "errors"]}
+                      colors={["green", "red"]}
+                      showYAxis={false}
+                    />
+                  )}
                 </StyledAreaChart>
               </div>
               {metricsData.map((m, i) => (
@@ -483,24 +497,30 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "$0.00"
                   }
                 >
-                  <BarChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.costs.data?.data?.map((r) => ({
-                        date: getUSDateShort(r.time.toString()),
-                        costs: r.cost,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["costs"]}
-                    colors={["blue"]}
-                    showYAxis={false}
-                    valueFormatter={(number: number | bigint) =>
-                      `$ ${new Intl.NumberFormat("us")
-                        .format(number)
-                        .toString()}`
-                    }
-                  />
+                  {overTimeData.costs.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <BarChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.costs.data?.data?.map((r) => ({
+                          date: getUSDateShort(r.time.toString()),
+                          costs: r.cost,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["costs"]}
+                      colors={["blue"]}
+                      showYAxis={false}
+                      valueFormatter={(number: number | bigint) =>
+                        `$ ${new Intl.NumberFormat("us")
+                          .format(number)
+                          .toString()}`
+                      }
+                    />
+                  )}
                 </StyledAreaChart>
               </div>
               <div key="users">
@@ -508,19 +528,25 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
                 >
-                  <BarChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.users.data?.data?.map((r) => ({
-                        date: getUSDateShort(r.time.toString()),
-                        users: r.count,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["users"]}
-                    colors={["orange"]}
-                    showYAxis={false}
-                  />
+                  {overTimeData.users.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <BarChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.users.data?.data?.map((r) => ({
+                          date: getUSDateShort(r.time.toString()),
+                          users: r.count,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["users"]}
+                      colors={["orange"]}
+                      showYAxis={false}
+                    />
+                  )}
                 </StyledAreaChart>
               </div>
               <div key="feedback">
@@ -534,14 +560,20 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "0"
                   }
                 >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={combinePositiveAndNegativeFeedback()}
-                    index="date"
-                    categories={["positive", "negative"]}
-                    colors={["green", "red"]}
-                    showYAxis={false}
-                  />
+                  {overTimeData.feedback.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={combinePositiveAndNegativeFeedback()}
+                      index="date"
+                      categories={["positive", "negative"]}
+                      colors={["green", "red"]}
+                      showYAxis={false}
+                    />
+                  )}
                 </StyledAreaChart>
               </div>
               <div key="latency">
@@ -551,19 +583,25 @@ const DashboardPage = (props: DashboardPageProps) => {
                     metrics.averageLatency.data?.data?.toFixed(0) ?? 0
                   } ms / req`}
                 >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={
-                      overTimeData.latency.data?.data?.map((r) => ({
-                        date: getUSDateShort(r.time.toString()),
-                        latency: r.duration,
-                      })) ?? []
-                    }
-                    index="date"
-                    categories={["latency"]}
-                    colors={["cyan"]}
-                    showYAxis={false}
-                  />
+                  {overTimeData.latency.isLoading ? (
+                    <div className="p-2 w-full h-[14rem]">
+                      <div className="h-full w-full bg-gray-200 rounded-md pt-4"></div>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      className="h-[14rem]"
+                      data={
+                        overTimeData.latency.data?.data?.map((r) => ({
+                          date: getUSDateShort(r.time.toString()),
+                          latency: r.duration,
+                        })) ?? []
+                      }
+                      index="date"
+                      categories={["latency"]}
+                      colors={["cyan"]}
+                      showYAxis={false}
+                    />
+                  )}
                 </StyledAreaChart>
               </div>
             </ResponsiveGridLayout>
