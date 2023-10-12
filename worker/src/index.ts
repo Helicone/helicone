@@ -1,10 +1,7 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import {
-  insertIntoRequest,
-  insertIntoResponse,
-} from "./lib/dbLogger/insertQueue";
+import { insertIntoRequest, updateResponse } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 
@@ -121,7 +118,7 @@ export default {
             payload.payload
           );
         } else if (payload._type === "response") {
-          insertIntoResponse(
+          updateResponse(
             createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
             payload.payload
           );

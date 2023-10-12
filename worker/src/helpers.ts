@@ -11,3 +11,13 @@ export const once = (
     };
     emitter.addListener(eventName, listener);
   });
+
+export async function withTimeout<T>(
+  promise: Promise<T>,
+  timeout: number
+): Promise<T> {
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Request timed out")), timeout)
+  );
+  return (await Promise.race([promise, timeoutPromise])) as T;
+}
