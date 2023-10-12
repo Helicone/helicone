@@ -1,0 +1,135 @@
+---
+title: "Export Script"
+description: "Use Helicone's GraphQL API to export all your data"
+---
+
+<Warning>
+This exporting script is not well tested. Please use with caution
+</Warning>
+
+
+```python
+import requests
+from datetime import datetime, timedelta
+import json
+import sys
+import os
+
+HELICONE_API_KEY = os.environ.get('HELICONE_API_KEY')
+PAGE_SIZE = int(os.environ.get('PAGE_SIZE')) if os.environ.get('PAGE_SIZE') else 50
+# Define the GraphQL endpoint (replace with your actual endpoint)
+url = os.environ.get('HELICONE_API_URL') or "https://www.helicone.ai/api/graphql"
+
+
+def fetch_data_from_last_date(last_date: datetime, end_time_dt: datetime):
+    # Define the GraphQL query and variables
+    query = """
+    query ExampleQuery($limit: Int, $startTimeISO: String, $endTimeISO: String){
+      heliconeRequest(
+          limit: $limit
+          filters: [
+            {
+              createdAt: {
+                gte: $startTimeISO,
+              }
+            },
+            {
+                createdAt: {
+                    lt: $endTimeISO,
+                }
+            }
+          ]
+      ) {
+        prompt
+        properties{
+            name
+        }
+        responseBody
+        response
+        costUSD
+        cacheHits
+        feedback {
+            rating
+        }
+        id
+        createdAt
+        latency
+        model
+        requestBody
+      }
+    }
+    """
+
+    variables = {
+        "limit": PAGE_SIZE,
+        "startTimeISO": last_date.isoformat() + "Z",
+        "endTimeISO": end_time_dt.isoformat() + "Z"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {HELICONE_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, json={'query': query, 'variables': variables}, headers=headers)
+    if response.status_code == 200:
+        return response.json()['data']['heliconeRequest']
+    else:
+        print("Error:", response.status_code, response.json())
+        # print(json.dumps(response))
+        return []
+
+
+
+# Check for correct number of arguments
+if len(sys.argv) != 3:
+    print("Usage: script_name.py <start_time_iso> <end_time_iso>")
+    sys.exit(1)
+
+# Use command-line arguments for start time and end time
+start_time = sys.argv[1]
+end_time = sys.argv[2]
+
+start_time_dt = datetime.fromisoformat(start_time.rstrip('Z'))
+current_time = datetime.fromisoformat(end_time.rstrip('Z'))
+
+
+count = 0
+previous_count = 0
+with open("output_data.json", "w") as f, open("output_data.jsonl", "w") as jsonl_file:
+    f.write('[')  # Start of JSON array
+
+
+    first_iteration = True
+    while start_time_dt < current_time:
+        print(f"Fetching data from {start_time_dt} to {current_time}...")
+        fetched_data = fetch_data_from_last_date(start_time_dt, current_time)
+        previous_count = count
+        count += len(fetched_data)
+
+        # Write fetched data to file
+        if not first_iteration:
+            f.write(',\n')  # Add comma before new data, except for first iteration
+        f.write(json.dumps(fetched_data, indent=4).removeprefix('[').removesuffix(']'))
+        first_iteration = False  # Set to False after first iteration
+
+        print(f"Fetched {len(fetched_data)} records.")
+
+        for record in fetched_data:
+            jsonl_file.write(json.dumps(record) + '\n')
+        
+        # Break if less than PAGE_SIZE data is fetched, indicating no more data
+        if len(fetched_data) < PAGE_SIZE:
+            break
+
+        # unix_timestamp = fetched_data[-1]['createdAt']
+        # print("unix_timestamp", fetched_data[0])
+        # last_date = datetime.fromtimestamp(int(unix_timestamp) / 1000.0)
+
+        iso_string = fetched_data[-1]['createdAt']
+        print("iso_string", iso_string)
+        last_date = datetime.fromisoformat(iso_string.rstrip('Z'))
+        current_time = last_date
+
+    f.write(']')  # End of JSON array
+```

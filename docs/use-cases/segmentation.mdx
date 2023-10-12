@@ -1,11 +1,29 @@
 ---
-title: "Data Segmentation"
+title: "Overview"
 description: "Leverage custom segments to gain insights into costs and user behavior"
 ---
 
 Utilizing [Custom Properties](features/advanced-usage/custom-properties), you have the ability to segment your data in a multitude of ways. This powerful technique allows you to comprehend the costs and behavior of distinct user groups, thereby informing strategic decisions and optimizations.
 
 In this document, we will outline some recommended methods for data segmentation, supplemented with illustrative examples.
+
+## Tracking Environments in Helicone
+
+Many organizations utilize multiple environments, such as development, staging, and production. To distinguish between these environments, you can create a `Helicone-Property-Environment` property. In the example below, we assign the property "development" to the environment:
+
+```python
+openai.Completion.create(
+    # ...
+    headers={
+        "Helicone-Property-Environment": "development",
+    }
+)
+```
+
+![](/images/environment-cp/1.png)
+![](/images/environment-cp/2.png)
+![](/images/environment-cp/3.png)
+![](/images/environment-cp/4.png)
 
 ## Example of Data Segmentation
 

@@ -26,7 +26,7 @@ export async function insertIntoRequest(
       id: responseId,
       delay_ms: -1,
       body: {},
-      status: -1,
+      status: -2,
       created_at: createdAt,
     },
   ]);
@@ -50,7 +50,7 @@ export async function insertIntoRequest(
   return { data: null, error: null };
 }
 
-export async function insertIntoResponse(
+export async function updateResponse(
   database: SupabaseClient<Database>,
   responsePayload: ResponsePayload
 ): Promise<Result<null, string>> {
@@ -73,7 +73,7 @@ export async function insertIntoResponse(
 export interface ResponsePayload {
   responseId: string;
   requestId: string;
-  response: Database["public"]["Tables"]["response"]["Insert"];
+  response: Database["public"]["Tables"]["response"]["Update"];
 }
 
 export class InsertQueue {
@@ -187,14 +187,14 @@ export class InsertQueue {
   async updateResponse(
     responseId: string,
     requestId: string,
-    response: Database["public"]["Tables"]["response"]["Insert"]
+    response: Database["public"]["Tables"]["response"]["Update"]
   ): Promise<Result<null, string>> {
     const payload: ResponsePayload = {
       responseId,
       requestId,
       response,
     };
-    const res = await insertIntoResponse(this.database, payload);
+    const res = await updateResponse(this.database, payload);
     if (res.error) {
       // delay the insert to the fallBackQueue to mitigate any race conditions
 

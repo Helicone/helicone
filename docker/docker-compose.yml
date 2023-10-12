@@ -317,7 +317,7 @@ services:
 
   worker-openai-proxy:
     container_name: helicone-worker-openai-proxy
-    image: helicone/worker:latest
+    image: helicone/worker-openai-proxy:latest
     restart: unless-stopped
     ports:
       # Pass down internal port because it's set dynamically by other services
@@ -333,7 +333,7 @@ services:
 
   worker-helicone-api:
     container_name: helicone-worker-helicone-api
-    image: helicone/worker:latest
+    image: helicone/worker-helicone-api:latest
     restart: unless-stopped
     ports:
       # Pass down internal port because it's set dynamically by other services

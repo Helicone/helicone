@@ -49,8 +49,8 @@
       "pages": ["use-cases/github-actions"]
     },
     {
-      "group": "Analytics",
-      "pages": ["use-cases/segmentation"]
+      "group": "Custom Properties",
+      "pages": ["use-cases/segmentation", "use-cases/environment-tracking"]
     },
     {
       "group": "Developer",
@@ -109,7 +109,7 @@
     },
     {
       "group": "Tools",
-      "pages": ["tools/mitm-proxy"]
+      "pages": ["tools/mitm-proxy", "tools/export"]
     },
     {
       "group": "GraphQL API",
