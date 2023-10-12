@@ -118,7 +118,6 @@ export async function getRequestsCached(
         ...d,
         response_body: {
           ...d.response_body,
-          streamed_data: null,
         },
       };
     });
@@ -228,7 +227,6 @@ export async function getRequests(
         ...d,
         response_body: {
           ...d.response_body,
-          streamed_data: null,
         },
       };
     });
