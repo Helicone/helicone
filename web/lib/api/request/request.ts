@@ -15,7 +15,7 @@ import {
   printRunnableQuery,
 } from "../db/dbExecute";
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
-const MAX_TOTAL_BODY_SIZE = 3900000 * 10;
+const MAX_TOTAL_BODY_SIZE = 3900000;
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
@@ -118,7 +118,6 @@ export async function getRequestsCached(
         ...d,
         response_body: {
           ...d.response_body,
-          streamed_data: null,
         },
       };
     });
@@ -165,7 +164,6 @@ export async function getRequests(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-
   const builtFilter = await buildFilterWithAuth({
     org_id: orgId,
     filter,
@@ -207,12 +205,12 @@ export async function getRequests(
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (
     (${builtFilter.filter})
+    AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
   OFFSET ${offset}
 `;
-  // printRunnableQuery(query, builtFilter.argsAcc);
 
   const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
   return resultMap(res, (data) => {
@@ -229,7 +227,6 @@ export async function getRequests(
         ...d,
         response_body: {
           ...d.response_body,
-          streamed_data: null,
         },
       };
     });
