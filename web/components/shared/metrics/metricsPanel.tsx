@@ -23,7 +23,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
   const { metric } = props;
 
   return (
-    <Card className="flex flex-col p-4 w-full h-full justify-end">
+    <Card className="flex flex-col p-4 w-full h-full max-h-24 justify-end">
       <p className="text-gray-500 text-xs text-left">{metric.label}</p>
       {metric.isLoading ? (
         <div className="bg-gray-200 animate-pulse h-6 w-16 rounded-md mt-1" />
