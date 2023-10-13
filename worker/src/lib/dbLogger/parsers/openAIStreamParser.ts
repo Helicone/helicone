@@ -8,7 +8,12 @@ export async function parseOpenAIStream(
   const lines = result.split("\n").filter((line) => line !== "");
   const data = lines.map((line, i) => {
     if (i === lines.length - 1) return {};
-    return JSON.parse(line.replace("data:", ""));
+    try {
+      return JSON.parse(line.replace("data:", ""));
+    } catch (e) {
+      console.error("Error parsing JSON", e);
+      return {};
+    }
   });
 
   try {
