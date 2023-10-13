@@ -1,7 +1,4 @@
-import EventEmitter from "events";
-
-const CHUNK_EVENT = "done";
-const CHUNK_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+import { EventEmitter } from "events";
 
 export interface CompletedChunk {
   body: string;
@@ -9,85 +6,104 @@ export interface CompletedChunk {
 }
 
 export class ReadableInterceptor {
-  private chunkEmitter: EventEmitter;
+  private chunkEmitter = new EventEmitter();
   private cachedChunk: CompletedChunk | null = null;
   private responseBody = "";
-  private decoder = new TextDecoder();
+  private decoder = new TextDecoder("utf-8");
   stream: ReadableStream;
 
-  constructor(stream: ReadableStream) {
-    this.chunkEmitter = new EventEmitter();
-    this.once(CHUNK_EVENT).then((value) => {
+  constructor(
+    stream: ReadableStream,
+    private chunkEventName = "done",
+    private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
+  ) {
+    this.stream = this.interceptStream(stream);
+    this.setupChunkListener();
+  }
+
+  private setupChunkListener() {
+    this.once(this.chunkEventName).then((value) => {
       this.cachedChunk = value;
     });
-    this.stream = this.interceptStream(stream);
   }
 
   private interceptStream(stream: ReadableStream): ReadableStream {
     const onDone = (reason: "cancel" | "done") => {
-      this.chunkEmitter.emit(CHUNK_EVENT, {
+      this.chunkEmitter.emit(this.chunkEventName, {
         body: this.responseBody,
         reason,
       });
     };
 
     const onChunk = (chunk: Uint8Array) => {
-      this.responseBody += this.decoder.decode(chunk);
+      this.responseBody += this.decoder.decode(chunk, { stream: true });
     };
 
     const reader = stream.getReader();
+
     const readable = new ReadableStream({
-      pull(controller) {
-        return reader.read().then(({ done, value }) => {
+      async pull(controller) {
+        try {
+          const { done, value } = await reader.read();
           if (done) {
             controller.close();
             onDone("done");
             return;
           }
 
-          controller.enqueue(value);
-          onChunk(value as Uint8Array);
-        });
+          if (value) {
+            controller.enqueue(value);
+            onChunk(value);
+          }
+        } catch (error) {
+          console.error("An error occurred while reading the stream:", error);
+          controller.error(error);
+        }
       },
 
       cancel(reason) {
         console.error("Stream was canceled:", reason);
-        stream.cancel(reason); // Cancel the source
-        onDone("cancel"); // Resolve the cancellation promise
+        stream.cancel(reason);
+        onDone("cancel");
       },
     });
+
     return readable;
   }
 
   async waitForChunk(): Promise<CompletedChunk> {
-    // instantiate promise before emitting event
-    // so that it doesn't get missed (race condition)
-    const promise = this.once(CHUNK_EVENT);
-    if (this.cachedChunk) {
-      return this.cachedChunk;
+    const startTime = Date.now();
+
+    while (!this.cachedChunk) {
+      // Check if the waiting duration has exceeded chunkTimeoutMs
+      if (Date.now() - startTime >= this.chunkTimeoutMs) {
+        throw new Error("Waiting for chunk timed out");
+      }
+
+      // Wait for 1s before rechecking
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    return promise;
+
+    return this.cachedChunk;
   }
 
-  private async responseBodyTimeout(delay_ms: number) {
-    await new Promise((resolve) => setTimeout(resolve, delay_ms));
-  }
-
-  // waits for a chunk to be emitted
-  private once = (eventName: string): Promise<CompletedChunk> =>
-    new Promise((resolve) => {
-      const listener = (value: CompletedChunk) => {
-        this.chunkEmitter.removeListener(eventName, listener);
-        resolve(value);
-      };
-      this.chunkEmitter.addListener(eventName, listener);
-
-      this.responseBodyTimeout(CHUNK_TIMEOUT).then(() => {
+  private once(eventName: string): Promise<CompletedChunk> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
         this.chunkEmitter.removeListener(eventName, listener);
         resolve({
           body: this.responseBody,
           reason: "timeout",
         });
-      });
+      }, this.chunkTimeoutMs);
+
+      const listener = (value: CompletedChunk) => {
+        clearTimeout(timeoutId);
+        this.chunkEmitter.removeListener(eventName, listener);
+        resolve(value);
+      };
+
+      this.chunkEmitter.addListener(eventName, listener);
     });
+  }
 }
