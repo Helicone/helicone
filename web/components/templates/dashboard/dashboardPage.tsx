@@ -181,8 +181,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         errors: overTimeData.errors.data?.data
           ? overTimeData.errors.data?.data[index].count > 0
             ? overTimeData.errors.data?.data[index].count
-            : null
-          : null,
+            : 0
+          : 0,
       })
     );
     return combinedArray || [];
