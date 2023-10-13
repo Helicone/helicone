@@ -50,7 +50,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         return "";
       } else {
         // network error
-        return this.response.response_body?.error?.message || "network error";
+        return this.response.response_body?.error?.message || `network error `;
       }
     };
 
