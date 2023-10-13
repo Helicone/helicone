@@ -197,7 +197,6 @@ export class DBLoggable {
     const responseStatus = await this.response.status();
     const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
-
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
       result = result.split("\n").slice(0, -1).join("\n");
@@ -223,7 +222,11 @@ export class DBLoggable {
           },
           error: null,
         };
-      } else if (!isStream || responseStatus !== 200) {
+      } else if (
+        !isStream &&
+        responseStatus !== 200 &&
+        responseStatus !== INTERNAL_ERRORS["Cancelled"]
+      ) {
         return {
           data: JSON.parse(result),
           error: null,
