@@ -20,6 +20,10 @@ sum(
     WHEN (${table}.model LIKE '%gpt-4%') THEN 0.03 * ${table}.prompt_tokens + 0.06 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%claude-v1%') THEN 0.0163 * ${table}.prompt_tokens + 0.0551 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%claude-instant-v1%') THEN 0.01102 * ${table}.prompt_tokens + 0.03268 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%claude-2%') THEN 0.01102 * ${table}.prompt_tokens + 0.03268 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%claude-instant-1%') THEN 0.00163 * ${table}.prompt_tokens + 0.00551 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%claude-2.0%') THEN 0.01102 * ${table}.prompt_tokens + 0.03268 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%claude-instant-1.2%') THEN 0.00163 * ${table}.prompt_tokens + 0.00551 * ${table}.completion_tokens
     ELSE 0
   END
   ) / 1000
