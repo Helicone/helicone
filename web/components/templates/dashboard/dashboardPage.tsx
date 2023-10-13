@@ -481,7 +481,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>
               {metricsData.map((m, i) => (
                 <div key={m.id}>
-                  <MetricsPanel metric={m} />
+                  <MetricsPanel metric={m} hFull={true} />
                 </div>
               ))}
               <div key="costs">
