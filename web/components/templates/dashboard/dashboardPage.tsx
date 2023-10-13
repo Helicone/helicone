@@ -181,8 +181,8 @@ const DashboardPage = (props: DashboardPageProps) => {
         errors: overTimeData.errors.data?.data
           ? overTimeData.errors.data?.data[index].count > 0
             ? overTimeData.errors.data?.data[index].count
-            : null
-          : null,
+            : 0
+          : 0,
       })
     );
     return combinedArray || [];
@@ -481,7 +481,7 @@ const DashboardPage = (props: DashboardPageProps) => {
               </div>
               {metricsData.map((m, i) => (
                 <div key={m.id}>
-                  <MetricsPanel metric={m} />
+                  <MetricsPanel metric={m} hFull={true} />
                 </div>
               ))}
               <div key="costs">
