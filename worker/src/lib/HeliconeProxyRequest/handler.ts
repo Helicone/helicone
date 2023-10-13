@@ -1,6 +1,6 @@
 import { Result } from "../../results";
 import { callProviderWithRetry } from "../providerCalls/retry";
-import { ReadableInterceptor } from "../ReadableInterceptor";
+import { CompletedChunk, ReadableInterceptor } from "../ReadableInterceptor";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { callPropsFromProxyRequest, callProvider } from "../providerCalls/call";
 import { HeliconeProxyRequest } from "./mapper";
@@ -10,6 +10,23 @@ export type ProxyResult = {
   loggable: DBLoggable;
   response: Response;
 };
+
+function getStatus(
+  responseStatus: number,
+  endReason?: CompletedChunk["reason"]
+) {
+  if (!endReason) {
+    return responseStatus;
+  } else if (endReason === "done") {
+    return responseStatus;
+  } else if (endReason === "cancel") {
+    return -3;
+  } else if (endReason === "timeout") {
+    return -2;
+  } else {
+    return -100;
+  }
+}
 
 export async function handleProxyRequest(
   proxyRequest: HeliconeProxyRequest
@@ -60,9 +77,15 @@ export async function handleProxyRequest(
         request: dbLoggableRequestFromProxyRequest(proxyRequest),
         response: {
           responseId: crypto.randomUUID(),
-          getResponseBody: async () => interceptor?.waitForChunk() ?? "",
+          getResponseBody: async () =>
+            (await interceptor?.waitForChunk())?.body ?? "",
           responseHeaders: new Headers(response.headers),
-          status: response.status,
+          status: async () => {
+            return getStatus(
+              response.status,
+              (await interceptor?.waitForChunk())?.reason
+            );
+          },
           omitLog:
             proxyRequest.requestWrapper.heliconeHeaders.omitHeaders
               .omitResponse,

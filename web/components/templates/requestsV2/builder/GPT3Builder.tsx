@@ -10,7 +10,7 @@ class GPT3Builder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const getResponseText = () => {
       const statusCode = this.response.response_status;
-      if (statusCode === 200) {
+      if (statusCode in [200, 201, -3]) {
         // successful response, check for an error from openai
         if (this.response.response_body?.error) {
           return this.response.response_body?.error?.message || "";
