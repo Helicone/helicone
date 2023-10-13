@@ -72,7 +72,7 @@ const capitalizeWords = (str: string) => {
 };
 
 function removeLeadingWhitespace(str: string | null): string {
-  if (!str) return "";
+  if (typeof str !== "string") return "";
   return str.replace(/^\s+/, ""); // Replace one or more whitespace characters at the beginning of the string with an empty string
 }
 
