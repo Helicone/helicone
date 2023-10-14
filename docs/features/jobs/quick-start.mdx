@@ -1,0 +1,98 @@
+---
+title: "Introduction"
+description: "A Job is a collection of nodes that can be linked and evaluate as clusters.
+
+This is really helpful for evaluating chains and observing your system as a whole."
+---
+
+# Overview
+
+# Quick Start
+
+<Tabs>
+  <Tab title="Python (w/ package)">
+
+    ```python
+    from helicone.runs import HeliconeJob, HeliconeNode, HeliconeNodeConfig
+    from helicone.openai_proxy import openai, Meta
+
+    my_job = HeliconeJob(
+        name="My Job",
+        description="This is a job that uses Helicone",
+        custom_properties={
+            "hello": "bye"
+        }
+    )
+
+    create_course_outline = my_job.create_node(
+        HeliconeNodeConfig(
+            name="My Node",
+            description="This is a node that uses Helicone",
+            custom_properties={
+                "topic": topic,
+            }
+        )
+    )
+
+    openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": f"Hello!"}
+        ],
+        heliconeMeta=Meta(
+            node_id=create_course_outline.id,
+        )
+    )
+    ```
+
+  </Tab>
+  <Tab title="Node.js (w/ package)">
+  Coming soon! Please upvote on our [roadmap](https://github.com/Helicone/helicone/issues/933).
+
+  </Tab>
+  <Tab title="cURL">
+
+**Create a job**
+
+```bash
+curl --request POST \
+--url https://api.hconeai.com/job \
+--header 'Authorization: Bearer <HELICONE_API_KEY>' \
+--header 'Content-Type: application/json' \
+--data '{
+"name": "My Job",
+	"description": "This is my job",
+	"customProperties": {
+		"hello": "world"
+	},
+	"timeoutSeconds": 3600,
+	"status": "PENDING"
+}'
+```
+
+  </Tab>
+</Tabs>
+
+---
+
+# Viewing Jobs
+
+Going to [helicone.ai/jobs](https://www.helicone.ai/job) you will see all your jobs and their current status.
+![](images/jobs/table.png)
+
+Clicking on a job will take you to the job page where you can see the nodes and their status.
+
+Both in a list view
+![](images/jobs/list.png)
+
+and a graph view
+![](images/jobs/graph.png)
+
+# Roadmap
+
+- [ ] [Node.js SDK](https://github.com/Helicone/helicone/issues/933)
+- [ ] [Feedback on Nodes]()
+- [ ] [Feedback on Jobs]()
+- [ ] [Custom Node Types]()
+- [ ] [Improved Node Graph]()
+- [ ] [OpenTelemetry Integration]()

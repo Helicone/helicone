@@ -94,6 +94,10 @@
     {
       "group": "Features",
       "pages": [
+        {
+          "group": "Jobs",
+          "pages": ["features/jobs/quick-start", "features/jobs/example"]
+        },
         "features/advanced-usage/custom-properties",
         "features/advanced-usage/user-metrics",
         "features/advanced-usage/feedback",

@@ -1,7 +1,24 @@
+---
+title: "Course Example"
+description: "Let's use Helicone to monitor our agent that creates courses"
+---
+
+# Course Example
+
+This example is taken from one of our e2e [tests here](https://github.com/Helicone/helicone/tree/main/helicone-python/tests).
+
+```python
+
 from helicone.globals.helicone import helicone_global
 from helicone.runs import HeliconeJob, HeliconeNode, HeliconeNodeConfig
 from helicone.openai_proxy import openai, Meta
 import json
+
+# Replace these with your own values
+helicone_global.fail_on_error = True
+helicone_global.api_key = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
+
+
 COURSE_FUNCTIONS = [
     {
         "name": "generate_course_outline",
@@ -81,11 +98,6 @@ CHAPTER_FUNCTIONS = [
     }
 ]
 
-
-helicone_global.fail_on_error = True
-helicone_global.base_url = "http://127.0.0.1:8788"
-helicone_global.api_key = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
-helicone_global.proxy_url = "http://127.0.0.1:8787/v1"
 
 
 def run_creation(topic: str, create_course_outline: HeliconeNode):
@@ -169,7 +181,7 @@ def run_creation(topic: str, create_course_outline: HeliconeNode):
     create_chapters.success()
 
 
-def test_run_creation():
+def main():
     my_job = HeliconeJob(
         name="Generate Entire Course",
         description="Generates an entire course",
@@ -198,3 +210,9 @@ def test_run_creation():
     except Exception as e:
         my_job.fail()
     my_job.success()
+
+
+if __name__ == "__main__":
+    main()
+
+```
