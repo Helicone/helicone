@@ -122,14 +122,18 @@ const PropertiesPage = (props: {}) => {
           />
           <div className="w-full space-y-2 max-w-sm">
             <MultiSelect
-              placeholder="Select a Custom Property"
+              placeholder="Select a Custom Property..."
               value={selectedProperties}
               onValueChange={(values: string[]) => {
                 setSelectedProperties(values);
               }}
             >
               {properties.map((property, idx) => (
-                <MultiSelectItem value={property} key={idx}>
+                <MultiSelectItem
+                  value={property}
+                  key={idx}
+                  className="font-medium text-black"
+                >
                   {property}
                 </MultiSelectItem>
               ))}
