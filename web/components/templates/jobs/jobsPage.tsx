@@ -20,6 +20,7 @@ import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import TableFooter from "../requestsV2/tableFooter";
 import { getInitialColumns } from "./initialColumns";
 import { useJobPage } from "./useJobPage";
+import Link from "next/link";
 
 interface JobsPageProps {
   currentPage: number;
@@ -180,6 +181,14 @@ const JobsPage = (props: JobsPageProps) => {
           onRowSelect={(row) => {
             router.push(`/jobs/${row.id}`, undefined, { shallow: true });
           }}
+          noDataCTA={
+            <Link
+              href="https://docs.helicone.ai/features/jobs/quick-start"
+              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded"
+            >
+              Get started
+            </Link>
+          }
         />
         <TableFooter
           currentPage={currentPage}
