@@ -224,7 +224,7 @@ export class DBLoggable {
         };
       } else if (
         !isStream &&
-        responseStatus !== 200 &&
+        responseStatus === 200 &&
         responseStatus !== INTERNAL_ERRORS["Cancelled"]
       ) {
         return {
