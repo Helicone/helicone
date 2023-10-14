@@ -1,8 +1,6 @@
 ---
 title: "Introduction"
-description: "A Job is a collection of nodes that can be linked and evaluate as clusters.
-
-This is really helpful for evaluating chains and observing your system as a whole."
+description: "A Job is an assembly of nodes that can be interconnected and evaluated as clusters. This is particularly beneficial for assessing chains and monitoring your system holistically."
 ---
 
 # Overview
@@ -18,7 +16,7 @@ This is really helpful for evaluating chains and observing your system as a whol
 
     my_job = HeliconeJob(
         name="My Job",
-        description="This is a job that uses Helicone",
+        description="This job utilizes Helicone",
         custom_properties={
             "hello": "bye"
         }
@@ -27,7 +25,7 @@ This is really helpful for evaluating chains and observing your system as a whol
     create_course_outline = my_job.create_node(
         HeliconeNodeConfig(
             name="My Node",
-            description="This is a node that uses Helicone",
+            description="This node utilizes Helicone",
             custom_properties={
                 "topic": topic,
             }
@@ -77,15 +75,15 @@ curl --request POST \
 
 # Viewing Jobs
 
-Going to [helicone.ai/jobs](https://www.helicone.ai/job) you will see all your jobs and their current status.
+By navigating to [helicone.ai/jobs](https://www.helicone.ai/job), you can view all your jobs along with their current status.
 ![](images/jobs/table.png)
 
-Clicking on a job will take you to the job page where you can see the nodes and their status.
+Clicking on a specific job will redirect you to the job page where you can observe the nodes and their respective status.
 
-Both in a list view
+This can be viewed in both a list format
 ![](images/jobs/list.png)
 
-and a graph view
+and a graphical representation
 ![](images/jobs/graph.png)
 
 # Roadmap
@@ -94,5 +92,5 @@ and a graph view
 - [ ] [Feedback on Nodes]()
 - [ ] [Feedback on Jobs]()
 - [ ] [Custom Node Types]()
-- [ ] [Improved Node Graph]()
+- [ ] [Enhanced Node Graph]()
 - [ ] [OpenTelemetry Integration]()

@@ -1,11 +1,11 @@
 ---
-title: "Course Example"
-description: "Let's use Helicone to monitor our agent that creates courses"
+title: "Course Creation Example"
+description: "Utilizing Helicone to monitor our agent that generates courses"
 ---
 
-# Course Example
+# Course Creation Example
 
-This example is taken from one of our e2e [tests here](https://github.com/Helicone/helicone/tree/main/helicone-python/tests).
+This example is derived from one of our end-to-end [tests here](https://github.com/Helicone/helicone/tree/main/helicone-python/tests).
 
 ```python
 
@@ -14,7 +14,7 @@ from helicone.runs import HeliconeJob, HeliconeNode, HeliconeNodeConfig
 from helicone.openai_proxy import openai, Meta
 import json
 
-# Replace these with your own values
+# Substitute these with your personal values
 helicone_global.fail_on_error = True
 helicone_global.api_key = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
 
@@ -22,13 +22,13 @@ helicone_global.api_key = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
 COURSE_FUNCTIONS = [
     {
         "name": "generate_course_outline",
-        "description": "Generate a course outline",
+        "description": "Generates a course outline",
         "parameters": {
             "type": "object",
             "properties": {
                     "Description": {
                         "type": "string",
-                        "description": "The course description"
+                        "description": "The description of the course"
                     },
                 "chapters": {
                         "type": "array",
@@ -37,16 +37,16 @@ COURSE_FUNCTIONS = [
                             "properties": {
                                 "name": {
                                     "type": "string",
-                                    "description": "The name of the chapter"
+                                    "description": "The title of the chapter"
                                 },
                                 "description": {
                                     "type": "string",
-                                    "description": "The description of the chapter"
+                                    "description": "The summary of the chapter"
                                 },
                             },
                             "required": ["name", "description"]
                         },
-                        "description": "The chapters of the course",
+                        "description": "The chapters included in the course",
                         "minItems": 1,
                         "maxItems": 10
                     }
@@ -60,17 +60,17 @@ COURSE_FUNCTIONS = [
 CHAPTER_FUNCTIONS = [
     {
         "name": "generate_chapter_outline",
-        "description": "Generate a chapter outline",
+        "description": "Generates a chapter outline",
         "parameters": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
-                    "description": "The name of the chapter"
+                    "description": "The title of the chapter"
                 },
                 "description": {
                     "type": "string",
-                    "description": "The description of the chapter"
+                    "description": "The summary of the chapter"
                 },
                 "sections": {
                     "type": "array",
@@ -79,16 +79,16 @@ CHAPTER_FUNCTIONS = [
                         "properties": {
                             "name": {
                                 "type": "string",
-                                "description": "The name of the section"
+                                "description": "The title of the section"
                             },
                             "description": {
                                 "type": "string",
-                                "description": "The description of the section"
+                                "description": "The summary of the section"
                             },
                         },
                         "required": ["name", "description"]
                     },
-                    "description": "The sections of the chapter",
+                    "description": "The sections included in the chapter",
                     "minItems": 1,
                     "maxItems": 10
                 }
@@ -195,7 +195,7 @@ def main():
             create_course_outline = my_job.create_node(
                 HeliconeNodeConfig(
                     name="Create Course Outline",
-                    description="Small task to create a course outline",
+                    description="A task to create a course outline",
                     custom_properties={
                         "topic": topic,
                     }
