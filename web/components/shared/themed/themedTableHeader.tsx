@@ -105,7 +105,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
         <h2 id="filter-heading" className="sr-only">
           Filters
         </h2>
-        <div className="flex flex-col lg:flex-row items-start gap-4 justify-between lg:items-center">
+        <div className="flex flex-col lg:flex-row items-start gap-4 lg:gap-2 justify-between lg:items-center">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-2 sm:items-center">
             {timeFilter && (
               <ThemedTimeFilter
@@ -120,80 +120,82 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          <div className="flex flex-wrap space-x-2 items-center">
-            {advancedFilter && (
-              <div className="mx-auto flex text-sm">
-                <button
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
-                >
-                  <FunnelIcon
-                    className="h-5 w-5 text-gray-900"
-                    aria-hidden="true"
-                  />
-                  <p className="text-sm font-medium text-gray-900 hidden sm:block">
-                    {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
-                    {advancedFilter.filters.length > 0 &&
-                      `(${advancedFilter.filters.length})`}
-                  </p>
-                </button>
-              </div>
-            )}
-            {editColumns && (
-              <ThemedMultiSelect
-                columns={editColumns.columns.map((col) => ({
-                  active: col.active,
-                  label: col.label,
-                  value: col.label,
-                }))}
-                buttonLabel="Columns"
-                deselectAll={() => {
-                  const newColumns = [...editColumns.columns];
-
-                  newColumns.forEach((col) => {
-                    col.active = false;
-                  });
-
-                  editColumns.onColumnCallback(newColumns);
-                }}
-                selectAll={() => {
-                  const newColumns = [...editColumns.columns];
-
-                  newColumns.forEach((col) => {
-                    col.active = true;
-                  });
-
-                  editColumns.onColumnCallback(newColumns);
-                }}
-                onSelect={(value) => {
-                  const newColumns = [...editColumns.columns];
-                  const col = newColumns.find((col) => col.label === value);
-                  if (!col) return;
-                  col.active = !col.active;
-
-                  editColumns.onColumnCallback(newColumns);
-                }}
-              />
-            )}
-            {csvExport && (
-              <div className="mx-auto flex text-sm">
-                <Menu as="div" className="relative inline-block">
+          {(advancedFilter || editColumns || csvExport) && (
+            <div className="flex flex-wrap space-x-2 items-center">
+              {advancedFilter && (
+                <div className="mx-auto flex text-sm">
                   <button
-                    onClick={() => csvExport.setOpenExport(true)}
+                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                     className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
                   >
-                    <ArrowDownTrayIcon
+                    <FunnelIcon
                       className="h-5 w-5 text-gray-900"
                       aria-hidden="true"
                     />
                     <p className="text-sm font-medium text-gray-900 hidden sm:block">
-                      Export
+                      {showAdvancedFilters ? "Hide Filters" : "Show Filters"}{" "}
+                      {advancedFilter.filters.length > 0 &&
+                        `(${advancedFilter.filters.length})`}
                     </p>
                   </button>
-                </Menu>
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+              {editColumns && (
+                <ThemedMultiSelect
+                  columns={editColumns.columns.map((col) => ({
+                    active: col.active,
+                    label: col.label,
+                    value: col.label,
+                  }))}
+                  buttonLabel="Columns"
+                  deselectAll={() => {
+                    const newColumns = [...editColumns.columns];
+
+                    newColumns.forEach((col) => {
+                      col.active = false;
+                    });
+
+                    editColumns.onColumnCallback(newColumns);
+                  }}
+                  selectAll={() => {
+                    const newColumns = [...editColumns.columns];
+
+                    newColumns.forEach((col) => {
+                      col.active = true;
+                    });
+
+                    editColumns.onColumnCallback(newColumns);
+                  }}
+                  onSelect={(value) => {
+                    const newColumns = [...editColumns.columns];
+                    const col = newColumns.find((col) => col.label === value);
+                    if (!col) return;
+                    col.active = !col.active;
+
+                    editColumns.onColumnCallback(newColumns);
+                  }}
+                />
+              )}
+              {csvExport && (
+                <div className="mx-auto flex text-sm">
+                  <Menu as="div" className="relative inline-block">
+                    <button
+                      onClick={() => csvExport.setOpenExport(true)}
+                      className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
+                    >
+                      <ArrowDownTrayIcon
+                        className="h-5 w-5 text-gray-900"
+                        aria-hidden="true"
+                      />
+                      <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                        Export
+                      </p>
+                    </button>
+                  </Menu>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {advancedFilter && (
           <div>
