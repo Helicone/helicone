@@ -53,10 +53,20 @@ const RenderOrgUsage = (props: RenderOrgUsageProps) => {
     refetch();
   }, [currentMonth]);
 
-  const chartData = data?.data.map((d: any) => ({
-    requests: +d.count,
-    date: new Date(d.time).toLocaleDateString(),
-  }));
+  const chartData = data?.data.map((d: any) => {
+    // if the date is in the future, return null
+    if (new Date(d.time) > new Date()) {
+      return {
+        requests: null,
+        date: new Date(d.time).toLocaleDateString(),
+      };
+    } else {
+      return {
+        requests: +d.count,
+        date: new Date(d.time).toLocaleDateString(),
+      };
+    }
+  });
 
   return (
     <StyledAreaChart
