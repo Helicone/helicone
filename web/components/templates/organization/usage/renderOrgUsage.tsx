@@ -5,6 +5,8 @@ import MainGraph from "../../dashboard/graphs/mainGraph";
 import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import { getTimeInterval } from "../../../../lib/timeCalculations/time";
 import { filterListToTree } from "../../../../services/lib/filters/filterDefs";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import { AreaChart } from "@tremor/react";
 
 interface RenderOrgUsageProps {
   currentMonth: Date;
@@ -51,21 +53,36 @@ const RenderOrgUsage = (props: RenderOrgUsageProps) => {
     refetch();
   }, [currentMonth]);
 
-  const chartData = data?.data.map((d: any) => ({
-    value: +d.count,
-    time: new Date(d.time),
-  }));
+  const chartData = data?.data.map((d: any) => {
+    // if the date is in the future, return null
+    if (new Date(d.time) > new Date()) {
+      return {
+        requests: null,
+        date: new Date(d.time).toLocaleDateString(),
+      };
+    } else {
+      return {
+        requests: +d.count,
+        date: new Date(d.time).toLocaleDateString(),
+      };
+    }
+  });
 
   return (
-    <MainGraph
-      isLoading={isLoading}
-      dataOverTime={chartData}
-      timeMap={getTimeMap("day")}
+    <StyledAreaChart
       title={"Requests"}
       value={formatNumberString(requestCount.toString())}
-      valueLabel={"requests"}
-      type="bar"
-    />
+      isDataOverTimeLoading={isLoading}
+    >
+      <AreaChart
+        className="h-[14rem] -ml-4"
+        data={chartData}
+        index="date"
+        categories={["requests"]}
+        colors={["green"]}
+        curveType="monotone"
+      />
+    </StyledAreaChart>
   );
 };
 
