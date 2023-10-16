@@ -203,7 +203,11 @@ export class DBLoggable {
     }
 
     try {
-      if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
+      if (
+        !isStream &&
+        (this.provider === "ANTHROPIC" || this.provider === "OPENAI") &&
+        requestBody
+      ) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
