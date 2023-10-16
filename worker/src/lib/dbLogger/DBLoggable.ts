@@ -203,11 +203,7 @@ export class DBLoggable {
     }
 
     try {
-      if (
-        !isStream &&
-        (this.provider === "ANTHROPIC" || this.provider === "OPENAI") &&
-        requestBody
-      ) {
+      if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
@@ -226,11 +222,7 @@ export class DBLoggable {
           },
           error: null,
         };
-      } else if (
-        !isStream &&
-        responseStatus !== 200 &&
-        responseStatus !== INTERNAL_ERRORS["Cancelled"]
-      ) {
+      } else if (!isStream || responseStatus !== 200) {
         return {
           data: JSON.parse(result),
           error: null,
