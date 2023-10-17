@@ -39,7 +39,7 @@ function JobNodeInner({ task }: { task: HeliconeNode }) {
   };
 
   return (
-    <div className="">
+    <>
       <ThemedTableV5
         defaultData={requests || []}
         defaultColumns={columnsWithProperties}
@@ -56,7 +56,7 @@ function JobNodeInner({ task }: { task: HeliconeNode }) {
         request={selectedData}
         properties={properties}
       />
-    </div>
+    </>
   );
 }
 

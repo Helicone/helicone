@@ -43,8 +43,11 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
     else {
       setOpen(false);
       const { pathname, query } = router;
-      delete router.query.requestId;
-      router.replace({ pathname, query }, undefined, { shallow: true });
+      // only delete and replace if the request id exists in the router
+      if (router.query.requestId) {
+        delete router.query.requestId;
+        router.replace({ pathname, query }, undefined, { shallow: true });
+      }
     }
   };
 

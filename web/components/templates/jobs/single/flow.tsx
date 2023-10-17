@@ -16,7 +16,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
 import JobNode from "./JobNode";
-import NodeDirectory from "./nodeDirectory";
+import NodeOutline from "./nodeOutline";
 
 const nodeTypes = {
   custom: JobNode,
@@ -150,7 +150,7 @@ function Flow(props: FlowProps) {
     <ReactFlowProvider>
       <div className="h-full w-full flex relative">
         <div className="absolute z-10 rounded-lg">
-          <NodeDirectory
+          <NodeOutline
             nodes={jobNodes.map((node) => node.data.node)}
             filteredNodes={filteredNodes}
             setFilteredNodes={setFilteredNodes}

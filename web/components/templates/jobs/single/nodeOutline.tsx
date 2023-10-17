@@ -103,7 +103,7 @@ const RenderNode = (props: {
   );
 };
 
-const NodeDirectory: React.FC<TreeViewProps> = ({
+const NodeOutline: React.FC<TreeViewProps> = ({
   nodes: nodes,
   filteredNodes,
   setFilteredNodes,
@@ -166,4 +166,4 @@ const NodeDirectory: React.FC<TreeViewProps> = ({
   );
 };
 
-export default memo(NodeDirectory);
+export default memo(NodeOutline);
