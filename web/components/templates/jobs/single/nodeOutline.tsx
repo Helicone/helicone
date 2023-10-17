@@ -133,8 +133,8 @@ const NodeOutline: React.FC<TreeViewProps> = ({
         {({ open }) => (
           <div
             className={clsx(
-              open ? "opacity-100" : "opacity-80",
-              "bg-white p-2 rounded-lg shadow-lg w-72 h-full"
+              open ? "opacity-100" : "opacity-90",
+              "bg-white p-2 rounded-lg shadow-lg w-80 h-full"
             )}
           >
             <Disclosure.Button className="flex w-full justify-between rounded-lg px-4 py-2 text-left text-sm font-medium text-black hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-opacity-75">
