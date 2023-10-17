@@ -32,7 +32,12 @@ export type AnyOperator =
   | SingleKey<NumberOperators>
   | SingleKey<TimestampOperators>
   | SingleKey<TimestampOperatorsTyped>
-  | SingleKey<BooleanOperators>;
+  | SingleKey<BooleanOperators>
+  | {
+      custom_properties: {
+        [key: string]: SingleKey<TextOperators>;
+      };
+    };
 export type SingleKey<T> = {
   [K in keyof T]: Partial<{
     [P in keyof T]: P extends K ? T[P] : never;
