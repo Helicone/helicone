@@ -98,9 +98,13 @@ const whereKeyMappings: KeyMappings = {
     "user_api_keys"
   ),
   properties: (filter) => {
-    const key = Object.keys(filter)[0];
+    const keys = Object.keys(filter);
+    if (keys.length !== 1) {
+      throw new Error("Invalid filter, only one key is allowed");
+    }
+    const key = keys[0];
     const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter.property
+      filter[key as keyof typeof filter]
     );
     return {
       column: `properties ->> '${key}'`,
@@ -113,6 +117,7 @@ const whereKeyMappings: KeyMappings = {
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       filter.value
     );
+
     return {
       column: `prompt_values ->> '${key}'`,
       operator: operator,
