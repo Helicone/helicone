@@ -1,3 +1,4 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
@@ -7,8 +8,9 @@ import {
   SortLeafRequest,
   buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 import { Result, resultMap } from "../../result";
+import { RosettaWrapper } from "../../wrappers/rosetta/rosettaWrapper";
 import {
   dbExecute,
   dbQueryClickhouse,
@@ -58,7 +60,8 @@ export async function getRequestsCached(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  supabaseServer: SupabaseClient<Database>
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -112,8 +115,8 @@ export async function getRequestsCached(
 
   const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
-  return resultMap(res, (data) => {
-    return data.map((d) => {
+  const dater =
+    res.data?.map((d) => {
       return {
         ...d,
         response_body: {
@@ -121,9 +124,69 @@ export async function getRequestsCached(
           streamed_data: null,
         },
       };
-    });
-  });
+    }) ?? [];
+
+  const rosettaWrapper = new RosettaWrapper(supabaseServer);
+  console.log("about to gen gen");
+  await rosettaWrapper.generateMappers();
+
+  const promises =
+    dater?.map(async (request) => {
+      return await handleRequest(request, rosettaWrapper);
+    }) ?? [];
+
+  const results = await Promise.all(promises);
+
+  console.log("gen gened");
+  console.log("resulties: ", JSON.stringify(results, null, 2));
+
+  return { data: results, error: null };
 }
+
+async function handleRequest(
+  heliconeRequest: HeliconeRequest,
+  rosettaWrapper: RosettaWrapper
+): Promise<HeliconeRequest> {
+  // Extract the model from various possible locations.
+  const model =
+    heliconeRequest.response_body?.model ||
+    heliconeRequest.request_body?.model ||
+    heliconeRequest.response_body?.body?.model || // anthropic
+    getModelFromPath(heliconeRequest.request_path) ||
+    "";
+
+  const mappedRequest = await rosettaWrapper.mapRequestResponse(
+    {
+      request: heliconeRequest.request_body,
+      response: heliconeRequest.response_body,
+    },
+    heliconeRequest.provider,
+    model
+  );
+
+  const { request, response } = mappedRequest
+    ? (mappedRequest as any)
+    : {
+        request: null,
+        response: null,
+      };
+
+  heliconeRequest.request_body = request || "Failed to map request";
+  heliconeRequest.response_body = response || "Failed to map response";
+
+  return heliconeRequest;
+}
+
+const getModelFromPath = (path: string) => {
+  let regex = /\/engines\/([^\/]+)/;
+  let match = path.match(regex);
+
+  if (match && match[1]) {
+    return match[1];
+  } else {
+    return undefined;
+  }
+};
 
 export async function getRequestsDateRange(
   orgId: string,
@@ -160,8 +223,10 @@ export async function getRequests(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  supabaseServer: SupabaseClient<Database>
 ): Promise<Result<HeliconeRequest[], string>> {
+  console.log("huh");
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -213,9 +278,12 @@ export async function getRequests(
   OFFSET ${offset}
 `;
 
+  console.log("what da");
+
   const res = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-  return resultMap(res, (data) => {
-    return data.map((d) => {
+
+  const dater =
+    res.data?.map((d) => {
       if (d.request_path.includes("embeddings") && limit >= 5) {
         return {
           ...d,
@@ -231,8 +299,23 @@ export async function getRequests(
           streamed_data: null,
         },
       };
-    });
-  });
+    }) ?? [];
+
+  const rosettaWrapper = new RosettaWrapper(supabaseServer);
+  console.log("about to gen gen");
+  await rosettaWrapper.generateMappers();
+
+  const promises =
+    dater?.map(async (request) => {
+      return await handleRequest(request, rosettaWrapper);
+    }) ?? [];
+
+  const results = await Promise.all(promises);
+
+  console.log("gen gened");
+  console.log("resulties: ", JSON.stringify(results, null, 2));
+
+  return { data: results, error: null };
 }
 
 export async function getRequestCountCached(
