@@ -11,10 +11,10 @@ import { clsx } from "../../shared/clsx";
 interface RequestDrawerV2Props {
   open: boolean;
   setOpen: (open: boolean) => void;
-  hasPrevious: boolean;
-  hasNext: boolean;
-  onPrevHandler: () => void;
-  onNextHandler: () => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
+  onPrevHandler?: () => void;
+  onNextHandler?: () => void;
   request?: NormalizedRequest;
   properties: string[];
 }
