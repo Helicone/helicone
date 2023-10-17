@@ -118,7 +118,7 @@ const NodeDirectory: React.FC<TreeViewProps> = ({
     if (nodes.find((node) => node.id === nodeId)) {
       const node = nodes.find((node) => node.id === nodeId);
 
-      const x = node.position.x + node.width / 2;
+      const x = node.position.x - 100 + node.width / 2;
       const y = node.position.y + node.height / 2;
       const zoom = 0.85;
 

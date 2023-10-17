@@ -25,13 +25,16 @@ const AuthHeader = (props: AuthHeaderProps) => {
       <div className="sm:flex-auto items-center flex flex-row space-x-4">
         <div className="flex flex-row space-x-4 items-center">
           {breadcrumb && (
-            <Link
-              className="text-xl font-semibold text-gray-900 flex flex-row items-center hover:underline space-x-2"
-              href={breadcrumb.href}
-            >
-              <ArrowUturnLeftIcon className="h-4 w-4 text-gray-900" />
-              <p>{breadcrumb.title}</p>
-            </Link>
+            <>
+              <Link
+                className="text-xl font-semibold text-gray-900 flex flex-row items-center hover:underline space-x-2"
+                href={breadcrumb.href}
+              >
+                <ArrowUturnLeftIcon className="h-4 w-4 text-gray-900" />
+                <p>{breadcrumb.title}</p>
+              </Link>
+              <span className="text-gray-900">/</span>
+            </>
           )}
           <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
           {jobs && (
