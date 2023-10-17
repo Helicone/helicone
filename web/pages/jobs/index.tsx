@@ -28,9 +28,9 @@ const RequestsV2 = (props: RequestsV2Props) => {
           currentPage={currentPage}
           pageSize={pageSize}
           sort={sort}
-          initialRequestId={
-            initialRequestId === null ? undefined : initialRequestId
-          }
+          // initialRequestId={
+          //   initialRequestId === null ? undefined : initialRequestId
+          // }
         />
       </AuthLayout>
     </MetaData>
