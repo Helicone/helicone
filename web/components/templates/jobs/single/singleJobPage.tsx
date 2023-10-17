@@ -7,6 +7,7 @@ import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import StatusBadge from "../statusBadge";
 import { useSingleJobPage } from "../useSingleJobPage";
 import Flow from "./flow";
+import LoadingAnimation from "../../../shared/loadingAnimation";
 
 interface SingleJobPageProps {
   jobId: string | null;
@@ -50,19 +51,23 @@ const SingleJobPage = (props: SingleJobPageProps) => {
           </>
         }
       />
-      <Flow
-        jobNodes={
-          nodes.data?.heliconeNode?.map((node) => {
-            return {
-              id: node?.id ?? "dsafds",
-              data: {
-                node: node!,
-              },
-              parentIds: node?.parent_node_ids ?? [],
-            };
-          }) ?? []
-        }
-      />
+      {nodes.loading ? (
+        <LoadingAnimation title={`Loading Job...`} />
+      ) : (
+        <Flow
+          jobNodes={
+            nodes.data?.heliconeNode?.map((node) => {
+              return {
+                id: node?.id ?? "dsafds",
+                data: {
+                  node: node!,
+                },
+                parentIds: node?.parent_node_ids ?? [],
+              };
+            }) ?? []
+          }
+        />
+      )}
     </div>
   );
 };
