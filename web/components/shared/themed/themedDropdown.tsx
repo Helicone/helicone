@@ -42,20 +42,22 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
   const selected = options?.find((option) => option.value === selectedValue);
   const categories: {
     [key: string]: DropdownOption<T>[];
-  } = options?.reduce(
-    (acc, option) => {
-      if (option.category) {
-        if (!acc[option.category]) {
-          acc[option.category] = [];
-        }
-        acc[option.category].push(option);
-      }
-      return acc;
-    },
-    {
-      all: options,
-    } as { [key: string]: DropdownOption<T>[] }
-  );
+  } = options
+    ? options.reduce(
+        (acc, option) => {
+          if (option.category) {
+            if (!acc[option.category]) {
+              acc[option.category] = [];
+            }
+            acc[option.category].push(option);
+          }
+          return acc;
+        },
+        {
+          all: options,
+        } as { [key: string]: DropdownOption<T>[] }
+      )
+    : {};
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
