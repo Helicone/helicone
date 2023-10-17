@@ -16,14 +16,14 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
 import JobNode from "./JobNode";
-import NodeDirectory from "./nodeDirectory";
+import NodeOutline from "./nodeOutline";
 
 const nodeTypes = {
   custom: JobNode,
 };
 
-const nodeWidth = 1000;
-const nodeHeight = 600;
+const nodeWidth = 800;
+const nodeHeight = 500;
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -147,15 +147,17 @@ function Flow(props: FlowProps) {
   );
 
   return (
-    <>
-      <div className="w-full h-[85vh]">
-        <ReactFlowProvider>
-          <NodeDirectory
+    <ReactFlowProvider>
+      <div className="h-full w-full flex relative">
+        <div className="absolute z-10 rounded-lg">
+          <NodeOutline
             nodes={jobNodes.map((node) => node.data.node)}
             filteredNodes={filteredNodes}
             setFilteredNodes={setFilteredNodes}
           />
+        </div>
 
+        <div className="w-full h-[85vh]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -166,11 +168,11 @@ function Flow(props: FlowProps) {
             panOnScroll
           >
             <MiniMap />
-            <Background color="#f4f4f4" variant={BackgroundVariant.Lines} />
+            <Background color="#f4f4f4" />
           </ReactFlow>
-        </ReactFlowProvider>
+        </div>
       </div>
-    </>
+    </ReactFlowProvider>
   );
 }
 

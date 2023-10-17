@@ -73,7 +73,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/requests"),
     },
     {
-      name: "Jobs (beta)",
+      name: "Jobs",
       href: "/jobs",
       icon: BsBriefcase,
       current: pathname.includes("/jobs"),
@@ -427,6 +427,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             aria-hidden="true"
                           />
                           {item.name}
+                          {item.name === "Jobs" && (
+                            <span
+                              className={clsx(
+                                "bg-violet-50 text-violet-700 ring-violet-200",
+                                `ml-2 inline-flex items-center rounded-full px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+                              )}
+                            >
+                              beta
+                            </span>
+                          )}
                         </Link>
                       );
                     })}

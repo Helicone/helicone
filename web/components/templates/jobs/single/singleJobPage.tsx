@@ -7,6 +7,7 @@ import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import StatusBadge from "../statusBadge";
 import { useSingleJobPage } from "../useSingleJobPage";
 import Flow from "./flow";
+import LoadingAnimation from "../../../shared/loadingAnimation";
 
 interface SingleJobPageProps {
   jobId: string | null;
@@ -22,9 +23,13 @@ const SingleJobPage = (props: SingleJobPageProps) => {
   return (
     <div>
       <AuthHeader
-        title={`Job View`}
+        title={`${jobId}`}
+        breadcrumb={{
+          href: "/jobs",
+          title: "Jobs",
+        }}
         headerActions={
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-4">
             <button
               onClick={() => nodes.refetch()}
               className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
@@ -33,12 +38,6 @@ const SingleJobPage = (props: SingleJobPageProps) => {
                 className={clsx(false ? "animate-spin" : "", "h-5 w-5 inline")}
               />
             </button>
-            <i
-              className="text-gray-400 text-sm"
-              style={{ alignSelf: "center" }}
-            >
-              {jobId}
-            </i>
             <StatusBadge
               statusType={
                 (job.data?.heliconeJob?.[0]?.status ?? "UNKNOWN") as JobStatus
@@ -52,19 +51,23 @@ const SingleJobPage = (props: SingleJobPageProps) => {
           </>
         }
       />
-      <Flow
-        jobNodes={
-          nodes.data?.heliconeNode?.map((node) => {
-            return {
-              id: node?.id ?? "dsafds",
-              data: {
-                node: node!,
-              },
-              parentIds: node?.parent_node_ids ?? [],
-            };
-          }) ?? []
-        }
-      />
+      {nodes.loading ? (
+        <LoadingAnimation title={`Loading Job...`} />
+      ) : (
+        <Flow
+          jobNodes={
+            nodes.data?.heliconeNode?.map((node) => {
+              return {
+                id: node?.id ?? "dsafds",
+                data: {
+                  node: node!,
+                },
+                parentIds: node?.parent_node_ids ?? [],
+              };
+            }) ?? []
+          }
+        />
+      )}
     </div>
   );
 };

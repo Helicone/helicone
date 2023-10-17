@@ -39,7 +39,7 @@ function JobNodeInner({ task }: { task: HeliconeNode }) {
   };
 
   return (
-    <div className="">
+    <>
       <ThemedTableV5
         defaultData={requests || []}
         defaultColumns={columnsWithProperties}
@@ -56,7 +56,7 @@ function JobNodeInner({ task }: { task: HeliconeNode }) {
         request={selectedData}
         properties={properties}
       />
-    </div>
+    </>
   );
 }
 
@@ -73,8 +73,15 @@ function JobNode({
 }) {
   return (
     <>
-      <div className="p-10 bg-white">
-        <div>{data.node.name}</div>
+      <div className="p-8 bg-white rounded-2xl flex flex-col space-y-4 border border-gray-300">
+        <div className="flex flex-col space-y-1">
+          <p className="text-xl font-semibold text-gray-900">
+            {data.node.name}
+          </p>
+          {data.node.description && (
+            <p className="text-sm text-gray-600">{data.node.description}</p>
+          )}
+        </div>
         <JobNodeInner task={data.node} />
       </div>
 
@@ -85,7 +92,6 @@ function JobNode({
         onConnect={(params) => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
-      {/* <div>{JSON.stringify(data)}</div> */}
 
       <Handle
         type="source"
