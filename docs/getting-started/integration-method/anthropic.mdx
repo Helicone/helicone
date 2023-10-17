@@ -40,12 +40,12 @@ title: "Anthropic"
     },
   });
 
-const stream = await anthropic.completions.create({
-prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
-model: "claude-2",
-stream: true,
-max_tokens_to_sample: 300,
-});
+  const stream = await anthropic.completions.create({
+    prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
+    model: "claude-2",
+    stream: true,
+    max_tokens_to_sample: 300,
+  });
 ```
 
   </Tab>
