@@ -2,12 +2,13 @@ import {
   ArrowsPointingOutIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import React, { memo, useState } from "react";
 import { useReactFlow, useStoreApi } from "reactflow";
 import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";
 import { clsx } from "../../../shared/clsx";
+import { Disclosure } from "@headlessui/react";
 
 interface TreeViewProps {
   nodes: HeliconeNode[];
@@ -37,39 +38,43 @@ const RenderNode = (props: {
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div key={node.id} className="pl-4">
-      <div className="flex flex-row justify-start">
-        {children.length > 0 ? (
+    <div key={node.id} className="flex flex-col space-y-2">
+      <div className="flex flex-row justify-between items-center gap-2">
+        <div className="flex flex-row items-center">
           <button
             onClick={() => {
-              setExpanded(!expanded);
+              focusNode(node.id);
             }}
-            className="pr-2"
-          >
-            {expanded ? (
-              <ChevronDownIcon className="h-4 w-4 inline-block" />
-            ) : (
-              <ChevronUpIcon className="h-4 w-4 inline-block" />
+            className={clsx(
+              `px-3 py-1.5 ${level === 0 ? "font-semibold" : ""}`,
+              childrenHidden ? "opacity-50" : "",
+              "hover:bg-gray-200 rounded-lg text-gray-900 text-sm text-left"
             )}
+          >
+            {node.name}
           </button>
-        ) : (
-          <div className="pl-6" />
-        )}
-        <button
-          onClick={() => {
-            focusNode(node.id);
-          }}
-          className={clsx(
-            `py-2 px-2 ${level === 0 ? "font-bold" : ""}`,
-            childrenHidden ? "opacity-50" : "",
-            "hover:bg-gray-200 rounded-md "
+          {children.length > 0 && (
+            <button
+              onClick={() => {
+                setExpanded(!expanded);
+              }}
+              className="text-gray-900 px-1 py-0.5 hover:bg-gray-200 rounded-lg"
+            >
+              {expanded ? (
+                <ChevronDownIcon className="h-4 w-4 inline-block" />
+              ) : (
+                <ChevronUpIcon className="h-4 w-4 inline-block" />
+              )}
+            </button>
           )}
-        >
-          {node.name}
-        </button>
+        </div>
+
         <input
           type="checkbox"
-          className={clsx("ml-auto ", childrenHidden ? "opacity-50" : "")}
+          className={clsx(
+            "ml-auto text-sky-500 rounded-sm hover:cursor-pointer",
+            childrenHidden ? "opacity-50" : ""
+          )}
           checked={!filteredNodes.includes(node.id)}
           onChange={(e) => {
             if (e.target.checked) {
@@ -122,53 +127,42 @@ const NodeDirectory: React.FC<TreeViewProps> = ({
   };
   const rootNodes = nodes.filter((node) => node.parent_node_ids?.length === 0);
 
-  const [expanded, setExpanded] = useState(false);
-
   return (
-    <div className="bg-white p-4 rounded shadow">
-      <div className="flex flex-row justify-start">
-        <button
-          onClick={() => {
-            setExpanded(!expanded);
-          }}
-          className="pr-2"
-        >
-          {expanded ? (
-            <ChevronDownIcon className="h-4 w-4 inline-block" />
-          ) : (
-            <ChevronUpIcon className="h-4 w-4 inline-block" />
-          )}
-        </button>
-        <p className="font-bold">Nodes</p>
-      </div>
-      <div className="flex flex-col justify-start">
-        {expanded &&
-          rootNodes.map((node) => (
-            <div key={`root-${node.id}`} className="pl-4 max-w-3xl">
-              <RenderNode
-                node={node}
-                level={0}
-                allNodes={nodes}
-                focusNode={focusNode}
-                filteredNodes={filteredNodes}
-                setFilteredNodes={setFilteredNodes}
-              />
-            </div>
-          ))}
-      </div>
-      <div className="flex flex-row w-full justify-end">
-        <Tooltip title={"Fit View"}>
-          <button
-            onClick={() => {
-              fitView();
-            }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+    <>
+      <Disclosure>
+        {({ open }) => (
+          <div
+            className={clsx(
+              open ? "opacity-100" : "opacity-80",
+              "bg-white p-2 rounded-lg shadow-lg w-72 h-full"
+            )}
           >
-            <ArrowsPointingOutIcon className="h-5 w-5" />
-          </button>
-        </Tooltip>
-      </div>
-    </div>
+            <Disclosure.Button className="flex w-full justify-between rounded-lg px-4 py-2 text-left text-sm font-medium text-black hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-opacity-75">
+              <span>Nodes</span>
+              <ChevronUpIcon
+                className={`${
+                  open ? "rotate-180 transform" : ""
+                } h-5 w-5 text-black`}
+              />
+            </Disclosure.Button>
+            <Disclosure.Panel className="pl-2 pr-4 py-2 text-sm text-gray-500 flex flex-col space-y-2 h-full max-h-[80vh] overflow-auto">
+              {rootNodes.map((node) => (
+                <div key={`root-${node.id}`}>
+                  <RenderNode
+                    node={node}
+                    level={0}
+                    allNodes={nodes}
+                    focusNode={focusNode}
+                    filteredNodes={filteredNodes}
+                    setFilteredNodes={setFilteredNodes}
+                  />
+                </div>
+              ))}
+            </Disclosure.Panel>
+          </div>
+        )}
+      </Disclosure>
+    </>
   );
 };
 

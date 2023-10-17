@@ -30,68 +30,14 @@ interface JobsPageProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  isCached?: boolean;
-  initialRequestId?: string;
 }
 
 const JobsPage = (props: JobsPageProps) => {
-  const {
-    currentPage,
-    pageSize,
-    sort,
-    isCached = false,
-    initialRequestId,
-  } = props;
+  const { currentPage, pageSize, sort } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
 
-  // set the initial selected data on component load
-  useEffect(() => {
-    if (initialRequestId) {
-      const fetchRequest = async () => {
-        const resp = await fetch(`/api/request/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: {
-              left: {
-                request: {
-                  id: {
-                    equals: initialRequestId,
-                  },
-                },
-              },
-              operator: "and",
-              right: "all",
-            } as FilterNode,
-            offset: 0,
-            limit: 1,
-            sort: {},
-          }),
-        })
-          .then(
-            (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
-          )
-          .then((res) => {
-            const { data, error } = res;
-            if (data !== null && data.length > 0) {
-              const normalizedRequest = getRequestBuilder(data[0]).build();
-              setSelectedData(normalizedRequest);
-              setOpen(true);
-            }
-          });
-      };
-      fetchRequest();
-    }
-  }, [initialRequestId]);
-
   const [page, setPage] = useState<number>(currentPage);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [open, setOpen] = useState(false);
-  const [selectedData, setSelectedData] = useState<
-    NormalizedRequest | undefined
-  >(undefined);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(100);
 
   const router = useRouter();
   const {
@@ -99,8 +45,10 @@ const JobsPage = (props: JobsPageProps) => {
     jobs: jobs,
     properties,
     refetch,
-    loading,
+    isLoading,
   } = useJobPage(page, currentPageSize, isLive);
+
+  console.log("count", count);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -130,19 +78,6 @@ const JobsPage = (props: JobsPageProps) => {
     })
   );
 
-  const onRowSelectHandler = (row: NormalizedRequest) => {
-    setSelectedData(row);
-    setOpen(true);
-    router.push(
-      {
-        pathname: "/requests",
-        query: { ...router.query, requestId: row.id },
-      },
-      undefined,
-      {}
-    );
-  };
-
   return (
     <div>
       <AuthHeader
@@ -155,16 +90,14 @@ const JobsPage = (props: JobsPageProps) => {
             >
               <ArrowPathIcon
                 className={clsx(
-                  loading ? "animate-spin" : "",
+                  isLoading ? "animate-spin" : "",
                   "h-5 w-5 inline"
                 )}
               />
             </button>
-            <i>
-              {"In ~beta~, please use with caution and sorry for any bugs :)"}
-            </i>
           </div>
         }
+        jobs={true}
         actions={
           <>
             <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
@@ -176,7 +109,7 @@ const JobsPage = (props: JobsPageProps) => {
           defaultData={(jobs.data?.heliconeJob || []) as HeliconeJob[]}
           defaultColumns={columnsWithProperties}
           tableKey="requestsColumnVisibility"
-          dataLoading={loading}
+          dataLoading={isLoading}
           sortable={sort}
           onRowSelect={(row) => {
             router.push(`/jobs/${row.id}`, undefined, { shallow: true });
@@ -190,30 +123,16 @@ const JobsPage = (props: JobsPageProps) => {
             </Link>
           }
         />
-        <TableFooter
+        {/* <TableFooter
           currentPage={currentPage}
           pageSize={pageSize}
-          isCountLoading={loading}
+          isCountLoading={isLoading}
           count={count || 0}
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}
           pageSizeOptions={[10, 25, 50, 100]}
-        />
+        /> */}
       </div>
-      <RequestDrawerV2
-        open={open}
-        setOpen={setOpen}
-        request={selectedData}
-        properties={properties}
-        hasPrevious={false}
-        hasNext={false}
-        onPrevHandler={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-        onNextHandler={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
     </div>
   );
 };
