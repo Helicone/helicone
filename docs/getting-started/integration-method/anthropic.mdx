@@ -46,7 +46,8 @@ title: "Anthropic"
     stream: true,
     max_tokens_to_sample: 300,
   });
-    ```
+  ```
+
   </Tab>
   <Tab title="cURL">
     **Replace the Anthropic Base url with Helicone's**
@@ -102,7 +103,17 @@ curl --request POST \
     ```
     **Typescript**
 
-    Support is coming soon, pending new langchainjs version
-
+    ```typescript
+    const llm = new ChatAnthropic({
+      modelName: "claude-2",
+      anthropicApiKey: "ANTHROPIC_API_KEY",
+      clientOptions: {
+        baseURL: "https://anthropic.hconeai.com/",
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+        }
+      }
+    });
+    ```
   </Tab>
 </Tabs>
