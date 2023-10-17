@@ -205,6 +205,14 @@ const JobsPage = (props: JobsPageProps) => {
         setOpen={setOpen}
         request={selectedData}
         properties={properties}
+        hasPrevious={false}
+        hasNext={false}
+        onPrevHandler={function (): void {
+          throw new Error("Function not implemented.");
+        }}
+        onNextHandler={function (): void {
+          throw new Error("Function not implemented.");
+        }}
       />
     </div>
   );

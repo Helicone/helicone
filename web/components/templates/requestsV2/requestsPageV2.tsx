@@ -129,6 +129,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [open, setOpen] = useState(false);
+  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [selectedData, setSelectedData] = useState<
     NormalizedRequest | undefined
   >(undefined);
@@ -358,7 +359,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     setAdvancedFilters(filters);
   };
 
-  const onRowSelectHandler = (row: NormalizedRequest) => {
+  const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
+    setSelectedDataIndex(index);
     setSelectedData(row);
     setOpen(true);
     searchParams.set("requestId", row.id);
@@ -427,8 +429,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             defaultValue: "24h",
             onTimeSelectHandler: onTimeSelectHandler,
           }}
-          onRowSelect={(row) => {
-            onRowSelectHandler(row);
+          onRowSelect={(row, index) => {
+            onRowSelectHandler(row, index);
           }}
           expandedRow={(row) => {
             return (
@@ -458,6 +460,28 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         setOpen={setOpen}
         request={selectedData}
         properties={properties}
+        hasPrevious={selectedDataIndex !== undefined && selectedDataIndex > 0}
+        hasNext={
+          selectedDataIndex !== undefined &&
+          selectedDataIndex < requests.length - 1
+        }
+        onPrevHandler={() => {
+          if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
+            setSelectedDataIndex(selectedDataIndex - 1);
+            setSelectedData(requests[selectedDataIndex - 1]);
+            searchParams.set("requestId", requests[selectedDataIndex - 1].id);
+          }
+        }}
+        onNextHandler={() => {
+          if (
+            selectedDataIndex !== undefined &&
+            selectedDataIndex < requests.length - 1
+          ) {
+            setSelectedDataIndex(selectedDataIndex + 1);
+            setSelectedData(requests[selectedDataIndex + 1]);
+            searchParams.set("requestId", requests[selectedDataIndex + 1].id);
+          }
+        }}
       />
     </div>
   );
