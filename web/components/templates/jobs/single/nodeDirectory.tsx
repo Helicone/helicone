@@ -120,9 +120,9 @@ const NodeDirectory: React.FC<TreeViewProps> = ({
 
       const x = node.position.x + node.width / 2;
       const y = node.position.y + node.height / 2;
-      const zoom = 1.85;
+      const zoom = 0.85;
 
-      setCenter(x, y, { zoom, duration: 1000 });
+      setCenter(x, y, { zoom, duration: 700 });
     }
   };
   const rootNodes = nodes.filter((node) => node.parent_node_ids?.length === 0);
