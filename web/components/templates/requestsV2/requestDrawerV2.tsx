@@ -83,32 +83,34 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
               </button>
             </Tooltip>
           </div>
-          <div className="flex flex-row items-center space-x-1.5">
-            <Tooltip title="Previous">
-              <button
-                onClick={onPrevHandler}
-                disabled={!hasPrevious}
-                className={clsx(
-                  !hasPrevious && "opacity-50 hover:cursor-not-allowed",
-                  "hover:bg-gray-200 rounded-md -m-1 p-1"
-                )}
-              >
-                <ArrowUpIcon className="h-5 w-5" />
-              </button>
-            </Tooltip>
-            <Tooltip title="Next">
-              <button
-                onClick={onNextHandler}
-                disabled={!hasNext}
-                className={clsx(
-                  !hasNext && "opacity-50 hover:cursor-not-allowed",
-                  "hover:bg-gray-200 rounded-md -m-1 p-1"
-                )}
-              >
-                <ArrowDownIcon className="h-5 w-5" />
-              </button>
-            </Tooltip>
-          </div>
+          {(hasPrevious || hasNext) && (
+            <div className="flex flex-row items-center space-x-1.5">
+              <Tooltip title="Previous">
+                <button
+                  onClick={onPrevHandler}
+                  disabled={!hasPrevious}
+                  className={clsx(
+                    !hasPrevious && "opacity-50 hover:cursor-not-allowed",
+                    "hover:bg-gray-200 rounded-md -m-1 p-1"
+                  )}
+                >
+                  <ArrowUpIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+              <Tooltip title="Next">
+                <button
+                  onClick={onNextHandler}
+                  disabled={!hasNext}
+                  className={clsx(
+                    !hasNext && "opacity-50 hover:cursor-not-allowed",
+                    "hover:bg-gray-200 rounded-md -m-1 p-1"
+                  )}
+                >
+                  <ArrowDownIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+            </div>
+          )}
         </div>
       }
     >
