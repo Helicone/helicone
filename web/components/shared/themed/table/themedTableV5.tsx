@@ -55,7 +55,7 @@ interface ThemedTableV5Props<T> {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  onRowSelect?: (row: T) => void;
+  onRowSelect?: (row: T, index: number) => void;
   chart?: React.ReactNode;
   expandedRow?: (row: T) => React.ReactNode;
   hideView?: boolean;
@@ -204,11 +204,13 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                 ))}
               </thead>
               <tbody>
-                {rows.map((row) => (
+                {rows.map((row, index) => (
                   <tr
                     key={row.id}
                     className="hover:bg-gray-100 hover:cursor-pointer"
-                    onClick={onRowSelect && (() => onRowSelect(row.original))}
+                    onClick={
+                      onRowSelect && (() => onRowSelect(row.original, index))
+                    }
                   >
                     {row.getVisibleCells().map((cell, i) => (
                       <td
