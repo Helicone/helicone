@@ -206,16 +206,17 @@ Here is an example cURL command:
 
     **Change the base path and add a Helicone-Auth header**
     ```typescript
-    const model = new OpenAI(
-        {},
-        {
-            basePath: "https://oai.hconeai.com/v1",
-            baseOptions: {
-            headers: {
-                "Helicone-Auth": "Bearer HELICONE_API_KEY"
-            },
-        },
-    );
+    const llm = new OpenAI({
+      modelName: "gpt-3.5-turbo",
+      configuration: {
+        basePath: "https://oai.hconeai.com/v1",
+        baseOptions: {
+          headers: {
+            "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+            }
+          }
+        }
+      });
     ```
 
   </Tab>

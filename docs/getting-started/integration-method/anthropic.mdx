@@ -40,13 +40,14 @@ title: "Anthropic"
     },
   });
 
-  const stream = await anthropic.completions.create({
-    prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
-    model: "claude-2",
-    stream: true,
-    max_tokens_to_sample: 300,
-  });
-    ```
+const stream = await anthropic.completions.create({
+prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
+model: "claude-2",
+stream: true,
+max_tokens_to_sample: 300,
+});
+```
+
   </Tab>
   <Tab title="cURL">
     **Replace the Anthropic Base url with Helicone's**
@@ -102,7 +103,16 @@ curl --request POST \
     ```
     **Typescript**
 
-    Support is coming soon, pending new langchainjs version
+    const llm = new ChatAnthropic({
+      modelName: "claude-2",
+      anthropicApiKey: "ANTHROPIC_API_KEY",
+      clientOptions: {
+        baseURL: "https://anthropic.hconeai.com/",
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+          }
+        }
+      });
 
   </Tab>
 </Tabs>
