@@ -7,12 +7,13 @@ interface StyledAreaChartProps {
   title: string;
   value: string | number;
   isDataOverTimeLoading: boolean;
-  withBoxBee?: boolean;
+  withAnimation?: boolean;
   children: React.ReactNode;
 }
 
 const StyledAreaChart = (props: StyledAreaChartProps) => {
-  const { title, value, isDataOverTimeLoading, withBoxBee, children } = props;
+  const { title, value, isDataOverTimeLoading, withAnimation, children } =
+    props;
   return (
     <Card>
       <div className="flex flex-col space-y-0.5">
@@ -22,9 +23,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
       {isDataOverTimeLoading ? (
         <div className="p-2 w-full h-[14rem]">
           <div className="h-full w-full bg-gray-200 rounded-md pt-4">
-            {withBoxBee && (
-              <LoadingAnimation animation={boxbee} height={175} width={175} />
-            )}
+            {withAnimation && <LoadingAnimation height={175} width={175} />}
           </div>
         </div>
       ) : (
