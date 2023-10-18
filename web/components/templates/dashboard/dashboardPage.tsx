@@ -456,7 +456,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "0"
                   }
                   isDataOverTimeLoading={overTimeData.requests.isLoading}
-                  withBoxBee={true}
+                  withAnimation={true}
                 >
                   <AreaChart
                     className="h-[14rem]"
@@ -488,6 +488,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "$0.00"
                   }
                   isDataOverTimeLoading={overTimeData.costs.isLoading}
+                  withAnimation={true}
                 >
                   <BarChart
                     className="h-[14rem]"
@@ -514,6 +515,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
+                  withAnimation={true}
                 >
                   <BarChart
                     className="h-[14rem]"
@@ -541,6 +543,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "0"
                   }
                   isDataOverTimeLoading={overTimeData.feedback.isLoading}
+                  withAnimation={true}
                 >
                   <AreaChart
                     className="h-[14rem]"
@@ -559,6 +562,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     metrics.averageLatency.data?.data?.toFixed(0) ?? 0
                   } ms / req`}
                   isDataOverTimeLoading={overTimeData.latency.isLoading}
+                  withAnimation={true}
                 >
                   <AreaChart
                     className="h-[14rem]"
