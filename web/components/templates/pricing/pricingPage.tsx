@@ -15,7 +15,7 @@ const tiers = [
           $0
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
-          /month
+          / month per organization
         </span>
       </p>
     ),
@@ -44,7 +44,7 @@ const tiers = [
           $25
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
-          /month
+          / month per organization
         </span>
       </p>
     ),
