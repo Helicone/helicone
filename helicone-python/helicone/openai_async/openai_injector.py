@@ -225,7 +225,6 @@ class OpenAIInjector:
                     ),
                     timing=Timing.from_datetimes(now, later)
                 )
-                print("logging", async_log, Provider.OPENAI)
 
                 logger.log(async_log, Provider.OPENAI)
 
