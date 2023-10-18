@@ -151,7 +151,7 @@ interface ResponseCopyV2 {
   organization_id: string;
 }
 
-interface ResponseCopyV3 extends ResponseCopyV2 {
+export interface ResponseCopyV3 extends ResponseCopyV2 {
   node_id: Nullable<string>;
   job_id: Nullable<string>;
   proxy_key_id: Nullable<string>;
@@ -176,7 +176,7 @@ interface PropertiesCopyV2 {
   organization_id: string;
 }
 
-interface PropertyWithResponseV1 {
+export interface PropertyWithResponseV1 {
   response_id: Nullable<string>;
   response_created_at: Nullable<string>;
   latency: Nullable<number>;

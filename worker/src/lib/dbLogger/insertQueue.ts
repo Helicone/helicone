@@ -1,6 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "../../../supabase/database.types";
+import { Database, Json } from "../../../supabase/database.types";
 import { Result } from "../../results";
+import { ClickhouseClientWrapper } from "../db/clickhouse";
+import { ResponseCopyV3 } from "../db/clickhouse";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -79,6 +81,7 @@ export interface ResponsePayload {
 export class InsertQueue {
   constructor(
     private database: SupabaseClient<Database>,
+    private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
   ) {}
@@ -208,5 +211,67 @@ export class InsertQueue {
       return res;
     }
     return { data: null, error: null };
+  }
+
+  async putRequestProperty(
+    requestId: string,
+    properties: Json,
+    property: {
+      key: string,
+      value: string,
+    },
+    orgId: string,
+    values: Database["public"]["Tables"]["request"]["Row"],
+  ): Promise<void> {
+    await this.database
+      .from('request')
+      .update({ "properties": properties})
+      .match({
+        id: requestId,
+      })
+      .eq("helicone_org_id", orgId);
+
+    const query = `
+        SELECT * 
+        FROM response_copy_v3
+        WHERE (
+          request_id='${requestId}' AND
+          organization_id='${orgId}'
+        )
+    `;
+    
+    const {data, error} = await this.clickhouseWrapper.dbQuery(query, [])
+
+    if (error || data === null || data?.length == 0) {
+      return Promise.reject("No response data.")
+    }
+
+    const response: ResponseCopyV3 = data[0] as ResponseCopyV3
+
+    if (response.user_id === null || response.status === null || response.model === null) {
+      return Promise.reject("No response data.")
+    }
+    
+    await this.clickhouseWrapper.dbInsertClickhouse(
+      "property_with_response_v1",
+      [{
+        response_id: response.response_id,
+        response_created_at: response.response_created_at,
+        latency: response.latency,
+        status: response.status,
+        completion_tokens: response.completion_tokens,
+        prompt_tokens: response.prompt_tokens,
+        model: response.model,
+        request_id: values.id,
+        request_created_at: values.created_at,
+        auth_hash: values.auth_hash,
+        user_id: response.user_id,
+        organization_id: orgId,
+        property_key: property.key,
+        property_value: property.value,
+      }],
+    )
+
+    console.log('here')
   }
 }
