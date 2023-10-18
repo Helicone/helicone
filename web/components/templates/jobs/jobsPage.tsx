@@ -81,12 +81,12 @@ const JobsPage = (props: JobsPageProps) => {
     if (!jobs) return [];
 
     const copy = jobs.map((job) => {
-      const createdAt = Number(job.timeout_seconds); // Convert string to number
+      const createdAt = Number(job.created_at); // Convert string to number
       const currentTime = Date.now(); // Current time in milliseconds
 
-      const isWithin60Seconds = currentTime - createdAt > 60000;
-      // check to see if the timeout is greater than the created at by 60s
-      if (isWithin60Seconds && job.status === "PENDING") {
+      const isWithinTimeout = currentTime - createdAt > job.timeout_seconds;
+
+      if (isWithinTimeout && job.status === "PENDING") {
         return {
           ...job,
           status: "TIMEOUT",
