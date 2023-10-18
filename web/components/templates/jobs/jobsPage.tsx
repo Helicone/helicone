@@ -87,10 +87,9 @@ const JobsPage = (props: JobsPageProps) => {
       const isWithin60Seconds = currentTime - createdAt > 60000;
       // check to see if the timeout is greater than the created at by 60s
       if (isWithin60Seconds && job.status === "PENDING") {
-        console.log("made it");
         return {
           ...job,
-          status: "FAILED",
+          status: "TIMEOUT",
         };
       } else {
         return job;
