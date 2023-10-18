@@ -85,7 +85,7 @@ const JobsPage = (props: JobsPageProps) => {
       const currentTime = Date.now(); // Current time in milliseconds
 
       const isWithinTimeout = currentTime - createdAt > job.timeout_seconds;
-      // check to see if the timeout is greater than the created at by 60s
+
       if (isWithinTimeout && job.status === "PENDING") {
         return {
           ...job,
