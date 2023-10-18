@@ -35,6 +35,12 @@ const StatusBadge = (props: StatusBadgeProps) => {
           <ArrowPathIcon className={"animate-spin h-3 w-3 inline"} />
         </span>
       );
+    case "TIMEOUT":
+      return (
+        <span className="gap-2 inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-600/20">
+          Timeout
+        </span>
+      );
     default:
       return (
         <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">

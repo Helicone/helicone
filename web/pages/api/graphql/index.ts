@@ -45,7 +45,6 @@ export default async function handler(
   res: NextApiResponse<{}>
 ): Promise<void> {
   if (req.url === "/api/graphql") {
-    console.log("redirecting to playground");
   }
   const apolloServer = new ApolloServer({
     typeDefs: makeExecutableSchema({
