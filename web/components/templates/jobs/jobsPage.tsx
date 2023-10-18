@@ -21,6 +21,7 @@ import TableFooter from "../requestsV2/tableFooter";
 import { getInitialColumns } from "./initialColumns";
 import { useJobPage } from "./useJobPage";
 import Link from "next/link";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface JobsPageProps {
   currentPage: number;
@@ -47,8 +48,6 @@ const JobsPage = (props: JobsPageProps) => {
     refetch,
     isLoading,
   } = useJobPage(page, currentPageSize, isLive);
-
-  console.log("count", count);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
@@ -78,6 +77,28 @@ const JobsPage = (props: JobsPageProps) => {
     })
   );
 
+  const cleanJobData = (jobs: HeliconeJob[]) => {
+    if (!jobs) return [];
+
+    const copy = jobs.map((job) => {
+      const createdAt = Number(job.timeout_seconds); // Convert string to number
+      const currentTime = Date.now(); // Current time in milliseconds
+
+      const isWithin60Seconds = currentTime - createdAt > 60000;
+      // check to see if the timeout is greater than the created at by 60s
+      if (isWithin60Seconds && job.status === "PENDING") {
+        console.log("made it");
+        return {
+          ...job,
+          status: "FAILED",
+        };
+      } else {
+        return job;
+      }
+    });
+    return copy;
+  };
+
   return (
     <div>
       <AuthHeader
@@ -105,24 +126,30 @@ const JobsPage = (props: JobsPageProps) => {
         }
       />
       <div className="flex flex-col space-y-4">
-        <ThemedTableV5
-          defaultData={(jobs.data?.heliconeJob || []) as HeliconeJob[]}
-          defaultColumns={columnsWithProperties}
-          tableKey="requestsColumnVisibility"
-          dataLoading={isLoading}
-          sortable={sort}
-          onRowSelect={(row) => {
-            router.push(`/jobs/${row.id}`, undefined, { shallow: true });
-          }}
-          noDataCTA={
-            <Link
-              href="https://docs.helicone.ai/features/jobs/quick-start"
-              className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded"
-            >
-              Get started
-            </Link>
-          }
-        />
+        {jobs.loading ? (
+          <LoadingAnimation title="Loading jobs" />
+        ) : (
+          <ThemedTableV5
+            defaultData={cleanJobData(
+              (jobs.data?.heliconeJob as HeliconeJob[]) || []
+            )}
+            defaultColumns={columnsWithProperties}
+            tableKey="jobsColumnVisibility"
+            dataLoading={isLoading}
+            sortable={sort}
+            onRowSelect={(row) => {
+              router.push(`/jobs/${row.id}`, undefined, { shallow: true });
+            }}
+            noDataCTA={
+              <Link
+                href="https://docs.helicone.ai/features/jobs/quick-start"
+                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded"
+              >
+                Get started
+              </Link>
+            }
+          />
+        )}
         {/* <TableFooter
           currentPage={currentPage}
           pageSize={pageSize}
