@@ -23,9 +23,15 @@ const ContactForm = (props: ContactFormProps) => {
   const router = useRouter();
   const { setNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
+  const [showCoupon, setShowCoupon] = useState(false);
 
   const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (contactTag === "mfs" && !showCoupon) {
+      setShowCoupon(true);
+      return;
+    }
+
     setIsLoading(true);
     const firstName = event.currentTarget.elements.namedItem(
       "first-name"
@@ -177,7 +183,14 @@ const ContactForm = (props: ContactFormProps) => {
           />
         </div>
       </div>
-      <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
+      <div className="border-t border-gray-300 flex items-center justify-between gap-2 pt-4">
+        {showCoupon ? (
+          <p>
+            Use coupon code: <span className="font-semibold">MSFTHELI</span>
+          </p>
+        ) : (
+          <div />
+        )}
         <button
           type="submit"
           className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -185,7 +198,11 @@ const ContactForm = (props: ContactFormProps) => {
           {isLoading && (
             <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
           )}
-          {buttonText}
+          {contactTag === "mfs"
+            ? showCoupon
+              ? "Get Started"
+              : buttonText
+            : buttonText}
         </button>
       </div>
     </form>
