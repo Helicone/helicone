@@ -23,7 +23,7 @@ const SingleJobPage = (props: SingleJobPageProps) => {
   return (
     <div>
       <AuthHeader
-        title={`${jobId}`}
+        title={`${job.data?.heliconeJob?.[0]?.name ?? ""} `}
         breadcrumb={{
           href: "/jobs",
           title: "Jobs",
