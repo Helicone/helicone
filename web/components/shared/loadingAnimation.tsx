@@ -4,6 +4,9 @@ import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
 import * as dashboard from "../../public/lottie/DashboardAnimation.json";
 import * as boxbee from "../../public/lottie/boxbee.json";
+import * as pumpkinCat from "../../public/lottie/pumpkinCat.json";
+import * as bat from "../../public/lottie/bat.json";
+import * as halloween from "../../public/lottie/halloween.json";
 import { useEffect, useState } from "react";
 
 type Animation =
@@ -11,7 +14,10 @@ type Animation =
   | typeof hamster
   | typeof plane
   | typeof dashboard
-  | typeof boxbee;
+  | typeof boxbee
+  | typeof pumpkinCat
+  | typeof bat
+  | typeof halloween;
 
 interface LoadingAnimationProps {
   title?: string;
@@ -37,7 +43,12 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
 
   useEffect(() => {
     if (animation !== undefined) return;
-    const animationItems = [chicky, hamster, plane];
+
+    // Regular
+    // const animationItems = [chicky, hamster, plane, boxbee];
+
+    // Halloween
+    const animationItems = [pumpkinCat, bat, halloween];
     const randomIndex = randomIntFromInterval(0, animationItems.length - 1);
     setAnimation(animationItems[randomIndex]);
   }, [animation]);
