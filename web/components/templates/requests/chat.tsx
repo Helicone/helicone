@@ -15,6 +15,7 @@ import React from "react";
 import { Tooltip } from "@mui/material";
 
 export type Message = {
+  id: string;
   role: string;
   content: string | null;
   function_call?: {
@@ -192,11 +193,13 @@ export const SingleChat = (props: {
 interface ChatProps {
   request:
     | {
+        id: string;
         role: string;
         content: string;
       }[]
     | null;
   response: {
+    id: string;
     role: string;
     content: string | null;
     function_call?: {

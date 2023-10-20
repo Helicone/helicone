@@ -56,16 +56,17 @@ export default async function handler(
     return;
   }
 
-  const completion = await openai.createChatCompletion({
-    model: model,
-    messages: messages,
-    user: user.data.user.email,
-    temperature: temperature,
-  });
-
-  if (completion.status !== 200) {
-    res.status(500).json({ error: "Internal server error", data: null });
+  try {
+    const completion = await openai.createChatCompletion({
+      model: model,
+      messages: messages,
+      user: user.data.user.email,
+      temperature: temperature,
+    });
+    res.status(200).json({ error: null, data: completion.data });
+    return;
+  } catch (err) {
+    res.status(500).json({ error: `${err}`, data: null });
     return;
   }
-  res.status(200).json({ error: null, data: completion.data });
 }
