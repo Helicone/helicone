@@ -159,11 +159,11 @@ export const propertyRouter = (router: BaseRouter) => {
         return 
       }
 
-      client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
+      await client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
 
       const {data: d2, error: e2} = await client.db.getRequestById(id);
 
-      console.log(d2?.properties)
+      // console.log(d2?.properties)
 
       return client.response.successJSON({ "ok": "true" });
     }

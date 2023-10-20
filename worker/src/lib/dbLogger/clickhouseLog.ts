@@ -2,7 +2,7 @@ import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ClickhouseClientWrapper, ClickhouseDB } from "../db/clickhouse";
 
-function formatTimeString(timeString: string): string {
+export function formatTimeString(timeString: string): string {
   return new Date(timeString).toISOString().replace("Z", "");
 }
 

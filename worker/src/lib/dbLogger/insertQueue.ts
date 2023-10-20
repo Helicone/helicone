@@ -3,6 +3,7 @@ import { Database, Json } from "../../../supabase/database.types";
 import { Result } from "../../results";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ResponseCopyV3 } from "../db/clickhouse";
+import { formatTimeString } from "./clickhouseLog";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -231,6 +232,15 @@ export class InsertQueue {
       })
       .eq("helicone_org_id", orgId);
 
+    await this.database
+      .from('properties')
+      .insert({
+        request_id: requestId, 
+        key: property.key,
+        value: property.value,
+        auth_hash: values.auth_hash
+      })
+
     const query = `
         SELECT * 
         FROM response_copy_v3
@@ -239,20 +249,18 @@ export class InsertQueue {
           organization_id='${orgId}'
         )
     `;
-    
     const {data, error} = await this.clickhouseWrapper.dbQuery(query, [])
 
     if (error || data === null || data?.length == 0) {
-      return Promise.reject("No response data.")
+      return Promise.reject("No request found.")
     }
-
     const response: ResponseCopyV3 = data[0] as ResponseCopyV3
 
     if (response.user_id === null || response.status === null || response.model === null) {
-      return Promise.reject("No response data.")
+      return Promise.reject("No response found associated with that request.")
     }
-    
-    await this.clickhouseWrapper.dbInsertClickhouse(
+
+    const {data: d, error: e} = await this.clickhouseWrapper.dbInsertClickhouse(
       "property_with_response_v1",
       [{
         response_id: response.response_id,
@@ -263,7 +271,7 @@ export class InsertQueue {
         prompt_tokens: response.prompt_tokens,
         model: response.model,
         request_id: values.id,
-        request_created_at: values.created_at,
+        request_created_at: formatTimeString(values.created_at),
         auth_hash: values.auth_hash,
         user_id: response.user_id,
         organization_id: orgId,
@@ -271,7 +279,14 @@ export class InsertQueue {
         property_value: property.value,
       }],
     )
-
-    console.log('here')
+    
+    this.clickhouseWrapper.dbInsertClickhouse("properties_copy_v2", [{
+      id: 1,
+      request_id: requestId,
+      key: property.key,
+      value: property.value,
+      organization_id: orgId,
+      created_at: formatTimeString(new Date().toISOString()),
+    }])
   }
 }
