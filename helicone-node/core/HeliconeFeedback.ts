@@ -1,4 +1,4 @@
-import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
+import { IHeliconeMeta } from "./HeliconeClientOptions";
 
 export enum HeliconeFeedbackRating {
   Positive = "positive",
@@ -7,14 +7,14 @@ export enum HeliconeFeedbackRating {
 
 export class HeliconeFeedback {
   static async logFeedback(
-    heliconeConfiguration: IHeliconeConfiguration,
+    heliconeMeta: IHeliconeMeta,
     heliconeId: string,
     rating: boolean
   ): Promise<void> {
     const options = {
       method: "POST",
       headers: {
-        "Helicone-Auth": heliconeConfiguration.getHeliconeAuthHeader(),
+        "Helicone-Auth": `Bearer ${heliconeMeta.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -25,10 +25,8 @@ export class HeliconeFeedback {
 
     let response: Response;
     try {
-      response = await fetch(
-        heliconeConfiguration.getBaseUrl().origin + "/v1/feedback",
-        options
-      );
+      const url = new URL(heliconeMeta.baseUrl);
+      response = await fetch(url.origin + "/v1/feedback", options);
     } catch (error: any) {
       console.error(
         "Error making request to Helicone feedback endpoint:",
@@ -41,6 +39,8 @@ export class HeliconeFeedback {
       console.error("Error logging feedback: ", response.statusText);
     }
 
-    heliconeConfiguration.getOnHeliconeFeedback()?.(response);
+    if (heliconeMeta.onFeedback) {
+      heliconeMeta.onFeedback(response);
+    }
   }
 }
