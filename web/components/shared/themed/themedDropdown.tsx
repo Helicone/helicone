@@ -109,7 +109,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   </label>
                 )}
 
-                <span className="block truncate">
+                <span className="block truncate font-semibold">
                   {selected?.label || placeholder}
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -133,7 +133,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                     verticalAlign === "top"
                       ? "bottom-full mb-1.5"
                       : "top-full mt-1.5",
-                    "absolute z-30 max-h-96 w-full min-w-[250px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    "absolute z-30 max-h-96 w-full min-w-[225px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
                   {categories && Object.keys(categories).length >= 2 && (
@@ -187,11 +187,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                       >
                         {({ selected, active }) => (
                           <>
-                            <span
-                              className={clsx(
-                                "block truncate font-semibold text-md"
-                              )}
-                            >
+                            <span className={clsx("block truncate text-md")}>
                               {option.label}
                               {option.subtitle && (
                                 <p className="text-gray-500 font-light whitespace-pre-wrap text-sm">

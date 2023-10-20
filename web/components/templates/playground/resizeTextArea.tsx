@@ -3,10 +3,11 @@ import { ChangeEvent, useEffect, useRef } from "react";
 interface ResizeTextAreaProps {
   value: string;
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
 }
 
 const ResizeTextArea = (props: ResizeTextAreaProps) => {
-  const { value, onChange } = props;
+  const { value, onChange, placeholder } = props;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const resizeTextarea = () => {
@@ -22,6 +23,7 @@ const ResizeTextArea = (props: ResizeTextAreaProps) => {
     <textarea
       ref={textareaRef}
       value={value}
+      placeholder={placeholder}
       onChange={onChange}
       className="text-gray-900 w-full h-full flex-1 p-2 -m-2 rounded-lg whitespace-pre-wrap border-gray-300 resize-none"
       style={{

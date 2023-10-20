@@ -1,6 +1,8 @@
 import {
+  ArrowPathIcon,
   PaperAirplaneIcon,
   PencilIcon,
+  PlusIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
@@ -25,108 +27,154 @@ interface ChatPlaygroundProps {
 const ChatPlayground = (props: ChatPlaygroundProps) => {
   const { requestId, chat, model, temperature } = props;
 
-  const [text, setText] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { setNotification } = useNotification();
 
   const [currentChat, setCurrentChat] = useState<Message[]>(chat);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (text: string, history: Message[]) => {
-    if (text.trim() === "") {
-      setNotification("Please enter in a message", "info");
-      return;
-    }
-
-    const newChat = [...history];
-    newChat.push({
-      content: text,
-      role: "user",
-    });
-    setCurrentChat(newChat);
+  const handleSubmit = async (history: Message[]) => {
     setIsLoading(true);
-    setText("");
 
-    const resp = await fetchOpenAI(
-      newChat as ChatCompletionRequestMessage[],
+    // strip the id from the history
+    const historyWithoutId = history.map((message) => {
+      return {
+        content: message.content,
+        role: message.role,
+      };
+    });
+
+    const { data, error } = await fetchOpenAI(
+      historyWithoutId as ChatCompletionRequestMessage[],
       requestId,
       temperature,
       model
     );
-    if (resp) {
-      newChat.push({
-        content:
-          resp.choices[0].message?.content ||
-          "Failed to fetch response. Please try again",
-        role: resp.choices[0].message?.role || "system",
-      });
-      setCurrentChat(newChat);
+
+    if (error !== null) {
+      setNotification(error, "error");
     }
+
+    if (data) {
+      history.push({
+        // generate a uuid
+        id: crypto.randomUUID(),
+        content:
+          data.choices[0].message?.content ||
+          "Failed to fetch response. Please try again",
+        role: data.choices[0].message?.role || "system",
+      });
+      setCurrentChat(history);
+    }
+
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [text]);
+  const deleteRowHandler = (rowId: string) => {
+    setCurrentChat((prevChat) => {
+      return prevChat.filter((message) => message.id !== rowId);
+    });
+  };
 
   return (
     <ul className="w-full border border-gray-300 rounded-lg">
       {currentChat.map((c, i) => {
-        const slice = currentChat.slice(0, i + 1);
-
         return (
           <ChatRow
-            key={i}
+            key={c.id}
             index={i}
-            messages={slice}
-            callback={(userText: string, history: Message[] | null) => {
-              if (history) {
-                handleSubmit(userText, history);
-              } else {
-                // change the system message
-                const newChat = [...currentChat];
-                newChat[i].content = userText;
-                setCurrentChat(newChat);
-              }
+            message={c}
+            callback={(userText: string, role: string) => {
+              const newChat = [...currentChat];
+              newChat[i].content = userText;
+              newChat[i].role = role;
+              setCurrentChat(newChat);
+            }}
+            deleteRow={(rowId) => {
+              deleteRowHandler(rowId);
             }}
           />
         );
       })}
       {isLoading && (
-        <li className="flex flex-row px-4 py-6 gap-4">
-          <Image
-            src={"/assets/chatGPT.png"}
-            className="h-6 w-6 rounded-md"
-            height={30}
-            width={30}
-            alt="ChatGPT Logo"
-          />
-          <p>...</p>
+        <li className="flex flex-row justify-between px-8 py-6 gap-8">
+          <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-row space-x-8 w-full h-full relative">
+              <button
+                className={clsx(
+                  "bg-white border border-gray-300",
+                  "w-24 h-6 text-xs rounded-lg"
+                )}
+              >
+                assistant
+              </button>
+              <span className="flex flex-row space-x-1 items-center">
+                <ArrowPathIcon className="h-4 w-4 text-gray-600 animate-spin" />
+              </span>
+            </div>
+          </div>
         </li>
       )}
-      <li className="w-full flex my-4 items-center">
-        <div className="flex bg-white rounded-xl shadow-xl items-center mx-auto w-[90%] p-1.5">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            className="flex-1 resize-none whitespace-pre-wrap rounded-l-lg overflow-auto leading-7 border-none text-gray-900 focus:outline-none focus:ring-0"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(text, currentChat);
-              }
-            }}
-          />
+      <li className="px-8 py-4 bg-white rounded-b-lg justify-between space-x-4 flex">
+        <button
+          onClick={() => {
+            // check to see if the last message was a user
+            const lastMessage = currentChat[currentChat.length - 1];
+            if (lastMessage.role === "user") {
+              const newChat = [...currentChat];
+              newChat.push({
+                id: crypto.randomUUID(),
+                content: "",
+                role: "assistant",
+              });
+              setCurrentChat(newChat);
+            } else {
+              const newChat = [...currentChat];
+              newChat.push({
+                id: crypto.randomUUID(),
+                content: "",
+                role: "user",
+              });
+              setCurrentChat(newChat);
+            }
+          }}
+          className={clsx(
+            "bg-white hover:bg-gray-100 border border-gray-300 text-black",
+            "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          )}
+        >
+          <PlusIcon className="h-4 w-4 inline  text-black rounded-lg mr-2" />
+          Add Message
+        </button>
+        <div className="flex space-x-4">
           <button
-            className="p-2 self-end"
-            onClick={() => handleSubmit(text, currentChat)}
+            onClick={() => {
+              //  reset the chat to the original chat
+              const originalCopy = chat.map((message, index) => {
+                return { ...message, id: crypto.randomUUID() };
+              });
+              setCurrentChat(originalCopy);
+            }}
+            className={clsx(
+              "bg-white hover:bg-gray-100 border border-gray-300 text-black",
+              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            )}
           >
-            <PaperAirplaneIcon className="h-8 w-8 inline bg-green-500 text-white p-1 rounded-lg" />
+            <ArrowPathIcon className="h-4 w-4 inline  text-black rounded-lg mr-2" />
+            Reset
+          </button>
+          <button
+            onClick={() => {
+              handleSubmit(currentChat);
+            }}
+            className={clsx(
+              model.includes("3.5")
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-purple-600 hover:bg-purple-700",
+              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            )}
+          >
+            <PaperAirplaneIcon className="h-4 w-4 inline text-white rounded-lg mr-2" />
+            Submit
           </button>
         </div>
       </li>
