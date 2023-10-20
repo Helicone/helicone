@@ -1,5 +1,5 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Database } from "../../supabase/database.types";
+import { Database, Json } from "../../supabase/database.types";
 import { Env, hash } from "..";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
 import { Result, err, ok } from "../results";
@@ -236,4 +236,23 @@ export class DBWrapper {
     }
     return { data: data, error: null };
   }
+
+  async getRequestById(
+    requestId: string
+  ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
+    const {data, error} = await this.supabaseClient
+      .from("request")
+      .select("*")
+      .match({
+        id: requestId,
+      })
+      .eq("helicone_org_id", await this.orgId())
+      .single();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
+
 }
