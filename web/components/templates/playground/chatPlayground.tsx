@@ -96,15 +96,22 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       })}
       {isLoading && (
-        <li className="flex flex-row px-4 py-6 gap-4">
-          <Image
-            src={"/assets/chatGPT.png"}
-            className="h-6 w-6 rounded-md"
-            height={30}
-            width={30}
-            alt="ChatGPT Logo"
-          />
-          <p>...</p>
+        <li className="flex flex-row justify-between px-8 py-6 gap-8">
+          <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-row space-x-8 w-full h-full relative">
+              <button
+                className={clsx(
+                  "bg-white border border-gray-300",
+                  "w-24 h-6 text-xs rounded-lg"
+                )}
+              >
+                assistant
+              </button>
+              <span className="flex flex-row space-x-1 items-center">
+                <ArrowPathIcon className="h-4 w-4 text-gray-600 animate-spin" />
+              </span>
+            </div>
+          </div>
         </li>
       )}
       <li className="px-8 py-4 bg-white rounded-b-lg justify-between space-x-4 flex">
@@ -142,7 +149,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           <button
             onClick={() => {
               //  reset the chat to the original chat
-
               const originalCopy = chat.map((message, index) => {
                 return { ...message, id: crypto.randomUUID() };
               });
@@ -158,9 +164,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </button>
           <button
             onClick={() => {
-              console.log("chat", chat);
-              console.log("currentChat", currentChat);
-              // handleSubmit(currentChat);
+              handleSubmit(currentChat);
             }}
             className={clsx(
               model.includes("3.5")
