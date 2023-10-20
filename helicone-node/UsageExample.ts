@@ -1,7 +1,8 @@
-import { HeliconeOpenAI } from "./async_logger/HeliconeOpenAI";
+import { HeliconeAsyncOpenAI } from "./async_logger/HeliconeAsyncOpenAI";
 import { IHeliconeAsyncClientOptions } from "./core/HeliconeClientOptions";
 import { Response } from "openai/core";
 import { HeliconeFeedbackRating } from "./core/HeliconeFeedback";
+import { HeliconeProxyOpenAI } from "./proxy_logger/HeliconeProxyOpenAI";
 
 require("dotenv").config();
 
@@ -108,9 +109,7 @@ async function test() {
 
   // console.log(result2);
 
-  const helicone_id = crypto.randomUUID();
-  console.log(`Helicone ID: ${helicone_id}`);
-  const openai = new HeliconeOpenAI({
+  const openai = new HeliconeAsyncOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_ORG_ID,
     heliconeMeta: {
@@ -137,7 +136,7 @@ async function test() {
       messages: [
         {
           role: "user",
-          content: "Say hi!",
+          content: "Say 'TestAsync_ChatCompletion_NoStreaming'",
         },
       ],
     })
@@ -153,7 +152,7 @@ async function test() {
   //         messages: [
   //           {
   //             role: "user",
-  //             content: "Say what up dog",
+  //             content: "Say 'TestAsync_ChatCompletion_Streaming'",
   //           },
   //         ],
   //         stream: true,
@@ -188,4 +187,40 @@ async function test() {
   // console.log(data3.data[0].embedding); // Ugly, but works
 }
 
+async function testProxy() {
+  const openai = new HeliconeProxyOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_ORG_ID,
+    heliconeMeta: {
+      apiKey: process.env.HELICONE_API_KEY,
+      onFeedback: async (response: Response) => {
+        console.log(`Feedback result: ${response.status}`);
+      },
+    },
+  });
+
+  const { data, response } = await openai.chat.completions
+    .create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: "Say 'TestProxy_ChatCompletion_NoStreaming'",
+        },
+      ],
+    })
+    .withResponse();
+
+  console.log(data.choices[0].message.content);
+
+  const heliconeId = response.headers.get("helicone-id");
+  if (heliconeId) {
+    await openai.helicone.logFeedback(
+      heliconeId,
+      HeliconeFeedbackRating.Negative
+    );
+  }
+}
+
 test().then(() => {});
+testProxy().then(() => {});

@@ -1,4 +1,4 @@
-import { Helicone } from "./../core/HeliconeOpenAIApi";
+import { Helicone } from "../core/HeliconeOpenAIApi";
 import {
   HeliconeAsyncLogger,
   HeliconeAsyncLogRequest,
@@ -16,7 +16,7 @@ import { Stream } from "openai/streaming";
 import { EmbeddingCreateParams } from "openai/resources";
 import { wrapAPIPromise } from "./HeliconeMonkeyPatch";
 
-export class HeliconeOpenAI extends OpenAI {
+export class HeliconeAsyncOpenAI extends OpenAI {
   public helicone: Helicone;
   private originalCompletionCreate: hcone.CompletionCreateFunction;
   private originalChatCreate: hcone.ChatCreateFunction;

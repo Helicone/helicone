@@ -16,7 +16,7 @@ interface IHeliconeMeta {
 }
 
 interface IHeliconeProxyClientOptions extends ClientOptions {
-  heliconeMeta: IHeliconeMeta;
+  heliconeMeta: Omit<IHeliconeMeta, "onLog">;
 }
 
 interface IHeliconeAsyncClientOptions extends ClientOptions {
