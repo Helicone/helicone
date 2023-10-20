@@ -1,10 +1,9 @@
-import { v4 as uuidv4 } from "uuid";
-import { HeliconeAsyncConfiguration } from "../core/HeliconeAsyncConfiguration";
 import {
   HeliconeLogBuilder,
   HeliconeLogger,
   ResponseBody,
 } from "../async_logger/HeliconeLogger";
+import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
 
 const heliconeApiKey = process.env.HELICONE_API_KEY;
 
@@ -16,14 +15,14 @@ if (!heliconeApiKey) {
 
 // Test cache behavior
 test("customModel", async () => {
-  const config = new HeliconeAsyncConfiguration({
+  const options: IHeliconeAsyncClientOptions = {
     heliconeMeta: {
       apiKey: heliconeApiKey,
       baseUrl: asyncURL,
     },
-  });
+  };
 
-  const logger = new HeliconeLogger(config);
+  const logger = new HeliconeLogger(options);
 
   const llmArgs = {
     model: "llama-2",
@@ -47,6 +46,6 @@ test("customModel", async () => {
   builder.addUser("test-user");
   const response = await logger.submit(builder);
   if (response.status !== 200) {
-    throw new Error(response.data);
+    throw new Error(await response.text());
   }
 }, 60000);
