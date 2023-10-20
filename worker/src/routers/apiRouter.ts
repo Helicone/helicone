@@ -126,54 +126,7 @@ async function logAsync(
   return new Response("ok", { status: 200 });
 }
 
-
-export const propertyRouter = (router: BaseRouter) => {
-
-  router.put(
-    '/request/:id/property',
-    async (
-      { params: { id } },
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
-    ) => {
-      const client = await createAPIClient(env, requestWrapper);
-      const authParams = await client.db.getAuthParams();
-      
-      interface Body {
-        key: string,
-        value: string,
-      }
-      if (authParams.error !== null) {
-        return client.response.unauthorized();
-      }      
-      const property = await requestWrapper.getJson<Body>();
-      const {data, error} = await client.db.getRequestById(id);
-
-      const properties = {
-        ...(data?.properties as Record<string, any> || {}),
-        [property.key]: property.value,
-      }
-
-      if (!data){
-        return 
-      }
-
-      await client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
-
-      const {data: d2, error: e2} = await client.db.getRequestById(id);
-
-      // console.log(d2?.properties)
-
-      return client.response.successJSON({ "ok": "true" });
-    }
-  )
-
-}
-
 export const getAPIRouter = (router: BaseRouter) => {
-
-  propertyRouter(router);
 
   router.post(
     "/job",
@@ -384,6 +337,41 @@ export const getAPIRouter = (router: BaseRouter) => {
       return await logAsync(requestWrapper, env, ctx, "ANTHROPIC");
     }
   );
+
+  router.put(
+    '/request/:id/property',
+    async (
+      { params: { id } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      
+      interface Body {
+        key: string,
+        value: string,
+      }
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
+      }      
+      const property = await requestWrapper.getJson<Body>();
+      const {data, error} = await client.db.getRequestById(id);
+
+      if (error) {
+        return client.response.newError(error, 500);
+      }
+
+      const properties = {
+        ...(data?.properties as Record<string, any> || {}),
+        [property.key]: property.value,
+      }
+
+      await client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
+      return client.response.successJSON({"ok": 'true'});
+    }
+  )
 
   // Proxy only + proxy forwarder
   router.all(
