@@ -245,11 +245,11 @@ export class InsertQueue {
         SELECT * 
         FROM response_copy_v3
         WHERE (
-          request_id='${requestId}' AND
-          organization_id='${orgId}'
+          request_id={val_0: UUID} AND
+          organization_id={val_1: UUID}
         )
     `;
-    const {data, error} = await this.clickhouseWrapper.dbQuery(query, [])
+    const {data, error} = await this.clickhouseWrapper.dbQuery(query, [requestId, orgId])
 
     if (error || data === null || data?.length == 0) {
       return Promise.reject("No request found.")
