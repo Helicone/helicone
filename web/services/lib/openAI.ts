@@ -26,5 +26,5 @@ export const fetchOpenAI = async (
     (res) => res.json() as Promise<Result<CreateChatCompletionResponse, string>>
   );
 
-  return completion.data;
+  return completion;
 };
