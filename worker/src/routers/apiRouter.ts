@@ -362,6 +362,10 @@ export const getAPIRouter = (router: BaseRouter) => {
       if (error) {
         return client.response.newError(error, 500);
       }
+      
+      if (!data) {
+        return client.response.newError("Request not found.", 404);
+      }
 
       const properties = {
         ...(data?.properties as Record<string, any> || {}),
