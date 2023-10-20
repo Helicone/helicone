@@ -252,12 +252,12 @@ export class InsertQueue {
     const {data, error} = await this.clickhouseWrapper.dbQuery(query, [requestId, orgId])
 
     if (error || data === null || data?.length == 0) {
-      return Promise.reject("No request found.")
+      return Promise.reject("No response found.")
     }
     const response: ResponseCopyV3 = data[0] as ResponseCopyV3
 
     if (response.user_id === null || response.status === null || response.model === null) {
-      return Promise.reject("No response found associated with that request.")
+      return Promise.reject("Missing response data.")
     }
 
     const {data: d, error: e} = await this.clickhouseWrapper.dbInsertClickhouse(
