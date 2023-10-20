@@ -125,6 +125,7 @@ export async function proxyForwarder(
         dbWrapper: new DBWrapper(env, loggable.auth()),
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+          new ClickhouseClientWrapper(env),
           env.FALLBACK_QUEUE,
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
