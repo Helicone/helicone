@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
 import { getUSDateFromString } from "../../shared/utils/utils";
 
-function formatNumber(num: number) {
+export function formatNumber(num: number) {
   const numParts = num.toString().split(".");
 
   if (numParts.length > 1) {
@@ -28,6 +28,15 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
         {info.getValue() ? `${info.getValue()}` : "No User ID"}
       </span>
     ),
+    minSize: 225,
+  },
+  {
+    accessorKey: "cost",
+    header: "Total Cost",
+    cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
+    meta: {
+      sortKey: "cost",
+    },
   },
   {
     accessorKey: "active_for",
@@ -44,6 +53,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     meta: {
       sortKey: "last_active",
     },
+    minSize: 200,
   },
   {
     accessorKey: "total_requests",
@@ -56,25 +66,19 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "average_requests_per_day_active",
     header: "Avg Reqs / Day",
-    cell: (info) => info.getValue(),
+    cell: (info) => <span>{Number(info.getValue()).toFixed(2)}</span>,
     meta: {
       sortKey: "average_requests_per_day_active",
     },
+    minSize: 200,
   },
   {
     accessorKey: "average_tokens_per_request",
     header: "Avg Tokens / Req",
-    cell: (info) => info.getValue(),
+    cell: (info) => <span>{Number(info.getValue()).toFixed(2)}</span>,
     meta: {
       sortKey: "average_tokens_per_request",
     },
-  },
-  {
-    accessorKey: "cost",
-    header: "Total Cost",
-    cell: (info) => <span>${formatNumber(Number(info.getValue()))}</span>,
-    meta: {
-      sortKey: "cost",
-    },
+    minSize: 200,
   },
 ];
