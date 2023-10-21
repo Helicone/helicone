@@ -215,7 +215,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                     {row.getVisibleCells().map((cell, i) => (
                       <td
                         key={i}
-                        className="py-4 border-t border-gray-300 pr-4 text-gray-700"
+                        className={clsx(
+                          "py-4 border-t border-gray-300 pr-4 text-gray-700"
+                        )}
                         {...{
                           style: {
                             maxWidth: cell.column.getSize(),
