@@ -66,7 +66,7 @@ export default function OpenSourceMonitoringForOpenAI() {
         <div className="mx-auto max-w-3xl text-base leading-7 text-gray-700">
           <div className="flex flex-row divide-x divide-gray-200 gap-4 items-center">
             <div className={clsx("flex items-center space-x-3 bottom-0")}>
-              <img
+              <Image
                 className="inline-block h-8 w-8 rounded-full"
                 src={"/assets/blog/scottnguyen-headshot.webp"}
                 alt=""
@@ -219,7 +219,7 @@ export default function OpenSourceMonitoringForOpenAI() {
           </p>
           <figure className="mt-16">
             <div className="w-full rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
-              <img
+              <Image
                 src="/assets/blog/dashboard.webp"
                 alt="App screenshot"
                 className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"
@@ -236,7 +236,7 @@ export default function OpenSourceMonitoringForOpenAI() {
           </figure>
           <figure className="mt-16">
             <div className="w-full rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
-              <img
+              <Image
                 src="/assets/blog/request.webp"
                 alt="App screenshot"
                 className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"

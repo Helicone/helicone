@@ -24,6 +24,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
+import Image from "next/image";
 
 const features: {
   title: string;
@@ -239,7 +240,7 @@ export default function Example() {
           </a>
           <div className="flex flex-col pt-24">
             <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-2xl lg:p-2.5">
-              <img
+              <Image
                 src="/assets/landing/preview.webp"
                 alt="App screenshot"
                 width={2720}
@@ -256,56 +257,56 @@ export default function Example() {
               Modern startups and enterprises use Helicone.
             </h2>
             <div className="w-full mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
-              <img
+              <Image
                 className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/upenn.png"
                 alt="upenn"
                 width={400}
                 height={100}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/carta.png"
                 alt="carta"
                 width={400}
                 height={100}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-14 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/lex.svg"
                 alt="lex"
                 width={158}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
                 src="assets/home/logos/particl.png"
                 alt="particle"
                 width={158}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/commandbar.svg"
                 alt="commandbar"
                 width={100}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/mintlify.svg"
                 alt="mintlify"
                 width={125}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/onboard.png"
                 alt="onboard"
                 width={300}
                 height={100}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/autogpt.png"
                 alt="autogpt"
@@ -364,21 +365,21 @@ export default function Example() {
             <div className="grid grid-cols-8 gap-4 w-full py-16">
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex relative mb-8 justify-center">
-                  <img
+                  <Image
                     className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/requests.png"
                     alt="requests"
                     width={158}
                     height={48}
                   />
-                  <img
+                  <Image
                     className="hidden md:block absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/latency.png"
                     alt="requests"
                     width={158}
                     height={48}
                   />
-                  <img
+                  <Image
                     className="hidden md:block absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/costs.png"
                     alt="requests"
@@ -424,7 +425,7 @@ export default function Example() {
               </div>
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex justify-center items-center">
-                  <img
+                  <Image
                     src="/assets/landing/helicone-mobile.webp"
                     width={125}
                     height={125}
@@ -442,7 +443,7 @@ export default function Example() {
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex relative mb-4 justify-center">
-                    <img
+                    <Image
                       className="z-20 absolute bottom-0 shadow-md rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
                       src="/assets/home/bento/history.png"
                       alt="requests"
