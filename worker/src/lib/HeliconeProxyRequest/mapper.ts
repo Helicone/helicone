@@ -192,6 +192,7 @@ export class HeliconeProxyRequestMapper {
     const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
     const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
     const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev\/v\d+\/?$/;
+    const anyScalePattern = /^https:\/\/api\.anyscale\.com\/v\d+\/?$/;
 
     return (
       api_base === undefined ||
@@ -200,7 +201,8 @@ export class HeliconeProxyRequestMapper {
       azurePattern.test(api_base) ||
       localProxyPattern.test(api_base) ||
       heliconeProxyPattern.test(api_base) ||
-      amdbartekPattern.test(api_base)
+      amdbartekPattern.test(api_base) ||
+      anyScalePattern.test(api_base)
     );
   }
 
