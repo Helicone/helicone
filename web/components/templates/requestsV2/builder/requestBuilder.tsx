@@ -6,6 +6,7 @@ import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
 import AbstractRequestBuilder from "./abstractRequestBuilder";
 import CustomBuilder from "./customBuilder";
+import UnknownBuilder from "./unknownBuilder";
 
 export type BuilderType =
   | "ChatGPTBuilder"
@@ -13,7 +14,8 @@ export type BuilderType =
   | "ModerationBuilder"
   | "EmbeddingBuilder"
   | "ClaudeBuilder"
-  | "CustomBuilder";
+  | "CustomBuilder"
+  | "UnknownBuilder";
 
 export const getBuilderType = (
   model: string,
@@ -48,7 +50,7 @@ export const getBuilderType = (
     return "ClaudeBuilder";
   }
 
-  return "GPT3Builder";
+  return "UnknownBuilder";
 };
 
 const builders: {
@@ -63,6 +65,7 @@ const builders: {
   EmbeddingBuilder: EmbeddingBuilder,
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
+  UnknownBuilder: UnknownBuilder,
 };
 
 const getModelFromPath = (path: string) => {
