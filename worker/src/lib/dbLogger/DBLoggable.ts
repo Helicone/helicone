@@ -222,7 +222,7 @@ export class DBLoggable {
           },
           error: null,
         };
-      } else if (!isStream || responseStatus !== 200) {
+      } else if (!isStream) {
         return {
           data: JSON.parse(result),
           error: null,
