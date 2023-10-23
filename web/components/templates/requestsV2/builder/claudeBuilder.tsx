@@ -26,7 +26,9 @@ class ClaudeBuilder extends AbstractRequestBuilder {
       }
     };
     return {
-      requestText: this.response.request_body.prompt || "Invalid Prompt",
+      requestText: this.response.request_body.tooLarge
+        ? "Helicone Message: Input too large"
+        : this.response.request_body.prompt || "Invalid Prompt",
       responseText: getResponseText(),
       render:
         this.response.response_status === 0 ||
