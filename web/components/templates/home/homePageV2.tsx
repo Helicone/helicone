@@ -280,7 +280,7 @@ export default function Example() {
               />
               <Image
                 className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="assets/home/logos/particl.png"
+                src="/assets/home/logos/particl.png"
                 alt="particle"
                 width={158}
                 height={48}
