@@ -24,10 +24,9 @@ async function handler({
     sort: SortLeafRequest;
     isCached: boolean;
   };
-  // const metrics = isCached
-  //   ? await getRequestsCached(orgId, filter, offset, limit, sort)
-  //   : await getRequests(orgId, filter, offset, limit, sort);
-  const metrics = await getRequests(orgId, filter, offset, limit, sort);
+  const metrics = isCached
+    ? await getRequestsCached(orgId, filter, offset, limit, sort)
+    : await getRequests(orgId, filter, offset, limit, sort);
 
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
