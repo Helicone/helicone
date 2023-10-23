@@ -105,7 +105,9 @@ const NavBarV2 = (props: NavBarV2Props) => {
               Pricing
             </Link>
             <Link
-              href="/blog"
+              href="https://blog.helicone.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex flex-row items-center font-semibold hover:bg-gray-200 rounded-lg px-4 py-2 focus:outline-none"
             >
               Blog
@@ -231,7 +233,9 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       Github
                     </Link>
                     <Link
-                      href="/blog"
+                      href="https://blog.helicone.ai/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-md font-semibold text-gray-900"
                     >
                       Blog
