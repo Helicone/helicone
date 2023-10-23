@@ -221,7 +221,7 @@ export default function HomePage(props: HomePageProps) {
             <div className="relative mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-5 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-16">
               <div className="flex-none sm:max-w-5xl lg:max-w-none pl-24 pb-24">
                 <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                  <img
+                  <Image
                     src="/assets/landing/preview.webp"
                     alt="App screenshot"
                     width={2720}
@@ -232,7 +232,7 @@ export default function HomePage(props: HomePageProps) {
               </div>
               <div className="flex-none sm:max-w-5xl lg:max-w-none absolute bottom-0">
                 <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2 lg:rounded-2xl lg:p-2">
-                  <img
+                  <Image
                     src="/assets/landing/request-preview.png"
                     alt="App screenshot"
                     width={556}
@@ -538,7 +538,7 @@ export default function HomePage(props: HomePageProps) {
                       <div className="text-2xl font-semibold">437.27 ms</div>
                     </div>
                     <div className="p-2 bottom-2 absolute rounded-lg border border-gray-300 mr-8">
-                      <img
+                      <Image
                         src="/assets/landing/requests.png"
                         alt="requests-graph"
                       />
@@ -582,7 +582,7 @@ export default function HomePage(props: HomePageProps) {
                       <div className="text-2xl font-semibold">$146.21</div>
                     </div>
                     <div className="p-2 left-0 top-[15%] absolute rounded-lg border border-gray-300">
-                      <img
+                      <Image
                         src="/assets/landing/piechart.png"
                         alt="pie-chart"
                         className="h-56 w-56"

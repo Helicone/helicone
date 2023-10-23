@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { clsx } from "../../shared/clsx";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
+import Image from "next/image";
 
 interface BlogPageProps {}
 
@@ -192,7 +193,7 @@ const BlogPage = (props: BlogPageProps) => {
               className="w-full flex flex-col sm:flex-row gap-8 h-full sm:h-80 hover:bg-gray-100 hover:cursor-pointer rounded-xl p-4"
             >
               <div className="w-full sm:w-2/5 rounded-xl h-full bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:rounded-2xl">
-                <img
+                <Image
                   src={blog.imageUrl}
                   alt="App screenshot"
                   style={{
@@ -223,7 +224,7 @@ const BlogPage = (props: BlogPageProps) => {
                       )}
                       key={i}
                     >
-                      <img
+                      <Image
                         className="inline-block h-8 w-8 rounded-full"
                         src={author.imageUrl}
                         alt=""

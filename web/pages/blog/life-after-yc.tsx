@@ -62,7 +62,7 @@ export default function LifeAfterYC() {
         <div className="mx-auto max-w-3xl text-base leading-7 text-gray-700">
           <div className="flex flex-row divide-x divide-gray-200 gap-4 items-center">
             <div className={clsx("flex items-center space-x-3 bottom-0")}>
-              <img
+              <Image
                 className="inline-block h-8 w-8 rounded-full"
                 src={"/assets/blog/scottnguyen-headshot.webp"}
                 alt=""
