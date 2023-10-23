@@ -51,7 +51,7 @@ const RenderOrgUsage = (props: RenderOrgUsageProps) => {
   //   refetch if the current month changes
   useEffect(() => {
     refetch();
-  }, [currentMonth]);
+  }, [currentMonth, refetch]);
 
   const chartData = data?.data.map((d: any) => {
     // if the date is in the future, return null
