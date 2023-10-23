@@ -6,6 +6,7 @@ import {
 import Footer from "../../components/shared/layout/footer";
 import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
+import Image from "next/image";
 
 interface ExampleBlogProps {}
 
@@ -21,7 +22,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
       <section className="bg-white">
         <div className="flex flex-col py-32 items-center">
           <div className="px-4 sm:px-12 max-w-7xl text-base leading-7 text-gray-700">
-            <img
+            <Image
               className="h-full w-full sm:w-auto mx-auto max-w-2xl"
               src="/assets/autoGPTxHelicone.png"
               alt="Workflow"
@@ -165,7 +166,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               AutoGPT can track how different agents are impacting their costs.
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
-              <img
+              <Image
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/agentComparisons.png"
                 alt="Agent Comparisons"
@@ -183,7 +184,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               using the filter feature.
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
-              <img
+              <Image
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/agentFilters.png"
                 alt="Agent Filters"
@@ -206,7 +207,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               dashboards. Here&apos;s an example:
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
-              <img
+              <Image
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/cachePageStats.png"
                 alt="Cache Page Stats"
@@ -225,7 +226,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               Agents&quot;.
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
-              <img
+              <Image
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/cacheRequestTable.png"
                 alt="Cache Request Table"
@@ -247,7 +248,7 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
               directly to the reports after a run.
             </p>
             <figure className="mt-10 border-l border-indigo-600 pl-9">
-              <img
+              <Image
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/graphQL.png"
                 alt="GraphQL"

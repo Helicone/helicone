@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
+import Image from "next/image";
 
 const features: FeatureDetails[] = [
   {
@@ -100,7 +101,7 @@ const Details = () => {
                 aria-hidden="true"
               />
               <div className="mx-auto max-w-2xl sm:mx-0 sm:max-w-none">
-                <img
+                <Image
                   src={selected.src}
                   alt="Product screenshot"
                   width={2432}

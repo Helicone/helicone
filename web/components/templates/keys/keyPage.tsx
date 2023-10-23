@@ -98,7 +98,7 @@ const KeyPage = (props: KeyPageProps) => {
   // every time the edit modal is opened/closed, reset the edit name
   useEffect(() => {
     setEditName(selectedHeliconeKey?.api_key_name ?? "");
-  }, [editOpen]);
+  }, [editOpen, selectedHeliconeKey?.api_key_name]);
 
   return (
     <>
