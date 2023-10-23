@@ -8,7 +8,7 @@ interface ModelPillProps {
 const ModelPill = (props: ModelPillProps) => {
   const { model } = props;
 
-  const builderType = getBuilderType(model, "OPENAI"); //TODO move provider to props
+  const builderType = getBuilderType(model, "OPENAI");
 
   let modelMapping = {
     ChatGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
@@ -17,9 +17,8 @@ const ModelPill = (props: ModelPillProps) => {
     EmbeddingBuilder: "bg-blue-50 text-blue-700 ring-blue-200",
     ClaudeBuilder: "bg-orange-50 text-orange-700 ring-orange-200",
     CustomBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
+    UnknownBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
   };
-
-  // const color = modelMapping[builderType] || "gray";
 
   return (
     <span
@@ -28,7 +27,7 @@ const ModelPill = (props: ModelPillProps) => {
         `inline-flex items-center rounded-full px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
       )}
     >
-      {model && model !== "" ? model : "Unknown"}
+      {model && model !== "" ? model : "Unsupported"}
     </span>
   );
 };
