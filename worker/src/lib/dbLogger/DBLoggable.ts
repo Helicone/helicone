@@ -202,40 +202,34 @@ export class DBLoggable {
       result = result.split("\n").slice(0, -1).join("\n");
     }
 
+    const HTTPSErrorRange = responseStatus >= 400 && responseStatus < 600;
+    const HTTPSRedirect = responseStatus >= 300 && responseStatus < 400;
+
     try {
-      if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
+      if (HTTPSErrorRange || HTTPSRedirect) {
+        return ok(JSON.parse(result));
+      } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
         const responseJson = JSON.parse(result);
         const prompt = JSON.parse(requestBody)?.prompt ?? "";
         const completion = responseJson?.completion ?? "";
         const completionTokens = await tokenCounter(completion);
         const promptTokens = await tokenCounter(prompt);
 
-        return {
-          data: {
-            ...responseJson,
-            usage: {
-              total_tokens: promptTokens + completionTokens,
-              prompt_tokens: promptTokens,
-              completion_tokens: completionTokens,
-              helicone_calculated: true,
-            },
+        return ok({
+          ...responseJson,
+          usage: {
+            total_tokens: promptTokens + completionTokens,
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            helicone_calculated: true,
           },
-          error: null,
-        };
-      } else if (!isStream) {
-        return {
-          data: JSON.parse(result),
-          error: null,
-        };
+        });
       } else if (isStream && this.provider === "ANTHROPIC") {
         return anthropicAIStream(result, tokenCounter, requestBody);
       } else if (isStream) {
         return parseOpenAIStream(result, tokenCounter, requestBody);
       } else {
-        return {
-          data: null,
-          error: "Unknown error parsing response",
-        };
+        return ok(JSON.parse(result));
       }
     } catch (e) {
       console.log("Error parsing response", e);
