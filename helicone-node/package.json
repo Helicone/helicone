@@ -31,7 +31,7 @@
     "@babel/eslint-parser": "^7.21.3",
     "@types/jest": "^29.5.4",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^12.11.5",
+    "@types/node": "^12.20.55",
     "@types/node-fetch": "^2.6.4",
     "@types/uuid": "^9.0.1",
     "dotenv": "^16.0.3",
@@ -47,7 +47,7 @@
     "next": "^13.3.1",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4",
+    "typescript": "^5.2.2",
     "uuid": "^9.0.0"
   },
   "dependencies": {

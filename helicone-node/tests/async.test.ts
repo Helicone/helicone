@@ -18,6 +18,7 @@ import {
   completionResponseBody,
   createCustomModelRequestBody,
 } from "./test_objects";
+import { v4 as uuidv4 } from "uuid";
 
 require("dotenv").config();
 
@@ -75,7 +76,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   });
 
   test("COMPLETION", async () => {
-    const heliconeId = crypto.randomUUID();
+    const heliconeId = uuidv4();
     const openaiNock = nock(openai.baseURL)
       .post("/completions", (body) => {
         expect(body).toMatchObject(completionRequestBody);
@@ -112,7 +113,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   });
 
   test("CHAT", async () => {
-    const heliconeId = crypto.randomUUID();
+    const heliconeId = uuidv4();
     const openaiNock = nock(openai.baseURL)
       .post("/chat/completions", (body) => {
         expect(body).toMatchObject(chatCompletionRequestBody);
@@ -149,7 +150,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   });
 
   test("CUSTOM_MODEL", async () => {
-    const heliconeId = crypto.randomUUID();
+    const heliconeId = uuidv4();
 
     const options: IHeliconeAsyncClientOptions = {
       heliconeMeta: {

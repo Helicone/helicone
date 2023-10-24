@@ -7,6 +7,7 @@ import {
   completionRequestBody,
   completionResponseBody,
 } from "./test_objects";
+import { v4 as uuidv4 } from "uuid";
 
 require("dotenv").config();
 
@@ -67,7 +68,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   });
 
   test("COMPLETION", async () => {
-    const heliconeId = crypto.randomUUID();
+    const heliconeId = uuidv4();
 
     const proxyNock = nock(proxyUrl, {
       reqheaders: expectedHeaders,
@@ -90,7 +91,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   });
 
   test("CHAT_COMPLETION", async () => {
-    const heliconeId = crypto.randomUUID();
+    const heliconeId = uuidv4();
 
     const proxyNock = nock(proxyUrl, {
       reqheaders: expectedHeaders,
@@ -113,7 +114,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   });
 
   test("FEEDBACK", async () => {
-    const heliconeId = crypto.randomUUID();
+    const heliconeId = uuidv4();
 
     const feedbackNock = nock(proxyUrl)
       .post("/feedback", (body) => {
