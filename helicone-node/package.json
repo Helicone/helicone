@@ -29,9 +29,7 @@
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/eslint-parser": "^7.21.3",
-    "@types/jest": "^29.5.4",
-    "@types/node": "^12.20.55",
-    "@types/node-fetch": "^2.6.4",
+    "@types/jest": "^29.5.6",
     "@types/uuid": "^9.0.1",
     "dotenv": "^16.0.3",
     "eslint": "^8.39.0",
