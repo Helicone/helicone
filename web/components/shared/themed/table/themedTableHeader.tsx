@@ -15,6 +15,7 @@ import useNotification from "../../notification/useNotification";
 import { useRouter } from "next/router";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import ViewButton from "./viewButton";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -126,17 +127,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           )}
           {rows.length > 0 && <ExportButton rows={rows} />}
           {viewToggle && (
-            <button
-              onClick={showFilterHandler}
-              className={clsx(
-                "bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
-              )}
-            >
-              <FunnelIcon className="h-5 w-5 text-gray-900" />
-              <p className="text-sm font-medium text-gray-900 hidden sm:block">
-                {showFilters ? "Hide" : "Show"} Filters
-              </p>
-            </button>
+            <ViewButton
+              onViewChange={(value: "table" | "card") => {
+                viewToggle.onViewChange(value);
+              }}
+            />
           )}
         </div>
       </div>

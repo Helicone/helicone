@@ -171,7 +171,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             No Columns Selected
           </p>
         </div>
-      ) : router.query.expanded && expandedRow ? (
+      ) : expandedRow && view === "card" ? (
         <div className="overflow-x-auto text-sm bg-white rounded-lg border border-gray-300 py-2 px-4">
           {rows.map((row, i) => (
             <div key={"expanded-row" + i}>{expandedRow(row.original)}</div>
