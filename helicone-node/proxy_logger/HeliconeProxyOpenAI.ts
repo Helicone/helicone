@@ -10,8 +10,8 @@ export class HeliconeProxyOpenAI extends OpenAI {
 
   constructor(private options: IHeliconeProxyClientOptions) {
     const {
-      apiKey = Core.readEnv("OPENAI_API_KEY"),
-      organization = Core.readEnv("OPENAI_ORG_ID") ?? null,
+      apiKey,
+      organization,
       heliconeMeta: providedHeliconeMeta = {},
       ...opts
     } = options;
