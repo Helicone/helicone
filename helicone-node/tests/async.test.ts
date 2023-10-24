@@ -10,6 +10,10 @@ import {
   IHeliconeMeta,
 } from "../core/HeliconeClientOptions";
 import {
+  TEST_ASYNC_URL,
+  TEST_HELICONE_API_KEY,
+  TEST_OPENAI_API_KEY,
+  TEST_OPENAI_ORG,
   chatCompletionAsyncModel,
   chatCompletionRequestBody,
   chatCompletionResponseBody,
@@ -17,17 +21,8 @@ import {
   completionRequestBody,
   completionResponseBody,
   createCustomModelRequestBody,
-} from "./test_objects";
+} from "./testConsts";
 import { v4 as uuidv4 } from "uuid";
-
-require("dotenv").config();
-
-const heliconeApiKey = process.env.HELICONE_API_KEY;
-const asyncUrl = process.env.HELICONE_ASYNC_URL ?? "http://127.0.0.1:8788";
-
-if (!heliconeApiKey) {
-  throw new Error("API keys must be set as environment variables.");
-}
 
 describe("Helicone Proxy OpenAI tests", () => {
   let openai: HeliconeAsyncOpenAI;
@@ -37,27 +32,27 @@ describe("Helicone Proxy OpenAI tests", () => {
 
   beforeAll(() => {
     const heliconeMeta: IHeliconeMeta = {
-      apiKey: process.env.HELICONE_API_KEY,
+      apiKey: TEST_HELICONE_API_KEY,
       properties: { example: "propertyValue" },
       cache: true,
       retry: { num: 3, factor: 2, min_timeout: 1000, max_timeout: 3000 },
       rateLimitPolicy: { quota: 100, time_window: 60, segment: "testSegment" },
       user: "test-user",
-      baseUrl: asyncUrl,
+      baseUrl: TEST_ASYNC_URL,
       onFeedback: mockOnFeedback,
       onLog: mockOnLog,
     };
 
     // All headers are not used with async logging
     expectedHeaders = {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Auth": `Bearer ${TEST_HELICONE_API_KEY}`,
       "Helicone-Property-example": "propertyValue",
       "Helicone-User-Id": "test-user",
     };
 
     openai = new HeliconeAsyncOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      organization: process.env.OPENAI_ORG_ID,
+      apiKey: TEST_OPENAI_API_KEY,
+      organization: TEST_OPENAI_ORG,
       heliconeMeta: heliconeMeta,
     });
 
@@ -84,7 +79,7 @@ describe("Helicone Proxy OpenAI tests", () => {
       })
       .reply(200, completionResponseBody);
 
-    const asyncNock = nock(asyncUrl)
+    const asyncNock = nock(TEST_ASYNC_URL)
       .post("/oai/v1/log", (body) => {
         expect(body).toMatchObject(completionAsyncLogModel);
         expect(body).toHaveProperty("timing");
@@ -121,7 +116,7 @@ describe("Helicone Proxy OpenAI tests", () => {
       })
       .reply(200, chatCompletionResponseBody);
 
-    const asyncNock = nock(asyncUrl)
+    const asyncNock = nock(TEST_ASYNC_URL)
       .post("/oai/v1/log", (body) => {
         expect(body).toMatchObject(chatCompletionAsyncModel);
         expect(body).toHaveProperty("timing");
@@ -154,8 +149,8 @@ describe("Helicone Proxy OpenAI tests", () => {
 
     const options: IHeliconeAsyncClientOptions = {
       heliconeMeta: {
-        apiKey: heliconeApiKey,
-        baseUrl: asyncUrl,
+        apiKey: TEST_HELICONE_API_KEY,
+        baseUrl: TEST_ASYNC_URL,
       },
     };
 
@@ -179,7 +174,7 @@ describe("Helicone Proxy OpenAI tests", () => {
     builder.addResponse(result);
     builder.addUser("test-user");
 
-    const asyncNock = nock(asyncUrl)
+    const asyncNock = nock(TEST_ASYNC_URL)
       .post("/custom/v1/log", (body) => {
         expect(body).toMatchObject(createCustomModelRequestBody(builder.id));
         expect(body).toHaveProperty("timing");

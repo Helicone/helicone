@@ -2,21 +2,18 @@ import { HeliconeFeedbackRating } from "../core/HeliconeFeedback";
 import { HeliconeProxyOpenAI } from "./../proxy_logger/HeliconeProxyOpenAI";
 import nock from "nock";
 import {
+  TEST_HELICONE_API_KEY,
+  TEST_OPENAI_API_KEY,
+  TEST_OPENAI_ORG,
+  TEST_PROXY_URL,
   chatCompletionRequestBody,
   chatCompletionResponseBody,
   completionRequestBody,
   completionResponseBody,
-} from "./test_objects";
+} from "./testConsts";
 import { v4 as uuidv4 } from "uuid";
 
 require("dotenv").config();
-
-const heliconeApiKey = process.env.HELICONE_API_KEY;
-const proxyUrl = process.env.HELICONE_PROXY_URL ?? "http://127.0.0.1:8788/v1";
-
-if (!heliconeApiKey) {
-  throw new Error("API keys must be set as environment variables.");
-}
 
 describe("Helicone Proxy OpenAI tests", () => {
   let openai: HeliconeProxyOpenAI;
@@ -25,18 +22,18 @@ describe("Helicone Proxy OpenAI tests", () => {
 
   beforeAll(() => {
     const heliconeMeta = {
-      apiKey: process.env.HELICONE_API_KEY,
+      apiKey: TEST_HELICONE_API_KEY,
       properties: { example: "propertyValue" },
       cache: true,
       retry: { num: 3, factor: 2, min_timeout: 1000, max_timeout: 3000 },
       rateLimitPolicy: { quota: 100, time_window: 60, segment: "testSegment" },
       user: "test-user",
-      baseUrl: proxyUrl,
+      baseUrl: TEST_PROXY_URL,
       onFeedback: mockOnFeedback,
     };
 
     expectedHeaders = {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Auth": `Bearer ${TEST_HELICONE_API_KEY}`,
       "Helicone-Property-example": "propertyValue",
       "Helicone-Cache-Enabled": "true",
       "Helicone-Retry-Enabled": "true",
@@ -49,8 +46,8 @@ describe("Helicone Proxy OpenAI tests", () => {
     };
 
     openai = new HeliconeProxyOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      organization: process.env.OPENAI_ORG_ID,
+      apiKey: TEST_OPENAI_API_KEY,
+      organization: TEST_OPENAI_ORG,
       heliconeMeta: heliconeMeta,
     });
 
@@ -70,7 +67,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   test("COMPLETION", async () => {
     const heliconeId = uuidv4();
 
-    const proxyNock = nock(proxyUrl, {
+    const proxyNock = nock(TEST_PROXY_URL, {
       reqheaders: expectedHeaders,
     })
       .post("/completions", (body) => {
@@ -93,7 +90,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   test("CHAT_COMPLETION", async () => {
     const heliconeId = uuidv4();
 
-    const proxyNock = nock(proxyUrl, {
+    const proxyNock = nock(TEST_PROXY_URL, {
       reqheaders: expectedHeaders,
     })
       .post("/chat/completions", (body) => {
@@ -116,7 +113,7 @@ describe("Helicone Proxy OpenAI tests", () => {
   test("FEEDBACK", async () => {
     const heliconeId = uuidv4();
 
-    const feedbackNock = nock(proxyUrl)
+    const feedbackNock = nock(TEST_PROXY_URL)
       .post("/feedback", (body) => {
         expect(body).toMatchObject({
           "helicone-id": heliconeId,

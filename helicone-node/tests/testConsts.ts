@@ -3,6 +3,12 @@ import {
   ChatCompletionMessageParam,
 } from "openai/resources/chat/completions";
 
+const TEST_HELICONE_API_KEY = "sk-helicone-12345-12345-12345-12345";
+const TEST_OPENAI_API_KEY = "sk-openai-12345-12345-12345-12345";
+const TEST_OPENAI_ORG = "org-12345-12345-12345-12345";
+const TEST_ASYNC_URL = "http://127.0.0.1:8788";
+const TEST_PROXY_URL = "http://127.0.0.1:8788/v1";
+
 const completionRequestBody = {
   model: "text-ada-001",
   prompt: "Test",
@@ -70,7 +76,7 @@ const completionAsyncLogModel = {
     url: "https://api.openai.com/v1",
     json: { model: "text-ada-001", prompt: "Test", max_tokens: 10 },
     meta: {
-      "Helicone-Auth": "Bearer sk-helicone-5flui4i-eyeexvy-q2svtci-5a2okzq",
+      "Helicone-Auth": `Bearer ${TEST_HELICONE_API_KEY}`,
       "Helicone-Property-example": "propertyValue",
       "Helicone-User-Id": "test-user",
     },
@@ -107,7 +113,7 @@ const chatCompletionAsyncModel = {
       ],
     },
     meta: {
-      "Helicone-Auth": "Bearer sk-helicone-5flui4i-eyeexvy-q2svtci-5a2okzq",
+      "Helicone-Auth": `Bearer ${TEST_HELICONE_API_KEY}`,
       "Helicone-Property-example": "propertyValue",
       "Helicone-User-Id": "test-user",
     },
@@ -156,6 +162,11 @@ const createCustomModelRequestBody = (requestId: string) => ({
 });
 
 export {
+  TEST_HELICONE_API_KEY,
+  TEST_OPENAI_API_KEY,
+  TEST_OPENAI_ORG,
+  TEST_ASYNC_URL,
+  TEST_PROXY_URL,
   completionRequestBody,
   completionResponseBody,
   chatCompletionRequestBody,
