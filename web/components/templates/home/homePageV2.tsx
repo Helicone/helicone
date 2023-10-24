@@ -152,7 +152,7 @@ export default function Example() {
             Helicone is the smartest way to monitor your LLM applications.
           </h1>
           <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-3xl">
-            The worlds best open-source platform for AI observability. Get
+            The world{"'"}s best open-source platform for AI observability. Get
             monitoring, logging, and tracing for your LLM applications out of
             the box.
           </p>
@@ -241,7 +241,7 @@ export default function Example() {
           <div className="flex flex-col pt-24">
             <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-2xl lg:p-2.5">
               <Image
-                src="/assets/home/request-preview.png"
+                src="/assets/home/request-preview.webp"
                 alt="App screenshot"
                 width={2720}
                 height={1844}
@@ -367,21 +367,21 @@ export default function Example() {
                 <div className="w-full h-full flex relative mb-8 justify-center">
                   <Image
                     className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
-                    src="/assets/home/bento/requests.png"
+                    src="/assets/home/bento/requests.webp"
                     alt="requests"
                     width={980}
                     height={604}
                   />
                   <Image
                     className="hidden md:block absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
-                    src="/assets/home/bento/users.png"
+                    src="/assets/home/bento/users.webp"
                     alt="users"
                     width={980}
                     height={604}
                   />
                   <Image
                     className="hidden md:block absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
-                    src="/assets/home/bento/costs.png"
+                    src="/assets/home/bento/costs.webp"
                     alt="costs"
                     width={908}
                     height={608}
@@ -445,7 +445,7 @@ export default function Example() {
                   <div className="w-full h-full flex relative mb-4 justify-center">
                     <Image
                       className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
-                      src="/assets/home/bento/history.png"
+                      src="/assets/home/bento/history.webp"
                       alt="requests"
                       width={1858}
                       height={854}

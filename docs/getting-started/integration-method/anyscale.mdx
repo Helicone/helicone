@@ -1,0 +1,13 @@
+---
+title: "Anyscale"
+---
+
+You can use Helicone with your OpenAI compatible models that are deployed on Anyscale.
+
+Follow the Helicone integration as normal in the [proxy approach](/getting-started/integration-method/openai-proxy) but add the following header.
+
+```bash
+Helicone-OpenAI-API-Base: https://api.endpoints.anyscale.com/v1
+```
+
+This will route traffic through Helicone to your Anyscale deployment.
