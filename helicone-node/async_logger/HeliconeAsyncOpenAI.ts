@@ -77,8 +77,18 @@ export class HeliconeAsyncOpenAI extends OpenAI {
       }
     );
 
-    result.finally(() => {
-      this.logRequest(startTime, result, body, isStream, loggingStreamPromise);
+    result.finally(async () => {
+      try {
+        await this.logRequest(
+          startTime,
+          result,
+          body,
+          isStream,
+          loggingStreamPromise
+        );
+      } catch (error: any) {
+        console.error("Error logging request: ", error);
+      }
     });
 
     return result as hcone.CompletionCreateReturnType<T>;
@@ -100,8 +110,18 @@ export class HeliconeAsyncOpenAI extends OpenAI {
       }
     );
 
-    result.finally(() => {
-      this.logRequest(startTime, result, body, isStream, loggingStreamPromise);
+    result.finally(async () => {
+      try {
+        await this.logRequest(
+          startTime,
+          result,
+          body,
+          isStream,
+          loggingStreamPromise
+        );
+      } catch (error: any) {
+        console.error("Error logging request: ", error);
+      }
     });
 
     return result as hcone.ChatCreateReturnType<T>;
@@ -114,7 +134,11 @@ export class HeliconeAsyncOpenAI extends OpenAI {
     const startTime = Date.now();
     const result = this.originalEmbeddingCreate(body, options);
     result.finally(async () => {
-      this.logRequest(startTime, result, body, false, null);
+      try {
+        await this.logRequest(startTime, result, body, false, null);
+      } catch (error: any) {
+        console.error("Error logging request: ", error);
+      }
     });
 
     return result as hcone.EmbeddingCreateReturnType<T>;
@@ -178,7 +202,7 @@ export class HeliconeAsyncOpenAI extends OpenAI {
       timing: HeliconeAsyncLogger.createTiming(startTime, endTime),
     };
 
-    this.logger.log(asyncLogRequest, Provider.OPENAI);
+    await this.logger.log(asyncLogRequest, Provider.OPENAI);
   }
 
   private async handleStreamedResponse(

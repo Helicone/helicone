@@ -42,8 +42,10 @@ export class HeliconeFeedback {
       console.error("Error logging feedback: ", response.statusText);
     }
 
+    const responseBody = await response.text();
+    const consumerResponse = new Response(responseBody, response);
     if (heliconeMeta.onFeedback) {
-      heliconeMeta.onFeedback(response);
+      await heliconeMeta.onFeedback(consumerResponse);
     }
   }
 }

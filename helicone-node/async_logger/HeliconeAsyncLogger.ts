@@ -96,9 +96,10 @@ export class HeliconeAsyncLogger {
       return;
     }
 
+    const consumerResponse = new Response(await response.text(), response);
     const onHeliconeLog = this.options.heliconeMeta?.onLog;
     if (onHeliconeLog) {
-      onHeliconeLog(response);
+      onHeliconeLog(consumerResponse);
     }
 
     return response;
