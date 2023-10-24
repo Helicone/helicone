@@ -58,23 +58,8 @@ export class HeliconeAsyncLogger {
       return;
     }
 
-    // Set Helicone URL
-    let url: string;
-    if (provider == Provider.CUSTOM_MODEL) {
-      const urlObj = new URL(basePath);
-      urlObj.pathname = "/custom/v1/log";
-      url = urlObj.toString();
-    } else if (provider == Provider.OPENAI) {
-      url = `${basePath}/oai/v1/log`;
-    } else if (provider == Provider.AZURE_OPENAI) {
-      url = `${basePath}/oai/v1/log`;
-    } else if (provider == Provider.ANTHROPIC) {
-      url = `${basePath}/anthropic/v1/log`;
-    } else {
-      console.error("Failed to log to Helicone: Provider not supported");
-      return;
-    }
-
+    const url = HeliconeAsyncLogger.getUrlForProvider(basePath, provider);
+    if (!url) return;
     let response: Response;
     try {
       const options = {
@@ -116,5 +101,25 @@ export class HeliconeAsyncLogger {
         milliseconds: endTime % 1000,
       },
     };
+  }
+
+  static getUrlForProvider(
+    basePath: string,
+    provider: Provider
+  ): string | null {
+    switch (provider) {
+      case Provider.CUSTOM_MODEL:
+        const urlObj = new URL(basePath);
+        urlObj.pathname = "/custom/v1/log";
+        return urlObj.toString();
+      case Provider.OPENAI:
+      case Provider.AZURE_OPENAI:
+        return `${basePath}/oai/v1/log`;
+      case Provider.ANTHROPIC:
+        return `${basePath}/anthropic/v1/log`;
+      default:
+        console.error("Failed to log to Helicone: Provider not supported");
+        return null;
+    }
   }
 }
