@@ -43,12 +43,18 @@ interface ThemedTableHeaderProps<T> {
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
+
+  // define this if you want a table and view toggle
+  viewToggle?: {
+    onViewChange: (value: "table" | "card") => void;
+  };
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { setNotification } = useNotification();
 
-  const { rows, columnsFilter, timeFilter, advancedFilters } = props;
+  const { rows, columnsFilter, timeFilter, advancedFilters, viewToggle } =
+    props;
 
   const searchParams = useSearchParams();
 
@@ -119,6 +125,19 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
           {rows.length > 0 && <ExportButton rows={rows} />}
+          {viewToggle && (
+            <button
+              onClick={showFilterHandler}
+              className={clsx(
+                "bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
+              )}
+            >
+              <FunnelIcon className="h-5 w-5 text-gray-900" />
+              <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                {showFilters ? "Hide" : "Show"} Filters
+              </p>
+            </button>
+          )}
         </div>
       </div>
       {advancedFilters && showFilters && (

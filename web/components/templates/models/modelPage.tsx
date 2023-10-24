@@ -99,11 +99,6 @@ const ModelPage = (props: ModelPageProps) => {
                 end,
               });
             } else {
-              console.log("key", key);
-              console.log("timeFilter", {
-                start: getTimeIntervalAgo(key),
-                end: new Date(),
-              });
               setInterval(key);
               setTimeFilter({
                 start: getTimeIntervalAgo(key),

@@ -23,7 +23,11 @@ const Home = (props: HomeProps) => {
 
   if (user && user.email !== DEMO_EMAIL) {
     router.push("/dashboard");
-    return <LoadingAnimation title="Redirecting you to your dashboard..." />;
+    return (
+      <div className="h-screen justify-center items-center flex">
+        <LoadingAnimation title="Redirecting you to your dashboard..." />
+      </div>
+    );
   }
 
   return (

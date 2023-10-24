@@ -56,7 +56,6 @@ interface ThemedTableV5Props<T> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T, index: number) => void;
-  chart?: React.ReactNode;
   expandedRow?: (row: T) => React.ReactNode;
   hideView?: boolean;
   noDataCTA?: React.ReactNode;
@@ -74,8 +73,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     sortable,
     onRowSelect,
     expandedRow,
-    chart,
-    hideView,
+    hideView, // hides the view columns button
     noDataCTA,
   } = props;
 
@@ -85,6 +83,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
   );
+  const [view, setView] = useState<"table" | "card">("table");
 
   const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
     setVisibleColumns(newState);
@@ -147,9 +146,16 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
               }
             : undefined
         }
+        viewToggle={
+          expandedRow
+            ? {
+                onViewChange: setView,
+              }
+            : undefined
+        }
         rows={exportData || []}
       />
-      {chart}
+
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
@@ -161,7 +167,6 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
       ) : table.getVisibleFlatColumns().length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
           <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-400" />
-
           <p className="text-xl font-semibold text-gray-500">
             No Columns Selected
           </p>
