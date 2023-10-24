@@ -15,6 +15,7 @@ import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
 import { Stream } from "openai/streaming";
 import { EmbeddingCreateParams } from "openai/resources";
 import { wrapAPIPromise } from "./HeliconeMonkeyPatch";
+import { Response } from "@whatwg-node/fetch";
 
 export class HeliconeAsyncOpenAI extends OpenAI {
   public helicone: Helicone;
@@ -152,6 +153,7 @@ export class HeliconeAsyncOpenAI extends OpenAI {
         result,
         streamPromise!
       );
+
       response = streamResult.response;
       json = streamResult.json;
     } else {

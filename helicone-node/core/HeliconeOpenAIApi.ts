@@ -9,6 +9,10 @@ export class Helicone {
   public async logFeedback(heliconeId: string, rating: HeliconeFeedbackRating) {
     const ratingAsBool = rating === HeliconeFeedbackRating.Positive;
 
-    HeliconeFeedback.logFeedback(this.heliconeMeta, heliconeId, ratingAsBool);
+    await HeliconeFeedback.logFeedback(
+      this.heliconeMeta,
+      heliconeId,
+      ratingAsBool
+    );
   }
 }

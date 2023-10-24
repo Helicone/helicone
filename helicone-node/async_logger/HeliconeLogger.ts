@@ -128,8 +128,8 @@ export class HeliconeLogger {
     this.logger = new HeliconeAsyncLogger(options);
   }
 
-  submit(request: HeliconeLogBuilder): Promise<Response> {
+  async submit(request: HeliconeLogBuilder): Promise<Response> {
     const asyncLogRequest = request.build();
-    return this.logger.log(asyncLogRequest, Provider.CUSTOM_MODEL);
+    return await this.logger.log(asyncLogRequest, Provider.CUSTOM_MODEL);
   }
 }

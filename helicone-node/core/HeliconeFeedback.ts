@@ -1,4 +1,5 @@
 import { IHeliconeMeta } from "./HeliconeClientOptions";
+import { fetch, Response } from "@whatwg-node/fetch";
 
 export enum HeliconeFeedbackRating {
   Positive = "positive",
@@ -24,13 +25,15 @@ export class HeliconeFeedback {
     };
 
     let response: Response;
+    let url: URL;
     try {
-      const url = new URL(heliconeMeta.baseUrl);
-      response = await fetch(url.origin + "/v1/feedback", options);
+      url = new URL(heliconeMeta.baseUrl);
+      url.pathname = "/v1/feedback";
+      response = await fetch(url, options);
     } catch (error: any) {
       console.error(
         "Error making request to Helicone feedback endpoint:",
-        error.message
+        error
       );
       return;
     }

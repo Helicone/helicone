@@ -1,4 +1,5 @@
 import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
+import { fetch, Response } from "@whatwg-node/fetch";
 
 export type HeliconeAsyncLogRequest = {
   providerRequest: ProviderRequest;
@@ -76,14 +77,15 @@ export class HeliconeAsyncLogger {
 
     let response: Response;
     try {
-      response = await fetch(url, {
+      const options = {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${this.options.heliconeMeta.apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(asyncLogModel),
-      });
+      };
+      response = await fetch(url, options);
     } catch (error: any) {
       console.error(
         "Error making request to Helicone log endpoint:",
@@ -91,14 +93,13 @@ export class HeliconeAsyncLogger {
         error
       );
 
-      response = new Response(null, {
-        status: error.status || 500,
-        statusText: error.statusText || "Internal Server Error",
-      });
+      return;
     }
 
     const onHeliconeLog = this.options.heliconeMeta?.onLog;
-    if (onHeliconeLog) onHeliconeLog(response);
+    if (onHeliconeLog) {
+      onHeliconeLog(response);
+    }
 
     return response;
   }

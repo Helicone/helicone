@@ -130,45 +130,46 @@ async function test() {
     },
   });
 
-  const { data, response } = await openai.chat.completions
-    .create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: "Say 'TestAsync_ChatCompletion_NoStreaming'",
-        },
-      ],
-    })
-    .withResponse();
-
-  console.log(data.choices[0].message.content);
-
-  // const { data: dataStreaming, response: responseStreaming } =
-  //   await openai.chat.completions
-  //     .create(
+  // const { data, response } = await openai.chat.completions
+  //   .create({
+  //     model: "gpt-3.5-turbo",
+  //     messages: [
   //       {
-  //         model: "gpt-3.5-turbo",
-  //         messages: [
-  //           {
-  //             role: "user",
-  //             content: "Say 'TestAsync_ChatCompletion_Streaming'",
-  //           },
-  //         ],
-  //         stream: true,
+  //         role: "user",
+  //         content: "Say 'TestAsync_ChatCompletion_NoStreaming'",
   //       },
-  //       { stream: true }
-  //     )
-  //     .withResponse();
+  //     ],
+  //   })
+  //   .withResponse();
 
-  // const chunks: string[] = [];
-  // for await (const chunk of dataStreaming) {
-  //   chunks.push(chunk.choices[0].delta.content ?? "");
-  // }
+  // console.log(data.choices[0].message.content);
 
-  // console.log(`Streaming result: ${chunks.join("")}`);
+  const { data: dataStreaming, response: responseStreaming } =
+    await openai.chat.completions
+      .create(
+        {
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "user",
+              content: "Tell me  a long story",
+            },
+          ],
+          stream: true,
+        },
+        { stream: true }
+      )
+      .withResponse();
 
-  // const { data: data2, response: response2 } = await helicone.completions
+  const chunks: string[] = [];
+
+  for await (const chunk of dataStreaming) {
+    chunks.push(chunk.choices[0].delta.content ?? "");
+  }
+
+  console.log(`Streaming result: ${chunks.join("")}`);
+
+  // const { data: data2, response: response2 } = await openai.completions
   //   .create({
   //     model: "davinci",
   //     prompt: "1+1=",
@@ -177,13 +178,13 @@ async function test() {
 
   // console.log(data2.choices[0].text);
 
-  // const { data: data3, response: response3 } = await helicone.embeddings
+  // const { data: data3, response: response3 } = await openai.embeddings
   //   .create({
   //     input: "Hello, world!",
   //     model: "text-embedding-ada-002",
   //   })
   //   .withResponse();
-  //
+
   // console.log(data3.data[0].embedding); // Ugly, but works
 }
 
@@ -223,4 +224,4 @@ async function testProxy() {
 }
 
 test().then(() => {});
-testProxy().then(() => {});
+// testProxy().then(() => {});

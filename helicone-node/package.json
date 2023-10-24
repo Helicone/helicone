@@ -45,13 +45,14 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "next": "^13.3.1",
-    "node-fetch": "^2.6.11",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4",
     "uuid": "^9.0.0"
   },
   "dependencies": {
+    "@whatwg-node/fetch": "^0.9.13",
+    "nock": "^13.3.6",
     "openai": "^4.12.4"
   }
 }
