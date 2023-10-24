@@ -39,7 +39,7 @@ jobs:
               exit 1
           fi
 
-  e2e-test-python:
+  tests:
     name: Python E2E tests
     runs-on: ubuntu-latest
     services:
