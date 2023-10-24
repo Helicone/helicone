@@ -152,7 +152,7 @@ export default function Example() {
             Helicone is the smartest way to monitor your LLM applications.
           </h1>
           <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-3xl">
-            The worlds best open-source platform for AI observability. Get
+            The world's best open-source platform for AI observability. Get
             monitoring, logging, and tracing for your LLM applications out of
             the box.
           </p>
