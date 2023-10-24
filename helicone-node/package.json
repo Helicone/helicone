@@ -48,7 +48,6 @@
     "uuid": "^9.0.0"
   },
   "dependencies": {
-    "@types/mocha": "^10.0.3",
     "@whatwg-node/fetch": "^0.9.13",
     "nock": "^13.3.6",
     "openai": "^4.12.4"
