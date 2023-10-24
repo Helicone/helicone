@@ -12,11 +12,16 @@ export class HeliconeProxyOpenAI extends OpenAI {
     const {
       apiKey = Core.readEnv("OPENAI_API_KEY"),
       organization = Core.readEnv("OPENAI_ORG_ID") ?? null,
-      heliconeMeta,
-      defaultHeaders,
+      heliconeMeta: providedHeliconeMeta = {},
       ...opts
     } = options;
-    heliconeMeta.baseUrl ??= "https://oai.hconeai.com/v1";
+
+    const heliconeMeta = {
+      ...providedHeliconeMeta,
+      apiKey: providedHeliconeMeta.apiKey || Core.readEnv("HELICONE_API_KEY"),
+      baseURL: providedHeliconeMeta.baseUrl || "https://oai.hconeai.com/v1",
+    };
+
     super({
       apiKey,
       organization,
