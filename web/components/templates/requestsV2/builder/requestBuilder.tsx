@@ -38,6 +38,12 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
+  if (
+    /^meta-llama\/Llama-2-13b-chat-hf:transcript_summarizer:64cB1r3/.test(model)
+  ) {
+    return "ChatGPTBuilder"; // for now
+  }
+
   if (/^text-moderation(-\[\w+\]|-\d+)?$/.test(model)) {
     return "ModerationBuilder";
   }
