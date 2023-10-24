@@ -1,7 +1,7 @@
-import { HeliconeAsyncOpenAI } from "./async_logger/HeliconeAsyncOpenAI";
+import { HeliconeAsyncOpenAI } from "../async_logger/HeliconeAsyncOpenAI";
 import { Response } from "openai/core";
-import { HeliconeFeedbackRating } from "./core/HeliconeFeedback";
-import { HeliconeProxyOpenAI } from "./proxy_logger/HeliconeProxyOpenAI";
+import { HeliconeFeedbackRating } from "../core/HeliconeFeedback";
+import { HeliconeProxyOpenAI } from "../proxy_logger/HeliconeProxyOpenAI";
 
 require("dotenv").config();
 

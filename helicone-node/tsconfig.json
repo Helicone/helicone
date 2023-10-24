@@ -11,6 +11,6 @@
     "rootDir": ".",
     "typeRoots": ["node_modules/@types"]
   },
-  "exclude": ["dist", "node_modules", "UsageExample.ts"],
+  "exclude": ["dist", "node_modules", "tests/UsageExample.ts"],
   "include": ["*.ts", "tests/**/*.ts"]
 }
