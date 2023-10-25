@@ -3,6 +3,7 @@
 import requests
 import os
 from dotenv import load_dotenv
+import pytest
 import psycopg2
 from psycopg2.extras import DictCursor
 import uuid
