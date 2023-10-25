@@ -57,7 +57,7 @@ type EmbeddingCreateFunction = {
   (
     body: EmbeddingCreateParams,
     options?: RequestOptions
-  ): APIPromise<CreateEmbeddingResponse>; // Adjusted this line
+  ): APIPromise<CreateEmbeddingResponse>;
 };
 
 type EmbeddingCreateReturnType<T> = APIPromise<CreateEmbeddingResponse>;
