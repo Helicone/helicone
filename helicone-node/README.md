@@ -1,4 +1,8 @@
-# Proxy Setup
+# Helicone OpenAI v4+ Node.js Library
+
+This package is a simple and convenient way to log all requests made through the OpenAI API with Helicone. You can easily track and manage your OpenAI API usage and monitor your GPT models' cost, latency, and performance on the Helicone platform.
+
+## Proxy Setup
 
 ### Installation and Setup
 
@@ -84,7 +88,29 @@ type OnHeliconeLog = (response: Response) => Promise<void>;
 type OnHeliconeFeedback = (result: Response) => Promise<void>;
 ```
 
-# Async Setup
+### Advanced Features Example
+
+```typescript
+const options = new IHeliconeProxyClientOptions({
+  apiKey,
+  heliconeMeta: {
+    apiKey: process.env.HELICONE_API_KEY,
+    cache: true,
+    retry: true,
+    properties: {
+      Session: "24",
+      Conversation: "support_issue_2",
+    },
+    rateLimitPolicy: {
+      quota: 10,
+      time_window: 60,
+      segment: "Session",
+    },
+  },
+});
+```
+
+## Async Setup
 
 ### Installation and Setup
 
@@ -172,3 +198,11 @@ interface IHeliconeMeta {
 type OnHeliconeLog = (response: Response) => Promise<void>;
 type OnHeliconeFeedback = (result: Response) => Promise<void>;
 ```
+
+&nbsp;
+
+---
+
+&nbsp;
+
+> For more information see our [documentation](https://docs.helicone.ai/introduction).
