@@ -63,8 +63,8 @@ export default function MyApp({
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
                   <Component {...pageProps} />
+                  <Notification />
                 </OrgContextProvider>
-                <Notification />
               </DndProvider>
             </NotificationProvider>
           </QueryClientProvider>
