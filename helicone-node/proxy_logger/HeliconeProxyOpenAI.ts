@@ -2,7 +2,10 @@ import { Helicone } from "../core/HeliconeOpenAIApi";
 import OpenAI from "openai";
 import * as Core from "openai/core";
 import { HeliconeHeaderBuilder } from "../core/HeliconeHeaderBuilder";
-import { IHeliconeProxyClientOptions } from "../core/HeliconeClientOptions";
+import {
+  IHeliconeMeta,
+  IHeliconeProxyClientOptions,
+} from "../core/HeliconeClientOptions";
 
 export class HeliconeProxyOpenAI extends OpenAI {
   public helicone: Helicone;
@@ -16,10 +19,10 @@ export class HeliconeProxyOpenAI extends OpenAI {
       ...opts
     } = options;
 
-    const heliconeMeta = {
+    const heliconeMeta: IHeliconeMeta = {
       ...providedHeliconeMeta,
       apiKey: providedHeliconeMeta.apiKey || Core.readEnv("HELICONE_API_KEY"),
-      baseURL: providedHeliconeMeta.baseUrl || "https://oai.hconeai.com/v1",
+      baseUrl: providedHeliconeMeta.baseUrl || "https://oai.hconeai.com/v1",
     };
 
     super({

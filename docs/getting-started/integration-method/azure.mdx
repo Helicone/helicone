@@ -35,41 +35,73 @@ openai.ChatCompletion.create(
     That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
 
   </Tab>
-  
-  <Tab title="Node.js">
 
-### Set HELICONE_API_KEY as an environment variable
+<Tab title="Node.js">
+<Note>Ensure you include api-version in all of your requests</Note>
+<AccordionGroup>
 
-```bash
-export HELICONE_API_KEY=<your API key>
-```
+  <Accordion title="OpenAI v4+">
+    ```typescript
+    const openai = new OpenAI({
+      baseURL: "https://oai.hconeai.com/openai/deployments/DEPLOYMENTNAME/chat/completions",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
+        "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+        "api-key": "[AZURE_API_KEY]",
+      },
+      defaultQuery: { "api-version": "2023-03-15-preview" },
+    });
+    ```
+  </Accordion>
 
-## Change the base path and add a Helicone-Auth header
+  <Accordion title="OpenAI <v4">
+    ```typescript
+    import { Configuration, OpenAIApi } from "openai";
 
-```javascript
-import { Configuration, OpenAIApi } from "openai";
+    const configuration = new Configuration({
+      apiKey: "[AZURE_OPENAI_API_KEY]",
+      basePath: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+      baseOptions: {
+        headers: {
+          "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
+          "api-key": "[AZURE_OPENAI_API_KEY]",
+          "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+        },
+        params: {
+          "api-version": "[API_VERSION]",
+        },
+      },
+    });
 
-const configuration = new Configuration({
-  apiKey: "[AZURE_OPENAI_API_KEY]",
-  basePath: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
-  baseOptions: {
-    headers: {
-      "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
-      "api-key": "[AZURE_OPENAI_API_KEY]",
-      "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    },
-    params: {
-      "api-version": "[API_VERSION]",
-    },
-  },
-});
+    const openai = new OpenAIApi(configuration);
+    ```
 
-const openai = new OpenAIApi(configuration);
-```
+  </Accordion>
+  <Accordion title="cURL">
+    ```bash
+    curl --request POST \
+    --url https://oai.hconeai.com/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
+    --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
+    --header 'Helicone-OpenAI-Api-Base: https://[AZUREDOMAIN].openai.azure.com' \
+    --header 'api-key: [AZURE_API_KEY]' \
+    --header 'content-type: application/json' \
+    --data '{
+      "messages": [
+        {
+          "role": "user",
+          "content": "Answer in one word"
+        }],
+      "max_tokens": 800,
+      "temperature": 1,
+      "model": "gpt-3.5-turbo-0613"
+    }'
+    ```
+  </Accordion>
 
-  </Tab>
+</AccordionGroup>
 
-  <Tab title="Python w/package">
+</Tab>
+<Tab title="Python w/package">
 
 ```python
 from helicone.openai_proxy import openai
@@ -79,19 +111,19 @@ openai.api_version = "2023-03-15-preview"
 openai.api_key = YOUR_AZURE_API_KEY
 
 response = openai.ChatCompletion.create(
-    engine = 'gpt-35-turbo',
-    messages = [{
-        'role': 'user',
-        'content': "Hello World!"
-    }],
-    max_tokens=15,
+engine = 'gpt-35-turbo',
+messages = [{
+    'role': 'user',
+    'content': "Hello World!"
+}],
+max_tokens=15,
 )
 
 ```
 
-    </Tab>
+</Tab>
 
-  <Tab title="LangChain JS">
+<Tab title="LangChain JS">
 
 ```javascript
 const model = new ChatOpenAI({
@@ -112,28 +144,28 @@ const model = new ChatOpenAI({
 });
 ```
 
-  </Tab>
+</Tab>
 
-  <Tab title="LangChain">
+<Tab title="LangChain">
 
 ```python
 from langchain.chat_models import AzureChatOpenAI
 helicone_headers = {
-        "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-OpenAI-Api-Base":
-            "https://<model_name>.openai.azure.com/"
-    }
+    "Helicone-Auth": f"Bearer {helicone_api_key}",
+    "Helicone-OpenAI-Api-Base":
+        "https://<model_name>.openai.azure.com/"
+}
 self.model = AzureChatOpenAI(
-    openai_api_base="https://oai.hconeai.com",
-    deployment_name="gpt-35-turbo",
-    openai_api_key=<AZURE_OPENAI_API_KEY>,
-    openai_api_version="2023-05-15",
-    openai_api_type="azure",
-    max_retries=max_retries,
-    headers=helicone_headers,
-    **kwargs,
+openai_api_base="https://oai.hconeai.com",
+deployment_name="gpt-35-turbo",
+openai_api_key=<AZURE_OPENAI_API_KEY>,
+openai_api_version="2023-05-15",
+openai_api_type="azure",
+max_retries=max_retries,
+headers=helicone_headers,
+**kwargs,
 )
 ```
 
-  </Tab>
+</Tab>
 </Tabs>
