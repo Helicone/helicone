@@ -88,10 +88,6 @@ brew install supabase/tap/supabase
 ## Install and setup ClickHouse
 
 ```bash
-# https://clickhouse.com/docs/en/install
-curl https://clickhouse.com/ | sh
-
-
 # This will start clickhouse locally
 python3 clickhouse/ch_hcone.py --start
 ```
