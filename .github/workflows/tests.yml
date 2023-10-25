@@ -39,6 +39,17 @@ jobs:
               exit 1
           fi
 
+  helicone-node-tests:
+    name: Helicone Node Package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run node tests
+        working-directory: helicone-node
+        run: |
+          npm install
+          npm test
+
   tests:
     name: Python E2E tests
     runs-on: ubuntu-latest
@@ -98,11 +109,6 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
           pytest python_integration_tests.py -s
-      - name: Run node tests
-        working-directory: helicone-node
-        run: |
-          npm install
-          npm test
       - name: Run python tests tests
         working-directory: helicone-python
         env:
