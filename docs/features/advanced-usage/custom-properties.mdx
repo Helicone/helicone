@@ -69,4 +69,23 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 ```
 
+```python Langchain (Python)
+llm = ChatOpenAI(
+    openai_api_key="<OPENAI_API_KEY>",
+    openai_api_base="https://oai.hconeai.com/v1",
+    headers={
+        "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
+        "Helicone-Property-Type": "Course Outline"
+    }
+)
+
+course = llm.predict("Generate a course outline about AI.")
+
+# Update helicone properties/headers for each request
+headers["Helicone-Property-Type"] = "Lesson"
+llm.model_kwargs["headers"] = headers
+
+lesson = llm.predict("Generate a lesson for the AI course.")
+```
+
 </CodeGroup>
