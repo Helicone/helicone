@@ -1,9 +1,9 @@
 # TODO deprecate this file and move all test to helicone_python/tests
 
 import requests
-import pytest
 import os
 from dotenv import load_dotenv
+import pytest
 import psycopg2
 from psycopg2.extras import DictCursor
 import uuid

@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "es2020",
+    "module": "CommonJS",
+    "lib": ["es2020"],
+    "moduleResolution": "Node",
     "noImplicitAny": true,
     "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": ".",
     "typeRoots": ["node_modules/@types"]
   },
-  "exclude": ["dist", "node_modules", "UsageExample.ts"],
+  "exclude": ["dist", "node_modules", "tests/UsageExample.ts"],
   "include": ["*.ts", "tests/**/*.ts"]
 }
