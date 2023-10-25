@@ -97,50 +97,80 @@ const openai = new OpenAI({
 
   </Tab>
   <Tab title="Node.js (w/ package)">
-    **Set HELICONE_API_KEY as an environment variable**
-    ```bash
-    export HELICONE_API_KEY=sk-<your-api-key>
-    # You can also set it in your code (See below)
-    ```
+    # Installation and Setup
+    <Steps>
+      <Step title="To get started, install the `helicone-openai` package">
+      ```bash
+      npm install @helicone/helicone
+      ```
+      </Step>
+      <Step title="Set `HELICONE_API_KEY` as an environment variable">
+       ```bash
+      export HELICONE_API_KEY=sk-<your-api-key>
+      ```
+      <Info>You can also set the Helicone API Key in your code (See below)</Info>
+      </Step>
+      <Step title="Replace">
+      ```typescript
+      const { ClientOptions, OpenAI } = require("openai");
+      ```
 
-    **Install the helicone-openai package**
-    ```javascript
-    npm install helicone
-    ```
+      with
 
-    Replace
-
-    ```typescript
-    const { Configuration, OpenAIApi } = require("openai");
-    ```
-
-    with
-
-    ```typescript
-    const { HeliconeProxyConfiguration as Configuration, HeliconeProxyOpenAIApi as OpenAIApi } = require("helicone");
-    ```
-
-    **Example**
-    ```typescript
-    const configuration = new Configuration({
-      apiKey: process.env.OPENAI_API_KEY,
-      heliconeMeta: {
-        apiKey: process.env.HELICONE_API_KEY,
-        properties: {
-          customId: "1234",
+      ```typescript
+      const { HeliconeProxyOpenAI as OpenAI,
+        IHeliconeProxyClientOptions as ClientOptions } = require("helicone");
+      ```
+      </Step>
+      <Step title="Make a request">
+      Chat, Completion, Embedding, etc usage is equivalent to OpenAI package.
+      ```typescript
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+        heliconeMeta: {
+          apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
+          // ... additional helicone meta fields
         },
-        user: "test-user",
-      },
-    });
+      });
 
-    const openai = new OpenAIApi(configuration);
+      const chatCompletion = await openai.chat.completion.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: "Hello world" }],
+      });
 
-    const chatCompletion = await openai.createChatCompletion({
+      console.log(chatCompletion.data.choices[0].message);
+      ```
+      </Step>
+    </Steps>
+
+    ## Send feedback
+    Ensure you store the `helicone-id` header returned in the original response
+    ```typescript
+    const { data, response } = await openai.chat.completion.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: "Hello world" }],
-    });
+    }).withResponse();
 
-    console.log(chatCompletion.data.choices[0].message);
+    const heliconeId = response.headers.get("helicone-id");
+
+    await openai.helicone.logFeedback(heliconeId, HeliconeFeedbackRating.Positive) // or Negative
+    ```
+
+    #### HeliconeMeta options
+    ```typescript
+    interface IHeliconeMeta {
+      apiKey?: string;
+      properties?: { [key: string]: any };
+      cache?: boolean;
+      retry?: boolean | { [key: string]: any };
+      rateLimitPolicy?: string | { [key: string]: any };
+      user?: string;
+      baseUrl?: string;
+      onFeedback?: OnHeliconeFeedback; // Callback after feedback was processed
+    }
+
+    type OnHeliconeLog = (response: Response) => Promise<void>;
+    type OnHeliconeFeedback = (result: Response) => Promise<void>;
     ```
 
   </Tab>

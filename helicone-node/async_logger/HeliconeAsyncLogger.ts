@@ -1,7 +1,7 @@
-import { IHeliconeConfiguration } from "../core/IHeliconeConfiguration";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
+import { fetch, Response } from "@whatwg-node/fetch";
 
-export type HeliconeAyncLogRequest = {
+export type HeliconeAsyncLogRequest = {
   providerRequest: ProviderRequest;
   providerResponse: ProviderResponse;
   timing: Timing;
@@ -43,49 +43,34 @@ export enum Provider {
 }
 
 export class HeliconeAsyncLogger {
-  private heliconeConfiguration: IHeliconeConfiguration;
-  constructor(heliconeConfiguration: IHeliconeConfiguration) {
-    this.heliconeConfiguration = heliconeConfiguration;
+  private options: IHeliconeAsyncClientOptions;
+  constructor(options: IHeliconeAsyncClientOptions) {
+    this.options = options;
   }
 
   async log(
-    asyncLogModel: HeliconeAyncLogRequest,
+    asyncLogModel: HeliconeAsyncLogRequest,
     provider: Provider
-  ): Promise<AxiosResponse<any, any> | undefined> {
-    const options: AxiosRequestConfig = {
-      method: "POST",
-      data: asyncLogModel,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `${this.heliconeConfiguration.getHeliconeAuthHeader()}`,
-      },
-    };
-
-    const basePath = this.heliconeConfiguration.getBaseUrl();
+  ): Promise<Response | undefined> {
+    const basePath = this.options.heliconeMeta.baseUrl;
     if (!basePath) {
       console.error("Failed to log to Helicone: Base path is undefined");
       return;
     }
 
-    // Set Helicone URL
-    if (provider == Provider.CUSTOM_MODEL) {
-      const url = new URL(basePath);
-      url.pathname = "/custom/v1/log";
-      options.url = url.toString();
-    } else if (provider == Provider.OPENAI) {
-      options.url = `${basePath}/oai/v1/log`;
-    } else if (provider == Provider.AZURE_OPENAI) {
-      options.url = `${basePath}/oai/v1/log`;
-    } else if (provider == Provider.ANTHROPIC) {
-      options.url = `${basePath}/anthropic/v1/log`;
-    } else {
-      console.error("Failed to log to Helicone: Provider not supported");
-      return;
-    }
-
-    let result: AxiosResponse<any, any>;
+    const url = HeliconeAsyncLogger.getUrlForProvider(basePath, provider);
+    if (!url) return;
+    let response: Response;
     try {
-      result = await axios(options);
+      const options = {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.options.heliconeMeta.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(asyncLogModel),
+      };
+      response = await fetch(url, options);
     } catch (error: any) {
       console.error(
         "Error making request to Helicone log endpoint:",
@@ -93,23 +78,16 @@ export class HeliconeAsyncLogger {
         error
       );
 
-      if (axios.isAxiosError(error) && error.response) {
-        result = error.response;
-      } else {
-        result = {
-          data: null,
-          status: 500,
-          statusText: "Internal Server Error",
-          headers: {},
-          config: {},
-        };
-      }
+      return;
     }
 
-    const onHeliconeLog = this.heliconeConfiguration.getOnHeliconeLog();
-    if (onHeliconeLog) onHeliconeLog(result);
+    const consumerResponse = new Response(await response.text(), response);
+    const onHeliconeLog = this.options.heliconeMeta?.onLog;
+    if (onHeliconeLog) {
+      onHeliconeLog(consumerResponse);
+    }
 
-    return result;
+    return response;
   }
 
   static createTiming(startTime: number, endTime: number) {
@@ -123,5 +101,25 @@ export class HeliconeAsyncLogger {
         milliseconds: endTime % 1000,
       },
     };
+  }
+
+  static getUrlForProvider(
+    basePath: string,
+    provider: Provider
+  ): string | null {
+    switch (provider) {
+      case Provider.CUSTOM_MODEL:
+        const urlObj = new URL(basePath);
+        urlObj.pathname = "/custom/v1/log";
+        return urlObj.toString();
+      case Provider.OPENAI:
+      case Provider.AZURE_OPENAI:
+        return `${basePath}/oai/v1/log`;
+      case Provider.ANTHROPIC:
+        return `${basePath}/anthropic/v1/log`;
+      default:
+        console.error("Failed to log to Helicone: Provider not supported");
+        return null;
+    }
   }
 }

@@ -39,7 +39,18 @@ jobs:
               exit 1
           fi
 
-  e2e-test-python:
+  helicone-node-tests:
+    name: Helicone Node Package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run node tests
+        working-directory: helicone-node
+        run: |
+          npm install
+          npm test
+
+  tests:
     name: Python E2E tests
     runs-on: ubuntu-latest
     services:
@@ -98,21 +109,6 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
           pytest python_integration_tests.py -s
-      - name: Run node tests
-        working-directory: helicone-node
-        env:
-          HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
-          HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
-          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
-          SUPABASE_URL: "http://localhost:54321"
-          HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
-          OPENAI_API_KEY: ${{ secrets.CI_OPENAI_API_KEY }}
-          OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
-        run: |
-          npm install
-          npm test
-
-      This test takes too long. make it slow with cache or something :)
       - name: Run python tests tests
         working-directory: helicone-python
         env:
