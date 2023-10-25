@@ -123,7 +123,10 @@ async function logAsync(
     });
   }
 
-  return new Response("ok", { status: 200 });
+  return new Response("ok", {
+    status: 200,
+    headers: { "helicone-id": heliconeHeaders.requestId ?? "" },
+  });
 }
 
 export const getAPIRouter = (router: BaseRouter) => {

@@ -104,7 +104,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       openaiBaseUrl: this.headers.get("Helicone-OpenAI-Api-Base") ?? null,
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
-      requestId: this.headers.get("Helicone-Request-Id") ?? null,
+      requestId: this.headers.get("Helicone-Request-Id") ?? crypto.randomUUID(),
       promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,

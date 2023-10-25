@@ -1,12 +1,9 @@
-import { AxiosResponse } from "axios";
-import { PassThrough, Readable } from "stream";
+import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
 import { Helicone } from "../core/HeliconeOpenAIApi";
-import { IHeliconeConfiguration } from "../core/IHeliconeConfiguration";
 import {
   HeliconeAsyncLogger,
-  HeliconeAyncLogRequest,
+  HeliconeAsyncLogRequest,
   Provider,
-  ProviderRequest,
 } from "./HeliconeAsyncLogger";
 import { v4 as uuidv4 } from "uuid";
 
@@ -90,7 +87,7 @@ export class HeliconeLogBuilder {
     };
   }
 
-  build(): HeliconeAyncLogRequest {
+  build(): HeliconeAsyncLogRequest {
     if (this.response === undefined) {
       throw new Error("Response is undefined");
     }
@@ -121,18 +118,18 @@ export class HeliconeLogBuilder {
 }
 
 export class HeliconeLogger {
-  protected heliconeConfiguration: IHeliconeConfiguration;
+  protected options: IHeliconeAsyncClientOptions;
   public helicone: Helicone;
   private logger: HeliconeAsyncLogger;
 
-  constructor(heliconeConfiguration: IHeliconeConfiguration) {
-    this.heliconeConfiguration = heliconeConfiguration;
-    this.helicone = new Helicone(heliconeConfiguration);
-    this.logger = new HeliconeAsyncLogger(heliconeConfiguration);
+  constructor(options: IHeliconeAsyncClientOptions) {
+    this.options = options;
+    this.helicone = new Helicone(options);
+    this.logger = new HeliconeAsyncLogger(options);
   }
 
-  submit(request: HeliconeLogBuilder): Promise<AxiosResponse<any, any>> {
+  async submit(request: HeliconeLogBuilder): Promise<Response> {
     const asyncLogRequest = request.build();
-    return this.logger.log(asyncLogRequest, Provider.CUSTOM_MODEL);
+    return await this.logger.log(asyncLogRequest, Provider.CUSTOM_MODEL);
   }
 }
