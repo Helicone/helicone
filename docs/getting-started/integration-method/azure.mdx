@@ -77,27 +77,6 @@ openai.ChatCompletion.create(
     ```
 
   </Accordion>
-  <Accordion title="cURL">
-    ```bash
-    curl --request POST \
-    --url https://oai.hconeai.com/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
-    --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
-    --header 'Helicone-OpenAI-Api-Base: https://[AZUREDOMAIN].openai.azure.com' \
-    --header 'api-key: [AZURE_API_KEY]' \
-    --header 'content-type: application/json' \
-    --data '{
-      "messages": [
-        {
-          "role": "user",
-          "content": "Answer in one word"
-        }],
-      "max_tokens": 800,
-      "temperature": 1,
-      "model": "gpt-3.5-turbo-0613"
-    }'
-    ```
-  </Accordion>
-
 </AccordionGroup>
 
 </Tab>
@@ -167,5 +146,25 @@ headers=helicone_headers,
 )
 ```
 
+</Tab>
+<Tab title="cURL">
+  ```bash
+    curl --request POST \
+    --url https://oai.hconeai.com/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
+    --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
+    --header 'Helicone-OpenAI-Api-Base: https://[AZUREDOMAIN].openai.azure.com' \
+    --header 'api-key: [AZURE_API_KEY]' \
+    --header 'content-type: application/json' \
+    --data '{
+      "messages": [
+        {
+          "role": "user",
+          "content": "Answer in one word"
+        }],
+      "max_tokens": 800,
+      "temperature": 1,
+      "model": "gpt-3.5-turbo-0613"
+    }'
+  ```
 </Tab>
 </Tabs>
