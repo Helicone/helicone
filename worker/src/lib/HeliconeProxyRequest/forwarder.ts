@@ -137,7 +137,7 @@ export async function proxyForwarder(
         .getHeliconeAuthHeader()
         .then((x) => hash(x.data || ""))
         .then((hash) => {
-          console.error("Error logging", res.error, "\n\nHash:", hash);
+          console.error("Error logging", res.error);
         });
     }
   }
