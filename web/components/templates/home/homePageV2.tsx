@@ -6,6 +6,7 @@ import {
   BellAlertIcon,
   CircleStackIcon,
   CodeBracketIcon,
+  HandThumbUpIcon,
   LockClosedIcon,
   MinusSmallIcon,
   PencilSquareIcon,
@@ -25,6 +26,7 @@ import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import Image from "next/image";
+import { clsx } from "../../shared/clsx";
 
 const features: {
   title: string;
@@ -35,51 +37,61 @@ const features: {
       titleId?: string | undefined;
     }
   >;
+  color: string;
 }[] = [
   {
     title: "Custom Properties",
     description: "Easily segment requests.",
     icon: TagIcon,
+    color: "text-purple-700",
   },
   {
     title: "Caching",
     description: "Save time and money.",
     icon: CircleStackIcon,
+    color: "text-red-700",
   },
   {
     title: "Rate Limiting",
     description: "Protect your models from abuse.",
     icon: UserIcon,
+    color: "text-blue-700",
   },
   {
     title: "Retries",
     description: "Retry failed or rate-limited requests.",
     icon: ArrowPathIcon,
+    color: "text-yellow-700",
   },
   {
     title: "Feedback",
     description: "Identify good and bad requests.",
-    icon: PencilSquareIcon,
+    icon: HandThumbUpIcon,
+    color: "text-green-700",
   },
   {
     title: "Vault",
     description: "Securely map your provider keys.",
     icon: LockClosedIcon,
+    color: "text-indigo-700",
   },
   {
     title: "Jobs",
     description: "Visualize chains of requests.",
     icon: RectangleStackIcon,
+    color: "text-pink-700",
   },
   {
     title: "GraphQL",
     description: "ETL your data to your favorite apps.",
     icon: CodeBracketIcon,
+    color: "text-sky-700",
   },
   {
     title: "Alerts",
     description: "Get notified on important events.",
     icon: BellAlertIcon,
+    color: "text-rose-700",
   },
 ];
 
@@ -495,13 +507,13 @@ export default function Example() {
           </div>
           <div className="flex flex-col divide-y divide-gray-300 w-full">
             <div className="h-full rounded-xl flex flex-col text-left p-2 md:p-12">
-              <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 md:justify-center -mt-2 ">
+              <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 md:justify-center -mt-2 ">
                 {features.map((f, idx) => (
                   <li
                     key={idx}
-                    className="flex flex-row gap-4 justify-start items-start pt-6"
+                    className="flex flex-row gap-6 justify-start items-start pt-6 w-full"
                   >
-                    <div className="relative isolate bg-white h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
+                    <div className="relative isolate bg-white h-16 w-16 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
                       <svg
                         className="absolute inset-0 -z-10 h-full w-full"
                         aria-hidden="true"
@@ -513,13 +525,13 @@ export default function Example() {
                           fill="url(#123)"
                         />
                       </svg>
-                      <f.icon className="h-5 w-5 text-gray-900" />
+                      <f.icon className={clsx(f.color, "h-6 w-6")} />
                     </div>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-black font-semibold text-md w-[10rem] text-left">
+                    <div className="flex flex-col space-y-1 w-48">
+                      <p className="text-black font-semibold text-lg text-left">
                         {f.title}
                       </p>
-                      <p className="text-gray-700 text-sm text-left">
+                      <p className="text-gray-700 text-md text-left">
                         {f.description}
                       </p>
                     </div>
