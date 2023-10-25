@@ -11,7 +11,10 @@ import { ChatCompletionCreateParams } from "openai/resources/chat/completions";
 import { CompletionCreateParams } from "openai/resources/completions";
 import * as hcone from "./HeliconeOpenAITypes";
 import { HeliconeHeaderBuilder } from "../core/HeliconeHeaderBuilder";
-import { IHeliconeAsyncClientOptions } from "../core/HeliconeClientOptions";
+import {
+  IHeliconeAsyncClientOptions,
+  IHeliconeMeta,
+} from "../core/HeliconeClientOptions";
 import { Stream } from "openai/streaming";
 import { EmbeddingCreateParams } from "openai/resources";
 import { wrapAPIPromise } from "./HeliconeMonkeyPatch";
@@ -34,7 +37,7 @@ export class HeliconeAsyncOpenAI extends OpenAI {
     } = options;
     super({ apiKey, organization, ...opts });
 
-    const heliconeMeta = {
+    const heliconeMeta: IHeliconeMeta = {
       ...providedHeliconeMeta,
       apiKey: providedHeliconeMeta.apiKey || Core.readEnv("HELICONE_API_KEY"),
       baseUrl: providedHeliconeMeta.baseUrl ?? "https://api.hconeai.com",
