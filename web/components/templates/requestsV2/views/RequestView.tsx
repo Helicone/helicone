@@ -8,21 +8,21 @@ import {
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ThemedTabs from "../../shared/themed/themedTabs";
-import { getUSDateFromString } from "../../shared/utils/utils";
-import { Completion } from "../requests/completion";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-import { clsx } from "../../shared/clsx";
+import ThemedTabs from "../../../shared/themed/themedTabs";
+import { getUSDateFromString } from "../../../shared/utils/utils";
+import { Completion } from "../../requests/completion";
+import { NormalizedRequest } from "../builder/abstractRequestBuilder";
+import ModelPill from "../modelPill";
+import StatusBadge from "../statusBadge";
+import { clsx } from "../../../shared/clsx";
 import {
   HandThumbUpIcon as HTUp,
   HandThumbDownIcon as HTDown,
 } from "@heroicons/react/24/solid";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
+import { SUPABASE_AUTH_TOKEN } from "../../../../lib/constants";
 import Cookies from "js-cookie";
-import { updateRequestFeedback } from "../../../services/lib/requests";
-import useNotification from "../../shared/notification/useNotification";
+import { updateRequestFeedback } from "../../../../services/lib/requests";
+import useNotification from "../../../shared/notification/useNotification";
 
 function getPathName(url: string) {
   try {

@@ -97,7 +97,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             </p>
             {ownedOrgs && ownedOrgs.length > 0 && (
               <div className="p-1">
-                <p className="text-gray-900 font-semibold text-sm px-2 py-2 w-full">
+                <p className="text-gray-900 font-semibold text-xs px-2 py-2 w-full">
                   Your Organizations{" "}
                   {ownedOrgs.length > 7 && (
                     <span className="text-xs text-gray-400 font-normal pl-2">
@@ -149,7 +149,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             )}
             {memberOrgs && memberOrgs.length > 0 && (
               <div className="p-1">
-                <p className="text-gray-900 font-semibold text-sm px-2 py-2 w-full">
+                <p className="text-gray-900 font-semibold text-xs px-2 py-2 w-full">
                   Member Organizations
                   {memberOrgs.length > 7 && (
                     <span className="text-xs text-gray-400 font-normal pl-2">
