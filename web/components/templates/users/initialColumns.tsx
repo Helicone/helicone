@@ -2,15 +2,15 @@ import { ColumnDef } from "@tanstack/react-table";
 import { UserMetric } from "../../../lib/api/users/users";
 import { getUSDateFromString } from "../../shared/utils/utils";
 
-export function formatNumber(num: number) {
+export function formatNumber(num: number, decimals: number = 4) {
   const numParts = num.toString().split(".");
 
   if (numParts.length > 1) {
     const decimalPlaces = numParts[1].length;
     if (decimalPlaces < 2) {
       return num.toFixed(2);
-    } else if (decimalPlaces > 4) {
-      return num.toFixed(4);
+    } else if (decimalPlaces > decimals) {
+      return num.toFixed(decimals);
     } else {
       return num;
     }
