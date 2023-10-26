@@ -172,11 +172,11 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
           </p>
         </div>
       ) : expandedRow && view === "card" ? (
-        <div className="overflow-x-auto text-sm bg-white rounded-lg border border-gray-300 py-2 px-4">
+        <ul className="flex flex-col space-y-8 divide-y divide-gray-300 bg-white rounded-lg border border-gray-300">
           {rows.map((row, i) => (
-            <div key={"expanded-row" + i}>{expandedRow(row.original)}</div>
+            <li key={"expanded-row" + i}>{expandedRow(row.original)}</li>
           ))}
-        </div>
+        </ul>
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
           <div

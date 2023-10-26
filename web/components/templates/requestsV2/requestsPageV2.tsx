@@ -27,10 +27,11 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { RequestView } from "./RequestView";
+import { RequestView } from "./views/RequestView";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
+import RequestCard from "./views/requestCard";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -433,16 +434,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             onRowSelectHandler(row, index);
           }}
           expandedRow={(row) => {
-            return (
-              <div className="flex flex-col space-y-2 border-2 p-2 my-2">
-                <RequestView
-                  request={row}
-                  properties={[]}
-                  open={true}
-                  wFull={true}
-                />
-              </div>
-            );
+            return <RequestCard request={row} />;
           }}
         />
         <TableFooter
