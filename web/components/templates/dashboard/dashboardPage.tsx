@@ -30,6 +30,7 @@ import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import * as boxbee from "../../../public/lottie/boxbee.json";
+import { formatNumber } from "../users/initialColumns";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -202,9 +203,10 @@ const DashboardPage = (props: DashboardPageProps) => {
       id: "cost-req",
       value:
         metrics.totalCost.data?.data && metrics.totalRequests?.data?.data
-          ? `$${(
-              metrics.totalCost.data.data / metrics.totalRequests?.data?.data
-            ).toFixed(3)}`
+          ? `$${formatNumber(
+              metrics.totalCost.data.data / metrics.totalRequests?.data?.data,
+              6
+            )}`
           : "$0.00",
       label: "Avg Cost / Req",
       icon: ChartBarIcon,
