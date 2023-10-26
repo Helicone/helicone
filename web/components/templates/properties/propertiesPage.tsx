@@ -6,6 +6,7 @@ import {
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
+import { MultiSelect, MultiSelectItem, Text } from "@tremor/react";
 
 import AuthHeader from "../../shared/authHeader";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
@@ -14,10 +15,15 @@ import { ThemedPill } from "../../shared/themed/themedPill";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PropertyCard from "./propertyCard";
-import { ArrowPathIcon, TagIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  CalculatorIcon,
+  TagIcon,
+} from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import React from "react";
 
 const PropertiesPage = (props: {}) => {
   const searchParams = useSearchParams();
@@ -79,8 +85,8 @@ const PropertiesPage = (props: {}) => {
         }
       />
 
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-row justify-between">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-8">
           <ThemedTableHeader
             isFetching={false}
             timeFilter={{
@@ -114,30 +120,25 @@ const PropertiesPage = (props: {}) => {
               },
             }}
           />
-          <ThemedMultiSelect
-            columns={properties.map((property) => ({
-              label: property,
-              value: property,
-              active: selectedProperties.includes(property),
-            }))}
-            buttonLabel={isPropertiesLoading ? "Loading..." : "Properties"}
-            onSelect={(value) => {
-              if (selectedProperties.includes(value)) {
-                setSelectedProperties(
-                  selectedProperties.filter((p) => p !== value)
-                );
-              } else {
-                setSelectedProperties([...selectedProperties, value]);
-              }
-            }}
-            deselectAll={() => {
-              setSelectedProperties([]);
-            }}
-            selectAll={() => {
-              setSelectedProperties(properties);
-            }}
-            align="right"
-          />
+          <div className="w-full space-y-2 max-w-sm">
+            <MultiSelect
+              placeholder="Select a Custom Property..."
+              value={selectedProperties}
+              onValueChange={(values: string[]) => {
+                setSelectedProperties(values);
+              }}
+            >
+              {properties.map((property, idx) => (
+                <MultiSelectItem
+                  value={property}
+                  key={idx}
+                  className="font-medium text-black"
+                >
+                  {property}
+                </MultiSelectItem>
+              ))}
+            </MultiSelect>
+          </div>
         </div>
 
         <div className="flex flex-col gap-8">
@@ -150,28 +151,6 @@ const PropertiesPage = (props: {}) => {
               <p className="text-gray-500">
                 Please select a custom property to view data
               </p>
-              <div className="flex flex-wrap gap-4 pt-4">
-                {properties.slice(0, 8).map((property, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      if (selectedProperties.includes(property)) {
-                        setSelectedProperties(
-                          selectedProperties.filter((p) => p !== property)
-                        );
-                      } else {
-                        setSelectedProperties([
-                          ...selectedProperties,
-                          property,
-                        ]);
-                      }
-                    }}
-                    className="bg-white border border-gray-300 px-4 py-2 rounded-lg"
-                  >
-                    <p className="text-gray-700 text-lg">{property}</p>
-                  </button>
-                ))}
-              </div>
             </div>
           ) : (
             selectedProperties.map((property, i) => (

@@ -55,10 +55,11 @@ interface ThemedTableV5Props<T> {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  onRowSelect?: (row: T) => void;
+  onRowSelect?: (row: T, index: number) => void;
   chart?: React.ReactNode;
   expandedRow?: (row: T) => React.ReactNode;
   hideView?: boolean;
+  noDataCTA?: React.ReactNode;
 }
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
@@ -75,6 +76,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     expandedRow,
     chart,
     hideView,
+    noDataCTA,
   } = props;
 
   const router = useRouter();
@@ -154,6 +156,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
           <TableCellsIcon className="h-12 w-12 text-gray-400" />
           <p className="text-xl font-semibold text-gray-500">No Data Found</p>
+          {noDataCTA}
         </div>
       ) : table.getVisibleFlatColumns().length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
@@ -201,16 +204,20 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                 ))}
               </thead>
               <tbody>
-                {rows.map((row) => (
+                {rows.map((row, index) => (
                   <tr
                     key={row.id}
                     className="hover:bg-gray-100 hover:cursor-pointer"
-                    onClick={onRowSelect && (() => onRowSelect(row.original))}
+                    onClick={
+                      onRowSelect && (() => onRowSelect(row.original, index))
+                    }
                   >
                     {row.getVisibleCells().map((cell, i) => (
                       <td
                         key={i}
-                        className="py-4 border-t border-gray-300 pr-4 text-gray-700"
+                        className={clsx(
+                          "py-4 border-t border-gray-300 pr-4 text-gray-700"
+                        )}
                         {...{
                           style: {
                             maxWidth: cell.column.getSize(),

@@ -20,6 +20,8 @@ import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import TableFooter from "../requestsV2/tableFooter";
 import { getInitialColumns } from "./initialColumns";
 import { useJobPage } from "./useJobPage";
+import Link from "next/link";
+import LoadingAnimation from "../../shared/loadingAnimation";
 
 interface JobsPageProps {
   currentPage: number;
@@ -29,68 +31,14 @@ interface JobsPageProps {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  isCached?: boolean;
-  initialRequestId?: string;
 }
 
 const JobsPage = (props: JobsPageProps) => {
-  const {
-    currentPage,
-    pageSize,
-    sort,
-    isCached = false,
-    initialRequestId,
-  } = props;
+  const { currentPage, pageSize, sort } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
 
-  // set the initial selected data on component load
-  useEffect(() => {
-    if (initialRequestId) {
-      const fetchRequest = async () => {
-        const resp = await fetch(`/api/request/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: {
-              left: {
-                request: {
-                  id: {
-                    equals: initialRequestId,
-                  },
-                },
-              },
-              operator: "and",
-              right: "all",
-            } as FilterNode,
-            offset: 0,
-            limit: 1,
-            sort: {},
-          }),
-        })
-          .then(
-            (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
-          )
-          .then((res) => {
-            const { data, error } = res;
-            if (data !== null && data.length > 0) {
-              const normalizedRequest = getRequestBuilder(data[0]).build();
-              setSelectedData(normalizedRequest);
-              setOpen(true);
-            }
-          });
-      };
-      fetchRequest();
-    }
-  }, [initialRequestId]);
-
   const [page, setPage] = useState<number>(currentPage);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [open, setOpen] = useState(false);
-  const [selectedData, setSelectedData] = useState<
-    NormalizedRequest | undefined
-  >(undefined);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(100);
 
   const router = useRouter();
   const {
@@ -98,7 +46,7 @@ const JobsPage = (props: JobsPageProps) => {
     jobs: jobs,
     properties,
     refetch,
-    loading,
+    isLoading,
   } = useJobPage(page, currentPageSize, isLive);
 
   const onPageSizeChangeHandler = async (newPageSize: number) => {
@@ -129,17 +77,25 @@ const JobsPage = (props: JobsPageProps) => {
     })
   );
 
-  const onRowSelectHandler = (row: NormalizedRequest) => {
-    setSelectedData(row);
-    setOpen(true);
-    router.push(
-      {
-        pathname: "/requests",
-        query: { ...router.query, requestId: row.id },
-      },
-      undefined,
-      {}
-    );
+  const cleanJobData = (jobs: HeliconeJob[]) => {
+    if (!jobs) return [];
+
+    const copy = jobs.map((job) => {
+      const createdAt = Number(job.created_at); // Convert string to number
+      const currentTime = Date.now(); // Current time in milliseconds
+
+      const isWithinTimeout = currentTime - createdAt > job.timeout_seconds;
+
+      if (isWithinTimeout && job.status === "PENDING") {
+        return {
+          ...job,
+          status: "TIMEOUT",
+        };
+      } else {
+        return job;
+      }
+    });
+    return copy;
   };
 
   return (
@@ -154,16 +110,14 @@ const JobsPage = (props: JobsPageProps) => {
             >
               <ArrowPathIcon
                 className={clsx(
-                  loading ? "animate-spin" : "",
+                  isLoading ? "animate-spin" : "",
                   "h-5 w-5 inline"
                 )}
               />
             </button>
-            <i>
-              {"In ~beta~, please use with caution and sorry for any bugs :)"}
-            </i>
           </div>
         }
+        jobs={true}
         actions={
           <>
             <ThemedSwitch checked={isLive} onChange={setIsLive} label="Live" />
@@ -171,32 +125,40 @@ const JobsPage = (props: JobsPageProps) => {
         }
       />
       <div className="flex flex-col space-y-4">
-        <ThemedTableV5
-          defaultData={(jobs.data?.heliconeJob || []) as HeliconeJob[]}
-          defaultColumns={columnsWithProperties}
-          tableKey="requestsColumnVisibility"
-          dataLoading={loading}
-          sortable={sort}
-          onRowSelect={(row) => {
-            router.push(`/jobs/${row.id}`, undefined, { shallow: true });
-          }}
-        />
-        <TableFooter
+        {jobs.loading ? (
+          <LoadingAnimation title="Loading jobs" />
+        ) : (
+          <ThemedTableV5
+            defaultData={cleanJobData(
+              (jobs.data?.heliconeJob as HeliconeJob[]) || []
+            )}
+            defaultColumns={columnsWithProperties}
+            tableKey="jobsColumnVisibility"
+            dataLoading={isLoading}
+            sortable={sort}
+            onRowSelect={(row) => {
+              router.push(`/jobs/${row.id}`, undefined, { shallow: true });
+            }}
+            noDataCTA={
+              <Link
+                href="https://docs.helicone.ai/features/jobs/quick-start"
+                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded"
+              >
+                Get started
+              </Link>
+            }
+          />
+        )}
+        {/* <TableFooter
           currentPage={currentPage}
           pageSize={pageSize}
-          isCountLoading={loading}
+          isCountLoading={isLoading}
           count={count || 0}
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}
           pageSizeOptions={[10, 25, 50, 100]}
-        />
+        /> */}
       </div>
-      <RequestDrawerV2
-        open={open}
-        setOpen={setOpen}
-        request={selectedData}
-        properties={properties}
-      />
     </div>
   );
 };

@@ -27,12 +27,35 @@ const StatusBadge = (props: StatusBadgeProps) => {
           Pending
         </span>
       );
+
     case "error":
-      return (
-        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 -my-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-          {`${errorCode} Error`}
-        </span>
-      );
+      if (errorCode === -2) {
+        return (
+          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 -my-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+            {`Pending`}
+          </span>
+        );
+      }
+      if (errorCode === -3) {
+        return (
+          <span className="inline-flex items-center rounded-md bg-orange-50 px-2 py-1 -my-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/20">
+            {`Cancelled`}
+          </span>
+        );
+      }
+      if (errorCode === -1) {
+        return (
+          <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 -my-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+            {`Timeout`}
+          </span>
+        );
+      } else {
+        return (
+          <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 -my-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+            {`${errorCode} Error`}
+          </span>
+        );
+      }
     default:
       return (
         <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 -my-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">

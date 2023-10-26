@@ -7,7 +7,7 @@ class ClaudeBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const getResponseText = () => {
       const statusCode = this.response.response_status;
-      if (statusCode === 200) {
+      if ([200, 201, -3].includes(statusCode)) {
         // successful response, check for an error from openai
         if (this.response.response_body?.error) {
           return this.response.response_body?.error?.message || "";
@@ -15,10 +15,8 @@ class ClaudeBuilder extends AbstractRequestBuilder {
         // successful response, check for choices
 
         return this.response.response_body?.body
-          ? this.response.response_body?.body?.completion ??
-              this.response.response_body?.completion ??
-              ""
-          : "";
+          ? this.response.response_body?.body?.completion ?? ""
+          : this.response.response_body?.completion ?? "";
       } else if (statusCode === 0 || statusCode === null) {
         // pending response
         return "";
@@ -28,7 +26,9 @@ class ClaudeBuilder extends AbstractRequestBuilder {
       }
     };
     return {
-      requestText: this.response.request_body.prompt || "Invalid Prompt",
+      requestText: this.response.request_body.tooLarge
+        ? "Helicone Message: Input too large"
+        : this.response.request_body.prompt || "Invalid Prompt",
       responseText: getResponseText(),
       render:
         this.response.response_status === 0 ||

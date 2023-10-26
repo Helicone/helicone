@@ -44,7 +44,21 @@ openai.Completion.create(
 )
 ```
 
-```js Node.js
+```ts Node.js (w/ package)
+import { HeliconeProxyConfiguration as Configuration } from "./core/HeliconeProxyConfiguration";
+import { HeliconeProxyOpenAIApi as OpenAIApi } from "./proxy_logger/HeliconeProxyOpenAIApi";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+  heliconeMeta: {
+    // ... other meta data
+    cache: true,
+  },
+});
+
+const openai = new OpenAIApi(configuration);
+```
+
+```ts Node.js (w/o package)
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,

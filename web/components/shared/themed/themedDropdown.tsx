@@ -16,7 +16,7 @@ interface DropdownOption<T> {
 }
 
 interface ThemedDropdownProps<T> {
-  options: DropdownOption<T>[];
+  options?: DropdownOption<T>[];
   selectedValue: T;
   onSelect: (option: T) => void;
   verticalAlign?: "top" | "bottom";
@@ -39,27 +39,29 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
     disabled = false,
   } = props;
   let { options } = props;
-  const selected = options.find((option) => option.value === selectedValue);
+  const selected = options?.find((option) => option.value === selectedValue);
   const categories: {
     [key: string]: DropdownOption<T>[];
-  } = options.reduce(
-    (acc, option) => {
-      if (option.category) {
-        if (!acc[option.category]) {
-          acc[option.category] = [];
-        }
-        acc[option.category].push(option);
-      }
-      return acc;
-    },
-    {
-      all: options,
-    } as { [key: string]: DropdownOption<T>[] }
-  );
+  } = options
+    ? options.reduce(
+        (acc, option) => {
+          if (option.category) {
+            if (!acc[option.category]) {
+              acc[option.category] = [];
+            }
+            acc[option.category].push(option);
+          }
+          return acc;
+        },
+        {
+          all: options,
+        } as { [key: string]: DropdownOption<T>[] }
+      )
+    : {};
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  options = options.filter((option) => {
+  options = options?.filter((option) => {
     if (selectedCategory === null || selectedCategory === "all") {
       return true;
     }
@@ -107,7 +109,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                   </label>
                 )}
 
-                <span className="block truncate">
+                <span className="block truncate font-semibold">
                   {selected?.label || placeholder}
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -131,10 +133,10 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                     verticalAlign === "top"
                       ? "bottom-full mb-1.5"
                       : "top-full mt-1.5",
-                    "absolute z-30 max-h-96 w-full min-w-[250px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    "absolute z-30 max-h-96 w-full min-w-[225px] rounded-md bg-white py-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                   )}
                 >
-                  {Object.keys(categories).length >= 2 && (
+                  {categories && Object.keys(categories).length >= 2 && (
                     <div className="text-gray-500 px-3 py-2 text-xs border-b-2">
                       Categories
                       <div className="flex flex-wrap">
@@ -167,7 +169,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                       "max-h-[200px] divide-y divide-gray-200 overflow-auto"
                     )}
                   >
-                    {options.map((option, i) => (
+                    {options?.map((option, i) => (
                       <Listbox.Option
                         key={i}
                         className={({ active }) =>
@@ -185,11 +187,7 @@ export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
                       >
                         {({ selected, active }) => (
                           <>
-                            <span
-                              className={clsx(
-                                "block truncate font-semibold text-md"
-                              )}
-                            >
+                            <span className={clsx("block truncate text-md")}>
                               {option.label}
                               {option.subtitle && (
                                 <p className="text-gray-500 font-light whitespace-pre-wrap text-sm">

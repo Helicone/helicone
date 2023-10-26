@@ -1,4 +1,5 @@
-import { IHeliconeConfiguration } from "./IHeliconeConfiguration";
+import { IHeliconeMeta } from "./HeliconeClientOptions";
+import { fetch, Response } from "@whatwg-node/fetch";
 
 export enum HeliconeFeedbackRating {
   Positive = "positive",
@@ -7,14 +8,14 @@ export enum HeliconeFeedbackRating {
 
 export class HeliconeFeedback {
   static async logFeedback(
-    heliconeConfiguration: IHeliconeConfiguration,
+    heliconeMeta: IHeliconeMeta,
     heliconeId: string,
     rating: boolean
   ): Promise<void> {
     const options = {
       method: "POST",
       headers: {
-        "Helicone-Auth": heliconeConfiguration.getHeliconeAuthHeader(),
+        "Helicone-Auth": `Bearer ${heliconeMeta.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -24,15 +25,15 @@ export class HeliconeFeedback {
     };
 
     let response: Response;
+    let url: URL;
     try {
-      response = await fetch(
-        heliconeConfiguration.getBaseUrl().origin + "/v1/feedback",
-        options
-      );
+      url = new URL(heliconeMeta.baseUrl);
+      url.pathname = "/v1/feedback";
+      response = await fetch(url, options);
     } catch (error: any) {
       console.error(
         "Error making request to Helicone feedback endpoint:",
-        error.message
+        error
       );
       return;
     }
@@ -41,6 +42,10 @@ export class HeliconeFeedback {
       console.error("Error logging feedback: ", response.statusText);
     }
 
-    heliconeConfiguration.getOnHeliconeFeedback()?.(response);
+    const responseBody = await response.text();
+    const consumerResponse = new Response(responseBody, response);
+    if (heliconeMeta.onFeedback) {
+      await heliconeMeta.onFeedback(consumerResponse);
+    }
   }
 }

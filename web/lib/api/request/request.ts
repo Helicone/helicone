@@ -17,7 +17,7 @@ import {
   printRunnableQuery,
 } from "../db/dbExecute";
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
-const MAX_TOTAL_BODY_SIZE = 3900000;
+const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
@@ -141,6 +141,9 @@ export async function getRequestsCached(
   console.log("resulties: ", JSON.stringify(results, null, 2));
 
   return { data: results, error: null };
+  return resultMap(res, (data) => {
+    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+  });
 }
 
 async function handleRequest(
@@ -218,6 +221,45 @@ export async function getRequestsDateRange(
   });
 }
 
+function truncLargeData(
+  data: HeliconeRequest[],
+  maxBodySize: number
+): HeliconeRequest[] {
+  const trunced = data.map((d) => {
+    return {
+      ...d,
+      response_prompt:
+        JSON.stringify(d.response_prompt).length > maxBodySize / 2
+          ? "Response prompt too large"
+          : d.response_prompt,
+      request_prompt:
+        JSON.stringify(d.request_prompt).length > maxBodySize / 2
+          ? "Request prompt too large"
+          : d.request_prompt,
+      request_body:
+        JSON.stringify(d.request_body).length > maxBodySize / 2
+          ? {
+              model: d.request_body.model,
+              heliconeMessage: "Request body too large",
+              tooLarge: true,
+            }
+          : d.request_body,
+      response_body:
+        JSON.stringify(d.response_body).length > maxBodySize / 2
+          ? {
+              heliconeMessage: "Response body too large",
+              model: d.response_body.model,
+              tooLarge: true,
+            }
+          : {
+              ...d.response_body,
+            },
+    };
+  });
+
+  return trunced;
+}
+
 export async function getRequests(
   orgId: string,
   filter: FilterNode,
@@ -271,7 +313,6 @@ export async function getRequests(
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (
     (${builtFilter.filter})
-    AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
@@ -316,6 +357,9 @@ export async function getRequests(
   console.log("resulties: ", JSON.stringify(results, null, 2));
 
   return { data: results, error: null };
+  return resultMap(res, (data) => {
+    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+  });
 }
 
 export async function getRequestCountCached(

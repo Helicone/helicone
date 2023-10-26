@@ -97,9 +97,6 @@ def run_creation(topic: str, create_course_outline: HeliconeNode):
         ],
         functions=COURSE_FUNCTIONS,
         max_tokens=512,
-        # headers= {
-        #     "Helicone-Task-Id": create_course_outline.id,
-        # }
         heliconeMeta=Meta(
             node_id=create_course_outline.id,
         ),

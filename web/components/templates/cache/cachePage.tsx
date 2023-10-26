@@ -67,12 +67,14 @@ const CachePage = (props: CachePageProps) => {
 
   const metrics = [
     {
+      id: "caches",
       label: "All Time Caches",
       value: data.totalCached.data?.data || 0,
       isLoading: data.totalCached.isLoading,
       icon: CircleStackIcon,
     },
     {
+      id: "savings",
       label: "All Time Savings",
       value: data.totalSavings.data?.data
         ? `$${
@@ -85,6 +87,7 @@ const CachePage = (props: CachePageProps) => {
       icon: BanknotesIcon,
     },
     {
+      id: "time-saved",
       label: "Total Time Saved",
       value: data.totalTimeSaved.data?.data
         ? `${data.totalTimeSaved.data?.data}s`

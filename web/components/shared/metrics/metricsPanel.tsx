@@ -1,8 +1,11 @@
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { Card, Metric, Text } from "@tremor/react";
+import { clsx } from "../clsx";
 
 export interface MetricsPanelProps {
   metric: {
+    id: string;
     isLoading: boolean;
     value: number | string;
     label: string;
@@ -15,42 +18,25 @@ export interface MetricsPanelProps {
     >;
     onInformationHref?: string;
   };
+  hFull?: boolean;
 }
 
 export function MetricsPanel(props: MetricsPanelProps) {
-  const { metric } = props;
-  const onInformationHref = metric.onInformationHref;
+  const { metric, hFull = false } = props;
 
   return (
-    <div
-      className="p-6 bg-white border border-gray-300 rounded-lg space-y-2"
-      key={metric.label}
+    <Card
+      className={clsx(
+        hFull ? "h-full" : "h-full max-h-24",
+        "flex flex-col p-4 w-full justify-end"
+      )}
     >
-      <div className="w-full flex flex-row items-center justify-between">
-        <div className="text-sm text-gray-700 flex flex-row gap-1 items-center">
-          {metric.label}
-          {onInformationHref && (
-            <Link href={onInformationHref} target="_blank">
-              <InformationCircleIcon
-                className="h-5 w-5 text-gray-500"
-                aria-hidden="true"
-              />
-            </Link>
-          )}
-        </div>
-        {/* {<metric.icon className="h-5 w-5" aria-hidden="true" />} */}
-      </div>
-
-      <div className="text-xl font-semibold flex flex-row items-end gap-1">
-        {metric.isLoading ? (
-          <div className="h-8 w-16 bg-gray-300 rounded-lg animate-pulse" />
-        ) : (
-          metric.value
-        )}
-        <div className="text-gray-400 text-xs pb-1">
-          {metric.isLoading || metric.labelUnits}
-        </div>
-      </div>
-    </div>
+      <p className="text-gray-500 text-xs text-left">{metric.label}</p>
+      {metric.isLoading ? (
+        <div className="bg-gray-200 animate-pulse h-6 w-16 rounded-md mt-1" />
+      ) : (
+        <p className="text-black font-semibold text-lg">{metric.value}</p>
+      )}
+    </Card>
   );
 }

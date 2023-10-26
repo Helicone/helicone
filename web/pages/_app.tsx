@@ -8,6 +8,8 @@ import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "../styles/globals.css";
 import "../styles/index.css";
+import "../node_modules/react-grid-layout/css/styles.css";
+import "../node_modules/react-resizable/css/styles.css";
 
 import posthog from "posthog-js";
 import { OrgContextProvider } from "../components/shared/layout/organizationContext";
@@ -61,8 +63,8 @@ export default function MyApp({
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
                   <Component {...pageProps} />
+                  <Notification />
                 </OrgContextProvider>
-                <Notification />
               </DndProvider>
             </NotificationProvider>
           </QueryClientProvider>

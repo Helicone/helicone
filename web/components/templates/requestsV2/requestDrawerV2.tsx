@@ -5,16 +5,31 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { RequestView } from "./RequestView";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
+import { clsx } from "../../shared/clsx";
 
 interface RequestDrawerV2Props {
   open: boolean;
   setOpen: (open: boolean) => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
+  onPrevHandler?: () => void;
+  onNextHandler?: () => void;
   request?: NormalizedRequest;
   properties: string[];
 }
 
 const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
-  const { open, setOpen, request, properties } = props;
+  const {
+    open,
+    setOpen,
+    hasPrevious,
+    hasNext,
+    onPrevHandler,
+    onNextHandler,
+    request,
+    properties,
+  } = props;
 
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -28,8 +43,11 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
     else {
       setOpen(false);
       const { pathname, query } = router;
-      delete router.query.requestId;
-      router.replace({ pathname, query }, undefined, { shallow: true });
+      // only delete and replace if the request id exists in the router
+      if (router.query.requestId) {
+        delete router.query.requestId;
+        router.replace({ pathname, query }, undefined, { shallow: true });
+      }
     }
   };
 
@@ -38,34 +56,64 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
       open={open}
       setOpen={setOpenHandler}
       actions={
-        <div className="w-full flex flex-row justify-between pl-1">
-          <Tooltip title="Playground">
-            <button
-              onClick={() => {
-                if (request) {
-                  router.push("/playground?request=" + request.id);
-                }
-              }}
-              className="hover:bg-gray-200 rounded-md -m-1 p-1"
-            >
-              <BeakerIcon className="h-5 w-5" />
-            </button>
-          </Tooltip>
-          <Tooltip title="Copy">
-            <button
-              onClick={() => {
-                setNotification("Copied to clipboard", "success");
-                const copy = { ...request };
-                delete copy.render;
-                navigator.clipboard.writeText(
-                  JSON.stringify(copy || {}, null, 4)
-                );
-              }}
-              className="hover:bg-gray-200 rounded-md -m-1 p-1"
-            >
-              <ClipboardDocumentIcon className="h-5 w-5" />
-            </button>
-          </Tooltip>
+        <div className="w-full flex flex-row justify-between items-center">
+          <div className="flex flex-row items-center space-x-2">
+            <Tooltip title="Playground">
+              <button
+                onClick={() => {
+                  if (request) {
+                    router.push("/playground?request=" + request.id);
+                  }
+                }}
+                className="hover:bg-gray-200 rounded-md -m-1 p-1"
+              >
+                <BeakerIcon className="h-5 w-5" />
+              </button>
+            </Tooltip>
+            <Tooltip title="Copy">
+              <button
+                onClick={() => {
+                  setNotification("Copied to clipboard", "success");
+                  const copy = { ...request };
+                  delete copy.render;
+                  navigator.clipboard.writeText(
+                    JSON.stringify(copy || {}, null, 4)
+                  );
+                }}
+                className="hover:bg-gray-200 rounded-md -m-1 p-1"
+              >
+                <ClipboardDocumentIcon className="h-5 w-5" />
+              </button>
+            </Tooltip>
+          </div>
+          {(hasPrevious || hasNext) && (
+            <div className="flex flex-row items-center space-x-1.5">
+              <Tooltip title="Previous">
+                <button
+                  onClick={onPrevHandler}
+                  disabled={!hasPrevious}
+                  className={clsx(
+                    !hasPrevious && "opacity-50 hover:cursor-not-allowed",
+                    "hover:bg-gray-200 rounded-md -m-1 p-1"
+                  )}
+                >
+                  <ArrowUpIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+              <Tooltip title="Next">
+                <button
+                  onClick={onNextHandler}
+                  disabled={!hasNext}
+                  className={clsx(
+                    !hasNext && "opacity-50 hover:cursor-not-allowed",
+                    "hover:bg-gray-200 rounded-md -m-1 p-1"
+                  )}
+                >
+                  <ArrowDownIcon className="h-5 w-5" />
+                </button>
+              </Tooltip>
+            </div>
+          )}
         </div>
       }
     >

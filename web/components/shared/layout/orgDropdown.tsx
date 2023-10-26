@@ -91,98 +91,112 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 mt-2 w-[17rem] z-50 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-300 shadow-2xl">
+          <Menu.Items className="absolute left-0 mt-2 w-[16rem] z-50 origin-top-right divide-y divide-gray-200 rounded-md bg-white border border-gray-300 shadow-2xl">
             <p className="text-gray-900 text-sm p-3 w-full truncate">
               {user?.email}
             </p>
             {ownedOrgs && ownedOrgs.length > 0 && (
               <div className="p-1">
                 <p className="text-gray-900 font-semibold text-sm px-2 py-2 w-full">
-                  Your Organizations
+                  Your Organizations{" "}
+                  {ownedOrgs.length > 7 && (
+                    <span className="text-xs text-gray-400 font-normal pl-2">
+                      ({ownedOrgs.length})
+                    </span>
+                  )}
                 </p>
-                {ownedOrgs.map((org, idx) => {
-                  const icon = ORGANIZATION_ICONS.find(
-                    (icon) => icon.name === org.icon
-                  );
-                  return (
-                    <Menu.Item key={idx}>
-                      {({ active }) => (
-                        <button
-                          className={`${
-                            active
-                              ? "bg-sky-100 text-gray-700"
-                              : "text-gray-700"
-                          } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
-                          onClick={() => {
-                            orgContext?.setCurrentOrg(org.id);
-                          }}
-                        >
-                          <div className="flex flex-row space-x-2 items-center">
-                            {icon && (
-                              <icon.icon className="h-4 w-4 text-gray-500" />
-                            )}
-                            <div className="flex flex-row space-x-1">
-                              <p className="w-full max-w-[10rem] text-left truncate">
-                                {org.name}
-                              </p>
-                              <span className="text-sky-500">
-                                {org.tier === "pro" && "(Pro)"}
-                              </span>
+                <div className="h-full max-h-60 overflow-auto">
+                  {ownedOrgs.map((org, idx) => {
+                    const icon = ORGANIZATION_ICONS.find(
+                      (icon) => icon.name === org.icon
+                    );
+                    return (
+                      <Menu.Item key={idx}>
+                        {({ active }) => (
+                          <button
+                            className={`${
+                              active
+                                ? "bg-sky-100 text-gray-700"
+                                : "text-gray-700"
+                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
+                            onClick={() => {
+                              orgContext?.setCurrentOrg(org.id);
+                            }}
+                          >
+                            <div className="flex flex-row space-x-2 items-center">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-gray-500" />
+                              )}
+                              <div className="flex flex-row space-x-1">
+                                <p className="w-full max-w-[10rem] text-left truncate">
+                                  {org.name}
+                                </p>
+                                <span className="text-sky-500">
+                                  {org.tier === "pro" && "(Pro)"}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                          {org.id === orgContext?.currentOrg.id && (
-                            <CheckIcon className="h-4 w-4 text-sky-500" />
-                          )}
-                        </button>
-                      )}
-                    </Menu.Item>
-                  );
-                })}
+                            {org.id === orgContext?.currentOrg.id && (
+                              <CheckIcon className="h-4 w-4 text-sky-500" />
+                            )}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    );
+                  })}
+                </div>
               </div>
             )}
             {memberOrgs && memberOrgs.length > 0 && (
               <div className="p-1">
                 <p className="text-gray-900 font-semibold text-sm px-2 py-2 w-full">
                   Member Organizations
+                  {memberOrgs.length > 7 && (
+                    <span className="text-xs text-gray-400 font-normal pl-2">
+                      ({memberOrgs.length})
+                    </span>
+                  )}
                 </p>
-                {memberOrgs.map((org, idx) => {
-                  const icon = ORGANIZATION_ICONS.find(
-                    (icon) => icon.name === org.icon
-                  );
-                  return (
-                    <Menu.Item key={idx}>
-                      {({ active }) => (
-                        <button
-                          className={`${
-                            active
-                              ? "bg-sky-100 text-gray-700"
-                              : "text-gray-700"
-                          } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
-                          onClick={() => {
-                            orgContext?.setCurrentOrg(org.id);
-                          }}
-                        >
-                          <div className="flex flex-row space-x-2 items-center">
-                            {icon && (
-                              <icon.icon className="h-4 w-4 text-gray-500" />
-                            )}
-                            <div className="flex flex-row space-x-1">
-                              <p className="w-full max-w-[10rem] text-left truncate">
-                                {org.name}
-                              </p>
-                              <span className="text-sky-500">
-                                {org.tier === "pro" && "(Pro)"}
-                              </span>
+                <div className="h-full max-h-60 overflow-auto">
+                  {memberOrgs.map((org, idx) => {
+                    const icon = ORGANIZATION_ICONS.find(
+                      (icon) => icon.name === org.icon
+                    );
+                    return (
+                      <Menu.Item key={idx}>
+                        {({ active }) => (
+                          <button
+                            className={`${
+                              active
+                                ? "bg-sky-100 text-gray-700"
+                                : "text-gray-700"
+                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
+                            onClick={() => {
+                              orgContext?.setCurrentOrg(org.id);
+                            }}
+                          >
+                            <div className="flex flex-row space-x-2 items-center">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-gray-500" />
+                              )}
+                              <div className="flex flex-row space-x-1">
+                                <p className="w-full max-w-[10rem] text-left truncate">
+                                  {org.name}
+                                </p>
+                                <span className="text-sky-500">
+                                  {org.tier === "pro" && "(Pro)"}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                          {org.id === orgContext?.currentOrg.id && (
-                            <CheckIcon className="h-4 w-4 text-sky-500" />
-                          )}
-                        </button>
-                      )}
-                    </Menu.Item>
-                  );
-                })}
+                            {org.id === orgContext?.currentOrg.id && (
+                              <CheckIcon className="h-4 w-4 text-sky-500" />
+                            )}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    );
+                  })}
+                </div>
               </div>
             )}
             <Menu.Item>

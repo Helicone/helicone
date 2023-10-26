@@ -30,7 +30,7 @@ const ManageHostedButton = () => {
               }}
               className="p-4 rounded-lg shadow-lg border border-gray-300"
             >
-              <img
+              <Image
                 style={{
                   contain: "fit",
                 }}
@@ -40,7 +40,7 @@ const ManageHostedButton = () => {
               />
             </button>
             <div className="p-4 rounded-lg shadow-lg border border-gray-300 relative">
-              <img
+              <Image
                 style={{
                   contain: "fit",
                 }}
@@ -53,7 +53,7 @@ const ManageHostedButton = () => {
               </span>
             </div>
             <div className="p-4 rounded-lg shadow-lg border border-gray-300 relative">
-              <img
+              <Image
                 style={{
                   contain: "fit",
                 }}

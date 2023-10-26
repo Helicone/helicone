@@ -42,6 +42,11 @@ export const usePlaygroundPage = (requestId: string) => {
       sourceResponse.choices[0].message,
     ];
 
+    // give all the messages in sourcePrompt an id
+    sourcePrompt.forEach((message: any, index: number) => {
+      message.id = index;
+    });
+
     if (sourcePrompt.length > 1) {
       isChat = true;
     }
@@ -55,6 +60,7 @@ export const usePlaygroundPage = (requestId: string) => {
     isLoading: requests.isDataLoading,
     data: requests.requests,
     chat,
+    refetch: requests.refetch,
     hasData: requests.requests && requests.requests.length > 0,
     isChat,
   };

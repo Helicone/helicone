@@ -18,8 +18,8 @@ export const useJobPage = (
 
   return {
     jobs: jobs,
-    count: 100,
-    loading: jobs.loading || isPropertiesLoading,
+    count: jobs.data?.heliconeJob?.length || 0,
+    isLoading: jobs.loading || isPropertiesLoading,
     properties,
     refetch: jobs.refetch,
   };

@@ -141,6 +141,7 @@ export default function DraggableColumnHeader<T>(props: {
                             if (meta && sortable) {
                               router.query.sortDirection = "asc";
                               router.query.sortKey = meta.sortKey;
+
                               router.push(router);
                             }
                           }}
@@ -163,6 +164,7 @@ export default function DraggableColumnHeader<T>(props: {
                             if (meta && sortable) {
                               router.query.sortDirection = "desc";
                               router.query.sortKey = meta.sortKey;
+
                               router.push(router);
                             }
                           }}

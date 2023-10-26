@@ -6,6 +6,7 @@ import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
 import AbstractRequestBuilder from "./abstractRequestBuilder";
 import CustomBuilder from "./customBuilder";
+import UnknownBuilder from "./unknownBuilder";
 
 export type BuilderType =
   | "ChatGPTBuilder"
@@ -13,7 +14,8 @@ export type BuilderType =
   | "ModerationBuilder"
   | "EmbeddingBuilder"
   | "ClaudeBuilder"
-  | "CustomBuilder";
+  | "CustomBuilder"
+  | "UnknownBuilder";
 
 export const getBuilderType = (
   model: string,
@@ -32,8 +34,14 @@ export const getBuilderType = (
     return "GPT3Builder";
   }
 
-  if (/^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?$/.test(model)) {
+  if (/^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(model)) {
     return "ChatGPTBuilder";
+  }
+
+  if (
+    /^meta-llama\/Llama-2-13b-chat-hf:transcript_summarizer:64cB1r3/.test(model)
+  ) {
+    return "ChatGPTBuilder"; // for now
   }
 
   if (/^text-moderation(-\[\w+\]|-\d+)?$/.test(model)) {
@@ -48,7 +56,7 @@ export const getBuilderType = (
     return "ClaudeBuilder";
   }
 
-  return "GPT3Builder";
+  return "UnknownBuilder";
 };
 
 const builders: {
@@ -63,6 +71,7 @@ const builders: {
   EmbeddingBuilder: EmbeddingBuilder,
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
+  UnknownBuilder: UnknownBuilder,
 };
 
 const getModelFromPath = (path: string) => {

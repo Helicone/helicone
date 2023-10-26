@@ -6,6 +6,7 @@ import {
   BellAlertIcon,
   CircleStackIcon,
   CodeBracketIcon,
+  HandThumbUpIcon,
   LockClosedIcon,
   MinusSmallIcon,
   PencilSquareIcon,
@@ -24,6 +25,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
+import Image from "next/image";
+import { clsx } from "../../shared/clsx";
 
 const features: {
   title: string;
@@ -34,51 +37,61 @@ const features: {
       titleId?: string | undefined;
     }
   >;
+  color: string;
 }[] = [
   {
     title: "Custom Properties",
     description: "Easily segment requests.",
     icon: TagIcon,
+    color: "text-purple-700",
   },
   {
     title: "Caching",
     description: "Save time and money.",
     icon: CircleStackIcon,
+    color: "text-red-700",
   },
   {
     title: "Rate Limiting",
     description: "Protect your models from abuse.",
     icon: UserIcon,
+    color: "text-blue-700",
   },
   {
     title: "Retries",
     description: "Retry failed or rate-limited requests.",
     icon: ArrowPathIcon,
+    color: "text-yellow-700",
   },
   {
     title: "Feedback",
     description: "Identify good and bad requests.",
-    icon: PencilSquareIcon,
+    icon: HandThumbUpIcon,
+    color: "text-green-700",
   },
   {
     title: "Vault",
     description: "Securely map your provider keys.",
     icon: LockClosedIcon,
+    color: "text-indigo-700",
   },
   {
     title: "Jobs",
     description: "Visualize chains of requests.",
     icon: RectangleStackIcon,
+    color: "text-pink-700",
   },
   {
     title: "GraphQL",
     description: "ETL your data to your favorite apps.",
     icon: CodeBracketIcon,
+    color: "text-sky-700",
   },
   {
     title: "Alerts",
     description: "Get notified on important events.",
     icon: BellAlertIcon,
+    color: "text-rose-700",
   },
 ];
 
@@ -151,7 +164,7 @@ export default function Example() {
             Helicone is the smartest way to monitor your LLM applications.
           </h1>
           <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-3xl">
-            The worlds best open-source platform for AI observability. Get
+            The world{"'"}s best open-source platform for AI observability. Get
             monitoring, logging, and tracing for your LLM applications out of
             the box.
           </p>
@@ -239,8 +252,8 @@ export default function Example() {
           </a>
           <div className="flex flex-col pt-24">
             <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-2xl lg:p-2.5">
-              <img
-                src="/assets/landing/preview.webp"
+              <Image
+                src="/assets/home/request-preview.webp"
                 alt="App screenshot"
                 width={2720}
                 height={1844}
@@ -256,56 +269,56 @@ export default function Example() {
               Modern startups and enterprises use Helicone.
             </h2>
             <div className="w-full mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:gap-x-10 lg:mx-0 lg:max-w-none">
-              <img
+              <Image
                 className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/upenn.png"
                 alt="upenn"
                 width={400}
                 height={100}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/carta.png"
                 alt="carta"
                 width={400}
                 height={100}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-14 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/lex.svg"
                 alt="lex"
                 width={158}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
-                src="assets/home/logos/particl.png"
+                src="/assets/home/logos/particl.png"
                 alt="particle"
                 width={158}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/commandbar.svg"
                 alt="commandbar"
                 width={100}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-10 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/mintlify.svg"
                 alt="mintlify"
                 width={125}
                 height={48}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-24 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/onboard.png"
                 alt="onboard"
                 width={300}
                 height={100}
               />
-              <img
+              <Image
                 className="col-span-2 max-h-16 w-full object-contain lg:col-span-1"
                 src="/assets/home/logos/autogpt.png"
                 alt="autogpt"
@@ -364,26 +377,26 @@ export default function Example() {
             <div className="grid grid-cols-8 gap-4 w-full py-16">
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex relative mb-8 justify-center">
-                  <img
+                  <Image
                     className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
-                    src="/assets/home/bento/requests.png"
+                    src="/assets/home/bento/requests.webp"
                     alt="requests"
-                    width={158}
-                    height={48}
+                    width={980}
+                    height={604}
                   />
-                  <img
+                  <Image
                     className="hidden md:block absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
-                    src="/assets/home/bento/latency.png"
-                    alt="requests"
-                    width={158}
-                    height={48}
+                    src="/assets/home/bento/users.webp"
+                    alt="users"
+                    width={980}
+                    height={604}
                   />
-                  <img
+                  <Image
                     className="hidden md:block absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
-                    src="/assets/home/bento/costs.png"
-                    alt="requests"
-                    width={158}
-                    height={48}
+                    src="/assets/home/bento/costs.webp"
+                    alt="costs"
+                    width={908}
+                    height={608}
                   />
                 </div>
                 <div className="flex flex-col mt-auto space-y-2">
@@ -424,7 +437,7 @@ export default function Example() {
               </div>
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-2xl h-96 flex flex-col p-8">
                 <div className="w-full h-full flex justify-center items-center">
-                  <img
+                  <Image
                     src="/assets/landing/helicone-mobile.webp"
                     width={125}
                     height={125}
@@ -442,12 +455,12 @@ export default function Example() {
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex relative mb-4 justify-center">
-                    <img
-                      className="z-20 absolute bottom-0 shadow-md rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
-                      src="/assets/home/bento/history.png"
+                    <Image
+                      className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
+                      src="/assets/home/bento/history.webp"
                       alt="requests"
-                      width={300}
-                      height={300}
+                      width={1858}
+                      height={854}
                     />
                   </div>
                   <h3 className="text-3xl font-semibold">Chat History</h3>
@@ -494,13 +507,13 @@ export default function Example() {
           </div>
           <div className="flex flex-col divide-y divide-gray-300 w-full">
             <div className="h-full rounded-xl flex flex-col text-left p-2 md:p-12">
-              <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 md:justify-center -mt-2 ">
+              <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 md:justify-center -mt-2 ">
                 {features.map((f, idx) => (
                   <li
                     key={idx}
-                    className="flex flex-row gap-4 justify-start items-start pt-6"
+                    className="flex flex-row gap-6 justify-start items-start pt-6 w-full"
                   >
-                    <div className="relative isolate bg-white h-14 w-14 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
+                    <div className="relative isolate bg-white h-16 w-16 border border-gray-300 shadow-sm rounded-lg flex justify-center items-center">
                       <svg
                         className="absolute inset-0 -z-10 h-full w-full"
                         aria-hidden="true"
@@ -512,13 +525,13 @@ export default function Example() {
                           fill="url(#123)"
                         />
                       </svg>
-                      <f.icon className="h-5 w-5 text-gray-900" />
+                      <f.icon className={clsx(f.color, "h-6 w-6")} />
                     </div>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-black font-semibold text-md w-[10rem] text-left">
+                    <div className="flex flex-col space-y-1 w-48">
+                      <p className="text-black font-semibold text-lg text-left">
                         {f.title}
                       </p>
-                      <p className="text-gray-700 text-sm text-left">
+                      <p className="text-gray-700 text-md text-left">
                         {f.description}
                       </p>
                     </div>
