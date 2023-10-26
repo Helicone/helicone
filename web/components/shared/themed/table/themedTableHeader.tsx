@@ -15,6 +15,7 @@ import useNotification from "../../notification/useNotification";
 import { useRouter } from "next/router";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import ViewButton from "./viewButton";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -43,12 +44,19 @@ interface ThemedTableHeaderProps<T> {
     defaultValue: "24h" | "7d" | "1m" | "3m" | "all";
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
   };
+
+  // define this if you want a table and view toggle
+  viewToggle?: {
+    currentView: "table" | "card";
+    onViewChange: (value: "table" | "card") => void;
+  };
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const { setNotification } = useNotification();
 
-  const { rows, columnsFilter, timeFilter, advancedFilters } = props;
+  const { rows, columnsFilter, timeFilter, advancedFilters, viewToggle } =
+    props;
 
   const searchParams = useSearchParams();
 
@@ -119,6 +127,14 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             />
           )}
           {rows.length > 0 && <ExportButton rows={rows} />}
+          {viewToggle && (
+            <ViewButton
+              currentView={viewToggle.currentView}
+              onViewChange={(value: "table" | "card") => {
+                viewToggle.onViewChange(value);
+              }}
+            />
+          )}
         </div>
       </div>
       {advancedFilters && showFilters && (
