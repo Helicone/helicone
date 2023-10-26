@@ -11,16 +11,14 @@ import {
 } from "@heroicons/react/24/outline";
 
 interface ViewButtonProps {
+  currentView: "table" | "card";
   onViewChange: (value: "table" | "card") => void;
 }
 
 export default function ViewButton(props: ViewButtonProps) {
-  const { onViewChange } = props;
-
-  const [view, setView] = useState<"table" | "card">("table");
+  const { currentView, onViewChange } = props;
 
   const onViewChangeHandler = (value: "table" | "card") => {
-    setView(value);
     onViewChange(value);
   };
 
@@ -61,7 +59,9 @@ export default function ViewButton(props: ViewButtonProps) {
                       Table
                     </div>
 
-                    {view === "table" && <CheckIcon className="h-5 w-5" />}
+                    {currentView === "table" && (
+                      <CheckIcon className="h-5 w-5" />
+                    )}
                   </button>
                 )}
               </Menu.Item>
@@ -79,7 +79,9 @@ export default function ViewButton(props: ViewButtonProps) {
                       <Squares2X2Icon className="mr-2 h-5 w-5" />
                       Card
                     </div>
-                    {view === "card" && <CheckIcon className="h-5 w-5" />}
+                    {currentView === "card" && (
+                      <CheckIcon className="h-5 w-5" />
+                    )}
                   </button>
                 )}
               </Menu.Item>

@@ -29,6 +29,7 @@ import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -83,7 +84,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
   );
-  const [view, setView] = useState<"table" | "card">("table");
+  const [view, setView] = useLocalStorage("view", "table");
 
   const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
     setVisibleColumns(newState);
@@ -92,7 +93,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   // this needs to be abstracted out to the parent component to become modular
   useEffect(() => {
     const requestsVisibility = window.localStorage.getItem(tableKey) || null;
-    setVisibleColumns(requestsVisibility ? JSON.parse(requestsVisibility) : {});
+    if (requestsVisibility) {
+      setVisibleColumns(JSON.parse(requestsVisibility));
+    }
   }, [tableKey]);
 
   // syncs the visibility state with local storage
@@ -149,6 +152,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         viewToggle={
           expandedRow
             ? {
+                currentView: view as "table" | "card",
                 onViewChange: setView,
               }
             : undefined

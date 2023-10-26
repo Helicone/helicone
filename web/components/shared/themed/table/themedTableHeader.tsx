@@ -47,6 +47,7 @@ interface ThemedTableHeaderProps<T> {
 
   // define this if you want a table and view toggle
   viewToggle?: {
+    currentView: "table" | "card";
     onViewChange: (value: "table" | "card") => void;
   };
 }
@@ -128,6 +129,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           {rows.length > 0 && <ExportButton rows={rows} />}
           {viewToggle && (
             <ViewButton
+              currentView={viewToggle.currentView}
               onViewChange={(value: "table" | "card") => {
                 viewToggle.onViewChange(value);
               }}

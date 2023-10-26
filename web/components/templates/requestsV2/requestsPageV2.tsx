@@ -434,7 +434,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             onRowSelectHandler(row, index);
           }}
           expandedRow={(row) => {
-            return <RequestCard request={row} />;
+            return <RequestCard request={row} properties={properties} />;
           }}
         />
         <TableFooter
