@@ -19,17 +19,15 @@ interface RequestRowProps {
 const RequestRow = (props: RequestRowProps) => {
   const { index, length, isSelected, row, onSelectRow, properties } = props;
 
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <li
       key={"request-row-view-" + index}
       className={clsx(
-        index === 0 && "rounded-t-lg",
-        index === length - 1 && "rounded-b-lg",
-        isSelected &&
-          "bg-gray-100 sticky top-0 bottom-0 ring-1 ring-gray-500 shadow-md",
-        "flex flex-col space-y-4 w-full p-4 hover:bg-gray-50 hover:cursor-pointer"
+        index === length - 1 && "rounded-b-lg border-b",
+        index === 0 && "rounded-t-lg border-t",
+        isSelected ? "bg-gray-100" : "bg-white",
+        isSelected && "sticky top-0 bottom-0 ring-1 ring-gray-500 shadow-md",
+        "flex flex-col space-y-4 w-full p-4 border-l border-r border-gray-300 hover:bg-gray-50 hover:cursor-pointer"
       )}
       onClick={() => onSelectRow(row)}
     >
@@ -50,29 +48,16 @@ const RequestRow = (props: RequestRowProps) => {
             row.cost || 0
           )}`}</p>
         </div>
-        <button
-          onClick={() => {
-            setIsOpen(!isOpen);
-          }}
-        >
-          <ChevronRightIcon
-            className={clsx(
-              isOpen && "transform rotate-90",
-              "h-4 w-4 text-gray-500"
-            )}
-          />
-        </button>
+
+        <ChevronRightIcon
+          className={clsx(
+            isSelected && "transform rotate-90",
+            "h-4 w-4 text-gray-500"
+          )}
+        />
       </div>
 
-      <Transition
-        show={isOpen}
-        enter="transition duration-100 ease-out"
-        enterFrom="transform scale-95 opacity-0"
-        enterTo="transform scale-100 opacity-100"
-        leave="transition duration-75 ease-out"
-        leaveFrom="transform scale-100 opacity-100"
-        leaveTo="transform scale-95 opacity-0"
-      >
+      {isSelected && (
         <div className="flex flex-col space-y-4">
           <p className="text-sm">
             <span className="font-semibold">User:</span> {row.user}
@@ -104,7 +89,7 @@ const RequestRow = (props: RequestRowProps) => {
               </>
             )}
         </div>
-      </Transition>
+      )}
     </li>
   );
 };
