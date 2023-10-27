@@ -30,6 +30,8 @@ import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import RequestRowView from "./requestRowView";
+import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -57,10 +59,15 @@ interface ThemedTableV5Props<T> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T, index: number) => void;
-  expandedRow?: (row: T) => React.ReactNode;
+  makeCard?: (row: T) => React.ReactNode;
+  makeRow?: {
+    properties: string[];
+  };
   hideView?: boolean;
   noDataCTA?: React.ReactNode;
 }
+
+export type RequestViews = "table" | "card" | "row";
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const {
@@ -73,18 +80,17 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     timeFilter,
     sortable,
     onRowSelect,
-    expandedRow,
+    makeCard,
+    makeRow,
     hideView, // hides the view columns button
     noDataCTA,
   } = props;
-
-  const router = useRouter();
 
   const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
   );
-  const [view, setView] = useLocalStorage("view", "table");
+  const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
   const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
     setVisibleColumns(newState);
@@ -150,9 +156,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             : undefined
         }
         viewToggle={
-          expandedRow
+          makeCard
             ? {
-                currentView: view as "table" | "card",
+                currentView: view,
                 onViewChange: setView,
               }
             : undefined
@@ -175,12 +181,17 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             No Columns Selected
           </p>
         </div>
-      ) : expandedRow && view === "card" ? (
+      ) : makeCard && view === "card" ? (
         <ul className="flex flex-col space-y-8 divide-y divide-gray-300 bg-white rounded-lg border border-gray-300">
           {rows.map((row, i) => (
-            <li key={"expanded-row" + i}>{expandedRow(row.original)}</li>
+            <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
           ))}
         </ul>
+      ) : makeRow && view === "row" ? (
+        <RequestRowView
+          rows={rows.map((row) => row.original as NormalizedRequest)}
+          properties={makeRow.properties}
+        />
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
           <div
