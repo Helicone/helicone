@@ -26,6 +26,7 @@ const RequestRowView = (props: RequestRowViewProps) => {
       <ul className="h-full w-full max-w-md flex flex-col bg-white divide-y divide-gray-300 border border-gray-300 rounded-lg">
         {rows.map((row, i) => (
           <RequestRow
+            key={i}
             index={i}
             length={rows.length}
             isSelected={selectedRow?.id === row.id}
