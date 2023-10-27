@@ -22,8 +22,8 @@ const RequestRowView = (props: RequestRowViewProps) => {
   );
 
   return (
-    <div className="flex flex-row gap-4 relative">
-      <ul className="h-full w-full max-w-md flex flex-col bg-white divide-y divide-gray-300 border border-gray-300 rounded-lg">
+    <div className="flex flex-row gap-4 relative h-full">
+      <ul className="h-auto w-full max-w-md flex flex-col divide-y divide-gray-300">
         {rows.map((row, i) => (
           <RequestRow
             key={i}
