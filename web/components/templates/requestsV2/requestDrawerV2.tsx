@@ -3,10 +3,10 @@ import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import { RequestView } from "./views/RequestView";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
+import { RequestView } from "./views/RequestView";
 
 interface RequestDrawerV2Props {
   open: boolean;
