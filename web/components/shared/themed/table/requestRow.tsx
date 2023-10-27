@@ -19,6 +19,8 @@ interface RequestRowProps {
 const RequestRow = (props: RequestRowProps) => {
   const { index, length, isSelected, row, onSelectRow, properties } = props;
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <li
       key={"request-row-view-" + index}
@@ -29,7 +31,12 @@ const RequestRow = (props: RequestRowProps) => {
         isSelected && "sticky top-0 bottom-0 ring-1 ring-gray-500 shadow-md",
         "flex flex-col space-y-4 w-full p-4 border-l border-r border-gray-300 hover:bg-gray-50 hover:cursor-pointer"
       )}
-      onClick={() => onSelectRow(row)}
+      onClick={() => {
+        if (isSelected) {
+          setIsExpanded(!isExpanded);
+        }
+        onSelectRow(row);
+      }}
     >
       <div className="flex flex-row space-x-4 items-center">
         <p className="text-sm font-semibold">
@@ -51,13 +58,13 @@ const RequestRow = (props: RequestRowProps) => {
 
         <ChevronRightIcon
           className={clsx(
-            isSelected && "transform rotate-90",
+            isSelected && isExpanded && "transform rotate-90",
             "h-4 w-4 text-gray-500"
           )}
         />
       </div>
 
-      {isSelected && (
+      {isSelected && isExpanded && (
         <div className="flex flex-col space-y-4">
           <p className="text-sm">
             <span className="font-semibold">User:</span> {row.user}
