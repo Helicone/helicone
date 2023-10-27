@@ -25,7 +25,7 @@ export default function ViewButton(props: ViewButtonProps) {
   };
 
   return (
-    <div className="text-right">
+    <div className="hidden md:block text-right">
       <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2">
