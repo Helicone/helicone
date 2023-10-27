@@ -27,7 +27,7 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import useNotification from "../../shared/notification/useNotification";
 import { Switch } from "@headlessui/react";
 import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { RequestView } from "./views/RequestView";
+import { RequestView } from "./views/requestView";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
@@ -433,8 +433,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           onRowSelect={(row, index) => {
             onRowSelectHandler(row, index);
           }}
-          expandedRow={(row) => {
+          makeCard={(row) => {
             return <RequestCard request={row} properties={properties} />;
+          }}
+          makeRow={{
+            properties: properties,
           }}
         />
         <TableFooter

@@ -5,20 +5,22 @@ import {
   ArrowDownTrayIcon,
   CheckIcon,
   ChevronDoubleDownIcon,
+  Square2StackIcon,
   Square3Stack3DIcon,
   Squares2X2Icon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
+import { RequestViews } from "./themedTableV5";
 
 interface ViewButtonProps {
-  currentView: "table" | "card";
-  onViewChange: (value: "table" | "card") => void;
+  currentView: RequestViews;
+  onViewChange: (value: RequestViews) => void;
 }
 
 export default function ViewButton(props: ViewButtonProps) {
   const { currentView, onViewChange } = props;
 
-  const onViewChangeHandler = (value: "table" | "card") => {
+  const onViewChangeHandler = (value: RequestViews) => {
     onViewChange(value);
   };
 
@@ -62,6 +64,24 @@ export default function ViewButton(props: ViewButtonProps) {
                     {currentView === "table" && (
                       <CheckIcon className="h-5 w-5" />
                     )}
+                  </button>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    className={`${
+                      active ? "bg-sky-100 text-gray-900" : "text-gray-900"
+                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                    onClick={() => {
+                      onViewChangeHandler("row");
+                    }}
+                  >
+                    <div className="flex w-full items-center">
+                      <Square2StackIcon className="mr-2 h-5 w-5" />
+                      Row
+                    </div>
+                    {currentView === "row" && <CheckIcon className="h-5 w-5" />}
                   </button>
                 )}
               </Menu.Item>

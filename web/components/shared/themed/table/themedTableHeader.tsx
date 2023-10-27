@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import useSearchParams from "../../utils/useSearchParams";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import ViewButton from "./viewButton";
+import { RequestViews } from "./themedTableV5";
 
 interface ThemedTableHeaderProps<T> {
   rows: T[];
@@ -47,8 +48,8 @@ interface ThemedTableHeaderProps<T> {
 
   // define this if you want a table and view toggle
   viewToggle?: {
-    currentView: "table" | "card";
-    onViewChange: (value: "table" | "card") => void;
+    currentView: RequestViews;
+    onViewChange: (value: RequestViews) => void;
   };
 }
 
@@ -130,7 +131,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           {viewToggle && (
             <ViewButton
               currentView={viewToggle.currentView}
-              onViewChange={(value: "table" | "card") => {
+              onViewChange={(value: RequestViews) => {
                 viewToggle.onViewChange(value);
               }}
             />
