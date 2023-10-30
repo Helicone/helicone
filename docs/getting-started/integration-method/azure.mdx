@@ -43,13 +43,13 @@ openai.ChatCompletion.create(
   <Accordion title="OpenAI v4+">
     ```typescript
     const openai = new OpenAI({
-      baseURL: "https://oai.hconeai.com/openai/deployments/DEPLOYMENTNAME/chat/completions",
+      baseURL: "https://oai.hconeai.com/openai/deployments/[DEPLOYMENTNAME]",
       defaultHeaders: {
         "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
         "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
         "api-key": "[AZURE_API_KEY]",
       },
-      defaultQuery: { "api-version": "2023-03-15-preview" },
+      defaultQuery: { "api-version": "[API_VERSION]" },
     });
     ```
   </Accordion>
