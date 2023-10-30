@@ -34,11 +34,13 @@ export class RosettaWrapper {
       request: string;
       response: string;
     },
+    requestPath: string,
     provider: string,
     model: string
   ): Promise<Json | null> {
     const outputSchema = JSON.parse(JSON.stringify(requestResponseSchema));
-    const key = `${provider}:${model}`;
+    // const key = `${provider}:${model}`;
+    const key = `${provider}:${new URL(requestPath).pathname}`;
 
     try {
       return await this.rosetta.map(requestResponse, outputSchema, key);
