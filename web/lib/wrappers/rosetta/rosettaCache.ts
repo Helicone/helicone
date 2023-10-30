@@ -8,13 +8,22 @@ export class RosettaCache implements ICacheService {
   private defaultTTLSeconds: number = 120; // 2 minutes
 
   async getMappers(mapperKey: string): Promise<RosettaMapper[]> {
-    const rosettaMappers = ((await kv.get(mapperKey)) ?? []) as RosettaMapper[];
-
-    if (!rosettaMappers || rosettaMappers.length === 0) {
-      return [];
+    let rosettaMappers: RosettaMapper[] = [];
+    try {
+      rosettaMappers = ((await kv.get(mapperKey)) ?? []) as RosettaMapper[];
+    } catch (error: any) {
+      console.error("Error getting mappers: ", error.message);
     }
 
-    return rosettaMappers;
+    return rosettaMappers ?? [];
+  }
+
+  async invalidateMappers(mapperKey: string): Promise<void> {
+    try {
+      await kv.del(mapperKey);
+    } catch (error: any) {
+      console.error("Error invalidating mappers: ", error.message);
+    }
   }
 
   async insertMappers(
@@ -22,16 +31,10 @@ export class RosettaCache implements ICacheService {
     mappers: RosettaMapper[],
     ttl: number = this.defaultTTLSeconds
   ): Promise<void> {
-    await kv.set(mapperKey, mappers, { ex: ttl });
-  }
-
-  async insertMapper(
-    mapperKey: string,
-    mapper: RosettaMapper,
-    ttl: number = this.defaultTTLSeconds
-  ): Promise<void> {
-    const existingMappers = (await this.getMappers(mapperKey)) || [];
-    existingMappers.push(mapper);
-    await this.insertMappers(mapperKey, existingMappers, ttl);
+    try {
+      await kv.set(mapperKey, mappers, { ex: ttl });
+    } catch (error: any) {
+      console.error("Error inserting mappers: ", error.message);
+    }
   }
 }

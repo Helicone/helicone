@@ -39,8 +39,7 @@ export class RosettaWrapper {
     model: string
   ): Promise<Json | null> {
     const outputSchema = JSON.parse(JSON.stringify(requestResponseSchema));
-    // const key = `${provider}:${model}`;
-    const key = `${provider}:${new URL(requestPath).pathname}`;
+    const key = `${provider}:${requestPath}`;
 
     try {
       return await this.rosetta.map(requestResponse, outputSchema, key);

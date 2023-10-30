@@ -216,16 +216,17 @@ async function mapLLMCalls(
 
       let mappedRequest: { [key: string]: Json | undefined } | null = null;
       try {
+        const requestPath = new URL(heliconeRequest.request_path).pathname;
         mappedRequest = (await rosettaWrapper.mapLLMCall(
           {
             request: {
               ...heliconeRequest.request_body,
-              request_path: heliconeRequest.request_path,
+              request_path: requestPath,
               model_best_guess: model,
             },
             response: heliconeRequest.response_body,
           },
-          heliconeRequest.request_path,
+          requestPath,
           heliconeRequest.provider,
           model
         )) as { [key: string]: Json | undefined };

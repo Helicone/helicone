@@ -20,12 +20,12 @@ export class RosettaStore implements IDatabaseService {
       .select("*")
       .in("status", statuses);
 
-    if (error || !data) {
+    if (error) {
       console.error("Failed to retrieve rosetta mappers", error);
       return [];
     }
 
-    return data.map((mapper) => this.ToRosettaMapper(mapper));
+    return data?.map((mapper) => this.ToRosettaMapper(mapper)) ?? [];
   }
 
   public async getMappers(mapperKey: string): Promise<RosettaMapper[]> {
@@ -34,12 +34,12 @@ export class RosettaStore implements IDatabaseService {
       .select("*")
       .eq("key", mapperKey);
 
-    if (error || !data) {
+    if (error) {
       console.error("Failed to retrieve rosetta mappers", error);
       return [];
     }
 
-    return data.map((mapper) => this.ToRosettaMapper(mapper));
+    return data?.map((mapper) => this.ToRosettaMapper(mapper)) ?? [];
   }
 
   public async updateMapper(rosettaMapper: RosettaMapper): Promise<void> {
@@ -58,7 +58,10 @@ export class RosettaStore implements IDatabaseService {
     const newMapper = this.ToDbMapper(mapper);
     const { error } = await this.supabaseClient
       .from("rosetta_mappers")
-      .insert(newMapper);
+      .upsert(newMapper, {
+        onConflict: "key,version",
+        ignoreDuplicates: true,
+      });
 
     if (error) {
       console.error("Failed to add rosetta mapper", error);
