@@ -60,7 +60,7 @@ export async function getRequests(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
-  supabaseServer: SupabaseClient<Database>
+  supabaseServer?: SupabaseClient<Database>
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -113,6 +113,11 @@ export async function getRequests(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+  if (!supabaseServer) {
+    return resultMap(requests, (data) => {
+      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    });
+  }
 
   const rosettaWrapper = new RosettaWrapper(supabaseServer);
   const results = await mapLLMCalls(requests.data, rosettaWrapper);
@@ -128,7 +133,7 @@ export async function getRequestsCached(
   offset: number,
   limit: number,
   sort: SortLeafRequest,
-  supabaseServer: SupabaseClient<Database>
+  supabaseServer?: SupabaseClient<Database>
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -181,6 +186,11 @@ export async function getRequestsCached(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+  if (!supabaseServer) {
+    return resultMap(requests, (data) => {
+      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
+    });
+  }
 
   const rosettaWrapper = new RosettaWrapper(supabaseServer);
   const results = await mapLLMCalls(requests.data, rosettaWrapper);
