@@ -7,11 +7,11 @@ import { kv } from "@vercel/kv";
 export class RosettaCache implements ICacheService {
   private defaultTTLSeconds: number = 120; // 2 minutes
 
-  async getMappers(mapperKey: string): Promise<RosettaMapper[] | null> {
+  async getMappers(mapperKey: string): Promise<RosettaMapper[]> {
     const rosettaMappers = ((await kv.get(mapperKey)) ?? []) as RosettaMapper[];
 
     if (!rosettaMappers || rosettaMappers.length === 0) {
-      return null;
+      return [];
     }
 
     return rosettaMappers;

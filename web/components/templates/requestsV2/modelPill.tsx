@@ -11,6 +11,8 @@ const ModelPill = (props: ModelPillProps) => {
   const builderType = getBuilderType(model, "OPENAI");
 
   let modelMapping = {
+    ChatBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
+    CompletionBuilder: "bg-green-50 text-green-700 ring-green-200",
     ChatGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
     GPT3Builder: "bg-green-50 text-green-700 ring-green-200",
     ModerationBuilder: "bg-teal-50 text-teal-700 ring-teal-200",

@@ -23,12 +23,12 @@ export type BuilderType =
   | "CustomBuilder"
   | "UnknownBuilder";
 
-type LLMType = "chat" | "completion" | null;
+type LLMType = "chat" | "completion";
 
 export const getBuilderType = (
   model: string,
   provider: Provider,
-  llmType: LLMType
+  llmType?: LLMType
 ): BuilderType => {
   if (llmType === "chat") {
     return "ChatBuilder";
