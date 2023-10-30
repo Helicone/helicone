@@ -213,7 +213,7 @@ interface ChatProps {
 export const Chat = (props: ChatProps) => {
   const { request, response } = props;
 
-  const [expanedChildren, setExpandedChildren] = React.useState<{
+  const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
     Object.fromEntries(
@@ -221,7 +221,7 @@ export const Chat = (props: ChatProps) => {
     )
   );
 
-  const allExpanded = Object.values(expanedChildren).every(
+  const allExpanded = Object.values(expandedChildren).every(
     (value) => value === true
   );
 
@@ -235,13 +235,16 @@ export const Chat = (props: ChatProps) => {
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="flex flex-row justify-between">
-        <p className="font-semibold text-gray-900 text-sm">Chat</p>
+        {/* <p className="font-semibold text-gray-900 text-sm">Chat</p> */}
         <Tooltip title={clsx(allExpanded ? "Shrink All" : "Expand All")}>
           <button
             onClick={() => {
               setExpandedChildren(
                 Object.fromEntries(
-                  Object.keys(expanedChildren).map((key) => [key, !allExpanded])
+                  Object.keys(expandedChildren).map((key) => [
+                    key,
+                    !allExpanded,
+                  ])
                 )
               );
             }}
@@ -264,10 +267,10 @@ export const Chat = (props: ChatProps) => {
                 index={index}
                 isLast={index === messages.length - 1}
                 expandedProps={{
-                  expanded: expanedChildren[index],
+                  expanded: expandedChildren[index],
                   setExpanded: (expanded: boolean) => {
                     setExpandedChildren({
-                      ...expanedChildren,
+                      ...expandedChildren,
                       [index]: expanded,
                     });
                   },
