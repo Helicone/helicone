@@ -19,6 +19,7 @@ import AddHeliconeKeyModal from "./addHeliconeKeyModal";
 import { useKeysPage } from "./useKeysPage";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import AddKeyModal from "./addKeyModal";
+import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -84,6 +85,11 @@ const KeyPage = (props: KeyPageProps) => {
               key_name: (
                 <p className="font-semibold text-gray-900">
                   {key.api_key_name}
+                </p>
+              ),
+              created_at: (
+                <p className="text-gray-500">
+                  {getUSDateFromString(key.created_at)}
                 </p>
               ),
             };
