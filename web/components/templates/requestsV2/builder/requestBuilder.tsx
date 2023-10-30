@@ -4,11 +4,17 @@ import EmbeddingBuilder from "./embeddingBuilder";
 import ChatGPTBuilder from "./chatGPTBuilder";
 import GPT3Builder from "./GPT3Builder";
 import ModerationBuilder from "./moderationBuilder";
-import AbstractRequestBuilder from "./abstractRequestBuilder";
+import AbstractRequestBuilder, {
+  NormalizedRequest,
+} from "./abstractRequestBuilder";
 import CustomBuilder from "./customBuilder";
 import UnknownBuilder from "./unknownBuilder";
+import ChatBuilder from "./chatBuilder";
+import CompletionBuilder from "./completionBuilder";
 
 export type BuilderType =
+  | "ChatBuilder"
+  | "CompletionBuilder"
   | "ChatGPTBuilder"
   | "GPT3Builder"
   | "ModerationBuilder"
@@ -17,10 +23,21 @@ export type BuilderType =
   | "CustomBuilder"
   | "UnknownBuilder";
 
+type LLMType = "chat" | "completion" | null;
+
 export const getBuilderType = (
   model: string,
-  provider: Provider
+  provider: Provider,
+  llmType: LLMType
 ): BuilderType => {
+  if (llmType === "chat") {
+    return "ChatBuilder";
+  }
+
+  if (llmType === "completion") {
+    return "CompletionBuilder";
+  }
+
   if (provider === "CUSTOM") {
     return "CustomBuilder";
   }
@@ -65,6 +82,8 @@ const builders: {
     model: string
   ) => AbstractRequestBuilder;
 } = {
+  ChatBuilder: ChatBuilder,
+  CompletionBuilder: CompletionBuilder,
   ChatGPTBuilder: ChatGPTBuilder,
   GPT3Builder: GPT3Builder,
   ModerationBuilder: ModerationBuilder,
@@ -85,16 +104,28 @@ const getModelFromPath = (path: string) => {
   }
 };
 
-const getRequestBuilder = (request: HeliconeRequest) => {
+const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
   let model =
     request.response_body?.model ||
     request.request_body?.model ||
     request.response_body?.body?.model || // anthropic
     getModelFromPath(request.request_path) ||
     "";
-  const builderType = getBuilderType(model, request.provider);
+  const builderType = getBuilderType(
+    model,
+    request.provider,
+    useRosetta ? request.request_body_pretty?.llm_type : null
+  );
   let builder = builders[builderType];
   return new builder(request, model);
 };
 
-export default getRequestBuilder;
+const getNormalizedRequest = (request: HeliconeRequest): NormalizedRequest => {
+  try {
+    return getRequestBuilder(request, true).build();
+  } catch (error) {
+    return getRequestBuilder(request, false).build();
+  }
+};
+
+export default getNormalizedRequest;

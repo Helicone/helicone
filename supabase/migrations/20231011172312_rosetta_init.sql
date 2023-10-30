@@ -5,7 +5,8 @@ CREATE TYPE mapper_status AS ENUM (
     'PENDING_APPROVAL',
     'ACTIVE',
     'INACTIVE',
-    'DECLINED'
+    'DECLINED',
+    'FAILED'
 );
 CREATE TABLE rosetta_mappers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
