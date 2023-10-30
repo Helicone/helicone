@@ -24,14 +24,12 @@ import { HeliconeRequest } from "../../../lib/api/request/request";
 import getRequestBuilder from "./builder/requestBuilder";
 import { Result } from "../../../lib/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import useNotification from "../../shared/notification/useNotification";
-import { Switch } from "@headlessui/react";
-import { BoltIcon, BoltSlashIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { RequestView } from "./RequestView";
+
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import getNormalizedRequest from "./builder/requestBuilder";
+import RequestCard from "./views/requestCard";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -433,17 +431,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           onRowSelect={(row, index) => {
             onRowSelectHandler(row, index);
           }}
-          expandedRow={(row) => {
-            return (
-              <div className="flex flex-col space-y-2 border-2 p-2 my-2">
-                <RequestView
-                  request={row}
-                  properties={[]}
-                  open={true}
-                  wFull={true}
-                />
-              </div>
-            );
+          makeCard={(row) => {
+            return <RequestCard request={row} properties={properties} />;
+          }}
+          makeRow={{
+            properties: properties,
           }}
         />
         <TableFooter

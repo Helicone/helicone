@@ -29,6 +29,9 @@ import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import RequestRowView from "./requestRowView";
+import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -56,11 +59,15 @@ interface ThemedTableV5Props<T> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T, index: number) => void;
-  chart?: React.ReactNode;
-  expandedRow?: (row: T) => React.ReactNode;
+  makeCard?: (row: T) => React.ReactNode;
+  makeRow?: {
+    properties: string[];
+  };
   hideView?: boolean;
   noDataCTA?: React.ReactNode;
 }
+
+export type RequestViews = "table" | "card" | "row";
 
 export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   const {
@@ -73,18 +80,17 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     timeFilter,
     sortable,
     onRowSelect,
-    expandedRow,
-    chart,
-    hideView,
+    makeCard,
+    makeRow,
+    hideView, // hides the view columns button
     noDataCTA,
   } = props;
-
-  const router = useRouter();
 
   const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
     defaultColumns.map((column) => column.id as string) // must start out with populated columnOrder so we can splice
   );
+  const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
   const onVisibilityHandler: OnChangeFn<VisibilityState> = (newState) => {
     setVisibleColumns(newState);
@@ -93,7 +99,9 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   // this needs to be abstracted out to the parent component to become modular
   useEffect(() => {
     const requestsVisibility = window.localStorage.getItem(tableKey) || null;
-    setVisibleColumns(requestsVisibility ? JSON.parse(requestsVisibility) : {});
+    if (requestsVisibility) {
+      setVisibleColumns(JSON.parse(requestsVisibility));
+    }
   }, [tableKey]);
 
   // syncs the visibility state with local storage
@@ -147,9 +155,17 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
               }
             : undefined
         }
+        viewToggle={
+          makeCard
+            ? {
+                currentView: view,
+                onViewChange: setView,
+              }
+            : undefined
+        }
         rows={exportData || []}
       />
-      {chart}
+
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
@@ -161,17 +177,21 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
       ) : table.getVisibleFlatColumns().length === 0 ? (
         <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
           <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-400" />
-
           <p className="text-xl font-semibold text-gray-500">
             No Columns Selected
           </p>
         </div>
-      ) : router.query.expanded && expandedRow ? (
-        <div className="overflow-x-auto text-sm bg-white rounded-lg border border-gray-300 py-2 px-4">
+      ) : makeCard && view === "card" ? (
+        <ul className="flex flex-col space-y-8 divide-y divide-gray-300 bg-white rounded-lg border border-gray-300">
           {rows.map((row, i) => (
-            <div key={"expanded-row" + i}>{expandedRow(row.original)}</div>
+            <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
           ))}
-        </div>
+        </ul>
+      ) : makeRow && view === "row" ? (
+        <RequestRowView
+          rows={rows.map((row) => row.original as NormalizedRequest)}
+          properties={makeRow.properties}
+        />
       ) : (
         <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
           <div
