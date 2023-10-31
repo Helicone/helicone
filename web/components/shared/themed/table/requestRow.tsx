@@ -25,8 +25,8 @@ const RequestRow = (props: RequestRowProps) => {
     <li
       key={"request-row-view-" + index}
       className={clsx(
-        index === length - 1 && "rounded-b-lg border-b",
-        index === 0 && "rounded-t-lg border-t",
+        index === length - 1 && "border-b",
+        index === 0 && "border-t",
         isSelected ? "bg-gray-100" : "bg-white",
         isSelected && "sticky top-0 bottom-0 ring-1 ring-gray-500 shadow-md",
         "flex flex-col space-y-4 w-full p-4 border-l border-r border-gray-300 hover:bg-gray-50 hover:cursor-pointer"
