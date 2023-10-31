@@ -48,8 +48,6 @@ export function RequestView(props: {
     wFull = false,
     displayPreview = true,
   } = props;
-  const [mode, setMode] = useState<"pretty" | "json">("pretty");
-  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [requestFeedback, setRequestFeedback] = useState<{
     createdAt: string | null;
     id: string | null;
@@ -59,15 +57,7 @@ export function RequestView(props: {
   const router = useRouter();
   const { setNotification } = useNotification();
 
-  // set the mode to pretty if the drawer closes, also clear the requestId
-  useEffect(() => {
-    if (!open) {
-      setMode("pretty");
-    }
-  }, [open, router]);
-
   const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
-    setIsFeedbackLoading(true);
     updateRequestFeedback(requestId, rating)
       .then((res) => {
         if (res && res.status === 200) {
@@ -81,9 +71,6 @@ export function RequestView(props: {
       .catch((err) => {
         console.error(err);
         setNotification("Error submitting feedback", "error");
-      })
-      .finally(() => {
-        setIsFeedbackLoading(false);
       });
   };
 
@@ -184,22 +171,7 @@ export function RequestView(props: {
         )}
       {displayPreview && (
         <div className="flex flex-col space-y-8">
-          <div className="flex w-full justify-between">
-            <ThemedTabs
-              options={[
-                {
-                  label: "Pretty",
-                  icon: EyeIcon,
-                },
-                {
-                  label: "JSON",
-                  icon: CodeBracketIcon,
-                },
-              ]}
-              onOptionSelect={(option) =>
-                setMode(option.toLowerCase() as "pretty" | "json")
-              }
-            />
+          <div className="flex w-full justify-end">
             <div className="flex flex-row items-center space-x-4">
               <button
                 onClick={() => {
@@ -233,17 +205,8 @@ export function RequestView(props: {
               </button>
             </div>
           </div>
-          {mode === "pretty" ? (
-            <div className="flex flex-col space-y-2">{request.render}</div>
-          ) : (
-            <Completion
-              request={JSON.stringify(request.requestBody, null, 4)}
-              response={{
-                title: "Response",
-                text: JSON.stringify(request.responseBody, null, 4),
-              }}
-            />
-          )}
+
+          <div className="flex flex-col space-y-2">{request.render}</div>
         </div>
       )}
     </div>
