@@ -10,9 +10,12 @@ import {
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-
-import React from "react";
+import theme from "prism-react-renderer/themes/dracula";
+import React, { useState } from "react";
 import { Tooltip } from "@mui/material";
+import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import Prism, { defaultProps } from "prism-react-renderer";
+import { Completion } from "./completion";
 
 export type Message = {
   id: string;
@@ -49,7 +52,7 @@ export const SingleChat = (props: {
     message?.content?.toString() || ""
   );
 
-  const MAX_LENGTH = isLast ? 500 : 200;
+  const MAX_LENGTH = isLast ? 500 : 220;
   const MAX_NEWLINES = isLast ? 10 : 3;
 
   const checkShouldTruncate = (message: string) => {
@@ -68,10 +71,13 @@ export const SingleChat = (props: {
   }
 
   const getBgColor = () => {
-    if (isAssistant || isSystem) {
+    if (isSystem) {
       return "bg-gray-100";
+    }
+    if (isAssistant) {
+      return "bg-gray-50";
     } else if (isFunction) {
-      return "bg-gray-200";
+      return "bg-gray-100";
     } else {
       return "bg-white";
     }
@@ -94,12 +100,11 @@ export const SingleChat = (props: {
         getBgColor(),
         "items-start p-4 text-left grid grid-cols-12 space-x-2",
         isSystem && "font-semibold",
-        index === 0 && "rounded-t-md",
         isLast && "rounded-b-md"
       )}
       key={index}
     >
-      <div className="col-span-1">
+      <div className="col-span-1 flex items-center justify-center">
         {isAssistant || isSystem ? (
           <Image
             src={"/assets/chatGPT.png"}
@@ -109,9 +114,9 @@ export const SingleChat = (props: {
             alt="ChatGPT Logo"
           />
         ) : isFunction ? (
-          <CodeBracketIcon className="h-6 w-6 rounded-full border bg-white text-black border-black p-1" />
+          <CodeBracketIcon className="h-6 w-6 rounded-md border bg-white text-black border-black p-1" />
         ) : (
-          <UserIcon className="h-6 w-6 bg-white rounded-full p-1 border border-black text-black" />
+          <UserIcon className="h-6 w-6 bg-white rounded-md p-1 border border-black text-black" />
         )}
       </div>
       <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
@@ -144,7 +149,7 @@ export const SingleChat = (props: {
             )}
           </div>
         ) : (
-          <p className="text-sm whitespace-pre-wrap break-words">
+          <p className="text-sm whitespace-pre-wrap break-words leading-6">
             {formattedMessageContent}
           </p>
         )}
@@ -152,12 +157,12 @@ export const SingleChat = (props: {
         {possiblyTruncated &&
           (needsTruncation ? (
             <>
-              <div
+              {/* <div
                 className={clsx(
                   getBgColor(),
                   "inset-0 bg-gradient-to-b from-transparent pointer-events-none flex flex-col justify-end items-center"
                 )}
-              ></div>
+              ></div> */}
               <button
                 className={clsx(
                   getBgColor(),
@@ -191,29 +196,18 @@ export const SingleChat = (props: {
 };
 
 interface ChatProps {
-  request:
-    | {
-        id: string;
-        role: string;
-        content: string;
-      }[]
-    | null;
-  response: {
-    id: string;
-    role: string;
-    content: string | null;
-    function_call?: {
-      name: string;
-      arguments: string;
-    };
-  } | null;
+  requestBody: any;
+  responseBody: any;
   status: number;
 }
 
 export const Chat = (props: ChatProps) => {
-  const { request, response } = props;
+  const { requestBody, responseBody } = props;
 
-  const [expanedChildren, setExpandedChildren] = React.useState<{
+  const request = requestBody?.messages ?? null;
+  const response = responseBody?.choices?.[0]?.message ?? null;
+
+  const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
     Object.fromEntries(
@@ -221,11 +215,13 @@ export const Chat = (props: ChatProps) => {
     )
   );
 
-  const allExpanded = Object.values(expanedChildren).every(
+  const allExpanded = Object.values(expandedChildren).every(
     (value) => value === true
   );
 
   let messages: Message[] = request || [];
+
+  const [mode, setMode] = useState<"pretty" | "json">("pretty");
 
   // only display the response if the status is 200
   if (props.status === 200 && response) {
@@ -234,29 +230,59 @@ export const Chat = (props: ChatProps) => {
 
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <div className="flex flex-row justify-between">
-        <p className="font-semibold text-gray-900 text-sm">Chat</p>
-        <Tooltip title={clsx(allExpanded ? "Shrink All" : "Expand All")}>
+      <div className="w-full border border-gray-300 rounded-md divide-y divide-gray-300 h-full">
+        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 text-gray-900">
           <button
             onClick={() => {
               setExpandedChildren(
                 Object.fromEntries(
-                  Object.keys(expanedChildren).map((key) => [key, !allExpanded])
+                  Object.keys(expandedChildren).map((key) => [
+                    key,
+                    !allExpanded,
+                  ])
                 )
               );
             }}
-            className="hover:bg-gray-200 rounded-md -m-1 p-1 text-gray-500"
+            className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
           >
             {allExpanded ? (
-              <EyeSlashIcon className="h-5 w-5" />
+              <EyeSlashIcon className="h-4 w-4" />
             ) : (
-              <EyeIcon className="h-5 w-5" />
+              <EyeIcon className="h-4 w-4" />
             )}
+            <p className="text-xs font-semibold">
+              {allExpanded ? "Shrink All" : "Expand All"}
+            </p>
           </button>
-        </Tooltip>
-      </div>
-      <div className="w-full border border-gray-300 bg-gray-100 rounded-md divide-y divide-gray-200 h-full">
-        {messages.length > 0 ? (
+          <button
+            onClick={() => {
+              setMode(mode === "pretty" ? "json" : "pretty");
+            }}
+            className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+          >
+            <ChevronUpDownIcon className="h-4 w-4" />
+            <p className="text-xs font-semibold">
+              {mode === "pretty" ? "JSON" : "Pretty"}
+            </p>
+          </button>
+        </div>
+
+        {mode === "json" ? (
+          <div className="flex flex-col space-y-8 bg-gray-50 relative">
+            <div className="flex flex-col space-y-2 p-4">
+              <p className="font-semibold text-gray-900 text-md">Request</p>
+              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300">
+                {JSON.stringify(requestBody, null, 4)}
+              </pre>
+            </div>
+            <div className="flex flex-col space-y-2 p-4">
+              <p className="font-semibold text-gray-900 text-md">Response</p>
+              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300">
+                {JSON.stringify(responseBody, null, 4)}
+              </pre>
+            </div>
+          </div>
+        ) : messages.length > 0 ? (
           messages.map((message, index) => {
             return (
               <SingleChat
@@ -264,10 +290,10 @@ export const Chat = (props: ChatProps) => {
                 index={index}
                 isLast={index === messages.length - 1}
                 expandedProps={{
-                  expanded: expanedChildren[index],
+                  expanded: expandedChildren[index],
                   setExpanded: (expanded: boolean) => {
                     setExpandedChildren({
-                      ...expanedChildren,
+                      ...expandedChildren,
                       [index]: expanded,
                     });
                   },

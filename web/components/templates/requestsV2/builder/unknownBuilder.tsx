@@ -6,14 +6,14 @@ import AbstractRequestBuilder, {
 class UnknownBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     return {
-      requestText: "Unsupported model.",
-      responseText: "This model is not supported by Helicone.",
+      requestText: "",
+      responseText: "",
       render: (
         <Completion
-          request={"Unsupported model."}
+          request={""}
           response={{
             title: "Error",
-            text: "This model is not supported by Helicone.",
+            text: "",
           }}
         />
       ),
