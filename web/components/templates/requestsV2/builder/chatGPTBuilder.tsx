@@ -63,16 +63,16 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Chat
-            request={this.response.request_body.messages}
-            response={this.response.response_body?.choices?.[0]?.message}
+            requestBody={this.response.request_body}
+            responseBody={this.response.response_body}
             status={this.response.response_status}
           />
         ) : (
           <div className="w-full flex flex-col text-left space-y-8 text-sm">
             {this.response.request_body.messages && (
               <Chat
-                request={this.response.request_body.messages}
-                response={null}
+                requestBody={this.response.request_body}
+                responseBody={this.response.response_body}
                 status={this.response.response_status}
               />
             )}

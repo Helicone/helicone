@@ -6,7 +6,10 @@ import { formatNumber } from "../../../templates/users/initialColumns";
 import { getUSDate } from "../../utils/utils";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronRightIcon,
+  Square2StackIcon,
+} from "@heroicons/react/24/outline";
 import RequestRow from "./requestRow";
 
 interface RequestRowViewProps {
@@ -38,15 +41,17 @@ const RequestRowView = (props: RequestRowViewProps) => {
           />
         ))}
       </ul>
-      <div className="h-full w-full bg-white p-4 rounded-lg border border-gray-300">
-        {selectedRow ? (
-          <div>{selectedRow.render}</div>
-        ) : (
-          <div className="flex justify-center items-center h-[70vh]">
-            <LoadingAnimation title="Select a row to view" />
-          </div>
-        )}
-      </div>
+
+      {selectedRow ? (
+        <div className="w-full">{selectedRow.render}</div>
+      ) : (
+        <div className="flex flex-col space-y-4 justify-center items-center h-[75vh] w-full bg-white border border-gray-300 rounded-lg">
+          <Square2StackIcon className="h-12 w-12 text-gray-600" />
+          <p className="text-xl font-semibold text-gray-900">
+            Select a row to view
+          </p>
+        </div>
+      )}
     </div>
   );
 };
