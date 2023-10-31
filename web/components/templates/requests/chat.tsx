@@ -231,7 +231,7 @@ export const Chat = (props: ChatProps) => {
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-gray-300 rounded-md divide-y divide-gray-300 h-full">
-        <div className="h-10 px-2 rounded-t-md flex flex-row items-center justify-between w-full bg-gray-50 text-gray-900">
+        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 text-gray-900">
           <button
             onClick={() => {
               setExpandedChildren(
