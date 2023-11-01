@@ -20,11 +20,12 @@ enum Role {
 
 enum Permission {
   MANAGE_KEYS = "manageKeys",
+  MANAGE_ALERTS = "manageAlerts",
 }
 
 const rolePermissions: Record<Role, Permission[]> = {
-  [Role.ADMIN]: [Permission.MANAGE_KEYS],
-  [Role.OWNER]: [Permission.MANAGE_KEYS],
+  [Role.ADMIN]: [Permission.MANAGE_KEYS, Permission.MANAGE_ALERTS],
+  [Role.OWNER]: [Permission.MANAGE_KEYS, Permission.MANAGE_ALERTS],
   [Role.MEMBER]: [],
 };
 

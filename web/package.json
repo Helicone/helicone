@@ -48,6 +48,7 @@
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "graphql-type-json": "^0.3.2",
+    "joi": "^17.11.0",
     "js-cookie": "^3.0.5",
     "micro": "^10.0.1",
     "moment": "^2.29.4",
