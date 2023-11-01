@@ -52,6 +52,8 @@ const KeyPage = (props: KeyPageProps) => {
 
   const { heliconeKeys, isLoading, refetchHeliconeKeys } = useKeysPage();
 
+  console.log("helicone keys", heliconeKeys);
+
   const { setNotification } = useNotification();
 
   const renderHeliconeKeyTable = () => {
