@@ -341,12 +341,118 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   ];
 
-  const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
+  const smallLayout: ReactGridLayout.Layout[] = [
+    {
+      i: "requests",
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 4,
+      minW: 4,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
+      static: true,
+    },
+    {
+      i: "cost-req",
+      x: 0,
+      y: 4,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "prompt-tokens",
+      x: 2,
+      y: 4,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "completion-tokens",
+      x: 0,
+      y: 6,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "total-tokens",
+      x: 2,
+      y: 6,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "costs",
+      x: 0,
+      y: 8,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "users",
+      x: 0,
+      y: 12,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "feedback",
+      x: 0,
+      y: 16,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "latency",
+      x: 0,
+      y: 20,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+  ];
 
-  const [currentLayout, setCurrentLayout] = useLocalStorage(
-    "dashboardLayout",
-    JSON.stringify(initialLayout)
-  );
+  const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
 
   return (
     <>
@@ -434,11 +540,11 @@ const DashboardPage = (props: DashboardPageProps) => {
             <ResponsiveGridLayout
               className="layout"
               layouts={{
-                lg: JSON.parse(currentLayout) || initialLayout,
-                md: JSON.parse(currentLayout) || initialLayout,
-                sm: JSON.parse(currentLayout) || initialLayout,
-                xs: JSON.parse(currentLayout) || initialLayout,
-                xxs: JSON.parse(currentLayout) || initialLayout,
+                lg: initialLayout,
+                md: initialLayout,
+                sm: initialLayout,
+                xs: smallLayout,
+                xxs: smallLayout,
               }}
               autoSize={true}
               isBounded={true}
