@@ -1,5 +1,6 @@
 import {
   ArrowPathIcon,
+  CubeTransparentIcon,
   PaperAirplaneIcon,
   PencilIcon,
   PlusIcon,
@@ -16,6 +17,7 @@ import {
 import ChatRow from "./chatRow";
 import { fetchOpenAI } from "../../../services/lib/openAI";
 import { Message } from "../requests/chat";
+import { Tooltip } from "@mui/material";
 
 interface ChatPlaygroundProps {
   requestId: string;
@@ -115,53 +117,75 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         </li>
       )}
       <li className="px-8 py-4 bg-white rounded-b-lg justify-between space-x-4 flex">
-        <button
-          onClick={() => {
-            // check to see if the last message was a user
-            const lastMessage = currentChat[currentChat.length - 1];
-            if (lastMessage.role === "user") {
-              const newChat = [...currentChat];
-              newChat.push({
-                id: crypto.randomUUID(),
-                content: "",
-                role: "assistant",
-              });
-              setCurrentChat(newChat);
-            } else {
-              const newChat = [...currentChat];
-              newChat.push({
-                id: crypto.randomUUID(),
-                content: "",
-                role: "user",
-              });
-              setCurrentChat(newChat);
-            }
-          }}
-          className={clsx(
-            "bg-white hover:bg-gray-100 border border-gray-300 text-black",
-            "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          )}
-        >
-          <PlusIcon className="h-4 w-4 inline  text-black rounded-lg mr-2" />
-          Add Message
-        </button>
-        <div className="flex space-x-4">
+        <div className="w-full">
           <button
             onClick={() => {
-              //  reset the chat to the original chat
-              const originalCopy = chat.map((message, index) => {
-                return { ...message, id: crypto.randomUUID() };
-              });
-              setCurrentChat(originalCopy);
+              // check to see if the last message was a user
+              const lastMessage = currentChat[currentChat.length - 1];
+              if (lastMessage.role === "user") {
+                const newChat = [...currentChat];
+                newChat.push({
+                  id: crypto.randomUUID(),
+                  content: "",
+                  role: "assistant",
+                });
+                setCurrentChat(newChat);
+              } else {
+                const newChat = [...currentChat];
+                newChat.push({
+                  id: crypto.randomUUID(),
+                  content: "",
+                  role: "user",
+                });
+                setCurrentChat(newChat);
+              }
             }}
             className={clsx(
               "bg-white hover:bg-gray-100 border border-gray-300 text-black",
               "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             )}
           >
-            <ArrowPathIcon className="h-4 w-4 inline  text-black rounded-lg mr-2" />
-            Reset
+            <PlusIcon className="h-4 w-4 inline  text-black rounded-lg mr-2" />
+            Add Message
           </button>
+        </div>
+
+        <button
+          onClick={() => {
+            //  reset the chat to the original chat
+            const originalCopy = chat.map((message, index) => {
+              return { ...message, id: crypto.randomUUID() };
+            });
+            setCurrentChat(originalCopy);
+          }}
+          className={clsx(
+            "bg-white hover:bg-gray-100 border border-gray-300 text-black",
+            "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          )}
+        >
+          <ArrowPathIcon className="h-4 w-4 inline text-black rounded-lg mr-2" />
+          Reset
+        </button>
+        <div className="flex space-x-4 w-full justify-end">
+          <Tooltip title="Experiment with different models">
+            <button
+              onClick={() => {
+                //  reset the chat to the original chat
+                // const originalCopy = chat.map((message, index) => {
+                //   return { ...message, id: crypto.randomUUID() };
+                // });
+                // setCurrentChat(originalCopy);
+              }}
+              className={clsx(
+                "bg-white hover:bg-gray-100 border border-gray-300 text-black",
+                "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              )}
+            >
+              <CubeTransparentIcon className="h-4 w-4 inline text-black rounded-lg mr-2" />
+              Add Model
+            </button>
+          </Tooltip>
+
           <button
             onClick={() => {
               handleSubmit(currentChat);

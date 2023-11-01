@@ -7,7 +7,11 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
 import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
-import { CodeBracketSquareIcon } from "@heroicons/react/24/outline";
+import {
+  CodeBracketSquareIcon,
+  PlusCircleIcon,
+} from "@heroicons/react/24/outline";
+import { Tooltip } from "@mui/material";
 
 interface PlaygroundPageProps {
   request?: string;
@@ -100,9 +104,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   </div>
                   <div className="flex flex-col space-y-8 w-full sm:max-w-[15rem] order-1 sm:order-2">
                     <div className="flex flex-col space-y-2 w-full">
-                      <p className="font-semibold text-sm text-gray-900">
-                        Model:
-                      </p>
+                      <div className="flex flex-row w-full justify-between items-center">
+                        <p className="font-semibold text-sm text-gray-900">
+                          Model
+                        </p>
+                        <Tooltip
+                          title="Experiment between different models"
+                          placement="left"
+                        >
+                          <button
+                            onClick={() => {}}
+                            className="hover:bg-gray-200 rounded-lg p-1 -m-1"
+                          >
+                            <PlusCircleIcon className="h-5 w-5 text-gray-900" />
+                          </button>
+                        </Tooltip>
+                      </div>
+
                       <ThemedDropdown
                         options={[
                           {

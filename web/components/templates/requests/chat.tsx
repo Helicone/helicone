@@ -1,6 +1,7 @@
 import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
+  BeakerIcon,
   CodeBracketIcon,
   EyeIcon,
   EyeSlashIcon,
@@ -16,6 +17,7 @@ import { Tooltip } from "@mui/material";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import Prism, { defaultProps } from "prism-react-renderer";
 import { Completion } from "./completion";
+import { useRouter } from "next/router";
 
 export type Message = {
   id: string;
@@ -198,11 +200,12 @@ export const SingleChat = (props: {
 interface ChatProps {
   requestBody: any;
   responseBody: any;
+  requestId: string;
   status: number;
 }
 
 export const Chat = (props: ChatProps) => {
-  const { requestBody, responseBody } = props;
+  const { requestBody, responseBody, requestId } = props;
 
   const request = requestBody?.messages ?? null;
   const response = responseBody?.choices?.[0]?.message ?? null;
@@ -214,6 +217,8 @@ export const Chat = (props: ChatProps) => {
       Array.from({ length: (request || []).length }, (_, i) => [i, false])
     )
   );
+
+  const router = useRouter();
 
   const allExpanded = Object.values(expandedChildren).every(
     (value) => value === true
@@ -232,28 +237,42 @@ export const Chat = (props: ChatProps) => {
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-gray-300 rounded-md divide-y divide-gray-300 h-full">
         <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 text-gray-900">
-          <button
-            onClick={() => {
-              setExpandedChildren(
-                Object.fromEntries(
-                  Object.keys(expandedChildren).map((key) => [
-                    key,
-                    !allExpanded,
-                  ])
-                )
-              );
-            }}
-            className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
-          >
-            {allExpanded ? (
-              <EyeSlashIcon className="h-4 w-4" />
-            ) : (
-              <EyeIcon className="h-4 w-4" />
-            )}
-            <p className="text-xs font-semibold">
-              {allExpanded ? "Shrink All" : "Expand All"}
-            </p>
-          </button>
+          <div className="flex flex-row items-center space-x-2">
+            <button
+              onClick={() => {
+                setExpandedChildren(
+                  Object.fromEntries(
+                    Object.keys(expandedChildren).map((key) => [
+                      key,
+                      !allExpanded,
+                    ])
+                  )
+                );
+              }}
+              className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+            >
+              {allExpanded ? (
+                <EyeSlashIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <p className="text-xs font-semibold">
+                {allExpanded ? "Shrink All" : "Expand All"}
+              </p>
+            </button>
+            <button
+              onClick={() => {
+                if (request) {
+                  router.push("/playground?request=" + requestId);
+                }
+              }}
+              className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+            >
+              <BeakerIcon className="h-4 w-4" />
+              <p className="text-xs font-semibold">Playground</p>
+            </button>
+          </div>
+
           <button
             onClick={() => {
               setMode(mode === "pretty" ? "json" : "pretty");
