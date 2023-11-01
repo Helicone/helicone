@@ -24,9 +24,7 @@ export const useHeliconeKeys = () => {
       if (key.api_key_name === null) {
         key.api_key_name = "n/a";
       }
-      key.created_at = getUSDateFromString(
-        new Date(key.created_at).toLocaleString()
-      );
+      key.created_at = new Date(key.created_at.split(".")[0]).toLocaleString();
     });
   }
 
