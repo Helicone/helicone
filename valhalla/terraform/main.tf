@@ -327,7 +327,6 @@ resource "aws_apprunner_service" "app_service" {
       image_identifier      = "${var.image_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
-        start_command = "yarn workspace jawn serve"
         port                = "8585"
         runtime_environment_secrets = {
           AURORA_CREDS = module.aurora.cluster_master_user_secret[0].secret_arn
@@ -339,7 +338,6 @@ resource "aws_apprunner_service" "app_service" {
           AURORA_PORT     = "5432"
           AURORA_DATABASE = local.database_name
           ENV             = "production"
-          PORT            = "8585"
         }  
       }
     }
