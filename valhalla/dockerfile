@@ -14,3 +14,6 @@ RUN yarn install
 RUN npx lerna run build
 
 RUN yarn install
+
+#yarn workspace jawn serve
+CMD [ "yarn", "workspace", "jawn", "serve" ]
