@@ -28,6 +28,7 @@ export type Message = {
     arguments: string;
   };
   name?: string;
+  model?: string;
 };
 
 export const SingleChat = (props: {

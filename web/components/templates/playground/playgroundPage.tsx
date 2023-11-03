@@ -9,9 +9,12 @@ import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
 import {
   CodeBracketSquareIcon,
+  InformationCircleIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { MultiSelect, MultiSelectItem, Text } from "@tremor/react";
+import ThemedModal from "../../shared/themed/themedModal";
+import Image from "next/image";
 
 interface PlaygroundPageProps {
   request?: string;
@@ -20,10 +23,11 @@ interface PlaygroundPageProps {
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
   const [requestId, setRequestId] = useState<string | undefined>(request);
-  const [model, setModel] = useState<string>("gpt-3.5-turbo");
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [temperature, setTemperature] = useState<number>(1);
   const [maxTokens, setMaxTokens] = useState<number>(256);
   const [open, setOpen] = useState<boolean>(false);
+  const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
   const debouncedRequestId = useDebounce(requestId, 500);
 
@@ -39,7 +43,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       <AuthHeader
         title={"Playground"}
         actions={
-          <div id="toolbar" className="flex flex-row items-center gap-3 w-full">
+          <div id="toolbar" className="flex flex-row items-center gap-2 w-full">
             <input
               type="text"
               name="request-id"
@@ -98,61 +102,51 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                     <ChatPlayground
                       requestId={requestId || ""}
                       chat={chat}
-                      model={model}
+                      models={selectedModels}
                       temperature={temperature}
                     />
                   </div>
                   <div className="flex flex-col space-y-8 w-full sm:max-w-[15rem] order-1 sm:order-2">
                     <div className="flex flex-col space-y-2 w-full">
-                      <div className="flex flex-row w-full justify-between items-center">
+                      <div className="flex flex-row w-full space-x-1 items-center">
                         <p className="font-semibold text-sm text-gray-900">
-                          Model
+                          Models
                         </p>
-                        <Tooltip
-                          title="Experiment between different models"
-                          placement="left"
+                        <button
+                          onClick={() => {
+                            setInfoOpen(true);
+                          }}
+                          className="hover:cursor-pointer"
                         >
-                          <button
-                            onClick={() => {}}
-                            className="hover:bg-gray-200 rounded-lg p-1 -m-1"
-                          >
-                            <PlusCircleIcon className="h-5 w-5 text-gray-900" />
-                          </button>
-                        </Tooltip>
+                          <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+                        </button>
                       </div>
 
-                      <ThemedDropdown
-                        options={[
-                          {
-                            label: "gpt-3.5-turbo",
-                            value: "gpt-3.5-turbo",
-                          },
-                          {
-                            label: "gpt-3.5-turbo-0613",
-                            value: "gpt-3.5-turbo-0613",
-                          },
-                          {
-                            label: "gpt-3.5-turbo-16k",
-                            value: "gpt-3.5-turbo-16k",
-                          },
-                          {
-                            label: "gpt-4",
-                            value: "gpt-4",
-                          },
-                          {
-                            label: "gpt-4-0613",
-                            value: "gpt-4-0613",
-                          },
-                          {
-                            label: "gpt-4-32k",
-                            value: "gpt-4-32k",
-                          },
-                        ]}
-                        selectedValue={model}
-                        onSelect={(option) => {
-                          setModel(option);
+                      <MultiSelect
+                        placeholder="Select your models..."
+                        value={selectedModels}
+                        onValueChange={(values: string[]) => {
+                          setSelectedModels(values);
                         }}
-                      />
+                        className="border border-gray-500 rounded-lg"
+                      >
+                        {[
+                          "gpt-3.5-turbo",
+                          "gpt-3.5-turbo-0613",
+                          "gpt-3.5-turbo-16k",
+                          "gpt-4",
+                          "gpt-4-0613",
+                          "gpt-4-32k",
+                        ].map((model, idx) => (
+                          <MultiSelectItem
+                            value={model}
+                            key={idx}
+                            className="font-medium text-black"
+                          >
+                            {model}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelect>
                     </div>
                     <div className="flex flex-col space-y-3 w-full">
                       <div className="flex flex-row w-full justify-between items-center">
@@ -227,14 +221,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
                             if (value < 1) {
-                              setTemperature(1);
+                              setMaxTokens(1);
                               return;
                             }
                             if (value > 2048) {
-                              setTemperature(2048);
+                              setMaxTokens(2048);
                               return;
                             }
-                            setTemperature(parseFloat(e.target.value));
+                            setMaxTokens(parseFloat(e.target.value));
                           }}
                           min={1}
                           max={2048}
@@ -253,14 +247,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           if (value < 1) {
-                            setTemperature(1);
+                            setMaxTokens(1);
                             return;
                           }
                           if (value > 2048) {
-                            setTemperature(2048);
+                            setMaxTokens(2048);
                             return;
                           }
-                          setTemperature(parseFloat(e.target.value));
+                          setMaxTokens(parseFloat(e.target.value));
                         }}
                         style={{
                           accentColor: "black",
@@ -284,6 +278,30 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </div>
         )}
       </div>
+      <ThemedModal open={infoOpen} setOpen={setInfoOpen}>
+        <div className="w-[450px] flex flex-col space-y-4">
+          <h3 className="text-xl font-semibold">Experiment with Models</h3>
+          <p className="text-sm text-gray-700">
+            Easily experiment with different models and parameters to see how
+            they affect your chats. Different experiments will{" "}
+            <span className="font-semibold italic">use the same model</span> for
+            the entire conversation.
+          </p>
+          <div className="flex justify-center">
+            <Image
+              src={"/assets/playground/playground-graphic.png"}
+              height={400}
+              width={300}
+              alt={"playground-graphic"}
+            />
+          </div>
+          <p className="text-sm text-gray-700">
+            For the experiments above, the conversation for{" "}
+            <span className="font-semibold italic">gpt-3.5-turbo</span> will
+            take the flow: A - B - D - E
+          </p>
+        </div>
+      </ThemedModal>
       {singleRequest !== null && (
         <RequestDrawerV2
           open={open}
