@@ -6,7 +6,8 @@ import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import RequestView from "./views/requestView";
+import RequestView from "./requestRow";
+import RequestRow from "./requestRow";
 
 interface RequestDrawerV2Props {
   open: boolean;
@@ -118,7 +119,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
       }
     >
       {request ? (
-        <RequestView request={request} properties={properties} open={open} />
+        <RequestRow request={request} properties={properties} open={open} />
       ) : (
         <p>Loading...</p>
       )}
