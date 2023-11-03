@@ -9,6 +9,107 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      alert: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          soft_delete: boolean
+          threshold: number
+          time_period: unknown
+          type: string
+          updated_at: string
+          users: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          soft_delete?: boolean
+          threshold: number
+          time_period: unknown
+          type: string
+          updated_at?: string
+          users: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          soft_delete?: boolean
+          threshold?: number
+          time_period?: unknown
+          type?: string
+          updated_at?: string
+          users?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      alert_history: {
+        Row: {
+          alert_end_time: string | null
+          alert_id: string | null
+          alert_start_time: string
+          alert_type: string
+          created_at: string
+          id: string
+          org_id: string
+          soft_delete: boolean
+          status: string
+          triggered_value: string
+          updated_at: string
+        }
+        Insert: {
+          alert_end_time?: string | null
+          alert_id?: string | null
+          alert_start_time: string
+          alert_type: string
+          created_at?: string
+          id?: string
+          org_id: string
+          soft_delete?: boolean
+          status: string
+          triggered_value: string
+          updated_at?: string
+        }
+        Update: {
+          alert_end_time?: string | null
+          alert_id?: string | null
+          alert_start_time?: string
+          alert_type?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          soft_delete?: boolean
+          status?: string
+          triggered_value?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_history_alert_id_fkey"
+            columns: ["alert_id"]
+            referencedRelation: "alert"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_history_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       cache_hits: {
         Row: {
           created_at: string

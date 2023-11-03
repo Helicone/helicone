@@ -15,7 +15,8 @@ import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
-import { PropertyWithResponseV1 } from "../lib/db/clickhouse";
+import { Alerter } from "../db/Alerter";
+import { Alerts } from "../db/AtomicAlerter";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -130,7 +131,6 @@ async function logAsync(
 }
 
 export const getAPIRouter = (router: BaseRouter) => {
-
   router.post(
     "/job",
     async (
@@ -342,7 +342,7 @@ export const getAPIRouter = (router: BaseRouter) => {
   );
 
   router.put(
-    '/request/:id/property',
+    "/request/:id/property",
     async (
       { params: { id } },
       requestWrapper: RequestWrapper,
@@ -351,34 +351,89 @@ export const getAPIRouter = (router: BaseRouter) => {
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
-      
+
       interface Body {
-        key: string,
-        value: string,
+        key: string;
+        value: string;
       }
       if (authParams.error !== null) {
         return client.response.unauthorized();
-      }      
+      }
       const property = await requestWrapper.getJson<Body>();
-      const {data, error} = await client.db.getRequestById(id);
+      const { data, error } = await client.db.getRequestById(id);
 
       if (error) {
         return client.response.newError(error, 500);
       }
-      
+
       if (!data) {
         return client.response.newError("Request not found.", 404);
       }
 
       const properties = {
-        ...(data?.properties as Record<string, any> || {}),
+        ...((data?.properties as Record<string, any>) || {}),
         [property.key]: property.value,
+      };
+
+      await client.queue.putRequestProperty(
+        id,
+        properties,
+        property,
+        authParams.data.organizationId,
+        data
+      );
+      return client.response.successJSON({ ok: "true" });
+    }
+  );
+
+  router.post(
+    "/alerts",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error } = await client.db.getAuthParams();
+
+      if (error !== null) {
+        return client.response.unauthorized();
       }
 
-      await client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
-      return client.response.successJSON({"ok": 'true'});
+      const alertConfigMap = await requestWrapper.getJson<Alerts>();
+
+      const alerter = new Alerter(env.ALERTER, authParams);
+      const { error: configError } = await alerter.upsertAlerts(alertConfigMap);
+
+      if (configError !== null) {
+        return client.response.newError(configError, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" });
     }
-  )
+  );
+
+  router.delete(
+    "/alert/:id",
+    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error } = await client.db.getAuthParams();
+
+      if (error !== null) {
+        return client.response.unauthorized();
+      }
+
+      const alerter = new Alerter(env.ALERTER, authParams);
+      const deleteRes = await alerter.deleteAlert(id);
+
+      if (deleteRes.error) {
+        return client.response.newError(deleteRes.error, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" });
+    }
+  );
 
   // Proxy only + proxy forwarder
   router.all(

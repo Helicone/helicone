@@ -32,6 +32,7 @@ export interface Env {
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;
+  ALERTER: DurableObjectNamespace;
 }
 
 export async function hash(key: string): Promise<string> {
