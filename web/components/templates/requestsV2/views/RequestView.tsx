@@ -34,13 +34,13 @@ function getPathName(url: string) {
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-export function RequestView(props: {
+const RequestView = (props: {
   request: NormalizedRequest;
   properties: string[];
   open?: boolean;
   wFull?: boolean;
   displayPreview?: boolean;
-}) {
+}) => {
   const {
     request,
     properties,
@@ -211,4 +211,6 @@ export function RequestView(props: {
       )}
     </div>
   );
-}
+};
+
+export default RequestView;

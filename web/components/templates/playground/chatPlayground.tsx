@@ -119,6 +119,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               <div className="w-full flex flex-row justify-between space-x-4 divide-x divide-gray-300">
                 {modelMessage.map((message, idx) => (
                   <div
+                    key={idx}
                     className={clsx(
                       idx === 0 ? "" : "pl-4",
                       "w-full flex flex-col space-y-2"
@@ -198,6 +199,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             >
               {modelMessage.map((message, idx) => (
                 <div
+                  key={idx}
                   className={clsx(
                     idx % 3 === 0 ? "" : "pl-4 border-l border-gray-300",
                     "w-full flex flex-col space-y-2 col-span-1"
