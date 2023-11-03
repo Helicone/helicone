@@ -1,0 +1,15 @@
+{
+  "name": "helicone-shared-ts",
+  "version": "1.0.0",
+  "description": "Shared code for all Helicone services",
+  "scripts": {
+    "build": "tsc"
+  },
+  "main": "dist/index.js",
+  "author": "Justin Torre (Helicone.ai)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "typescript": "^5.2.2"
+  }
+}

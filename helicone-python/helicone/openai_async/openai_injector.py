@@ -122,7 +122,6 @@ class OpenAIInjector:
     def _with_helicone_auth(self, func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            print("HELLOZ")
             logger = HeliconeAsyncLogger.from_helicone_global()
 
             arg_extractor = CreateArgsExtractor(*args, **kwargs)
