@@ -28,7 +28,7 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import RequestCard from "./views/requestCard";
+import RequestCard from "./requestCard";
 
 interface RequestsPageV2Props {
   currentPage: number;

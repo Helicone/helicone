@@ -20,11 +20,11 @@ const Notification = () => {
       case "success":
         return "bg-green-100";
       case "info":
-        return "bg-yellow-500";
+        return "bg-yellow-100";
       case "error":
-        return "bg-red-500";
+        return "bg-red-100";
       default:
-        return "bg-green-500";
+        return "bg-green-100";
     }
   };
 
@@ -33,11 +33,11 @@ const Notification = () => {
       case "success":
         return "text-green-700";
       case "info":
-        return "text-yellow-800";
+        return "text-yellow-700";
       case "error":
-        return "text-red-800";
+        return "text-red-700";
       default:
-        return "text-green-800";
+        return "text-green-700";
     }
   };
 
@@ -127,7 +127,8 @@ const Notification = () => {
                     }}
                     className={clsx(
                       variantBgColor(),
-                      "inline-flex rounded-md p-1.5 text-green-500 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                      variantTextColor(),
+                      "inline-flex rounded-md p-1.5 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50"
                     )}
                   >
                     <span className="sr-only">Dismiss</span>
