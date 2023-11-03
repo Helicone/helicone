@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { getUSDate, getUSDateFromString } from "../../../shared/utils/utils";
-import { formatNumber } from "../../users/initialColumns";
-import { NormalizedRequest } from "../builder/abstractRequestBuilder";
-import ModelPill from "../modelPill";
-import StatusBadge from "../statusBadge";
+import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
+import { formatNumber } from "../users/initialColumns";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 import {
   HandThumbUpIcon as HTUp,
   HandThumbDownIcon as HTDown,
@@ -12,9 +12,9 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../../../shared/clsx";
-import { updateRequestFeedback } from "../../../../services/lib/requests";
-import useNotification from "../../../shared/notification/useNotification";
+import { clsx } from "../../shared/clsx";
+import { updateRequestFeedback } from "../../../services/lib/requests";
+import useNotification from "../../shared/notification/useNotification";
 
 interface RequestCardProps {
   request: NormalizedRequest;
