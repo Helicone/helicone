@@ -48,7 +48,7 @@ const ChatRow = (props: ChatRowProps) => {
               className={clsx(
                 isSystem ? "cursor-not-allowed" : "hover:bg-gray-50",
                 "bg-white border border-gray-300",
-                "w-24 h-6 text-xs rounded-lg"
+                "w-20 h-6 text-xs rounded-lg font-semibold"
               )}
               disabled={isSystem}
               onClick={() => {
@@ -60,14 +60,16 @@ const ChatRow = (props: ChatRowProps) => {
             </button>
             <div className={clsx(isEditing ? "w-5/6" : "w-2/3")}>
               {isEditing ? (
-                <ResizeTextArea
-                  value={currentMessage.content || ""}
-                  onChange={(e) => {
-                    const newMessages = { ...currentMessage };
-                    newMessages.content = e.target.value;
-                    setCurrentMessage(newMessages);
-                  }}
-                />
+                <span className="w-full">
+                  <ResizeTextArea
+                    value={currentMessage.content || ""}
+                    onChange={(e) => {
+                      const newMessages = { ...currentMessage };
+                      newMessages.content = e.target.value;
+                      setCurrentMessage(newMessages);
+                    }}
+                  />
+                </span>
               ) : (
                 <span
                   className={clsx(
@@ -126,7 +128,7 @@ const ChatRow = (props: ChatRowProps) => {
             <button
               className={clsx(
                 "bg-white hover:bg-gray-50 border border-gray-300",
-                "w-24 h-6 text-xs rounded-lg"
+                "w-20 h-6 text-xs rounded-lg font-semibold"
               )}
               disabled={isSystem}
               onClick={() => {
@@ -142,22 +144,24 @@ const ChatRow = (props: ChatRowProps) => {
             >
               user
             </button>
-            <div className={clsx(isEditing ? "w-full" : "w-2/3")}>
+            <div className={clsx(isEditing ? "w-5/6" : "w-2/3")}>
               {isEditing ? (
-                <ResizeTextArea
-                  value={currentMessage.content || ""}
-                  onChange={(e) => {
-                    const newMessages = { ...currentMessage };
-                    newMessages.content = e.target.value;
-                    setCurrentMessage(newMessages);
-                  }}
-                  placeholder="Enter your message here..."
-                />
+                <span className="w-full">
+                  <ResizeTextArea
+                    value={currentMessage.content || ""}
+                    onChange={(e) => {
+                      const newMessages = { ...currentMessage };
+                      newMessages.content = e.target.value;
+                      setCurrentMessage(newMessages);
+                    }}
+                    placeholder="Enter your message here..."
+                  />
+                </span>
               ) : (
                 <span
                   className={clsx(
                     isSystem ? "font-semibold" : "font-normal",
-                    "text-gray-900 whitespace-pre-wrap"
+                    "text-gray-900 whitespace-pre-wrap w-full"
                   )}
                 >
                   {currentMessage.content}

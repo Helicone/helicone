@@ -26,7 +26,7 @@ const ModelPill = (props: ModelPillProps) => {
     <span
       className={clsx(
         modelMapping[builderType] || "bg-gray-50 text-gray-700 ring-gray-200",
-        `inline-flex items-center rounded-full px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+        `inline-flex items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
       )}
     >
       {model && model !== "" ? model : "Unsupported"}

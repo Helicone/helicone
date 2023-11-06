@@ -28,8 +28,8 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
+import RequestCard from "./requestCard";
 import getNormalizedRequest from "./builder/requestBuilder";
-import RequestCard from "./views/requestCard";
 
 interface RequestsPageV2Props {
   currentPage: number;

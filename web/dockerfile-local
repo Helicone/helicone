@@ -1,0 +1,11 @@
+FROM node:18.11.0
+
+WORKDIR /usr/src/app
+
+COPY web/package.json web/yarn.lock ./
+
+RUN yarn
+
+EXPOSE 3000
+
+CMD [ "yarn", "dev"]

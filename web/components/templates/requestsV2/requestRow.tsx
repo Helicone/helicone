@@ -8,21 +8,21 @@ import {
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ThemedTabs from "../../../shared/themed/themedTabs";
-import { getUSDateFromString } from "../../../shared/utils/utils";
-import { Completion } from "../../requests/completion";
-import { NormalizedRequest } from "../builder/abstractRequestBuilder";
-import ModelPill from "../modelPill";
-import StatusBadge from "../statusBadge";
-import { clsx } from "../../../shared/clsx";
+import ThemedTabs from "../../shared/themed/themedTabs";
+import { getUSDateFromString } from "../../shared/utils/utils";
+import { Completion } from "../requests/completion";
+import { NormalizedRequest } from "./builder/abstractRequestBuilder";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
+import { clsx } from "../../shared/clsx";
 import {
   HandThumbUpIcon as HTUp,
   HandThumbDownIcon as HTDown,
 } from "@heroicons/react/24/solid";
-import { SUPABASE_AUTH_TOKEN } from "../../../../lib/constants";
+import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import Cookies from "js-cookie";
-import { updateRequestFeedback } from "../../../../services/lib/requests";
-import useNotification from "../../../shared/notification/useNotification";
+import { updateRequestFeedback } from "../../../services/lib/requests";
+import useNotification from "../../shared/notification/useNotification";
 
 function getPathName(url: string) {
   try {
@@ -34,13 +34,13 @@ function getPathName(url: string) {
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-export function RequestView(props: {
+const RequestRow = (props: {
   request: NormalizedRequest;
   properties: string[];
   open?: boolean;
   wFull?: boolean;
   displayPreview?: boolean;
-}) {
+}) => {
   const {
     request,
     properties,
@@ -48,8 +48,6 @@ export function RequestView(props: {
     wFull = false,
     displayPreview = true,
   } = props;
-  const [mode, setMode] = useState<"pretty" | "json">("pretty");
-  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [requestFeedback, setRequestFeedback] = useState<{
     createdAt: string | null;
     id: string | null;
@@ -59,15 +57,7 @@ export function RequestView(props: {
   const router = useRouter();
   const { setNotification } = useNotification();
 
-  // set the mode to pretty if the drawer closes, also clear the requestId
-  useEffect(() => {
-    if (!open) {
-      setMode("pretty");
-    }
-  }, [open, router]);
-
   const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
-    setIsFeedbackLoading(true);
     updateRequestFeedback(requestId, rating)
       .then((res) => {
         if (res && res.status === 200) {
@@ -81,9 +71,6 @@ export function RequestView(props: {
       .catch((err) => {
         console.error(err);
         setNotification("Error submitting feedback", "error");
-      })
-      .finally(() => {
-        setIsFeedbackLoading(false);
       });
   };
 
@@ -184,22 +171,7 @@ export function RequestView(props: {
         )}
       {displayPreview && (
         <div className="flex flex-col space-y-8">
-          <div className="flex w-full justify-between">
-            <ThemedTabs
-              options={[
-                {
-                  label: "Pretty",
-                  icon: EyeIcon,
-                },
-                {
-                  label: "JSON",
-                  icon: CodeBracketIcon,
-                },
-              ]}
-              onOptionSelect={(option) =>
-                setMode(option.toLowerCase() as "pretty" | "json")
-              }
-            />
+          <div className="flex w-full justify-end">
             <div className="flex flex-row items-center space-x-4">
               <button
                 onClick={() => {
@@ -233,19 +205,12 @@ export function RequestView(props: {
               </button>
             </div>
           </div>
-          {mode === "pretty" ? (
-            <div className="flex flex-col space-y-2">{request.render}</div>
-          ) : (
-            <Completion
-              request={JSON.stringify(request.requestBody, null, 4)}
-              response={{
-                title: "Response",
-                text: JSON.stringify(request.responseBody, null, 4),
-              }}
-            />
-          )}
+
+          <div className="flex flex-col space-y-2">{request.render}</div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default RequestRow;

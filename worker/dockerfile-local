@@ -1,0 +1,15 @@
+FROM node:18.11.0
+
+WORKDIR /worker
+
+RUN apt-get update && apt-get install -y clang libc++-dev libc++abi-dev
+
+RUN npm install -g wrangler
+
+WORKDIR /usr/src/app
+
+COPY worker/package.json worker/yarn.lock ./
+
+RUN yarn
+
+CMD env > .dev.vars && echo "n" | wrangler dev --local --port ${PORT}
