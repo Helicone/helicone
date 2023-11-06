@@ -25,7 +25,7 @@ export const getBuilderType = (
     return "CustomBuilder";
   }
 
-  if (model == "gpt-4-vision-preview") {
+  if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
     return "UnknownBuilder";
   }
 
