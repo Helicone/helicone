@@ -1,14 +1,14 @@
+import requestResponseSchema from "./requestResponseSchema.json";
+import { RosettaStore } from "./rosettaStore";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "../../../supabase/database.types";
+import { RosettaCache } from "./rosettaCache";
 import {
   ICacheService,
   IDatabaseService,
   Json,
   Rosetta,
 } from "@helicone/project-rosetta";
-import requestResponseSchema from "./requestResponseSchema.json";
-import { RosettaStore } from "./rosettaStore";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "../../../supabase/database.types";
-import { RosettaCache } from "./rosettaCache";
 
 export class RosettaWrapper {
   private rosetta: Rosetta;
@@ -21,16 +21,16 @@ export class RosettaWrapper {
       database: this.rosettaStore,
       cache: this.rosettaCache,
       openai: {
-        apiKey: "",
-        organization: "",
+        apiKey: process.env.OPENAI_API_KEY,
+        organization: process.env.OPENAI_ORG_ID,
       },
-      heliconeApiKey: "",
+      heliconeApiKey: process.env.ROSETTA_HELICONE_API_KEY,
       requireApproval: true,
     });
   }
 
   public async mapLLMCall(
-    requestResponse: {
+    llmCall: {
       request: string;
       response: string;
     },
@@ -42,7 +42,7 @@ export class RosettaWrapper {
     const key = `${provider}:${requestPath}`;
 
     try {
-      return await this.rosetta.map(requestResponse, outputSchema, key);
+      return await this.rosetta.map(llmCall, outputSchema, key);
     } catch (error: any) {
       console.log(`Error mapping LLM call: ${error.message}`);
       return null;

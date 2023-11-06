@@ -11,7 +11,6 @@ CREATE TYPE mapper_status AS ENUM (
 CREATE TABLE rosetta_mappers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     key TEXT NOT NULL,
-    -- A composite key (e.g., "OpenAI:GPT3.5")
     version INTEGER NOT NULL,
     status mapper_status NOT NULL,
     output_schema_hash TEXT NOT NULL,

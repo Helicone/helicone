@@ -148,6 +148,7 @@ export default {
         );
         const rosetta = new RosettaWrapper(supabaseClient, env);
         await rosetta.generateMappers();
+        break;
       default:
         await feedbackCronHandler(env);
         await updateLoopUsers(env);
