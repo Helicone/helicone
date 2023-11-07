@@ -3,14 +3,18 @@ export type LlmType = "chat" | "completion";
 interface Message {
   role?: string;
   content?: string;
-  function_name?: string;
-  function_arguments?: object;
+  function_call?: FunctionCall;
+}
+
+interface FunctionCall {
+  name?: string;
+  arguments?: object;
 }
 
 interface Request {
-  llm_type: LlmType;
-  model: string;
-  provider: string;
+  llm_type?: LlmType;
+  model?: string;
+  provider?: string;
   prompt?: string | null;
   max_tokens?: number | null;
   temperature?: number | null;

@@ -5,53 +5,61 @@ import AbstractRequestBuilder, {
 
 class CompletionBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
+    const requestBody = this.response.llmSchema?.request ?? null;
+    const responseBody = this.response.llmSchema?.response ?? null;
+
     const getResponseText = () => {
       const statusCode = this.response.response_status;
-      if ([200, 201, -3].includes(statusCode)) {
-        // successful response, check for an error from openai
-        if (this.response.response_body?.error) {
-          return this.response.response_body?.error?.message || "";
-        }
-        // successful response, check for choices
-        if (this.response.response_body?.choices) {
-          return this.response.response_body?.choices &&
-            this.response.response_body?.choices[0]
-            ? this.response.response_body?.choices[0].text
-            : "";
-        }
-      } else if (statusCode === 0 || statusCode === null) {
+      if (statusCode === 0 || statusCode === null) {
         // pending response
         return "";
+      }
+
+      const errorMessage = responseBody?.error?.message;
+      if (errorMessage) {
+        // Error message from the response
+        return errorMessage;
+      }
+
+      if ([200, 201, -3].includes(statusCode) && responseBody) {
+        // Successful response
+        const completion = responseBody?.completions?.[0];
+        return completion ? JSON.stringify(completion) : "";
+      }
+
+      return "network error";
+    };
+
+    const getRenderContent = () => {
+      if ([0, null].includes(this.response.response_status)) {
+        return <p>Pending...</p>;
+      } else if (this.response.response_status === 200) {
+        return (
+          <Completion
+            request={requestBody?.prompt || ""}
+            response={{
+              title: "Response",
+              text: (responseBody?.completions?.[0] as string) ?? "",
+            }}
+          />
+        );
       } else {
-        // network error
-        return this.response.response_body?.error?.message || "network error";
+        return (
+          <Completion
+            request={requestBody?.prompt || ""}
+            response={{
+              title: "Error",
+              text: responseBody?.error?.message || "",
+            }}
+          />
+        );
       }
     };
 
     return {
-      requestText: this.response.request_body.prompt || "",
+      requestText: requestBody?.prompt || "",
       responseText: getResponseText(),
-      render:
-        this.response.response_status === 0 ||
-        this.response.response_status === null ? (
-          <p>Pending...</p>
-        ) : this.response.response_status === 200 ? (
-          <Completion
-            request={this.response.request_body.prompt}
-            response={{
-              title: "Response",
-              text: this.response.response_body?.completions[0] ?? "",
-            }}
-          />
-        ) : (
-          <Completion
-            request={this.response.request_body.prompt || "n/a"}
-            response={{
-              title: "Error",
-              text: this.response.response_body?.error?.message || "n/a",
-            }}
-          />
-        ),
+      render: getRenderContent(),
     };
   }
 }

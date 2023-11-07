@@ -6,7 +6,7 @@ class ChatBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {
     const responseBody = this.response.llmSchema?.response ?? null;
     const requestBody = this.response.llmSchema?.request ?? null;
-    const hasNoContent = responseBody?.message?.content == null;
+    const hasNoContent = responseBody?.message?.content === null;
 
     const getRequestText = () => {
       // Check if there are any messages
@@ -49,8 +49,8 @@ class ChatBuilder extends AbstractRequestBuilder {
         if (message) {
           return hasNoContent
             ? JSON.stringify({
-                name: message.function_name,
-                arguments: message.function_arguments,
+                name: message.function_call?.name,
+                arguments: message.function_call?.arguments,
               })
             : message.content || "";
         }
@@ -62,9 +62,10 @@ class ChatBuilder extends AbstractRequestBuilder {
     const renderChat = () => {
       return (
         <Chat
-          requestBody={requestBody?.messages}
+          llmSchema={this.response.llmSchema ?? undefined}
+          requestBody={this.response.request_body}
           requestId={this.response.request_id}
-          responseBody={responseBody?.message}
+          responseBody={this.response.response_body}
           status={this.response.response_status}
         />
       );

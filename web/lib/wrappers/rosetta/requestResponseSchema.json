@@ -104,15 +104,22 @@
               "description": "Textual content of the message.",
               "default": null
             },
-            "function_name": {
-              "type": "string",
-              "description": "Specifies a function called within the message, if applicable.",
-              "default": null
-            },
-            "function_arguments": {
+            "function_call": {
               "type": "object",
-              "description": "Arguments used in the function call, if any, within the message.",
-              "default": null
+              "description": "Object containing information about a function call within the message, if applicable.",
+              "default": null,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Specifies a function called within the message, if applicable.",
+                  "default": null
+                },
+                "arguments": {
+                  "type": "object",
+                  "description": "Arguments used in the function call, if any, within the message.",
+                  "default": null
+                }
+              }
             }
           }
         }
@@ -145,15 +152,22 @@
             "description": "Textual content of the message.",
             "default": null
           },
-          "function_name": {
-            "type": "string",
-            "description": "Specifies a function called within the message, if applicable.",
-            "default": null
-          },
-          "function_arguments": {
+          "function_call": {
             "type": "object",
-            "description": "Arguments used in the function call, if any, within the message.",
-            "default": null
+            "description": "Object containing information about a function call within the message, if applicable.",
+            "default": null,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Specifies a function called within the message, if applicable.",
+                "default": null
+              },
+              "arguments": {
+                "type": "object",
+                "description": "Arguments used in the function call, if any, within the message.",
+                "default": null
+              }
+            }
           }
         }
       },
