@@ -9,8 +9,9 @@ import AbstractRequestBuilder, {
 } from "./abstractRequestBuilder";
 import CustomBuilder from "./customBuilder";
 import UnknownBuilder from "./unknownBuilder";
-import ChatBuilder from "./chatBuilder";
 import CompletionBuilder from "./completionBuilder";
+import { LlmType } from "../../../../lib/api/models/requestResponseModel";
+import ChatBuilder from "./chatBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -23,12 +24,10 @@ export type BuilderType =
   | "CustomBuilder"
   | "UnknownBuilder";
 
-type LLMType = "chat" | "completion";
-
 export const getBuilderType = (
   model: string,
   provider: Provider,
-  llmType?: LLMType
+  llmType?: LlmType | null
 ): BuilderType => {
   if (llmType === "chat") {
     return "ChatBuilder";
@@ -118,7 +117,7 @@ const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
   const builderType = getBuilderType(
     model,
     request.provider,
-    useRosetta ? request.request_body_pretty?.llm_type : null
+    useRosetta ? request.llmSchema?.request.llm_type ?? null : null
   );
   let builder = builders[builderType];
   return new builder(request, model);

@@ -12,19 +12,19 @@ import { Database, Json } from "../../../supabase/database.types";
 import { Result, resultMap, ok } from "../../result";
 import { RosettaWrapper } from "../../wrappers/rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { LlmSchema } from "../models/requestResponseModel";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
+
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
   response_body?: any;
-  response_body_pretty?: any;
   response_status: number;
   request_id: string;
   request_created_at: string;
   request_body: any;
-  request_body_pretty: any;
   request_path: string;
   request_user_id: string | null;
   request_properties: {
@@ -52,6 +52,7 @@ export interface HeliconeRequest {
   feedback_created_at?: string | null;
   feedback_id?: string | null;
   feedback_rating?: boolean | null;
+  llmSchema: LlmSchema | null;
 }
 
 export async function getRequests(
@@ -214,10 +215,10 @@ async function mapLLMCalls(
         getModelFromPath(heliconeRequest.request_path) ||
         "";
 
-      let mappedRequest: { [key: string]: Json | undefined } | null = null;
+      let mappedSchema: LlmSchema | null = null;
       try {
         const requestPath = new URL(heliconeRequest.request_path).pathname;
-        mappedRequest = (await rosettaWrapper.mapLLMCall(
+        const schemaJson = await rosettaWrapper.mapLLMCall(
           {
             request: {
               ...heliconeRequest.request_body,
@@ -229,13 +230,14 @@ async function mapLLMCalls(
           requestPath,
           heliconeRequest.provider,
           model
-        )) as { [key: string]: Json | undefined };
+        );
+
+        mappedSchema = JSON.parse(JSON.stringify(schemaJson)) as LlmSchema;
       } catch (error: any) {
         // Do nothing, FE will fall back to existing mappers
       }
 
-      heliconeRequest.request_body_pretty = mappedRequest?.request || null;
-      heliconeRequest.response_body_pretty = mappedRequest?.response || null;
+      heliconeRequest.llmSchema = mappedSchema || null;
 
       return heliconeRequest;
     }) ?? [];
@@ -317,22 +319,24 @@ function truncLargeData(
           : {
               ...d.response_body,
             },
-      request_body_pretty:
-        JSON.stringify(d.request_body_pretty).length > maxBodySize / 2
-          ? {
-              model: d.request_body_pretty.model,
-              heliconeMessage: "Request body too large",
-              tooLarge: true,
-            }
-          : d.request_body_pretty,
-      response_body_pretty:
-        JSON.stringify(d.response_body_pretty).length > maxBodySize / 2
-          ? {
-              model: d.response_body_pretty.model,
-              heliconeMessage: "Response body too large",
-              tooLarge: true,
-            }
-          : d.response_body_pretty,
+      schema: {
+        request:
+          JSON.stringify(d.llmSchema?.request).length > maxBodySize / 2
+            ? {
+                model: d.llmSchema?.request.model,
+                heliconeMessage: "Request schema too large",
+                tooLarge: true,
+              }
+            : d.llmSchema?.request,
+        response:
+          JSON.stringify(d.llmSchema?.response).length > maxBodySize / 2
+            ? {
+                model: d.llmSchema?.request?.model,
+                heliconeMessage: "Response body too large",
+                tooLarge: true,
+              }
+            : d.llmSchema?.response,
+      },
     };
   });
 
