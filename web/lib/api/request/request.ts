@@ -321,7 +321,7 @@ function truncLargeData(
             },
       schema: {
         request:
-          JSON.stringify(d.llmSchema?.request).length > maxBodySize / 2
+          JSON.stringify(d.llmSchema?.request ?? {}).length > maxBodySize / 2
             ? {
                 model: d.llmSchema?.request.model,
                 heliconeMessage: "Request schema too large",
@@ -329,7 +329,7 @@ function truncLargeData(
               }
             : d.llmSchema?.request,
         response:
-          JSON.stringify(d.llmSchema?.response).length > maxBodySize / 2
+          JSON.stringify(d.llmSchema?.response ?? {}).length > maxBodySize / 2
             ? {
                 model: d.llmSchema?.request?.model,
                 heliconeMessage: "Response body too large",
