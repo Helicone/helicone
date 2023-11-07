@@ -195,7 +195,7 @@ export default function Example() {
               xmlns="http://www.w3.org/2000/svg"
               className="mr-1 ml-2"
             >
-              <g clip-path="url(#clip0_24_57)">
+              <g clipPath="url(#clip0_24_57)">
                 <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
                 <rect
                   x="0.5"
