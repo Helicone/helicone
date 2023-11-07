@@ -20,12 +20,12 @@
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1201_3573" result="shape"/>
 </filter>
 <linearGradient id="paint0_linear_1201_3573" x1="170.55" y1="178.362" x2="-35.9284" y2="66.0549" gradientUnits="userSpaceOnUse">
-<stop stop-color="#4317AA"/>
-<stop offset="1" stop-color="#3F27D2"/>
+<stop stopColor="#4317AA"/>
+<stop offset="1" stopColor="#3F27D2"/>
 </linearGradient>
 <radialGradient id="paint1_radial_1201_3573" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(89.305 -24.3559) rotate(90) scale(202.966)">
-<stop stop-color="#68A4FF"/>
-<stop offset="1" stop-color="#224FEE"/>
+<stop stopColor="#68A4FF"/>
+<stop offset="1" stopColor="#224FEE"/>
 </radialGradient>
 <clipPath id="clip0_1201_3573">
 <rect width="976" height="178.614" fill="white"/>
