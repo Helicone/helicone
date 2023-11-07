@@ -117,7 +117,7 @@ const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
   const builderType = getBuilderType(
     model,
     request.provider,
-    useRosetta ? request.llmSchema?.request.llm_type ?? null : null
+    useRosetta ? request.llmSchema?.request?.llm_type ?? null : null
   );
   let builder = builders[builderType];
   return new builder(request, model);
