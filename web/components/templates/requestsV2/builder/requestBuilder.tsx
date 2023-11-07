@@ -42,6 +42,10 @@ export const getBuilderType = (
     return "CustomBuilder";
   }
 
+  if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
+    return "UnknownBuilder";
+  }
+
   if (
     // GPT-3 (deprecated)
     /^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model) ||
