@@ -12,7 +12,7 @@ const useFeatureFlags = (featureFlag: string, orgId: string) => {
     queryFn: async (query) => {
       const currentFeatureFlag = query.queryKey[1];
       const currentOrgId = query.queryKey[2];
-      if (!currentOrgId || !currentFeatureFlag) return;
+      if (!currentOrgId || !currentFeatureFlag) return null;
       const resp = await supabaseClient
         .from("feature_flags")
         .select("*", { count: "exact" })
@@ -27,7 +27,7 @@ const useFeatureFlags = (featureFlag: string, orgId: string) => {
 
   const hasFlag = data?.count ? data.data && data?.count > 0 : false;
 
-  return { hasFlag: hasFlag, isLoading, refetch, data };
+  return { hasFlag: hasFlag, isLoading, refetch, data: data ?? null };
 };
 
 export { useFeatureFlags };

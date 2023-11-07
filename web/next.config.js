@@ -11,9 +11,6 @@ const nextConfig = {
     config.resolve.extensions.push(".graphql"); // Add this line
     return config;
   },
-  webpackDevMiddleware: (config) => {
-    return config;
-  },
   async redirects() {
     return [
       {
