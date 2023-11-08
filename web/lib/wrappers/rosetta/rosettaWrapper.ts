@@ -59,10 +59,14 @@ export class RosettaWrapper {
     await this.rosetta.generateMappers();
   }
 
-  private cleanPath(requestPath: string): string {
+  private cleanPath(requestPath: string): string | null {
     const regexDeploymentOrEngine =
       /\/(?:openai\/deployments|engines)\/[^/]+(.*)/;
     const regexV1 = /^\/v1(\/.+)/;
+
+    if (/thread/.test(requestPath)) {
+      return null;
+    }
 
     let cleanedPath = requestPath;
     if (regexDeploymentOrEngine.test(requestPath)) {
@@ -72,7 +76,7 @@ export class RosettaWrapper {
     }
 
     if (cleanedPath === "/") {
-      return "";
+      return null;
     }
 
     return cleanedPath;
