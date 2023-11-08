@@ -1,11 +1,11 @@
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { insertIntoRequest, updateResponse } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
-
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
+import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -32,6 +32,9 @@ export interface Env {
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;
+  OPENAI_API_KEY: string;
+  OPENAI_ORG_ID: string;
+  ROSETTA_HELICONE_API_KEY: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -137,8 +140,19 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    await feedbackCronHandler(env);
-    await updateLoopUsers(env);
+    switch (controller.cron) {
+      case "0 * * * *":
+        const supabaseClient = createClient(
+          env.SUPABASE_URL,
+          env.SUPABASE_SERVICE_ROLE_KEY
+        );
+        const rosetta = new RosettaWrapper(supabaseClient, env);
+        await rosetta.generateMappers();
+        break;
+      default:
+        await feedbackCronHandler(env);
+        await updateLoopUsers(env);
+    }
   },
 };
 

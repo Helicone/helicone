@@ -12,8 +12,7 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-
-import getRequestBuilder from "./builder/requestBuilder";
+import getNormalizedRequest from "./builder/requestBuilder";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -58,8 +57,7 @@ const useRequestsPageV2 = (
   const getNormalizedRequests = useCallback(() => {
     const rawRequests = requests.data?.data || [];
     return rawRequests.map((request) => {
-      const builder = getRequestBuilder(request);
-      return builder.build();
+      return getNormalizedRequest(request);
     });
   }, [requests]);
 
