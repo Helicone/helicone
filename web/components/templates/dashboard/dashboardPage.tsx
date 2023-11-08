@@ -25,12 +25,19 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import StyledAreaChart from "./styledAreaChart";
-import { AreaChart, BarChart } from "@tremor/react";
+import { AreaChart, BarChart, BarList } from "@tremor/react";
 import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import * as boxbee from "../../../public/lottie/boxbee.json";
 import { formatNumber } from "../users/initialColumns";
+import { useQuery } from "@tanstack/react-query";
+import { Result } from "../../../lib/result";
+import { ModelMetric } from "../../../lib/api/models/models";
+import {
+  filterListToTree,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -136,6 +143,31 @@ const DashboardPage = (props: DashboardPageProps) => {
     apiKeyFilter: null,
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
+  });
+
+  // const userFilters = filterUIToFilterLeafs(
+  //   filterMap,
+  //   debouncedAdvancedFilters
+  // );
+
+  const { data: models, isLoading } = useQuery({
+    queryKey: ["modelMetrics", timeFilter],
+    queryFn: async (query) => {
+      return await fetch("/api/models", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          // filter: filterListToTree(userFilters, "and"),
+          filter: "all",
+          offset: 0,
+          limit: 100,
+          timeFilter,
+        }),
+      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
+    },
+    refetchOnWindowFocus: false,
   });
 
   function encodeFilter(filter: UIFilterRow): string {
@@ -315,8 +347,19 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 1,
       maxH: 4,
     },
-    { i: "costs", x: 0, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "users", x: 6, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    {
+      i: "models",
+      x: 0,
+      y: 4,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+    },
+    { i: "costs", x: 4, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "users", x: 8, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
     {
       i: "feedback",
       x: 0,
@@ -453,6 +496,10 @@ const DashboardPage = (props: DashboardPageProps) => {
   ];
 
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
+
+  const modelColors = ["purple", "blue", "green", "yellow", "orange"];
+
+  console.log("models", models);
 
   return (
     <>
@@ -613,6 +660,34 @@ const DashboardPage = (props: DashboardPageProps) => {
                       `$ ${new Intl.NumberFormat("us")
                         .format(number)
                         .toString()}`
+                    }
+                  />
+                </StyledAreaChart>
+              </div>
+              <div key="models">
+                <StyledAreaChart
+                  title="Models"
+                  value={undefined}
+                  isDataOverTimeLoading={isLoading}
+                >
+                  <div className="flex flex-row justify-between items-center pb-2">
+                    <p className="text-xs font-semibold text-gray-700">Name</p>
+                    <p className="text-xs font-semibold text-gray-700">
+                      Requests
+                    </p>
+                  </div>
+                  <BarList
+                    data={
+                      models?.data
+                        ?.map((model, index) => ({
+                          name: model.model || "n/a",
+                          value: model.total_requests,
+                          color: modelColors[index % modelColors.length],
+                        }))
+                        .sort(
+                          (a, b) =>
+                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
+                        ) ?? []
                     }
                   />
                 </StyledAreaChart>

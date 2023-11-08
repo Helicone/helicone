@@ -61,7 +61,7 @@ export const Completion = (props: CompletionProps) => {
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 text-sm">Request</p>
               <p className="text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 bg-white">
-                {request}
+                {removeLeadingWhitespace(request)}
               </p>
             </div>
             <div className="flex flex-col space-y-2 p-4">
