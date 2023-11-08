@@ -15,7 +15,6 @@ import { clsx } from "../../shared/clsx";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import { NormalizedRequest } from "../requestsV2/builder/abstractRequestBuilder";
-import getRequestBuilder from "../requestsV2/builder/requestBuilder";
 import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import TableFooter from "../requestsV2/tableFooter";
 import { getInitialColumns } from "./initialColumns";

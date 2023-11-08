@@ -33,7 +33,7 @@ VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 
 [triggers]
-crons = ["*/1 * * * *"]
+crons = ["*/1 * * * *", "0 * * * *"]
 
 [env.production]
 name = "helicone-worker-prod"
@@ -57,7 +57,7 @@ kv_namespaces = [
 ]
 
 [env.production.triggers]
-crons = ["*/1 * * * *"]
+crons = ["*/1 * * * *", "0 * * * *"]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },

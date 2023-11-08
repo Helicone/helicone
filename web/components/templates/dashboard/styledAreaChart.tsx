@@ -2,6 +2,7 @@ import { Card, Title, AreaChart } from "@tremor/react";
 import { Style } from "util";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import * as boxbee from "../../../public/lottie/boxbee.json";
+import clsx from "clsx";
 
 interface StyledAreaChartProps {
   title: string;
@@ -23,6 +24,16 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
     height = DEFAULT_HEIGHT,
     children,
   } = props;
+
+  const calculateHeight = () => {
+    // if value is undefined, add 28 to `224px`
+
+    if (!value) {
+      return parseInt(height.split("px")[0]) + 30 + "px";
+    }
+    return height;
+  };
+
   return (
     <Card>
       <div className="flex flex-col space-y-0.5">
@@ -30,9 +41,9 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
         {value && <p className="text-black text-xl font-semibold">{value}</p>}
       </div>
       <div
-        className="p-2 w-full"
+        className={clsx(value ? "p-2" : "py-4", "w-full")}
         style={{
-          height: height,
+          height: calculateHeight(),
         }}
       >
         {isDataOverTimeLoading ? (

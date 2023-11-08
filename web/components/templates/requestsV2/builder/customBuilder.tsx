@@ -28,6 +28,8 @@ class CustomBuilder extends AbstractRequestBuilder {
               title: "Response",
               text: responseText,
             }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
           />
         ) : (
           <Completion
@@ -36,6 +38,8 @@ class CustomBuilder extends AbstractRequestBuilder {
               title: "Error",
               text: responseText,
             }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
           />
         ),
     };

@@ -18,6 +18,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import Prism, { defaultProps } from "prism-react-renderer";
 import { Completion } from "./completion";
 import { useRouter } from "next/router";
+import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 
 export type Message = {
   id: string;
@@ -199,6 +200,7 @@ export const SingleChat = (props: {
 };
 
 interface ChatProps {
+  llmSchema?: LlmSchema;
   requestBody: any;
   responseBody: any;
   requestId: string;
@@ -206,16 +208,21 @@ interface ChatProps {
 }
 
 export const Chat = (props: ChatProps) => {
-  const { requestBody, responseBody, requestId } = props;
+  const { requestBody, responseBody, requestId, llmSchema } = props;
 
-  const request = requestBody?.messages ?? null;
-  const response = responseBody?.choices?.[0]?.message ?? null;
+  const requestMessages =
+    llmSchema?.request.messages ?? requestBody?.messages ?? null;
+  const responseMessage =
+    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? null;
 
   const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
     Object.fromEntries(
-      Array.from({ length: (request || []).length }, (_, i) => [i, false])
+      Array.from({ length: (requestMessages || []).length }, (_, i) => [
+        i,
+        false,
+      ])
     )
   );
 
@@ -225,13 +232,13 @@ export const Chat = (props: ChatProps) => {
     (value) => value === true
   );
 
-  let messages: Message[] = request || [];
+  let messages: Message[] = requestMessages || [];
 
   const [mode, setMode] = useState<"pretty" | "json">("pretty");
 
   // only display the response if the status is 200
-  if (props.status === 200 && response) {
-    messages = messages.concat([response]);
+  if (props.status === 200 && responseMessage) {
+    messages = messages.concat([responseMessage]);
   }
 
   return (
@@ -263,7 +270,7 @@ export const Chat = (props: ChatProps) => {
             </button>
             <button
               onClick={() => {
-                if (request) {
+                if (requestMessages) {
                   router.push("/playground?request=" + requestId);
                 }
               }}
