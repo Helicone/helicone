@@ -27,6 +27,7 @@
     "@anthropic-ai/tokenizer": "^0.0.4",
     "@clickhouse/client-common": "^0.2.1",
     "@clickhouse/client-web": "^0.2.2",
+    "@helicone/project-rosetta": "^1.1.39",
     "@supabase/supabase-js": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",

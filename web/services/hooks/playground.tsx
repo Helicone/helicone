@@ -37,6 +37,10 @@ export const usePlaygroundPage = (requestId: string) => {
       JSON.stringify(requests.requests[0].responseBody)
     );
 
+    if (!Array.isArray(sourceChat.messages)) {
+      return [];
+    }
+
     const sourcePrompt = [
       ...sourceChat.messages,
       sourceResponse.choices[0].message,
