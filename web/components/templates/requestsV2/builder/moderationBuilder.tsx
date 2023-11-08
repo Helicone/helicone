@@ -31,6 +31,8 @@ class ModerationBuilder extends AbstractRequestBuilder {
                 4
               ),
             }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
           />
         ) : (
           <Completion
@@ -39,6 +41,8 @@ class ModerationBuilder extends AbstractRequestBuilder {
               title: "Error",
               text: this.response.response_body?.error?.message || "",
             }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
           />
         ),
     };

@@ -25,10 +25,11 @@ interface ChatPlaygroundProps {
   chat: Message[];
   models: string[];
   temperature: number;
+  maxTokens: number;
 }
 
 const ChatPlayground = (props: ChatPlaygroundProps) => {
-  const { requestId, chat, models, temperature } = props;
+  const { requestId, chat, models, temperature, maxTokens } = props;
 
   const { setNotification } = useNotification();
 
@@ -61,7 +62,8 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           historyWithoutId as ChatCompletionRequestMessage[],
           requestId,
           temperature,
-          model
+          model,
+          maxTokens
         );
 
         return { model, data, error };
@@ -106,7 +108,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       } else {
         if (modelMessage.length > 0) {
           renderRows.push(
-            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300">
+            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200">
               <button
                 className={clsx(
                   "hover:bg-gray-50 hover:cursor-not-allowed",
@@ -179,7 +181,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300">
+          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200">
             <button
               className={clsx(
                 "hover:bg-gray-50 hover:cursor-not-allowed",
