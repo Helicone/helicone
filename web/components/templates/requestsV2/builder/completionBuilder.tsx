@@ -41,6 +41,8 @@ class CompletionBuilder extends AbstractRequestBuilder {
               title: "Response",
               text: (responseBody?.completions?.[0] as string) ?? "",
             }}
+            rawRequest={requestBody}
+            rawResponse={responseBody}
           />
         );
       } else {
@@ -51,6 +53,8 @@ class CompletionBuilder extends AbstractRequestBuilder {
               title: "Error",
               text: responseBody?.error?.message || "",
             }}
+            rawRequest={requestBody}
+            rawResponse={responseBody}
           />
         );
       }
