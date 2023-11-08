@@ -16,11 +16,12 @@ export default async function handler(
 ) {
   const client = new SupabaseServerWrapper({ req, res }).getClient();
   const user = await client.auth.getUser();
-  const { messages, requestId, temperature, model } = req.body as {
+  const { messages, requestId, temperature, model, maxTokens } = req.body as {
     messages: ChatCompletionRequestMessage[];
     requestId: string;
     temperature: number;
     model: string;
+    maxTokens: number;
   };
 
   if (!requestId || !temperature || !model) {
@@ -62,6 +63,7 @@ export default async function handler(
       messages: messages,
       user: user.data.user.email,
       temperature: temperature,
+      max_tokens: maxTokens,
     });
     res.status(200).json({ error: null, data: completion.data });
     return;
