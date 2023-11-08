@@ -77,6 +77,9 @@ const UserModal = (props: UserModalProps) => {
         }));
         setUserRequests(cleaned);
       })
+      .catch((err) => {
+        console.error(err);
+      })
       .finally(() => {
         setIsLoading(false);
       });
