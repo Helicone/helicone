@@ -29,6 +29,7 @@ import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import RequestCard from "./requestCard";
+import getNormalizedRequest from "./builder/requestBuilder";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -114,7 +115,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           .then((res) => {
             const { data, error } = res;
             if (data !== null && data.length > 0) {
-              const normalizedRequest = getRequestBuilder(data[0]).build();
+              const normalizedRequest = getNormalizedRequest(data[0]);
               setSelectedData(normalizedRequest);
               setOpen(true);
             }

@@ -912,6 +912,51 @@ export interface Database {
         }
         Relationships: []
       }
+      rosetta_mappers: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          ignored_fields: string[] | null
+          input_json: Json
+          key: string
+          mapped_fields: string[] | null
+          output_schema: Json
+          output_schema_hash: string
+          status: Database["public"]["Enums"]["mapper_status"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          ignored_fields?: string[] | null
+          input_json: Json
+          key: string
+          mapped_fields?: string[] | null
+          output_schema: Json
+          output_schema_hash: string
+          status: Database["public"]["Enums"]["mapper_status"]
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          ignored_fields?: string[] | null
+          input_json?: Json
+          key?: string
+          mapped_fields?: string[] | null
+          output_schema?: Json
+          output_schema_hash?: string
+          status?: Database["public"]["Enums"]["mapper_status"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       user_api_keys: {
         Row: {
           api_key_hash: string
@@ -1296,7 +1341,15 @@ export interface Database {
       }
     }
     Enums: {
-      [_ in never]: never
+      mapper_status:
+        | "PENDING_CREATION"
+        | "PENDING_UPDATE"
+        | "IN_PROGRESS"
+        | "PENDING_APPROVAL"
+        | "ACTIVE"
+        | "INACTIVE"
+        | "DECLINED"
+        | "FAILED"
     }
     CompositeTypes: {
       [_ in never]: never
