@@ -15,6 +15,8 @@ class UnknownBuilder extends AbstractRequestBuilder {
             title: "Error",
             text: "",
           }}
+          rawRequest={this.response.request_body}
+          rawResponse={this.response.response_body}
         />
       ),
     };

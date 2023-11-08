@@ -87,10 +87,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               Please enter in a request ID to load it into the playground
             </p>
           </div>
-        ) : isLoading ? (
-          <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
-            Loading in request...
-          </div>
         ) : hasData && isChat && singleRequest !== null ? (
           <>
             <div className="col-span-8">
@@ -104,6 +100,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                       chat={chat}
                       models={selectedModels}
                       temperature={temperature}
+                      maxTokens={maxTokens}
                     />
                   </div>
                   <div className="flex flex-col space-y-8 w-full sm:max-w-[15rem] order-1 sm:order-2 relative">
