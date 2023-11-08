@@ -162,7 +162,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           // filter: filterListToTree(userFilters, "and"),
           filter: "all",
           offset: 0,
-          limit: 100,
+          limit: 5,
           timeFilter,
         }),
       }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
@@ -629,6 +629,35 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <MetricsPanel metric={m} hFull={true} />
                 </div>
               ))}
+              <div key="models">
+                <StyledAreaChart
+                  title={`Top Models`}
+                  value={undefined}
+                  isDataOverTimeLoading={isLoading}
+                >
+                  <div className="flex flex-row justify-between items-center pb-2">
+                    <p className="text-xs font-semibold text-gray-700">Name</p>
+                    <p className="text-xs font-semibold text-gray-700">
+                      Requests
+                    </p>
+                  </div>
+                  <BarList
+                    data={
+                      models?.data
+                        ?.map((model, index) => ({
+                          name: model.model || "n/a",
+                          value: model.total_requests,
+                          color: modelColors[index % modelColors.length],
+                        }))
+                        .sort(
+                          (a, b) =>
+                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
+                        ) ?? []
+                    }
+                    className="overflow-auto h-full"
+                  />
+                </StyledAreaChart>
+              </div>
               <div key="costs">
                 <StyledAreaChart
                   title={"Costs"}
@@ -664,34 +693,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
-              <div key="models">
-                <StyledAreaChart
-                  title="Models"
-                  value={undefined}
-                  isDataOverTimeLoading={isLoading}
-                >
-                  <div className="flex flex-row justify-between items-center pb-2">
-                    <p className="text-xs font-semibold text-gray-700">Name</p>
-                    <p className="text-xs font-semibold text-gray-700">
-                      Requests
-                    </p>
-                  </div>
-                  <BarList
-                    data={
-                      models?.data
-                        ?.map((model, index) => ({
-                          name: model.model || "n/a",
-                          value: model.total_requests,
-                          color: modelColors[index % modelColors.length],
-                        }))
-                        .sort(
-                          (a, b) =>
-                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
-                        ) ?? []
-                    }
-                  />
-                </StyledAreaChart>
-              </div>
+
               <div key="users">
                 <StyledAreaChart
                   title={"Users"}
