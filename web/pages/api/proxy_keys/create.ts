@@ -7,7 +7,6 @@ import {
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
-import { Permission } from "../../../services/lib/user";
 import crypto from "crypto";
 import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
 import { Database } from "../../../supabase/database.types";

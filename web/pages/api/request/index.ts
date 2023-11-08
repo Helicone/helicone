@@ -11,6 +11,7 @@ import {
 import { Result } from "../../../lib/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { supabaseServer } from "../../../lib/supabaseServer";
 
 async function handler({
   req,
@@ -24,10 +25,17 @@ async function handler({
     sort: SortLeafRequest;
     isCached: boolean;
   };
-  const metrics = isCached
-    ? await getRequestsCached(orgId, filter, offset, limit, sort)
-    : await getRequests(orgId, filter, offset, limit, sort);
 
+  const metrics = isCached
+    ? await getRequestsCached(
+        orgId,
+        filter,
+        offset,
+        limit,
+        sort,
+        supabaseServer
+      )
+    : await getRequests(orgId, filter, offset, limit, sort, supabaseServer);
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
 
