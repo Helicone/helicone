@@ -1919,10 +1919,10 @@
   resolved "https://registry.yarnpkg.com/@headlessui/tailwindcss/-/tailwindcss-0.1.3.tgz#a9b8b4c2677a7ef37889708d4401c7871b2e6105"
   integrity sha512-3aMdDyYZx9A15euRehpppSyQnb2gIw2s/Uccn2ELIoLQ9oDy0+9oRygNWNjXCD5Dt+w1pxo7C+XoiYvGcqA4Kg==
 
-"@helicone/project-rosetta@^1.1.40":
-  version "1.1.40"
-  resolved "https://registry.yarnpkg.com/@helicone/project-rosetta/-/project-rosetta-1.1.40.tgz#689533e0b1051dfa7256c14f5894db30742c7a7c"
-  integrity sha512-MaL/ybtH5Pf0RtNPqAkNx9VySRZSw2Ad9AmeDOIaviprJFyPtQ1YBC1mFXQJW64VTbGWdxIze2R+uackXNPSEw==
+"@helicone/project-rosetta@^1.1.42":
+  version "1.1.42"
+  resolved "https://registry.yarnpkg.com/@helicone/project-rosetta/-/project-rosetta-1.1.42.tgz#7e193bc2ba404031776b29fd6cd001a2af70d68e"
+  integrity sha512-SqBx//OhE4La0/PhxBtqn1IgZlrJbMRBr5VS9IjXulckyRjKhG2zDX2FFrHxR8qmfAG43lEyCHHnKvI17mKCOg==
   dependencies:
     "@types/lodash.merge" "^4.6.8"
     lodash "^4.17.21"
