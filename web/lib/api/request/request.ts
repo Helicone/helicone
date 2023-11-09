@@ -114,19 +114,7 @@ export async function getRequests(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-  return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-  });
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
-
-  return resultMap(results, (data) => {
+  return resultMap(requests, (data) => {
     return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
   });
 }
@@ -190,19 +178,7 @@ export async function getRequestsCached(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-  return resultMap(results, (data) => {
-    return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-  });
-  if (!supabaseServer) {
-    return resultMap(requests, (data) => {
-      return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
-    });
-  }
-
-  const rosettaWrapper = new RosettaWrapper(supabaseServer);
-  const results = await mapLLMCalls(requests.data, rosettaWrapper);
-
-  return resultMap(results, (data) => {
+  return resultMap(requests, (data) => {
     return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
   });
 }
