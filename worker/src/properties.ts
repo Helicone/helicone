@@ -17,6 +17,7 @@ export async function handleLoggingEndpoint(
   const heliconeHeaders = Object.fromEntries(
     [...request.getHeaders().entries()]
       .filter(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ([key, _]) => key.startsWith(propTag) && key.length > propTag.length
       )
       .map(([key, value]) => [key.substring(propTag.length), value])

@@ -1,9 +1,9 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Database, Json } from "../../supabase/database.types";
 import { Env, hash } from "..";
+import { Database } from "../../supabase/database.types";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
-import { Result, err, ok } from "../results";
 import { SecureCacheEnv, getFromCache, storeInCache } from "../lib/secureCache";
+import { Result, err, ok } from "../results";
 import { RateLimiter } from "./RateLimiter";
 
 async function getHeliconeApiKeyRow(
@@ -240,7 +240,7 @@ export class DBWrapper {
   async getRequestById(
     requestId: string
   ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
-    const {data, error} = await this.supabaseClient
+    const { data, error } = await this.supabaseClient
       .from("request")
       .select("*")
       .match({
@@ -254,5 +254,4 @@ export class DBWrapper {
     }
     return { data: data, error: null };
   }
-
 }

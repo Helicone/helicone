@@ -6,6 +6,7 @@ export async function callProviderWithRetry(
   callProps: CallProps,
   retryOptions: RetryOptions
 ): Promise<Response> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let lastError;
   let lastResponse;
 

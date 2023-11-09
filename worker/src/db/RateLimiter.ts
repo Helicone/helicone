@@ -33,7 +33,11 @@ export class RateLimiter {
     return rateLimitParams[tier];
   }
 
-  async checkRateLimit(tier: string) {
+  async checkRateLimit(tier: string): Promise<{
+    isRateLimited: boolean;
+    shouldLogInDB: boolean;
+    rlIncrementDB: number;
+  }> {
     const rateLimiterId = this.rateLimiter.idFromName(
       this.authParams.organizationId
     );
@@ -53,10 +57,7 @@ export class RateLimiter {
       }
     );
 
-    return await rateLimitRes.json<{
-      isRateLimited: boolean;
-      shouldLogInDB: boolean;
-      rlIncrementDB: number;
-    }>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (await rateLimitRes.json()) as any;
   }
 }

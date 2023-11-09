@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IRequest, Route, Router, RouterType } from "itty-router";
 import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";

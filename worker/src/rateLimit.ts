@@ -1,7 +1,4 @@
-import {
-  HeliconeProperties,
-  HeliconeProxyRequest,
-} from "./lib/HeliconeProxyRequest/mapper";
+import { HeliconeProperties } from "./lib/HeliconeProxyRequest/mapper";
 
 export interface RateLimitOptions {
   time_window: number;

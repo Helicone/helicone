@@ -9,7 +9,9 @@ export const getOpenAIProxyRouter = (router: BaseRouter) => {
     async (
       _,
       requestWrapper: RequestWrapper,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       env: Env,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ctx: ExecutionContext
     ) => {
       const properties = requestWrapper.heliconeHeaders.heliconeProperties;

@@ -13,7 +13,7 @@ export class ReadableInterceptor {
   stream: ReadableStream;
 
   constructor(
-    stream: ReadableStream,
+    stream: ReadableStream<any>,
     private chunkEventName = "done",
     private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
   ) {

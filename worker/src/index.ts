@@ -1,13 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
-import { insertIntoRequest, updateResponse } from "./lib/dbLogger/insertQueue";
-import { buildRouter } from "./routers/routerFactory";
-import { updateLoopUsers } from "./lib/updateLoopsUsers";
-import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
-
-const FALLBACK_QUEUE = "fallback-queue";
+import { updateLoopUsers } from "./lib/updateLoopsUsers";
+import { buildRouter } from "./routers/routerFactory";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 
@@ -100,48 +97,17 @@ export default {
       return handleError(e);
     }
   },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async queue(_batch: MessageBatch<string>, env: Env): Promise<void> {
-    if (_batch.queue.includes(FALLBACK_QUEUE)) {
-      const batch = _batch as MessageBatch<string>;
-
-      let sawError = false;
-      for (const message of batch.messages) {
-        const payload =
-          await env.REQUEST_AND_RESPONSE_QUEUE_KV.get<RequestResponseQueuePayload>(
-            message.body
-          );
-        if (!payload) {
-          console.error(`No payload found for ${message.body}`);
-          sawError = true;
-          continue;
-        }
-        if (payload._type === "request") {
-          insertIntoRequest(
-            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-            payload.payload
-          );
-        } else if (payload._type === "response") {
-          updateResponse(
-            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-            payload.payload
-          );
-        }
-      }
-      if (!sawError) {
-        batch.ackAll();
-        return;
-      }
-    } else {
-      console.error(`Unknown queue: ${_batch.queue}`);
-    }
+    console.error(`Unknown queue: ${_batch.queue}`);
   },
   async scheduled(
     controller: ScheduledController,
     env: Env,
-    ctx: ExecutionContext
+    _ctx: ExecutionContext
   ): Promise<void> {
     switch (controller.cron) {
-      case "0 * * * *":
+      case "0 * * * *": {
         const supabaseClient = createClient(
           env.SUPABASE_URL,
           env.SUPABASE_SERVICE_ROLE_KEY
@@ -149,6 +115,7 @@ export default {
         const rosetta = new RosettaWrapper(supabaseClient, env);
         await rosetta.generateMappers();
         break;
+      }
       default:
         await feedbackCronHandler(env);
         await updateLoopUsers(env);
