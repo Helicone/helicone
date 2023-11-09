@@ -38,8 +38,14 @@ export class RosettaWrapper {
     provider: string,
     model: string
   ): Promise<Json | null> {
+    const cleanedPath = this.cleanPath(requestPath);
+
+    if (!cleanedPath) {
+      return null;
+    }
+
     const outputSchema = JSON.parse(JSON.stringify(requestResponseSchema));
-    const key = `${provider}:${requestPath}`;
+    const key = `${provider}:${cleanedPath}`;
 
     try {
       return await this.rosetta.map(llmCall, outputSchema, key);
@@ -51,5 +57,28 @@ export class RosettaWrapper {
 
   public async generateMappers() {
     await this.rosetta.generateMappers();
+  }
+
+  private cleanPath(requestPath: string): string | null {
+    const regexDeploymentOrEngine =
+      /\/(?:openai\/deployments|engines)\/[^/]+(.*)/;
+    const regexV1 = /^\/v1(\/.+)/;
+
+    if (/thread/.test(requestPath)) {
+      return null;
+    }
+
+    let cleanedPath = requestPath;
+    if (regexDeploymentOrEngine.test(requestPath)) {
+      cleanedPath = requestPath.replace(regexDeploymentOrEngine, "$1");
+    } else if (regexV1.test(requestPath)) {
+      cleanedPath = requestPath.replace(regexV1, "$1");
+    }
+
+    if (cleanedPath === "/") {
+      return null;
+    }
+
+    return cleanedPath;
   }
 }
