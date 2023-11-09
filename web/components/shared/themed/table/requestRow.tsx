@@ -48,7 +48,7 @@ const RequestRow = (props: RequestRowProps) => {
         />
       </div>
       <div className="flex flex-row justify-between items-center">
-        <div className="flex flex-row gap-4 items-center">
+        <div className="flex flex-wrap gap-4 items-center">
           <ModelPill model={row.model} />
           <p className="text-xs font-semibold">{Number(row.latency) / 1000}s</p>
           <p className="text-xs font-semibold">{`$${formatNumber(

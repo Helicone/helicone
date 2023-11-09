@@ -23,7 +23,7 @@ import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 export type Message = {
   id: string;
   role: string;
-  content: string | null;
+  content: string | null | any[];
   function_call?: {
     name: string;
     arguments: string;
@@ -51,6 +51,14 @@ export const SingleChat = (props: {
   const isSystem = message.role === "system";
   const isFunction = message.role === "function";
   const hasFunctionCall = message.function_call;
+  const hasImage = () => {
+    const arr = message.content;
+    if (Array.isArray(arr)) {
+      return arr.some((item) => item.type === "image_url");
+    } else {
+      return false;
+    }
+  };
 
   let formattedMessageContent = removeLeadingWhitespace(
     message?.content?.toString() || ""
@@ -152,6 +160,16 @@ export const SingleChat = (props: {
               </pre>
             )}
           </div>
+        ) : hasImage() ? (
+          <div className="flex flex-col space-y-4">
+            <p>{message?.content?.at(0).text}</p>
+            <img
+              src={message?.content?.at(1).image_url.url}
+              alt={""}
+              width={200}
+              height={200}
+            />
+          </div>
         ) : (
           <p className="text-sm whitespace-pre-wrap break-words leading-6">
             {formattedMessageContent}
@@ -161,12 +179,6 @@ export const SingleChat = (props: {
         {possiblyTruncated &&
           (needsTruncation ? (
             <>
-              {/* <div
-                className={clsx(
-                  getBgColor(),
-                  "inset-0 bg-gradient-to-b from-transparent pointer-events-none flex flex-col justify-end items-center"
-                )}
-              ></div> */}
               <button
                 className={clsx(
                   getBgColor(),

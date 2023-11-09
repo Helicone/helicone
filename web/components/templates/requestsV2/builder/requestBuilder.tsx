@@ -42,7 +42,7 @@ export const getBuilderType = (
   }
 
   if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
-    return "UnknownBuilder";
+    return "ChatGPTBuilder";
   }
 
   if (
