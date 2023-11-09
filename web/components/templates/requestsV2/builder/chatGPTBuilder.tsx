@@ -17,7 +17,18 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       const messages = this.response.request_body.messages;
       if (messages) {
         if (messages.length > 0) {
-          return messages.at(-1).content;
+          const content = messages.at(-1).content;
+
+          if (Array.isArray(content)) {
+            // image handling
+            const textMessage = content.find(
+              (message) => message.type === "text"
+            );
+
+            return textMessage?.text || "";
+          } else {
+            return content;
+          }
         } else {
           return JSON.stringify(messages);
         }

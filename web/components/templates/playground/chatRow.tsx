@@ -33,6 +33,8 @@ const ChatRow = (props: ChatRowProps) => {
   const isAssistant = role === "assistant";
   const isSystem = role === "system";
 
+  const contentAsString = currentMessage.content as string;
+
   return (
     <li
       className={clsx(
@@ -53,7 +55,7 @@ const ChatRow = (props: ChatRowProps) => {
               disabled={isSystem}
               onClick={() => {
                 setRole("user");
-                callback(currentMessage.content || "", "user");
+                callback(contentAsString || "", "user");
               }}
             >
               {isSystem ? "system" : "assistant"}
@@ -62,7 +64,7 @@ const ChatRow = (props: ChatRowProps) => {
               {isEditing ? (
                 <span className="w-full">
                   <ResizeTextArea
-                    value={currentMessage.content || ""}
+                    value={contentAsString || ""}
                     onChange={(e) => {
                       const newMessages = { ...currentMessage };
                       newMessages.content = e.target.value;
@@ -112,7 +114,7 @@ const ChatRow = (props: ChatRowProps) => {
               </button>
               <button
                 onClick={() => {
-                  callback(currentMessage.content || "", role);
+                  callback(contentAsString || "", role);
                   setIsEditing(false);
                 }}
                 className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 text-white rounded-lg"
@@ -139,7 +141,7 @@ const ChatRow = (props: ChatRowProps) => {
 
                 newMessage.role = "assistant";
                 setCurrentMessage(newMessage);
-                callback(currentMessage.content || "", "assistant");
+                callback(contentAsString || "", "assistant");
               }}
             >
               user
@@ -148,7 +150,7 @@ const ChatRow = (props: ChatRowProps) => {
               {isEditing ? (
                 <span className="w-full">
                   <ResizeTextArea
-                    value={currentMessage.content || ""}
+                    value={contentAsString || ""}
                     onChange={(e) => {
                       const newMessages = { ...currentMessage };
                       newMessages.content = e.target.value;
@@ -197,7 +199,7 @@ const ChatRow = (props: ChatRowProps) => {
               </button>
               <button
                 onClick={() => {
-                  callback(currentMessage.content || "", role);
+                  callback(contentAsString || "", role);
                   setIsEditing(false);
                 }}
                 className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 text-white rounded-lg"

@@ -19,6 +19,8 @@ import Prism, { defaultProps } from "prism-react-renderer";
 import { Completion } from "./completion";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
+import ThemedModal from "../../shared/themed/themedModal";
+import useNotification from "../../shared/notification/useNotification";
 
 export type Message = {
   id: string;
@@ -47,16 +49,65 @@ export const SingleChat = (props: {
     isLast,
     expandedProps: { expanded, setExpanded },
   } = props;
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
   const isAssistant = message.role === "assistant";
   const isSystem = message.role === "system";
   const isFunction = message.role === "function";
   const hasFunctionCall = message.function_call;
+
+  const { setNotification } = useNotification();
+
   const hasImage = () => {
     const arr = message.content;
     if (Array.isArray(arr)) {
       return arr.some((item) => item.type === "image_url");
     } else {
       return false;
+    }
+  };
+
+  const renderImageRow = () => {
+    const arr = message.content;
+    if (Array.isArray(arr)) {
+      const textMessage = arr.find((message) => message.type === "text");
+
+      return (
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100">
+          <p>{textMessage?.text}</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="flex flex-wrap items-center pt-4">
+            {arr.map((item, index) =>
+              item.type === "image_url" ? (
+                <div key={index}>
+                  {item.image_url.url ? (
+                    <button
+                      onClick={() => {
+                        setSelectedImageUrl(item.image_url.url);
+                        setOpen(true);
+                      }}
+                    >
+                      <img
+                        src={item.image_url.url}
+                        alt={""}
+                        width={200}
+                        height={200}
+                      />
+                    </button>
+                  ) : (
+                    <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+                      Unsupported Image Type
+                    </div>
+                  )}
+                </div>
+              ) : null
+            )}
+          </div>
+        </div>
+      );
+    } else {
+      return null;
     }
   };
 
@@ -107,107 +158,125 @@ export const SingleChat = (props: {
   };
 
   return (
-    <div
-      className={clsx(
-        getBgColor(),
-        "items-start p-4 text-left grid grid-cols-12 space-x-2",
-        isSystem && "font-semibold",
-        isLast && "rounded-b-md"
-      )}
-      key={index}
-    >
-      <div className="col-span-1 flex items-center justify-center">
-        {isAssistant || isSystem ? (
-          <Image
-            src={"/assets/chatGPT.png"}
-            className="h-6 w-6 rounded-md"
-            height={30}
-            width={30}
-            alt="ChatGPT Logo"
-          />
-        ) : isFunction ? (
-          <CodeBracketIcon className="h-6 w-6 rounded-md border bg-white text-black border-black p-1" />
-        ) : (
-          <UserIcon className="h-6 w-6 bg-white rounded-md p-1 border border-black text-black" />
+    <>
+      <div
+        className={clsx(
+          getBgColor(),
+          "items-start p-4 text-left grid grid-cols-12 space-x-2",
+          isSystem && "font-semibold",
+          isLast && "rounded-b-md"
         )}
-      </div>
-      <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
-        {isFunction ? (
-          <div className="flex flex-col space-y-2">
-            <code className="text-xs whitespace-pre-wrap font-semibold">
-              {message.name}
-            </code>
-            <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg overflow-auto">
-              {isJSON(formattedMessageContent)
-                ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-                : formattedMessageContent}
-            </pre>
-          </div>
-        ) : hasFunctionCall ? (
-          <div className="flex flex-col space-y-2">
-            {formattedMessageContent !== "" ? (
-              <>
-                <p className="text-sm whitespace-pre-wrap">
-                  {formattedMessageContent}
-                </p>
-                <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+        key={index}
+      >
+        <div className="col-span-1 flex items-center justify-center">
+          {isAssistant || isSystem ? (
+            <Image
+              src={"/assets/chatGPT.png"}
+              className="h-6 w-6 rounded-md"
+              height={30}
+              width={30}
+              alt="ChatGPT Logo"
+            />
+          ) : isFunction ? (
+            <CodeBracketIcon className="h-6 w-6 rounded-md border bg-white text-black border-black p-1" />
+          ) : (
+            <UserIcon className="h-6 w-6 bg-white rounded-md p-1 border border-black text-black" />
+          )}
+        </div>
+        <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
+          {isFunction ? (
+            <div className="flex flex-col space-y-2">
+              <code className="text-xs whitespace-pre-wrap font-semibold">
+                {message.name}
+              </code>
+              <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg overflow-auto">
+                {isJSON(formattedMessageContent)
+                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                  : formattedMessageContent}
+              </pre>
+            </div>
+          ) : hasFunctionCall ? (
+            <div className="flex flex-col space-y-2">
+              {formattedMessageContent !== "" ? (
+                <>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {formattedMessageContent}
+                  </p>
+                  <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+                    {`${message.function_call?.name}(${message.function_call?.arguments})`}
+                  </pre>
+                </>
+              ) : (
+                <pre className="text-xs whitespace-pre-wrap py-1 font-semibold break-words">
                   {`${message.function_call?.name}(${message.function_call?.arguments})`}
                 </pre>
+              )}
+            </div>
+          ) : hasImage() ? (
+            renderImageRow()
+          ) : (
+            <p className="text-sm whitespace-pre-wrap break-words leading-6">
+              {formattedMessageContent}
+            </p>
+          )}
+
+          {possiblyTruncated &&
+            (needsTruncation ? (
+              <>
+                <button
+                  className={clsx(
+                    getBgColor(),
+                    "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
+                  )}
+                  onClick={() => {
+                    setExpanded(true);
+                  }}
+                >
+                  Show More
+                </button>
               </>
             ) : (
-              <pre className="text-xs whitespace-pre-wrap py-1 font-semibold break-words">
-                {`${message.function_call?.name}(${message.function_call?.arguments})`}
-              </pre>
-            )}
-          </div>
-        ) : hasImage() ? (
-          <div className="flex flex-col space-y-4">
-            <p>{message?.content?.at(0).text}</p>
+              <>
+                <button
+                  className={clsx(
+                    getBgColor(),
+                    "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
+                  )}
+                  onClick={() => {
+                    setExpanded(false);
+                  }}
+                >
+                  Show Less
+                </button>
+              </>
+            ))}
+        </div>
+      </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="flex flex-col space-y-4">
+          {selectedImageUrl && (
             <img
-              src={message?.content?.at(1).image_url.url}
-              alt={""}
-              width={200}
+              src={selectedImageUrl}
+              alt={selectedImageUrl}
+              width={600}
               height={200}
             />
+          )}
+          <div className="flex flex-row justify-between items-center">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(selectedImageUrl || "");
+                setNotification("Copied to clipboard", "success");
+              }}
+            >
+              <p className="text-xs truncate max-w-[600px]">
+                {selectedImageUrl}
+              </p>
+            </button>
           </div>
-        ) : (
-          <p className="text-sm whitespace-pre-wrap break-words leading-6">
-            {formattedMessageContent}
-          </p>
-        )}
-
-        {possiblyTruncated &&
-          (needsTruncation ? (
-            <>
-              <button
-                className={clsx(
-                  getBgColor(),
-                  "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
-                )}
-                onClick={() => {
-                  setExpanded(true);
-                }}
-              >
-                Show More
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className={clsx(
-                  getBgColor(),
-                  "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
-                )}
-                onClick={() => {
-                  setExpanded(false);
-                }}
-              >
-                Show Less
-              </button>
-            </>
-          ))}
-      </div>
-    </div>
+        </div>
+      </ThemedModal>
+    </>
   );
 };
 
