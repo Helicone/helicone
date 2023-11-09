@@ -74,7 +74,7 @@ export async function handleProxyRequest(
   let status = response.status;
   if (status < 200 || status >= 600) {
     console.error("Invalid status code: ", status);
-    status = 200;
+    status = 500;
     if (status === 100) {
       status = 200;
     }
