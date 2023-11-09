@@ -36,13 +36,18 @@ export class ResponseBuilder {
   }
 
   build(params: BuildParams): Response {
-    const { body, inheritFrom: _inheritFrom, status } = params;
+    const { body, inheritFrom: _inheritFrom } = params;
+    let { status } = params;
     const inheritFrom = _inheritFrom ?? new Response();
 
     const headers = new Headers(inheritFrom.headers);
     this.headers.forEach((value, key) => {
       headers.set(key, value);
     });
+    if (status < 200 || status >= 600) {
+      console.log("Invalid status code:", status);
+      status = 500;
+    }
 
     const res = new Response(body, {
       ...inheritFrom,

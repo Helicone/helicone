@@ -87,10 +87,14 @@ function unsupportedImage(body: any): any {
   if (Array.isArray(body)) {
     return body.map((item) => unsupportedImage(item));
   }
+  const notSupportMessage = {
+    helicone_message:
+      "Storing images as bytes is currently not supported within Helicone.",
+  };
   if (body["image_url"] !== undefined) {
     const imageUrl = body["image_url"];
     if (typeof imageUrl === "string" && !imageUrl.startsWith("http")) {
-      body.image_url = { unsupported_image: true };
+      body.image_url = notSupportMessage;
     }
     if (
       typeof imageUrl === "object" &&
@@ -98,7 +102,7 @@ function unsupportedImage(body: any): any {
       typeof imageUrl.url === "string" &&
       !imageUrl.url.startsWith("http")
     ) {
-      body.image_url = { unsupported_image: true };
+      body.image_url = notSupportMessage;
     }
   }
   const result: any = {};
