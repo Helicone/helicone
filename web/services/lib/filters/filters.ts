@@ -10,7 +10,7 @@ import {
 } from "./filterDefs";
 
 type KeyMapper<T> = (filter: T) => {
-  column: string;
+  column?: string;
   operator: AllOperators;
   value: string;
 };
@@ -35,7 +35,7 @@ function easyKeyMappings<T extends keyof TablesAndViews>(keyMappings: {
   [key in keyof TablesAndViews[T]]: string;
 }): (key: {
   [key in keyof TablesAndViews[T]]: AnyOperator;
-}) => { column: string; operator: AllOperators; value: string } {
+}) => { column?: string; operator: AllOperators; value: string } {
   return (key: {
     [key in keyof TablesAndViews[T]]: AnyOperator;
   }) => {
@@ -46,7 +46,7 @@ function easyKeyMappings<T extends keyof TablesAndViews>(keyMappings: {
     );
 
     return {
-      column: `${columnFromMapping}`,
+      column: columnFromMapping ? `${columnFromMapping}` : undefined,
       operator: operator,
       value: value,
     };
@@ -182,7 +182,10 @@ const whereKeyMappings: KeyMappings = {
       feedback_created_at: "response_copy_v3.feedback_created_at",
     })(filter);
   },
-  users_view: NOT_IMPLEMENTED,
+  users_view: easyKeyMappings<"response_copy_v3">({
+    status: "r.status",
+    user_id: "r.user_id",
+  }),
   properties_copy_v1: easyKeyMappings<"properties_copy_v1">({
     key: "properties_copy_v1.key",
     value: "properties_copy_v1.value",
@@ -260,6 +263,14 @@ const havingKeyMappings: KeyMappings = {
     total_requests: "count(request.id)",
   }),
   users_view: easyKeyMappings<"users_view">({
+    active_for: "active_for",
+    first_active: "first_active",
+    last_active: "last_active",
+    total_requests: "total_requests",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
   user_api_keys: NOT_IMPLEMENTED,
@@ -295,6 +306,10 @@ export function buildFilterLeaf(
     const table = filter[tableKey];
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
     const { column, operator: operatorKey, value } = mapper(table);
+
+    if (!column) {
+      continue;
+    }
 
     const sqlOperator =
       operatorKey === "equals"

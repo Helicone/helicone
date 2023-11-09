@@ -140,6 +140,10 @@ type UserViewToOperators = {
   first_active: SingleKey<TimestampOperators>;
   last_active: SingleKey<TimestampOperators>;
   total_requests: SingleKey<NumberOperators>;
+  average_requests_per_day_active: SingleKey<NumberOperators>;
+  average_tokens_per_request: SingleKey<NumberOperators>;
+  total_completion_tokens: SingleKey<NumberOperators>;
+  total_prompt_token: SingleKey<NumberOperators>;
   cost: SingleKey<NumberOperators>;
 };
 
