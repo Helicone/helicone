@@ -79,8 +79,8 @@ export class RosettaStore implements IDatabaseService {
       version: rosettaMapper.version,
       mapped_fields: rosettaMapper.mappedFields,
       ignored_fields: rosettaMapper.ignoredFields,
-      created_at: rosettaMapper.createdAt.toISOString(),
-      updated_at: rosettaMapper.updatedAt.toISOString(),
+      created_at: new Date(rosettaMapper.createdAt).toISOString(),
+      updated_at: new Date(rosettaMapper.updatedAt).toISOString(),
     };
   }
 
