@@ -302,9 +302,6 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               handleSubmit(currentChat);
             }}
             className={clsx(
-              // model.includes("3.5")
-              //   ? "bg-green-600 hover:bg-green-700"
-              //   : "bg-purple-600 hover:bg-purple-700",
               "bg-sky-500 hover:bg-sky-600",
               "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             )}

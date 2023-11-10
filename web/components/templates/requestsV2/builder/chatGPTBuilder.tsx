@@ -78,6 +78,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             responseBody={this.response.response_body}
             status={this.response.response_status}
             requestId={this.response.request_id}
+            model={this.model}
           />
         ) : (
           <div className="w-full flex flex-col text-left space-y-8 text-sm">
@@ -87,6 +88,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 responseBody={this.response.response_body}
                 status={this.response.response_status}
                 requestId={this.response.request_id}
+                model={this.model}
               />
             )}
             <div className="w-full flex flex-col text-left space-y-1 text-sm">

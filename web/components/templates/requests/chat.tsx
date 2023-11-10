@@ -286,10 +286,11 @@ interface ChatProps {
   responseBody: any;
   requestId: string;
   status: number;
+  model: string;
 }
 
 export const Chat = (props: ChatProps) => {
-  const { requestBody, responseBody, requestId, llmSchema } = props;
+  const { requestBody, responseBody, requestId, llmSchema, model } = props;
 
   const requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? null;
@@ -349,17 +350,22 @@ export const Chat = (props: ChatProps) => {
                 {allExpanded ? "Shrink All" : "Expand All"}
               </p>
             </button>
-            <button
-              onClick={() => {
-                if (requestMessages) {
-                  router.push("/playground?request=" + requestId);
-                }
-              }}
-              className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
-            >
-              <BeakerIcon className="h-4 w-4" />
-              <p className="text-xs font-semibold">Playground</p>
-            </button>
+            {!(
+              model === "gpt-4-vision-preview" ||
+              model === "gpt-4-1106-vision-preview"
+            ) && (
+              <button
+                onClick={() => {
+                  if (requestMessages) {
+                    router.push("/playground?request=" + requestId);
+                  }
+                }}
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+              >
+                <BeakerIcon className="h-4 w-4" />
+                <p className="text-xs font-semibold">Playground</p>
+              </button>
+            )}
           </div>
 
           <button

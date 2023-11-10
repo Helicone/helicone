@@ -35,6 +35,51 @@ const ChatRow = (props: ChatRowProps) => {
 
   const contentAsString = currentMessage.content as string;
 
+  const getContent = (content: string | any[] | null) => {
+    if (Array.isArray(content)) {
+      const textMessage = content.find((element) => element.type === "text");
+
+      return (
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100">
+          <p>{textMessage?.text}</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="flex flex-wrap items-center pt-4">
+            {content.map((item, index) =>
+              item.type === "image_url" ? (
+                <div key={index}>
+                  {item.image_url.url ? (
+                    <img
+                      src={item.image_url.url}
+                      alt={""}
+                      width={200}
+                      height={200}
+                    />
+                  ) : (
+                    // </button>
+                    <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+                      Unsupported Image Type
+                    </div>
+                  )}
+                </div>
+              ) : null
+            )}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <span
+          className={clsx(
+            isSystem ? "font-semibold" : "font-normal",
+            "text-gray-900 whitespace-pre-wrap w-full"
+          )}
+        >
+          {content ?? ""}
+        </span>
+      );
+    }
+  };
+
   return (
     <li
       className={clsx(
@@ -73,14 +118,15 @@ const ChatRow = (props: ChatRowProps) => {
                   />
                 </span>
               ) : (
-                <span
-                  className={clsx(
-                    isSystem ? "font-semibold" : "font-normal",
-                    "text-gray-900 whitespace-pre-wrap w-full"
-                  )}
-                >
-                  {currentMessage.content}
-                </span>
+                <>{getContent(currentMessage.content)}</>
+                // <span
+                //   className={clsx(
+                //     isSystem ? "font-semibold" : "font-normal",
+                //     "text-gray-900 whitespace-pre-wrap w-full"
+                //   )}
+                // >
+                //   {getContent(currentMessage.content)}
+                // </span>
               )}
             </div>
 
@@ -160,14 +206,7 @@ const ChatRow = (props: ChatRowProps) => {
                   />
                 </span>
               ) : (
-                <span
-                  className={clsx(
-                    isSystem ? "font-semibold" : "font-normal",
-                    "text-gray-900 whitespace-pre-wrap w-full"
-                  )}
-                >
-                  {currentMessage.content}
-                </span>
+                <>{getContent(currentMessage.content)}</>
               )}
             </div>
 
