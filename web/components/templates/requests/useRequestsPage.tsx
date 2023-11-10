@@ -130,7 +130,7 @@ function getRequestText(api: RequestWrapper["api"]): string {
     if (!api.chat.request) {
       return "";
     }
-    return api.chat?.request?.at(-1)?.content ?? "";
+    return (api.chat?.request?.at(-1)?.content as string) ?? "";
   } else if ("completion" in api) {
     return api.completion.request ?? "";
   } else if ("moderation" in api) {
@@ -141,7 +141,7 @@ function getRequestText(api: RequestWrapper["api"]): string {
 
 function getResponseText(api: RequestWrapper["api"]): string {
   if ("chat" in api) {
-    return api.chat.response?.content ?? "";
+    return (api.chat.response?.content as string) ?? "";
   } else if ("completion" in api) {
     return api.completion.response ?? "";
   } else if ("moderation" in api) {

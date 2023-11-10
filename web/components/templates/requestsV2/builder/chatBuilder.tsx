@@ -67,6 +67,7 @@ class ChatBuilder extends AbstractRequestBuilder {
           requestId={this.response.request_id}
           responseBody={this.response.response_body}
           status={this.response.response_status}
+          model={this.model}
         />
       );
     };
