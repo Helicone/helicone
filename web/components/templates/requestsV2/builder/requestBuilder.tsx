@@ -45,6 +45,11 @@ export const getBuilderType = (
     return "ChatGPTBuilder";
   }
 
+  // mistralai/Mistral-7B-Instruct-v[number].[number]
+  if (/^mistralai\/Mistral-7B-Instruct-v\d+\.\d+$/.test(model)) {
+    return "ChatBuilder";
+  }
+
   if (
     // GPT-3 (deprecated)
     /^text-(davinci|curie|babbage|ada)(-\[\w+\]|-\d+)?$/.test(model) ||
