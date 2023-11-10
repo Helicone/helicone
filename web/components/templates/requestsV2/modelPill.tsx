@@ -27,9 +27,11 @@ const ModelPill = (props: ModelPillProps) => {
         "00" + Math.min(255, baseValue + 200).toString(16)
       ).slice(-2);
       // Create a light color for the ring by adding a moderate value
-      colors.ring += ("00" + Math.min(255, baseValue).toString(16)).slice(-2);
+      colors.ring += ("00" + Math.min(255, baseValue + 20).toString(16)).slice(
+        -2
+      );
       // Create a darker color for the text by adding a smaller value
-      colors.text += ("00" + Math.min(255, baseValue - 10).toString(16)).slice(
+      colors.text += ("00" + Math.min(255, baseValue - 20).toString(16)).slice(
         -2
       );
     }
