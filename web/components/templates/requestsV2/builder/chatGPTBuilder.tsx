@@ -17,7 +17,18 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       const messages = this.response.request_body.messages;
       if (messages) {
         if (messages.length > 0) {
-          return messages.at(-1).content;
+          const content = messages.at(-1).content;
+
+          if (Array.isArray(content)) {
+            // image handling
+            const textMessage = content.find(
+              (message) => message.type === "text"
+            );
+
+            return textMessage?.text || "";
+          } else {
+            return content;
+          }
         } else {
           return JSON.stringify(messages);
         }
@@ -67,6 +78,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             responseBody={this.response.response_body}
             status={this.response.response_status}
             requestId={this.response.request_id}
+            model={this.model}
           />
         ) : (
           <div className="w-full flex flex-col text-left space-y-8 text-sm">
@@ -76,6 +88,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 responseBody={this.response.response_body}
                 status={this.response.response_status}
                 requestId={this.response.request_id}
+                model={this.model}
               />
             )}
             <div className="w-full flex flex-col text-left space-y-1 text-sm">
