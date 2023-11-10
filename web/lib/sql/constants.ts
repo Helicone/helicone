@@ -9,6 +9,8 @@ sum(
     -- Non-finetuned
     WHEN (${table}.model LIKE '%gpt-4-32k-0314%') THEN 0.06 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-4-32k-0613%') THEN 0.06 * ${table}.prompt_tokens + 0.12 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-4-1106-preview%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
+    WHEN (${table}.model LIKE '%gpt-4-1106-preview-vision%') THEN 0.01 * ${table}.prompt_tokens + 0.03 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-3.5-turbo-0613%') THEN 0.0015 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-3.5-turbo-16k-0613%') THEN 0.003 * ${table}.prompt_tokens + 0.004 * ${table}.completion_tokens
     WHEN (${table}.model LIKE '%gpt-35-turbo%') THEN 0.0015 * ${table}.prompt_tokens + 0.002 * ${table}.completion_tokens
