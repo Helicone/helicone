@@ -8,26 +8,52 @@ interface ModelPillProps {
 const ModelPill = (props: ModelPillProps) => {
   const { model } = props;
 
-  const builderType = getBuilderType(model, "OPENAI");
+  function generateColorShades(str: string) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
 
-  let modelMapping = {
-    ChatBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
-    CompletionBuilder: "bg-green-50 text-green-700 ring-green-200",
-    ChatGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
-    GPT3Builder: "bg-green-50 text-green-700 ring-green-200",
-    ModerationBuilder: "bg-teal-50 text-teal-700 ring-teal-200",
-    EmbeddingBuilder: "bg-blue-50 text-blue-700 ring-blue-200",
-    ClaudeBuilder: "bg-orange-50 text-orange-700 ring-orange-200",
-    CustomBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
-    UnknownBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
+    const colors = {
+      background: "",
+      ring: "",
+      text: "",
+    };
+
+    for (let i = 0; i < 3; i++) {
+      const baseValue = (hash >> (i * 8)) & 0xff;
+      // Create a very light color for the background by adding a large value
+      colors.background += (
+        "00" + Math.min(255, baseValue + 200).toString(16)
+      ).slice(-2);
+      // Create a light color for the ring by adding a moderate value
+      colors.ring += ("00" + Math.min(255, baseValue).toString(16)).slice(-2);
+      // Create a darker color for the text by adding a smaller value
+      colors.text += ("00" + Math.min(255, baseValue - 10).toString(16)).slice(
+        -2
+      );
+    }
+
+    colors.background = `#${colors.background}`;
+    colors.ring = `#${colors.ring}`;
+    colors.text = `#${colors.text}`;
+
+    return colors;
+  }
+
+  const { background, ring, text } = generateColorShades(model);
+  const style = {
+    backgroundColor: background,
+    color: text,
+    boxShadow: `0 0 0 1px ${ring}`,
   };
 
   return (
     <span
       className={clsx(
-        modelMapping[builderType] || "bg-gray-50 text-gray-700 ring-gray-200",
         `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
       )}
+      style={style}
     >
       {model && model !== "" ? model : "Unsupported"}
     </span>
