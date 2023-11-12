@@ -196,6 +196,7 @@ export class HeliconeProxyRequestMapper {
       /^https:\/\/api\.endpoints\.anyscale\.com\/v\d+\/?$/;
     const cloudflareAiGatewayPattern =
       /^https:\/\/gateway\.ai\.cloudflare\.com\/v\d+\/?$/;
+    const twoYFV = /^https:\/\/api\.2yfv\.com\/v\d+\/?$/;
 
     return (
       api_base === undefined ||
@@ -206,7 +207,8 @@ export class HeliconeProxyRequestMapper {
       heliconeProxyPattern.test(api_base) ||
       amdbartekPattern.test(api_base) ||
       anyscalePattern.test(api_base) ||
-      cloudflareAiGatewayPattern.test(api_base)
+      cloudflareAiGatewayPattern.test(api_base) ||
+      twoYFV.test(api_base)
     );
   }
 
