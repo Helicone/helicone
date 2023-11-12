@@ -33,25 +33,23 @@ module "aurora" {
 
   name            = local.name
   engine          = "aurora-postgresql"
-  engine_version  = "14.7"
+  engine_version  = "15.4"
   master_username = "root"
   storage_type    = "aurora-iopt1"
+  storage_encrypted   = true
+  instance_class  = "db.r5b.large" 
+  backup_retention_period = 7
+  preferred_backup_window = "03:00-06:00"
   instances = {
-    1 = {
-      instance_class          = "db.r5.2xlarge"
-      publicly_accessible     = true
-      db_parameter_group_name = "default.aurora-postgresql14"
-    }
-    2 = {
-      identifier     = "static-member-1"
-      instance_class = "db.r5.2xlarge"
-    }
-    3 = {
-      identifier     = "excluded-member-1"
-      instance_class = "db.r5.large"
-      promotion_tier = 15
+    one = {}
+    two = {
+      instance_class = "db.r6g.2xlarge"
     }
   }
+  autoscaling_enabled      = true
+  autoscaling_min_capacity = 1
+  autoscaling_max_capacity = 5
+  allow_major_version_upgrade = true
 
   endpoints = {
     static = {

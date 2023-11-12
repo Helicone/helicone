@@ -1,4 +1,1 @@
-export function hello() {
-  console.log("HELLO");
-  return "adfad";
-}
+export { ValhallaDB } from "./db/client";

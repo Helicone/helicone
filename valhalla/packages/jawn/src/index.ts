@@ -1,11 +1,13 @@
 // src/index.ts
 import express from "express";
 import morgan from "morgan";
-import { Client } from "pg";
-import { hello } from "helicone-shared-ts";
+import { ValhallaDB } from "helicone-shared-ts";
+
+require("dotenv").config({
+  path: "./.env",
+});
 
 const app = express();
-const environment = process.env.ENV || "development";
 
 // for logs
 app.use(morgan("combined"));
@@ -18,71 +20,17 @@ app.post("/v1/request", (req, res) => {
 });
 
 app.get("/healthcheck-db", async (req, res) => {
-  const auroraCreds = process.env.AURORA_CREDS || "";
-  const auroraHost = process.env.AURORA_HOST;
-  const auroraPort = process.env.AURORA_PORT;
-  const auroraDb = process.env.AURORA_DATABASE;
-
-  if (!auroraCreds) {
-    res.json({ status: "healthy :)", dataBase: "no creds :(" });
+  const valhallaDB = new ValhallaDB();
+  const now = await valhallaDB.now();
+  if (now.error) {
+    res.json({ status: "unhealthy :(", error: now.error });
     return;
   }
 
-  if (!auroraHost) {
-    res.json({ status: "healthy :)", dataBase: "no host :(" });
-    return;
-  }
-
-  if (!auroraPort) {
-    res.json({ status: "healthy :)", dataBase: "no port :(" });
-    return;
-  }
-  const {
-    username,
-    password,
-  }: {
-    username: string;
-    password: string;
-  } = JSON.parse(auroraCreds);
-
-  const client = new Client({
-    host: auroraHost,
-    port: parseInt(auroraPort),
-    user: username,
-    password: password,
-    database: auroraDb,
-    ssl:
-      environment === "development"
-        ? undefined
-        : {
-            rejectUnauthorized: true, // This should be set to true for better security
-          },
-  });
-
-  let databaseStatus = "healthy :)";
-  try {
-    console.log("Connecting to database...");
-    console.log("Host: ", auroraHost);
-    console.log("Port: ", auroraPort);
-    console.log("User: ", username);
-    console.log("Password: ", password);
-    await client.connect();
-
-    // Test the connection
-    const result = await client.query("SELECT NOW() as now");
-    console.log(result);
-  } catch (err) {
-    databaseStatus = "unhealthy :(" + JSON.stringify(err);
-  } finally {
-    await client.end();
-  }
-
-  res.json({ status: "healthy :)", dataBase: databaseStatus });
+  res.json({ status: "healthy :)", dataBase: now.data?.rows });
 });
 
 app.get("/healthcheck", (req, res) => {
-  const h = hello();
-  console.log("BYE", h, hello.prototype);
   res.json({
     status: "healthy :)",
   });
