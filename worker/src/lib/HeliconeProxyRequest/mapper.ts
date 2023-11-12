@@ -194,6 +194,8 @@ export class HeliconeProxyRequestMapper {
     const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev\/v\d+\/?$/;
     const anyscalePattern =
       /^https:\/\/api\.endpoints\.anyscale\.com\/v\d+\/?$/;
+    const cloudflareAiGatewayPattern =
+      /^https:\/\/gateway\.ai\.cloudflare\.com\/v\d+\/?$/;
 
     return (
       api_base === undefined ||
@@ -203,7 +205,8 @@ export class HeliconeProxyRequestMapper {
       localProxyPattern.test(api_base) ||
       heliconeProxyPattern.test(api_base) ||
       amdbartekPattern.test(api_base) ||
-      anyscalePattern.test(api_base)
+      anyscalePattern.test(api_base) ||
+      cloudflareAiGatewayPattern.test(api_base)
     );
   }
 
