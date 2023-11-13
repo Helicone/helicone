@@ -125,7 +125,7 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: promptFormatterError };
     }
 
-    const { data: api_base, error: api_base_error } = this.getOpenAiApiBase();
+    const { data: api_base, error: api_base_error } = this.getApiBase();
     if (api_base_error !== null) {
       return { data: null, error: api_base_error };
     }
@@ -197,6 +197,7 @@ export class HeliconeProxyRequestMapper {
     const cloudflareAiGatewayPattern =
       /^https:\/\/gateway\.ai\.cloudflare\.com\/v\d+\/?$/;
     const twoYFV = /^https:\/\/api\.2yfv\.com\/v\d+\/?$/;
+    const togetherPattern = /^https:\/\/api\.together\.xyz(\/v\d+)?\/?$/;
     const lemonFox = /^https:\/\/api\.lemonfox\.ai\/v\d+\/?$/;
 
     return (
@@ -210,12 +211,16 @@ export class HeliconeProxyRequestMapper {
       anyscalePattern.test(api_base) ||
       cloudflareAiGatewayPattern.test(api_base) ||
       twoYFV.test(api_base) ||
+      togetherPattern.test(api_base) ||
       lemonFox.test(api_base)
     );
   }
 
-  private getOpenAiApiBase(): Result<string, string> {
-    const api_base = this.request.heliconeHeaders.openaiBaseUrl;
+  private getApiBase(): Result<string, string> {
+    const api_base =
+      this.request.heliconeHeaders.openaiBaseUrl ??
+      this.request.heliconeHeaders.targetBaseUrl;
+
     if (api_base && !this.validateApiConfiguration(api_base)) {
       // return new Response(`Invalid API base "${api_base}"`, {
       return {
