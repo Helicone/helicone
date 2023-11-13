@@ -83,13 +83,13 @@ def test_gateway_api():
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Target-Url": "https://api.openai.com",
+        "Helicone-Target-Url": "https://api.openai.com/v1/",
         "Helicone-Target-Provider": "OPENAI",
         "Helicone-Property-RequestId": requestId,
         "OpenAI-Organization": openai_org_id
     }
     
-    response = fetch(helicone_gateway_url, "/v1/chat/completions",
+    response = fetch(helicone_gateway_url, "v1/chat/completions",
                      method="POST", json=data, headers=headers)
     assert response, "Response from OpenAI API is empty"
 
