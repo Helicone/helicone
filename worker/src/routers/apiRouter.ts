@@ -9,13 +9,11 @@ import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
 import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
 import { Database } from "../../supabase/database.types";
-import { Result, isErr } from "../results";
 import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
-import { PropertyWithResponseV1 } from "../lib/db/clickhouse";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -128,6 +126,7 @@ async function logAsync(
 }
 
 export const getAPIRouter = (router: BaseRouter) => {
+
   router.post(
     "/job",
     async (
@@ -339,7 +338,7 @@ export const getAPIRouter = (router: BaseRouter) => {
   );
 
   router.put(
-    "/request/:id/property",
+    '/request/:id/property',
     async (
       { params: { id } },
       requestWrapper: RequestWrapper,
@@ -348,40 +347,34 @@ export const getAPIRouter = (router: BaseRouter) => {
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
-
+      
       interface Body {
-        key: string;
-        value: string;
+        key: string,
+        value: string,
       }
       if (authParams.error !== null) {
         return client.response.unauthorized();
-      }
+      }      
       const property = await requestWrapper.getJson<Body>();
-      const { data, error } = await client.db.getRequestById(id);
+      const {data, error} = await client.db.getRequestById(id);
 
       if (error) {
         return client.response.newError(error, 500);
       }
-
+      
       if (!data) {
         return client.response.newError("Request not found.", 404);
       }
 
       const properties = {
-        ...((data?.properties as Record<string, any>) || {}),
+        ...(data?.properties as Record<string, any> || {}),
         [property.key]: property.value,
-      };
+      }
 
-      await client.queue.putRequestProperty(
-        id,
-        properties,
-        property,
-        authParams.data.organizationId,
-        data
-      );
-      return client.response.successJSON({ ok: "true" });
+      await client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
+      return client.response.successJSON({"ok": 'true'});
     }
-  );
+  )
 
   // Proxy only + proxy forwarder
   router.all(
