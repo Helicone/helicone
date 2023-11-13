@@ -9,7 +9,7 @@ import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM" | string;
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -23,7 +23,11 @@ export interface Env {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
-  WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
+  WORKER_TYPE:
+    | "OPENAI_PROXY"
+    | "ANTHROPIC_PROXY"
+    | "HELICONE_API"
+    | "GATEWAY_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
