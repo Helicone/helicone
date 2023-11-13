@@ -128,6 +128,7 @@ SELECT
   ${dateTrunc} as created_at_trunc,
   ${countColumn}
 FROM response_copy_v3
+LEFT JOIN feedback as f FINAL ON response_copy_v3.request_id = f.request_id
 WHERE (
   ${builtFilter}
 )

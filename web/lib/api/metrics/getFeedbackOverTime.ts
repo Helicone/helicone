@@ -16,7 +16,8 @@ export async function getFeedbackOverTime(
     negativeFeedback: number;
   }>(
     data,
-    "SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as positiveFeedback, SUM(CASE WHEN rating = 0 THEN 1 ELSE 0 END) as negativeFeedback"
+    `SUM(CASE WHEN COALESCE(f.rating, response_copy_v3.rating) = 1 THEN 1 ELSE 0 END) as positiveFeedback,
+    SUM(CASE WHEN COALESCE(f.rating, response_copy_v3.rating) = 0 THEN 1 ELSE 0 END) as negativeFeedback`
   );
 
   return resultMap(res, (resData) =>
