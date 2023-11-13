@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env } from "..";
+import { Env, Provider } from "..";
 import { HeliconeHeaders } from "../lib/HeliconeHeaders";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
@@ -9,13 +9,11 @@ import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
 import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
 import { Database } from "../../supabase/database.types";
-import { Result, isErr } from "../results";
 import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
-import { PropertyWithResponseV1 } from "../lib/db/clickhouse";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -65,8 +63,6 @@ class APIClient {
     );
   }
 }
-
-type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 
 async function logAsync(
   requestWrapper: RequestWrapper,
