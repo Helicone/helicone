@@ -85,7 +85,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row justify-between ">
+      <div className="flex flex-col gap-3 lg:flex-row justify-between">
         {timeFilter !== undefined ? (
           <ThemedTimeFilter
             currentTimeFilter={timeFilter.currentTimeFilter}
@@ -111,11 +111,11 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             <button
               onClick={showFilterHandler}
               className={clsx(
-                "bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-950 flex flex-row items-center gap-2"
               )}
             >
-              <FunnelIcon className="h-5 w-5 text-gray-900" />
-              <p className="text-sm font-medium text-gray-900 hidden sm:block">
+              <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                 {showFilters ? "Hide" : "Show"} Filters
               </p>
             </button>

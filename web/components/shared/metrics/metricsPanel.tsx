@@ -33,9 +33,11 @@ export function MetricsPanel(props: MetricsPanelProps) {
     >
       <p className="text-gray-500 text-xs text-left">{metric.label}</p>
       {metric.isLoading ? (
-        <div className="bg-gray-200 animate-pulse h-6 w-16 rounded-md mt-1" />
+        <div className="bg-gray-200 dark:bg-gray-800 animate-pulse h-6 w-16 rounded-md mt-1" />
       ) : (
-        <p className="text-black font-semibold text-lg">{metric.value}</p>
+        <p className="text-black dark:text-white font-semibold text-lg">
+          {metric.value}
+        </p>
       )}
     </Card>
   );

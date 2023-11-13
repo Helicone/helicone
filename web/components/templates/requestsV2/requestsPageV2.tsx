@@ -373,7 +373,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           <div className="flex flex-row gap-2">
             <button
               onClick={() => refetch()}
-              className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+              className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
             >
               <ArrowPathIcon
                 className={clsx(

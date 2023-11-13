@@ -6,7 +6,7 @@ export const ThemedPill = ({
   onDelete?: () => void;
 }) => {
   return (
-    <span className="inline-flex items-center rounded-2xl bg-sky-100 py-1.5 pl-4 pr-2 text-sm font-medium text-sky-700 border border-sky-300">
+    <span className="inline-flex items-center rounded-2xl bg-sky-100 dark:bg-sky-900 py-1.5 pl-4 pr-2 text-sm font-medium text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-700">
       {label}
       <button
         onClick={onDelete}

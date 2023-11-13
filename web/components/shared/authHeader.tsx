@@ -21,32 +21,25 @@ const AuthHeader = (props: AuthHeaderProps) => {
   const { title, breadcrumb, headerActions, actions, jobs = false } = props;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center border-b border-gray-200 pb-2 mb-4 justify-between">
+    <div className="flex flex-col sm:flex-row sm:items-center border-b border-gray-200 dark:border-gray-800 pb-2 mb-4 justify-between">
       <div className="sm:flex-auto items-center flex flex-row space-x-4">
         <div className="flex flex-row space-x-4 items-center">
           {breadcrumb && (
             <>
               <Link
-                className="text-xl font-semibold text-gray-900 flex flex-row items-center hover:underline space-x-2"
+                className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex flex-row items-center hover:underline space-x-2"
                 href={breadcrumb.href}
               >
-                <ArrowUturnLeftIcon className="h-4 w-4 text-gray-900" />
+                <ArrowUturnLeftIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                 <p>{breadcrumb.title}</p>
               </Link>
               <span className="text-gray-900">/</span>
             </>
           )}
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-          {jobs && (
-            <span
-              className={clsx(
-                "bg-violet-50 text-violet-700 ring-violet-200",
-                `inline-flex items-center rounded-full px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-              )}
-            >
-              beta
-            </span>
-          )}
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            {title}
+          </h1>
+
           {props.subtitle && (
             <h2 className="text-md font-normal text-gray-500">
               {props.subtitle}

@@ -38,7 +38,11 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
     <Card>
       <div className="flex flex-col space-y-0.5">
         <p className="text-gray-500 text-sm">{title}</p>
-        {value && <p className="text-black text-xl font-semibold">{value}</p>}
+        {value && (
+          <p className="text-black dark:text-white text-xl font-semibold">
+            {value}
+          </p>
+        )}
       </div>
       <div
         className={clsx(value ? "p-2" : "py-4", "w-full")}
@@ -47,7 +51,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
         }}
       >
         {isDataOverTimeLoading ? (
-          <div className="h-full w-full bg-gray-200 rounded-md pt-4">
+          <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
             {withAnimation && <LoadingAnimation height={175} width={175} />}
           </div>
         ) : (
