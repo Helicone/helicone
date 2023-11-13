@@ -92,7 +92,7 @@ jobs:
           wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Start async worker
+      - name: Start gateway worker
         run: |
           cd worker
           wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API &
