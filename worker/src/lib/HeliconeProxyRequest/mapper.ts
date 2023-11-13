@@ -213,7 +213,10 @@ export class HeliconeProxyRequestMapper {
   }
 
   private getOpenAiApiBase(): Result<string, string> {
-    const api_base = this.request.heliconeHeaders.openaiBaseUrl;
+    const api_base =
+      this.request.heliconeHeaders.openaiBaseUrl ??
+      this.request.heliconeHeaders.targetBaseUrl;
+
     if (api_base && !this.validateApiConfiguration(api_base)) {
       // return new Response(`Invalid API base "${api_base}"`, {
       return {

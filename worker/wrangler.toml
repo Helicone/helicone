@@ -41,6 +41,7 @@ routes = [
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 durable_objects.bindings = [
@@ -76,6 +77,7 @@ routes = [
 	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [

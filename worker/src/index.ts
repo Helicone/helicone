@@ -9,7 +9,7 @@ import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM" | any;
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
