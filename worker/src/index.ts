@@ -23,7 +23,11 @@ export interface Env {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
-  WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
+  WORKER_TYPE:
+    | "OPENAI_PROXY"
+    | "ANTHROPIC_PROXY"
+    | "HELICONE_API"
+    | "GATEWAY_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
