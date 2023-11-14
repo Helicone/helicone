@@ -41,7 +41,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-300 bg-opacity-50 dark:bg-opacity-20 transition-opacity" />
+          <div className="fixed inset-0 bg-gray-300 dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
