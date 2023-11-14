@@ -1,7 +1,7 @@
 // src/index.ts
-import express from "express";
+import express, { Request, Response } from "express";
 import morgan from "morgan";
-import { ValhallaDB } from "helicone-shared-ts";
+import { createValhallaClient, withDB, withAuth } from "helicone-shared-ts";
 
 require("dotenv").config({
   path: "./.env",
@@ -14,21 +14,28 @@ app.use(morgan("combined"));
 
 app.use(express.json()); // for parsing application/json
 
-app.post("/v1/request", (req, res) => {
-  // Handle your logic here
-  res.json({ message: "Request received!" });
-});
+app.post(
+  "/v1/request",
+  withAuth(({ req, res, supabaseClient }) => {
+    // Handle your logic here
+    res.json({
+      message: "Request received! :)",
+      orgId: supabaseClient.organizationId,
+    });
+  })
+);
 
-app.get("/healthcheck-db", async (req, res) => {
-  const valhallaDB = new ValhallaDB();
-  const now = await valhallaDB.now();
-  if (now.error) {
-    res.json({ status: "unhealthy :(", error: now.error });
-    return;
-  }
-
-  res.json({ status: "healthy :)", dataBase: now.data?.rows });
-});
+app.get(
+  "/healthcheck-db",
+  withDB(async ({ db, req, res }) => {
+    const now = await db.now();
+    if (now.error) {
+      res.json({ status: "unhealthy :(", error: now.error });
+      return;
+    }
+    res.json({ status: "healthy :)", dataBase: now.data?.rows });
+  })
+);
 
 app.get("/healthcheck", (req, res) => {
   res.json({

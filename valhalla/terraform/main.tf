@@ -37,12 +37,14 @@ module "aurora" {
   master_username = "root"
   storage_type    = "aurora-iopt1"
   storage_encrypted   = true
-  instance_class  = "db.r5b.large" 
+  instance_class  = "db.r5.large" 
   backup_retention_period = 7
   preferred_backup_window = "03:00-06:00"
+  preferred_maintenance_window = "Sat:06:00-Sat:09:00"
   instances = {
-    one = {}
+    one = { }
     two = {
+      identifier     = "static-member-1"
       instance_class = "db.r6g.2xlarge"
     }
   }
@@ -57,12 +59,6 @@ module "aurora" {
       type           = "ANY"
       static_members = ["static-member-1"]
       tags           = { Endpoint = "static-members" }
-    }
-    excluded = {
-      identifier       = "excluded-custom-endpt"
-      type             = "READER"
-      excluded_members = ["excluded-member-1"]
-      tags             = { Endpoint = "excluded-members" }
     }
   }
 
@@ -79,7 +75,7 @@ module "aurora" {
 
   create_db_cluster_parameter_group      = true
   db_cluster_parameter_group_name        = local.name
-  db_cluster_parameter_group_family      = "aurora-postgresql14"
+  db_cluster_parameter_group_family      = "aurora-postgresql15"
   db_cluster_parameter_group_description = "${local.name} example cluster parameter group"
   db_cluster_parameter_group_parameters = [
     {
@@ -96,7 +92,7 @@ module "aurora" {
 
   create_db_parameter_group      = true
   db_parameter_group_name        = local.name
-  db_parameter_group_family      = "aurora-postgresql14"
+  db_parameter_group_family      = "aurora-postgresql15"
   db_parameter_group_description = "${local.name} example DB parameter group"
   db_parameter_group_parameters = [
     {

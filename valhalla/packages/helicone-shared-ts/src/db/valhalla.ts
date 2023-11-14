@@ -7,7 +7,12 @@ import {
   ok,
 } from "../modules/result";
 
-export class ValhallaDB {
+export interface IValhallaDB {
+  query(query: string): PromiseGenericResult<QueryResult<any>>;
+  now(): PromiseGenericResult<QueryResult<any>>;
+}
+
+class ValhallaDB implements IValhallaDB {
   client: Client;
   connected: boolean = false;
 
@@ -56,7 +61,7 @@ export class ValhallaDB {
     });
   }
 
-  async connect() {
+  private async connect() {
     if (!this.connected) {
       await this.client.connect();
       this.connected = true;
@@ -75,4 +80,19 @@ export class ValhallaDB {
   async now() {
     return this.query("SELECT NOW() as now");
   }
+}
+
+class StaticValhallaPool {
+  private static client: ValhallaDB | null = null;
+
+  static getClient(): IValhallaDB {
+    if (this.client === null) {
+      this.client = new ValhallaDB();
+    }
+    return this.client;
+  }
+}
+
+export function createValhallaClient(): IValhallaDB {
+  return StaticValhallaPool.getClient();
 }
