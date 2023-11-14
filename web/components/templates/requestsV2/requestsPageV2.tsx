@@ -185,7 +185,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         return decodedFilters;
       }
     } catch (error) {
-      console.log("Error decoding advanced filters:", error);
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
@@ -282,7 +282,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
       return { filterMapIdx, operatorIdx, value };
     } catch (error) {
-      console.log("Error decoding filter:", error);
+      console.error("Error decoding filter:", error);
       return null;
     }
   }

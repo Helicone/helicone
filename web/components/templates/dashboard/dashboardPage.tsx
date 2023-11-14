@@ -115,7 +115,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return decodedFilters;
       }
     } catch (error) {
-      console.log("Error decoding advanced filters:", error);
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
@@ -182,7 +182,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
       return { filterMapIdx, operatorIdx, value };
     } catch (error) {
-      console.log("Error decoding filter:", error);
+      console.error("Error decoding filter:", error);
       return null;
     }
   }

@@ -19,7 +19,6 @@ const Home = (props: HomeProps) => {
       return (await response.json()) as Result<HeliconeStats, string>;
     },
   });
-  console.log(data);
 
   return (
     <MetaData title="Home">

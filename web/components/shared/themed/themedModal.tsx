@@ -1,6 +1,8 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/24/outline";
+import { clsx } from "../clsx";
+import { useTheme } from "../theme/themeContext";
 
 interface ThemedModalProps {
   open: boolean;
@@ -11,9 +13,15 @@ interface ThemedModalProps {
 const ThemedModal = (props: ThemedModalProps) => {
   const { open, setOpen, children } = props;
 
+  const themeContext = useTheme();
+
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={setOpen}>
+      <Dialog
+        as="div"
+        className={clsx(themeContext?.theme ?? "light", "relative z-20")}
+        onClose={setOpen}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"

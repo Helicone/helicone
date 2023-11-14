@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/20/solid";
 
 const Notification = () => {
-  const { variant, title, setNotification } = useNotification();
+  const { variant, title } = useNotification();
 
   const [show, setShow] = useState(true);
 

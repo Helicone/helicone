@@ -9,7 +9,7 @@ export const ThemedSwitch = ({
   OnIcon = BoltIcon,
   OffIcon = BoltSlashIcon,
 }: {
-  label: string;
+  label?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
   OnIcon?: React.ComponentType<any>;
@@ -20,11 +20,14 @@ export const ThemedSwitch = ({
       as="div"
       className="flex items-center space-x-3 hover:cursor-pointer"
     >
-      <Switch.Label as="span" className="text-sm">
-        <span className="font-semibold text-gray-700 dark:text-gray-300">
-          {label}
-        </span>
-      </Switch.Label>
+      {label && (
+        <Switch.Label as="span" className="text-sm">
+          <span className="font-semibold text-gray-700 dark:text-gray-300">
+            {label}
+          </span>
+        </Switch.Label>
+      )}
+
       <Switch
         checked={checked}
         onChange={onChange}

@@ -85,8 +85,6 @@ const UserModal = (props: UserModalProps) => {
       });
   }, [open, user?.user_id]);
 
-  console.log("requests", userRequests);
-
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       {user ? (

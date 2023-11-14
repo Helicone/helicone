@@ -46,7 +46,6 @@ const LimitRowDiv = (props: {
         required
         value={_limitType}
         onChange={(e) => {
-          console.log("e.target.value", e.target.value);
           const newLimit = { ...limit };
           newLimit._limitType = e.target.value as any;
           newLimit.cost = undefined;

@@ -4,7 +4,9 @@ import {
   BuildingOffice2Icon,
   CheckIcon,
   ChevronDownIcon,
+  MoonIcon,
   PlusIcon,
+  SunIcon,
   UserCircleIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
@@ -22,6 +24,8 @@ import { useUserSettings } from "../../../services/hooks/userSettings";
 import useNotification from "../notification/useNotification";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import AddMemberModal from "../../templates/organization/addMemberModal";
+import { ThemedSwitch } from "../themed/themedSwitch";
+import { useTheme } from "../theme/themeContext";
 
 interface OrgDropdownProps {}
 
@@ -33,6 +37,8 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   const [createOpen, setCreateOpen] = useState(false);
 
   const org = useOrg();
+  const themeContext = useTheme();
+
   const [addOpen, setAddOpen] = useState(false);
 
   const ownedOrgs = orgContext?.allOrgs.filter((org) => org.owner === user?.id);
@@ -92,9 +98,24 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           leaveTo="transform opacity-0 scale-95"
         >
           <Menu.Items className="absolute left-0 mt-2 w-[16rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
-            <p className="text-gray-900 dark:text-gray-100 text-sm p-3 w-full truncate">
-              {user?.email}
-            </p>
+            <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
+              <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
+                {user?.email} fsdklfjskFJDSlfjdslFJKLDSkfds
+              </p>
+              <div className="p-2">
+                <ThemedSwitch
+                  checked={themeContext?.theme === "dark" ? true : false}
+                  onChange={() => {
+                    themeContext?.theme === "dark"
+                      ? themeContext?.setTheme("light")
+                      : themeContext?.setTheme("dark");
+                  }}
+                  OnIcon={SunIcon}
+                  OffIcon={MoonIcon}
+                />
+              </div>
+            </div>
+
             {ownedOrgs && ownedOrgs.length > 0 && (
               <div className="p-1">
                 <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">

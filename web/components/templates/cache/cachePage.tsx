@@ -121,8 +121,6 @@ const CachePage = (props: CachePageProps) => {
 
   cacheDist.sort((a, b) => a.name.localeCompare(b.name));
 
-  console.log(topRequests.topRequests.data?.data);
-
   return (
     <>
       <div className="flex flex-col space-y-4 w-full">

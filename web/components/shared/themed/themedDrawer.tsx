@@ -12,6 +12,7 @@ import { Tooltip } from "@mui/material";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
+import { useTheme } from "../theme/themeContext";
 
 interface ThemedDrawerProps {
   open: boolean;
@@ -25,13 +26,19 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
 
   const [expanded, setExpanded] = useState(false);
 
+  const themeContext = useTheme();
+
   useEffect(() => {
     setExpanded(false);
   }, []);
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={setOpen}>
+      <Dialog
+        as="div"
+        className={clsx(themeContext?.theme ?? "light", "relative z-20")}
+        onClose={setOpen}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-100"

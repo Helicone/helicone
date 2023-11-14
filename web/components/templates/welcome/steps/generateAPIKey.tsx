@@ -55,7 +55,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
       setNotification("Failed to generate API key", "error");
       console.error(res.error);
     }
-    console.log("Generated API key", apiKey, res);
+
     return apiKey;
   }
 

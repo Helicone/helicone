@@ -104,7 +104,6 @@ export function withAuth<T>(
         hasPermission(data.role as Role, permission)
       )
     ) {
-      console.log("User does not have required permissions");
       res.status(403).json({ error: "Forbidden" });
       return;
     }
