@@ -28,14 +28,16 @@ export function MetricsPanel(props: MetricsPanelProps) {
     <Card
       className={clsx(
         hFull ? "h-full" : "h-full max-h-24",
-        "flex flex-col p-4 w-full justify-end"
+        "flex flex-col p-4 w-full justify-end dark:border dark:border-gray-700"
       )}
     >
       <p className="text-gray-500 text-xs text-left">{metric.label}</p>
       {metric.isLoading ? (
-        <div className="bg-gray-200 animate-pulse h-6 w-16 rounded-md mt-1" />
+        <div className="bg-gray-200 dark:bg-gray-800 animate-pulse h-6 w-16 rounded-md mt-1" />
       ) : (
-        <p className="text-black font-semibold text-lg">{metric.value}</p>
+        <p className="text-black dark:text-white font-semibold text-lg">
+          {metric.value} {metric.labelUnits}
+        </p>
       )}
     </Card>
   );

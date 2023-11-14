@@ -51,7 +51,6 @@ async function getDecryptedProviderKeysByOrgId(
     .eq("soft_delete", false);
 
   if (keys.error !== null || keys.data === null) {
-    console.log("Failed to retrieve proxy keys");
     return { data: null, error: keys.error.message };
   }
 
@@ -80,7 +79,6 @@ async function getDecryptedProviderKeyById(
     .single();
 
   if (key.error !== null || key.data === null) {
-    console.log("Failed to retrieve proxy key");
     return { data: null, error: key.error.message };
   }
 

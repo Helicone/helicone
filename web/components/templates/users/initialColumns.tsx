@@ -24,7 +24,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     accessorKey: "user_id",
     header: "User ID",
     cell: (info) => (
-      <span className="text-gray-900 font-medium">
+      <span className="text-gray-900 dark:text-gray-100 font-medium">
         {info.getValue() ? `${info.getValue()}` : "No User ID"}
       </span>
     ),

@@ -21,7 +21,7 @@ async function handler({
     filter: FilterNode;
   };
   const metrics = await getDailyActiveUsers(orgId, filter);
-  console.log("metrics", metrics);
+
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
 export default withAuth(handler);

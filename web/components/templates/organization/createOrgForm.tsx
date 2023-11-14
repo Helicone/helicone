@@ -124,12 +124,14 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
       {initialValues ? (
         <></>
       ) : (
-        <p className="font-semibold text-lg">Create New Organization</p>
+        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+          Create New Organization
+        </p>
       )}
       <div className="space-y-1.5 text-sm">
         <label
           htmlFor="org-name"
-          className="block text-sm font-medium leading-6 text-gray-900"
+          className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
         >
           Organization Name
         </label>
@@ -139,14 +141,14 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           id="org-name"
           value={orgName}
           className={clsx(
-            "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+            "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-sm p-2 text-sm"
           )}
           placeholder={"Your shiny new org name"}
           onChange={(e) => setOrgName(e.target.value)}
         />
       </div>
       <RadioGroup value={selectedColor} onChange={setSelectedColor}>
-        <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900">
+        <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
           Choose a label color
         </RadioGroup.Label>
         <div className="mt-4 flex items-center justify-between px-8">
@@ -170,7 +172,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 aria-hidden="true"
                 className={clsx(
                   color.bgColor,
-                  "h-8 w-8 rounded-full border border-black border-opacity-10"
+                  "h-8 w-8 rounded-full border border-black dark:border-white border-opacity-10"
                 )}
               />
             </RadioGroup.Option>
@@ -178,7 +180,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         </div>
       </RadioGroup>
       <RadioGroup value={selectedIcon} onChange={setSelectedIcon}>
-        <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900">
+        <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
           Choose an icon
         </RadioGroup.Label>
         <div className="mt-4 flex items-center justify-between px-8">
@@ -189,16 +191,18 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               className={({ active, checked }) =>
                 clsx(
                   checked
-                    ? "ring-2 ring-offset-1 ring-sky-300"
-                    : "ring-1 ring-gray-200",
-                  "bg-white rounded-md p-2"
+                    ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
+                    : "ring-1 ring-gray-200 dark:ring-gray-800",
+                  "bg-white dark:bg-black rounded-md p-2"
                 )
               }
             >
               <RadioGroup.Label as="span" className="sr-only">
                 {icon.name}
               </RadioGroup.Label>
-              {<icon.icon className="h-6 w-6 hover:cursor-pointer" />}
+              {
+                <icon.icon className="h-6 w-6 hover:cursor-pointer text-black dark:text-white" />
+              }
             </RadioGroup.Option>
           ))}
         </div>
@@ -208,7 +212,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           onClick={() => {
             onCancelHandler && onCancelHandler(false);
           }}
-          className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
         >
           Cancel
         </button>
@@ -263,7 +267,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               orgContext?.refetchOrgs();
             }
           }}
-          className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           {initialValues ? "Update" : "Create"}
         </button>

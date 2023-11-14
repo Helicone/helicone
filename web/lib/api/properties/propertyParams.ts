@@ -66,7 +66,6 @@ export async function getPropertyParams(
     query,
     builtFilter.argsAcc
   );
-  console.log(data, error);
 
   if (error !== null) {
     return { data: null, error: error };

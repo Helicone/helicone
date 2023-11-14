@@ -30,8 +30,6 @@ export async function printRunnableQuery(
   const setParams = Object.entries(queryParams)
     .map(([key, value]) => `SET param_${key} = '${value}';`)
     .join("\n");
-  console.log(setParams);
-  console.log(query);
 }
 export async function dbQueryClickhouse<T>(
   query: string,

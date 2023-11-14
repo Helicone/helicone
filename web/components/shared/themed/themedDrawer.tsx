@@ -12,6 +12,7 @@ import { Tooltip } from "@mui/material";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
+import { useTheme } from "../theme/themeContext";
 
 interface ThemedDrawerProps {
   open: boolean;
@@ -25,13 +26,19 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
 
   const [expanded, setExpanded] = useState(false);
 
+  const themeContext = useTheme();
+
   useEffect(() => {
     setExpanded(false);
   }, []);
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={setOpen}>
+      <Dialog
+        as="div"
+        className={clsx(themeContext?.theme ?? "light", "relative z-20")}
+        onClose={setOpen}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-100"
@@ -41,7 +48,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-300 bg-opacity-50 transition-opacity" />
+          <div className="fixed inset-0 bg-gray-300 dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
@@ -64,12 +71,12 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                     "pointer-events-auto ease-in-out duration-300"
                   )}
                 >
-                  <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-2xl">
+                  <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-black py-6 shadow-2xl">
                     <div className="px-4 sm:px-6 flex flex-row justify-between">
                       <div className="flex flex-row items-center space-x-2 text-gray-500 w-full">
                         <button
                           onClick={() => setOpen(false)}
-                          className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                          className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
                         >
                           <ChevronDoubleRightIcon className="h-5 w-5" />
                         </button>
@@ -77,7 +84,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                         <Tooltip title={clsx(expanded ? "Shrink" : "Expand")}>
                           <button
                             onClick={() => setExpanded(!expanded)}
-                            className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                            className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
                           >
                             {expanded ? (
                               <ArrowsPointingInIcon className="h-5 w-5" />

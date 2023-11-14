@@ -72,7 +72,11 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
         }}
       />
 
-      {title && <p className="font-medium text-lg">{title}</p>}
+      {title && (
+        <p className="font-medium text-lg text-gray-900 dark:text-gray-100">
+          {title}
+        </p>
+      )}
     </div>
   );
 };

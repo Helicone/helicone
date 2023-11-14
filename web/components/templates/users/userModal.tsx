@@ -85,14 +85,12 @@ const UserModal = (props: UserModalProps) => {
       });
   }, [open, user?.user_id]);
 
-  console.log("requests", userRequests);
-
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       {user ? (
         <div className="flex flex-col space-y-4 w-full min-w-[400px] h-full">
           <div className="w-full flex flex-row justify-between items-center">
-            <h2 className="font-semibold text-gray-900 text-xl truncate w-[325px]">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-xl truncate w-[325px]">
               {user.user_id}
             </h2>
             <div className="flex flex-row items-center space-x-2">
@@ -103,7 +101,7 @@ const UserModal = (props: UserModalProps) => {
                     setNotification("Copied to clipboard", "success");
                   }}
                   tabIndex={-1}
-                  className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
                 >
                   <ClipboardDocumentIcon className="h-5 w-5 text-gray-500" />
                 </button>
@@ -114,7 +112,7 @@ const UserModal = (props: UserModalProps) => {
                     setOpen(false);
                   }}
                   tabIndex={-1}
-                  className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
                 >
                   <XMarkIcon className="h-5 w-5 text-gray-500" />
                 </button>
@@ -141,42 +139,52 @@ const UserModal = (props: UserModalProps) => {
 
           <ul
             className={clsx(
-              "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 justify-between text-sm w-full"
+              "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 dark:divide-gray-700 justify-between text-sm w-full"
             )}
           >
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">Total Cost</p>
-              <p className="text-gray-700 truncate">{`$${formatNumber(
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Total Cost
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">{`$${formatNumber(
                 user.cost
               )}`}</p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">Active For</p>
-              <p className="text-gray-700 truncate">{`${user.active_for} days`}</p>
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Active For
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">{`${user.active_for} days`}</p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">Last Active</p>
-              <p className="text-gray-700 truncate">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Last Active
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">
                 {getUSDateFromString(user.last_active.toString())}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">Total Requests</p>
-              <p className="text-gray-700 truncate">{user.total_requests}</p>
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Total Requests
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">
+                {user.total_requests}
+              </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Average Requests per Day
               </p>
-              <p className="text-gray-700 truncate">
+              <p className="text-gray-700 dark:text-gray-300 truncate">
                 {user.average_requests_per_day_active}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Average Tokens per Request
               </p>
-              <p className="text-gray-700 truncate">
+              <p className="text-gray-700 dark:text-gray-300 truncate">
                 {user.average_tokens_per_request}
               </p>
             </li>
