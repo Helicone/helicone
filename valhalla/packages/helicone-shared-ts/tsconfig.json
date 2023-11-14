@@ -4,7 +4,11 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "strict": true
+    "strict": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "rootDir": "src"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]

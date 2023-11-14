@@ -1,5 +1,6 @@
 version: "3.8"
 
+
 services:
   clickhouse-db:
     container_name: clickhouse-db
@@ -32,7 +33,7 @@ services:
 
   helicone-be-db:
     container_name: helicone-be-db
-    image: postgres:14.6
+    image: postgres:15.4
     restart: unless-stopped
     ports:
       - 25432:5432/tcp
@@ -50,8 +51,8 @@ services:
       dockerfile: ./dockerfile
     command: yarn dev:jawn
     ports:
-      - 8585:8585/tcp
-    volumes:
+      - 8585:8585
+    volumes: 
       - ./valhalla:/usr/src/app:cached
     environment:
       - AURORA_CREDS={"username":"postgres", "password":"password"}
@@ -67,7 +68,7 @@ services:
       context: .
       dockerfile: ./web/dockerfile-local
     ports:
-      - 3000:3000/tcp
+      - 3000:3000
     volumes:
       - ./web:/usr/src/app:cached
 
@@ -77,7 +78,7 @@ services:
       context: .
       dockerfile: ./worker/dockerfile-local
     ports:
-      - 8787:8787/tcp
+      - 8787:8787
     volumes:
       - ./worker:/usr/src/app:cached
     environment:
@@ -90,7 +91,7 @@ services:
       context: .
       dockerfile: ./worker/dockerfile-local
     ports:
-      - 8789:8789/tcp
+      - 8789:8789
     volumes:
       - ./worker:/usr/src/app:cached
     environment:
@@ -103,7 +104,7 @@ services:
       context: .
       dockerfile: ./worker/dockerfile-local
     ports:
-      - 8788:8788/tcp
+      - 8788:8788
     volumes:
       - ./worker:/usr/src/app:cached
     environment:
