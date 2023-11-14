@@ -1,0 +1,68 @@
+---
+title: "Gateway"
+description: "The best way to integrate with Helicone is through our Gateway. It's a simple API that allows you to send requests and responses to Helicone."
+---
+
+# How it works
+
+Gateway acts as a unified entry point for all traffic regardless of your provider. It allows you to send requests to any provider through a single endpoint.
+This gives you the ability to leverage all of Helicone's features like
+
+- [caching](/features/advanced-usage/caching.mdx)
+- [logging](/docs/logging)
+- [rate limiting](/docs/rate-limiting)
+- And more!
+
+`api.myllm-provider.ai` -> `gateway.hconeai.com`
+
+- Header: `Helicone-Target-Url: https://api.myllm-provider.ai`
+- Header: `Helicone-Target-Provider: myllm-provider`
+
+{/* prettier-ignore */}
+{/*
+
+Once we get the auto-mapper and the unapproved domains in a better spot we should show off how we can use the auto mapper
+to quickly identify new models and their schemas
+
+\*/}
+
+# Approved Domains
+
+| Provider    | Domain Name                  | Cost Support | Dedicated Domain        |
+| ----------- | ---------------------------- | ------------ | ----------------------- |
+| OpenAI      | `api.openai.com`             | ✅           | `oai.hconeai.com`       |
+| Anthropic   | `api.anthropic.com`          | ✅           | `anthropic.hconeai.com` |
+| Azure       | `openai.azure.com`           | ✅           | ❌                      |
+| Anyscale    | `api.endpoints.anyscale.com` | ❌           | ❌                      |
+| Cloudflare  | `gateway.ai.cloudflare.com`  | ❌           | ❌                      |
+| Together-AI | `api.together.xyz`           | ❌           | ❌                      |
+| LemonFox    | `api.lemonfox.ai`            | ❌           | ❌                      |
+
+## Getting a domain approved
+
+Please reach out to engineering@helicone.ai to get a domain approved, or connected with us on [discord](https://discord.gg/zsSTcH2qhG)!
+
+> Subject: Domain Approval Request
+>
+> Body: Is this a personal deployment? If not, what is the name of the company? What is the domain name?
+>
+> If it is a personal deployment, please provide proof you own the domain by updating a text record
+> with the following value: `hconeai-verification=true`
+
+{/* prettier-ignore */}
+{/*
+TODO: We should have it so that there is an online form or something if we get a lot of emails
+  \*/}
+
+{/* prettier-ignore */}
+{/*
+
+## Unapproved Domains
+
+For unapproved domains, we want to protect our community from potential attack vectors.
+Inorder to have a safe internet, you can use an unapproved domain by using the proxy, which
+will be available soon.
+
+- 10,000 requests per day
+- 1 request per second
+  \*/}
