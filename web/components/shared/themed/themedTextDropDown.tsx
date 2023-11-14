@@ -52,7 +52,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
         }}
       >
         <div className="relative">
-          <div className="relative w-full cursor-default overflow-hidden rounded-md bg-white dark:border-gray-700 dark:bg-black text-left border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-sky-300 sm:text-sm">
+          <div className="hover:cursor-pointer relative w-full cursor-default overflow-hidden rounded-md bg-white dark:border-gray-700 dark:bg-black text-left border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-sky-300 sm:text-sm">
             <Combobox.Button
               as="div"
               className="right-0 flex items-center pr-2"
