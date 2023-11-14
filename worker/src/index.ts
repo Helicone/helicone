@@ -64,7 +64,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
+  if (hostParts.length >= 3 && hostParts[0].includes("gateway")) {
+    return {
+      ...env,
+      WORKER_TYPE: "GATEWAY_API",
+    };
+  } else if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
     return {
       ...env,
       WORKER_TYPE: "OPENAI_PROXY",
