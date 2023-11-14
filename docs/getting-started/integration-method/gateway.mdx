@@ -1,6 +1,6 @@
 ---
 title: "Gateway Integration"
-description: "The optimal method to integrate with Helicone is through our Gateway. This simple API allows you to send requests and responses to Helicone seamlessly."
+description: "The optimal method to integrate with Helicone is through our Gateway. This API provides a seamless interface for sending requests and responses to Helicone."
 ---
 
 # Overview
@@ -17,8 +17,7 @@ and many more for any provider.
 
 ## Simple Integration
 
-We do this by allowing you to decide on the destination of your request by specifying the provider in the URL path. For example, if you want to send a request to LemonFox, you would send a request to `https://gateway.hconeai.com` instead of `https://api.lemonfox.ai`, but
-you would specify the provider and the endpoint in the URL path within the headers of your request.
+This is achieved by allowing you to determine the destination of your request by specifying the provider in the URL path. For instance, if you wish to send a request to LemonFox, you would send a request to `https://gateway.hconeai.com` instead of `https://api.lemonfox.ai`, but you would specify the provider and the endpoint in the URL path within the headers of your request.
 
 `api.lemonfox.ai/v1` -> `gateway.hconeai.com/v1`
 
@@ -29,24 +28,24 @@ you would specify the provider and the endpoint in the URL path within the heade
 
 <Tabs>
  <Tab title="Python">
-```python
-import openai
+        ```python
+        import openai
 
-openai.api_base = "https://gateway.hconeai.com"
+        openai.api_base = "https://gateway.hconeai.com"
 
-# Create the completion request
+        # Create the completion request
 
-openai.ChatCompletion.create(
-model="[DEPLOYMENT]",
-messages=[{"role": "User", "content": "Say hi!"}],
-headers={
-"Helicone-Auth": "Bearer [HELICONE_API_KEY]",
-"Helicone-Target-Url": "https://api.lemonfox.ai/v1",
-"Helicone-Target-Provider": "LemonFox",
-}
-)
+        openai.ChatCompletion.create(
+        model="[DEPLOYMENT]",
+        messages=[{"role": "User", "content": "Say hi!"}],
+        headers={
+        "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
+        "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
+        "Helicone-Target-Provider": "LemonFox",
+        }
+        )
 
-````
+        ```
 
   </Tab>
 
@@ -219,4 +218,3 @@ To protect our community from potential threats, we have certain restrictions fo
 - 10,000 requests per day
 - 1 request per second
   \*/}
-````

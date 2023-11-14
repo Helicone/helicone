@@ -73,6 +73,7 @@
     {
       "group": "Integrations",
       "pages": [
+        "getting-started/integration-method/gateway",
         {
           "group": "Proxy",
           "pages": [
