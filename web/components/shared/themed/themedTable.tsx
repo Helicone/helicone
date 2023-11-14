@@ -70,15 +70,15 @@ const SecretInput = (props: { value: string }) => {
   return (
     <div className="flex flex-row items-center">
       {isUserAdmin ? (
-        <>
+        <div className="flex flex-row space-x-1">
           <button
-            className="hover:cursor-pointer hover:bg-gray-200 rounded-md p-1"
+            className="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1"
             onClick={() => setShow(!show)}
           >
             {show ? (
-              <EyeSlashIcon className="h-5 w-5 text-gray-900" />
+              <EyeSlashIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
             ) : (
-              <EyeIcon className="h-5 w-5 text-gray-900" />
+              <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
             )}
           </button>
           <div className="flex w-full min-w-[10rem]">
@@ -91,8 +91,8 @@ const SecretInput = (props: { value: string }) => {
                     setNotification("Copied to clipboard", "success");
                   }}
                   className={clsx(
-                    "bg-gray-200 text-xs ml-2 hover:cursor-pointer",
-                    "block w-full rounded-md border-0 h-8 text-gray-900 text-left p-2 text-ellipsis overflow-hidden"
+                    "bg-gray-200 dark:bg-gray-800 text-xs hover:cursor-pointer",
+                    "flex w-[200px] rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 text-left p-2 truncate"
                   )}
                 >
                   {value}
@@ -104,27 +104,27 @@ const SecretInput = (props: { value: string }) => {
                 name="secret-key"
                 type={clsx(show ? "text" : "password")}
                 required
-                value={"*************************"}
+                value={"***************************************************"}
                 disabled
                 className={clsx(
                   "text-md",
-                  "block w-full rounded-md border-0 h-8 text-gray-900"
+                  "block w-fit rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
                 )}
               />
             )}
           </div>
-        </>
+        </div>
       ) : (
         <input
           id="secret-key"
           name="secret-key"
           type={clsx(show ? "text" : "password")}
           required
-          value={"*************************"}
+          value={"***************************************************"}
           disabled
           className={clsx(
             "text-md",
-            "block w-full rounded-md border-0 h-8 text-gray-900"
+            "block w-fit rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
           )}
         />
       )}
@@ -136,8 +136,8 @@ const ThemedTable = (props: ThemedTableProps) => {
   const { columns, rows, viewHandler, editHandler, deleteHandler } = props;
 
   return (
-    <div className="ring-1 ring-gray-300 rounded-lg bg-white">
-      <table className="min-w-full divide-y divide-gray-300">
+    <div className="ring-1 ring-gray-300 rounded-lg bg-white dark:bg-black dark:ring-gray-700">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
         <thead>
           <tr>
             {columns.map((col, idx) => {
@@ -146,7 +146,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   <th
                     key={col.key}
                     scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6"
                   >
                     {col.name}
                   </th>
@@ -158,7 +158,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                     scope="col"
                     className={clsx(
                       col.hidden ? "hidden" : "",
-                      `px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell`
+                      `px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 lg:table-cell`
                     )}
                   >
                     {col.name}
@@ -168,7 +168,7 @@ const ThemedTable = (props: ThemedTableProps) => {
             })}
             <th
               scope="col"
-              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
+              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 lg:table-cell"
             >
               <span className="sr-only">Actions</span>
             </th>
@@ -190,11 +190,11 @@ const ThemedTable = (props: ThemedTableProps) => {
                         )}
                         onClick={() => viewHandler && viewHandler(row)}
                       >
-                        <div className="font-medium text-gray-900 truncate max-w-[300px]">
+                        <div className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[300px]">
                           {row[col.key] || "n/a"}
                         </div>
                         {rowIdx !== 0 ? (
-                          <div className="absolute right-0 left-6 -top-px h-px bg-gray-200" />
+                          <div className="absolute right-0 left-6 -top-px h-px bg-gray-200 dark:bg-gray-800" />
                         ) : null}
                       </td>
                     );
@@ -203,7 +203,9 @@ const ThemedTable = (props: ThemedTableProps) => {
                       <td
                         key={colIdx}
                         className={clsx(
-                          rowIdx === 0 ? "" : "border-t border-gray-200",
+                          rowIdx === 0
+                            ? ""
+                            : "border-t border-gray-200 dark:border-gray-800",
                           col.hidden ? "hidden" : "",
                           "max-w-[150px]",
                           "px-3 py-2.5 text-sm text-gray-500 lg:table-cell truncate",
@@ -231,7 +233,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {viewHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs text-white shadow-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 px-2 py-1 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-700 dark:focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => viewHandler(row)}
                     >
                       View
@@ -240,7 +242,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {editHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs text-white shadow-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 px-2 py-1 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-700 dark:focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => editHandler(row)}
                     >
                       Edit
@@ -249,7 +251,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {deleteHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-red-600 px-2 py-1 text-xs text-white shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-4 inline-flex items-center rounded-md bg-red-500 px-2 py-1 text-xs text-white shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => deleteHandler(row)}
                     >
                       Delete
@@ -257,7 +259,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   )}
 
                   {rowIdx !== 0 ? (
-                    <div className="absolute right-6 left-0 -top-px h-px bg-gray-200" />
+                    <div className="absolute right-6 left-0 -top-px h-px bg-gray-200 dark:bg-gray-800" />
                   ) : null}
                 </td>
               </tr>

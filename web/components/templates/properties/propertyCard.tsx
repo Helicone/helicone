@@ -61,21 +61,21 @@ const PropertyCard = (props: PropertyCardPageProps) => {
     },
   ];
 
-  console.log(valueMetrics.aggregatedKeyMetrics.data?.data);
-
   return (
     <>
-      <div className="bg-white p-8 rounded-xl border border-gray-300 shadow-sm flex flex-col space-y-4">
+      <div className="bg-white dark:bg-black p-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm flex flex-col space-y-4">
         <div className="flex flex-row justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">{property}</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            {property}
+          </h1>
           <button
             onClick={onDelete}
-            className="p-1 rounded-lg hover:bg-gray-300"
+            className="p-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700"
           >
-            <XMarkIcon className="h-5 w-5 text-gray-900" />
+            <XMarkIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
           </button>
         </div>
-        <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-3 text-gray-900 gap-4">
+        <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-3 text-gray-900 dark:text-gray-100 gap-4">
           {metricsData.map((m, i) => (
             <MetricsPanel metric={m} key={i} />
           ))}

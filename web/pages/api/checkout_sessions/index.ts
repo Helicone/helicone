@@ -32,7 +32,7 @@ export default async function handler(
   const email = (await supabase.auth.getUser())?.data.user?.email;
 
   const discountCode = req.query.discountCode as string;
-  console.log("discountCode", discountCode);
+
   if (!email) {
     res.status(401).json({ error: "Unauthorized" });
     return;
@@ -77,7 +77,6 @@ export default async function handler(
 
       res.status(200).json(checkoutSession);
     } catch (err) {
-      console.log("err", err);
       const errorMessage =
         err instanceof Error ? err.message : "Internal server error";
       res.status(500).json({ statusCode: 500, message: errorMessage });

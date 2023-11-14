@@ -397,8 +397,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
             {/* Static sidebar for desktop */}
             <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col z-10">
               {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white">
-                <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 h-16">
+              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+                <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 dark:border-gray-800 h-16">
                   <div className="flex flex-col absolute">
                     <OrgDropdown />
                   </div>
@@ -412,16 +412,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           href={item.href}
                           className={clsx(
                             item.current
-                              ? "bg-gray-200 text-black"
-                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                              ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
                             "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                           )}
                         >
                           <item.icon
                             className={clsx(
                               item.current
-                                ? "text-black"
-                                : "text-gray-600 group-hover:text-gray-900",
+                                ? "text-black dark:text-white"
+                                : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
                               "mr-3 flex-shrink-0 h-5 w-5"
                             )}
                             aria-hidden="true"
@@ -441,16 +441,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             href={item.href}
                             className={clsx(
                               item.current
-                                ? "bg-gray-200 text-black"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
                               "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                             )}
                           >
                             <item.icon
                               className={clsx(
                                 item.current
-                                  ? "text-black"
-                                  : "text-gray-600 group-hover:text-gray-900",
+                                  ? "text-black dark:text-white"
+                                  : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
                                 "mr-3 flex-shrink-0 h-5 w-5"
                               )}
                               aria-hidden="true"
@@ -463,7 +463,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <Disclosure defaultOpen={item.current} key={i}>
                             <Disclosure.Button
                               className={clsx(
-                                "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
                                 "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
                               )}
                             >
@@ -473,8 +473,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                     <item.icon
                                       className={clsx(
                                         item.current
-                                          ? "text-black"
-                                          : "text-gray-600 group-hover:text-gray-900",
+                                          ? "text-black dark:text-white"
+                                          : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
                                         "mr-3 flex-shrink-0 h-5 w-5"
                                       )}
                                       aria-hidden="true"
@@ -500,8 +500,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                         href={subItem.href}
                                         className={clsx(
                                           subItem.current
-                                            ? "bg-gray-200 text-black"
-                                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                            ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
                                           "group flex items-center pr-2 pl-4 py-2 text-sm font-medium rounded-md"
                                         )}
                                       >
@@ -520,7 +520,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
                 <div>
                   <Link
-                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                     href={"https://docs.helicone.ai/introduction"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -529,7 +529,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>View Documentation</p>
                   </Link>
                   <Link
-                    className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-1 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                     href={"https://discord.gg/zsSTcH2qhG"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -542,7 +542,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
-                      className="bg-gray-100 border border-gray-300 text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
+                      className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 dark:text-white text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
                     >
                       <div className="flex flex-row items-center">
                         <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
@@ -564,7 +564,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <div
           className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
         >
-          <div className="sticky top-0 z-20 h-16 flex md:hidden flex-shrink-0 bg-white border-b border-gray-300">
+          <div className="sticky top-0 z-20 h-16 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-700">
             <button
               type="button"
               className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
@@ -670,9 +670,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
 
           <main className="flex-1">
-            <div className="mx-auto px-4 sm:px-8 bg-gray-100 h-full">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full">
               {/* Replace with your content */}
-
               {user?.email === DEMO_EMAIL && (
                 <div className="pointer-events-none flex sm:justify-center mt-4">
                   <div className="w-full pointer-events-auto flex items-center justify-between gap-x-6 bg-red-500 shadow-md py-2.5 px-6 rounded-xl sm:py-3 sm:pr-3.5 sm:pl-4">

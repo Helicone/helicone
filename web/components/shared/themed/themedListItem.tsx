@@ -21,18 +21,18 @@ const ThemedListItem = (props: ThemedListItemProps) => {
 
   return (
     <button
-      className="py-3 flex flex-row justify-between items-center w-full hover:bg-gray-100 px-2"
+      className="py-3 flex flex-row justify-between items-center w-full hover:bg-gray-100 dark:hover:bg-gray-900 px-2"
       onClick={onClickHandler}
     >
       <div className="flex flex-col space-y-0.5">
         <div className="flex flex-row gap-2.5 items-center">
-          <p className="hidden xl:block text-sm text-gray-900 leading-6 font-semibold text-left">
+          <p className="hidden xl:block text-sm text-gray-900 dark:text-gray-100 leading-6 font-semibold text-left">
             {truncString(title, 56)}
           </p>
-          <p className="hidden md:block xl:hidden text-sm text-gray-900 leading-6 font-semibold text-left">
+          <p className="hidden md:block xl:hidden text-sm text-gray-900 dark:text-gray-100 leading-6 font-semibold text-left">
             {truncString(title, 36)}
           </p>
-          <p className="block md:hidden text-sm text-gray-900 leading-6 font-semibold text-left">
+          <p className="block md:hidden text-sm text-gray-900 dark:text-gray-100 leading-6 font-semibold text-left">
             {truncString(title, 16)}
           </p>
           {pill && pill}
@@ -58,7 +58,7 @@ const ThemedListItem = (props: ThemedListItemProps) => {
       <div className="flex flex-row space-x-1 items-center">
         {props.icon && <props.icon className="h-5 w-5 text-gray-500" />}
 
-        <p className="text-md font-semibold text-gray-700">
+        <p className="text-md font-semibold text-gray-700 dark:text-gray-300">
           {typeof value === "number" ? value.toLocaleString() : value}
         </p>
       </div>

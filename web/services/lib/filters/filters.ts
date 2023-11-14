@@ -228,15 +228,12 @@ const whereKeyMappings: KeyMappings = {
   },
   job_node: (filter) => {
     if ("custom_properties" in filter && filter.custom_properties) {
-      console.log("customer_properties", filter.custom_properties);
       const key = Object.keys(filter.custom_properties)[0];
-      console.log("key", key);
 
       const { operator, value } = extractOperatorAndValueFromAnOperator(
         filter.custom_properties[key as keyof typeof filter.custom_properties]
       );
-      console.log("operator", operator);
-      console.log("value", value);
+
       return {
         column: `custom_properties ->> '${key}'`,
         operator: operator,

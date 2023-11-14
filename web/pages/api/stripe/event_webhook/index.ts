@@ -23,7 +23,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         process.env.STRIPE_WEBHOOK_SECRET!
       ) as Stripe.Event;
     } catch (err) {
-      console.log(`❌ Error message: ${err}`);
       res.status(400).send(`Webhook Error: ${err}`);
       return;
     }

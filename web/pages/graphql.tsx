@@ -32,7 +32,7 @@ const Keys = (props: KeysProps) => {
             showBetaWarning || (
               <button
                 onClick={() => setShowBetaWarning(true)}
-                className="font-semibold text-black text-sm items-center flex flex-row hover:text-sky-700"
+                className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
               >
                 Beta - Subject to change
               </button>
@@ -40,7 +40,7 @@ const Keys = (props: KeysProps) => {
           }
         />
         {showBetaWarning && (
-          <div className="bg-violet-200 p-6 rounded-lg font-semibold max-w-2xl w-full flex flex-col relative mb-8">
+          <div className="bg-violet-200 dark:bg-violet-800 p-6 rounded-lg font-semibold max-w-2xl w-full flex flex-col relative mb-8">
             <button
               className="absolute top-4 right-4"
               onClick={() => setShowBetaWarning(false)}

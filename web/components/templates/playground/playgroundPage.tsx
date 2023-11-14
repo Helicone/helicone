@@ -50,7 +50,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               id="request-id"
               onChange={(e) => setRequestId(e.target.value)}
               className={clsx(
-                "block w-[22rem] rounded-lg px-3 py-1.5 text-sm text-gray-900 shadow-sm border border-gray-300"
+                "block w-[22rem] rounded-lg px-4 py-2 text-sm text-gray-900 bg-white shadow-sm border border-gray-300 dark:bg-black dark:text-gray-100 dark:border-gray-700"
               )}
               placeholder="Enter in a Request ID"
               value={requestId}
@@ -66,11 +66,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               }}
               className={clsx(
                 singleRequest === null ? "opacity-50" : "",
-                "bg-white border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-sky-50 flex flex-row items-center gap-2"
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               )}
             >
-              <CodeBracketSquareIcon className="h-5 w-5 text-gray-900" />
-              <p className="text-sm font-medium text-gray-900 hidden sm:block">
+              <CodeBracketSquareIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
                 View Source
               </p>
             </button>
@@ -80,7 +80,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       <div className="grid grid-cols-8 gap-8 h-full w-full pt-4">
         {requestId === undefined || requestId === "" ? (
           <div className="col-span-8 h-96 p-8 flex flex-col space-y-4 w-full border border-dashed border-gray-300 rounded-xl justify-center items-center text-center">
-            <p className="text-2xl font-semibold text-gray-700">
+            <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
               No Request Selected
             </p>
             <p className="text-gray-500">
@@ -107,7 +107,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                     <div className="h-fit sticky top-8 flex flex-col space-y-8">
                       <div className="flex flex-col space-y-2 w-full">
                         <div className="flex flex-row w-full space-x-1 items-center">
-                          <p className="font-semibold text-sm text-gray-900">
+                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                             Models
                           </p>
                           <button
@@ -150,7 +150,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                         <div className="flex flex-row w-full justify-between items-center">
                           <label
                             htmlFor="temp"
-                            className="font-semibold text-sm text-gray-900"
+                            className="font-semibold text-sm text-gray-900 dark:text-gray-100"
                           >
                             Temperature
                           </label>
@@ -174,7 +174,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                             min={0}
                             max={1}
                             step={0.01}
-                            className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                            className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                           />
                         </div>
                         <input
@@ -207,7 +207,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                         <div className="flex flex-row w-full justify-between items-center">
                           <label
                             htmlFor="tokens"
-                            className="font-semibold text-sm text-gray-900"
+                            className="font-semibold text-sm text-gray-900 dark:text-gray-100"
                           >
                             Max Tokens
                           </label>
@@ -231,7 +231,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                             min={1}
                             max={2048}
                             step={1}
-                            className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                            className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                           />
                         </div>
                         <input
@@ -266,12 +266,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             </div>
           </>
         ) : !isChat ? (
-          <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
+          <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
             This request is not a chat completion request. We do not currently
             support non-chat completion requests in playground
           </div>
         ) : (
-          <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 rounded-xl text-gray-500">
+          <div className="col-span-8 h-96 items-center justify-center flex flex-col border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-500">
             No data found for this request. Please make sure the request is
             correct or try another request.
           </div>
@@ -279,8 +279,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       </div>
       <ThemedModal open={infoOpen} setOpen={setInfoOpen}>
         <div className="w-[450px] flex flex-col space-y-4">
-          <h3 className="text-xl font-semibold">Experiment with Models</h3>
-          <p className="text-sm text-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Experiment with Models
+          </h3>
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             Easily experiment with different models and parameters to see how
             they affect your chats. Different experiments will{" "}
             <span className="font-semibold italic">use the same model</span> for
@@ -294,7 +296,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               alt={"playground-graphic"}
             />
           </div>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             For the experiments above, the conversation for{" "}
             <span className="font-semibold italic">gpt-3.5-turbo</span> will
             take the flow: A - B - D - E

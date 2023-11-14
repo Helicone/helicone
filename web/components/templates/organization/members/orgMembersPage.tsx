@@ -66,7 +66,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
 
   return (
     <>
-      <div className="flex flex-col text-gray-900 max-w-2xl space-y-8">
+      <div className="flex flex-col text-gray-900 dark:text-gray-100 max-w-2xl space-y-8">
         <div className="flex flex-col h-full space-y-4 w-full mt-8">
           <div className="flex flex-row justify-between items-center">
             <h3 className="text-lg font-semibold">Members</h3>

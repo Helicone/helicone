@@ -107,7 +107,6 @@ async function handler({
   newProxyMapping.data.helicone_proxy_key = proxyKey;
 
   if (limits.length > 0) {
-    console.log("inserting limits", limits);
     const insertLimits = await supabaseServer
       .from("helicone_proxy_key_limits")
       .insert(

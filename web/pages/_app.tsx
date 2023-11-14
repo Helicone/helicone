@@ -16,6 +16,11 @@ import { OrgContextProvider } from "../components/shared/layout/organizationCont
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import {
+  ThemeContextProvider,
+  useTheme,
+} from "../components/shared/theme/themeContext";
+import { clsx } from "../components/shared/clsx";
 
 if (
   typeof window !== "undefined" &&
@@ -47,9 +52,6 @@ export default function MyApp({
 
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
-  if (typeof window !== "undefined") {
-    document.documentElement.classList.add("dark");
-  }
 
   return (
     <>
@@ -62,7 +64,9 @@ export default function MyApp({
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
-                  <Component {...pageProps} />
+                  <ThemeContextProvider>
+                    <Component {...pageProps} />
+                  </ThemeContextProvider>
                   <Notification />
                 </OrgContextProvider>
               </DndProvider>

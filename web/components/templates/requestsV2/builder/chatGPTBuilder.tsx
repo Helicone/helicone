@@ -14,6 +14,10 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
       : true;
 
     const getRequestText = () => {
+      // check for too large
+      if (this.response.request_body.heliconeMessage) {
+        return this.response.request_body.heliconeMessage;
+      }
       const messages = this.response.request_body.messages;
       if (messages) {
         if (messages.length > 0) {
@@ -25,7 +29,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               (message) => message.type === "text"
             );
 
-            return textMessage?.text || "";
+            return textMessage?.text ?? content ?? "";
           } else {
             return content;
           }
@@ -92,8 +96,10 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               />
             )}
             <div className="w-full flex flex-col text-left space-y-1 text-sm">
-              <p className="font-semibold text-gray-900 text-sm">Error</p>
-              <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                Error
+              </p>
+              <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
                 {this.response.response_body?.error?.message || ""}
               </p>
             </div>
