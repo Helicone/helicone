@@ -10,7 +10,9 @@ export type AllOperators =
   | "lt"
   | "gt"
   | "not-equals"
-  | "contains";
+  | "contains"
+  | "is-not-null"
+  | "is-null";
 export type TextOperators = Record<
   "not-equals" | "equals" | "like" | "ilike" | "contains",
   string
@@ -21,7 +23,10 @@ export type NumberOperators = Record<
   number
 >;
 
-export type BooleanOperators = Record<"equals", boolean>;
+export type BooleanOperators = Record<
+  "equals" | "is-not-null" | "is-null",
+  boolean
+>;
 
 export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
 

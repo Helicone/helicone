@@ -146,7 +146,7 @@ const whereKeyMappings: KeyMappings = {
     value: "properties.value",
   }),
   feedback: easyKeyMappings<"feedback">({
-    rating: "feedback.rating",
+    rating: "coalesce(feedback.rating, response_copy_v3.rating)",
     id: "feedback.id",
     created_at: "feedback.created_at",
     response_id: "feedback.response_id",
@@ -177,7 +177,7 @@ const whereKeyMappings: KeyMappings = {
       user_id: "response_copy_v3.user_id",
       status: "response_copy_v3.status",
       organization_id: "response_copy_v3.organization_id",
-      rating: "response_copy_v3.rating",
+      rating: "coalesce(feedback.rating, response_copy_v3.rating)",
       feedback_id: "response_copy_v3.feedback_id",
       feedback_created_at: "response_copy_v3.feedback_created_at",
     })(filter);
@@ -330,11 +330,20 @@ export function buildFilterLeaf(
         ? "!="
         : operatorKey === "contains"
         ? "ILIKE"
+        : operatorKey === "is-not-null"
+        ? "IS NOT NULL"
+        : operatorKey === "is-null"
+        ? "IS NULL"
         : undefined;
 
-    filters.push(
-      `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
-    );
+    if (operatorKey === "is-not-null" || operatorKey === "is-null") {
+      filters.push(`${column} ${sqlOperator}`);
+    } else {
+      filters.push(
+        `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`
+      );
+    }
+
     if (operatorKey === "contains") {
       argsAcc.push(`%${value}%`);
     } else {

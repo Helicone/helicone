@@ -193,6 +193,17 @@ export interface PropertyWithResponseV1 {
   property_value: string;
 }
 
+interface Feedback {
+  feedback_id: string;
+  rating: number;
+  feedback_created_at: string;
+  request_id: string;
+  request_created_at: string;
+  response_id: Nullable<string>;
+  organization_id: string;
+  user_id: Nullable<string>;
+  created_at: Nullable<string>;
+}
 export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
@@ -201,5 +212,6 @@ export interface ClickhouseDB {
     properties_copy_v2: PropertiesCopyV2;
     response_copy_v3: ResponseCopyV3;
     property_with_response_v1: PropertyWithResponseV1;
+    feedback: Feedback;
   };
 }

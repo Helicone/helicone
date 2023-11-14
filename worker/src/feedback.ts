@@ -4,7 +4,10 @@ import { RequestWrapper } from "./lib/RequestWrapper";
 import { Database } from "../supabase/database.types";
 import { Result } from "./results";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
-import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
+import {
+  addFeedbackToResponse,
+  insertFeedback,
+} from "./lib/dbLogger/clickhouseLog";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
 
 const FEEDBACK_LATEST_CREATED_AT = "feedback-latest-created-at";
@@ -131,6 +134,25 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     return new Response(`Error upserting feedback: ${feedbackDataError}`, {
       status: 500,
     });
+  }
+
+  const { data: _, error: feedbackChError } = await insertFeedback(
+    new ClickhouseClientWrapper({
+      CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+      CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+      CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+    }),
+    feedbackData,
+    requestData
+  );
+
+  if (feedbackChError) {
+    return new Response(
+      `Error inserting feedback into Clickhouse: ${feedbackChError}`,
+      {
+        status: 500,
+      }
+    );
   }
 
   return new Response(

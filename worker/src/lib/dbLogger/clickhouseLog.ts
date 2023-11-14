@@ -134,6 +134,33 @@ export async function logInClickhouse(
   ]);
 }
 
+export async function insertFeedback(
+  clickhouseDb: ClickhouseClientWrapper,
+  feedback: Database["public"]["Tables"]["feedback"]["Row"],
+  request: Database["public"]["Tables"]["request"]["Row"]
+): Promise<Result<string, string>> {
+  console.log(feedback.created_at);
+  const feedbackCreatedAt = formatTimeString(feedback.created_at);
+  console.log(feedbackCreatedAt);
+  const requestCreatedAt = formatTimeString(request.created_at);
+  const currentCreatedAt = formatTimeString(new Date().toISOString());
+
+  const feedbackLog = {
+    feedback_id: feedback.id,
+    rating: feedback.rating ? 1 : 0,
+    feedback_created_at: feedbackCreatedAt,
+    request_id: request.id,
+    request_created_at: requestCreatedAt,
+    response_id: feedback.response_id,
+    organization_id:
+      request.helicone_org_id ?? "00000000-0000-0000-0000-000000000000",
+    user_id: request.user_id,
+    created_at: currentCreatedAt,
+  };
+
+  return await clickhouseDb.dbInsertClickhouse("feedback", [feedbackLog]);
+}
+
 export async function addFeedbackToResponse(
   clickhouseDb: ClickhouseClientWrapper,
   feedback: Database["public"]["Tables"]["feedback"]["Insert"][]
