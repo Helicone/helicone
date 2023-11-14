@@ -1,7 +1,13 @@
 ---
 title: "Templated Prompts"
-description: "Visualize the prompts, values, and completions"
+description: "DEPRECATED: Templated prompts are a way to separate the parameters from the prompt text"
 ---
+
+<Warning>
+
+This feature is being depracated, we are looking to support similar functionality in the future.
+
+</Warning>
 
 ### What are Templated Prompts?
 
@@ -33,8 +39,8 @@ Add the header `Helicone-Prompt-Format` (with any value) into the request to not
 
 <Warning>
   {" "}
-  Add the header `Helicone-Prompt-Format` (with any value) into the request to notify Helicone that you are sending a serialized
-  prompt template with values string.
+  Add the header `Helicone-Prompt-Format` (with any value) into the request to notify
+  Helicone that you are sending a serialized prompt template with values string.
 </Warning>
 
 ### Serialize the prompt template and values
@@ -46,7 +52,10 @@ Serialize a dictionary with two keys:
 
 Helicone then formats the string, replacing the user parameter values with their actual values before passing the formatted prompt to OpenAI.
 
-<Note>On OpenAIs end, it's as if you just made the string-formatted request without serializing a dictionary.</Note>
+<Note>
+  On OpenAIs end, it's as if you just made the string-formatted request without
+  serializing a dictionary.
+</Note>
 
 Here is an example:
 
@@ -112,7 +121,8 @@ This is equivalent to sending the prompt `Write an amazing poem about Helicone` 
 
 <Warning>
   {" "}
-  Make sure every prompt variable is defined in values and every value is present in prompt without any typos to avoid errors{" "}
+  Make sure every prompt variable is defined in values and every value is present
+  in prompt without any typos to avoid errors{" "}
 </Warning>
 
 (Optional) Assign a name to the prompt
