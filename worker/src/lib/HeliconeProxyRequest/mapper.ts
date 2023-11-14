@@ -198,7 +198,7 @@ export class HeliconeProxyRequestMapper {
       /^https:\/\/gateway\.ai\.cloudflare\.com\/v\d+\/?$/;
     const twoYFV = /^https:\/\/api\.2yfv\.com\/v\d+\/?$/;
     const togetherPattern = /^https:\/\/api\.together\.xyz(\/v\d+)?\/?$/;
-    const lemonFox = /^https:\/\/api\.lemonfox\.ai\/v\d+\/?$/;
+    const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
 
     return (
       api_base === undefined ||
