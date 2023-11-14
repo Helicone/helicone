@@ -36,13 +36,13 @@ const TableFooter = (props: TableFooterProps) => {
     <div className="flex flex-row justify-between text-sm items-center">
       <div className="flex flex-row gap-16 items-center justify-between w-full">
         <div className="flex flex-row gap-2 items-center">
-          <p className="text-gray-700 font-medium hidden sm:block">
+          <p className="text-gray-700 dark:text-gray-300 font-medium hidden sm:block">
             Rows per page
           </p>
           <select
             id="location"
             name="location"
-            className="block w-fit rounded-md border-gray-300 py-1.5 pl-3 pr-6 text-base focus:border-sky-500 hover:cursor-pointer focus:outline-none focus:ring-sky-500 sm:text-sm"
+            className="text-gray-700 dark:text-gray-300 bg-white dark:bg-black block w-fit rounded-md border-gray-300 dark:border-gray-700 py-1.5 pl-3 pr-6 text-base focus:border-sky-500 hover:cursor-pointer focus:outline-none focus:ring-sky-500 sm:text-sm"
             defaultValue={router.query.page_size}
             onChange={(e) => {
               router.query.page_size = e.target.value;
@@ -56,7 +56,7 @@ const TableFooter = (props: TableFooterProps) => {
             ))}
           </select>
         </div>
-        <p className="text-gray-700 font-medium">{`Page ${currentPage} of ${
+        <p className="text-gray-700 dark:text-gray-300 font-medium">{`Page ${currentPage} of ${
           isCountLoading
             ? "..."
             : Math.ceil((count as number) / Number(pageSize || 10))
@@ -71,9 +71,9 @@ const TableFooter = (props: TableFooterProps) => {
             }}
             className={clsx(
               currentPage <= 1
-                ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
-                : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
-              "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm "
+                ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
+                : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
+              "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             )}
           >
             <ChevronDoubleLeftIcon className="h-5 w-5" />
@@ -87,8 +87,8 @@ const TableFooter = (props: TableFooterProps) => {
             }}
             className={clsx(
               currentPage <= 1
-                ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
-                : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
+                ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
+                : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             )}
           >
@@ -103,8 +103,8 @@ const TableFooter = (props: TableFooterProps) => {
             }}
             className={clsx(
               currentPage >= totalPages
-                ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
-                : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
+                ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
+                : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             )}
           >
@@ -123,8 +123,8 @@ const TableFooter = (props: TableFooterProps) => {
             }}
             className={clsx(
               currentPage >= totalPages
-                ? "border-gray-200 bg-gray-50 hover:cursor-not-allowed text-gray-300"
-                : "border-gray-300 bg-white hover:cursor-pointer text-gray-700",
+                ? "border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-700 hover:cursor-not-allowed text-gray-300 dark:text-gray-500"
+                : "border-gray-300 bg-white dark:border-gray-700 dark:bg-black hover:cursor-pointer text-gray-700 dark:text-gray-300",
               "hidden sm:block w-fit rounded-md border p-1.5 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             )}
           >

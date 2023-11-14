@@ -169,20 +169,20 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
-        <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-          <TableCellsIcon className="h-12 w-12 text-gray-400" />
+        <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+          <TableCellsIcon className="h-12 w-12 text-gray-500" />
           <p className="text-xl font-semibold text-gray-500">No Data Found</p>
           {noDataCTA}
         </div>
       ) : table.getVisibleFlatColumns().length === 0 ? (
-        <div className="bg-white h-48 w-full rounded-lg border border-gray-300 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-          <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-400" />
+        <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+          <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-500" />
           <p className="text-xl font-semibold text-gray-500">
             No Columns Selected
           </p>
         </div>
       ) : makeCard && view === "card" ? (
-        <ul className="flex flex-col space-y-8 divide-y divide-gray-300 bg-white rounded-lg border border-gray-300">
+        <ul className="flex flex-col space-y-8 divide-y divide-gray-300 dark:divide-gray-700 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700">
           {rows.map((row, i) => (
             <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
           ))}
@@ -193,7 +193,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
           properties={makeRow.properties}
         />
       ) : (
-        <div className="bg-white rounded-lg border border-gray-300 py-2 px-4">
+        <div className="bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4">
           <div
             className="text-sm"
             style={{
@@ -211,7 +211,10 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
             >
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id} className="border-b border-gray-300">
+                  <tr
+                    key={headerGroup.id}
+                    className="border-b border-gray-300 dark:border-gray-700"
+                  >
                     {headerGroup.headers.map((header) => (
                       <DraggableColumnHeader
                         key={header.id}
@@ -227,7 +230,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                 {rows.map((row, index) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-100 hover:cursor-pointer"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer"
                     onClick={
                       onRowSelect && (() => onRowSelect(row.original, index))
                     }
@@ -236,7 +239,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                       <td
                         key={i}
                         className={clsx(
-                          "py-4 border-t border-gray-300 pr-4 text-gray-700"
+                          "py-4 border-t border-gray-300 dark:border-gray-700 pr-4 text-gray-700 dark:text-gray-300"
                         )}
                         {...{
                           style: {

@@ -111,7 +111,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
             <button
               onClick={showFilterHandler}
               className={clsx(
-                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-950 flex flex-row items-center gap-2"
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               )}
             >
               <FunnelIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />

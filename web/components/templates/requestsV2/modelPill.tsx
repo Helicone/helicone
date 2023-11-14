@@ -11,15 +11,24 @@ const ModelPill = (props: ModelPillProps) => {
   const builderType = getBuilderType(model, "OPENAI");
 
   let modelMapping = {
-    ChatBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
-    CompletionBuilder: "bg-green-50 text-green-700 ring-green-200",
-    ChatGPTBuilder: "bg-purple-50 text-purple-700 ring-purple-200",
-    GPT3Builder: "bg-green-50 text-green-700 ring-green-200",
-    ModerationBuilder: "bg-teal-50 text-teal-700 ring-teal-200",
-    EmbeddingBuilder: "bg-blue-50 text-blue-700 ring-blue-200",
-    ClaudeBuilder: "bg-orange-50 text-orange-700 ring-orange-200",
-    CustomBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
-    UnknownBuilder: "bg-gray-50 text-gray-700 ring-gray-200",
+    ChatBuilder:
+      "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
+    CompletionBuilder:
+      "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900 dark:text-green-300 dark:ring-green-800",
+    ChatGPTBuilder:
+      "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
+    GPT3Builder:
+      "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900 dark:text-green-300 dark:ring-green-800",
+    ModerationBuilder:
+      "bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-900 dark:text-teal-300 dark:ring-teal-800",
+    EmbeddingBuilder:
+      "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:ring-blue-800",
+    ClaudeBuilder:
+      "bg-orange-50 text-orange-700 ring-orange-200 dark:bg-orange-900 dark:text-orange-300 dark:ring-orange-800",
+    CustomBuilder:
+      "bg-gray-50 text-gray-700 ring-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800",
+    UnknownBuilder:
+      "bg-gray-50 text-gray-700 ring-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800",
   };
 
   return (
