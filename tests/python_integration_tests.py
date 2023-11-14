@@ -15,6 +15,7 @@ load_dotenv()
 
 helicone_proxy_url = os.environ["HELICONE_PROXY_URL"]
 helicone_async_url = os.environ["HELICONE_ASYNC_URL"]
+helicone_gateway_url = os.environ["HELICONE_GATEWAY_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 openai_org_id = os.environ["OPENAI_ORG"]
 helicone_api_key = os.environ["HELICONE_API_KEY"]
@@ -23,7 +24,6 @@ supabase_url = os.environ["SUPABASE_URL"]
 org_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24a'
 helicone_proxy_key = 'sk-helicone-proxy-7wpoayi-xm5e6cy-wfimwqy-avnannq-d144312e-5c65-4eaa-a1c1-f0c143080601'
 hashed_proxy_key = '246172676f6e32696424763d3139246d3d3236323134342c743d332c703d3124415972396d5431736832356a474546546630614371672468767537654e7879674f474c6c7633584f4a597565643162414b6f326732732f7a575a30584c4b6c716134000000000000000000000000000000000000000000000000000000000000'
-
 
 def connect_to_db():
     return psycopg2.connect(
@@ -63,6 +63,50 @@ def fetch(base_url, endpoint, method="GET", json=None, headers=None):
     response.raise_for_status()
     return response.json()
 
+def test_gateway_api():
+    print("\n---------Running test_gateway_api---------")
+    requestId = str(uuid.uuid4())
+    print("Request ID: " + requestId + "")
+    message_content = test_gateway_api.__name__ + " - " + requestId
+
+    messages = [
+        {
+            "role": "user",
+            "content": message_content
+        }
+    ]
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": messages,
+        "max_tokens": 10
+    }
+    headers = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Target-Url": "https://api.openai.com/v1/",
+        "Helicone-Target-Provider": "OPENAI",
+        "Helicone-Property-RequestId": requestId,
+        "OpenAI-Organization": openai_org_id
+    }
+    
+    response = fetch(helicone_gateway_url, "v1/chat/completions",
+                     method="POST", json=data, headers=headers)
+    assert response, "Response from OpenAI API is empty"
+
+    time.sleep(3)  # Helicone needs time to insert request into the database
+    
+    query = "SELECT * FROM properties INNER JOIN request ON properties.request_id = request.id WHERE key = 'requestid' AND value = %s LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
+
+    latest_request = request_data[0]
+    assert message_content in latest_request["body"]["messages"][
+        0]["content"], "Request not found in the database"
+
+    query = "SELECT * FROM response WHERE request = %s LIMIT 1"
+    response_data = fetch_from_db(query, (latest_request["id"],))
+    assert response_data, "Response data not found in the database for the given request ID"
+    print("passed")
 
 def test_openai_proxy():
     print("\n---------Running test_proxy---------")
