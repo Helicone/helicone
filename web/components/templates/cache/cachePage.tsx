@@ -22,6 +22,7 @@ import ThemedListItem from "../../shared/themed/themedListItem";
 import ThemedModal from "../../shared/themed/themedModal";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import ModelPill from "../requestsV2/modelPill";
 
 interface CachePageProps {
   currentPage: number;
@@ -54,16 +55,6 @@ const CachePage = (props: CachePageProps) => {
   const hasCache = data.totalCached.data?.data
     ? +data.totalCached.data?.data === 0
     : false;
-
-  const getPillDecoration = (model: string) => {
-    if (model === "text-davinci-003") {
-      return "text-green-700 bg-green-50 ring-green-600/20";
-    } else if (model === "gpt-3.5-turbo") {
-      return "text-blue-700 bg-blue-50 ring-blue-600/20";
-    } else {
-      return "text-gray-600 bg-gray-50 ring-gray-500/10";
-    }
-  };
 
   const metrics = [
     {
@@ -141,10 +132,10 @@ const CachePage = (props: CachePageProps) => {
             href="https://docs.helicone.ai/advanced-usage/caching"
             target="_blank"
             rel="noreferrer noopener"
-            className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+            className="relative block w-full rounded-lg border-2 border-gray-300 dark:border-gray-700 p-12 text-center focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
           >
             <svg
-              className="mx-auto h-12 w-12 text-gray-700"
+              className="mx-auto h-12 w-12 text-gray-700 dark:text-gray-300"
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
@@ -165,18 +156,18 @@ const CachePage = (props: CachePageProps) => {
           <div className="gap-4 grid grid-cols-8">
             <div className="col-span-8 md:col-span-3 grid grid-cols-1 text-gray-900 gap-4">
               {metrics.map((metric, i) => (
-                <MetricsPanel metric={metric} key={i} />
+                <MetricsPanel metric={metric} key={i} hFull={true} />
               ))}
             </div>
-            <div className="col-span-8 md:col-span-5 bg-white border border-gray-300 rounded-lg">
+            <div className="col-span-8 md:col-span-5 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
               <div className="flex flex-col space-y-4 py-6">
-                <h3 className="text-lg font-semibold text-gray-900 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
                   Caches last 30 days
                 </h3>
                 <div className="h-72 px-4">
                   {cacheOverTime.overTime.isLoading ? (
                     <div className="h-full w-full flex-col flex p-8">
-                      <div className="h-full w-full rounded-lg bg-gray-300 animate-pulse" />
+                      <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
                     </div>
                   ) : (
                     <StackedBarChart data={chartData} keys={cacheModels} />
@@ -184,12 +175,12 @@ const CachePage = (props: CachePageProps) => {
                 </div>
               </div>
             </div>
-            <div className="col-span-8 md:col-span-8 bg-white border border-gray-300 rounded-lg h-96">
+            <div className="col-span-8 md:col-span-8 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-96">
               <div className="flex flex-col space-y-4 py-6">
-                <h3 className="text-lg font-semibold text-gray-900 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
                   Top Requests
                 </h3>
-                <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300">
+                <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
                   {topRequests.topRequests.data?.data?.map((request, i) => (
                     <ThemedListItem
                       key={i}
@@ -203,16 +194,7 @@ const CachePage = (props: CachePageProps) => {
                       ).toLocaleString()}`}
                       icon={CircleStackIcon}
                       value={request.count}
-                      pill={
-                        <p
-                          className={clsx(
-                            getPillDecoration(request.model),
-                            "rounded-md whitespace-nowrap px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset"
-                          )}
-                        >
-                          {request.model}
-                        </p>
-                      }
+                      pill={<ModelPill model={request.model} />}
                       secondarySubtitle={`Recent: ${new Date(
                         request.last_used
                       ).toLocaleString()}`}
@@ -234,40 +216,46 @@ const CachePage = (props: CachePageProps) => {
       </div>
       <ThemedDrawer open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-2">
-          <p className="text-gray-500 text-sm border p-2 rounded-lg border-red-300">
+          <p className="text-gray-500 text-sm border p-2 rounded-lg border-red-300 dark:border-red-700">
             Cache Bucket response configurable soon...
           </p>
           <dl className="mt-2 grid grid-cols-2">
-            <div className="col-span-2 flex flex-row justify-between py-2 items-center text-sm font-medium border-b border-gray-200">
+            <div className="col-span-2 flex flex-row justify-between py-2 items-center text-sm font-medium border-b border-gray-200 dark:border-gray-800">
               <div className="flex flex-col">
                 <dt className="text-gray-500">Request ID</dt>
-                <dd className="text-gray-900">{selectedRequest?.request_id}</dd>
+                <dd className="text-gray-900 dark:text-gray-100">
+                  {selectedRequest?.request_id}
+                </dd>
               </div>
             </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
+            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
               <dt className="text-gray-500">Model</dt>
-              <dd className="text-gray-900">{selectedRequest?.model}</dd>
+              <dd className="text-gray-900 dark:text-gray-100">
+                <ModelPill model={selectedRequest?.model ?? ""} />
+              </dd>
             </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
+            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
               <dt className="text-gray-500">Cache Hits</dt>
-              <dd className="text-gray-900">{selectedRequest?.count}</dd>
+              <dd className="text-gray-900 dark:text-gray-100">
+                {selectedRequest?.count}
+              </dd>
             </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
+            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
               <dt className="text-gray-500">First Used</dt>
-              <dd className="text-gray-900">
+              <dd className="text-gray-900 dark:text-gray-100">
                 {new Date(selectedRequest?.first_used || "").toLocaleString()}
               </dd>
             </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200">
+            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
               <dt className="text-gray-500">Last Used</dt>
-              <dd className="text-gray-900">
+              <dd className="text-gray-900 dark:text-gray-100">
                 {new Date(selectedRequest?.last_used || "").toLocaleString()}
               </dd>
             </div>
           </dl>
           <div className="w-full flex flex-col text-left space-y-1 mb-4 pt-8">
             <p className="text-gray-500 text-sm font-medium">Request</p>
-            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
               {selectedRequest?.prompt || "n/a"}
             </p>
           </div>

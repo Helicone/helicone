@@ -28,7 +28,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
     <Card
       className={clsx(
         hFull ? "h-full" : "h-full max-h-24",
-        "flex flex-col p-4 w-full justify-end"
+        "flex flex-col p-4 w-full justify-end dark:border dark:border-gray-700"
       )}
     >
       <p className="text-gray-500 text-xs text-left">{metric.label}</p>
