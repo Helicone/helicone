@@ -71,7 +71,7 @@ const ChatRow = (props: ChatRowProps) => {
         <span
           className={clsx(
             isSystem ? "font-semibold" : "font-normal",
-            "text-gray-900 whitespace-pre-wrap w-full"
+            "text-gray-900 dark:text-gray-100 whitespace-pre-wrap w-full"
           )}
         >
           {content ?? ""}
@@ -84,8 +84,10 @@ const ChatRow = (props: ChatRowProps) => {
     <li
       className={clsx(
         index === 0 && "rounded-t-lg",
-        role === "user" ? "bg-gray-100" : "bg-gray-200",
-        "flex flex-row justify-between px-8 py-6 gap-8 border-b border-gray-300"
+        role === "user"
+          ? "bg-gray-100 dark:bg-black"
+          : "bg-gray-200 dark:bg-gray-800",
+        "flex flex-row justify-between px-8 py-6 gap-8 border-b border-gray-300 dark:border-gray-700"
       )}
     >
       {isSystem || isAssistant ? (
@@ -94,8 +96,8 @@ const ChatRow = (props: ChatRowProps) => {
             <button
               className={clsx(
                 isSystem ? "cursor-not-allowed" : "hover:bg-gray-50",
-                "bg-white border border-gray-300",
-                "w-20 h-6 text-xs rounded-lg font-semibold"
+                "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 border border-gray-300 dark:border-gray-700",
+                "w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
               )}
               disabled={isSystem}
               onClick={() => {
@@ -119,21 +121,13 @@ const ChatRow = (props: ChatRowProps) => {
                 </span>
               ) : (
                 <>{getContent(currentMessage.content)}</>
-                // <span
-                //   className={clsx(
-                //     isSystem ? "font-semibold" : "font-normal",
-                //     "text-gray-900 whitespace-pre-wrap w-full"
-                //   )}
-                // >
-                //   {getContent(currentMessage.content)}
-                // </span>
               )}
             </div>
 
             {!isEditing && (
               <div className="absolute right-0 flex flex-row space-x-4">
                 <button onClick={() => setIsEditing(true)}>
-                  <PencilIcon className="h-4 w-4 text-gray-900" />
+                  <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                 </button>
                 {!isSystem && (
                   <button
@@ -141,7 +135,7 @@ const ChatRow = (props: ChatRowProps) => {
                       deleteRow(currentMessage.id);
                     }}
                   >
-                    <TrashIcon className="h-4 w-4 text-gray-900" />
+                    <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                   </button>
                 )}
               </div>
@@ -154,7 +148,7 @@ const ChatRow = (props: ChatRowProps) => {
                   setCurrentMessage(originalMessage);
                   setIsEditing(false);
                 }}
-                className="px-2.5 py-1.5 text-xs font-medium border border-gray-700 text-gray-900 bg-white rounded-lg"
+                className="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-black border border-gray-700 dark:border-gray-300 text-gray-900 dark:text-gray-100 rounded-lg"
               >
                 Cancel
               </button>
@@ -163,7 +157,7 @@ const ChatRow = (props: ChatRowProps) => {
                   callback(contentAsString || "", role);
                   setIsEditing(false);
                 }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 text-white rounded-lg"
+                className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 dark:bg-gray-100 text-white dark:text-black rounded-lg"
               >
                 Save
               </button>
@@ -175,8 +169,8 @@ const ChatRow = (props: ChatRowProps) => {
           <div className="flex flex-row space-x-8 w-full h-full relative">
             <button
               className={clsx(
-                "bg-white hover:bg-gray-50 border border-gray-300",
-                "w-20 h-6 text-xs rounded-lg font-semibold"
+                "bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 border border-gray-300 dark:border-gray-700",
+                "w-20 h-6 text-xs rounded-lg font-semibold text-gray-900 dark:text-gray-100"
               )}
               disabled={isSystem}
               onClick={() => {
@@ -213,14 +207,14 @@ const ChatRow = (props: ChatRowProps) => {
             {!isEditing && (
               <div className="absolute right-0 flex flex-row space-x-4">
                 <button onClick={() => setIsEditing(true)}>
-                  <PencilIcon className="h-4 w-4 text-gray-900" />
+                  <PencilIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                 </button>
                 <button
                   onClick={() => {
                     deleteRow(currentMessage.id);
                   }}
                 >
-                  <TrashIcon className="h-4 w-4 text-gray-900" />
+                  <TrashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                 </button>
               </div>
             )}
@@ -232,7 +226,7 @@ const ChatRow = (props: ChatRowProps) => {
                   setCurrentMessage({ ...originalMessage });
                   setIsEditing(false);
                 }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-white border border-gray-700 text-gray-900 rounded-lg"
+                className="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-black border border-gray-700 dark:border-gray-300 text-gray-900 dark:text-gray-100 rounded-lg"
               >
                 Cancel
               </button>
@@ -241,7 +235,7 @@ const ChatRow = (props: ChatRowProps) => {
                   callback(contentAsString || "", role);
                   setIsEditing(false);
                 }}
-                className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 text-white rounded-lg"
+                className="px-2.5 py-1.5 text-xs font-medium bg-gray-900 dark:bg-gray-100 text-white dark:text-black rounded-lg"
               >
                 Save
               </button>

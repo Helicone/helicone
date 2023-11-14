@@ -108,17 +108,17 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       } else {
         if (modelMessage.length > 0) {
           renderRows.push(
-            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200">
+            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
               <button
                 className={clsx(
-                  "hover:bg-gray-50 hover:cursor-not-allowed",
-                  "bg-white border border-gray-300",
+                  "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
+                  "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
                   "w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
                 )}
               >
                 assistant
               </button>
-              <div className="w-full flex flex-row justify-between space-x-4 divide-x divide-gray-300">
+              <div className="w-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
                 {modelMessage.map((message, idx) => (
                   <div
                     key={idx}
@@ -181,11 +181,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200">
+          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
             <button
               className={clsx(
-                "hover:bg-gray-50 hover:cursor-not-allowed",
-                "bg-white border border-gray-300",
+                "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
+                "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
                 "w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
               )}
             >
@@ -203,7 +203,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 <div
                   key={idx}
                   className={clsx(
-                    idx % 3 === 0 ? "" : "pl-4 border-l border-gray-300",
+                    idx % 3 === 0
+                      ? ""
+                      : "pl-4 border-l border-gray-300 dark:border-gray-700",
                     "w-full flex flex-col space-y-2 col-span-1"
                   )}
                 >
@@ -225,7 +227,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   };
 
   return (
-    <ul className="w-full border border-gray-300 rounded-lg relative h-fit">
+    <ul className="w-full border border-gray-300 dark:border-gray-700 rounded-lg relative h-fit">
       {generateChatRows()}
       {isLoading && (
         <li className="flex flex-row justify-between px-8 py-6 gap-8">
@@ -233,7 +235,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             <div className="flex flex-row space-x-8 w-full h-full relative">
               <button
                 className={clsx(
-                  "bg-white border border-gray-300",
+                  "bg-white border border-gray-300 dark:border-gray-700 dark:bg-black",
                   "w-20 h-6 text-xs rounded-lg font-semibold"
                 )}
               >
@@ -246,7 +248,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           </div>
         </li>
       )}
-      <li className="px-8 py-4 bg-white rounded-b-lg justify-between space-x-4 flex">
+      <li className="px-8 py-4 bg-white dark:bg-black rounded-b-lg justify-between space-x-4 flex">
         <div className="w-full">
           <button
             onClick={() => {
@@ -271,11 +273,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               }
             }}
             className={clsx(
-              "bg-white hover:bg-gray-100 border border-gray-300 text-black",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
+              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             )}
           >
-            <PlusIcon className="h-4 w-4 inline  text-black rounded-lg mr-2" />
+            <PlusIcon className="h-4 w-4 inline  text-black dark:text-white rounded-lg mr-2" />
             Add Message
           </button>
         </div>
@@ -290,11 +292,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               setCurrentChat(originalCopy);
             }}
             className={clsx(
-              "bg-white hover:bg-gray-100 border border-gray-300 text-black",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              "bg-white hover:bg-gray-100 border border-gray-300 text-black dark:bg-black dark:hover:bg-gray-900 dark:border-gray-700 dark:text-white",
+              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-black dark:text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             )}
           >
-            <ArrowPathIcon className="h-4 w-4 inline text-black rounded-lg mr-2" />
+            <ArrowPathIcon className="h-4 w-4 inline text-black dark:text-white rounded-lg mr-2" />
             Reset
           </button>
           <button
@@ -303,10 +305,10 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             }}
             className={clsx(
               "bg-sky-500 hover:bg-sky-600",
-              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              "items-center rounded-md px-3 py-1.5 text-sm flex flex-row font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             )}
           >
-            <PaperAirplaneIcon className="h-4 w-4 inline text-white rounded-lg mr-2" />
+            <PaperAirplaneIcon className="h-4 w-4 inline text-white dark:text-black rounded-lg mr-2" />
             Submit
           </button>
         </div>
