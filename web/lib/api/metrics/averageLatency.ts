@@ -1,3 +1,4 @@
+import { getJoinClause } from "../../../services/lib/feedback";
 import {
   FilterNode,
   timeFilterToFilterNode,
@@ -26,12 +27,14 @@ export async function getAverageLatency(
       argsAcc: [],
     }
   );
+
   const query = `
   WITH total_count AS (
     SELECT 
       count(*) as count,
       sum(response_copy_v3.latency) as total_latency
     FROM response_copy_v3
+    ${getJoinClause(filterString)}
     WHERE (
       (${filterString})
     )

@@ -1,3 +1,4 @@
+import { getJoinClause } from "../../../services/lib/feedback";
 import {
   FilterNode,
   timeFilterToFilterNode,
@@ -26,11 +27,12 @@ export async function getTotalRequests(
       argsAcc: [],
     }
   );
-  const query = `
 
+  const query = `
   WITH total_count AS (
     SELECT count(*) as count
     FROM response_copy_v3
+    ${getJoinClause(filterString)}
     WHERE (
       (${filterString})
     )

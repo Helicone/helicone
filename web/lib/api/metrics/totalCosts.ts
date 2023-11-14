@@ -1,3 +1,4 @@
+import { getJoinClause } from "../../../services/lib/feedback";
 import {
   FilterNode,
   timeFilterToFilterNode,
@@ -30,11 +31,12 @@ export async function getTotalCost(
       argsAcc: [],
     }
   );
-  const query = `
 
+  const query = `
   WITH total_cost AS (
     SELECT ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as cost
     FROM response_copy_v3
+    ${getJoinClause(filterString)}
     WHERE (
       (${filterString})
     )

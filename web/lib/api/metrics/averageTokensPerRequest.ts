@@ -1,3 +1,4 @@
+import { getJoinClause } from "../../../services/lib/feedback";
 import {
   FilterNode,
   timeFilterToFilterNode,
@@ -42,6 +43,7 @@ export async function getTokensPerRequest(
       sum(response_copy_v3.prompt_tokens) as sum_prompt_tokens,
       sum(response_copy_v3.completion_tokens) as sum_completion_tokens
     FROM response_copy_v3
+    ${getJoinClause(filterString)}
     WHERE (
       (${filterString})
     )

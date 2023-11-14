@@ -15,6 +15,7 @@ import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
+import { getJoinClause } from "../../../services/lib/feedback";
 
 function buildFill(
   startDate: Date,
@@ -123,12 +124,13 @@ export async function getXOverTime<T>(
     timeZoneDifference,
     "request_created_at"
   );
+
   const query = `
 SELECT
   ${dateTrunc} as created_at_trunc,
   ${countColumn}
 FROM response_copy_v3
-LEFT JOIN feedback FINAL ON response_copy_v3.request_id = feedback.request_id
+${getJoinClause(builtFilter)}
 WHERE (
   ${builtFilter}
 )

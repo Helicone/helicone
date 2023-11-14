@@ -1,3 +1,4 @@
+import { getJoinClause } from "../../../services/lib/feedback";
 import {
   FilterNode,
   timeFilterToFilterNode,
@@ -29,6 +30,7 @@ export async function getActiveUsers(
     SELECT 
         count(DISTINCT response_copy_v3.user_id) AS users
     FROM response_copy_v3
+    ${getJoinClause(filterString)}
     WHERE (
         ${filterString}
     )

@@ -30,9 +30,10 @@ export async function getTotalFeedback(
       WITH total_count AS (
         SELECT count(*) as count
         FROM response_copy_v3
+        LEFT JOIN feedback FINAL ON response_copy_v3.request_id = feedback.request_id
         WHERE (
           (${filterString})
-          AND rating IS NOT NULL
+          AND coalesce(feedback.rating, response_copy_v3.rating) IS NOT NULL
         )
       )
       SELECT coalesce(sum(count), 0) as count
