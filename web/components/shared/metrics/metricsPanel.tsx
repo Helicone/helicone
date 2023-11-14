@@ -36,7 +36,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
         <div className="bg-gray-200 dark:bg-gray-800 animate-pulse h-6 w-16 rounded-md mt-1" />
       ) : (
         <p className="text-black dark:text-white font-semibold text-lg">
-          {metric.value}
+          {metric.value} {metric.labelUnits}
         </p>
       )}
     </Card>
