@@ -80,26 +80,34 @@ const RequestRow = (props: {
         <ul
           className={clsx(
             wFull && "2xl:grid-cols-4 2xl:gap-5",
-            "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 justify-between text-sm w-full"
+            "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 dark:divide-gray-700 justify-between text-sm w-full"
           )}
         >
           <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900">Created At</p>
-            <p className="text-gray-700 truncate ">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Created At
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
               {new Date(request.createdAt).toLocaleString("en-US")}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900">Model</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Model
+            </p>
             <div className="">
               <ModelPill model={request.model} />
             </div>
           </li>
           {request.status.statusType === "success" && (
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">Tokens</p>
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                Tokens
+              </p>
               <div className="flex flex-row items-center space-x-1">
-                <p className="text-gray-700 truncate">{request.totalTokens}</p>
+                <p className="text-gray-700 truncate dark:text-gray-300">
+                  {request.totalTokens}
+                </p>
                 <Tooltip
                   title={`Completion Tokens: ${request.completionTokens} - Prompt Tokens: ${request.promptTokens}`}
                 >
@@ -109,32 +117,46 @@ const RequestRow = (props: {
             </li>
           )}
           <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900">Latency</p>
-            <p className="text-gray-700 truncate">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Latency
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
               <span>{Number(request.latency) / 1000}s</span>
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 ">Status</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Status
+            </p>
             <StatusBadge
               statusType={request.status.statusType}
               errorCode={request.status.code}
             />
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900">User</p>
-            <p className="text-gray-700 truncate">{request.user}</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              User
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
+              {request.user}
+            </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900">Path</p>
-            <p className="text-gray-700 truncate">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              Path
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
               {getPathName(request.path)}
             </p>
           </li>
           {displayPreview && (
             <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900">ID</p>
-              <p className="text-gray-700 truncate">{request.id}</p>
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                ID
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">
+                {request.id}
+              </p>
             </li>
           )}
         </ul>
@@ -144,7 +166,7 @@ const RequestRow = (props: {
         properties.length > 0 &&
         Object.keys(request.customProperties).length > 0 && (
           <div className="flex flex-col space-y-2">
-            <p className="font-semibold text-gray-900 text-sm">
+            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
               Custom Properties
             </p>
             <div className="flex flex-wrap gap-4 text-sm">
@@ -155,11 +177,13 @@ const RequestRow = (props: {
                 ) {
                   return (
                     <li
-                      className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 rounded-lg min-w-[5rem]"
+                      className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
                       key={i}
                     >
-                      <p className="font-semibold text-gray-900">{property}</p>
-                      <p className="text-gray-700">
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        {property}
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-300">
                         {request.customProperties[property] as string}
                       </p>
                     </li>

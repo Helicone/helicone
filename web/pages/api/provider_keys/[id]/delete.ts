@@ -29,7 +29,6 @@ async function handler({
     .eq("id", id);
 
   if (error) {
-    console.log("Failed to soft_delete provider key");
     res.status(500).json({ error: error.message, data: null });
     return;
   }

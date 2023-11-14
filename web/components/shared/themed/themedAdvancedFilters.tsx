@@ -23,20 +23,20 @@ export function AdvancedFilters({
   ) => Promise<Result<void, string>>;
 }) {
   return (
-    <div className="flex flex-col bg-white p-4 rounded-lg border border-gray-300 mt-8">
+    <div className="flex flex-col bg-white dark:bg-black p-4 rounded-lg border border-gray-300 dark:border-gray-700 mt-8">
       <div className="w-full flex flex-col sm:flex-row justify-between items-center">
         <p className="text-sm text-gray-500 font-medium">Filters</p>
         <button
           onClick={() => {
             setAdvancedFilters([]);
           }}
-          className="text-xs text-gray-500 font-medium py-1 px-2 rounded-md hover:bg-gray-200"
+          className="text-xs text-gray-500 font-medium py-1 px-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
         >
           Clear All
         </button>
       </div>
 
-      <div className="flex flex-col gap-2 bg-white space-y-2 mt-4">
+      <div className="flex flex-col gap-2 bg-white dark:bg-black space-y-2 mt-4">
         {filters.map((_filter, index) => {
           return (
             <div key={index}>
@@ -72,10 +72,10 @@ export function AdvancedFilters({
               { filterMapIdx: 0, value: "", operatorIdx: 0 },
             ]);
           }}
-          className="bg-white ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black hover:bg-sky-100 hover:text-sky-900 px-4 py-2 rounded-lg"
+          className="bg-white dark:bg-black ml-4 flex flex-row w-fit items-center justify-center font-normal text-sm text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100 px-4 py-2 rounded-lg"
         >
           <PlusIcon
-            className="mr-1 h-3.5 flex-none text-black hover:bg-sky-100 hover:text-sky-900"
+            className="mr-1 h-3.5 flex-none text-black dark:text-white hover:bg-sky-100 hover:text-sky-900 dark:hover:bg-sky-900 dark:hover:text-sky-100"
             aria-hidden="true"
           />
           Add Filter
@@ -109,7 +109,7 @@ function AdvancedFilterInput({
           }}
           placeholder={"text..."}
           value={value}
-          className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          className="block w-full sm:min-w-[25rem] rounded-md border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
     case "number":
@@ -120,7 +120,7 @@ function AdvancedFilterInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={"number..."}
           value={value}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
     case "timestamp":
@@ -131,7 +131,7 @@ function AdvancedFilterInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={"date..."}
           value={value}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white text-black dark:text-white dark:bg-black shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         />
       );
     case "text-with-suggestions":
@@ -150,7 +150,7 @@ function AdvancedFilterInput({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-black shadow-sm text-black dark:text-white focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
         >
           <option value="1">Positive</option>
           <option value="0">Negative</option>
@@ -260,11 +260,6 @@ function AdvancedFilterRow({
                 value: value ?? "",
               },
             ]);
-
-            // setFilter((f) => ({
-            //   ...f,
-            //   value: value ?? "",
-            // }));
           }}
           onSearchHandler={(search: string) =>
             onSearchHandler(
@@ -277,7 +272,7 @@ function AdvancedFilterRow({
       <div className="w-full lg:w-fit mr-16">
         <button
           onClick={onDeleteHandler}
-          className="bg-red-600 text-white rounded-md p-1 hover:bg-red-700"
+          className="bg-red-700  text-white rounded-md p-1 hover:bg-red-500"
         >
           <TrashIcon className="h-4" />
         </button>

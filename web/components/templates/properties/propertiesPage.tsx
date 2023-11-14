@@ -76,7 +76,7 @@ const PropertiesPage = (props: {}) => {
               });
               refetch();
             }}
-            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+            className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
           >
             <ArrowPathIcon
               className={clsx(false ? "animate-spin" : "", "h-5 w-5 inline")}

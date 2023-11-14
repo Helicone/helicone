@@ -31,7 +31,7 @@ export default async function handler(
   try {
     // Fetch organization from Supabase
     // get the user id
-    console.log("orgId", orgId);
+
     const { data: org, error: orgError } = resultMap(
       await dbExecute<{
         stripe_customer_id: string;
@@ -44,8 +44,6 @@ export default async function handler(
       res.status(400).send(`Unable to find org: ${orgError}`);
       return;
     }
-
-    console.log("orgStripeID:::", org.stripe_customer_id);
 
     let customerId = org.stripe_customer_id;
 
@@ -89,7 +87,6 @@ export default async function handler(
     // Respond with the session ID
     res.status(200).json({ sessionId: session.id });
   } catch (e) {
-    console.log("Checkout Session creation error:", e);
     res.status(500).json({ error: "Failed to create checkout session." + e });
   }
 }

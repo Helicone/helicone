@@ -79,7 +79,7 @@ export async function getTotalCostProperties(
       filter: filterListToTree(filter, "or"),
       argsAcc: [],
     });
-  console.log("argsAcc", filterArgs);
+
   const propertyKeys = properties.map((p) => p.name);
   const propertyValues = properties.map((p) => p.value.equals as string);
 

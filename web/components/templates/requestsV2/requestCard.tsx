@@ -56,8 +56,8 @@ const RequestCard = (props: RequestCardProps) => {
 
   return (
     <div className="rounded-lg px-4 pb-4 pt-8 flex flex-row justify-between w-full relative gap-8">
-      <div className="sticky top-8 flex flex-col space-y-4 h-full w-full max-w-md">
-        <div className="flex flex-row justify-between items-center w-full border-b border-gray-100 py-2">
+      <div className="sticky top-8 flex flex-col space-y-4 h-full w-full max-w-md text-gray-900 dark:text-gray-100">
+        <div className=" flex flex-row justify-between items-center w-full border-b border-gray-100 dark:border-gray-900 py-2">
           <div className="flex flex-row items-center gap-2">
             <p className="font-semibold text-xl">
               {new Date(request.createdAt).toLocaleString()}

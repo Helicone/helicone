@@ -74,7 +74,7 @@ export const SingleChat = (props: {
       const textMessage = arr.find((message) => message.type === "text");
 
       return (
-        <div className="flex flex-col space-y-4 divide-y divide-gray-100">
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
           <p>{textMessage?.text}</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
@@ -96,7 +96,7 @@ export const SingleChat = (props: {
                       />
                     </button>
                   ) : (
-                    <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+                    <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
                       Unsupported Image Type
                     </div>
                   )}
@@ -135,14 +135,14 @@ export const SingleChat = (props: {
 
   const getBgColor = () => {
     if (isSystem) {
-      return "bg-gray-100";
+      return "bg-gray-100 dark:bg-gray-800";
     }
     if (isAssistant) {
-      return "bg-gray-50";
+      return "bg-gray-50 dark:bg-gray-900";
     } else if (isFunction) {
-      return "bg-gray-100";
+      return "bg-gray-100 dark:bg-gray-800";
     } else {
-      return "bg-white";
+      return "bg-white dark:bg-black";
     }
   };
 
@@ -162,7 +162,7 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left grid grid-cols-12 space-x-2",
+          "items-start p-4 text-left grid grid-cols-12 space-x-2 text-black dark:text-white",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
@@ -178,9 +178,9 @@ export const SingleChat = (props: {
               alt="ChatGPT Logo"
             />
           ) : isFunction ? (
-            <CodeBracketIcon className="h-6 w-6 rounded-md border bg-white text-black border-black p-1" />
+            <CodeBracketIcon className="h-6 w-6 rounded-md border bg-white dark:bg-black dark:text-white text-black border-black dark:border-white p-1" />
           ) : (
-            <UserIcon className="h-6 w-6 bg-white rounded-md p-1 border border-black text-black" />
+            <UserIcon className="h-6 w-6 bg-white dark:bg-black rounded-md p-1 border border-black text-black dark:border-white dark:text-white" />
           )}
         </div>
         <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
@@ -189,7 +189,7 @@ export const SingleChat = (props: {
               <code className="text-xs whitespace-pre-wrap font-semibold">
                 {message.name}
               </code>
-              <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg overflow-auto">
+              <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded-lg overflow-auto">
                 {isJSON(formattedMessageContent)
                   ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                   : formattedMessageContent}
@@ -202,7 +202,7 @@ export const SingleChat = (props: {
                   <p className="text-sm whitespace-pre-wrap">
                     {formattedMessageContent}
                   </p>
-                  <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded-lg">
+                  <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded-lg">
                     {`${message.function_call?.name}(${message.function_call?.arguments})`}
                   </pre>
                 </>
@@ -325,8 +325,8 @@ export const Chat = (props: ChatProps) => {
 
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
-      <div className="w-full border border-gray-300 rounded-md divide-y divide-gray-300 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 text-gray-900">
+      <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <div className="flex flex-row items-center space-x-2">
             <button
               onClick={() => {
@@ -339,7 +339,7 @@ export const Chat = (props: ChatProps) => {
                   )
                 );
               }}
-              className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+              className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
             >
               {allExpanded ? (
                 <EyeSlashIcon className="h-4 w-4" />
@@ -360,7 +360,7 @@ export const Chat = (props: ChatProps) => {
                     router.push("/playground?request=" + requestId);
                   }
                 }}
-                className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+                className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
               >
                 <BeakerIcon className="h-4 w-4" />
                 <p className="text-xs font-semibold">Playground</p>
@@ -372,7 +372,7 @@ export const Chat = (props: ChatProps) => {
             onClick={() => {
               setMode(mode === "pretty" ? "json" : "pretty");
             }}
-            className="flex flex-row space-x-1 items-center hover:bg-gray-200 py-1 px-2 rounded-lg"
+            className="flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
           >
             <ChevronUpDownIcon className="h-4 w-4" />
             <p className="text-xs font-semibold">
@@ -382,16 +382,20 @@ export const Chat = (props: ChatProps) => {
         </div>
 
         {mode === "json" ? (
-          <div className="flex flex-col space-y-8 bg-gray-50 relative">
+          <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-gray-900 relative text-black dark:text-white">
             <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 text-md">Request</p>
-              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                Request
+              </p>
+              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
                 {JSON.stringify(requestBody, null, 4)}
               </pre>
             </div>
             <div className="flex flex-col space-y-2 p-4">
-              <p className="font-semibold text-gray-900 text-md">Response</p>
-              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
+                Response
+              </p>
+              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
                 {JSON.stringify(responseBody, null, 4)}
               </pre>
             </div>
@@ -420,7 +424,7 @@ export const Chat = (props: ChatProps) => {
           <div className="">
             <div
               className={clsx(
-                "bg-gray-100 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
+                "bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2"
               )}
             >
               n/a

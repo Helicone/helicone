@@ -53,7 +53,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           </h1>
           <button
             onClick={() => setAddWebhookOpen(true)}
-            className="bg-gray-900 hover:bg-gray-700 flex flex-row whitespace-nowrap rounded-md pl-3 pr-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+            className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 flex flex-row whitespace-nowrap rounded-md pl-3 pr-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
           >
             <PlusIcon className="h-5 w-5 mr-1" />
             Add Webhook

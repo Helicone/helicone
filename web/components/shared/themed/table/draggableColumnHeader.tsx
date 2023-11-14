@@ -82,16 +82,16 @@ export default function DraggableColumnHeader<T>(props: {
         },
       }}
       ref={dropRef}
-      className="text-left py-2 font-semibold text-gray-900"
+      className="text-left py-2 font-semibold text-gray-900 dark:text-gray-100"
     >
       <div className="flex flex-row items-center gap-0.5">
         <button
           ref={dragRef}
-          className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 rounded-lg"
+          className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg"
         >
           <EllipsisVerticalIcon className="h-3 w-3 -ml-1" />
           <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
-          <span className="text-gray-900">
+          <span className="text-gray-900 dark:text-gray-100">
             {header.isPlaceholder
               ? null
               : flexRender(header.column.columnDef.header, header.getContext())}
@@ -102,7 +102,7 @@ export default function DraggableColumnHeader<T>(props: {
           <div className="text-right items-center">
             <Menu as="div" className="relative text-left pl-1">
               <div className="flex items-center">
-                <Menu.Button className="hover:bg-gray-100 rounded-md p-1 -m-0.5">
+                <Menu.Button className="hover:bg-gray-100 dark:hover:bg-gray-900  rounded-md p-1 -m-0.5">
                   {meta.sortKey === sortable.sortKey ? (
                     sortable.sortDirection === "asc" ? (
                       <BarsArrowUpIcon
@@ -129,13 +129,15 @@ export default function DraggableColumnHeader<T>(props: {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-2 w-24 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <Menu.Items className="absolute right-0 mt-2 w-24 origin-top-right divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white dark:bg-black shadow-lg ring-1 ring-black dark:ring-gray-500 ring-opacity-5 focus:outline-none">
                   <div className="px-1 py-1">
                     <Menu.Item>
                       {({ active }) => (
                         <button
                           className={`${
-                            active ? "bg-sky-500 text-white" : "text-gray-900"
+                            active
+                              ? "bg-sky-500 text-white dark:text-black"
+                              : "text-gray-900 dark:text-gray-100"
                           } group flex w-full items-center justify-between rounded-md px-2 py-2 text-xs`}
                           onClick={() => {
                             if (meta && sortable) {
@@ -158,7 +160,9 @@ export default function DraggableColumnHeader<T>(props: {
                       {({ active }) => (
                         <button
                           className={`${
-                            active ? "bg-sky-500 text-white" : "text-gray-900"
+                            active
+                              ? "bg-sky-500 text-white dark:text-black"
+                              : "text-gray-900 dark:text-gray-100"
                           } group flex w-full items-center justify-between rounded-md px-2 py-2 text-xs`}
                           onClick={() => {
                             if (meta && sortable) {
@@ -195,7 +199,9 @@ export default function DraggableColumnHeader<T>(props: {
       >
         <div
           className={clsx(
-            header.column.getIsResizing() ? "bg-blue-700" : "bg-gray-500",
+            header.column.getIsResizing()
+              ? "bg-blue-700 dark:bg-blue-300"
+              : "bg-gray-500",
             "h-full w-1"
           )}
         />

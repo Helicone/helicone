@@ -66,7 +66,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                     router.push("/playground?request=" + request.id);
                   }
                 }}
-                className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
               >
                 <BeakerIcon className="h-5 w-5" />
               </button>
@@ -81,7 +81,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                     JSON.stringify(copy || {}, null, 4)
                   );
                 }}
-                className="hover:bg-gray-200 rounded-md -m-1 p-1"
+                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
               >
                 <ClipboardDocumentIcon className="h-5 w-5" />
               </button>
@@ -95,7 +95,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                   disabled={!hasPrevious}
                   className={clsx(
                     !hasPrevious && "opacity-50 hover:cursor-not-allowed",
-                    "hover:bg-gray-200 rounded-md -m-1 p-1"
+                    "hover:bg-gray-200 dark:hover:bg-gray-800  rounded-md -m-1 p-1"
                   )}
                 >
                   <ArrowUpIcon className="h-5 w-5" />
@@ -107,7 +107,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                   disabled={!hasNext}
                   className={clsx(
                     !hasNext && "opacity-50 hover:cursor-not-allowed",
-                    "hover:bg-gray-200 rounded-md -m-1 p-1"
+                    "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
                   )}
                 >
                   <ArrowDownIcon className="h-5 w-5" />

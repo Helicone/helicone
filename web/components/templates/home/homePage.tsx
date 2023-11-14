@@ -93,8 +93,6 @@ export default function HomePage(props: HomePageProps) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          console.log("entry", entry);
-
           if (entry.isIntersecting) {
             setCurrentPanel(entry.target.id);
             return;

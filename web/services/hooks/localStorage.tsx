@@ -16,7 +16,7 @@ export function useLocalStorage<T>(
         typeof window !== "undefined" &&
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     },
     [key, storedValue]

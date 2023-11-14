@@ -28,9 +28,9 @@ export default function ViewButton(props: ViewButtonProps) {
     <div className="hidden md:block text-right">
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2">
-            <Square3Stack3DIcon className="h-5 w-5 text-gray-900" />
-            <p className="text-sm font-medium text-gray-900 hidden sm:block">
+          <Menu.Button className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
+            <Square3Stack3DIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
               View
             </p>
           </Menu.Button>
@@ -44,14 +44,14 @@ export default function ViewButton(props: ViewButtonProps) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 mt-2 w-40 z-10 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute right-0 mt-2 w-40 z-10 origin-top-right divide-y divide-gray-100 dark:divide-gray-900 rounded-md bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1 ">
               <Menu.Item>
                 {({ active }) => (
                   <button
                     className={`${
-                      active ? "bg-sky-100 text-gray-900" : "text-gray-900"
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                      active ? "bg-sky-100 dark:bg-sky-900" : ""
+                    } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                     onClick={() => {
                       onViewChangeHandler("table");
                     }}
@@ -71,8 +71,8 @@ export default function ViewButton(props: ViewButtonProps) {
                 {({ active }) => (
                   <button
                     className={`${
-                      active ? "bg-sky-100 text-gray-900" : "text-gray-900"
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                      active ? "bg-sky-100 dark:bg-sky-900" : ""
+                    } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                     onClick={() => {
                       onViewChangeHandler("row");
                     }}
@@ -89,8 +89,8 @@ export default function ViewButton(props: ViewButtonProps) {
                 {({ active }) => (
                   <button
                     className={`${
-                      active ? "bg-sky-100 text-gray-900" : "text-gray-900"
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                      active ? "bg-sky-100 dark:bg-sky-900" : ""
+                    } text-gray-900 dark:text-gray-100 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                     onClick={() => {
                       onViewChangeHandler("card");
                     }}

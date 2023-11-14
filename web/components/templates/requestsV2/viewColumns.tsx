@@ -22,9 +22,9 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2">
-          <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-900" />
-          <p className="text-sm font-medium text-gray-900 hidden sm:block">
+        <Menu.Button className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2">
+          <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
             View {`( ${visibleColumns} / ${columns.length} )`}
           </p>
         </Menu.Button>
@@ -38,17 +38,17 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 right-0 mt-2 w-[200px] origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="grid grid-cols-2 divide-x divide-gray-300 bg-gray-50 rounded-t-lg border-b border-gray-300">
+        <Menu.Items className="absolute z-10 right-0 mt-2 w-[200px] origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="grid grid-cols-2 divide-x divide-gray-300 dark:divide-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg border-b border-gray-300 dark:border-gray-700">
             <button
               onClick={() => onSelectAll(false)}
-              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 hover:bg-gray-100 rounded-t-lg"
+              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-t-lg"
             >
               Deselect All
             </button>
             <button
               onClick={() => onSelectAll(true)}
-              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 hover:bg-gray-100"
+              className="text-xs flex items-center justify-center gap-x-2.5 p-2.5 font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900"
             >
               Select All
             </button>
@@ -61,14 +61,14 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                 <div key={idx} className="flex flex-row py-0.5">
                   <label
                     key={idx}
-                    className="relative mx-1 px-3 py-2 rounded-md select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 hover:cursor-pointer"
+                    className="relative mx-1 px-3 py-2 rounded-md select-none font-medium text-gray-900 w-full items-center flex hover:bg-sky-100 dark:hover:bg-sky-900 hover:cursor-pointer"
                   >
                     {column.getIsVisible() ? (
-                      <CheckIcon className="h-4 w-4 text-gray-900" />
+                      <CheckIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
                     ) : (
                       <div className="h-4 w-4" />
                     )}
-                    <span className="text-sm text-gray-700 hover:text-sky-900 pl-2">
+                    <span className="text-sm text-gray-700 hover:text-sky-900 dark:text-gray-300 dark:hover:text-sky-100 pl-2">
                       {header}
                     </span>
                     <input
@@ -77,7 +77,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                         checked: column.getIsVisible(),
                         onChange: column.getToggleVisibilityHandler(),
                       }}
-                      className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-600 sr-only"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-sky-500 focus:ring-sky-500 sr-only"
                     />
                   </label>
                 </div>

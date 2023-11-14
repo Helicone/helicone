@@ -52,7 +52,7 @@ async function getData(authClient: AuthClient, options: GetMetricsOptions) {
     ]);
     return { data: results, error: null };
   } catch (error) {
-    console.log("error", error);
+    console.error("error", error);
     return { data: null, error: JSON.stringify(error) };
   }
 }
