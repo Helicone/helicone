@@ -100,7 +100,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           <Menu.Items className="absolute left-0 mt-2 w-[16rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
             <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
               <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
-                {user?.email} fsdklfjskFJDSlfjdslFJKLDSkfds
+                {user?.email}
               </p>
               <div className="p-2">
                 <ThemedSwitch
