@@ -149,22 +149,13 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    switch (controller.cron) {
-      case "0 * * * *":
-        const supabaseClient = createClient(
-          env.SUPABASE_URL,
-          env.SUPABASE_SERVICE_ROLE_KEY
-        );
-        const rosetta = new RosettaWrapper(supabaseClient, env);
-        await rosetta.generateMappers();
-        break;
-      // case "*/1 * * * *": need to update how we handle updates
-      //   await feedbackCronHandler(env);
-      //   break;
-      default:
-        await updateLoopUsers(env);
-        break;
-    }
+    const supabaseClient = createClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    const rosetta = new RosettaWrapper(supabaseClient, env);
+    await rosetta.generateMappers();
+    await updateLoopUsers(env);
   },
 };
 
