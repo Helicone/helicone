@@ -91,6 +91,12 @@ provide_feedback(request_id, True)
 
 ### Logging Feedback using Fetch
 
+<Note>
+In some pacakges or cases you may not be able to retrieve headers to get the `helicone-id`. You can still log feedback by supplying a UUID as the `helicone-id`.
+
+See the [Helicone API docs](/docs/helicone-headers/intro.mdx) for more information.
+
+</Note>
 If you're not using our package, you can still log feedback using the Fetch API. Here's a simple example:
 
 ```js

@@ -1,0 +1,98 @@
+---
+title: "Introduction"
+description: Easily attach headers to your proxy request with Helicone to unlock new features and capabilities
+---
+
+# How to use headers
+
+<CodeGroup>
+
+```bash Curl
+curl https://gateway.hconeai.com/v1/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Helicone-Auth: Bearer HELICONE_API_KEY' \
+  -H 'Helicone-<HEADER>: <VALUE>'
+  -d ...
+```
+
+```python Python
+openai.api_base = "https://gateway.hconeai.com/v1"
+openai.Completion.create(
+    model="text-davinci-003",
+    prompt="Say this is a test",
+    headers={
+        "Helicone-Auth": "Bearer HELICONE_API_KEY"
+        "Helicone-<Header>": "<Value>",
+    }
+)
+```
+
+```typescript Node.js v4+
+const openai = new OpenAI({
+  baseURL: "https://gateway.hconeai.com/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
+    "Helicone-<Header>": "<Value>",
+  },
+});
+```
+
+```typescript Node.js <v4
+import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+  basePath: "https://gateway.hconeai.com",
+  baseOptions: {
+    headers: {
+      "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
+      "Helicone-<Header>": "<Value>",
+    },
+  },
+});
+
+const openai = new OpenAIApi(configuration);
+```
+
+```python Langchain (Python)
+llm = ChatOpenAI(
+    openai_api_key="<OPENAI_API_KEY>",
+    openai_api_base="https://gateway.hconeai.com/v1",
+    headers={
+        "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
+        "Helicone-<Header>": "<Value>",
+    }
+)
+```
+
+```javascript LangChain JS
+const model = new ChatOpenAI({
+  azureOpenAIBasePath: "https://oai.hconeai.com",
+  configuration: {
+    organization: "[organization]",
+    baseOptions: {
+      headers: {
+        "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+        "Helicone-<Header>": "<Value>",
+      },
+    },
+  },
+});
+```
+
+</CodeGroup>
+
+# Supported Headers
+
+| Header Name              | Type          | Description                                                    | Example                                               |
+| ------------------------ | ------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
+| Helicone-Target-URL      | string (url)  | The URL to proxy the request to when using gateway.hconeai.com | https://api.openai.com/v1/engines/davinci/completions |
+| Helicone-OpenAI-Api-Base | string (url)  | The URL to proxy the request to when using oai.hconeai.com     | https://[YOUR_AZURE_DOMAIN].openai.azure.com          |
+| Helicone-Request-Id      | string (uuid) | The ID of the request                                          | 123e4567-e89b-12d3-a456-426614174000                  |
+| Helicone-Omit-Response   | boolean       | Whether to omit the response from the request                  | true                                                  |
+| Helicone-Omit-Request    | boolean       | Whether to omit the request from the response                  | true                                                  |
+
+# Feature flags
+
+| Header Name                  | Type    | Description                                                                                                            | Example |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| Helicone-Stream-Force-Format | boolean | Some libraries do not support proper stream stitching like Ruby, this will enforce each chunk to be properly formatted | true    |
