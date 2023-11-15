@@ -103,15 +103,19 @@ const AddMemberModal = (props: AddMemberModalProps) => {
         onSubmit={onSubmitHandler}
         className="flex flex-col gap-4 w-full"
       >
-        <p className="font-semibold text-lg">Add New Member</p>
+        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+          Add New Member
+        </p>
         <div className="space-y-1.5 text-sm w-[400px]">
-          <label htmlFor="email">User Email</label>
+          <label htmlFor="email" className="text-gray-900 dark:text-gray-100">
+            User Email
+          </label>
           <input
             type="email"
             name="email"
             id="email"
             className={clsx(
-              "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+              "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-700"
             )}
             placeholder={"Enter user email"}
           />
@@ -122,13 +126,13 @@ const AddMemberModal = (props: AddMemberModalProps) => {
             onClick={() => {
               setOpen(false);
             }}
-            className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {isLoading && (
               <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />

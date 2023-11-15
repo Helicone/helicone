@@ -67,7 +67,6 @@ export async function getModelMetricsForUsers(
   org_id: string,
   users: (string | null)[]
 ) {
-  console.log("getModelMetricsForUsers", users);
   const containsNullUser = users.includes(null);
 
   const builtFilter = await buildFilterWithAuth({

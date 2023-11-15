@@ -31,7 +31,7 @@ export const getInitialColumns: (
     accessorKey: "createdAt",
     header: "Created At",
     cell: (info) => (
-      <span className="text-gray-900 font-medium">
+      <span className="text-gray-900 dark:text-gray-100 font-medium">
         {getUSDateFromString(info.getValue() as string)}
       </span>
     ),

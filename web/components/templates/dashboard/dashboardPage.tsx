@@ -115,7 +115,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return decodedFilters;
       }
     } catch (error) {
-      console.log("Error decoding advanced filters:", error);
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
@@ -145,11 +145,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
   });
 
-  // const userFilters = filterUIToFilterLeafs(
-  //   filterMap,
-  //   debouncedAdvancedFilters
-  // );
-
   const { data: models, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter],
     queryFn: async (query) => {
@@ -159,7 +154,6 @@ const DashboardPage = (props: DashboardPageProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          // filter: filterListToTree(userFilters, "and"),
           filter: "all",
           offset: 0,
           limit: 5,
@@ -188,7 +182,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
       return { filterMapIdx, operatorIdx, value };
     } catch (error) {
-      console.log("Error decoding filter:", error);
+      console.error("Error decoding filter:", error);
       return null;
     }
   }
@@ -499,8 +493,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const modelColors = ["purple", "blue", "green", "yellow", "orange"];
 
-  console.log("models", models);
-
   return (
     <>
       <AuthHeader
@@ -513,7 +505,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 end: new Date(),
               });
             }}
-            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+            className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
           >
             <ArrowPathIcon
               className={clsx(

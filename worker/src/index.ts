@@ -9,7 +9,7 @@ import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM" | string;
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -23,7 +23,11 @@ export interface Env {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
-  WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
+  WORKER_TYPE:
+    | "OPENAI_PROXY"
+    | "ANTHROPIC_PROXY"
+    | "HELICONE_API"
+    | "GATEWAY_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -60,7 +64,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
+  if (hostParts.length >= 3 && hostParts[0].includes("gateway")) {
+    return {
+      ...env,
+      WORKER_TYPE: "GATEWAY_API",
+    };
+  } else if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
     return {
       ...env,
       WORKER_TYPE: "OPENAI_PROXY",
@@ -140,19 +149,13 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    switch (controller.cron) {
-      case "0 * * * *":
-        const supabaseClient = createClient(
-          env.SUPABASE_URL,
-          env.SUPABASE_SERVICE_ROLE_KEY
-        );
-        const rosetta = new RosettaWrapper(supabaseClient, env);
-        await rosetta.generateMappers();
-        break;
-      default:
-        await feedbackCronHandler(env);
-        await updateLoopUsers(env);
-    }
+    const supabaseClient = createClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    const rosetta = new RosettaWrapper(supabaseClient, env);
+    await rosetta.generateMappers();
+    await updateLoopUsers(env);
   },
 };
 

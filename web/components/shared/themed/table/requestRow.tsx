@@ -27,9 +27,9 @@ const RequestRow = (props: RequestRowProps) => {
       className={clsx(
         index === length - 1 && "border-b",
         index === 0 && "border-t",
-        isSelected ? "bg-gray-100" : "bg-white",
+        isSelected ? "bg-gray-100 dark:bg-gray-900" : "bg-white dark:bg-black",
         isSelected && "sticky top-0 bottom-0 ring-1 ring-gray-500 shadow-md",
-        "flex flex-col space-y-4 w-full p-4 border-l border-r border-gray-300 hover:bg-gray-50 hover:cursor-pointer"
+        "text-gray-900 dark:text-gray-100 flex flex-col space-y-4 w-full p-4 border-l border-r border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-900 hover:cursor-pointer"
       )}
       onClick={() => {
         if (isSelected) {
@@ -38,7 +38,7 @@ const RequestRow = (props: RequestRowProps) => {
         onSelectRow(row);
       }}
     >
-      <div className="flex flex-row space-x-4 items-center">
+      <div className="flex flex-row space-x-4 items-center ">
         <p className="text-sm font-semibold">
           {new Date(row.createdAt).toLocaleString()}
         </p>
@@ -65,14 +65,14 @@ const RequestRow = (props: RequestRowProps) => {
       </div>
 
       {isSelected && isExpanded && (
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-4 text-gray-900 dark:text-gray-100">
           <p className="text-sm">
             <span className="font-semibold">User:</span> {row.user}
           </p>
           <p className="text-sm">
             <span className="font-semibold">Total Tokens:</span>{" "}
             {row.totalTokens}{" "}
-            <span className="text-gray-600 text-xs">
+            <span className="text-gray-500 text-xs">
               (Completion: {row.completionTokens} / Prompt: {row.promptTokens})
             </span>
           </p>

@@ -36,13 +36,13 @@ const GraphQLPage = (props: GraphQLPageProps) => {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-row justify-between items-start">
-        <h1 className="text-2xl font-semibold flex flex-row gap-2 items-center">
+        <h1 className="text-2xl font-semibold flex flex-row gap-2 items-center text-gray-900 dark:text-gray-100">
           GraphQL Sandbox
           <button
             onClick={() => {
               router.push("/api/graphql");
             }}
-            className="p-2 hover:bg-gray-200 rounded-lg"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg"
           >
             <BsBoxArrowUpRight className="h-4 w-4" />
           </button>
@@ -80,7 +80,6 @@ const GraphQLPage = (props: GraphQLPageProps) => {
           }}
           className={clsx(showGraphqlHeader || "-mt-14", "h-full")}
           runTelemetry={false}
-          includeCookies={true}
         />
       </div>
     </div>

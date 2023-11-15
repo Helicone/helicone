@@ -25,11 +25,11 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
 
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 w-full max-w-2xl">
-        <div className="text-sm pb-8 max-w-[450px] w-full">
+      <div className="py-4 flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl">
+        <div className="text-sm pb-8 max-w-[450px] w-full flex flex-col space-y-1.5">
           <label
             htmlFor="org-id"
-            className="block text-sm font-medium leading-6 text-gray-900"
+            className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
           >
             Organization Id
           </label>
@@ -39,7 +39,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             id="org-id"
             value={org.id}
             className={clsx(
-              "block w-full rounded-md border border-gray-300 bg-gray-200 text-gray-500 shadow-sm p-2 text-sm"
+              "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-sm p-2 text-sm"
             )}
             placeholder={"Your shiny new org name"}
             disabled

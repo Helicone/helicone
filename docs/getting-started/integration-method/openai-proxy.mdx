@@ -4,13 +4,49 @@ title: "OpenAI"
 
 <Tabs>
   <Tab title="Python">
-  **Set HELICONE_API_KEY as an environment variable**
+  <AccordionGroup>
+
+  <Accordion title="OpenAI v1+">
+  Set HELICONE_API_KEY as an environment variable
   ```python
   export HELICONE_API_KEY=<your API key>
   ```
 
-**Change the api base and add a Helicone-Auth header**
+  Initialize OpenAI client. Can also be done via global client.
+  ```python
+  client = OpenAI(
+    api_key="your-api-key-here",  # Replace with your OpenAI API key
+    base_url="http://oai.hconeai.com/v1",  # Set the API endpoint
+    default_headers= {  # Optionally set default headers or set per request (see below)
+      "Helicone-Auth": "Bearer HELICONE_API_KEY" 
+    }
+  )
+  ```
 
+  Send request and attach extra headers
+  ```python
+  chat_completion = client.chat.completions.create(
+    model="gpt-4-vision-preview",
+    messages=[
+        {"role": "user", "content": "Hello world!"}
+    ],
+    extra_headers={ # Can also attach headers per request
+        "Helicone-Auth": "Bearer HELICONE_API_KEY"
+    },
+  )
+  ```
+
+    That's it! Your OpenAI requests now log results to Helicone.
+
+  </Accordion>
+
+  <Accordion title="OpenAI <v1">
+  Set HELICONE_API_KEY as an environment variable
+  ```python
+  export HELICONE_API_KEY=<your API key>
+  ```
+
+Change the api base and add a Helicone-Auth header
 ```python
 import openai
 
@@ -23,7 +59,11 @@ openai.Completion.create(
 )
 ```
 
-    That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
+    That's it! Your OpenAI requests now log results to Helicone.
+
+  </Accordion>
+</AccordionGroup>
+
 
   </Tab>
   <Tab title="Python (w/ package)">

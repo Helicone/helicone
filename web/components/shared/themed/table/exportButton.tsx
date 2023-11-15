@@ -42,10 +42,10 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
+        className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
       >
-        <ArrowDownTrayIcon className="h-5 w-5 text-gray-900" />
-        <p className="text-sm font-medium text-gray-900 hidden sm:block">
+        <ArrowDownTrayIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hidden sm:block">
           Export
         </p>
       </button>
@@ -53,10 +53,10 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[350px] max-w-sm w-full">
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col space-y-4">
-              <p className="text-md sm:text-lg font-semibold text-gray-900">
+              <p className="text-md sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Export CSV
               </p>
-              <p className="text-sm sm:text-md text-gray-600">
+              <p className="text-sm sm:text-md text-gray-500">
                 Exporting by CSV is limited to 500 rows due to the huge amounts
                 of data in the requests. For larger exports, please use our{" "}
                 <Link
@@ -70,7 +70,7 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
                 .
               </p>
             </div>
-            <p className="text-sm sm:text-md text-gray-600">
+            <p className="text-sm sm:text-md text-gray-500">
               Export may take a lot of time. Please do not close this modal once
               export is started.
             </p>
@@ -80,12 +80,12 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               Cancel
             </button>
             <button
-              className="items-center rounded-md bg-black px-4 py-2 text-md flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               onClick={csvDownload}
             >
               {downloadingCSV ? (

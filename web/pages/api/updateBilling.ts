@@ -23,7 +23,6 @@ export default async function handler(
     requestPayerName: true,
     requestPayerEmail: true,
   });
-  console.log("charge", charge);
 
   res.status(200).json({ name: "John Doe" });
 }
