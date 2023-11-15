@@ -1,9 +1,9 @@
 ---
 title: "Introduction"
-description: Easily attach headers to your proxy request with Helicone to unlock new features and capabilities
+description: Leverage the power of headers in your proxy request with Helicone to unlock advanced features and capabilities.
 ---
 
-# How to use headers
+# Utilizing Headers
 
 <CodeGroup>
 
@@ -19,9 +19,9 @@ curl https://gateway.hconeai.com/v1/completions \
 openai.api_base = "https://gateway.hconeai.com/v1"
 openai.Completion.create(
     model="text-davinci-003",
-    prompt="Say this is a test",
+    prompt="This is a test",
     headers={
-        "Helicone-Auth": "Bearer HELICONE_API_KEY"
+        "Helicone-Auth": "Bearer HELICONE_API_KEY",
         "Helicone-<Header>": "<Value>",
     }
 )
@@ -58,7 +58,7 @@ llm = ChatOpenAI(
     openai_api_key="<OPENAI_API_KEY>",
     openai_api_base="https://gateway.hconeai.com/v1",
     headers={
-        "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
+        "Helicone-Auth": "Bearer <HELICONE_API_KEY>",
         "Helicone-<Header>": "<Value>",
     }
 )
@@ -88,11 +88,11 @@ const model = new ChatOpenAI({
 | Helicone-Target-URL      | string (url)  | The URL to proxy the request to when using gateway.hconeai.com | https://api.openai.com/v1/engines/davinci/completions |
 | Helicone-OpenAI-Api-Base | string (url)  | The URL to proxy the request to when using oai.hconeai.com     | https://[YOUR_AZURE_DOMAIN].openai.azure.com          |
 | Helicone-Request-Id      | string (uuid) | The ID of the request                                          | 123e4567-e89b-12d3-a456-426614174000                  |
-| Helicone-Omit-Response   | boolean       | Whether to omit the response from the request                  | true                                                  |
-| Helicone-Omit-Request    | boolean       | Whether to omit the request from the response                  | true                                                  |
+| Helicone-Omit-Response   | boolean       | Whether to exclude the response from the request               | true                                                  |
+| Helicone-Omit-Request    | boolean       | Whether to exclude the request from the response               | true                                                  |
 
-# Feature flags
+# Feature Flags
 
-| Header Name                  | Type    | Description                                                                                                            | Example |
-| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
-| Helicone-Stream-Force-Format | boolean | Some libraries do not support proper stream stitching like Ruby, this will enforce each chunk to be properly formatted | true    |
+| Header Name                  | Type    | Description                                                                                     | Example |
+| ---------------------------- | ------- | ----------------------------------------------------------------------------------------------- | ------- |
+| Helicone-Stream-Force-Format | boolean | Enforce proper stream formatting for libraries that do not inherently support it, such as Ruby. | true    |
