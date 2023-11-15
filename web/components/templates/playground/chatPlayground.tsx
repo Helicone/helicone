@@ -125,13 +125,13 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               >
                 assistant
               </button>
-              <div className="w-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
+              <div className="w-full h-full flex flex-row justify-between space-x-4 divide-x divide-gray-300 dark:divide-gray-700">
                 {modelMessage.map((message, idx) => (
                   <div
                     key={idx}
                     className={clsx(
                       idx === 0 ? "" : "pl-4",
-                      "w-full flex flex-col space-y-2"
+                      "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
                     )}
                   >
                     <div className="flex justify-center items-center">
@@ -140,7 +140,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     <div className="p-4 text-gray-900 dark:text-gray-100">
                       <p>{message.content}</p>
                     </div>
-                    <div className="flex w-full justify-end">
+                    <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
                       <p>{`${message.latency} ms`}</p>
                     </div>
                   </div>
@@ -216,7 +216,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     idx % 3 === 0
                       ? ""
                       : "pl-4 border-l border-gray-300 dark:border-gray-700",
-                    "w-full h-full flex flex-col space-y-2 col-span-1 relative"
+                    "w-full h-auto flex flex-col space-y-2 col-span-1 relative"
                   )}
                 >
                   <div className="flex justify-center items-center">
