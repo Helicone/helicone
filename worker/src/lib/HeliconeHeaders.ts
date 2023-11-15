@@ -20,7 +20,6 @@ export interface IHeliconeHeaders {
   }>;
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
-  targetProvider: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
   promptId: Nullable<string>;
@@ -51,7 +50,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }>;
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
-  targetProvider: Nullable<string>;
   promptFormat: Nullable<string>;
   requestId: Nullable<string>;
   promptId: Nullable<string>;
@@ -69,7 +67,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.retryHeaders = heliconeHeaders.retryHeaders;
     this.openaiBaseUrl = heliconeHeaders.openaiBaseUrl;
     this.targetBaseUrl = heliconeHeaders.targetBaseUrl;
-    this.targetProvider = heliconeHeaders.targetProvider;
     this.promptFormat = heliconeHeaders.promptFormat;
     this.requestId = heliconeHeaders.requestId;
     this.promptId = heliconeHeaders.promptId;
@@ -109,7 +106,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       rateLimitPolicy: this.headers.get("Helicone-RateLimit-Policy") ?? null,
       openaiBaseUrl: this.headers.get("Helicone-OpenAI-Api-Base") ?? null,
       targetBaseUrl: this.headers.get("Helicone-Target-URL") ?? null,
-      targetProvider: this.headers.get("Helicone-Target-Provider") ?? null,
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
       requestId: this.headers.get("Helicone-Request-Id") ?? crypto.randomUUID(),
