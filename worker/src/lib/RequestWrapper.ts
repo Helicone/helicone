@@ -25,6 +25,7 @@ export class RequestWrapper {
   providerAuth: string | undefined;
   headers: Headers;
   heliconeProxyKeyId: string | undefined;
+  baseURLOverride?: string;
 
   private cachedText: string | null = null;
 
@@ -94,6 +95,10 @@ export class RequestWrapper {
 
   getNodeId(): string | null {
     return this.heliconeHeaders.nodeId;
+  }
+
+  setBaseURLOverride(url: string): void {
+    this.baseURLOverride = url;
   }
 
   async auth(): Promise<HeliconeAuth> {
