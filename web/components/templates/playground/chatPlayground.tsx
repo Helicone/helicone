@@ -45,19 +45,20 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
     const responses = await Promise.all(
       models.map(async (model) => {
-        // only use the histories
-        // strip the id from the history to be compatible with api and only use the messages with either no model or the current model
+        // Filter and map the history as before
         const historyWithoutId = history
           .filter(
             (message) => message.model === model || message.model === undefined
           )
-          .map((message) => {
-            return {
-              content: message.content,
-              role: message.role,
-            };
-          });
+          .map((message) => ({
+            content: message.content,
+            role: message.role,
+          }));
 
+        // Record the start time
+        const startTime = new Date().getTime();
+
+        // Perform the OpenAI request
         const { data, error } = await fetchOpenAI(
           historyWithoutId as ChatCompletionRequestMessage[],
           requestId,
@@ -66,11 +67,16 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           maxTokens
         );
 
-        return { model, data, error };
+        // Record the end time and calculate latency
+        const endTime = new Date().getTime();
+        const latency = endTime - startTime; // Latency in milliseconds
+
+        // Return the model, data, error, and latency
+        return { model, data, error, latency };
       })
     );
 
-    responses.forEach(({ model, data, error }) => {
+    responses.forEach(({ model, data, error, latency }) => {
       if (error !== null) {
         setNotification(`${model}: ${error}`, "error");
         return;
@@ -84,6 +90,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
             `${model} failed to fetch response. Please try again`,
           role: data.choices[0].message?.role || "assistant",
           model, // Include the model in the message
+          latency, // client side calculated latency
         });
       }
     });
@@ -113,7 +120,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 className={clsx(
                   "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
                   "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-                  "w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
+                  "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
                 )}
               >
                 assistant
@@ -130,8 +137,11 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     <div className="flex justify-center items-center">
                       <ModelPill model={message.model ?? ""} />
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 text-gray-900 dark:text-gray-100">
                       <p>{message.content}</p>
+                    </div>
+                    <div className="flex w-full justify-end">
+                      <p>{`${message.latency} ms`}</p>
                     </div>
                   </div>
                 ))}
@@ -186,7 +196,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               className={clsx(
                 "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
                 "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
-                "w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
+                "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold text-center justify-center items-center"
               )}
             >
               assistant
@@ -206,14 +216,17 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     idx % 3 === 0
                       ? ""
                       : "pl-4 border-l border-gray-300 dark:border-gray-700",
-                    "w-full flex flex-col space-y-2 col-span-1"
+                    "w-full h-full flex flex-col space-y-2 col-span-1 relative"
                   )}
                 >
                   <div className="flex justify-center items-center">
                     <ModelPill model={message.model ?? ""} />
                   </div>
-                  <div className="p-4">
+                  <div className="p-4 text-gray-900 dark:text-gray-100">
                     <p>{message.content}</p>
+                  </div>
+                  <div className="flex w-full justify-end bottom-0 absolute text-xs text-gray-900 dark:text-gray-100">
+                    <p>{`${message.latency} ms`}</p>
                   </div>
                 </div>
               ))}
@@ -236,13 +249,13 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               <button
                 className={clsx(
                   "bg-white border border-gray-300 dark:border-gray-700 dark:bg-black",
-                  "w-20 h-6 text-xs rounded-lg font-semibold"
+                  "text-gray-900 dark:text-gray-100 w-20 h-6 text-xs rounded-lg font-semibold"
                 )}
               >
                 assistant
               </button>
               <span className="flex flex-row space-x-1 items-center">
-                <ArrowPathIcon className="h-4 w-4 text-gray-600 animate-spin" />
+                <ArrowPathIcon className="h-4 w-4 text-gray-500 animate-spin" />
               </span>
             </div>
           </div>

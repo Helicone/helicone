@@ -32,6 +32,7 @@ export type Message = {
   };
   name?: string;
   model?: string;
+  latency?: number;
 };
 
 export const SingleChat = (props: {
