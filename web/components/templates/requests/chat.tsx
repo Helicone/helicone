@@ -134,11 +134,8 @@ export const SingleChat = (props: {
   }
 
   const getBgColor = () => {
-    if (isSystem) {
-      return "bg-gray-100 dark:bg-gray-800";
-    }
-    if (isAssistant) {
-      return "bg-gray-50 dark:bg-gray-900";
+    if (isSystem || isAssistant) {
+      return "bg-gray-50 dark:bg-[#17191d]";
     } else if (isFunction) {
       return "bg-gray-100 dark:bg-gray-800";
     } else {
@@ -326,7 +323,7 @@ export const Chat = (props: ChatProps) => {
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
           <div className="flex flex-row items-center space-x-2">
             <button
               onClick={() => {
