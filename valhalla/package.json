@@ -1,0 +1,17 @@
+{
+  "name": "valhalla",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev:jawn": "nodemon --config nodemon.jawn.json",
+    "dev:slay": "nodemon --config nodemon.slay.json"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "private": "true",
+  "dependencies": {},
+  "devDependencies": {
+    "lerna": "^7.4.2"
+  }
+}

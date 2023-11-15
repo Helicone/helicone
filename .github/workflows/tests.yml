@@ -92,6 +92,12 @@ jobs:
           wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API &
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Start gateway worker
+        run: |
+          cd worker
+          wrangler dev --port 8789 --var WORKER_TYPE:GATEWAY_API &
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start Supabase DB & API
         run: supabase start db,api
       - name: Install python dependencies
@@ -102,6 +108,7 @@ jobs:
         env:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
+          HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
@@ -114,6 +121,7 @@ jobs:
         env:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
+          HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
           SUPABASE_URL: "http://localhost:54321"
           HELICONE_API_KEY: "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"

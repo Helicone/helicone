@@ -34,7 +34,7 @@ VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 
 [triggers]
-crons = ["*/1 * * * *"]
+crons = ["*/5 * * * *"]
 
 [env.production]
 name = "helicone-worker-prod"
@@ -42,6 +42,7 @@ routes = [
 	{ pattern = "oai.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 durable_objects.bindings = [
@@ -59,7 +60,7 @@ kv_namespaces = [
 ]
 
 [env.production.triggers]
-crons = ["*/1 * * * *"]
+crons = ["*/5 * * * *"]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },
@@ -78,6 +79,7 @@ routes = [
 	{ pattern = "oai_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "gateway_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [
@@ -93,9 +95,6 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
 	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
-
-[env.production_staging.triggers]
-crons = ["*/1 * * * *"]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-staging" },

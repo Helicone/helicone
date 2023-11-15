@@ -12,9 +12,12 @@ class UnknownBuilder extends AbstractRequestBuilder {
         <Completion
           request={""}
           response={{
-            title: "Error",
+            title: "Response",
             text: "",
           }}
+          rawRequest={this.response.request_body}
+          rawResponse={this.response.response_body}
+          defaultMode="json"
         />
       ),
     };

@@ -45,10 +45,8 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
     if (animation !== undefined) return;
 
     // Regular
-    // const animationItems = [chicky, hamster, plane, boxbee];
+    const animationItems = [chicky, hamster, plane, boxbee];
 
-    // Halloween
-    const animationItems = [pumpkinCat, bat, halloween];
     const randomIndex = randomIntFromInterval(0, animationItems.length - 1);
     setAnimation(animationItems[randomIndex]);
   }, [animation]);
@@ -74,7 +72,11 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
         }}
       />
 
-      {title && <p className="font-medium text-lg">{title}</p>}
+      {title && (
+        <p className="font-medium text-lg text-gray-900 dark:text-gray-100">
+          {title}
+        </p>
+      )}
     </div>
   );
 };

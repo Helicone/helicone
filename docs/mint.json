@@ -73,6 +73,7 @@
     {
       "group": "Integrations",
       "pages": [
+        "getting-started/integration-method/gateway",
         {
           "group": "Proxy",
           "pages": [
@@ -90,6 +91,13 @@
           ]
         },
         "getting-started/integration-method/custom"
+      ]
+    },
+    {
+      "group": "Helicone Headers",
+      "pages": [
+        "helicone-headers/intro",
+        "helicone-headers/predefining-request-id"
       ]
     },
     {

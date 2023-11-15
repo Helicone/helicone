@@ -15,7 +15,6 @@ import { clsx } from "../../shared/clsx";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import { NormalizedRequest } from "../requestsV2/builder/abstractRequestBuilder";
-import getRequestBuilder from "../requestsV2/builder/requestBuilder";
 import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
 import TableFooter from "../requestsV2/tableFooter";
 import { getInitialColumns } from "./initialColumns";
@@ -106,7 +105,7 @@ const JobsPage = (props: JobsPageProps) => {
           <div className="flex flex-row gap-2">
             <button
               onClick={() => refetch()}
-              className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+              className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
             >
               <ArrowPathIcon
                 className={clsx(

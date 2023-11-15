@@ -1,15 +1,15 @@
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { insertIntoRequest, updateResponse } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
-
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
+import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
+export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM" | string;
 
 export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -23,7 +23,11 @@ export interface Env {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
-  WORKER_TYPE: "OPENAI_PROXY" | "ANTHROPIC_PROXY" | "HELICONE_API";
+  WORKER_TYPE:
+    | "OPENAI_PROXY"
+    | "ANTHROPIC_PROXY"
+    | "HELICONE_API"
+    | "GATEWAY_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -32,6 +36,9 @@ export interface Env {
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;
+  OPENAI_API_KEY: string;
+  OPENAI_ORG_ID: string;
+  ROSETTA_HELICONE_API_KEY: string;
   ALERTER: DurableObjectNamespace;
 }
 
@@ -58,7 +65,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
+  if (hostParts.length >= 3 && hostParts[0].includes("gateway")) {
+    return {
+      ...env,
+      WORKER_TYPE: "GATEWAY_API",
+    };
+  } else if (hostParts.length >= 3 && hostParts[0].includes("oai")) {
     return {
       ...env,
       WORKER_TYPE: "OPENAI_PROXY",
@@ -138,7 +150,12 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    await feedbackCronHandler(env);
+    const supabaseClient = createClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    const rosetta = new RosettaWrapper(supabaseClient, env);
+    await rosetta.generateMappers();
     await updateLoopUsers(env);
   },
 };

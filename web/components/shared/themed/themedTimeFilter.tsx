@@ -64,9 +64,9 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               disabled={isFetching}
               className={clsx(
                 isActive("custom")
-                  ? "bg-sky-200 border-sky-300"
-                  : "bg-white hover:bg-sky-50 border-gray-300",
-                "relative inline-flex text-gray-900 items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  ? "bg-sky-200 border-sky-300 dark:bg-sky-800 dark:border-sky-700"
+                  : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
+                "relative inline-flex text-gray-900 dark:text-gray-100 items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
               )}
             >
               <CalendarDaysIcon className="h-5 mr-2" />
@@ -82,14 +82,14 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Popover.Panel className="mt-3 absolute z-10 bg-white rounded-lg shadow-2xl p-2 border border-gray-300">
+              <Popover.Panel className="mt-3 absolute z-10 bg-white dark:bg-black rounded-lg shadow-2xl p-2 border border-gray-300 dark:border-gray-700">
                 {({ close }) => (
                   <div className="px-4 py-2 flex flex-col space-y-4">
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div>
                         <label
                           htmlFor="startDate"
-                          className="block text-xs font-medium text-gray-700"
+                          className="block text-xs font-medium text-gray-700 dark:text-gray-300"
                         >
                           Start Date
                         </label>
@@ -102,14 +102,14 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                               setStartDate(e.target.value);
                             }}
                             value={startDate}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           />
                         </div>
                       </div>
                       <div>
                         <label
                           htmlFor="endDate"
-                          className="block text-xs font-medium text-gray-700"
+                          className="block text-xs font-medium text-gray-700 dark:text-gray-300"
                         >
                           End Date
                         </label>
@@ -122,7 +122,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                               setEndDate(e.target.value);
                             }}
                             value={endDate}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           />
                         </div>
                       </div>
@@ -130,7 +130,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                     <div className="py-1 w-full flex flex-row gap-3 items-center justify-end">
                       <button
                         onClick={() => close()}
-                        className="items-center rounded-md bg-white border border-gray-300 px-3 py-1.5 text-sm flex font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        className="items-center rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm flex font-semibold text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                       >
                         Cancel
                       </button>
@@ -171,7 +171,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
                           );
                           close();
                         }}
-                        className="items-center rounded-md bg-black px-3 py-1.5 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        className="items-center rounded-md bg-black dark:bg-white px-3 py-1.5 text-sm flex font-semibold text-white dark:text-black dark:hover:bg-gray-200 shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                       >
                         Save
                       </button>
@@ -195,10 +195,10 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
             onSelect(option.key, option.value);
           }}
           className={clsx(
-            "text-gray-900",
+            "text-gray-900 dark:text-gray-100",
             isActive(option.key)
-              ? "bg-sky-200 border-sky-300 border"
-              : "bg-white hover:bg-sky-50 border-gray-300",
+              ? "bg-sky-200 border-sky-300 border dark:bg-sky-800 dark:border-sky-700"
+              : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
             idx === timeFilterOptions.length - 1 ? "rounded-r-lg" : "",
             !custom && idx === 0
               ? "relative inline-flex items-center rounded-l-lg border px-3 py-1.5 text-sm font-medium focus:z-10 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"

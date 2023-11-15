@@ -2,8 +2,9 @@ import { HeliconeAsyncOpenAI } from "../async_logger/HeliconeAsyncOpenAI";
 import { Response } from "openai/core";
 import { HeliconeFeedbackRating } from "../core/HeliconeFeedback";
 import { HeliconeProxyOpenAI } from "../proxy_logger/HeliconeProxyOpenAI";
+import * as dotenv from "dotenv";
 
-require("dotenv").config();
+dotenv.config();
 
 async function testAsync(): Promise<void> {
   const openai = new HeliconeAsyncOpenAI({

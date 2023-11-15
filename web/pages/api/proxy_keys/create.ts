@@ -7,7 +7,6 @@ import {
 import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
-import { Permission } from "../../../services/lib/user";
 import crypto from "crypto";
 import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
 import { Database } from "../../../supabase/database.types";
@@ -108,7 +107,6 @@ async function handler({
   newProxyMapping.data.helicone_proxy_key = proxyKey;
 
   if (limits.length > 0) {
-    console.log("inserting limits", limits);
     const insertLimits = await supabaseServer
       .from("helicone_proxy_key_limits")
       .insert(

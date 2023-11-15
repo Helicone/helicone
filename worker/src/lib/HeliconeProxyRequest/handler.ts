@@ -71,6 +71,15 @@ export async function handleProxyRequest(
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", proxyRequest.requestId);
 
+  let status = response.status;
+  if (status < 200 || status >= 600) {
+    console.error("Invalid status code: ", status);
+    status = 500;
+    if (status === 100) {
+      status = 200;
+    }
+  }
+
   return {
     data: {
       loggable: new DBLoggable({
@@ -98,7 +107,7 @@ export async function handleProxyRequest(
       response: new Response(body, {
         ...response,
         headers: responseHeaders,
-        status: response.status,
+        status: status,
       }),
     },
     error: null,

@@ -12,7 +12,7 @@ const useGetRequestMetaData = (requestId: string) => {
           error: "No request id provided",
         };
       }
-      console.log(`fetching request metadata, ${requestId}`);
+
       return fetch(`/api/request/${requestId}/metaData`).then(
         (res) => res.json() as Promise<Result<RequestMetaData[], string>>
       );

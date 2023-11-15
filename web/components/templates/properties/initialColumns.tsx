@@ -29,6 +29,7 @@ export const INITIAL_COLUMNS: ColumnDef<{
     accessorKey: "property_value",
     header: "Value",
     cell: (info) => info.getValue(),
+    minSize: 300,
   },
   {
     accessorKey: "total_requests",
@@ -38,7 +39,8 @@ export const INITIAL_COLUMNS: ColumnDef<{
   {
     accessorKey: "avg_completion_tokens_per_request",
     header: "Avg Completion Tokens / Req",
-    cell: (info) => info.getValue(),
+    cell: (info) => `${formatNumber(Number(info.getValue()))}`,
+    minSize: 250,
   },
   {
     accessorKey: "avg_latency_per_request",

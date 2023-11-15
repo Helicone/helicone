@@ -49,6 +49,8 @@ class EmbeddingBuilder extends AbstractRequestBuilder {
                 4
               ),
             }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
           />
         ) : (
           <Completion
@@ -57,6 +59,8 @@ class EmbeddingBuilder extends AbstractRequestBuilder {
               title: "Error",
               text: this.response.response_body?.error?.message || "n/a",
             }}
+            rawRequest={this.response.request_body}
+            rawResponse={this.response.response_body}
           />
         ),
     };

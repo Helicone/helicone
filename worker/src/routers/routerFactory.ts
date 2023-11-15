@@ -6,6 +6,7 @@ import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../feedback";
+import { getGatewayAPIRouter } from "./gatewayRouter";
 
 export type BaseRouter = RouterType<
   Route,
@@ -18,6 +19,7 @@ const WORKER_MAP: {
   ANTHROPIC_PROXY: getAnthropicProxyRouter,
   OPENAI_PROXY: getOpenAIProxyRouter,
   HELICONE_API: getAPIRouter,
+  GATEWAY_API: getGatewayAPIRouter,
 };
 
 export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {

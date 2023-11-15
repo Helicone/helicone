@@ -28,7 +28,8 @@ import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
-import RequestCard from "./views/requestCard";
+import RequestCard from "./requestCard";
+import getNormalizedRequest from "./builder/requestBuilder";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -114,7 +115,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           .then((res) => {
             const { data, error } = res;
             if (data !== null && data.length > 0) {
-              const normalizedRequest = getRequestBuilder(data[0]).build();
+              const normalizedRequest = getNormalizedRequest(data[0]);
               setSelectedData(normalizedRequest);
               setOpen(true);
             }
@@ -184,7 +185,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         return decodedFilters;
       }
     } catch (error) {
-      console.log("Error decoding advanced filters:", error);
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
@@ -281,7 +282,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
       return { filterMapIdx, operatorIdx, value };
     } catch (error) {
-      console.log("Error decoding filter:", error);
+      console.error("Error decoding filter:", error);
       return null;
     }
   }
@@ -372,7 +373,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           <div className="flex flex-row gap-2">
             <button
               onClick={() => refetch()}
-              className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+              className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
             >
               <ArrowPathIcon
                 className={clsx(

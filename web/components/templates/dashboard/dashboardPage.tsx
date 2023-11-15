@@ -25,12 +25,19 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import StyledAreaChart from "./styledAreaChart";
-import { AreaChart, BarChart } from "@tremor/react";
+import { AreaChart, BarChart, BarList } from "@tremor/react";
 import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import * as boxbee from "../../../public/lottie/boxbee.json";
 import { formatNumber } from "../users/initialColumns";
+import { useQuery } from "@tanstack/react-query";
+import { Result } from "../../../lib/result";
+import { ModelMetric } from "../../../lib/api/models/models";
+import {
+  filterListToTree,
+  filterUIToFilterLeafs,
+} from "../../../services/lib/filters/filterDefs";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -108,7 +115,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         return decodedFilters;
       }
     } catch (error) {
-      console.log("Error decoding advanced filters:", error);
+      console.error("Error decoding advanced filters:", error);
     }
     return [];
   };
@@ -138,6 +145,25 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
   });
 
+  const { data: models, isLoading } = useQuery({
+    queryKey: ["modelMetrics", timeFilter],
+    queryFn: async (query) => {
+      return await fetch("/api/models", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: "all",
+          offset: 0,
+          limit: 5,
+          timeFilter,
+        }),
+      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
+    },
+    refetchOnWindowFocus: false,
+  });
+
   function encodeFilter(filter: UIFilterRow): string {
     return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
       filter.value
@@ -156,7 +182,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
       return { filterMapIdx, operatorIdx, value };
     } catch (error) {
-      console.log("Error decoding filter:", error);
+      console.error("Error decoding filter:", error);
       return null;
     }
   }
@@ -315,8 +341,19 @@ const DashboardPage = (props: DashboardPageProps) => {
       minH: 1,
       maxH: 4,
     },
-    { i: "costs", x: 0, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "users", x: 6, y: 4, w: 6, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    {
+      i: "models",
+      x: 0,
+      y: 4,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+    },
+    { i: "costs", x: 4, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "users", x: 8, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
     {
       i: "feedback",
       x: 0,
@@ -341,12 +378,120 @@ const DashboardPage = (props: DashboardPageProps) => {
     },
   ];
 
+  const smallLayout: ReactGridLayout.Layout[] = [
+    {
+      i: "requests",
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 4,
+      minW: 4,
+      maxW: 12,
+      minH: 4,
+      maxH: 8,
+      static: true,
+    },
+    {
+      i: "cost-req",
+      x: 0,
+      y: 4,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "prompt-tokens",
+      x: 2,
+      y: 4,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "completion-tokens",
+      x: 0,
+      y: 6,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "total-tokens",
+      x: 2,
+      y: 6,
+      w: 2,
+      h: 2,
+      minW: 2,
+      maxW: 4,
+      minH: 1,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "costs",
+      x: 0,
+      y: 8,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "users",
+      x: 0,
+      y: 12,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "feedback",
+      x: 0,
+      y: 16,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+    {
+      i: "latency",
+      x: 0,
+      y: 20,
+      w: 4,
+      h: 4,
+      minW: 3,
+      maxW: 8,
+      minH: 4,
+      maxH: 4,
+      static: true,
+    },
+  ];
+
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
 
-  const [currentLayout, setCurrentLayout] = useLocalStorage(
-    "dashboardLayout",
-    JSON.stringify(initialLayout)
-  );
+  const modelColors = ["purple", "blue", "green", "yellow", "orange"];
 
   return (
     <>
@@ -360,7 +505,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 end: new Date(),
               });
             }}
-            className="font-medium text-black text-sm items-center flex flex-row hover:text-sky-700"
+            className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
           >
             <ArrowPathIcon
               className={clsx(
@@ -434,11 +579,11 @@ const DashboardPage = (props: DashboardPageProps) => {
             <ResponsiveGridLayout
               className="layout"
               layouts={{
-                lg: JSON.parse(currentLayout) || initialLayout,
-                md: JSON.parse(currentLayout) || initialLayout,
-                sm: JSON.parse(currentLayout) || initialLayout,
-                xs: JSON.parse(currentLayout) || initialLayout,
-                xxs: JSON.parse(currentLayout) || initialLayout,
+                lg: initialLayout,
+                md: initialLayout,
+                sm: initialLayout,
+                xs: smallLayout,
+                xxs: smallLayout,
               }}
               autoSize={true}
               isBounded={true}
@@ -476,6 +621,35 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <MetricsPanel metric={m} hFull={true} />
                 </div>
               ))}
+              <div key="models">
+                <StyledAreaChart
+                  title={`Top Models`}
+                  value={undefined}
+                  isDataOverTimeLoading={isLoading}
+                >
+                  <div className="flex flex-row justify-between items-center pb-2">
+                    <p className="text-xs font-semibold text-gray-700">Name</p>
+                    <p className="text-xs font-semibold text-gray-700">
+                      Requests
+                    </p>
+                  </div>
+                  <BarList
+                    data={
+                      models?.data
+                        ?.map((model, index) => ({
+                          name: model.model || "n/a",
+                          value: model.total_requests,
+                          color: modelColors[index % modelColors.length],
+                        }))
+                        .sort(
+                          (a, b) =>
+                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
+                        ) ?? []
+                    }
+                    className="overflow-auto h-full"
+                  />
+                </StyledAreaChart>
+              </div>
               <div key="costs">
                 <StyledAreaChart
                   title={"Costs"}
@@ -490,7 +664,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "$0.00"
                   }
                   isDataOverTimeLoading={overTimeData.costs.isLoading}
-                  withAnimation={true}
                 >
                   <BarChart
                     className="h-[14rem]"
@@ -512,12 +685,12 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </StyledAreaChart>
               </div>
+
               <div key="users">
                 <StyledAreaChart
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
-                  withAnimation={true}
                 >
                   <BarChart
                     className="h-[14rem]"
@@ -545,7 +718,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                       : "0"
                   }
                   isDataOverTimeLoading={overTimeData.feedback.isLoading}
-                  withAnimation={true}
                 >
                   <AreaChart
                     className="h-[14rem]"
@@ -564,7 +736,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                     metrics.averageLatency.data?.data?.toFixed(0) ?? 0
                   } ms / req`}
                   isDataOverTimeLoading={overTimeData.latency.isLoading}
-                  withAnimation={true}
                 >
                   <AreaChart
                     className="h-[14rem]"

@@ -1,9 +1,10 @@
 // This will store all of the information coming from the client.
 
 import { Env, Provider } from "../..";
-import { Result } from "../../results";
+import { Result, ok } from "../../results";
 import { IHeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
+import { approvedDomains } from "../gateway/approvedDomains";
 import {
   ChatPrompt,
   FormattedPrompt,
@@ -125,7 +126,7 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: promptFormatterError };
     }
 
-    const { data: api_base, error: api_base_error } = this.getOpenAiApiBase();
+    const { data: api_base, error: api_base_error } = this.getApiBase();
     if (api_base_error !== null) {
       return { data: null, error: api_base_error };
     }
@@ -185,30 +186,21 @@ export class HeliconeProxyRequestMapper {
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
-    const openAiPattern = /^https:\/\/api\.openai\.com\/v\d+\/?$/;
-    const anthropicPattern = /^https:\/\/api\.anthropic\.com\/v\d+\/?$/;
-    const azurePattern =
-      /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net)(\/.*)?$/;
-    const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
-    const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com\/v\d+\/?$/;
-    const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev\/v\d+\/?$/;
-    const anyscalePattern =
-      /^https:\/\/api\.endpoints\.anyscale\.com\/v\d+\/?$/;
-
     return (
       api_base === undefined ||
-      openAiPattern.test(api_base) ||
-      anthropicPattern.test(api_base) ||
-      azurePattern.test(api_base) ||
-      localProxyPattern.test(api_base) ||
-      heliconeProxyPattern.test(api_base) ||
-      amdbartekPattern.test(api_base) ||
-      anyscalePattern.test(api_base)
+      approvedDomains.some((domain) => domain.test(api_base))
     );
   }
 
-  private getOpenAiApiBase(): Result<string, string> {
-    const api_base = this.request.heliconeHeaders.openaiBaseUrl;
+  private getApiBase(): Result<string, string> {
+    if (this.request.baseURLOverride) {
+      console.log("Using baseURLOverride");
+      return ok(this.request.baseURLOverride);
+    }
+    const api_base =
+      this.request.heliconeHeaders.openaiBaseUrl ??
+      this.request.heliconeHeaders.targetBaseUrl;
+
     if (api_base && !this.validateApiConfiguration(api_base)) {
       // return new Response(`Invalid API base "${api_base}"`, {
       return {

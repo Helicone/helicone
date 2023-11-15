@@ -10,7 +10,6 @@ export async function deleteSubscription(
 ): Promise<Result<Stripe.Subscription, string>> {
   const { pid } = req.query;
   const subscriptionId = pid as string | undefined;
-  console.log("subscriptionId", subscriptionId);
 
   if (!subscriptionId) {
     return { data: null, error: "No subscription id provided" };

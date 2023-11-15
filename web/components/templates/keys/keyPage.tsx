@@ -61,13 +61,13 @@ const KeyPage = (props: KeyPageProps) => {
           onClick={() => {
             setAddKeyOpen(true);
           }}
-          className="mt-8 relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="mt-8 relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           <div className="w-full justify-center align-middle items-center">
-            <KeyIcon className="h-10 w-10 mx-auto text-gray-900" />
+            <KeyIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
           </div>
 
-          <span className="mt-2 block text-sm font-medium text-gray-900">
+          <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
             Click here to generate a Helicone key
           </span>
         </button>
@@ -83,7 +83,7 @@ const KeyPage = (props: KeyPageProps) => {
             return {
               ...key,
               key_name: (
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-gray-900 dark:text-gray-100">
                   {key.api_key_name}
                 </p>
               ),
@@ -109,16 +109,16 @@ const KeyPage = (props: KeyPageProps) => {
   return (
     <>
       <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
-        <div className="text-gray-900 space-y-8 text-sm flex flex-col">
+        <div className="text-gray-900 dark:text-gray-100 space-y-8 text-sm flex flex-col">
           <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
             <div className="flex flex-col justify-between space-y-4">
-              <h1 className="text-xl font-semibold text-gray-900">
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Helicone Keys for:{" "}
                 <span className="underline">
                   {org?.currentOrg.name ?? "No Org Found"}
                 </span>
               </h1>
-              <p className="text-md text-gray-900">
+              <p className="text-md text-gray-900 dark:text-gray-100">
                 These keys can be used to read and write data to Helicone.
                 Please do not share these keys and make sure you store them
                 somewhere secure.
@@ -133,7 +133,7 @@ const KeyPage = (props: KeyPageProps) => {
           <div>
             <button
               onClick={() => setAddKeyOpen(true)}
-              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
             >
               Generate New Key
             </button>
