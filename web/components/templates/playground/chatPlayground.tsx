@@ -108,7 +108,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
       } else {
         if (modelMessage.length > 0) {
           renderRows.push(
-            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <div className="flex flex-col px-8 py-6 space-y-4 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-[#17191d]">
               <button
                 className={clsx(
                   "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
@@ -181,7 +181,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
         );
       } else {
         renderRows.push(
-          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex flex-col px-8 py-6 space-y-8 border-b border-gray-300 bg-gray-200 dark:border-gray-700 dark:bg-[#17191d]">
             <button
               className={clsx(
                 "hover:bg-gray-50 dark:hover:bg-gray-900 hover:cursor-not-allowed",
