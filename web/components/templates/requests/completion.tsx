@@ -32,7 +32,7 @@ export const Completion = (props: CompletionProps) => {
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-end w-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-end w-full bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100">
           {defaultMode === "json" ? (
             <Tooltip title="Model is pending mapping">
               <button className="hover:cursor-not-allowed flex flex-row space-x-1 items-center hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg">
@@ -58,7 +58,7 @@ export const Completion = (props: CompletionProps) => {
         </div>
 
         {mode === "json" ? (
-          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-gray-900 relative rounded-b-md">
+          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-[#17191d] relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Request
@@ -77,7 +77,7 @@ export const Completion = (props: CompletionProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-gray-900 relative rounded-b-md">
+          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-[#17191d] relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Request
