@@ -1,11 +1,11 @@
 ---
-title: "Request ID"
-description: Predetermine Helicone's request ID which can be utilized asynchronously for other tasks
+title: "Request ID Predefinition"
+description: Predetermine Helicone's request ID for asynchronous utilization in other tasks
 ---
 
-One of the nice things about having UUIDs as request IDs, is that we can predetermin the request ID before the actual request is sent over to Helicone.
+One of the significant advantages of using UUIDs as request IDs is the ability to predetermine the request ID before the actual request is dispatched to Helicone.
 
-This allows us to easily keep track of the request IDs without needed to get a response back from Helicone.
+This feature facilitates the tracking of request IDs without the necessity of receiving a response from Helicone.
 
 ```python
 
@@ -19,7 +19,7 @@ my_helicone_request_id = str(uuid.uuid4())
     "Helcione-Request-Id": my_helicone_request_id
 ...
 
-# While the above code is running you an perform other tasks like giving feedback on a specific request.
+# While the above code is executing, you can perform other tasks such as providing feedback on a specific request.
 import requests
 url = 'https://api.hconeai.com/v1/feedback'
 headers = {
@@ -34,4 +34,4 @@ response = requests.post(url, headers=headers, json=data)
 
 ```
 
-This is also super useful when tagging different requests to different [jobs](/features/jobs/quick-start) or other features within Helicone.
+This functionality is particularly beneficial when associating different requests with different [jobs](/features/jobs/quick-start) or other features within Helicone.
