@@ -94,6 +94,13 @@
       ]
     },
     {
+      "group": "Helicone Headers",
+      "pages": [
+        "helicone-headers/intro",
+        "helicone-headers/predefining-request-id"
+      ]
+    },
+    {
       "group": "Features",
       "pages": [
         {
