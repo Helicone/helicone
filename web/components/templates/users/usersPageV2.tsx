@@ -123,6 +123,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}
           pageSizeOptions={[25, 50, 100]}
+          showCount={true}
         />
       </div>
 
