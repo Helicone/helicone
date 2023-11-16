@@ -42,6 +42,7 @@ import { useUserSettings } from "../../../services/hooks/userSettings";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -61,6 +62,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [open, setOpen] = useState(false);
   const { hasFlag } = useFeatureFlags("webhook_beta", org?.currentOrg.id || "");
+  const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
+  const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
+
+  console.log("openDev", openDev);
 
   const navigation = [
     {
@@ -377,10 +382,22 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         );
                       })}
                     </div>
-                    <Disclosure defaultOpen={true}>
+                    <Disclosure
+                      defaultOpen={
+                        router.pathname.includes("/keys") ||
+                        router.pathname.includes("/graphql") ||
+                        router.pathname.includes("/webhooks") ||
+                        router.pathname.includes("/vault")
+                      }
+                    >
                       {({ open }) => (
                         <div>
-                          <Disclosure.Button className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1">
+                          <Disclosure.Button
+                            onClick={() => {
+                              setOpenDev(openDev === "true" ? "false" : "true");
+                            }}
+                            className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
+                          >
                             <p>Developer</p>
                             <ChevronRightIcon
                               className={clsx(
@@ -390,6 +407,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             />
                           </Disclosure.Button>
                           <Transition
+                            show={open}
                             enter="transition duration-100 ease-out"
                             enterFrom="transform scale-95 opacity-0"
                             enterTo="transform scale-100 opacity-100"
@@ -430,10 +448,21 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         </div>
                       )}
                     </Disclosure>
-                    <Disclosure>
+                    <Disclosure
+                      defaultOpen={
+                        router.pathname.includes("/organization/settings") ||
+                        router.pathname.includes("/organization/plan") ||
+                        router.pathname.includes("/organization/members")
+                      }
+                    >
                       {({ open }) => (
                         <div>
-                          <Disclosure.Button className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1">
+                          <Disclosure.Button
+                            onClick={() => {
+                              setOpenOrg(openOrg === "true" ? "false" : "true");
+                            }}
+                            className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
+                          >
                             <p>Organization</p>
                             <ChevronRightIcon
                               className={clsx(
