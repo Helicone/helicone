@@ -21,6 +21,8 @@ import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
 import { INTERNAL_ERRORS } from "../constants";
+import { Alerter } from "../../db/Alerter";
+import { AlertMetricEvent } from "../../db/AtomicAlerter";
 
 export interface DBLoggableProps {
   response: {
@@ -435,7 +437,8 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
-    rateLimitKV: KVNamespace
+    rateLimitKV: KVNamespace,
+    alerterDurableObject: DurableObjectNamespace
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -508,6 +511,53 @@ export class DBLoggable {
         error: webhookError,
       };
     }
+
+    const alerter = new Alerter(
+      alerterDurableObject,
+      authParams.organizationId
+    );
+    const metricEvent: AlertMetricEvent = {
+      timestamp: Date.now(),
+      metrics: {
+        "response.status": {
+          count: responseResult.data.status === 200 ? 0 : 1,
+          total: 1,
+        },
+      },
+    };
+
+    const alertRes = await alerter.processMetricEvent(metricEvent);
+
+    if (alertRes.error !== null) {
+      console.error("Error processing metric event", alertRes.error);
+      return {
+        data: null,
+        error: alertRes.error,
+      };
+    }
+
+    const activeAlerts = alertRes.data;
+    const triggeredIds = activeAlerts?.triggered.map((x) => x.alertId) ?? [];
+    const resolvedIds = activeAlerts?.resolved.map((x) => x.alertId) ?? [];
+
+    const triggeredAlertsPromise = db.supabase
+      .from("alert")
+      .select("*")
+      .eq("org_id", authParams.organizationId)
+      .in("id", triggeredIds);
+
+    const resolvedAlertsPromise = db.supabase
+      .from("alert")
+      .select("*")
+      .eq("org_id", authParams.organizationId)
+      .in("id", resolvedIds);
+
+    const [triggeredAlerts, resolvedAlerts] = await Promise.all([
+      triggeredAlertsPromise,
+      resolvedAlertsPromise,
+    ]);
+
+    if()
 
     return {
       data: null,

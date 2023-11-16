@@ -14,6 +14,9 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
 import { InsertQueue } from "../dbLogger/insertQueue";
 import { DBWrapper } from "../../db/DBWrapper";
+import { Alerter } from "../../db/Alerter";
+import { Result } from "../../results";
+import { AlertMetricEvent } from "../../db/AtomicAlerter";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -117,12 +120,15 @@ export async function proxyForwarder(
   if (cacheSettings.shouldReadFromCache) {
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
+
+  const dbWrapper = new DBWrapper(env, loggable.auth());
+
   async function log() {
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        dbWrapper: new DBWrapper(env, loggable.auth()),
+        dbWrapper: dbWrapper,
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
           new ClickhouseClientWrapper(env),
@@ -130,7 +136,8 @@ export async function proxyForwarder(
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
       },
-      env.RATE_LIMIT_KV
+      env.RATE_LIMIT_KV,
+      env.ALERTER
     );
     if (res.error !== null) {
       request

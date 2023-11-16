@@ -3,12 +3,12 @@ CREATE TABLE alert (
     org_id UUID NOT NULL REFERENCES public.organization(id),
     type TEXT NOT NULL,
     threshold DECIMAL NOT NULL,
-    time_period INTERVAL NOT NULL,
-    users TEXT [] NOT NULL,
+    time_window BIGINT NOT NULL,
+    emails TEXT [] NOT NULL,
     name TEXT NOT NULL,
     soft_delete boolean not null default false,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW()
 );
 CREATE TABLE alert_history (
     id uuid not null default gen_random_uuid() primary key,
@@ -22,6 +22,6 @@ CREATE TABLE alert_history (
     status TEXT NOT NULL,
     -- Triggered, Resolved
     soft_delete boolean not null default false,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW()
 );

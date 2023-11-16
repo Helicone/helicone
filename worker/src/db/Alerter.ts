@@ -1,18 +1,18 @@
 import { Env } from "..";
-import { AuthParams } from "../lib/dbLogger/DBLoggable";
+import { AuthParams as string } from "../lib/dbLogger/DBLoggable";
 import { Result } from "../results";
 import { Alerts, ActiveAlerts, AlertMetricEvent } from "./AtomicAlerter";
 
 export class Alerter {
   constructor(
     private alerter: Env["ALERTER"],
-    private authParams: AuthParams
+    private organizationId: string
   ) {}
 
-  async metricEvent(
+  async processMetricEvent(
     metricEvent: AlertMetricEvent
-  ): Promise<Result<ActiveAlerts[], string>> {
-    const alerterId = this.alerter.idFromName(this.authParams.organizationId);
+  ): Promise<Result<ActiveAlerts, string>> {
+    const alerterId = this.alerter.idFromName(this.organizationId);
     const alerter = this.alerter.get(alerterId);
 
     const alerterRes = await alerter.fetch(
@@ -30,7 +30,7 @@ export class Alerter {
       return { data: null, error: "Failed to process event" };
     }
 
-    const alerts = (await alerterRes.json()) as ActiveAlerts[];
+    const alerts = (await alerterRes.json()) as ActiveAlerts;
 
     return {
       data: alerts,
@@ -39,7 +39,7 @@ export class Alerter {
   }
 
   async upsertAlerts(alerts: Alerts): Promise<Result<null, string>> {
-    const alerterId = this.alerter.idFromName(this.authParams.organizationId);
+    const alerterId = this.alerter.idFromName(this.organizationId);
     const alerter = this.alerter.get(alerterId);
 
     const alerterRes = await alerter.fetch(
@@ -64,7 +64,7 @@ export class Alerter {
   }
 
   async deleteAlert(alertId: string): Promise<Result<null, string>> {
-    const alerterId = this.alerter.idFromName(this.authParams.organizationId);
+    const alerterId = this.alerter.idFromName(this.organizationId);
     const alerter = this.alerter.get(alerterId);
 
     const alerterRes = await alerter.fetch(

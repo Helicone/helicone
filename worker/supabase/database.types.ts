@@ -11,40 +11,40 @@ export interface Database {
     Tables: {
       alert: {
         Row: {
-          created_at: string
+          created_at: string | null
+          emails: string[]
           id: string
           name: string
           org_id: string
           soft_delete: boolean
           threshold: number
-          time_period: unknown
+          time_window: number
           type: string
-          updated_at: string
-          users: string[]
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
+          emails: string[]
           id?: string
           name: string
           org_id: string
           soft_delete?: boolean
           threshold: number
-          time_period: unknown
+          time_window: number
           type: string
-          updated_at?: string
-          users: string[]
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
+          emails?: string[]
           id?: string
           name?: string
           org_id?: string
           soft_delete?: boolean
           threshold?: number
-          time_period?: unknown
+          time_window?: number
           type?: string
-          updated_at?: string
-          users?: string[]
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -61,39 +61,39 @@ export interface Database {
           alert_id: string | null
           alert_start_time: string
           alert_type: string
-          created_at: string
+          created_at: string | null
           id: string
           org_id: string
           soft_delete: boolean
           status: string
           triggered_value: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           alert_end_time?: string | null
           alert_id?: string | null
           alert_start_time: string
           alert_type: string
-          created_at?: string
+          created_at?: string | null
           id?: string
           org_id: string
           soft_delete?: boolean
           status: string
           triggered_value: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           alert_end_time?: string | null
           alert_id?: string | null
           alert_start_time?: string
           alert_type?: string
-          created_at?: string
+          created_at?: string | null
           id?: string
           org_id?: string
           soft_delete?: boolean
           status?: string
           triggered_value?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
           {

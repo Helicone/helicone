@@ -1,17 +1,13 @@
+import { Database } from "../../supabase/database.types";
 import { Result } from "../results";
 
 const ALERT_KEY = "alerts";
-type MetricType = "rate" | "count";
 
 export type Alerts = {
   [alertId: string]: Alert;
 };
 
-type Alert = {
-  type: MetricType;
-  threshold: number;
-  timeWindow: number;
-};
+type Alert = Database["public"]["Tables"]["alert"]["Row"];
 
 export type AlertMetricEvent = {
   timestamp: number;
@@ -24,31 +20,37 @@ export type AlertMetricEvent = {
 };
 
 type AlertStateMap = {
-  [alertId: string]: {
-    timestamps: Array<{
-      timestamp: number;
-      count: number;
-      total: number;
-    }>;
-    metricValues: {
-      counts: number;
-      totals: number;
-    };
-    triggered: boolean;
-    triggeredAt?: number;
+  [alertId: string]: AlertState;
+};
+
+type AlertState = {
+  timestamps: Array<{
+    timestamp: number;
+    count: number;
+    total: number;
+  }>;
+  metricValues: {
+    counts: number;
+    totals: number;
   };
+  triggerState: AlertTriggerState;
+};
+
+type AlertTriggerState = {
+  triggered: boolean;
+  triggeredThreshold?: number;
+  triggeredAt?: number;
+};
+
+type AlertStatusUpdate = {
+  status: "triggered" | "resolved" | "unchanged";
+  timestamp: number;
+  triggeredThreshold?: number;
 };
 
 export type ActiveAlerts = {
-  triggered: AlertInfo[];
-  resolved: AlertInfo[];
-};
-
-type AlertInfo = {
-  alertId: string;
-  alertTime: number;
-  threshold: number;
-  currentRate: number;
+  triggered: Database["public"]["Tables"]["alert_history"]["Insert"][];
+  resolved: Database["public"]["Tables"]["alert_history"]["Update"][];
 };
 
 export class AtomicAlerter {
@@ -63,16 +65,29 @@ export class AtomicAlerter {
     });
   }
 
+  async hasAlertsEnabled(): Promise<boolean> {
+    const alerts = await this.state.storage.get<Alert>(ALERT_KEY);
+    const hasAlerts = alerts !== undefined && Object.keys(alerts).length > 0;
+    return hasAlerts;
+  }
+
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
+    // Process events
     if (url.pathname.startsWith("/events") && request.method === "POST") {
+      if (!this.alerts) {
+        return new Response("No alerts configured", { status: 200 });
+      }
+
       return await this.handleEventsPost(request);
     }
 
+    // Upsert alerts
     if (url.pathname.startsWith("/alerts") && request.method === "POST") {
       return await this.handleAlertsPost(request);
     }
 
+    // Delete alert
     if (url.pathname.startsWith("/alert") && request.method === "DELETE") {
       return await this.handleAlertDelete(request);
     }
@@ -174,13 +189,13 @@ export class AtomicAlerter {
           continue;
         }
 
-        const windowStart = now - alert.timeWindow;
-        let alertState: AlertStateMap[typeof alertId] = (await txn.get<
-          AlertStateMap[typeof alertId]
-        >(alertId)) || {
+        const windowStart = now - alert.time_window;
+        let alertState: AlertState = (await txn.get<AlertState>(alertId)) || {
           timestamps: [],
           metricValues: { counts: 0, totals: 0 },
-          triggered: false,
+          triggerState: {
+            triggered: false,
+          },
         };
 
         // Add the new event
@@ -202,55 +217,101 @@ export class AtomicAlerter {
           alertState.timestamps.shift();
         }
 
-        const alertInfo = await this.checkAlert(
-          alertId,
+        const alertUpdate = await this.checkAlert(
           alert,
           alertState,
           event.timestamp
         );
 
-        if (alertInfo) {
-          if (alertState.triggered) {
-            activeAlerts.triggered.push(alertInfo);
-          } else {
-            activeAlerts.resolved.push(alertInfo);
-          }
+        if (alertUpdate.status === "triggered") {
+          alertState.triggerState.triggered = true;
+          alertState.triggerState.triggeredAt = alertUpdate.timestamp;
+          alertState.triggerState.triggeredThreshold =
+            alertUpdate.triggeredThreshold;
+          activeAlerts.triggered.push(
+            this.mapAlertToInsert(alertUpdate, alertId, alert)
+          );
+        } else if (alertUpdate.status === "resolved") {
+          alertState.triggerState.triggered = false;
+          alertState.triggerState.triggeredAt = undefined; // Reset triggeredAt
+          activeAlerts.resolved.push(
+            this.mapAlertToUpdate(alertUpdate, alertId, alert)
+          );
         }
 
         await txn.put(alertId, alertState);
       }
     });
+    /*
+    alert_end_time: string | null;
+    alert_id: string | null;
+    alert_start_time: string;
+    alert_type: string;
+    created_at: string;
+    id: string;
+    org_id: string;
+    soft_delete: boolean;
+    status: string;
+    triggered_value: string;
+    updated_at: string;
+    */
 
     return { data: activeAlerts, error: null };
   }
 
   private async checkAlert(
-    alertId: string,
     alert: Alert,
-    alertState: AlertStateMap[typeof alertId],
+    alertState: AlertState,
     eventTimestamp: number
-  ): Promise<AlertInfo | null> {
+  ): Promise<AlertStatusUpdate> {
     const rate =
       (alertState.metricValues.counts / alertState.metricValues.totals) * 100;
 
-    if (rate > alert.threshold && !alertState.triggered) {
-      alertState.triggered = true;
+    if (rate > alert.threshold && !alertState.triggerState.triggered) {
       return {
-        alertId,
-        alertTime: eventTimestamp,
-        threshold: alert.threshold,
-        currentRate: rate,
+        status: "triggered",
+        timestamp: eventTimestamp,
+        triggeredThreshold: rate,
       };
-    } else if (rate <= alert.threshold && alertState.triggered) {
-      alertState.triggered = false;
+    } else if (rate <= alert.threshold && alertState.triggerState.triggered) {
       return {
-        alertId,
-        alertTime: eventTimestamp,
-        threshold: alert.threshold,
-        currentRate: rate,
+        status: "resolved",
+        timestamp: eventTimestamp,
       };
     }
 
-    return null;
+    return { status: "unchanged", timestamp: eventTimestamp };
+  }
+
+  private mapAlertToInsert(
+    alertUpdate: AlertStatusUpdate,
+    alertId: string,
+    alert: Alert
+  ): Database["public"]["Tables"]["alert_history"]["Insert"] {
+    return {
+      alert_id: alertId,
+      alert_start_time: new Date(alertUpdate.timestamp).toISOString(),
+      alert_type: alert.type,
+      org_id: alert.org_id,
+      soft_delete: false,
+      status: "triggered",
+      triggered_value: `${alertUpdate.triggeredThreshold}`,
+    };
+  }
+
+  private mapAlertToUpdate(
+    alertUpdate: AlertStatusUpdate,
+    alertId: string,
+    alert: Alert
+  ): Database["public"]["Tables"]["alert_history"]["Update"] {
+    return {
+      alert_id: alertId,
+      alert_end_time: new Date(alertUpdate.timestamp).toISOString(),
+      alert_type: alert.type,
+      org_id: alert.org_id,
+      soft_delete: false,
+      status: "resolved",
+      triggered_value: `${alertUpdate.triggeredThreshold}`,
+    };
   }
 }
