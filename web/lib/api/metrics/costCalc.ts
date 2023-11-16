@@ -9,11 +9,12 @@ const COSTS_PROMPT = {
   davinci: 0.02,
   "gpt-3.5-turbo": 0.0015,
   "gpt-35-turbo": 0.0015,
-
   "gpt-4": 0.03,
   "gpt-4-32k-0314": 0.06,
+  "gpt-4-0613": 0.03,
   "gpt-4-32k-0613": 0.06,
   "gpt-4-1106-preview": 0.01,
+  "gpt-4-1106-vision-preview": 0.01,
   "gpt-3.5-turbo-0613": 0.0015,
   "gpt-35-turbo-16k": 0.003,
   "gpt-3.5-turbo-16k-0613": 0.003,
@@ -33,10 +34,11 @@ const COSTS_COMPLETIONS = {
   davinci: 0.02,
   "gpt-3.5-turbo": 0.002,
   "gpt-35-turbo": 0.002,
-  "gpt-4": 0.06,
+  "gpt-4-0613": 0.06,
   "gpt-4-32k-0314": 0.12,
   "gpt-4-32k-0613": 0.12,
   "gpt-4-1106-preview": 0.03,
+  "gpt-4-1106-vision-preview": 0.03,
   "gpt-3.5-turbo-0613": 0.002,
   "gpt-3.5-turbo-16k-0613": 0.004,
   "gpt-35-turbo-16k": 0.004,
@@ -85,11 +87,11 @@ export function modelCost(modelRow: ModelMetrics): number {
     ? OPENAI_FINETUNE_COSTS_COMPLETIONS
     : COSTS_COMPLETIONS;
 
-  const promptCost = Object.entries(promptCosts).find(([key]) =>
-    model_prefix.includes(key)
+  const promptCost = Object.entries(promptCosts).find(
+    ([key]) => key === model_prefix
   )?.[1];
-  const completionCost = Object.entries(completionCosts).find(([key]) =>
-    model_prefix.includes(key)
+  const completionCost = Object.entries(completionCosts).find(
+    ([key]) => key === model_prefix
   )?.[1];
   if (!promptCost || !completionCost) {
     console.error("No cost found for model", model);
