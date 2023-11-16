@@ -354,7 +354,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </div>
                 </div>
                 <div className="mt-1 flex flex-grow flex-col">
-                  <nav className="flex-1 space-y-4 px-2 pb-4 pt-2">
+                  <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
                       {navigation.map((item) => {
                         return (
@@ -382,72 +382,42 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         );
                       })}
                     </div>
-                    <Disclosure
-                      defaultOpen={
-                        router.pathname.includes("/keys") ||
-                        router.pathname.includes("/graphql") ||
-                        router.pathname.includes("/webhooks") ||
-                        router.pathname.includes("/vault")
-                      }
-                    >
-                      {({ open }) => (
-                        <div>
-                          <Disclosure.Button
-                            onClick={() => {
-                              setOpenDev(openDev === "true" ? "false" : "true");
-                            }}
-                            className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
-                          >
-                            <p>Developer</p>
-                            <ChevronRightIcon
+
+                    <div>
+                      <button className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1">
+                        <p>Developer</p>
+                      </button>
+                      <div className="flex flex-col space-y-1">
+                        {developerNav.map((item, i) => {
+                          return (
+                            <Link
+                              key={item.name}
+                              href={item.href}
                               className={clsx(
-                                open ? "transform rotate-90" : "",
-                                "h-4 w-4 inline"
+                                "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
+                                "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
                               )}
-                            />
-                          </Disclosure.Button>
-                          <Transition
-                            show={open}
-                            enter="transition duration-100 ease-out"
-                            enterFrom="transform scale-95 opacity-0"
-                            enterTo="transform scale-100 opacity-100"
-                            leave="transition duration-75 ease-out"
-                            leaveFrom="transform scale-100 opacity-100"
-                            leaveTo="transform scale-95 opacity-0"
-                          >
-                            <Disclosure.Panel className="flex flex-col space-y-1">
-                              {developerNav.map((item, i) => {
-                                return (
-                                  <Link
-                                    key={item.name}
-                                    href={item.href}
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center">
+                                  <item.icon
                                     className={clsx(
-                                      "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
+                                      item.current
+                                        ? "text-black dark:text-white"
+                                        : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
+                                      "mr-3 flex-shrink-0 h-5 w-5"
                                     )}
-                                  >
-                                    <div className="flex items-center justify-between w-full">
-                                      <div className="flex items-center">
-                                        <item.icon
-                                          className={clsx(
-                                            item.current
-                                              ? "text-black dark:text-white"
-                                              : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                            "mr-3 flex-shrink-0 h-5 w-5"
-                                          )}
-                                          aria-hidden="true"
-                                        />
-                                        {item.name}
-                                      </div>
-                                    </div>
-                                  </Link>
-                                );
-                              })}
-                            </Disclosure.Panel>
-                          </Transition>
-                        </div>
-                      )}
-                    </Disclosure>
+                                    aria-hidden="true"
+                                  />
+                                  {item.name}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <Disclosure
                       defaultOpen={
                         router.pathname.includes("/organization/settings") ||
