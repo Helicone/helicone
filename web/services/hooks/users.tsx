@@ -65,7 +65,6 @@ const useUsers = (
 
   return {
     users,
-
     count: count?.data ?? 0,
     from,
     to,
