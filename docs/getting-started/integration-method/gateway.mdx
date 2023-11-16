@@ -22,76 +22,75 @@ This is achieved by allowing you to determine the destination of your request by
 `api.lemonfox.ai/v1` -> `gateway.hconeai.com/v1`
 
 - Header: `Helicone-Target-Url: https://api.lemonfox.ai`
-- Header: `Helicone-Target-Provider: LemonFox`
 
 # How to Use the Gateway
 
 <Tabs>
- <Tab title="Python">
-        ```python
-        import openai
+  <Tab title="Python">
+    ```python
+    import openai
 
-        openai.api_base = "https://gateway.hconeai.com"
+    openai.api_base = "https://gateway.hconeai.com"
 
-        # Create the completion request
+    # Create the completion request
 
-        openai.ChatCompletion.create(
-        model="[DEPLOYMENT]",
-        messages=[{"role": "User", "content": "Say hi!"}],
-        headers={
+    openai.ChatCompletion.create(
+      model="[DEPLOYMENT]",
+      messages=[{"role": "User", "content": "Say hi!"}],
+      headers={
         "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
         "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
         "Helicone-Target-Provider": "LemonFox",
-        }
-        )
-
-        ```
+      }
+    )
+    ```
 
   </Tab>
 
-<Tab title="Node.js">
-<Note>Ensure you include api-version in all of your requests</Note>
-<AccordionGroup>
+  <Tab title="Node.js">
+  <Note>Ensure you include api-version in all of your requests</Note>
+  <AccordionGroup>
 
-  <Accordion title="OpenAI v4+">
-    ```typescript
-    const openai = new OpenAI({
-      baseURL: "https://gateway.hconeai.com",
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
-        "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
-      },
-    });
-    ```
-  </Accordion>
-
-  <Accordion title="OpenAI <v4">
-    ```typescript
-    import { Configuration, OpenAIApi } from "openai";
-
-    const configuration = new Configuration({
-      apiKey: "[AZURE_OPENAI_API_KEY]",
-      basePath: "https://gateway.hconeai.com/",
-      baseOptions: {
-        headers: {
+    <Accordion title="OpenAI v4+">
+      ```typescript
+      const openai = new OpenAI({
+        baseURL: "https://gateway.hconeai.com",
+        defaultHeaders: {
           "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
-          "api-key": "[AZURE_OPENAI_API_KEY]",
-          "Helicone-Target-Url": "https://[AZURE_DOMAIN].openai.azure.com",
+          "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
         },
-        params: {
-          "api-version": "[API_VERSION]",
+      });
+      ```
+    </Accordion>
+
+    <Accordion title="OpenAI <v4">
+      ```typescript
+      import { Configuration, OpenAIApi } from "openai";
+
+      const configuration = new Configuration({
+        apiKey: "[AZURE_OPENAI_API_KEY]",
+        basePath: "https://gateway.hconeai.com/",
+        baseOptions: {
+          headers: {
+            "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
+            "api-key": "[AZURE_OPENAI_API_KEY]",
+            "Helicone-Target-Url": "https://[AZURE_DOMAIN].openai.azure.com",
+          },
+          params: {
+            "api-version": "[API_VERSION]",
+          },
         },
-      },
-    });
+      });
 
-    const openai = new OpenAIApi(configuration);
-    ```
+      const openai = new OpenAIApi(configuration);
+      ```
 
-  </Accordion>
-</AccordionGroup>
+    </Accordion>
 
-</Tab>
-<Tab title="Python w/package">
+  </AccordionGroup>
+
+  </Tab>
+  <Tab title="Python w/package">
 
 ```python
 from helicone.openai_proxy import openai
@@ -99,19 +98,19 @@ from helicone.openai_proxy import openai
 openai.api_base = "https://gateway.hconeai.com"
 
 response = openai.ChatCompletion.create(
-engine = 'gpt-35-turbo',
-messages = [{
-    'role': 'user',
-    'content': "Hello World!"
-}],
-max_tokens=15,
+  engine = 'gpt-35-turbo',
+  messages = [{
+      'role': 'user',
+      'content': "Hello World!"
+  }],
+  max_tokens=15,
 )
 
 ```
 
 </Tab>
 
-<Tab title="LangChain JS">
+  <Tab title="LangChain JS">
 
 ```javascript
 const model = new ChatOpenAI({
@@ -129,9 +128,9 @@ const model = new ChatOpenAI({
 });
 ```
 
-</Tab>
+  </Tab>
 
-<Tab title="LangChain">
+  <Tab title="LangChain">
 
 ```python
 from langchain.chat_models import AzureChatOpenAI
@@ -150,8 +149,8 @@ llm = ChatOpenAI(
 )
 ```
 
-</Tab>
-<Tab title="cURL">
+  </Tab>
+  <Tab title="cURL">
   ```bash
     curl --request POST \
     --url https://gateway.hconeai.com/v1/chat/completetions \
@@ -173,6 +172,52 @@ llm = ChatOpenAI(
 </Tab>
 </Tabs>
 
+# Examples
+
+<Accordion title="Cloudflare gateway example">
+
+Current gateway request
+
+```bash
+curl --request POST \
+  --url https://gateway.ai.cloudflare.com/v1/[id]/open-ai/openai/chat/completions \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  -d ' {
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is Cloudflare?"
+      }
+    ]
+  }
+'
+```
+
+Simply change `gateway.ai.cloudflare.com` to `gateway.hconeai.com` and add the following headers
+
+```bash
+curl --request POST \
+  --url https://gateway.hconeai.com/v1/[id]/open-ai/openai/chat/completions \
+  --header 'Helicone-Auth: Bearer <Helicone_Auth>' \
+  --header 'Helicone-Target-Url: https://gateway.ai.cloudflare.com' \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'content-type: application/json' \
+  -d '{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is Cloudflare?"
+      }
+    ]
+  }
+'
+```
+
+</Accordion>
+
 {/* prettier-ignore */}
 {/*
 
@@ -192,7 +237,29 @@ As we improve the auto-mapper and the unapproved domains, we will demonstrate ho
 | Together-AI | `api.together.xyz`           | ❌           | ❌                      |
 | LemonFox    | `api.lemonfox.ai`            | ❌           | ❌                      |
 
-## How to Get a Domain Approved
+## Unapproved Domains
+
+To protect our community from potential threats, we have certain restrictions for unapproved domains. To ensure a safe internet environment, you can use any unapproved domain, but you will be limited to the following:
+
+- 10,000 requests per day
+- 1 request per second
+
+The integration is the same as the approved domains, but you will need to add the following header:
+
+```bash
+--header 'Helicone-Target-Url: https://[DOMAIN_NAME]'
+```
+
+## Automated Mappers ("Model is pending mapping")
+
+<Frame>![](/images/integrations/model-is-pending-mapping.png)</Frame>
+
+Helicone will automically determine how to map any unsupported model that you throw at it using our automated mapper. Helicone intelligently determines the schema of the model and maps it to the appropriate schema for the provider. This allows you to use any model you want without having to wait for us to manually map it.
+
+Mappings are on a specialized job that runs ever 24 hours, so your UI may not be mapped immediately. If you would like to expedite the mapping, please contact us at
+engineering@helicone.ai or connect with us on [Discord](https://discord.gg/zsSTcH2qhG)!
+
+## How to Get a Domain Approved or Mapper Expidited
 
 To get a domain approved, please contact us at engineering@helicone.ai or connect with us on [Discord](https://discord.gg/zsSTcH2qhG)!
 
@@ -206,15 +273,4 @@ To get a domain approved, please contact us at engineering@helicone.ai or connec
 {/* prettier-ignore */}
 {/*
 In the future, we plan to implement an online form to streamline the process if we receive a high volume of emails.
-  \*/}
-
-{/* prettier-ignore */}
-{/*
-
-## Unapproved Domains
-
-To protect our community from potential threats, we have certain restrictions for unapproved domains. To ensure a safe internet environment, you can use an unapproved domain by utilizing the proxy, which will be available soon.
-
-- 10,000 requests per day
-- 1 request per second
   \*/}
