@@ -5,15 +5,7 @@ description: "The optimal method to integrate with Helicone is through our Gatew
 
 # Overview
 
-The Gateway serves as a unified entry point for all traffic, irrespective of your provider. It enables you to dispatch requests to any provider through a single endpoint.
-This provides you with the advantage of utilizing all of Helicone's
-features such as
-[Caching](/features/advanced-usage/caching),
-[Monitoring](https://helicone.ai),
-[Rate Limiting](/features/advanced-usage/custom-rate-limits),
-[Vaults](/features/advanced-usage/vaults),
-[Feedback](/features/advanced-usage/feedback),
-and many more for any provider.
+The Gateway serves as a unified entry point for all traffic, regardless of your provider. It enables you to dispatch requests to any provider through a single endpoint. This provides you with the advantage of utilizing all of Helicone's features such as [Caching](/features/advanced-usage/caching), [Monitoring](https://helicone.ai), [Rate Limiting](/features/advanced-usage/custom-rate-limits), [Vaults](/features/advanced-usage/vaults), [Feedback](/features/advanced-usage/feedback), and many more for any provider.
 
 ## Simple Integration
 
@@ -218,13 +210,6 @@ curl --request POST \
 
 </Accordion>
 
-{/* prettier-ignore */}
-{/*
-
-As we improve the auto-mapper and the unapproved domains, we will demonstrate how the auto mapper can be used to swiftly identify new models and their schemas.
-
-\*/}
-
 # Approved Domains
 
 | Provider    | Domain Name                  | Cost Support | Dedicated Domain        |
@@ -254,12 +239,11 @@ The integration is the same as the approved domains, but you will need to add th
 
 <Frame>![](/images/integrations/model-is-pending-mapping.png)</Frame>
 
-Helicone will automically determine how to map any unsupported model that you throw at it using our automated mapper. Helicone intelligently determines the schema of the model and maps it to the appropriate schema for the provider. This allows you to use any model you want without having to wait for us to manually map it.
+Helicone will automatically determine how to map any unsupported model that you throw at it using our automated mapper. Helicone intelligently determines the schema of the model and maps it to the appropriate schema for the provider. This allows you to use any model you want without having to wait for us to manually map it.
 
-Mappings are on a specialized job that runs ever 24 hours, so your UI may not be mapped immediately. If you would like to expedite the mapping, please contact us at
-engineering@helicone.ai or connect with us on [Discord](https://discord.gg/zsSTcH2qhG)!
+Mappings are on a specialized job that runs every 24 hours, so your UI may not be mapped immediately. If you would like to expedite the mapping, please contact us at engineering@helicone.ai or connect with us on [Discord](https://discord.gg/zsSTcH2qhG)!
 
-## How to Get a Domain Approved or Mapper Expidited
+## How to Get a Domain Approved or Mapper Expedited
 
 To get a domain approved, please contact us at engineering@helicone.ai or connect with us on [Discord](https://discord.gg/zsSTcH2qhG)!
 
@@ -269,8 +253,3 @@ To get a domain approved, please contact us at engineering@helicone.ai or connec
 >
 > If it is a personal deployment, please provide proof you own the domain by updating a text record
 > with the following value: `hconeai-verification=true`
-
-{/* prettier-ignore */}
-{/*
-In the future, we plan to implement an online form to streamline the process if we receive a high volume of emails.
-  \*/}
