@@ -57,7 +57,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   const { currentPage, pageSize, sort } = props;
 
   const [open, setOpen] = useState(false);
-  // const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRow[]>([]);
   const debouncedAdvancedFilters = useDebounce(advancedFilters, 2_000); // 2 seconds
   const [selectedUser, setSelectedUser] = useState<UserMetric>();
