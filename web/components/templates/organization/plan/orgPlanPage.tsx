@@ -26,16 +26,16 @@ import useNotification from "../../../shared/notification/useNotification";
 import { useEffect, useState } from "react";
 import { useGetRequestCountClickhouse } from "../../../../services/hooks/requests";
 import Link from "next/link";
-import RenderOrgUsage from "./renderOrgUsage";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import { useRateLimitTracker } from "../../../../services/hooks/rateLimitTracker";
+import RenderOrgPlan from "./renderOrgPlan";
 
-interface OrgUsagePageProps {
+interface OrgPlanPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
 }
 
-const OrgUsagePage = (props: OrgUsagePageProps) => {
+const OrgPlanPage = (props: OrgPlanPageProps) => {
   const { org } = props;
   const { setNotification } = useNotification();
 
@@ -125,7 +125,7 @@ const OrgUsagePage = (props: OrgUsagePageProps) => {
       );
     } else if (org !== undefined) {
       return (
-        <RenderOrgUsage
+        <RenderOrgPlan
           currentMonth={currentMonth}
           requestCount={Number(count?.data || 0)}
         />
@@ -331,4 +331,4 @@ const OrgUsagePage = (props: OrgUsagePageProps) => {
   );
 };
 
-export default OrgUsagePage;
+export default OrgPlanPage;

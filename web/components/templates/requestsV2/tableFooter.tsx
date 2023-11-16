@@ -15,6 +15,7 @@ interface TableFooterProps {
   onPageChange: (newPageNumber: number) => void;
   onPageSizeChange: (newPageSize: number) => void;
   pageSizeOptions: number[];
+  showCount?: boolean;
 }
 
 const TableFooter = (props: TableFooterProps) => {
@@ -26,6 +27,7 @@ const TableFooter = (props: TableFooterProps) => {
     onPageChange,
     onPageSizeChange,
     pageSizeOptions,
+    showCount = false,
   } = props;
 
   const router = useRouter();
@@ -56,11 +58,17 @@ const TableFooter = (props: TableFooterProps) => {
             ))}
           </select>
         </div>
-        <p className="text-gray-700 dark:text-gray-300 font-medium">{`Page ${currentPage} of ${
-          isCountLoading
-            ? "..."
-            : Math.ceil((count as number) / Number(pageSize || 10))
-        }`}</p>
+        <div className="flex flex-row space-x-1 items-center">
+          <p className="text-gray-700 dark:text-gray-300 font-medium">{`Page ${currentPage} of ${
+            isCountLoading
+              ? "..."
+              : Math.ceil((count as number) / Number(pageSize || 10))
+          }`}</p>
+          {showCount && (
+            <p className="text-gray-500 font-medium text-xs">{`(${count} total)`}</p>
+          )}
+        </div>
+
         <div className="flex flex-row gap-2 items-center">
           <button
             disabled={currentPage <= 1}
