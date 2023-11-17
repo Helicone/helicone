@@ -1,6 +1,6 @@
 {
   "name": "@helicone/helicone",
-  "version": "2.1.2",
+  "version": "2.1.6",
   "description": "A Node.js wrapper for the OpenAI API that logs all requests to Helicone.",
   "repository": {
     "type": "git",
@@ -30,7 +30,6 @@
     "@babel/core": "^7.21.4",
     "@babel/eslint-parser": "^7.21.3",
     "@types/jest": "^29.5.6",
-    "@types/uuid": "^9.0.1",
     "dotenv": "^16.3.1",
     "eslint": "^8.39.0",
     "eslint-config-next": "^13.3.1",
@@ -44,12 +43,13 @@
     "next": "^13.3.1",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.2.2",
-    "uuid": "^9.0.0"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@types/uuid": "^9.0.1",
     "@whatwg-node/fetch": "^0.9.14",
     "nock": "^13.3.6",
-    "openai": "^4.17.1"
+    "openai": "4.17.1",
+    "uuid": "^9.0.1"
   }
 }

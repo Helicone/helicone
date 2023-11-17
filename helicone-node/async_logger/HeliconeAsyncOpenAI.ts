@@ -29,16 +29,25 @@ export class HeliconeAsyncOpenAI extends OpenAI {
   private logger: HeliconeAsyncLogger;
 
   constructor(private options: IHeliconeAsyncClientOptions) {
-    const { apiKey, organization, ...opts } = options;
+    const {
+      apiKey,
+      organization,
+      heliconeMeta: providedHeliconeMeta = {},
+      ...opts
+    } = options;
     super({ apiKey, organization, ...opts });
 
-    options.heliconeMeta ??= {};
-    options.heliconeMeta.apiKey ??= Core.readEnv("HELICONE_API_KEY");
-    options.heliconeMeta.baseUrl ??= "https://api.hconeai.com";
+    const heliconeMeta: IHeliconeMeta = {
+      ...providedHeliconeMeta,
+      apiKey: providedHeliconeMeta.apiKey || Core.readEnv("HELICONE_API_KEY"),
+      baseUrl: providedHeliconeMeta.baseUrl ?? "https://api.hconeai.com",
+    };
 
-    this.helicone = new Helicone(options.heliconeMeta);
+    options.heliconeMeta = heliconeMeta;
+
+    this.helicone = new Helicone(heliconeMeta);
     this.logger = new HeliconeAsyncLogger(options);
-    this.heliconeHeaders = new HeliconeHeaderBuilder(options.heliconeMeta)
+    this.heliconeHeaders = new HeliconeHeaderBuilder(heliconeMeta)
       .withPropertiesHeader()
       .withUserHeader()
       .build();
