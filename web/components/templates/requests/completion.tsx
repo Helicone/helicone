@@ -58,12 +58,12 @@ export const Completion = (props: CompletionProps) => {
         </div>
 
         {mode === "json" ? (
-          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-[#17191d] relative rounded-b-md">
+          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-black relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Request
               </p>
-              <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
+              <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {JSON.stringify(rawRequest, null, 4)}
               </pre>
             </div>
@@ -71,18 +71,18 @@ export const Completion = (props: CompletionProps) => {
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 {response.title}
               </p>
-              <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
+              <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {JSON.stringify(rawResponse, null, 4)}
               </pre>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-[#17191d] relative rounded-b-md">
+          <div className="flex flex-col space-y-4 bg-gray-100 dark:bg-black relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Request
               </p>
-              <p className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
+              <p className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {removeLeadingWhitespace(request)}
               </p>
             </div>
@@ -90,7 +90,7 @@ export const Completion = (props: CompletionProps) => {
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 {response.title}
               </p>
-              <p className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black">
+              <p className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {response && removeLeadingWhitespace(response.text)}
               </p>
             </div>

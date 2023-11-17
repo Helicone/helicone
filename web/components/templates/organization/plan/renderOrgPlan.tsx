@@ -8,7 +8,7 @@ import { filterListToTree } from "../../../../services/lib/filters/filterDefs";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
 
-interface RenderOrgUsageProps {
+interface RenderOrgPlanProps {
   currentMonth: Date;
   requestCount: number;
 }
@@ -25,7 +25,7 @@ function formatNumberString(
   }
 }
 
-const RenderOrgUsage = (props: RenderOrgUsageProps) => {
+const RenderOrgPlan = (props: RenderOrgPlanProps) => {
   const { currentMonth, requestCount } = props;
 
   const startOfMonthFormatted = formatISO(currentMonth, {
@@ -125,4 +125,4 @@ const useRequestsOverTime = (props: {
   };
 };
 
-export default RenderOrgUsage;
+export default RenderOrgPlan;
