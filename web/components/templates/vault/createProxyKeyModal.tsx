@@ -294,11 +294,9 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
           action="#"
           method="POST"
           onSubmit={handleSubmitHandler}
-          className="flex flex-col space-y-8 w-[600px]"
+          className="flex flex-col space-y-8 w-[400px] text-gray-900 dark:text-gray-100"
         >
-          <h1 className="text-lg font-semibold text-gray-900">
-            Create Proxy Key
-          </h1>
+          <h1 className="text-lg font-semibold">Create Proxy Key</h1>
           <div className="w-full space-y-1.5 text-sm">
             <label htmlFor="proxy-key-name">Proxy Key Name</label>
             <input
@@ -306,7 +304,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
               name="proxy-key-name"
               id="proxy-key-name"
               className={clsx(
-                "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm"
+                "block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
               )}
               required
               placeholder="Proxy Key Name"
@@ -317,7 +315,7 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
             <select
               id="provider-key-name"
               name="provider-key-name"
-              className="block w-full rounded-md border border-gray-300  shadow-sm p-2 text-sm"
+              className="block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
               required
             >
               {providerKeys.map((key) => (
@@ -333,13 +331,13 @@ const CreateProxyKeyModal = (props: CreateProxyKeyModalProps) => {
             <button
               onClick={() => setOpen(false)}
               type="button"
-              className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+              className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {isLoading && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
