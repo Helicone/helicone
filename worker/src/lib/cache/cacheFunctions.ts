@@ -45,7 +45,7 @@ export async function saveToCache(
     cacheKv
   );
   if (freeIndexes.length > 0) {
-    cacheKv.put(
+    await cacheKv.put(
       await kvKeyFromRequest(request, freeIndexes[0]),
       JSON.stringify({
         headers: Object.fromEntries(response.headers.entries()),
