@@ -111,9 +111,8 @@ async function getProvider(
       )
     );
   }
-  console.log("targetBaseUrl", targetBaseUrl, setBaseURLOverride);
+
   setBaseURLOverride(targetBaseUrl);
-  console.log("setBaseURLOverride", targetBaseUrl);
 
   const provider = targetBaseUrlHost ?? "CUSTOM";
   return ok({
@@ -148,6 +147,49 @@ const gatewayForwarder = async (
   );
 };
 
+const fallBack = async (
+  requestWrapper: RequestWrapper,
+  forwarder: (targetBaseUrl: string | null) => Promise<Response>
+) => {
+  const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
+  if (!fallbacks) {
+    throw new Error("No fallbacks");
+  }
+  for (const [i, fallback] of enumerate(fallbacks)) {
+    const {
+      "target-url": targetBaseUrl,
+      headers,
+      onCodes,
+      bodyKeyOverride,
+    } = fallback;
+    const remappedHeaders = new Headers();
+    for (const [key, value] of Object.entries(headers)) {
+      remappedHeaders.set(key, value);
+    }
+    requestWrapper.remapHeaders(remappedHeaders);
+    if (bodyKeyOverride) {
+      requestWrapper.setBodyKeyOverride(bodyKeyOverride);
+    }
+
+    const response = await forwarder(targetBaseUrl);
+    if (
+      onCodes.find((code) => {
+        if (typeof code === "number") {
+          return code === response.status;
+        } else {
+          return response.status >= code.from && response.status <= code.to;
+        }
+      }) &&
+      i !== fallbacks.length - 1
+    ) {
+      console.log(targetBaseUrl, "failed, trying next fallback");
+    } else {
+      response.headers.set("helicone-fallback-index", i.toString());
+      return response;
+    }
+  }
+};
+
 export const getGatewayAPIRouter = (router: BaseRouter) => {
   // proxy forwarder only
   router.all(
@@ -174,48 +216,8 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
 
       if (fallbacks && fallbacks.length > 0) {
-        for (const [i, fallback] of enumerate(fallbacks)) {
-          const {
-            "target-url": targetBaseUrl,
-            headers,
-            onCodes,
-            bodyKeyOverride,
-          } = fallback;
-          const remappedHeaders = new Headers();
-          for (const [key, value] of Object.entries(headers)) {
-            remappedHeaders.set(key, value);
-          }
-          requestWrapper.remapHeaders(remappedHeaders);
-          if (bodyKeyOverride) {
-            console.log("Setting body key override", bodyKeyOverride);
-            requestWrapper.setBodyKeyOverride(bodyKeyOverride);
-          }
-
-          const response = await forwarder(targetBaseUrl);
-          if (
-            onCodes.find((code) => {
-              if (typeof code === "number") {
-                return code === response.status;
-              } else {
-                return (
-                  response.status >= code.from && response.status <= code.to
-                );
-              }
-            }) &&
-            i !== fallbacks.length - 1
-          ) {
-            console.log(targetBaseUrl, "failed, trying next fallback");
-          } else {
-            console.log(
-              "Found a fallback that works",
-              response.status,
-              onCodes,
-              i,
-              fallbacks.length
-            );
-            return response;
-          }
-        }
+        console.log("Trying fallbacks");
+        return await fallBack(requestWrapper, forwarder);
       } else {
         console.log("Just forwarding");
         return await forwarder(requestWrapper.heliconeHeaders.targetBaseUrl);

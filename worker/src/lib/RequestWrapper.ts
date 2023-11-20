@@ -140,9 +140,7 @@ export class RequestWrapper {
 
   async getText(): Promise<string> {
     let text = await this.getRawText();
-    console.log("this.bodyKeyOverride", this.bodyKeyOverride);
     if (this.bodyKeyOverride) {
-      console.log("OVERRIDING BODY 1", text);
       try {
         const bodyJson = await JSON.parse(text);
         const bodyOverrideJson = await JSON.parse(
@@ -153,7 +151,6 @@ export class RequestWrapper {
       } catch (e) {
         throw new Error("Could not stringify bodyKeyOverride");
       }
-      console.log("OVERRIDING BODY 2", text);
     }
     return text;
   }
