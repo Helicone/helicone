@@ -149,9 +149,9 @@ const VaultPage = () => {
               onClick={() => {
                 setIsProviderOpen(true);
               }}
-              className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 flex flex-row whitespace-nowrap rounded-md pl-3 pr-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              className="bg-gray-100 dark:bg-black relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              <KeyIcon className="h-8 w-8" />
+              <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
               <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Add a provider key
               </span>
@@ -200,9 +200,9 @@ const VaultPage = () => {
               onClick={() => {
                 setIsProxyOpen(true);
               }}
-              className="relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="bg-gray-100 dark:bg-black relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              <KeyIcon className="h-8 w-8" />
+              <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
               <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Add a proxy key
               </span>
