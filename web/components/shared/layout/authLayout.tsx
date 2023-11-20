@@ -65,8 +65,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
-  console.log("openDev", openDev);
-
   const navigation = [
     {
       name: "Dashboard",

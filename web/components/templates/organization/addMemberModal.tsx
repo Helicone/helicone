@@ -5,13 +5,13 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import { useUserSettings } from "../../../services/hooks/userSettings";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface AddMemberModalProps {
   orgId: string;
   orgOwnerId: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-
   onSuccess?: () => void;
 }
 
@@ -23,8 +23,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const { setNotification } = useNotification();
   const { data, refetch } = useGetOrgMembers(orgId);
 
-  const { isLoading: isUserSettingsLoading, userSettings } =
-    useUserSettings(orgOwnerId);
+  const orgContext = useOrg();
 
   const members = data?.data
     ? data?.data.map((d) => {
@@ -38,7 +37,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    if (userSettings?.tier === "free" && members.length >= 4) {
+    if (orgContext?.currentOrg.tier === "free" && members.length >= 4) {
       setNotification(
         "You have reached the maximum number of members for the free plan.",
         "error"
@@ -47,7 +46,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
       return;
     }
 
-    if (userSettings?.tier === "pro" && members.length >= 9) {
+    if (orgContext?.currentOrg.tier === "pro" && members.length >= 9) {
       setNotification(
         "You have reached the maximum number of members for the pro plan.",
         "error"
@@ -115,7 +114,7 @@ const AddMemberModal = (props: AddMemberModalProps) => {
             name="email"
             id="email"
             className={clsx(
-              "block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-700"
+              "text-gray-900 dark:text-gray-100 block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-700"
             )}
             placeholder={"Enter user email"}
           />
