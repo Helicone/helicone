@@ -6,12 +6,29 @@ You can use Helicone with your Azure-OpenAI deployment, and it requires no addit
 
 <Tabs>
  <Tab title="Python">
-  **Set HELICONE_API_KEY as an environment variable**
+ <Note>Ensure you include api-version in all of your requests</Note>
+<AccordionGroup>
+  <Accordion title="OpenAI v1+">
+  <Note>Must include api-key in both locations</Note>
   ```python
-  export HELICONE_API_KEY=<your API key>
+    client = OpenAI(
+      api_key="[AZURE_OPENAI_API_KEY]",
+      base_url="https://oai.hconeai.com/openai/deployments/[DEPLOYMENT]",
+      default_headers={
+          "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+          "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
+          "api-key": "[AZURE_OPENAI_API_KEY]",
+      },
+      default_query={
+          "api-version": "[API_VERSION]"
+      
+      }
+  )
   ```
+  </Accordion>
 
-**Change the api base and add a Helicone-Auth header**
+  <Accordion title="OpenAI <v1">
+  **Change the api base and add a Helicone-Auth header**
 
 ```python
 import openai
@@ -32,8 +49,9 @@ openai.ChatCompletion.create(
 )
 ```
 
-    That's it! Your OpenAI requests now log results to Helicone. You can use advanced Helicone features as parameters:
-
+  </Accordion>
+</AccordionGroup>
+    That's it! Your Azure OpenAI requests now log results to Helicone.
   </Tab>
 
 <Tab title="Node.js">
