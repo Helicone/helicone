@@ -38,7 +38,6 @@ import { GrGraphQl } from "react-icons/gr";
 import { BsBriefcase, BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useUserSettings } from "../../../services/hooks/userSettings";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
@@ -64,8 +63,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { hasFlag } = useFeatureFlags("webhook_beta", org?.currentOrg.id || "");
   const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
-
-  console.log("openDev", openDev);
 
   const navigation = [
     {

@@ -4,7 +4,6 @@ import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
-import { useUserSettings } from "./userSettings";
 import { Tier } from "../../pages/api/organization/tier";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 

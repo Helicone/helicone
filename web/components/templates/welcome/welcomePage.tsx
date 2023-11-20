@@ -73,27 +73,6 @@ const WelcomePage = (props: WelcomePageProps) => {
     <EventListen
       key={5}
       nextStep={async () => {
-        const { data: userSettings, error: userSettingsError } =
-          await supabaseClient
-            .from("user_settings")
-            .select("*")
-            .eq("user", user?.id)
-            .single();
-
-        if (userSettings === null) {
-          // add the user into the userSettings page
-          const { data: newUserSettings, error: newUserSettingsError } =
-            await supabaseClient
-              .from("user_settings")
-              .insert({
-                user: user?.id,
-                tier: "free",
-                request_limit: 100_000,
-              })
-              .select("*")
-              .single();
-        }
-
         router.push("/dashboard");
       }}
     />,
