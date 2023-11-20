@@ -149,7 +149,7 @@ const VaultPage = () => {
               onClick={() => {
                 setIsProviderOpen(true);
               }}
-              className="bg-gray-100 dark:bg-gray-900 relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="bg-gray-100 dark:bg-black relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
               <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -200,7 +200,7 @@ const VaultPage = () => {
               onClick={() => {
                 setIsProxyOpen(true);
               }}
-              className="bg-gray-100 dark:bg-gray-900 relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="bg-gray-100 dark:bg-black relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
               <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
