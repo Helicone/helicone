@@ -1,7 +1,10 @@
+import { status } from "itty-router";
 import { Env } from "..";
+import { enumerate } from "../helpers";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { approvedDomains } from "../lib/gateway/approvedDomains";
+import { Result, err, ok } from "../results";
 import { BaseRouter } from "./routerFactory";
 
 function validateURL(url: string) {
@@ -56,6 +59,95 @@ async function rateLimitUnapprovedDomains(
   };
 }
 
+async function getProvider(
+  targetBaseUrl: string | null,
+  setBaseURLOverride: (url: string) => void,
+  rateLimitKV: KVNamespace
+): Promise<
+  Result<
+    {
+      provider: string;
+    },
+    Response
+  >
+> {
+  if (!targetBaseUrl) {
+    return err(
+      new Response("Missing target base url", {
+        status: 400,
+      })
+    );
+  }
+  if (!validateURL(targetBaseUrl)) {
+    err(
+      new Response(`Invalid target base url "${targetBaseUrl}"`, {
+        status: 400,
+      })
+    );
+  }
+  const targetBaseUrlHost = new URL(targetBaseUrl).origin;
+
+  if (targetBaseUrlHost !== targetBaseUrl) {
+    err(
+      new Response(
+        `Target base url "${targetBaseUrl}" must not contain a path, got "${targetBaseUrlHost}"`,
+        {
+          status: 400,
+        }
+      )
+    );
+  }
+  const { rateLimited } = await rateLimitUnapprovedDomains(
+    targetBaseUrlHost,
+    rateLimitKV
+  );
+  if (rateLimited) {
+    err(
+      new Response(
+        `Rate limited unapproved domain! To get your target-url on the list of approved domains to surpase the rate limit please reach out to us at engineering@helicone.ai`,
+        {
+          status: 429,
+        }
+      )
+    );
+  }
+  console.log("targetBaseUrl", targetBaseUrl, setBaseURLOverride);
+  setBaseURLOverride(targetBaseUrl);
+  console.log("setBaseURLOverride", targetBaseUrl);
+
+  const provider = targetBaseUrlHost ?? "CUSTOM";
+  return ok({
+    provider,
+  });
+}
+
+const gatewayForwarder = async (
+  targetProps: {
+    targetBaseUrl: string | null;
+    setBaseURLOverride: (url: string) => void;
+  },
+  requestWrapper: RequestWrapper,
+  env: Env,
+  ctx: ExecutionContext
+) => {
+  const { data: provderResults, error } = await getProvider(
+    targetProps.targetBaseUrl,
+    targetProps.setBaseURLOverride,
+    env.RATE_LIMIT_KV
+  );
+
+  if (error) {
+    return error;
+  }
+
+  return await proxyForwarder(
+    requestWrapper,
+    env,
+    ctx,
+    provderResults.provider
+  );
+};
+
 export const getGatewayAPIRouter = (router: BaseRouter) => {
   // proxy forwarder only
   router.all(
@@ -66,44 +158,68 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      const targetBaseUrl = requestWrapper.heliconeHeaders.targetBaseUrl;
-      if (!targetBaseUrl) {
-        return new Response("Missing target base url", {
-          status: 400,
-        });
-      }
-      if (!validateURL(targetBaseUrl)) {
-        return new Response(`Invalid target base url "${targetBaseUrl}"`, {
-          status: 400,
-        });
-      }
-      const targetBaseUrlHost = new URL(targetBaseUrl).origin;
-
-      if (targetBaseUrlHost !== targetBaseUrl) {
-        return new Response(
-          `Target base url "${targetBaseUrl}" must not contain a path, got "${targetBaseUrlHost}"`,
+      function forwarder(targetBaseUrl: string | null) {
+        return gatewayForwarder(
           {
-            status: 400,
-          }
+            targetBaseUrl,
+            setBaseURLOverride: (url) => {
+              requestWrapper.setBaseURLOverride(url);
+            },
+          },
+          requestWrapper,
+          env,
+          ctx
         );
       }
-      const { rateLimited } = await rateLimitUnapprovedDomains(
-        targetBaseUrlHost,
-        env.RATE_LIMIT_KV
-      );
-      if (rateLimited) {
-        return new Response(
-          `Rate limited unapproved domain! To get your target-url on the list of approved domains to surpase the rate limit please reach out to us at engineering@helicone.ai`,
-          {
-            status: 429,
-          }
-        );
-      }
-      console.log("targetBaseUrl", targetBaseUrl);
-      requestWrapper.setBaseURLOverride(targetBaseUrl);
+      const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
 
-      const provider = targetBaseUrlHost ?? "CUSTOM";
-      return await proxyForwarder(requestWrapper, env, ctx, provider);
+      if (fallbacks && fallbacks.length > 0) {
+        for (const [i, fallback] of enumerate(fallbacks)) {
+          const {
+            "target-url": targetBaseUrl,
+            headers,
+            onCodes,
+            bodyKeyOverride,
+          } = fallback;
+          const remappedHeaders = new Headers();
+          for (const [key, value] of Object.entries(headers)) {
+            remappedHeaders.set(key, value);
+          }
+          requestWrapper.remapHeaders(remappedHeaders);
+          if (bodyKeyOverride) {
+            console.log("Setting body key override", bodyKeyOverride);
+            requestWrapper.setBodyKeyOverride(bodyKeyOverride);
+          }
+
+          const response = await forwarder(targetBaseUrl);
+          if (
+            onCodes.find((code) => {
+              if (typeof code === "number") {
+                return code === response.status;
+              } else {
+                return (
+                  response.status >= code.from && response.status <= code.to
+                );
+              }
+            }) &&
+            i !== fallbacks.length - 1
+          ) {
+            console.log(targetBaseUrl, "failed, trying next fallback");
+          } else {
+            console.log(
+              "Found a fallback that works",
+              response.status,
+              onCodes,
+              i,
+              fallbacks.length
+            );
+            return response;
+          }
+        }
+      } else {
+        console.log("Just forwarding");
+        return await forwarder(requestWrapper.heliconeHeaders.targetBaseUrl);
+      }
     }
   );
 
