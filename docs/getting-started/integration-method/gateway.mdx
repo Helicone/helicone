@@ -31,7 +31,7 @@ This is achieved by allowing you to determine the destination of your request by
       messages=[{"role": "User", "content": "Say hi!"}],
       headers={
         "Helicone-Auth": "Bearer [HELICONE_API_KEY]",
-        "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
+        "Helicone-Target-Url": "https://api.lemonfox.ai",
         "Helicone-Target-Provider": "LemonFox",
       }
     )
@@ -49,7 +49,7 @@ This is achieved by allowing you to determine the destination of your request by
         baseURL: "https://gateway.hconeai.com",
         defaultHeaders: {
           "Helicone-Auth": `Bearer [HELICONE_API_KEY]`,
-          "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
+          "Helicone-Target-Url": "https://api.lemonfox.ai",
         },
       });
       ```
@@ -112,7 +112,7 @@ const model = new ChatOpenAI({
     baseOptions: {
       headers: {
         "Helicone-Auth": `Bearer ${heliconeApiKey}`,
-        "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
+        "Helicone-Target-Url": "https://api.lemonfox.ai",
         "Helicone-Target-Provider": "LemonFox",
       },
     },
@@ -134,7 +134,7 @@ llm = ChatOpenAI(
     openai_api_key='<>',
     headers={
         "Helicone-Auth": f"Bearer {env.HELICONE_API_KEY}"
-        "Helicone-Target-Url": "https://api.lemonfox.ai/v1",
+        "Helicone-Target-Url": "https://api.lemonfox.ai",
         "Helicone-Target-Provider": "LemonFox",
     },
     openai_api_base="https://gateway.hconeai.com/v1",
@@ -147,7 +147,7 @@ llm = ChatOpenAI(
     curl --request POST \
     --url https://gateway.hconeai.com/v1/chat/completetions \
     --header 'Helicone-Auth: Bearer [HELICONE_KEY]' \
-    --header 'Helicone-Target-Url: https://api.lemonfox.ai/v1' \
+    --header 'Helicone-Target-Url: https://api.lemonfox.ai' \
     --header 'Helicone-Target-Provider: LemonFox' \
     --header 'content-type: application/json' \
     --data '{
