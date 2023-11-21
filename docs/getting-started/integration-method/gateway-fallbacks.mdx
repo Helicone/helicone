@@ -1,19 +1,17 @@
 ---
-title: "Gateway Fallback (beta)"
-description: "Many providers have similar APIs, and with some of them being unstable, we have created a unified gateway that allows you to use any provider through a single endpoint."
+title: "Gateway Fallback (Beta)"
+description: "With the instability of some APIs and the similarity of many providers, we have developed a unified gateway. This gateway allows you to utilize any provider through a single endpoint."
 ---
 
 # Overview
 
-Rather than providing a single `Helicone-Target-Url` header, we have created a unified gateway that
-allows you to use any provider through a single endpoint.
-This allows you to use any provider without having to change your code.
+Instead of providing a single `Helicone-Target-Url` header, we have developed a unified gateway. This gateway enables you to utilize any provider through a single endpoint, eliminating the need to modify your code when switching providers.
 
-# How it works
+# How it Works
 
-Provide a header called `Helicone-Fallbacks` that is a JSON string dump of the fallbacks you want to use. The fallbacks are ordered by priority, so the first one will be used if it is available. If it is not available, it will try the next one, and so on.
+To use this feature, provide a header named `Helicone-Fallbacks`. This header should contain a JSON string dump of the fallbacks you wish to use. The fallbacks are prioritized, meaning the first one will be used if available. If it is not available, the system will attempt to use the next one, and so on.
 
-The header for `Helicone-Fallbacks` is as follows:
+The structure for the `Helicone-Fallbacks` header is as follows:
 
 ```TypeScript
 export type HeliconeFallbackCode = number | { from: number; to: number };
@@ -29,9 +27,9 @@ export type HeliconeFallback = {
 # Example
 
 <Tabs>
-  <Tab title="Python w/o pacakge">
+  <Tab title="Python w/o package">
 
-The following example will use the OpenAI API, and if it fails, it will use the LemonFox API.
+The following example demonstrates how to use the OpenAI API. If it fails, the system will switch to the LemonFox API.
 
     ```python
     url = "http://gateway.hconeai.com/v1/chat/completions"
@@ -80,7 +78,7 @@ The following example will use the OpenAI API, and if it fails, it will use the 
 
   </Tab>
   <Tab title="Other Languages">
-    Please take a look at how to [add a Helicone Header](/helicone-headers/intro) for how to integrate within other languages.
+    For integration within other languages, please refer to our guide on [adding a Helicone Header](/helicone-headers/intro).
   </Tab>
 
 </Tabs>
