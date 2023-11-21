@@ -1,4 +1,3 @@
-import { status } from "itty-router";
 import { Env } from "..";
 import { enumerate } from "../helpers";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/forwarder";

@@ -1,0 +1,86 @@
+---
+title: "Gateway Fallback (beta)"
+description: "Many providers have similar APIs, and with some of them being unstable, we have created a unified gateway that allows you to use any provider through a single endpoint."
+---
+
+# Overview
+
+Rather than providing a single `Helicone-Target-Url` header, we have created a unified gateway that
+allows you to use any provider through a single endpoint.
+This allows you to use any provider without having to change your code.
+
+# How it works
+
+Provide a header called `Helicone-Fallbacks` that is a JSON string dump of the fallbacks you want to use. The fallbacks are ordered by priority, so the first one will be used if it is available. If it is not available, it will try the next one, and so on.
+
+The header for `Helicone-Fallbacks` is as follows:
+
+```TypeScript
+export type HeliconeFallbackCode = number | { from: number; to: number };
+
+export type HeliconeFallback = {
+  "target-url": string;
+  headers: Record<string, string>;
+  onCodes: HeliconeFallbackCode[];
+  bodyKeyOverride?: object;
+};
+```
+
+# Example
+
+<Tabs>
+  <Tab title="Python w/o pacakge">
+
+The following example will use the OpenAI API, and if it fails, it will use the LemonFox API.
+
+    ```python
+    url = "http://gateway.hconeai.com/v1/chat/completions"
+
+    headers = {
+      "Content-Type": "application/json",
+      "Helicone-Auth": "Bearer <Helicone KEY>",
+      "Helicone-Fallbacks": json.dumps([
+          {
+              "target-url": "https://api.openai.com",
+              "headers": {
+                "Authorization": "Bearer <OpenAI Key>",
+              },
+              "onCodes": [{"from": 400, "to": 500}]
+          },
+          {
+              "target-url": "https://api.lemonfox.ai",
+              "headers": {
+                  "Authorization": "Bearer <LemonFox Key>",
+                  "Content-Type": "application/json",
+              },
+              "onCodes": [401, 403],
+              "bodyKeyOverride": {
+                  "model": "zephyr-chat",
+              }
+          },
+      ]),
+    }
+    payload = {
+      "model": "gpt-4",
+      "messages": [
+        {
+          "role": "user",
+          "content": "What is the meaning of life?"
+        }
+      ],
+      "max_tokens": 300
+    }
+
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    print("Fallback index used: ", response.headers["helicone-fallback-index"])
+    print(response.status_code)
+    print(response.text)
+
+    ```
+
+  </Tab>
+  <Tab title="Other Languages">
+    Please take a look at how to [add a Helicone Header](/helicone-headers/intro) for how to integrate within other languages.
+  </Tab>
+
+</Tabs>
