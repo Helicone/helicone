@@ -10,6 +10,16 @@ import {
   Rosetta,
 } from "@helicone/project-rosetta";
 
+const THREAD_REGEX = /thread/;
+const CHAT_COMPLETIONS_REGEX = /\/chat\/completions/;
+const COMPLETIONS_REGEX = /\/completions/;
+const DEPLOYMENT_OR_ENGINE_REGEX =
+  /\/(?:openai\/deployments|engines)\/[^/]+(.*)/;
+const VERSION_ONE_REGEX = /\/v1/g;
+const ASSISTANTS_REGEX = /(?<=\/assistants\/).*/;
+const DUPLICATE_SLASH_REGEX = /\/{2,}/g;
+const TRAILING_SLASH_REGEX = /\/+$/;
+
 export class RosettaWrapper {
   private rosetta: Rosetta;
   private rosettaStore: IDatabaseService;
@@ -38,17 +48,16 @@ export class RosettaWrapper {
     provider: string,
     model: string
   ): Promise<Json | null> {
-    const cleanedPath = this.cleanPath(requestPath);
+    const cleanPathKey = this.cleanPath(requestPath);
 
-    if (!cleanedPath) {
+    if (!cleanPathKey) {
       return null;
     }
 
     const outputSchema = JSON.parse(JSON.stringify(requestResponseSchema));
-    const key = `${provider}:${cleanedPath}`;
 
     try {
-      return await this.rosetta.map(llmCall, outputSchema, key);
+      return await this.rosetta.map(llmCall, outputSchema, cleanPathKey);
     } catch (error: any) {
       console.log(`Error mapping LLM call: ${error.message}`);
       return null;
@@ -60,20 +69,24 @@ export class RosettaWrapper {
   }
 
   private cleanPath(requestPath: string): string | null {
-    const regexDeploymentOrEngine =
-      /\/(?:openai\/deployments|engines)\/[^/]+(.*)/;
-    const regexV1 = /^\/v1(\/.+)/;
-
-    if (/thread/.test(requestPath)) {
+    if (THREAD_REGEX.test(requestPath)) {
       return null;
     }
 
     let cleanedPath = requestPath;
-    if (regexDeploymentOrEngine.test(requestPath)) {
-      cleanedPath = requestPath.replace(regexDeploymentOrEngine, "$1");
-    } else if (regexV1.test(requestPath)) {
-      cleanedPath = requestPath.replace(regexV1, "$1");
+    if (CHAT_COMPLETIONS_REGEX.test(requestPath)) {
+      return "/chat/completions";
     }
+
+    if (COMPLETIONS_REGEX.test(requestPath)) {
+      return "/completions";
+    }
+
+    cleanedPath = cleanedPath.replace(DEPLOYMENT_OR_ENGINE_REGEX, "$1");
+    cleanedPath = cleanedPath.replace(VERSION_ONE_REGEX, "$1");
+    cleanedPath = cleanedPath.replace(ASSISTANTS_REGEX, "");
+    cleanedPath = cleanedPath.replace(DUPLICATE_SLASH_REGEX, "/");
+    cleanedPath = cleanedPath.replace(TRAILING_SLASH_REGEX, "");
 
     if (cleanedPath === "/") {
       return null;
