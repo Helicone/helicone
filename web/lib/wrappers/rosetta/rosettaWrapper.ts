@@ -83,7 +83,7 @@ export class RosettaWrapper {
     }
 
     cleanedPath = cleanedPath.replace(DEPLOYMENT_OR_ENGINE_REGEX, "$1");
-    cleanedPath = cleanedPath.replace(VERSION_ONE_REGEX, "$1");
+    cleanedPath = cleanedPath.replace(VERSION_ONE_REGEX, "");
     cleanedPath = cleanedPath.replace(ASSISTANTS_REGEX, "");
     cleanedPath = cleanedPath.replace(DUPLICATE_SLASH_REGEX, "/");
     cleanedPath = cleanedPath.replace(TRAILING_SLASH_REGEX, "");
