@@ -27,6 +27,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
+import Globe from "./globe";
 
 const features: {
   title: string;
@@ -160,13 +161,23 @@ export default function Example() {
           <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
         </svg>
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-8 sm:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <h1 className="text-4xl sm:text-6xl font-semibold sm:leading-tight max-w-4xl">
-            Helicone is the smartest way to monitor your LLM applications.
+          <h1 className="text-4xl sm:text-6xl font-semibold sm:leading-snug max-w-4xl">
+            The{" "}
+            <span className="border-2 border-violet-700 border-dashed text-violet-700 py-2 px-4">
+              easiest
+            </span>{" "}
+            way to monitor your LLM-applications at{" "}
+            <span className="border-2 border-pink-700 border-dashed text-pink-700 py-2 px-4">
+              scale
+            </span>
           </h1>
-          <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-3xl">
-            The world{"'"}s best open-source platform for AI observability. Get
-            monitoring, logging, and tracing for your LLM applications out of
-            the box.
+          <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-4xl">
+            Join thousands of developers and companies who have streamlined
+            their{" "}
+            <span className="block">
+              LLM-powered application infrastructure with Helicone&apos;s
+              scalable solutions.
+            </span>
           </p>
 
           <div className="flex flex-row gap-8 pt-8">
@@ -174,7 +185,7 @@ export default function Example() {
               onClick={() => {
                 router.push("/signup");
               }}
-              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-md md:text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
             >
               Get Started
             </button>
@@ -251,7 +262,7 @@ export default function Example() {
             Combinator
           </a>
           <div className="flex flex-col pt-24">
-            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-2xl lg:p-2.5">
+            <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
               <Image
                 src="/assets/home/request-preview.webp"
                 alt="App screenshot"
@@ -333,22 +344,22 @@ export default function Example() {
         id="features"
         className="bg-gradient-to-b from-white to-gray-200 mt-24 pb-24 antialiased"
       >
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4 w-full">
             <h2 className="text-4xl md:text-5xl font-semibold">
-              Monitoring without the hassle.
+              Monitoring has never been easier
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-normal">
-              Helicone makes it easy to understand what your AI is doing and
-              speeds up your development process - with the easiest integration
-              in the market.
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto md:leading-normal">
+              Designed to work out of the box, Helicone provides meaningful
+              insights that help you understand your applications performance in
+              real-time.
             </p>
             <div className="flex flex-row gap-6 pt-4 w-full justify-center">
               <button
                 onClick={() => {
                   router.push("/signup");
                 }}
-                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Get Started
               </button>
@@ -368,31 +379,31 @@ export default function Example() {
                       });
                   });
                 }}
-                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 {demoLoading && <ArrowPathIcon className="h-4 w-4 inline" />}
                 View Demo
               </button>
             </div>
-            <div className="grid grid-cols-8 gap-4 w-full py-16">
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
+            <div className="grid grid-cols-8 gap-4 w-full py-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-xl  h-[26rem] flex flex-col p-8">
                 <div className="w-full h-full flex relative mb-8 justify-center">
                   <Image
-                    className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
+                    className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-48 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/requests.webp"
                     alt="requests"
                     width={980}
                     height={604}
                   />
                   <Image
-                    className="hidden md:block absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-40 w-fit object-contain lg:col-span-1"
+                    className="hidden md:block absolute bottom-16 right-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/users.webp"
                     alt="users"
                     width={980}
                     height={604}
                   />
                   <Image
-                    className="hidden md:block absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-44 w-fit object-contain lg:col-span-1"
+                    className="hidden md:block absolute bottom-10 left-0 shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-48 w-fit object-contain lg:col-span-1"
                     src="/assets/home/bento/costs.webp"
                     alt="costs"
                     width={908}
@@ -404,43 +415,33 @@ export default function Example() {
                     Meaningful Insights
                   </h3>
                   <p className="text-md text-gray-600">
-                    See how your AI is performing in real-time.
+                    High-level metrics to help you monitor your application
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-xl h-[26rem] flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
-                  <div className="w-full h-full flex flex-col space-y-12 mb-8 justify-center">
-                    <div className="flex flex-row gap-4 mx-auto">
-                      <div className="text-6xl text-green-500 flex gap-0.5">
-                        <span>+</span>
-                        <span>2</span>
-                      </div>
-                      <div className="text-6xl text-red-500 flex gap-0.5">
-                        <span>-</span>
-                        <span>2</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-row gap-2 mx-auto">
-                      <div className="h-6 w-6 border border-gray-200 bg-green-500" />
-                      <div className="h-6 w-6 border border-gray-200 bg-green-500" />
-                      <div className="h-6 w-6 border border-gray-200 bg-red-500" />
-                      <div className="h-6 w-6 border border-gray-200 bg-red-500" />
-                      <div className="h-6 w-6 border border-gray-200 bg-gray-100" />
-                    </div>
+                  <div className="w-full h-full flex flex-col mb-8 justify-center items-center">
+                    <Image
+                      className="shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
+                      src="/assets/home/bento/models.png"
+                      alt="costs"
+                      width={778}
+                      height={612}
+                    />
                   </div>
-                  <h3 className="text-3xl font-semibold">2 lines of code</h3>
+                  <h3 className="text-3xl font-semibold">Model Breakdown</h3>
                   <p className="text-md text-gray-600">
-                    Get integrated in seconds. Not days.
+                    Understand your model usage and costs.
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-xl  h-[26rem] flex flex-col p-8">
                 <div className="w-full h-full flex justify-center items-center">
                   <Image
                     src="/assets/landing/helicone-mobile.webp"
-                    width={125}
-                    height={125}
+                    width={160}
+                    height={160}
                     alt="Helicone Logo"
                     className="rounded-xl"
                   />
@@ -448,24 +449,27 @@ export default function Example() {
                 <div className="flex flex-col mt-auto space-y-2">
                   <h3 className="text-3xl font-semibold">Open Source</h3>
                   <p className="text-md text-gray-600">
-                    Commited to user-centric development and transparency.
+                    Commited to full transparency.
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-2xl h-96 flex flex-col p-8">
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-xl h-[26rem] flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex relative mb-4 justify-center">
                     <Image
-                      className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-300 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
-                      src="/assets/home/bento/history.webp"
+                      className="z-20 absolute bottom-0 shadow-sm rounded-lg border border-gray-300 col-span-2 max-h-[15.5rem] w-fit object-contain lg:col-span-1"
+                      src="/assets/home/bento/experiment.png"
                       alt="requests"
-                      width={1858}
-                      height={854}
+                      width={1860}
+                      height={834}
                     />
                   </div>
-                  <h3 className="text-3xl font-semibold">Chat History</h3>
+                  <h3 className="text-3xl font-semibold">
+                    Practical Playground
+                  </h3>
                   <p className="text-md text-gray-600">
-                    Easily replay, debug, and edit chat sessions.
+                    Easily replay, debug, and experiment with your user&apos;s
+                    sessions.
                   </p>
                 </div>
               </div>
@@ -474,13 +478,108 @@ export default function Example() {
         </div>
       </section>
       <section
-        id="features"
-        className="bg-gradient-to-b from-gray-200 to-white py-24 antialiased"
+        id="integration"
+        className="bg-gradient-to-b from-gray-200 to-white py-36 antialiased"
       >
-        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-12">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
           <div className="flex flex-col space-y-4">
             <h2 className="text-4xl md:text-5xl font-semibold">
-              Purpose-built for LLM developers.
+              Any model, any scale
+            </h2>
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
+              We support any provider and model, as well as fine-tuned models.
+              All with sub millisecond latency and query times.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 md:justify-center w-full">
+            <div className="relative isolate bg-white h-[32rem] w-full border border-gray-300 shadow-sm rounded-xl flex justify-center items-center">
+              <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Support for all models
+                </h2>
+                <p className="text-lg text-gray-600 max-w-[18rem]">
+                  Our custom-built mapper engine allows us to support any
+                  large-language model from any provider.
+                </p>
+              </div>
+              <div className="bottom-0 absolute w-full">
+                <div className="w-full flex flex-row space-x-4 justify-end p-8 relative h-full">
+                  <div className="flex flex-col space-y-4">
+                    <div className="h-28 w-28"></div>
+                    <div className="h-28 w-28"></div>
+                    <Image
+                      src={"/assets/home/providers/bard.png"}
+                      alt={"baard"}
+                      width={112}
+                      height={112}
+                      className="border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-4 h-full">
+                    <div className="h-28 w-28"></div>
+                    <Image
+                      src={"/assets/home/providers/llama2.png"}
+                      alt={"llama2"}
+                      width={112}
+                      height={112}
+                      className="border border-gray-300 rounded-lg"
+                    />
+                    <Image
+                      src={"/assets/home/providers/together.png"}
+                      alt={"together"}
+                      width={112}
+                      height={112}
+                      className="border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-4">
+                    <Image
+                      src={"/assets/home/providers/openai.png"}
+                      alt={"openai"}
+                      width={112}
+                      height={112}
+                      className="border border-gray-300 rounded-lg"
+                    />
+                    <Image
+                      src={"/assets/home/providers/anthropic.png"}
+                      alt={"anthropic"}
+                      width={112}
+                      height={112}
+                      className="border border-gray-300 rounded-lg"
+                    />
+                    <Image
+                      src={"/assets/home/providers/mistral.png"}
+                      alt={"mistral"}
+                      width={112}
+                      height={112}
+                      className="border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="overflow-hidden relative isolate bg-white h-[32rem] w-full border border-gray-300 shadow-sm rounded-xl flex justify-center items-center">
+              <div className="w-full h-full rounded-xl p-8 flex flex-col space-y-4 text-left">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Built for scale
+                </h2>
+                <p className="text-lg text-gray-600 max-w-[18rem]">
+                  We meticulously designed Helicone to support millions of
+                  requests per second with no latency impact.
+                </p>
+              </div>
+              <div className="-bottom-32 items-center flex absolute -right-32 w-full justify-end">
+                <Globe />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="tooling" className="bg-white py-24 antialiased">
+        <div className="px-4 md:px-8 max-w-6xl justify-center items-center text-center flex flex-col mx-auto w-full space-y-8">
+          <div className="flex flex-col space-y-4">
+            <h2 className="text-4xl md:text-5xl font-semibold">
+              Purpose-built tooling for LLM developers.
             </h2>
             <p className="text-lg md:text-xl text-gray-600">
               Everything you need to build, deploy, and scale your LLM-powered
@@ -491,7 +590,7 @@ export default function Example() {
                 href="https://docs.helicone.ai/introduction"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 View Docs
               </Link>
@@ -499,7 +598,7 @@ export default function Example() {
                 href="https://discord.gg/zsSTcH2qhG"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-2xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                className="bg-white hover:bg-gray-200 whitespace-nowrap border border-gray-900 rounded-xl px-6 py-3 text-sm md:text-md font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Join Discord
               </Link>
@@ -542,19 +641,8 @@ export default function Example() {
           </div>
         </div>
       </section>
-      {/* <section id="features" className="bg-white h-screen pt-36 antialiased">
-        <div className="md:px-8 mx-auto max-w-6xl text-center">
-          <div className="flex flex-col space-y-4">
-            <h2 className="text-5xl font-semibold">Production Ready</h2>
-            <p className="text-xl text-gray-600 max-w-xl mx-auto">
-              Helicone is ready for your use case today. Take a look at how
-              organizations are using Helicone to monitor their AI applications:
-            </p>
-          </div>
-          <div className="mx-auto mt-16 grid auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3"></div>
-        </div>
-      </section> */}
-      <section id="features" className="bg-white pt-36 pb-48 antialiased">
+
+      <section id="faq" className="bg-white pt-36 pb-48 antialiased">
         <div className="mx-auto px-4 md:px-8 max-w-6xl divide-y divide-gray-900/10">
           <div className="flex flex-col space-y-4 text-center">
             <h2 className="text-4xl md:text-5xl font-semibold">
