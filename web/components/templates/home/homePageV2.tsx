@@ -268,7 +268,7 @@ export default function Example() {
                 alt="App screenshot"
                 width={2720}
                 height={1844}
-                className="w-[70rem] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
+                className="w-[70rem] rounded-lg shadow-2xl ring-1 ring-gray-900/10"
               />
             </div>
           </div>
