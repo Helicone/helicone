@@ -310,6 +310,8 @@ export class DBLoggable {
           status: -1,
           body: {
             helicone_error: "error getting response, " + e,
+            helicone_repsonse_body_as_string:
+              await this.response.getResponseBody(),
           },
         }
       );
