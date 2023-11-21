@@ -149,13 +149,16 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    const supabaseClient = createClient(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    const rosetta = new RosettaWrapper(supabaseClient, env);
-    await rosetta.generateMappers();
-    await updateLoopUsers(env);
+    if (controller.cron === "0 * * * *") {
+      const supabaseClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
+      const rosetta = new RosettaWrapper(supabaseClient, env);
+      await rosetta.generateMappers();
+    } else {
+      await updateLoopUsers(env);
+    }
   },
 };
 
