@@ -15,7 +15,7 @@ const CHAT_COMPLETIONS_REGEX = /\/chat\/completions/;
 const COMPLETIONS_REGEX = /\/completions/;
 const DEPLOYMENT_OR_ENGINE_REGEX =
   /\/(?:openai\/deployments|engines)\/[^/]+(.*)/;
-const VERSION_ONE_REGEX = /^\/v1(\/.+)/;
+const VERSION_ONE_REGEX = /\/v1/g;
 const ASSISTANTS_REGEX = /(?<=\/assistants\/).*/;
 const DUPLICATE_SLASH_REGEX = /\/{2,}/g;
 const TRAILING_SLASH_REGEX = /\/+$/;
