@@ -16,7 +16,7 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import { ChevronRightIcon, HeartIcon } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 import CodeSnippet from "./codeSnippet";
 import { DiffHighlight } from "../welcome/diffHighlight";
@@ -160,23 +160,23 @@ export default function Example() {
           </defs>
           <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
         </svg>
-        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-8 sm:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
-          <h1 className="text-4xl sm:text-6xl font-semibold sm:leading-snug max-w-4xl">
+        <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
+          <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
             The{" "}
-            <span className="border-2 border-violet-700 border-dashed text-violet-700 py-2 px-4">
+            <span className="md:border-2 border-violet-700 border-dashed text-violet-700 md:py-2 md:px-4">
               easiest
             </span>{" "}
             way to monitor your LLM-applications at{" "}
-            <span className="border-2 border-pink-700 border-dashed text-pink-700 py-2 px-4">
+            <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
               scale
             </span>
           </h1>
-          <p className="text-xl sm:text-2xl text-gray-600 sm:leading-relaxed max-w-4xl">
+          <p className="text-lg sm:text-2xl text-gray-600 leading-8 sm:leading-relaxed max-w-4xl">
             Join thousands of developers and companies who have streamlined
             their{" "}
             <span className="block">
               LLM-powered application infrastructure with Helicone&apos;s
-              scalable solutions.
+              solutions.
             </span>
           </p>
 
@@ -190,77 +190,83 @@ export default function Example() {
               Get Started
             </button>
           </div>
-
-          <a
-            href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex space-x-6 font-semibold text-gray-600 pt-4"
-          >
-            Backed by{" "}
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-1 ml-2"
+          <div className="flex flex-col md:flex-row pt-4 md:divide-x-2 gap-[14px] justify-center w-full items-center divide-gray-300">
+            <Link
+              href="https://www.ycombinator.com/launches/I73-helicone-open-source-observability-platform-for-generative-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex space-x-6 font-semibold text-gray-600 md:w-52"
             >
-              <g clipPath="url(#clip0_24_57)">
-                <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
+              Backed by{" "}
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="mr-1 ml-2"
+              >
+                <g clipPath="url(#clip0_24_57)">
+                  <rect width="24" height="24" rx="5.4" fill="#FF5100"></rect>
+                  <rect
+                    x="0.5"
+                    y="0.5"
+                    width="23"
+                    height="23"
+                    rx="4.9"
+                    stroke="#FF844B"
+                  ></rect>
+                  <path
+                    d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
+                    fill="white"
+                  ></path>
+                </g>
                 <rect
                   x="0.5"
                   y="0.5"
                   width="23"
                   height="23"
                   rx="4.9"
-                  stroke="#FF844B"
+                  stroke="#FF5100"
+                  strokeOpacity="0.1"
                 ></rect>
-                <path
-                  d="M7.54102 7.31818H9.28604L11.9458 11.9467H12.0552L14.715 7.31818H16.46L12.7662 13.5028V17.5H11.2349V13.5028L7.54102 7.31818Z"
-                  fill="white"
-                ></path>
-              </g>
-              <rect
-                x="0.5"
-                y="0.5"
-                width="23"
-                height="23"
-                rx="4.9"
-                stroke="#FF5100"
-                strokeOpacity="0.1"
-              ></rect>
-              <rect
-                x="0.5"
-                y="0.5"
-                width="23"
-                height="23"
-                rx="4.9"
-                stroke="url(#paint0_radial_24_57)"
-              ></rect>
-              <defs>
-                <radialGradient
-                  id="paint0_radial_24_57"
-                  cx="0"
-                  cy="0"
-                  r="1"
-                  gradientUnits="userSpaceOnUse"
-                  gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
-                >
-                  <stop stopColor="white" stopOpacity="0.56"></stop>
-                  <stop
-                    offset="0.28125"
-                    stopColor="white"
-                    stopOpacity="0"
-                  ></stop>
-                </radialGradient>
-                <clipPath id="clip0_24_57">
-                  <rect width="24" height="24" rx="5.4" fill="white"></rect>
-                </clipPath>
-              </defs>
-            </svg>{" "}
-            Combinator
-          </a>
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="23"
+                  height="23"
+                  rx="4.9"
+                  stroke="url(#paint0_radial_24_57)"
+                ></rect>
+                <defs>
+                  <radialGradient
+                    id="paint0_radial_24_57"
+                    cx="0"
+                    cy="0"
+                    r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(7.35) rotate(58.475) scale(34.1384)"
+                  >
+                    <stop stopColor="white" stopOpacity="0.56"></stop>
+                    <stop
+                      offset="0.28125"
+                      stopColor="white"
+                      stopOpacity="0"
+                    ></stop>
+                  </radialGradient>
+                  <clipPath id="clip0_24_57">
+                    <rect width="24" height="24" rx="5.4" fill="white"></rect>
+                  </clipPath>
+                </defs>
+              </svg>{" "}
+              Combinator
+            </Link>
+            <div className="font-semibold text-gray-600 pl-4 flex items-center md:w-56">
+              Fully open-source{" "}
+              <HeartIcon className="h-4 w-4 inline ml-2 text-pink-500" />
+            </div>
+          </div>
+
           <div className="flex flex-col pt-24">
             <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-2.5 lg:rounded-xl lg:p-2.5">
               <Image
@@ -421,6 +427,33 @@ export default function Example() {
               </div>
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-xl h-[26rem] flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
+                  <div className="w-full h-full flex flex-col space-y-12 mb-8 justify-center">
+                    <div className="flex flex-row gap-4 mx-auto">
+                      <div className="text-7xl text-green-500 flex gap-0.5">
+                        <span>+</span>
+                        <span>2</span>
+                      </div>
+                      <div className="text-7xl text-red-500 flex gap-0.5">
+                        <span>-</span>
+                        <span>2</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-2 mx-auto">
+                      <div className="h-8 w-8 border border-gray-200 bg-green-500" />
+                      <div className="h-8 w-8 border border-gray-200 bg-green-500" />
+                      <div className="h-8 w-8 border border-gray-200 bg-red-500" />
+                      <div className="h-8 w-8 border border-gray-200 bg-red-500" />
+                      <div className="h-8 w-8 border border-gray-200 bg-gray-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-semibold">2 lines of code</h3>
+                  <p className="text-md text-gray-600">
+                    Get integrated in seconds. Not days.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-xl h-[26rem] flex flex-col p-8">
+                <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex flex-col mb-8 justify-center items-center">
                     <Image
                       className="shadow-sm rounded-lg border border-gray-200 col-span-2 max-h-56 w-fit object-contain lg:col-span-1"
@@ -436,23 +469,7 @@ export default function Example() {
                   </p>
                 </div>
               </div>
-              <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-3 rounded-xl  h-[26rem] flex flex-col p-8">
-                <div className="w-full h-full flex justify-center items-center">
-                  <Image
-                    src="/assets/landing/helicone-mobile.webp"
-                    width={160}
-                    height={160}
-                    alt="Helicone Logo"
-                    className="rounded-xl"
-                  />
-                </div>
-                <div className="flex flex-col mt-auto space-y-2">
-                  <h3 className="text-3xl font-semibold">Open Source</h3>
-                  <p className="text-md text-gray-600">
-                    Commited to full transparency.
-                  </p>
-                </div>
-              </div>
+
               <div className="bg-gradient-to-b from-gray-100 to-white border border-gray-300 col-span-8 md:col-span-5 rounded-xl h-[26rem] flex flex-col p-8">
                 <div className="flex flex-col mt-auto space-y-2">
                   <div className="w-full h-full flex relative mb-4 justify-center">
@@ -498,61 +515,101 @@ export default function Example() {
                   Support for all models
                 </h2>
                 <p className="text-lg text-gray-600 max-w-[18rem]">
-                  Our custom-built mapper engine allows us to support any
-                  large-language model from any provider.
+                  Our custom-built mapper engine and gateway allows us to
+                  support any model from any provider.
                 </p>
               </div>
               <div className="bottom-0 absolute w-full">
                 <div className="w-full flex flex-row space-x-4 justify-end p-8 relative h-full">
-                  <div className="flex flex-col space-y-4">
-                    <div className="h-28 w-28"></div>
-                    <div className="h-28 w-28"></div>
+                  <div className="flex flex-col space-y-4 justify-end">
                     <Image
                       src={"/assets/home/providers/bard.png"}
-                      alt={"baard"}
+                      alt={"bard"}
+                      width={80}
+                      height={80}
+                      className="border border-gray-300 rounded-lg block md:hidden"
+                    />
+                    <Image
+                      src={"/assets/home/providers/bard.png"}
+                      alt={"bard"}
                       width={112}
                       height={112}
-                      className="border border-gray-300 rounded-lg"
+                      className="border border-gray-300 rounded-lg hidden md:block"
                     />
                   </div>
-                  <div className="flex flex-col space-y-4 h-full">
-                    <div className="h-28 w-28"></div>
+                  <div className="flex flex-col justify-end space-y-4">
+                    <Image
+                      src={"/assets/home/providers/llama2.png"}
+                      alt={"llama2"}
+                      width={80}
+                      height={80}
+                      className="border border-gray-300 rounded-lg block md:hidden"
+                    />
                     <Image
                       src={"/assets/home/providers/llama2.png"}
                       alt={"llama2"}
                       width={112}
                       height={112}
-                      className="border border-gray-300 rounded-lg"
+                      className="border border-gray-300 rounded-lg hidden md:block"
+                    />
+                    <Image
+                      src={"/assets/home/providers/together.png"}
+                      alt={"together"}
+                      width={80}
+                      height={80}
+                      className="border border-gray-300 rounded-lg block md:hidden"
                     />
                     <Image
                       src={"/assets/home/providers/together.png"}
                       alt={"together"}
                       width={112}
                       height={112}
-                      className="border border-gray-300 rounded-lg"
+                      className="border border-gray-300 rounded-lg hidden md:block"
                     />
                   </div>
                   <div className="flex flex-col space-y-4">
                     <Image
                       src={"/assets/home/providers/openai.png"}
                       alt={"openai"}
+                      width={80}
+                      height={80}
+                      className="border border-gray-300 rounded-lg block md:hidden"
+                    />
+                    <Image
+                      src={"/assets/home/providers/openai.png"}
+                      alt={"openai"}
                       width={112}
                       height={112}
-                      className="border border-gray-300 rounded-lg"
+                      className="border border-gray-300 rounded-lg hidden md:block"
                     />
+                    <Image
+                      src={"/assets/home/providers/anthropic.png"}
+                      alt={"ant"}
+                      width={80}
+                      height={80}
+                      className="border border-gray-300 rounded-lg block md:hidden"
+                    />
+
                     <Image
                       src={"/assets/home/providers/anthropic.png"}
                       alt={"anthropic"}
                       width={112}
                       height={112}
-                      className="border border-gray-300 rounded-lg"
+                      className="border border-gray-300 rounded-lg hidden md:block"
                     />
                     <Image
                       src={"/assets/home/providers/mistral.png"}
-                      alt={"mistral"}
+                      alt={"mis"}
+                      width={80}
+                      height={80}
+                      className="border border-gray-300 rounded-lg block md:hidden"
+                    />
+                    <Image
+                      src={"/assets/home/providers/mistral.png"}
+                      alt={"mis"}
                       width={112}
                       height={112}
-                      className="border border-gray-300 rounded-lg"
+                      className="border border-gray-300 rounded-lg hidden md:block"
                     />
                   </div>
                 </div>
@@ -568,7 +625,7 @@ export default function Example() {
                   requests per second with no latency impact.
                 </p>
               </div>
-              <div className="-bottom-32 items-center flex absolute -right-32 w-full justify-end">
+              <div className="-bottom-44 md:-bottom-32 items-center flex absolute md:-right-32 w-full justify-end">
                 <Globe />
               </div>
             </div>
