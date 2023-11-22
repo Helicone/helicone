@@ -21,3 +21,7 @@ export async function withTimeout<T>(
   );
   return (await Promise.race([promise, timeoutPromise])) as T;
 }
+
+export function enumerate<T>(arr: T[]): [number, T][] {
+  return arr.map((item, index) => [index, item]);
+}

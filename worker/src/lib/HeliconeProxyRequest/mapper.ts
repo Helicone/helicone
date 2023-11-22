@@ -194,7 +194,6 @@ export class HeliconeProxyRequestMapper {
 
   private getApiBase(): Result<string, string> {
     if (this.request.baseURLOverride) {
-      console.log("Using baseURLOverride");
       return ok(this.request.baseURLOverride);
     }
     const api_base =
