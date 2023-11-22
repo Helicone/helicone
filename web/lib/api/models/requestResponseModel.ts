@@ -1,14 +1,32 @@
 export type LlmType = "chat" | "completion";
 
-interface Message {
+interface RequestMessage {
   role?: string;
   content?: string;
-  function_call?: FunctionCall;
+  tool_call_id?: string;
 }
 
-interface FunctionCall {
-  name?: string;
-  arguments?: object;
+interface ResponseMessage {
+  role?: string;
+  content?: string;
+  tool_calls?: ToolCall[];
+}
+
+interface ToolCall {
+  id: string;
+  type: string;
+  function: Function;
+}
+
+interface Function {
+  name: string;
+  arguments: string;
+  description?: string;
+}
+
+interface Tool {
+  type: string;
+  function: Function;
 }
 
 interface Request {
@@ -28,7 +46,8 @@ interface Request {
   best_of?: number | null;
   logit_bias?: object | null;
   user?: string | null;
-  messages?: Message[] | null;
+  tools?: Tool[];
+  messages?: RequestMessage[] | null;
   // Truncated state fields
   tooLarge?: boolean;
   heliconeMessage?: string;
@@ -45,7 +64,7 @@ interface ErrorInfo {
 
 interface Response {
   completions?: Completion[] | null;
-  message?: Message | null;
+  message?: ResponseMessage | null;
   error?: ErrorInfo | null;
   model?: string | null;
   // Truncated state fields
