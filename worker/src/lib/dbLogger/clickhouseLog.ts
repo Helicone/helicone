@@ -138,6 +138,11 @@ export async function addFeedbackToResponse(
   clickhouseDb: ClickhouseClientWrapper,
   feedback: Database["public"]["Tables"]["feedback"]["Insert"][]
 ): Promise<Result<null, string>> {
+  const positiveFeedback = feedback.filter((f) => f.rating);
+  const negativeFeedback = feedback.filter((f) => !f.rating);
+
+  const positiveFeedbackUpdateQuery = `ALTER TABLE default.response_copy_v3 UPDATE `;
+
   const updateQueries: string[] = [];
 
   for (const fb of feedback) {

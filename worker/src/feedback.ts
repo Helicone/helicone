@@ -20,17 +20,24 @@ export async function feedbackCronHandler(env: Env) {
     storedDate ? new Date(storedDate) : new Date(Date.now() - 60 * 1000)
   ).toISOString();
 
-  const { data: feedback, error } = await supabaseClient
-    .from("feedback")
-    .select("*")
-    .gt("created_at", feedbackCreatedAt);
+  const { data: positiveFeedback, error: positiveFeedbackError } =
+    await supabaseClient
+      .from("feedback")
+      .select("*")
+      .gt("created_at", feedbackCreatedAt)
+      .order("created_at", { ascending: false })
+      .group("responseId");
+  // await supabaseClient
+  //   .from("feedback")
+  //   .select("*")
+  //   .gt("created_at", feedbackCreatedAt);
 
-  if (error) {
-    console.error(`Error fetching feedback: ${error}`);
+  if (positiveFeedbackError) {
+    console.error(`Error fetching feedback: ${positiveFeedbackError}`);
     return;
   }
 
-  if (!feedback || feedback.length === 0) {
+  if (!positiveFeedback || positiveFeedback.length === 0) {
     console.log("No new feedback");
     return;
   }
@@ -41,7 +48,7 @@ export async function feedbackCronHandler(env: Env) {
       CLICKHOUSE_USER: env.CLICKHOUSE_USER,
       CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
     }),
-    feedback
+    positiveFeedback
   );
 
   if (feedbackUpdateResult.error) {
@@ -49,12 +56,7 @@ export async function feedbackCronHandler(env: Env) {
     return;
   }
 
-  await env.UTILITY_KV.put(
-    FEEDBACK_LATEST_CREATED_AT,
-    new Date(Date.now() - 5 * 1000).toISOString()
-  );
-
-  console.log(`Updated ${feedback.length} feedback rows.`);
+  console.log(`Updated ${positiveFeedback.length} feedback rows.`);
 }
 
 interface FeedbackRequestBodyV2 {

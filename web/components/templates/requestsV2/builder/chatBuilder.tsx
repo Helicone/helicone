@@ -46,13 +46,16 @@ class ChatBuilder extends AbstractRequestBuilder {
       if ([200, 201, -3].includes(statusCode) && responseBody) {
         // Successful response
         const message = responseBody.message;
-        if (message) {
-          return hasNoContent
-            ? JSON.stringify({
-                name: message.function_call?.name,
-                arguments: message.function_call?.arguments,
-              })
-            : message.content || "";
+        if (message && hasNoContent) {
+          if (hasNoContent) {
+            message.tool_calls.map((toolCall) => {});
+            JSON.stringify({
+              name: message.function_call?.name,
+              arguments: message.function_call?.arguments,
+            });
+          } else {
+            return message.content || "";
+          }
         }
       }
 
