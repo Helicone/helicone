@@ -25,6 +25,7 @@ export function useLocalStorage<T>(
     try {
       const item =
         typeof window !== "undefined" && window.localStorage.getItem(key);
+
       if (!item) {
         throw new Error("No item stored");
       }
@@ -40,7 +41,6 @@ export function useLocalStorage<T>(
 
       setStoredValue(val);
     } catch (error) {
-      console.error(error);
       onNothingStored && onNothingStored(setValue);
     }
   }, [key, initialValue, onNothingStored, setValue, storedValue]);

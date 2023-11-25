@@ -98,7 +98,6 @@ export function modelCost(modelRow: ModelMetrics): number {
     ([key]) => key === model_prefix
   )?.[1];
   if (!promptCost || !completionCost) {
-    console.error("No cost found for model", model);
     return 0;
   }
   return (promptCost * promptTokens + completionCost * completionTokens) / 1000;
