@@ -30,6 +30,7 @@ export type Message = {
     name: string;
     arguments: string;
   };
+  tool_calls?: any[];
   name?: string;
   model?: string;
   latency?: number;
@@ -56,7 +57,59 @@ export const SingleChat = (props: {
   const isAssistant = message.role === "assistant";
   const isSystem = message.role === "system";
   const isFunction = message.role === "function";
-  const hasFunctionCall = message.function_call;
+
+  const hasFunctionCall = () => {
+    if (message.function_call) {
+      return true;
+    }
+    if (message.tool_calls) {
+      const tools = message.tool_calls;
+      return tools.some((tool) => tool.type === "function");
+    }
+    return false;
+  };
+
+  const renderFunctionCall = () => {
+    if (message.function_call) {
+      return (
+        <div className="flex flex-col space-y-2">
+          {message.content !== null && message.content !== "" && (
+            <code className="text-xs whitespace-pre-wrap font-semibold">
+              {message.content}
+            </code>
+          )}
+          <pre className="text-xs whitespace-pre-wrap  rounded-lg overflow-auto">
+            {`${message.function_call?.name}(${message.function_call?.arguments})`}
+          </pre>
+        </div>
+      );
+    } else if (message.tool_calls) {
+      const tools = message.tool_calls;
+      const functionTools = tools.filter((tool) => tool.type === "function");
+      return (
+        <div className="flex flex-col space-y-2">
+          {message.content !== null && message.content !== "" && (
+            <code className="text-xs whitespace-pre-wrap font-semibold">
+              {message.content}
+            </code>
+          )}
+          {functionTools.map((tool, index) => {
+            const toolFunc = tool.function;
+            return (
+              <pre
+                key={index}
+                className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+              >
+                {`${toolFunc.name}(${toolFunc.arguments})`}
+              </pre>
+            );
+          })}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
 
   const { setNotification } = useNotification();
 
@@ -193,23 +246,8 @@ export const SingleChat = (props: {
                   : formattedMessageContent}
               </pre>
             </div>
-          ) : hasFunctionCall ? (
-            <div className="flex flex-col space-y-2">
-              {formattedMessageContent !== "" ? (
-                <>
-                  <p className="text-sm whitespace-pre-wrap">
-                    {formattedMessageContent}
-                  </p>
-                  <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded-lg">
-                    {`${message.function_call?.name}(${message.function_call?.arguments})`}
-                  </pre>
-                </>
-              ) : (
-                <pre className="text-xs whitespace-pre-wrap py-1 font-semibold break-words">
-                  {`${message.function_call?.name}(${message.function_call?.arguments})`}
-                </pre>
-              )}
-            </div>
+          ) : hasFunctionCall() ? (
+            renderFunctionCall()
           ) : hasImage() ? (
             renderImageRow()
           ) : (
@@ -386,7 +424,7 @@ export const Chat = (props: ChatProps) => {
                 Request
               </p>
               <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(requestBody, null, 4)}
+                {JSON.stringify(requestBody, null, 2)}
               </pre>
             </div>
             <div className="flex flex-col space-y-2 p-4">
@@ -394,7 +432,7 @@ export const Chat = (props: ChatProps) => {
                 Response
               </p>
               <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(responseBody, null, 4)}
+                {JSON.stringify(responseBody, null, 2)}
               </pre>
             </div>
           </div>
