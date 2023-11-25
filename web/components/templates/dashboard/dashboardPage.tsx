@@ -218,8 +218,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   const combinePositiveAndNegativeFeedback = () => {
     let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
       date: getTimeMap(timeIncrement)(feedback.time),
-      positive: feedback.positiveCount > 0 ? feedback.positiveCount : null,
-      negative: feedback.negativeCount > 0 ? feedback.negativeCount : null,
+      positive: feedback.positiveCount > 0 ? feedback.positiveCount : 0,
+      negative: feedback.negativeCount > 0 ? feedback.negativeCount : 0,
     }));
     return combinedArray || [];
   };

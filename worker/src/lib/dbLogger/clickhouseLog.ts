@@ -138,25 +138,35 @@ export async function addFeedbackToResponse(
   clickhouseDb: ClickhouseClientWrapper,
   feedback: Database["public"]["Tables"]["feedback"]["Insert"][]
 ): Promise<Result<null, string>> {
-  const updateQueries: string[] = [];
-
-  for (const fb of feedback) {
-    const { response_id, created_at, id, rating } = fb;
-
-    const updateQuery = `
-      UPDATE feedback_created_at = '${formatTimeString(
+  const feedbackCreatedAtCases = [];
+  const feedbackIdCases = [];
+  const ratingCases = [];
+  const responseIds = [];
+  for (const { response_id, created_at, id, rating } of feedback) {
+    responseIds.push(`'${response_id}'`);
+    feedbackCreatedAtCases.push(
+      `WHEN response_id = '${response_id}' THEN toDateTime64('${formatTimeString(
         created_at ?? new Date().toISOString()
-      )}',
-          feedback_id = '${id}',
-          rating = ${rating ? "1" : "0"}
-      WHERE response_id = '${response_id}'`;
-
-    updateQueries.push(updateQuery);
+      )}', 3)`
+    );
+    feedbackIdCases.push(
+      `WHEN response_id = '${response_id}' THEN toUUID('${id}')`
+    );
+    ratingCases.push(
+      `WHEN response_id = '${response_id}' THEN ${rating ? "1" : "0"}`
+    );
   }
 
-  const batchUpdateQuery = `ALTER TABLE default.response_copy_v3 ${updateQueries.join(
-    ", "
-  )}`;
+  const batchUpdateQuery = `
+  ALTER TABLE default.response_copy_v3
+  UPDATE 
+    feedback_created_at = CASE ${feedbackCreatedAtCases.join(
+      " "
+    )} ELSE feedback_created_at END,
+    feedback_id = CASE ${feedbackIdCases.join(" ")} ELSE feedback_id END,
+    rating = CASE ${ratingCases.join(" ")} ELSE rating END
+  WHERE response_id IN (${responseIds.join(", ")});
+`;
 
   const updateResult = await clickhouseDb.dbUpdateClickhouse(batchUpdateQuery);
 
