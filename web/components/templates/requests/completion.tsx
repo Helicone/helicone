@@ -64,7 +64,7 @@ export const Completion = (props: CompletionProps) => {
                 Request
               </p>
               <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
-                {JSON.stringify(rawRequest, null, 4)}
+                {JSON.stringify(rawRequest, null, 2)}
               </pre>
             </div>
             <div className="flex flex-col space-y-2 p-4">
@@ -72,7 +72,7 @@ export const Completion = (props: CompletionProps) => {
                 {response.title}
               </p>
               <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
-                {JSON.stringify(rawResponse, null, 4)}
+                {JSON.stringify(rawResponse, null, 2)}
               </pre>
             </div>
           </div>
