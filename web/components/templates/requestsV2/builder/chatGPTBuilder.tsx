@@ -53,6 +53,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         if (this.response.response_body?.choices) {
           if (hasNoContent) {
             const message = this.response.response_body?.choices?.[0]?.message;
+
             const hasFunctionCall = () => {
               if (message.function_call) {
                 return true;
@@ -71,8 +72,11 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               const functionTools = tools?.find(
                 (tool: { type: string }) => tool.type === "function"
               ).function;
+
               if (functionTools !== undefined && functionTools !== null) {
                 return `${functionTools.name}(${functionTools.arguments})`;
+              } else {
+                return `${message.function_call?.name}(${message.function_call?.arguments})`;
               }
             } else {
               return JSON.stringify(
@@ -91,7 +95,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         return "";
       } else {
         // network error
-        return this.response.response_body?.error?.message || `network error `;
+        return this.response.response_body?.error?.message || `network error`;
       }
     };
 
