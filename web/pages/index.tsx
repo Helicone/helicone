@@ -12,7 +12,7 @@ import Head from "next/head";
 
 interface HomeProps {}
 
-const Home = (props: HomeProps) => {
+export const Home = (props: HomeProps) => {
   const {} = props;
   const router = useRouter();
 
