@@ -85,7 +85,7 @@ def test_gateway_api():
     data = {
         "model": "gpt-3.5-turbo",
         "messages": messages,
-        "max_tokens": 10
+        "max_tokens": 1
     }
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
@@ -129,7 +129,7 @@ def test_openai_proxy():
     data = {
         "model": "gpt-3.5-turbo",
         "messages": messages,
-        "max_tokens": 10
+        "max_tokens": 1
     }
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
@@ -190,7 +190,7 @@ def test_helicone_proxy_key():
     data = {
         "model": "gpt-3.5-turbo",
         "messages": messages,
-        "max_tokens": 10
+        "max_tokens": 1
     }
     headers = {
         "Authorization": f"Bearer {helicone_proxy_key}",
@@ -241,7 +241,7 @@ def test_openai_async():
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=10,
+        max_tokens=1,
         helicone_meta=Meta(
             custom_properties={
                 "requestId": requestId
@@ -264,3 +264,43 @@ def test_openai_async():
     response_data = fetch_from_db(query, (latest_request["id"],))
     assert response_data, "Response data not found in the database for the given request ID"
     print("passed")
+
+def test_labeling():
+    print("\n---------Running test_proxy---------")
+    requestId = str(uuid.uuid4())
+    print("Request ID: " + requestId + "")
+    message_content = test_labeling.__name__ + " - " + requestId
+    messages = [
+        {
+            "role": "user",
+            "content": message_content
+        }
+    ]
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": messages,
+        "max_tokens": 1
+    }
+    headers = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Request-Id": requestId,
+        "Helicone-Property-RequestId": requestId,
+        "OpenAI-Organization": openai_org_id
+    }
+
+    response = fetch(helicone_proxy_url, "chat/completions",
+                     method="POST", json=data, headers=headers)
+    assert response, "Response from OpenAI API is empty"
+
+    time.sleep(3)  # Helicone needs time to insert request into the database
+
+    headers["Authorization"] = f"Bearer {helicone_api_key}"
+    response = fetch(helicone_async_url, "request/" + requestId + "/property",
+                     method="PUT", json={"key": "label", "value": "test_labeling"}, headers=headers)
+    
+    assert response, "Failed to add label to request"
+    
+    query = "SELECT * FROM properties where request_id = %s AND key = 'label' AND value = 'test_labeling' LIMIT 1"
+    request_data = fetch_from_db(query, (requestId,))
+    assert request_data, "Request data not found in the database for the given property request id"
