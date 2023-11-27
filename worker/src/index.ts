@@ -157,6 +157,7 @@ export default {
       const rosetta = new RosettaWrapper(supabaseClient, env);
       await rosetta.generateMappers();
     } else {
+      await feedbackCronHandler(env);
       await updateLoopUsers(env);
     }
   },

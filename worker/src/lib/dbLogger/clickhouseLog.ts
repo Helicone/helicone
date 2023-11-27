@@ -136,44 +136,59 @@ export async function logInClickhouse(
 
 export async function addFeedbackToResponse(
   clickhouseDb: ClickhouseClientWrapper,
-  feedback: Database["public"]["Tables"]["feedback"]["Insert"][]
+  feedback: Database["public"]["Tables"]["feedback"]["Insert"][],
+  batchSize = 200
 ): Promise<Result<null, string>> {
-  const feedbackCreatedAtCases = [];
-  const feedbackIdCases = [];
-  const ratingCases = [];
-  const responseIds = [];
-  for (const { response_id, created_at, id, rating } of feedback) {
-    responseIds.push(`'${response_id}'`);
-    feedbackCreatedAtCases.push(
-      `WHEN response_id = '${response_id}' THEN toDateTime64('${formatTimeString(
+  for (let i = 0; i < feedback.length; i += batchSize) {
+    const feedbackBatch = feedback.slice(i, i + batchSize);
+    await processBatch(clickhouseDb, feedbackBatch);
+  }
+
+  return { error: null, data: null };
+}
+
+async function processBatch(
+  clickhouseDb: ClickhouseClientWrapper,
+  feedbackBatch: Database["public"]["Tables"]["feedback"]["Insert"][]
+) {
+  const feedbackCreatedAtArgs = [];
+  const feedbackIdArgs = [];
+  const ratingArgs = [];
+
+  feedbackBatch.forEach(({ response_id, created_at, id, rating }) => {
+    feedbackCreatedAtArgs.push(
+      `response_id = '${response_id}'`,
+      `toDateTime64('${formatTimeString(
         created_at ?? new Date().toISOString()
       )}', 3)`
     );
-    feedbackIdCases.push(
-      `WHEN response_id = '${response_id}' THEN toUUID('${id}')`
-    );
-    ratingCases.push(
-      `WHEN response_id = '${response_id}' THEN ${rating ? "1" : "0"}`
-    );
-  }
+    feedbackIdArgs.push(`response_id = '${response_id}'`, `toUUID('${id}')`);
+    ratingArgs.push(`response_id = '${response_id}'`, rating ? "1" : "0");
+  });
+
+  // Add the 'ELSE' part of the multiIf
+  feedbackCreatedAtArgs.push("feedback_created_at");
+  feedbackIdArgs.push("feedback_id");
+  ratingArgs.push("rating");
 
   const batchUpdateQuery = `
   ALTER TABLE default.response_copy_v3
   UPDATE 
-    feedback_created_at = CASE ${feedbackCreatedAtCases.join(
-      " "
-    )} ELSE feedback_created_at END,
-    feedback_id = CASE ${feedbackIdCases.join(" ")} ELSE feedback_id END,
-    rating = CASE ${ratingCases.join(" ")} ELSE rating END
-  WHERE response_id IN (${responseIds.join(", ")});
-`;
+    feedback_created_at = multiIf(${feedbackCreatedAtArgs.join(", ")}),
+    feedback_id = multiIf(${feedbackIdArgs.join(", ")}),
+    rating = multiIf(${ratingArgs.join(", ")})
+  WHERE response_id IN (${feedbackBatch
+    .map((item) => `'${item.response_id}'`)
+    .join(", ")});
+  `;
 
+  console.log(`Updating response_copy_v3: ${batchUpdateQuery}`);
+
+  await clickhouseDb.dbUpdateClickhouse("SET apply_mutations_on_fly = 1;");
   const updateResult = await clickhouseDb.dbUpdateClickhouse(batchUpdateQuery);
 
   if (updateResult.error) {
     console.error(`Error updating response_copy_v3: ${updateResult.error}`);
-    return { error: updateResult.error, data: null };
+    throw new Error(updateResult.error); // Throwing an error to stop execution
   }
-
-  return { error: null, data: null };
 }
