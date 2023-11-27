@@ -104,15 +104,25 @@ export class RequestWrapper {
   }
 
   async auth(): Promise<HeliconeAuth> {
-    return this.heliconeProxyKeyId
-      ? {
-          heliconeProxyKeyId: this.heliconeProxyKeyId,
-          heliconeApiKeyAuthHash: undefined,
-        }
-      : {
-          heliconeApiKeyAuthHash: (await this.getProviderAuthHeader()) ?? "",
-          heliconeProxyKeyId: undefined,
+    switch (this.heliconeHeaders.heliconeAuthV2?._type) {
+      case "jwt":
+        return {
+          _type: "jwt",
+          token: this.heliconeHeaders.heliconeAuthV2.token,
         };
+      default:
+        return this.heliconeProxyKeyId
+          ? {
+              _type: "bearer",
+              _bearerType: "heliconeProxyKey",
+              token: this.heliconeProxyKeyId,
+            }
+          : {
+              _type: "bearer",
+              _bearerType: "heliconeApiKey",
+              token: (await this.getProviderAuthHeader()) ?? "",
+            };
+    }
   }
 
   setBodyKeyOverride(bodyKeyOverride: object): void {

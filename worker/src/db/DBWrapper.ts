@@ -321,16 +321,18 @@ export class DBWrapper {
   }
 
   async getRequestById(
-    requestId: string
+    requestId: string,
+    includeOrgId: boolean = true
   ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
-    const { data, error } = await this.supabaseClient
-      .from("request")
-      .select("*")
-      .match({
-        id: requestId,
-      })
-      .eq("helicone_org_id", await this.orgId())
-      .single();
+    const query = this.supabaseClient.from("request").select("*").match({
+      id: requestId,
+    });
+
+    if (includeOrgId) {
+      query.eq("helicone_org_id", await this.orgId());
+    }
+
+    const { data, error } = await query.single();
 
     if (error) {
       return { data: null, error: error.message };
