@@ -69,8 +69,15 @@ const useGetOrgs = () => {
     },
     refetchOnWindowFocus: false,
   });
-  data && data.sort((a, b) => (a.name > b.name ? -1 : 1));
-  data && data.sort((a, b) => (a.is_personal ? -1 : 1));
+
+  data &&
+    data.sort((a, b) => {
+      if (a.name === b.name) {
+        return a.id < b.id ? -1 : 1;
+      }
+      return a.name < b.name ? -1 : 1;
+    });
+
   return {
     data,
     isLoading,
@@ -94,8 +101,6 @@ const useOrgsContextManager = () => {
       setOrg(orgFromCookie || orgs[0]);
     }
   }, [orgs]);
-
-  const orgOwner = useGetOrgOwner(org?.id ?? "");
 
   let orgContextValue: OrgContextValue | null = null;
   if (org && orgs) {
