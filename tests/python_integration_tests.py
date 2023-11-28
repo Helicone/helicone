@@ -293,7 +293,7 @@ def test_labeling():
                      method="POST", json=data, headers=headers)
     assert response, "Response from OpenAI API is empty"
 
-    time.sleep(3)  # Helicone needs time to insert request into the database
+    time.sleep(10)  # Helicone needs time to insert request into the database
 
     headers["Authorization"] = f"Bearer {helicone_api_key}"
     response = fetch(helicone_async_url, "request/" + requestId + "/property",
