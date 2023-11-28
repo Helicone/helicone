@@ -2,6 +2,8 @@ import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
   BeakerIcon,
+  ChatBubbleLeftRightIcon,
+  ChevronDownIcon,
   CodeBracketIcon,
   EyeIcon,
   EyeSlashIcon,
@@ -12,7 +14,7 @@ import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import theme from "prism-react-renderer/themes/dracula";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@mui/material";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import Prism, { defaultProps } from "prism-react-renderer";
@@ -53,6 +55,38 @@ export const SingleChat = (props: {
   } = props;
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+
+  const [showButton, setShowButton] = useState(false);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const calculateContentHeight = () => {
+      const current = textContainerRef.current;
+
+      if (current) {
+        const lineHeight = 1.5 * 16; // Convert 1.5rem -> px
+        const maxContentHeight = lineHeight * 7;
+        if (current.scrollHeight > maxContentHeight) {
+          setShowButton(true);
+          // setIsTruncated(true);
+        } else {
+          setShowButton(false);
+          // setIsTruncated(false);
+        }
+      }
+    };
+
+    // Calculate on mount and on window resize
+    calculateContentHeight();
+    window.addEventListener("resize", calculateContentHeight);
+
+    // Cleanup listener to prevent memory leaks
+    return () => window.removeEventListener("resize", calculateContentHeight);
+  }, []);
+
+  const handleToggle = () => {
+    setExpanded(!expanded);
+  };
 
   const isAssistant = message.role === "assistant";
   const isSystem = message.role === "system";
@@ -169,32 +203,8 @@ export const SingleChat = (props: {
     message?.content?.toString() || ""
   );
 
-  const MAX_LENGTH = isLast ? 500 : 220;
-  const MAX_NEWLINES = isLast ? 10 : 3;
-
-  const checkShouldTruncate = (message: string) => {
-    const newlines = message.split("\n").length - 1;
-    return message.length > MAX_LENGTH || newlines > MAX_NEWLINES;
-  };
-
-  const possiblyTruncated = checkShouldTruncate(formattedMessageContent);
-  const needsTruncation = possiblyTruncated && !expanded;
-
-  if (needsTruncation) {
-    formattedMessageContent = `${formattedMessageContent.slice(
-      0,
-      MAX_LENGTH
-    )}...`;
-  }
-
   const getBgColor = () => {
-    if (isSystem || isAssistant) {
-      return "bg-gray-50 dark:bg-[#17191d]";
-    } else if (isFunction) {
-      return "bg-gray-100 dark:bg-gray-800";
-    } else {
-      return "bg-white dark:bg-black";
-    }
+    return "bg-gray-50 dark:bg-[#17191d]";
   };
 
   const isJSON = (content: string): boolean => {
@@ -251,41 +261,27 @@ export const SingleChat = (props: {
           ) : hasImage() ? (
             renderImageRow()
           ) : (
-            <p className="text-sm whitespace-pre-wrap break-words leading-6">
-              {formattedMessageContent}
-            </p>
+            <div className="relative">
+              <div
+                ref={textContainerRef}
+                className={!showButton ? "" : expanded ? "" : "truncate-text"}
+                style={{ maxHeight: expanded ? "none" : "10.5em" }}
+              >
+                {formattedMessageContent}
+              </div>
+              {showButton && (
+                <div className="w-full flex justify-center items-center pt-2">
+                  <button onClick={handleToggle}>
+                    {expanded ? (
+                      <ChevronDownIcon className="rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5 rotate-180" />
+                    ) : (
+                      <ChevronDownIcon className="rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5" />
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
-
-          {possiblyTruncated &&
-            (needsTruncation ? (
-              <>
-                <button
-                  className={clsx(
-                    getBgColor(),
-                    "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
-                  )}
-                  onClick={() => {
-                    setExpanded(true);
-                  }}
-                >
-                  Show More
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className={clsx(
-                    getBgColor(),
-                    "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
-                  )}
-                  onClick={() => {
-                    setExpanded(false);
-                  }}
-                >
-                  Show Less
-                </button>
-              </>
-            ))}
         </div>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
@@ -337,12 +333,14 @@ export const Chat = (props: ChatProps) => {
     [key: string]: boolean;
   }>(
     Object.fromEntries(
-      Array.from({ length: (requestMessages || []).length }, (_, i) => [
-        i,
-        false,
-      ])
+      Array.from(
+        { length: ([...requestMessages, responseMessage] || []).length },
+        (_, i) => [i, false]
+      )
     )
   );
+
+  const [showAllMessages, setShowAllMessages] = useState(false);
 
   const router = useRouter();
 
@@ -358,6 +356,96 @@ export const Chat = (props: ChatProps) => {
   if (props.status === 200 && responseMessage) {
     messages = messages.concat([responseMessage]);
   }
+
+  const renderMessages = (messages: Message[]) => {
+    if (!showAllMessages && messages.length >= 10) {
+      // slice the messages and display the first 2 and last 2. also throw in a button in the middle that says "show more"
+
+      const firstTwo = messages.slice(0, 2);
+      const lastTwo = messages.slice(messages.length - 2, messages.length);
+
+      return (
+        <>
+          {firstTwo.map((message, index) => {
+            return (
+              <SingleChat
+                message={message}
+                index={index}
+                isLast={index === messages.length - 1}
+                expandedProps={{
+                  expanded: expandedChildren[index],
+                  setExpanded: (expanded: boolean) => {
+                    setExpandedChildren({
+                      ...expandedChildren,
+                      [index]: expanded,
+                    });
+                  },
+                }}
+                key={index}
+              />
+            );
+          })}
+          <div className="flex flex-row justify-center items-center py-8 relative ">
+            <button
+              onClick={() => {
+                setShowAllMessages(true);
+              }}
+              className="absolute flex flex-row space-x-1 items-center border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+            >
+              <ChatBubbleLeftRightIcon className="h-4 w-4" />
+              <p className="text-xs font-semibold">
+                Show More{" "}
+                <span className="text-gray-500">
+                  ({messages.length - 4} hidden)
+                </span>
+              </p>
+            </button>
+          </div>
+          {lastTwo.map((message, index) => {
+            return (
+              <SingleChat
+                message={message}
+                index={index}
+                isLast={index === messages.length - 1}
+                expandedProps={{
+                  expanded: expandedChildren[index],
+                  setExpanded: (expanded: boolean) => {
+                    setExpandedChildren({
+                      ...expandedChildren,
+                      [index]: expanded,
+                    });
+                  },
+                }}
+                key={index}
+              />
+            );
+          })}
+        </>
+      );
+    } else if (messages.length > 0) {
+      return messages.map((message, index) => {
+        return (
+          <SingleChat
+            message={message}
+            index={index}
+            isLast={index === messages.length - 1}
+            expandedProps={{
+              expanded: expandedChildren[index],
+              setExpanded: (expanded: boolean) => {
+                setExpandedChildren({
+                  ...expandedChildren,
+                  [index]: expanded,
+                });
+              },
+            }}
+            key={index}
+          />
+        );
+      });
+    } else {
+      return <></>;
+    }
+  };
 
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
@@ -437,25 +525,7 @@ export const Chat = (props: ChatProps) => {
             </div>
           </div>
         ) : messages.length > 0 ? (
-          messages.map((message, index) => {
-            return (
-              <SingleChat
-                message={message}
-                index={index}
-                isLast={index === messages.length - 1}
-                expandedProps={{
-                  expanded: expandedChildren[index],
-                  setExpanded: (expanded: boolean) => {
-                    setExpandedChildren({
-                      ...expandedChildren,
-                      [index]: expanded,
-                    });
-                  },
-                }}
-                key={index}
-              />
-            );
-          })
+          <>{renderMessages(messages)}</>
         ) : (
           <div className="">
             <div
