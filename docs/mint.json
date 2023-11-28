@@ -74,6 +74,7 @@
       "group": "Integrations",
       "pages": [
         "getting-started/integration-method/gateway",
+        "getting-started/integration-method/gateway-fallbacks",
         {
           "group": "Proxy",
           "pages": [

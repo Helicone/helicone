@@ -5,32 +5,32 @@ import AuthHeader from "../../components/shared/authHeader";
 import MetaData from "../../components/shared/metaData";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { GetServerSidePropsContext } from "next";
-import OrgUsagePage from "../../components/templates/organization/usage/orgUsagePage";
+import OrgPlanPage from "../../components/templates/organization/plan/orgPlanPage";
 
-interface UsageProps {
+interface PlanProps {
   user: User;
 }
 
-const Usage = (props: UsageProps) => {
+const Plan = (props: PlanProps) => {
   const { user } = props;
 
   const org = useOrg();
 
   return (
-    <MetaData title="Usage">
+    <MetaData title="Plan">
       <AuthLayout user={user}>
-        <AuthHeader title={"Organization Usage"} />
+        <AuthHeader title={"Organization Plan"} />
         {!org?.currentOrg ? (
           <h1>Loading...</h1>
         ) : (
-          <OrgUsagePage org={org?.currentOrg!} />
+          <OrgPlanPage org={org?.currentOrg!} />
         )}
       </AuthLayout>
     </MetaData>
   );
 };
 
-export default Usage;
+export default Plan;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client

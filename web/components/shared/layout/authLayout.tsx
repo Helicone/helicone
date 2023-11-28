@@ -8,8 +8,10 @@ import {
   BeakerIcon,
   BookOpenIcon,
   BuildingOfficeIcon,
+  ChartBarIcon,
   CircleStackIcon,
   CloudArrowUpIcon,
+  Cog6ToothIcon,
   CubeTransparentIcon,
   GlobeAltIcon,
   HomeIcon,
@@ -18,6 +20,7 @@ import {
   QuestionMarkCircleIcon,
   TableCellsIcon,
   UserCircleIcon,
+  UserGroupIcon,
   UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -35,10 +38,10 @@ import { GrGraphQl } from "react-icons/gr";
 import { BsBriefcase, BsTags, BsTagsFill } from "react-icons/bs";
 import Notification from "../notification/Notification";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useUserSettings } from "../../../services/hooks/userSettings";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;
@@ -58,6 +61,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [open, setOpen] = useState(false);
   const { hasFlag } = useFeatureFlags("webhook_beta", org?.currentOrg.id || "");
+  const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
+  const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
   const navigation = [
     {
@@ -71,12 +76,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/requests",
       icon: TableCellsIcon,
       current: pathname.includes("/requests"),
-    },
-    {
-      name: "Jobs",
-      href: "/jobs",
-      icon: BsBriefcase,
-      current: pathname.includes("/jobs"),
     },
     {
       name: "Users",
@@ -97,6 +96,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/cache"),
     },
     {
+      name: "Jobs",
+      href: "/jobs",
+      icon: BsBriefcase,
+      current: pathname.includes("/jobs"),
+    },
+    {
       name: "Models",
       href: "/models",
       icon: CubeTransparentIcon,
@@ -110,30 +115,28 @@ const AuthLayout = (props: AuthLayoutProps) => {
     },
   ];
 
-  const accountNav = [
+  const organizationNav = [
     {
-      name: "Organization",
-      href: "/organization",
-      icon: BuildingOfficeIcon,
-      current: pathname.includes("/organization"),
-      children: [
-        {
-          name: "Settings",
-          href: "/organization/settings",
-          current: pathname.includes("/settings"),
-        },
-        {
-          name: "Usage",
-          href: "/organization/usage",
-          current: pathname.includes("/usage"),
-        },
-        {
-          name: "Members",
-          href: "/organization/members",
-          current: pathname.includes("/members"),
-        },
-      ],
+      name: "Settings",
+      href: "/organization/settings",
+      icon: Cog6ToothIcon,
+      current: pathname.includes("/settings"),
     },
+    {
+      name: "Plan",
+      href: "/organization/plan",
+      icon: ChartBarIcon,
+      current: pathname.includes("/plan"),
+    },
+    {
+      name: "Members",
+      href: "/organization/members",
+      icon: UserGroupIcon,
+      current: pathname.includes("/members"),
+    },
+  ];
+
+  const developerNav = [
     {
       name: "Keys",
       href: "/keys",
@@ -149,7 +152,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   ];
 
   if (hasFlag) {
-    accountNav.push({
+    developerNav.push({
       name: "Webhooks",
       href: "/webhooks",
       icon: GlobeAltIcon,
@@ -158,7 +161,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   }
 
   if (tier === "pro" || tier === "enterprise") {
-    accountNav.push({
+    developerNav.push({
       name: "Vault",
       href: "/vault",
       icon: LockClosedIcon,
@@ -261,88 +264,32 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
                             Account
                           </p>
-                          {accountNav.map((item, i) => {
-                            if (!item.children) {
-                              return (
-                                <Link
-                                  key={item.name}
-                                  href={item.href}
-                                  className={clsx(
-                                    item.current
-                                      ? "bg-gray-200 text-black"
-                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                    "group flex items-center px-2 py-2 text-md font-medium rounded-md"
-                                  )}
-                                >
-                                  <item.icon
-                                    className={clsx(
-                                      item.current
-                                        ? "text-black"
-                                        : "text-gray-600 group-hover:text-gray-900",
-                                      "mr-3 flex-shrink-0 h-5 w-5"
-                                    )}
-                                    aria-hidden="true"
-                                  />
-                                  {item.name}
-                                </Link>
-                              );
-                            } else {
-                              return (
-                                <Disclosure defaultOpen={item.current} key={i}>
-                                  <Disclosure.Button
-                                    className={clsx(
-                                      "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                      "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full"
-                                    )}
-                                  >
-                                    {({ open }) => (
-                                      <div className="flex items-center justify-between w-full">
-                                        <div className="flex items-center">
-                                          <item.icon
-                                            className={clsx(
-                                              item.current
-                                                ? "text-black"
-                                                : "text-gray-600 group-hover:text-gray-900",
-                                              "mr-3 flex-shrink-0 h-5 w-5"
-                                            )}
-                                            aria-hidden="true"
-                                          />
-                                          {item.name}
-                                        </div>
-                                        <ChevronRightIcon
-                                          className={clsx(
-                                            open ? "rotate-90 transform" : "",
-                                            "h-4 w-4"
-                                          )}
-                                        />
-                                      </div>
-                                    )}
-                                  </Disclosure.Button>
-                                  <Disclosure.Panel>
-                                    <ul className="pl-4 space-y-0.5 flex flex-col">
-                                      {item.children.map((subItem, idx) => {
-                                        return (
-                                          <li key={idx}>
-                                            <Link
-                                              key={subItem.name}
-                                              href={subItem.href}
-                                              className={clsx(
-                                                subItem.current
-                                                  ? "bg-gray-200 text-black"
-                                                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                                "pl-4 group flex items-center pr-2 py-2 text-md font-medium rounded-md"
-                                              )}
-                                            >
-                                              {subItem.name}
-                                            </Link>
-                                          </li>
-                                        );
-                                      })}
-                                    </ul>
-                                  </Disclosure.Panel>
-                                </Disclosure>
-                              );
-                            }
+                          {organizationNav.map((item, i) => {
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                className={clsx(
+                                  "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full"
+                                )}
+                              >
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center">
+                                    <item.icon
+                                      className={clsx(
+                                        item.current
+                                          ? "text-black"
+                                          : "text-gray-600 group-hover:text-gray-900",
+                                        "mr-3 flex-shrink-0 h-5 w-5"
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    {item.name}
+                                  </div>
+                                </div>
+                              </Link>
+                            );
                           })}
                         </nav>
                       </div>
@@ -404,37 +351,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </div>
                 </div>
                 <div className="mt-1 flex flex-grow flex-col">
-                  <nav className="flex-1 space-y-1 px-2 pb-4 pt-2">
-                    {navigation.map((item) => {
-                      return (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={clsx(
-                            item.current
-                              ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                            "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                          )}
-                        >
-                          <item.icon
-                            className={clsx(
-                              item.current
-                                ? "text-black dark:text-white"
-                                : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                              "mr-3 flex-shrink-0 h-5 w-5"
-                            )}
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </Link>
-                      );
-                    })}
-                    <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
-                      Account
-                    </p>
-                    {accountNav.map((item, i) => {
-                      if (!item.children) {
+                  <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
+                    <div className="flex flex-col space-y-1">
+                      {navigation.map((item) => {
                         return (
                           <Link
                             key={item.name}
@@ -458,64 +377,108 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             {item.name}
                           </Link>
                         );
-                      } else {
-                        return (
-                          <Disclosure defaultOpen={item.current} key={i}>
-                            <Disclosure.Button
+                      })}
+                    </div>
+
+                    <div>
+                      <button className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1">
+                        <p>Developer</p>
+                      </button>
+                      <div className="flex flex-col space-y-1">
+                        {developerNav.map((item, i) => {
+                          return (
+                            <Link
+                              key={item.name}
+                              href={item.href}
                               className={clsx(
                                 "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
                                 "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
                               )}
                             >
-                              {({ open }) => (
-                                <div className="flex items-center justify-between w-full">
-                                  <div className="flex items-center">
-                                    <item.icon
-                                      className={clsx(
-                                        item.current
-                                          ? "text-black dark:text-white"
-                                          : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                        "mr-3 flex-shrink-0 h-5 w-5"
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                    {item.name}
-                                  </div>
-                                  <ChevronRightIcon
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center">
+                                  <item.icon
                                     className={clsx(
-                                      open ? "rotate-90 transform" : "",
-                                      "h-4 w-4"
+                                      item.current
+                                        ? "text-black dark:text-white"
+                                        : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
+                                      "mr-3 flex-shrink-0 h-5 w-5"
                                     )}
+                                    aria-hidden="true"
                                   />
+                                  {item.name}
                                 </div>
-                              )}
-                            </Disclosure.Button>
-                            <Disclosure.Panel>
-                              <ul className="pl-4 space-y-0.5 flex flex-col">
-                                {item.children.map((subItem, idx) => {
-                                  return (
-                                    <li key={idx}>
-                                      <Link
-                                        key={subItem.name}
-                                        href={subItem.href}
-                                        className={clsx(
-                                          subItem.current
-                                            ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                          "group flex items-center pr-2 pl-4 py-2 text-sm font-medium rounded-md"
-                                        )}
-                                      >
-                                        {subItem.name}
-                                      </Link>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </Disclosure.Panel>
-                          </Disclosure>
-                        );
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <Disclosure
+                      defaultOpen={
+                        router.pathname.includes("/organization/settings") ||
+                        router.pathname.includes("/organization/plan") ||
+                        router.pathname.includes("/organization/members")
                       }
-                    })}
+                    >
+                      {({ open }) => (
+                        <div>
+                          <Disclosure.Button
+                            onClick={() => {
+                              setOpenOrg(openOrg === "true" ? "false" : "true");
+                            }}
+                            className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
+                          >
+                            <p>Organization</p>
+                            <ChevronRightIcon
+                              className={clsx(
+                                open ? "transform rotate-90" : "",
+                                "h-4 w-4 inline"
+                              )}
+                            />
+                          </Disclosure.Button>
+                          <Transition
+                            enter="transition duration-100 ease-out"
+                            enterFrom="transform scale-95 opacity-0"
+                            enterTo="transform scale-100 opacity-100"
+                            leave="transition duration-75 ease-out"
+                            leaveFrom="transform scale-100 opacity-100"
+                            leaveTo="transform scale-95 opacity-0"
+                          >
+                            <Disclosure.Panel className="flex flex-col space-y-1">
+                              {organizationNav.map((item, i) => {
+                                return (
+                                  <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={clsx(
+                                      "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
+                                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
+                                    )}
+                                  >
+                                    <div className="flex items-center justify-between w-full">
+                                      <div className="flex items-center">
+                                        <item.icon
+                                          className={clsx(
+                                            item.current
+                                              ? "text-black dark:text-white"
+                                              : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
+                                            "mr-3 flex-shrink-0 h-5 w-5"
+                                          )}
+                                          aria-hidden="true"
+                                        />
+                                        {item.name}
+                                      </div>
+                                    </div>
+                                  </Link>
+                                );
+                              })}
+                            </Disclosure.Panel>
+                          </Transition>
+                        </div>
+                      )}
+                    </Disclosure>
                   </nav>
                 </div>
                 <div>
@@ -629,7 +592,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           </p>
                         )}
                       </Menu.Item>
-                      {accountNav.map((item) => (
+                      {organizationNav.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <a

@@ -29,6 +29,10 @@ export function consolidateTextFields(responseBody: any[]): any {
       } else if (acc.choices === undefined) {
         return cur;
       } else {
+        // This is to handle the case if the choices array is empty (happens on Azure)
+        if (acc.choices.length === 0 && cur.choices?.length !== 0) {
+          acc.choices.push(...cur.choices.slice(acc.choices.length));
+        }
         return {
           ...acc,
           choices: acc.choices.map((c: any, i: number) => {

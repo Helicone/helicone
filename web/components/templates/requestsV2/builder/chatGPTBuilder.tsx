@@ -43,6 +43,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
 
     const getResponseText = () => {
       const statusCode = this.response.response_status;
+
       if ([200, 201, -3].includes(statusCode)) {
         // successful response, check for an error from openai
         if (this.response.response_body?.error) {
@@ -51,11 +52,40 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         // successful response, check for choices
         if (this.response.response_body?.choices) {
           if (hasNoContent) {
-            return JSON.stringify(
-              this.response.response_body?.choices?.[0]?.message?.function_call,
-              null,
-              2
-            );
+            const message = this.response.response_body?.choices?.[0]?.message;
+
+            const hasFunctionCall = () => {
+              if (message.function_call) {
+                return true;
+              }
+              if (message.tool_calls) {
+                const tools = message.tool_calls;
+                return tools.some(
+                  (tool: { type: string }) => tool.type === "function"
+                );
+              }
+              return false;
+            };
+
+            if (hasFunctionCall()) {
+              const tools = message.tool_calls;
+              const functionTools = tools?.find(
+                (tool: { type: string }) => tool.type === "function"
+              ).function;
+
+              if (functionTools !== undefined && functionTools !== null) {
+                return `${functionTools.name}(${functionTools.arguments})`;
+              } else {
+                return `${message.function_call?.name}(${message.function_call?.arguments})`;
+              }
+            } else {
+              return JSON.stringify(
+                this.response.response_body?.choices?.[0]?.message
+                  ?.function_call,
+                null,
+                2
+              );
+            }
           } else {
             return this.response.response_body?.choices?.[0]?.message?.content;
           }
@@ -65,7 +95,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         return "";
       } else {
         // network error
-        return this.response.response_body?.error?.message || `network error `;
+        return this.response.response_body?.error?.message || `network error`;
       }
     };
 

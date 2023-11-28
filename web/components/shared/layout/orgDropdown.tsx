@@ -20,7 +20,6 @@ import CreateOrgForm, {
 } from "../../templates/organization/createOrgForm";
 import Link from "next/link";
 import ThemedModal from "../themed/themedModal";
-import { useUserSettings } from "../../../services/hooks/userSettings";
 import useNotification from "../notification/useNotification";
 import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import AddMemberModal from "../../templates/organization/addMemberModal";

@@ -9,7 +9,9 @@ const COSTS_PROMPT = {
   davinci: 0.02,
   "gpt-3.5-turbo": 0.0015,
   "gpt-35-turbo": 0.0015,
+  "gpt-3.5-turbo-1106": 0.001,
   "gpt-4": 0.03,
+  "gpt-4-32k": 0.06,
   "gpt-4-32k-0314": 0.06,
   "gpt-4-0613": 0.03,
   "gpt-4-32k-0613": 0.06,
@@ -34,7 +36,9 @@ const COSTS_COMPLETIONS = {
   davinci: 0.02,
   "gpt-3.5-turbo": 0.002,
   "gpt-35-turbo": 0.002,
+  "gpt-3.5-turbo-1106": 0.002,
   "gpt-4-0613": 0.06,
+  "gpt-4-32k": 0.12,
   "gpt-4-32k-0314": 0.12,
   "gpt-4-32k-0613": 0.12,
   "gpt-4-1106-preview": 0.03,
@@ -94,7 +98,6 @@ export function modelCost(modelRow: ModelMetrics): number {
     ([key]) => key === model_prefix
   )?.[1];
   if (!promptCost || !completionCost) {
-    console.error("No cost found for model", model);
     return 0;
   }
   return (promptCost * promptTokens + completionCost * completionTokens) / 1000;

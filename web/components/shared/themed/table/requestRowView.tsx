@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import StatusBadge from "../../../templates/requestsV2/statusBadge";
 import ModelPill from "../../../templates/requestsV2/modelPill";
@@ -25,7 +25,7 @@ const RequestRowView = (props: RequestRowViewProps) => {
   );
 
   return (
-    <div className="flex flex-row gap-4 relative h-full">
+    <div className="flex flex-row gap-4 h-full w-full">
       <ul className="h-auto w-full max-w-md flex flex-col divide-y divide-gray-300 dark:divide-gray-700">
         {rows.map((row, i) => (
           <RequestRow
@@ -43,7 +43,9 @@ const RequestRowView = (props: RequestRowViewProps) => {
       </ul>
 
       {selectedRow ? (
-        <div className="w-full">{selectedRow.render}</div>
+        <div className="flex flex-col space-y-2 w-full h-full">
+          {selectedRow.render}
+        </div>
       ) : (
         <div className="flex flex-col space-y-4 justify-center items-center h-[75vh] w-full bg-white border border-gray-300 dark:bg-black dark:border-gray-700 rounded-lg">
           <Square2StackIcon className="h-12 w-12 text-gray-500" />
