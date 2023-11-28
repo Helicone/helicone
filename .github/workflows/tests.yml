@@ -57,7 +57,7 @@ jobs:
       clickhouse:
         image: yandex/clickhouse-server
         ports:
-          - 18123:8123
+          - 8123:8123
     steps:
       - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1.2.0
@@ -91,9 +91,6 @@ jobs:
           cd worker
           wrangler dev --port 8788 --var WORKER_TYPE:HELICONE_API &
         env:
-          CLICKHOUSE_HOST: "http://localhost:18123"
-          CLICKHOUSE_USERL: "default"
-          CLICKHOUSE_PASSWORD: ""
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Start gateway worker
         run: |
