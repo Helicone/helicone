@@ -56,31 +56,28 @@ export const SingleChat = (props: {
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
-  const [showButton, setShowButton] = useState(false);
+  const [showButton, setShowButton] = useState(true);
   const textContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const calculateContentHeight = () => {
       const current = textContainerRef.current;
-
       if (current) {
-        const lineHeight = 1.5 * 16; // Convert 1.5rem -> px
-        const maxContentHeight = lineHeight * 7;
-        if (current.scrollHeight > maxContentHeight) {
-          setShowButton(true);
-          // setIsTruncated(true);
-        } else {
-          setShowButton(false);
-          // setIsTruncated(false);
-        }
+        const lineHeight = 1.5 * 16; // Assuming 1.5rem line-height and 16px font-size
+        const maxContentHeight = lineHeight * 7; // For 7 lines of text
+        setShowButton(current.scrollHeight > maxContentHeight);
       }
     };
 
-    // Calculate on mount and on window resize
-    calculateContentHeight();
+    // Use requestAnimationFrame to ensure measurements occur after the DOM has updated
+    requestAnimationFrame(() => {
+      calculateContentHeight();
+    });
+
+    // Add resize listener to recalculate on window resize
     window.addEventListener("resize", calculateContentHeight);
 
-    // Cleanup listener to prevent memory leaks
+    // Cleanup resize listener on component unmount
     return () => window.removeEventListener("resize", calculateContentHeight);
   }, []);
 
@@ -244,7 +241,7 @@ export const SingleChat = (props: {
             <UserIcon className="h-6 w-6 bg-white dark:bg-black rounded-md p-1 border border-black text-black dark:border-white dark:text-white" />
           )}
         </div>
-        <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
+        <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center h-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -261,13 +258,16 @@ export const SingleChat = (props: {
           ) : hasImage() ? (
             renderImageRow()
           ) : (
-            <div className="relative">
+            <div className="relative h-full">
               <div
                 ref={textContainerRef}
-                className={!showButton ? "" : expanded ? "" : "truncate-text"}
-                style={{ maxHeight: expanded ? "none" : "10.5em" }}
+                className={clsx(
+                  !expanded && showButton ? "truncate-text" : "",
+                  "leading-6 pb-2"
+                )}
+                style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
-                {formattedMessageContent}
+                {message?.content}
               </div>
               {showButton && (
                 <div className="w-full flex justify-center items-center pt-2">
