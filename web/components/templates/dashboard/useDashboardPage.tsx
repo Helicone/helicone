@@ -145,20 +145,6 @@ export const useDashboardPage = ({
         );
       },
     }),
-    feedback: useBackendMetricCall<Result<FeedbackOverTime[], string>>({
-      params,
-      endpoint: "/api/metrics/feedbackOverTime",
-      key: "feedbackOverTime",
-      postProcess: (data) => {
-        return resultMap(data, (d) =>
-          d.map((d) => ({
-            time: new Date(d.time),
-            positiveCount: +d.positiveCount,
-            negativeCount: +d.negativeCount,
-          }))
-        );
-      },
-    }),
   };
 
   const metrics = {
@@ -183,10 +169,6 @@ export const useDashboardPage = ({
     activeUsers: useBackendMetricCall<Result<number, string>>({
       params,
       endpoint: "/api/metrics/activeUsers",
-    }),
-    feedback: useBackendMetricCall<Result<number, string>>({
-      params,
-      endpoint: "/api/metrics/feedback",
     }),
   };
 
