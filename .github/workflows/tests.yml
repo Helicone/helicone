@@ -57,7 +57,7 @@ jobs:
       clickhouse:
         image: yandex/clickhouse-server
         ports:
-          - 8123:8123
+          - 18123:18123
     steps:
       - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1.2.0
@@ -106,6 +106,9 @@ jobs:
       - name: Run integration tests
         working-directory: tests
         env:
+          CLICKHOUSE_HOST: "http://localhost:18123"
+          CLICKHOUSE_USERL: "default"
+          CLICKHOUSE_PASSWORD: ""
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
           HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
@@ -116,9 +119,12 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
           pytest python_integration_tests.py -s
-      - name: Run python tests tests
+      - name: Run helicone-python tests
         working-directory: helicone-python
         env:
+          CLICKHOUSE_HOST: "http://localhost:18123"
+          CLICKHOUSE_USERL: "default"
+          CLICKHOUSE_PASSWORD: ""
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
           HELICONE_ASYNC_URL: "http://127.0.0.1:8788"
           HELICONE_GATEWAY_URL: "http://127.0.0.1:8789"
