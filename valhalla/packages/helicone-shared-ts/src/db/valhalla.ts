@@ -9,7 +9,7 @@ import {
 import { ValhallaRequest, ValhallaResponse } from "./valhalla.database.types";
 
 export interface IValhallaDB {
-  query(query: string): PromiseGenericResult<QueryResult<any>>;
+  query(query: string, values: any[]): PromiseGenericResult<QueryResult<any>>;
   now(): PromiseGenericResult<QueryResult<any>>;
   insertRequest(
     request: ValhallaRequest
@@ -17,6 +17,7 @@ export interface IValhallaDB {
   insertResponse(
     response: ValhallaResponse
   ): PromiseGenericResult<QueryResult<any>>;
+  close(): Promise<void>;
 }
 
 class ValhallaDB implements IValhallaDB {
@@ -73,6 +74,10 @@ class ValhallaDB implements IValhallaDB {
       await this.client.connect();
       this.connected = true;
     }
+  }
+
+  async close() {
+    await this.client.end();
   }
 
   async query(

@@ -15,6 +15,10 @@ require("dotenv").config({
 
 const app = express();
 
+export const helloWorld = () => {
+  return "Hello, world!";
+};
+
 // for logs
 app.use(morgan("combined"));
 app.use(express.json()); // for parsing application/json
@@ -53,6 +57,7 @@ app.post(
       });
       return;
     }
+    const responseId = heliconeResponse.response_id ?? uuid();
 
     const insertResponseResult = await db.insertResponse({
       body: heliconeResponse.body,
@@ -60,7 +65,7 @@ app.post(
       createdAt: new Date(),
       delayMs: heliconeResponse.delay_ms ?? 0,
       http_status: heliconeResponse.http_status ?? null,
-      id: heliconeResponse.response_id ?? uuid(),
+      id: responseId,
       model: heliconeResponse.model ?? null,
       promptTokens: heliconeResponse.prompt_tokens ?? null,
       request: heliconeRequestID,
@@ -74,6 +79,8 @@ app.post(
     res.json({
       message: "Request received! :)",
       orgId: supabaseClient.organizationId,
+      responseId: responseId,
+      requestId: heliconeRequestID,
     });
   })
 );
