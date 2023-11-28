@@ -1,18 +1,19 @@
 import { createValhallaClient } from "..";
+import { RequestWrapper } from "../requestWrapper";
 import { IRouterWrapperDB } from "./iRouterWrapper";
 import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
 
-export function withDB<T extends ExpressRequest, K extends ExpressResponse>(
-  fn: ({ db, req, res }: IRouterWrapperDB) => void
+export function withDB<T>(
+  fn: ({ db, request, res }: IRouterWrapperDB<T>) => void
 ) {
-  return async (req: T, res: K) => {
+  return async (req: ExpressRequest, res: ExpressResponse) => {
     const valhallaDB = createValhallaClient();
     fn({
       db: valhallaDB,
-      req,
+      request: new RequestWrapper<T>(req),
       res,
     });
   };

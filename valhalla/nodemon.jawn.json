@@ -1,7 +1,16 @@
 {
-  "watch": ["packages/jawn/src/**/*", "packages/helicone-shared-ts/src/**/*"],
+  "watch": [
+    "packages/jawn/src/**/*",
+    "packages/helicone-shared-ts/src/**/*",
+    "packages/jawn/src/schema/openapi.yml"
+  ],
+
   "ext": "ts,tsx,js,json",
-  "exec": "yarn workspace helicone-shared-ts build && ts-node packages/jawn/src/index.ts",
-  "ignore": ["node_modules/*", "packages/*/node_modules/*"],
+  "exec": "openapi-typescript packages/jawn/src/schema/openapi.yml --output packages/jawn/src/schema/types.d.ts && yarn workspace helicone-shared-ts build && ts-node packages/jawn/src/index.ts ",
+  "ignore": [
+    "node_modules/*",
+    "packages/*/node_modules/*",
+    "packages/jawn/src/schema/types.d.ts"
+  ],
   "delay": "1000"
 }

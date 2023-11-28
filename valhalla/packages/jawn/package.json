@@ -13,14 +13,17 @@
     "@types/morgan": "^1.9.7",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-openapi-validator": "^5.1.1",
     "helicone-shared-ts": "*",
     "morgan": "^1.10.0",
     "pg": "^8.11.3",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@types/pg": "^8.10.7",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "openapi-typescript": "^6.7.1"
   }
 }
