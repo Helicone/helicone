@@ -168,7 +168,12 @@ output "db_cluster_activity_stream_kinesis_stream_name" {
   value       = module.aurora.db_cluster_activity_stream_kinesis_stream_name
 }
 
-output "rds_proxy_endpoint" {
+output "rds_writer_proxy_endpoint" {
   description = "Endpoint URL of the RDS Proxy"
-  value       = aws_db_proxy.aurora_proxy.endpoint
+  value       = aws_db_proxy.aurora_writer_proxy.endpoint
+}
+
+output "bastion_host_public_ip" {
+  value       = aws_instance.bastion_host.public_ip
+  description = "The public IP address of the Bastion host"
 }

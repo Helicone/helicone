@@ -116,6 +116,40 @@ module "aurora" {
 # Supporting Resources
 ################################################################################
 
+resource "aws_instance" "bastion_host" {
+  ami                    = "ami-0efcece6bed30fd98" # Ubuntu 20.04
+  instance_type          = "t2.micro"
+  key_name               = var.jump_host_key
+  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
+  subnet_id              = module.vpc.public_subnets[0]
+  associate_public_ip_address = true
+
+  tags = {
+    Name = "${local.name}-bastion"
+  }
+}
+
+resource "aws_security_group" "bastion_sg" {
+  name        = "${local.name}-bastion-sg"
+  description = "Security group for bastion host"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.jump_cidr_blocks]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
@@ -179,11 +213,46 @@ resource "aws_iam_role_policy" "rds_proxy_policy" {
     ]
   })
 }
+# Adding RDS Proxy Reader
+resource "aws_db_proxy" "aurora_reader_proxy" {
+  name                   = "${local.name}-reader-proxy"
+  debug_logging          = false
+  engine_family          = "POSTGRESQL"
+  idle_client_timeout    = 1800
+  require_tls            = true
+  role_arn               = aws_iam_role.rds_proxy_role.arn
+  vpc_security_group_ids = [module.aurora.security_group_id]
+  vpc_subnet_ids         = module.vpc.database_subnets
 
 
-# Adding RDS Proxy
-resource "aws_db_proxy" "aurora_proxy" {
-  name                   = "${local.name}-proxy"
+  auth {
+    auth_scheme = "SECRETS"
+    description = "example"
+    iam_auth    = "DISABLED"
+    secret_arn  = module.aurora.cluster_master_user_secret[0].secret_arn
+  }
+}
+
+resource "aws_db_proxy_default_target_group" "default_reader" {
+  db_proxy_name = aws_db_proxy.aurora_reader_proxy.name
+
+  connection_pool_config {
+    connection_borrow_timeout    = 120
+    max_connections_percent      = 100
+    max_idle_connections_percent = 50
+    session_pinning_filters     = ["EXCLUDE_VARIABLE_SETS"]
+  }
+}
+
+resource "aws_db_proxy_target" "aurora_reader_target" {
+  db_proxy_name         = aws_db_proxy.aurora_reader_proxy.name
+  target_group_name     = aws_db_proxy_default_target_group.default_reader.name
+  db_cluster_identifier = module.aurora.cluster_id
+}
+
+# Adding RDS Proxy Writer
+resource "aws_db_proxy" "aurora_writer_proxy" {
+  name                   = "${local.name}-writer-proxy"
   debug_logging          = false
   engine_family          = "POSTGRESQL"
   idle_client_timeout    = 1800
@@ -202,7 +271,7 @@ resource "aws_db_proxy" "aurora_proxy" {
 }
 
 resource "aws_db_proxy_default_target_group" "default" {
-  db_proxy_name = aws_db_proxy.aurora_proxy.name
+  db_proxy_name = aws_db_proxy.aurora_writer_proxy.name
 
   connection_pool_config {
     connection_borrow_timeout    = 120
@@ -213,7 +282,7 @@ resource "aws_db_proxy_default_target_group" "default" {
 }
 
 resource "aws_db_proxy_target" "aurora_target" {
-  db_proxy_name           = aws_db_proxy.aurora_proxy.name
+  db_proxy_name           = aws_db_proxy.aurora_writer_proxy.name
   target_group_name       = aws_db_proxy_default_target_group.default.name
   db_cluster_identifier   = module.aurora.cluster_id
 }
@@ -328,7 +397,7 @@ resource "aws_apprunner_service" "app_service" {
         }
         runtime_environment_variables = {
           # proxy endpoint
-          AURORA_HOST     = aws_db_proxy.aurora_proxy.endpoint
+          AURORA_HOST     = aws_db_proxy.aurora_reader_proxy.endpoint
           AURORA_PORT     = "5432"
           AURORA_DATABASE = local.database_name
           ENV             = "production"
