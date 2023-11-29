@@ -43,12 +43,12 @@ export class SupabaseServerWrapper<T> {
         user: User;
         role: string;
       },
-      "Unauthorized"
+      string
     >
   > {
     const user = await this.client.auth.getUser();
     if (!user.data || !user.data.user) {
-      return { error: "Unauthorized", data: null };
+      return { error: "Unauthorized User", data: null };
     }
 
     const orgAccessCheck = await this.client
@@ -59,7 +59,7 @@ export class SupabaseServerWrapper<T> {
 
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
       return {
-        error: "Unauthorized",
+        error: `Unauthorized orgChecking ${this.ctx.req.cookies[ORG_ID_COOKIE_KEY]}`,
         data: null,
       };
     }

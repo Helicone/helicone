@@ -15,15 +15,16 @@ import useNotification from "../../../shared/notification/useNotification";
 interface GenerateAPIKeyProps {
   apiKey: string;
   setApiKey: (apiKey: string) => void;
+  orgId: string | undefined;
   nextStep: () => void;
 }
 
 const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
-  const { apiKey, setApiKey, nextStep } = props;
+  const { apiKey, setApiKey, orgId, nextStep } = props;
 
   const supabaseClient = useSupabaseClient();
   const user = useUser();
-  const org = useOrg();
+
   const { setNotification } = useNotification();
 
   const [name, setName] = useState<string>("");
@@ -44,11 +45,17 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   ): Promise<string> {
     const apiKey = await generateAPIKey();
 
+    if (!user || !orgId) {
+      setNotification("Invalid user or organization", "error");
+      console.error("Invalid user or organization");
+      return apiKey;
+    }
+
     const res = await supabaseClient.from("helicone_api_keys").insert({
       api_key_hash: await hashAuth(apiKey),
       user_id: user.id,
       api_key_name: keyName,
-      organization_id: org?.currentOrg.id!,
+      organization_id: orgId,
     });
 
     if (res.error) {
