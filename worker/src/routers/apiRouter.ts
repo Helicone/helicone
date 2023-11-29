@@ -345,18 +345,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       _: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
-
-      const { data, error } = await client.db.getRequestById(id, false);
-      if (error) {
-        return client.response.newError(error, 500);
-      }
-
-      if (!data || !data.helicone_org_id) {
-        return client.response.newError("Request not found.", 404);
-      }
-
-      const orgId = data.helicone_org_id;
-      const authParams = await client.db.getAuthParams(orgId);
+      const authParams = await client.db.getAuthParams();
       if (authParams.error !== null) {
         return client.response.unauthorized();
       }
@@ -364,6 +353,15 @@ export const getAPIRouter = (router: BaseRouter) => {
       interface Body {
         key: string;
         value: string;
+      }
+
+      const { data, error } = await client.db.getRequestById(id);
+      if (error) {
+        return client.response.newError(error, 500);
+      }
+
+      if (!data) {
+        return client.response.newError("Request not found.", 404);
       }
 
       const property = await requestWrapper.getJson<Body>();

@@ -109,6 +109,7 @@ export class RequestWrapper {
         return {
           _type: "jwt",
           token: this.heliconeHeaders.heliconeAuthV2.token,
+          orgId: this.heliconeHeaders.heliconeAuthV2.orgId,
         };
       default:
         return this.heliconeProxyKeyId
