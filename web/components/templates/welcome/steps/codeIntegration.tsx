@@ -4,19 +4,15 @@ import CodeSnippet from "../../home/codeSnippet";
 import { UnionProviderMethods } from "../welcomePage";
 import AnthropicProxy from "./codeSnippets/anthropic-proxy";
 import OpenAIAsync from "./codeSnippets/openai-async";
+import Link from "next/link";
 
 interface CodeIntegrationProps {
   nextStep: () => void;
-  providerMethod?: UnionProviderMethods;
   apiKey?: string;
 }
 
 const CodeIntegration = (props: CodeIntegrationProps) => {
-  const {
-    nextStep,
-    providerMethod = "openai-proxy",
-    apiKey = "<YOUR_API_KEY>",
-  } = props;
+  const { nextStep, apiKey = "<YOUR_API_KEY>" } = props;
 
   const [loaded, setLoaded] = useState(false);
 
@@ -36,27 +32,42 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
       )}
     >
       <p className="text-2xl md:text-5xl font-semibold text-center">
-        {providerMethod
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ")}
+        OpenAI Proxy Integration
       </p>
-      <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
-        Choose your preferred platform and follow the directions
-      </p>
+      <div className="text-md md:text-lg text-gray-700 font-light mt-5 text-center max-w-3xl">
+        We recommend using the proxy integration, but we also support
+        OpenAI&apos;s packages{" "}
+        <Link
+          href={
+            "https://docs.helicone.ai/getting-started/integration-method/openai"
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline"
+        >
+          here
+        </Link>
+        .
+        <p>
+          Have a different provider or fine tuned model? View our docs{" "}
+          <Link
+            href={
+              "https://docs.helicone.ai/getting-started/integration-method/gateway"
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline"
+          >
+            here
+          </Link>{" "}
+          to integrate.
+        </p>
+      </div>
       <div className="flex w-full md:w-[650px] mt-8">
-        {providerMethod === "openai-proxy" && (
-          <CodeSnippet
-            variant="simple"
-            apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey}
-          />
-        )}
-        {providerMethod === "openai-async" && (
-          <OpenAIAsync apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
-        )}
-        {providerMethod === "anthropic-proxy" && (
-          <AnthropicProxy apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey} />
-        )}
+        <CodeSnippet
+          variant="simple"
+          apiKey={apiKey === "" ? "<YOUR_API_KEY>" : apiKey}
+        />
       </div>
       <button
         onClick={nextStep}

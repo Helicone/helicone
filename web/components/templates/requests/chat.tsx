@@ -173,7 +173,7 @@ export const SingleChat = (props: {
                         setOpen(true);
                       }}
                     >
-                      <img
+                      <Image
                         src={item.image_url.url}
                         alt={""}
                         width={200}
@@ -287,7 +287,7 @@ export const SingleChat = (props: {
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4">
           {selectedImageUrl && (
-            <img
+            <Image
               src={selectedImageUrl}
               alt={selectedImageUrl}
               width={600}
