@@ -52,8 +52,8 @@ const CreateOrg = (props: CreateOrgProps) => {
         {
           owner: user.id ?? "",
           name: orgName,
-          // size: orgSize,
-          // referral: orgReferral,
+          size: orgSize,
+          referral: orgReferral,
           is_personal: true,
         },
       ])
