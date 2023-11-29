@@ -37,7 +37,7 @@ const GetStarted = (props: GetStartedProps) => {
         Welcome to Helicone
       </p>
       <p className="text-md md:text-lg text-gray-700 font-light mt-5">
-        Helicone helps make your Large-Language Model operations more efficient
+        The easiest way to monitor your LLM-powered applications at scale
       </p>
       <button
         onClick={nextStep}

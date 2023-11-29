@@ -5,6 +5,8 @@ import { Result } from "../../../../lib/result";
 import { clsx } from "../../../shared/clsx";
 import * as Listening from "../../../../public/lottie/Listening.json";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import LoadingAnimation from "../../../shared/loadingAnimation";
+import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 
 interface EventListenProps {
   nextStep: () => void;
@@ -104,7 +106,8 @@ const EventListen = (props: EventListenProps) => {
         </>
       ) : (
         <>
-          <p className="text-2xl md:text-5xl font-semibold text-center">
+          <LoadingAnimation animation={PartyParrot} height={75} width={75} />
+          <p className="text-2xl md:text-5xl font-semibold text-center mt-4">
             Successfully received an event
           </p>
           <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">

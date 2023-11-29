@@ -48,7 +48,7 @@ const ChatRow = (props: ChatRowProps) => {
               item.type === "image_url" ? (
                 <div key={index}>
                   {item.image_url.url ? (
-                    <img
+                    <Image
                       src={item.image_url.url}
                       alt={""}
                       width={200}

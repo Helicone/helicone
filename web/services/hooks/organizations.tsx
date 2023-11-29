@@ -59,12 +59,12 @@ const useGetOrgs = () => {
       if (error) {
         return [];
       }
-      if (!data.find((d) => d.is_personal)) {
-        await supabaseClient.rpc("ensure_personal");
-        console.warn("Created personal org");
-        // just a shim that will only execute once for the entire life time of a user
-        return (await supabaseClient.from("organization").select(`*`)).data!;
-      }
+      // if (!data.find((d) => d.is_personal)) {
+      //   await supabaseClient.rpc("ensure_personal");
+      //   console.warn("Created personal org");
+      //   // just a shim that will only execute once for the entire life time of a user
+      //   return (await supabaseClient.from("organization").select(`*`)).data!;
+      // }
       return data;
     },
     refetchOnWindowFocus: false,
@@ -83,6 +83,10 @@ const useGetOrgs = () => {
     isLoading,
     refetch,
   };
+};
+
+const setOrgCookie = (orgId: string) => {
+  Cookies.set(ORG_ID_COOKIE_KEY, orgId, { expires: 30 });
 };
 
 const useOrgsContextManager = () => {
@@ -111,7 +115,7 @@ const useOrgsContextManager = () => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
-          Cookies.set(ORG_ID_COOKIE_KEY, org.id, { expires: 30 });
+          setOrgCookie(org.id);
           setRenderKey((key) => key + 1);
         }
       },
@@ -122,4 +126,10 @@ const useOrgsContextManager = () => {
   return orgContextValue;
 };
 
-export { useGetOrgMembers, useGetOrgOwner, useGetOrgs, useOrgsContextManager };
+export {
+  useGetOrgMembers,
+  useGetOrgOwner,
+  useGetOrgs,
+  useOrgsContextManager,
+  setOrgCookie,
+};
