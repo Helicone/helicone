@@ -334,7 +334,7 @@ export class DBWrapper {
       .match({
         id: requestId,
       })
-      .eq("org_id", await this.orgId())
+      .eq("helicone_org_id", await this.orgId())
       .single();
 
     if (error) {
