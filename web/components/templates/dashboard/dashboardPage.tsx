@@ -215,15 +215,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     return combinedArray || [];
   };
 
-  const combinePositiveAndNegativeFeedback = () => {
-    let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
-      date: getTimeMap(timeIncrement)(feedback.time),
-      positive: feedback.positiveCount > 0 ? feedback.positiveCount : null,
-      negative: feedback.negativeCount > 0 ? feedback.negativeCount : null,
-    }));
-    return combinedArray || [];
-  };
-
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -703,28 +694,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                     index="date"
                     categories={["users"]}
                     colors={["orange"]}
-                    showYAxis={false}
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="feedback">
-                <StyledAreaChart
-                  title={"Feedback"}
-                  value={
-                    metrics.feedback?.data?.data
-                      ? `${formatNumberString(
-                          metrics.feedback?.data?.data.toFixed(2)
-                        )}`
-                      : "0"
-                  }
-                  isDataOverTimeLoading={overTimeData.feedback.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={combinePositiveAndNegativeFeedback()}
-                    index="date"
-                    categories={["positive", "negative"]}
-                    colors={["green", "red"]}
                     showYAxis={false}
                   />
                 </StyledAreaChart>

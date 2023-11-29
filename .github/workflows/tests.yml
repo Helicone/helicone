@@ -116,7 +116,7 @@ jobs:
           OPENAI_ORG: ${{ secrets.CI_OPENAI_ORG }}
         run: |
           pytest python_integration_tests.py -s
-      - name: Run python tests tests
+      - name: Run helicone-python tests
         working-directory: helicone-python
         env:
           HELICONE_PROXY_URL: "http://127.0.0.1:8787/v1"
