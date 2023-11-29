@@ -70,7 +70,6 @@ const GraphQLPage = (props: GraphQLPageProps) => {
             },
             headers: {
               "use-cookies": "true",
-              cookie: "hello",
             },
             displayOptions: {
               theme: "light",
@@ -80,6 +79,8 @@ const GraphQLPage = (props: GraphQLPageProps) => {
           }}
           className={clsx(showGraphqlHeader || "-mt-14", "h-full")}
           runTelemetry={false}
+          //@ts-ignore
+          includeCookies={true}
         />
       </div>
     </div>
