@@ -125,6 +125,7 @@ async function getHeliconeJwtAuthParams(
 export type JwtAuth = {
   _type: "jwt";
   token: string;
+  orgId: string;
 };
 
 export type BearerAuth = {
@@ -168,7 +169,7 @@ export class DBWrapper {
     return ok(this.rateLimiter);
   }
 
-  async getAuthParams(orgId?: string): Promise<Result<AuthParams, string>> {
+  async getAuthParams(): Promise<Result<AuthParams, string>> {
     if (this.authParams !== undefined) {
       return {
         data: this.authParams,
@@ -187,12 +188,9 @@ export class DBWrapper {
     let authParams: Result<AuthParams, string> | undefined;
     switch (this.auth._type) {
       case "jwt":
-        if (!orgId) {
-          return { data: null, error: "orgId must be provided for jwt auth" };
-        }
         authParams = await getHeliconeJwtAuthParams(
           this.supabaseClient,
-          orgId,
+          this.auth.orgId,
           this.auth.token
         );
         break;
@@ -321,16 +319,13 @@ export class DBWrapper {
   }
 
   async getRequestById(
-    requestId: string,
-    includeOrgId: boolean = true
+    requestId: string
   ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
     const query = this.supabaseClient.from("request").select("*").match({
       id: requestId,
     });
 
-    if (includeOrgId) {
-      query.eq("helicone_org_id", await this.orgId());
-    }
+    query.eq("helicone_org_id", await this.orgId());
 
     const { data, error } = await query.single();
 

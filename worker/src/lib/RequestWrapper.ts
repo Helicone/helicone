@@ -106,9 +106,13 @@ export class RequestWrapper {
   async auth(): Promise<HeliconeAuth> {
     switch (this.heliconeHeaders.heliconeAuthV2?._type) {
       case "jwt":
+        if (!this.heliconeHeaders.heliconeAuthV2.orgId) {
+          throw new Error("No orgId in heliconeAuthV2");
+        }
         return {
           _type: "jwt",
           token: this.heliconeHeaders.heliconeAuthV2.token,
+          orgId: this.heliconeHeaders.heliconeAuthV2.orgId,
         };
       default:
         return this.heliconeProxyKeyId
