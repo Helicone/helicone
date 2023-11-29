@@ -48,7 +48,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   heliconeAuthV2: Nullable<{
     _type: "jwt" | "bearer";
     token: string;
-    orgId?: string;
   }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
@@ -145,7 +144,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   private getHeliconeAuthV2(): Nullable<{
     _type: "jwt" | "bearer";
     token: string;
-    orgId?: string;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
@@ -159,7 +157,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "jwt",
         token: heliconeAuthJWT,
-        orgId: this.headers.get("helicone-org-id") ?? undefined,
       };
     }
     return null;
