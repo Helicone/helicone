@@ -35,8 +35,8 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
         OpenAI Proxy Integration
       </p>
       <div className="text-md md:text-lg text-gray-700 font-light mt-5 text-center max-w-3xl">
-        We recommend using the proxy integration, but we also support OpenAI's
-        packages{" "}
+        We recommend using the proxy integration, but we also support
+        OpenAI&apos;s packages{" "}
         <Link
           href={
             "https://docs.helicone.ai/getting-started/integration-method/openai"
