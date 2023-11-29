@@ -11,12 +11,10 @@ import { useOrg } from "../../../shared/layout/organizationContext";
 
 interface CreateOrgProps {
   nextStep: () => void;
-  org: OrgProps | undefined;
-  setOrg: (org: OrgProps) => void;
 }
 
 const CreateOrg = (props: CreateOrgProps) => {
-  const { nextStep, org, setOrg } = props;
+  const { nextStep } = props;
 
   const user = useUser();
   const [loaded, setLoaded] = useState(false);
@@ -36,11 +34,6 @@ const CreateOrg = (props: CreateOrgProps) => {
 
     if (!user) return;
 
-    if (org?.name !== undefined) {
-      nextStep();
-      return;
-    }
-
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -48,22 +41,19 @@ const CreateOrg = (props: CreateOrgProps) => {
     const orgSize = formData.get("org-size") as string;
     const orgReferral = formData.get("org-referral") as string;
 
-    const { data: orgData, error } = await supabaseClient
+    // update the current org
+    const { error } = await supabaseClient
       .from("organization")
-      .insert([
-        {
-          owner: user.id ?? "",
-          name: orgName,
-          size: orgSize,
-          referral: orgReferral,
-          is_personal: true,
-        },
-      ])
-      .select(`id`);
+      .update({
+        name: orgName,
+        size: orgSize,
+        referral: orgReferral,
+      })
+      .eq("id", orgContext?.currentOrg.id ?? "");
 
     if (error) {
       setNotification(
-        "Failed to create organization. Please try again.",
+        "Failed to update organization. Please try again.",
         "error"
       );
       setIsLoading(false);
@@ -71,14 +61,7 @@ const CreateOrg = (props: CreateOrgProps) => {
     }
 
     setIsLoading(false);
-    setOrg({
-      id: orgData?.[0].id ?? "",
-      name: orgName,
-      size: orgSize,
-      referral: orgReferral,
-    });
-    orgContext?.setCurrentOrg(orgData?.[0].id ?? "");
-
+    orgContext?.refetchOrgs();
     nextStep();
   };
 
@@ -113,16 +96,18 @@ const CreateOrg = (props: CreateOrgProps) => {
           </label>
           <div className="">
             <input
-              disabled={org?.name !== undefined}
               type="text"
               name="org-name"
               id="org-name"
               required
               className={clsx(
-                org?.name !== undefined && "bg-gray-100",
                 "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
-              placeholder={org?.name ?? "Your Organization Name"}
+              placeholder={
+                orgContext?.currentOrg?.name === "Personal"
+                  ? "Your Organization Name"
+                  : orgContext?.currentOrg?.name
+              }
             />
           </div>
         </div>
@@ -135,12 +120,10 @@ const CreateOrg = (props: CreateOrgProps) => {
           </label>
           <div className="">
             <select
-              disabled={org?.name !== undefined}
               id="org-size"
               name="org-size"
               defaultValue={"Select company size"}
               className={clsx(
-                org?.name !== undefined && "bg-gray-100",
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
             >
@@ -166,12 +149,10 @@ const CreateOrg = (props: CreateOrgProps) => {
           </label>
           <div className="">
             <select
-              disabled={org?.name !== undefined}
               id="org-referral"
               name="org-referral"
               defaultValue={"Select referral source"}
               className={clsx(
-                org?.name !== undefined && "bg-gray-100",
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
             >
@@ -196,7 +177,9 @@ const CreateOrg = (props: CreateOrgProps) => {
           {isLoading && (
             <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />
           )}
-          {org?.name === undefined ? "Create Organization" : "Next"}
+          {orgContext?.currentOrg.name === "Personal"
+            ? "Create Organization"
+            : "Next"}
         </button>
       </form>
     </div>
