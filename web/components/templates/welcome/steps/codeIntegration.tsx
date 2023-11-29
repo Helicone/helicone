@@ -5,6 +5,7 @@ import { UnionProviderMethods } from "../welcomePage";
 import AnthropicProxy from "./codeSnippets/anthropic-proxy";
 import OpenAIAsync from "./codeSnippets/openai-async";
 import Link from "next/link";
+import { useOrg } from "../../../shared/layout/organizationContext";
 
 interface CodeIntegrationProps {
   nextStep: () => void;
@@ -70,7 +71,9 @@ const CodeIntegration = (props: CodeIntegrationProps) => {
         />
       </div>
       <button
-        onClick={nextStep}
+        onClick={() => {
+          nextStep();
+        }}
         className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
       >
         Ready to go!
