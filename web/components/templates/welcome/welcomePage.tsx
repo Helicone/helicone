@@ -14,6 +14,7 @@ import GetStarted from "./steps/getStarted";
 import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface WelcomePageProps {}
 
@@ -39,6 +40,8 @@ const WelcomePage = (props: WelcomePageProps) => {
   const [apiKey, setApiKey] = useState<string>("");
   const [org, setOrg] = useState<OrgProps>();
 
+  const orgContext = useOrg();
+
   const nextStep = () => {
     setStep(step + 1);
   };
@@ -53,12 +56,11 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const stepArray = [
     <GetStarted key={0} nextStep={nextStep} />,
-    <CreateOrg key={1} nextStep={nextStep} setOrg={setOrg} org={org} />,
+    <CreateOrg key={1} nextStep={nextStep} />,
     <GenerateAPIKey
       key={2}
       nextStep={nextStep}
       apiKey={apiKey}
-      orgId={org?.id}
       setApiKey={setApiKey}
     />,
 
