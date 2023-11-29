@@ -365,6 +365,23 @@ export const getAPIRouter = (router: BaseRouter) => {
       }
 
       const property = await requestWrapper.getJson<Body>();
+      if (!property) {
+        return client.response.newError("Request body is missing.", 400);
+      }
+
+      if (!property.key) {
+        return client.response.newError(
+          "Invalid request body. 'key' is required.",
+          400
+        );
+      }
+
+      if (!property.value) {
+        return client.response.newError(
+          "Invalid request body. 'value' is required.",
+          400
+        );
+      }
 
       const properties = {
         ...((data?.properties as Record<string, any>) || {}),
