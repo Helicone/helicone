@@ -7,6 +7,7 @@ import useNotification from "../../../shared/notification/useNotification";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { setOrgCookie } from "../../../../services/hooks/organizations";
 import { OrgProps } from "../welcomePage";
+import { useOrg } from "../../../shared/layout/organizationContext";
 
 interface CreateOrgProps {
   nextStep: () => void;
@@ -22,6 +23,7 @@ const CreateOrg = (props: CreateOrgProps) => {
   const supabaseClient = useSupabaseClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useNotification();
+  const orgContext = useOrg();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 500); // delay of 500ms
@@ -75,7 +77,8 @@ const CreateOrg = (props: CreateOrgProps) => {
       size: orgSize,
       referral: orgReferral,
     });
-    setOrgCookie(orgData?.[0].id ?? "");
+    orgContext?.setCurrentOrg(orgData?.[0].id ?? "");
+
     nextStep();
   };
 
