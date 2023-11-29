@@ -7,6 +7,7 @@ import * as boxbee from "../../public/lottie/boxbee.json";
 import * as pumpkinCat from "../../public/lottie/pumpkinCat.json";
 import * as bat from "../../public/lottie/bat.json";
 import * as halloween from "../../public/lottie/halloween.json";
+import * as PartyParrot from "../../public/lottie/PartyParrot.json";
 import { useEffect, useState } from "react";
 
 type Animation =
@@ -17,7 +18,8 @@ type Animation =
   | typeof boxbee
   | typeof pumpkinCat
   | typeof bat
-  | typeof halloween;
+  | typeof halloween
+  | typeof PartyParrot;
 
 interface LoadingAnimationProps {
   title?: string;
