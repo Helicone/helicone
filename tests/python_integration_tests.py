@@ -85,7 +85,7 @@ def test_gateway_api():
     data = {
         "model": "gpt-3.5-turbo",
         "messages": messages,
-        "max_tokens": 10
+        "max_tokens": 1
     }
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
@@ -129,7 +129,7 @@ def test_openai_proxy():
     data = {
         "model": "gpt-3.5-turbo",
         "messages": messages,
-        "max_tokens": 10
+        "max_tokens": 1
     }
     headers = {
         "Authorization": f"Bearer {openai_api_key}",
@@ -190,7 +190,7 @@ def test_helicone_proxy_key():
     data = {
         "model": "gpt-3.5-turbo",
         "messages": messages,
-        "max_tokens": 10
+        "max_tokens": 1
     }
     headers = {
         "Authorization": f"Bearer {helicone_proxy_key}",
@@ -241,7 +241,7 @@ def test_openai_async():
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=10,
+        max_tokens=1,
         helicone_meta=Meta(
             custom_properties={
                 "requestId": requestId

@@ -421,12 +421,14 @@ export class DBLoggable {
   auth(): HeliconeAuth {
     return this.request.heliconeProxyKeyId
       ? {
-          heliconeProxyKeyId: this.request.heliconeProxyKeyId,
-          heliconeApiKeyAuthHash: undefined,
+          token: this.request.heliconeProxyKeyId,
+          _type: "bearer",
+          _bearerType: "heliconeProxyKey",
         }
       : {
-          heliconeApiKeyAuthHash: this.request.heliconeApiKeyAuthHash ?? "",
-          heliconeProxyKeyId: undefined,
+          token: this.request.heliconeApiKeyAuthHash ?? "",
+          _type: "bearer",
+          _bearerType: "heliconeApiKey",
         };
   }
 
