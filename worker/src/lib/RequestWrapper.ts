@@ -7,7 +7,7 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "../db/DBWrapper";
-import { Result } from "../results";
+import { Result, err } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 import { checkLimits } from "./limits/check";
 import { getAndStoreInCache } from "./secureCache";
@@ -263,10 +263,7 @@ export class RequestWrapper {
         async () => await this.getProviderKeyFromProxy(authKey, env)
       );
       if (error || !data || !data.providerKey || !data.proxyKeyId) {
-        return {
-          data: null,
-          error: `Proxy key not found. Error: ${error}`,
-        };
+        return err(`Proxy key not found. Error: ${error}`);
       }
       const providerKeyRow = data;
 
