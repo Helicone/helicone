@@ -1,4 +1,4 @@
-import { IRequest, Route, Router, RouterType } from "itty-router";
+import { IRequest, Route, Router, RouterType, error } from "itty-router";
 import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { handleLoggingEndpoint } from "../properties";
@@ -20,6 +20,28 @@ const WORKER_MAP: {
   OPENAI_PROXY: getOpenAIProxyRouter,
   HELICONE_API: getAPIRouter,
   GATEWAY_API: getGatewayAPIRouter,
+  CUSTOMER_GATEWAY: (router: BaseRouter) => {
+    router.all(
+      "*",
+      async (
+        _,
+        requestWrapper: RequestWrapper,
+        env: Env,
+        ctx: ExecutionContext
+      ) => {
+        console.log("CUSTOMER_GATEWAY", requestWrapper?.heliconeProxyKeyId);
+        if (!env.CUSTOMER_GATEWAY_URL) {
+          return error(500, "CUSTOMER_GATEWAY_URL not set.");
+        }
+
+        if (!requestWrapper?.heliconeProxyKeyId) {
+          return error(401, "Invalid user.");
+        }
+        requestWrapper.setBaseURLOverride(env.CUSTOMER_GATEWAY_URL);
+      }
+    );
+    return getOpenAIProxyRouter(router);
+  },
 };
 
 export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
