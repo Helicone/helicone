@@ -93,7 +93,6 @@ export async function getAndStoreInCache<T>(
 ): Promise<Result<T, string>> {
   const cached = await getFromCache(key, env);
   if (cached !== null) {
-    console.log("Using cached value");
     return ok(JSON.parse(cached) as T);
   }
   const value = await fn();
