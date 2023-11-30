@@ -411,7 +411,8 @@ export const getAPIRouter = (router: BaseRouter) => {
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "PUT",
-          "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
+          "Access-Control-Allow-Headers":
+            "Content-Type, helicone-jwt, helicone-org-id",
         },
       });
     }
