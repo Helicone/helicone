@@ -5,12 +5,12 @@
 
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
+import { Database } from "../../supabase/database.types";
+import { HeliconeAuth } from "../db/DBWrapper";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
-import { Database } from "../../supabase/database.types";
 import { checkLimits } from "./limits/check";
-import { getFromCache, storeInCache } from "./secureCache";
-import { HeliconeAuth } from "../db/DBWrapper";
+import { getAndStoreInCache } from "./secureCache";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -257,26 +257,18 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      let providerKeyRow: {
-        providerKey?: string;
-        proxyKeyId?: string;
-      } | null = await getFromCache(authKey, env).then((x) =>
-        x ? JSON.parse(x) : null
+      const { data, error } = await getAndStoreInCache(
+        `getProviderKeyFromProxy-${authKey}`,
+        env,
+        async () => await this.getProviderKeyFromProxy(authKey, env)
       );
-      if (!providerKeyRow) {
-        const { data, error } = await this.getProviderKeyFromProxy(
-          authKey,
-          env
-        );
-        if (error || !data || !data.providerKey || !data.proxyKeyId) {
-          return {
-            data: null,
-            error: `Proxy key not found. Error: ${error}`,
-          };
-        }
-        providerKeyRow = data;
-        await storeInCache(authKey, JSON.stringify(providerKeyRow), this.env);
+      if (error || !data || !data.providerKey || !data.proxyKeyId) {
+        return {
+          data: null,
+          error: `Proxy key not found. Error: ${error}`,
+        };
       }
+      const providerKeyRow = data;
 
       this.heliconeProxyKeyId = providerKeyRow.proxyKeyId;
       this.authorization = providerKeyRow.providerKey;

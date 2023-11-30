@@ -1,4 +1,5 @@
 import { Env, hash } from "..";
+import { Result, ok } from "../results";
 
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
@@ -76,10 +77,30 @@ export async function getFromCache(
   key: string,
   env: SecureCacheEnv
 ): Promise<string | null> {
-  const encrypted = await env.SECURE_CACHE.get(await hash(key));
+  const hashedKey = await hash(key);
+  const encrypted = await env.SECURE_CACHE.get(hashedKey);
   if (!encrypted) {
     return null;
   }
 
   return decrypt(JSON.parse(encrypted), env);
+}
+
+export async function getAndStoreInCache<T>(
+  key: string,
+  env: SecureCacheEnv,
+  fn: () => Promise<Result<T, string>>
+): Promise<Result<T, string>> {
+  const cached = await getFromCache(key, env);
+  if (cached !== null) {
+    console.log("Using cached value");
+    return ok(JSON.parse(cached) as T);
+  }
+  const value = await fn();
+  if (value.error !== null) {
+    return value;
+  }
+
+  await storeInCache(key, JSON.stringify(value.data), env);
+  return value;
 }
