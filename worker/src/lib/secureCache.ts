@@ -86,11 +86,11 @@ export async function getFromCache(
   return decrypt(JSON.parse(encrypted), env);
 }
 
-export async function getAndStoreInCache<T>(
+export async function getAndStoreInCache<T, K>(
   key: string,
   env: SecureCacheEnv,
-  fn: () => Promise<Result<T, string>>
-): Promise<Result<T, string>> {
+  fn: () => Promise<Result<T, K>>
+): Promise<Result<T, K>> {
   const cached = await getFromCache(key, env);
   if (cached !== null) {
     return ok(JSON.parse(cached) as T);
