@@ -80,6 +80,7 @@ routes = [
 	{ pattern = "api_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "gateway_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "2yfv_staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
+	{ pattern = "2yfv_staging2.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 ]
 
 kv_namespaces = [
