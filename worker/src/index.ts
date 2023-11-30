@@ -27,7 +27,8 @@ export interface Env {
     | "OPENAI_PROXY"
     | "ANTHROPIC_PROXY"
     | "HELICONE_API"
-    | "GATEWAY_API";
+    | "GATEWAY_API"
+    | "CUSTOMER_GATEWAY";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -39,6 +40,7 @@ export interface Env {
   OPENAI_API_KEY: string;
   OPENAI_ORG_ID: string;
   ROSETTA_HELICONE_API_KEY: string;
+  CUSTOMER_GATEWAY_URL?: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -64,7 +66,12 @@ function modifyEnvBasedOnPath(env: Env, request: RequestWrapper): Env {
   const url = new URL(request.getUrl());
   const host = url.host;
   const hostParts = host.split(".");
-  if (hostParts.length >= 3 && hostParts[0].includes("gateway")) {
+  if (hostParts.length >= 3 && hostParts[0].includes("2yfv")) {
+    return {
+      ...env,
+      WORKER_TYPE: "CUSTOMER_GATEWAY",
+    };
+  } else if (hostParts.length >= 3 && hostParts[0].includes("gateway")) {
     return {
       ...env,
       WORKER_TYPE: "GATEWAY_API",
