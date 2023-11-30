@@ -410,7 +410,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       return new Response(null, {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST",
+          "Access-Control-Allow-Methods": "PUT",
           "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
         },
       });
