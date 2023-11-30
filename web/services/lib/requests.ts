@@ -59,3 +59,33 @@ export const updateRequestFeedback = async (
     }),
   });
 };
+
+export const addRequestLabel = async (
+  requestId: string,
+  orgId: string,
+  key: string,
+  value: string
+) => {
+  const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
+  if (!authFromCookie) {
+    console.error("No auth token found in cookie");
+    return;
+  }
+  const decodedCookie = decodeURIComponent(authFromCookie);
+  const parsedCookie = JSON.parse(decodedCookie);
+  const jwtToken = parsedCookie[0];
+
+  return fetch(`${BASE_PATH}/request/:id/property`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "helicone-jwt": jwtToken,
+      "helicone-org-id": orgId,
+    },
+    body: JSON.stringify({
+      "helicone-id": requestId,
+      key,
+      value,
+    }),
+  });
+};

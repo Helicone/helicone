@@ -1,9 +1,12 @@
 import {
+  ArrowPathIcon,
   CodeBracketIcon,
   EyeIcon,
   HandThumbDownIcon,
   HandThumbUpIcon,
   InformationCircleIcon,
+  MinusIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
@@ -21,8 +24,12 @@ import {
 } from "@heroicons/react/24/solid";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import Cookies from "js-cookie";
-import { updateRequestFeedback } from "../../../services/lib/requests";
+import {
+  addRequestLabel,
+  updateRequestFeedback,
+} from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 function getPathName(url: string) {
   try {
@@ -54,6 +61,11 @@ const RequestRow = (props: {
     rating: boolean | null;
   }>(request.feedback);
 
+  const org = useOrg();
+
+  const [isAddingLabel, setIsAddingLabel] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+
   const router = useRouter();
   const { setNotification } = useNotification();
 
@@ -72,6 +84,42 @@ const RequestRow = (props: {
         console.error(err);
         setNotification("Error submitting feedback", "error");
       });
+  };
+
+  const onAddLabelHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsAdding(true);
+
+    const formData = new FormData(e.currentTarget);
+    const key = formData.get("key") as string;
+    const value = formData.get("value") as string;
+
+    if (!key || !value || org?.currentOrg.id === undefined) {
+      setNotification("Error adding label", "error");
+      setIsAdding(false);
+      return;
+    }
+    try {
+      const res = await addRequestLabel(
+        request.id,
+        org?.currentOrg.id,
+        key,
+        value
+      );
+
+      if (res?.status === 200) {
+        setNotification("Label added", "success");
+        setIsAdding(false);
+      } else {
+        setNotification("Error adding label", "error");
+        setIsAdding(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setNotification(`Error adding label: ${err}`, "error");
+      setIsAdding(false);
+      return;
+    }
   };
 
   return (
@@ -166,10 +214,78 @@ const RequestRow = (props: {
         properties.length > 0 &&
         Object.keys(request.customProperties).length > 0 && (
           <div className="flex flex-col space-y-2">
-            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-              Custom Properties
-            </p>
-            <div className="flex flex-wrap gap-4 text-sm">
+            <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+              Custom Properties{" "}
+              <button
+                onClick={() => {
+                  setIsAddingLabel(!isAddingLabel);
+                }}
+                className="ml-1.5 p-1 shadow-sm bg-gray-200 rounded-lg h-fit"
+              >
+                {isAddingLabel ? (
+                  <MinusIcon className="h-3 w-3 text-gray-500" />
+                ) : (
+                  <PlusIcon className="h-3 w-3 text-gray-500" />
+                )}
+              </button>
+            </div>
+            {isAddingLabel && (
+              <form
+                onSubmit={onAddLabelHandler}
+                className="flex flex-row items-end space-x-2 py-2 border-b border-gray-300"
+              >
+                <div className="flex flex-col space-y-1">
+                  <label
+                    htmlFor="key"
+                    className="block text-sm font-semibold leading-6 text-gray-900"
+                  >
+                    Key
+                  </label>
+                  <div className="">
+                    <input
+                      type="text"
+                      name="key"
+                      id="key"
+                      required
+                      className={clsx(
+                        "block w-full rounded-md px-2 py-1 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                      )}
+                      placeholder={"Key"}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <label
+                    htmlFor="value"
+                    className="block text-sm font-semibold leading-6 text-gray-900"
+                  >
+                    Value
+                  </label>
+                  <div className="">
+                    <input
+                      type="text"
+                      name="value"
+                      id="value"
+                      required
+                      className={clsx(
+                        "block w-full rounded-md px-2 py-1 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                      )}
+                      placeholder={"Value"}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="h-fit flex flex-row rounded-md bg-black dark:bg-white px-4 py-2 text-xs font-semibold border border-black dark:border-white hover:bg-gray-900 dark:hover:bg-gray-100 text-gray-50 dark:text-gray-900 shadow-sm hover:text-gray-300 dark:hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                >
+                  {isAdding && (
+                    <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
+                  )}
+                  Add
+                </button>
+              </form>
+            )}
+            <div className="flex flex-wrap gap-4 text-sm items-center">
               {properties.map((property, i) => {
                 if (
                   request.customProperties &&
