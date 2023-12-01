@@ -34,6 +34,8 @@ export type ResponseAndRequest = Omit<
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
+const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
+
 export const updateRequestFeedback = async (
   requestId: string,
   rating: boolean
@@ -47,7 +49,7 @@ export const updateRequestFeedback = async (
   const parsedCookie = JSON.parse(decodedCookie);
   const jwtToken = parsedCookie[0];
 
-  return fetch(`${BASE_PATH}/feedback`, {
+  return fetch(`${API_BASE_PATH}/feedback`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
