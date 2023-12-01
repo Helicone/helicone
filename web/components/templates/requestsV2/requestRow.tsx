@@ -249,7 +249,7 @@ const RequestRow = (props: {
       <div className="flex flex-col">
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
-          {/* <Tooltip title="Add a new label" placement="top">
+          <Tooltip title="Add a new label" placement="top">
             <button
               onClick={() => {
                 setIsAddingLabel(!isAddingLabel);
@@ -262,7 +262,7 @@ const RequestRow = (props: {
                 <PlusIcon className="h-3 w-3 text-gray-500" />
               )}
             </button>
-          </Tooltip> */}
+          </Tooltip>
         </div>
         {isAddingLabel && (
           <form
