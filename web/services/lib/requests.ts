@@ -49,7 +49,7 @@ export const updateRequestFeedback = async (
   const parsedCookie = JSON.parse(decodedCookie);
   const jwtToken = parsedCookie[0];
 
-  return fetch(`${API_BASE_PATH}/feedback`, {
+  return fetch(`${BASE_PATH}/feedback`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export const addRequestLabel = async (
   const parsedCookie = JSON.parse(decodedCookie);
   const jwtToken = parsedCookie[0];
 
-  return fetch(`${BASE_PATH}/request/${requestId}/property`, {
+  return fetch(`${API_BASE_PATH}/request/${requestId}/property`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
