@@ -144,9 +144,6 @@ const RequestRow = (props: {
               ]
             : [{ [key]: value }]
         );
-        // clear the form
-        (e.currentTarget.elements[0] as HTMLInputElement).value = "";
-        (e.currentTarget.elements[1] as HTMLInputElement).value = "";
 
         setIsAdding(false);
       } else {
