@@ -336,31 +336,21 @@ const DashboardPage = (props: DashboardPageProps) => {
       i: "models",
       x: 0,
       y: 4,
-      w: 4,
+      w: 3,
       h: 4,
       minW: 3,
       maxW: 8,
       minH: 4,
       maxH: 4,
     },
-    { i: "costs", x: 4, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "users", x: 8, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    {
-      i: "feedback",
-      x: 0,
-      y: 8,
-      w: 6,
-      h: 4,
-      minW: 3,
-      maxW: 8,
-      minH: 4,
-      maxH: 4,
-    },
+    { i: "costs", x: 3, y: 4, w: 3, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "users", x: 6, y: 4, w: 3, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+
     {
       i: "latency",
-      x: 6,
-      y: 8,
-      w: 6,
+      x: 9,
+      y: 4,
+      w: 3,
       h: 4,
       minW: 3,
       maxW: 8,
@@ -431,7 +421,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "costs",
+      i: "models",
       x: 0,
       y: 8,
       w: 4,
@@ -443,7 +433,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "users",
+      i: "costs",
       x: 0,
       y: 12,
       w: 4,
@@ -455,7 +445,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "feedback",
+      i: "users",
       x: 0,
       y: 16,
       w: 4,
@@ -682,6 +672,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
+                  // height={"212px"}
                 >
                   <BarChart
                     className="h-[14rem]"
