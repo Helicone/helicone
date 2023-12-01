@@ -325,16 +325,18 @@ export const Chat = (props: ChatProps) => {
   const { requestBody, responseBody, requestId, llmSchema, model } = props;
 
   const requestMessages =
-    llmSchema?.request.messages ?? requestBody?.messages ?? null;
+    llmSchema?.request.messages ?? requestBody?.messages ?? [];
   const responseMessage =
-    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? null;
+    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? "";
 
   const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
     Object.fromEntries(
       Array.from(
-        { length: ([...requestMessages, responseMessage] || []).length },
+        {
+          length: [...requestMessages, responseMessage].filter(Boolean).length,
+        },
         (_, i) => [i, false]
       )
     )
