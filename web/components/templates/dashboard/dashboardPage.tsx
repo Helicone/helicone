@@ -672,6 +672,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
+                  // height={"212px"}
                 >
                   <BarChart
                     className="h-[14rem]"

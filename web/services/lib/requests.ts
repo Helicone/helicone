@@ -75,15 +75,14 @@ export const addRequestLabel = async (
   const parsedCookie = JSON.parse(decodedCookie);
   const jwtToken = parsedCookie[0];
 
-  return fetch(`${BASE_PATH}/request/:id/property`, {
-    method: "POST",
+  return fetch(`${BASE_PATH}/request/${requestId}/property`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "helicone-jwt": jwtToken,
       "helicone-org-id": orgId,
     },
     body: JSON.stringify({
-      "helicone-id": requestId,
       key,
       value,
     }),
