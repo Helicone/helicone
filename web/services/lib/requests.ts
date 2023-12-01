@@ -49,7 +49,7 @@ export const updateRequestFeedback = async (
   const parsedCookie = JSON.parse(decodedCookie);
   const jwtToken = parsedCookie[0];
 
-  return fetch(`${API_BASE_PATH}/feedback`, {
+  return fetch(`${BASE_PATH}/feedback`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
