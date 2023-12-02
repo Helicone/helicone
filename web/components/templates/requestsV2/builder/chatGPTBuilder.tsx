@@ -55,10 +55,10 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
             const message = this.response.response_body?.choices?.[0]?.message;
 
             const hasFunctionCall = () => {
-              if (message.function_call) {
+              if (message?.function_call) {
                 return true;
               }
-              if (message.tool_calls) {
+              if (message?.tool_calls) {
                 const tools = message.tool_calls;
                 return tools.some(
                   (tool: { type: string }) => tool.type === "function"
