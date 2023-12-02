@@ -254,7 +254,7 @@ const RequestRow = (props: {
               onClick={() => {
                 setIsAddingLabel(!isAddingLabel);
               }}
-              className="ml-1.5 p-0.5 shadow-sm bg-white border border-gray-300 rounded-md h-fit"
+              className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
             >
               {isAddingLabel ? (
                 <MinusIcon className="h-3 w-3 text-gray-500" />
@@ -267,12 +267,12 @@ const RequestRow = (props: {
         {isAddingLabel && (
           <form
             onSubmit={onAddLabelHandler}
-            className="flex flex-row items-end space-x-2 py-4 mb-4 border-b border-gray-300"
+            className="flex flex-row items-end space-x-2 py-4 mb-4 border-b border-gray-300 dark:border-gray-700"
           >
             <div className="flex flex-col space-y-1">
               <label
                 htmlFor="key"
-                className="block text-sm font-semibold leading-6 text-gray-900"
+                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
               >
                 Key
               </label>
@@ -283,7 +283,7 @@ const RequestRow = (props: {
                   id="key"
                   required
                   className={clsx(
-                    "block w-full rounded-md px-2 py-1 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
                   )}
                   placeholder={"Key"}
                 />
@@ -292,7 +292,7 @@ const RequestRow = (props: {
             <div className="flex flex-col space-y-1">
               <label
                 htmlFor="value"
-                className="block text-sm font-semibold leading-6 text-gray-900"
+                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
               >
                 Value
               </label>
@@ -303,7 +303,7 @@ const RequestRow = (props: {
                   id="value"
                   required
                   className={clsx(
-                    "block w-full rounded-md px-2 py-1 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
+                    "bg-white dark:bg-black block w-full rounded-md px-2 py-1 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6"
                   )}
                   placeholder={"Value"}
                 />
