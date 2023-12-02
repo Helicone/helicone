@@ -63,7 +63,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
         <Menu.Button
           className={clsx(
             "text-gray-600 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-            "group flex justify-between w-56 items-center pl-2 pr-3 py-2 text-sm font-medium rounded-md"
+            "group flex justify-between w-52 items-center pl-2 pr-3 py-2 text-sm font-medium rounded-md"
           )}
         >
           <div className="flex space-x-1">
@@ -96,7 +96,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 mt-2 w-[16rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
+          <Menu.Items className="absolute left-0 mt-2 w-[14.5rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
             <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
               <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
                 {user?.email}
