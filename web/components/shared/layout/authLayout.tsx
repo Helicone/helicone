@@ -348,12 +348,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
             <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-10">
               {/* Sidebar component, swap this element with another sidebar if you like */}
               <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-                <div className="flex flex-row justify-between items-center mx-2 pr-2 bg-white border-b border-gray-200 dark:border-gray-800 h-16 min-h-[4rem]">
-                  <div className="flex flex-col absolute bg-white">
+                <div className="bg-white dark:bg-black absolute flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 dark:border-gray-800 h-16 min-h-[4rem]">
+                  <div className="flex flex-col">
                     <OrgDropdown />
                   </div>
                 </div>
-                <div className="mt-1 flex flex-grow flex-col">
+                <div className="mt-16 flex flex-grow flex-col">
                   <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
                       {navigation.map((item) => {
