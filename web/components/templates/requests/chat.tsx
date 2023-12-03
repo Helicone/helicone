@@ -101,7 +101,7 @@ export const SingleChat = (props: {
   };
 
   const renderFunctionCall = () => {
-    if (message.function_call) {
+    if (message?.function_call) {
       return (
         <div className="flex flex-col space-y-2">
           {message.content !== null && message.content !== "" && (
@@ -147,7 +147,9 @@ export const SingleChat = (props: {
   const hasImage = () => {
     const arr = message.content;
     if (Array.isArray(arr)) {
-      return arr.some((item) => item.type === "image_url");
+      return arr.some(
+        (item) => item.type === "image_url" || item.type === "image"
+      );
     } else {
       return false;
     }
@@ -164,7 +166,7 @@ export const SingleChat = (props: {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {arr.map((item, index) =>
-              item.type === "image_url" ? (
+              item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
                   {item.image_url.url ? (
                     <button
@@ -173,8 +175,22 @@ export const SingleChat = (props: {
                         setOpen(true);
                       }}
                     >
-                      <Image
+                      <img
                         src={item.image_url.url}
+                        alt={""}
+                        width={200}
+                        height={200}
+                      />
+                    </button>
+                  ) : item.image_url ? (
+                    <button
+                      onClick={() => {
+                        setSelectedImageUrl(item.image_url);
+                        setOpen(true);
+                      }}
+                    >
+                      <img
+                        src={item.image_url}
                         alt={""}
                         width={200}
                         height={200}
@@ -267,7 +283,11 @@ export const SingleChat = (props: {
                 )}
                 style={{ maxHeight: expanded ? "none" : "10.5rem" }}
               >
-                {message?.content}
+                {/* render the string or stringify the array/object */}
+                {isJSON(formattedMessageContent)
+                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                  : formattedMessageContent}
+                {/* {message?.content} */}
               </div>
               {showButton && (
                 <div className="w-full flex justify-center items-center pt-2">
@@ -325,16 +345,18 @@ export const Chat = (props: ChatProps) => {
   const { requestBody, responseBody, requestId, llmSchema, model } = props;
 
   const requestMessages =
-    llmSchema?.request.messages ?? requestBody?.messages ?? null;
+    llmSchema?.request.messages ?? requestBody?.messages ?? [];
   const responseMessage =
-    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? null;
+    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? "";
 
   const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
     Object.fromEntries(
       Array.from(
-        { length: ([...requestMessages, responseMessage] || []).length },
+        {
+          length: [...requestMessages, responseMessage].filter(Boolean).length,
+        },
         (_, i) => [i, false]
       )
     )

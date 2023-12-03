@@ -23,7 +23,19 @@ class InternalResponse {
     return new Response(JSON.stringify({ error: message }), { status });
   }
 
-  successJSON(data: any): Response {
+  successJSON(data: any, enableCors: boolean = false): Response {
+    if (enableCors) {
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+          "content-type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "PUT",
+          "Access-Control-Allow-Headers":
+            "Content-Type, helicone-jwt, helicone-org-id",
+        },
+      });
+    }
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: {
@@ -395,7 +407,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         authParams.data.organizationId,
         data
       );
-      return client.response.successJSON({ ok: "true" });
+      return client.response.successJSON({ ok: "true" }, true);
     }
   );
 
