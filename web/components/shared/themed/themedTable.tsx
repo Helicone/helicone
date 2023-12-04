@@ -1,4 +1,9 @@
-import { EyeIcon, EyeSlashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  PencilIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
 import { useState } from "react";
 import { Tooltip } from "@mui/material";
@@ -227,34 +232,34 @@ const ThemedTable = (props: ThemedTableProps) => {
                   scope="col"
                   className={clsx(
                     rowIdx === 0 ? "" : "border-t border-transparent",
-                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right"
+                    "relative py-2.5 pl-3 pr-4 sm:pr-6 text-right items-center"
                   )}
                 >
                   {viewHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 px-2 py-1 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-700 dark:focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-3 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 p-1.5 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none  disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => viewHandler(row)}
                     >
-                      View
+                      <EyeIcon className="h-3 w-3" />
                     </button>
                   )}
                   {editHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 px-2 py-1 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-700 dark:focus:ring-gray-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-3 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 p-1.5 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => editHandler(row)}
                     >
-                      Edit
+                      <PencilIcon className="h-3 w-3" />
                     </button>
                   )}
                   {deleteHandler && (
                     <button
                       type="button"
-                      className="ml-4 inline-flex items-center rounded-md bg-red-500 px-2 py-1 text-xs text-white shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-3 inline-flex items-center rounded-md bg-red-700 p-1.5 text-xs text-white shadow-md hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => deleteHandler(row)}
                     >
-                      Delete
+                      <TrashIcon className="h-3 w-3" />
                     </button>
                   )}
 
