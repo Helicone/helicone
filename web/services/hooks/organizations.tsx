@@ -85,6 +85,10 @@ const useGetOrgs = () => {
   };
 };
 
+const setOrgCookie = (orgId: string) => {
+  Cookies.set(ORG_ID_COOKIE_KEY, orgId, { expires: 30 });
+};
+
 const useOrgsContextManager = () => {
   const { data: orgs, refetch } = useGetOrgs();
 
@@ -111,7 +115,7 @@ const useOrgsContextManager = () => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
-          Cookies.set(ORG_ID_COOKIE_KEY, org.id, { expires: 30 });
+          setOrgCookie(org.id);
           setRenderKey((key) => key + 1);
         }
       },
@@ -122,4 +126,10 @@ const useOrgsContextManager = () => {
   return orgContextValue;
 };
 
-export { useGetOrgMembers, useGetOrgOwner, useGetOrgs, useOrgsContextManager };
+export {
+  useGetOrgMembers,
+  useGetOrgOwner,
+  useGetOrgs,
+  useOrgsContextManager,
+  setOrgCookie,
+};

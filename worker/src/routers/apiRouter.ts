@@ -23,7 +23,19 @@ class InternalResponse {
     return new Response(JSON.stringify({ error: message }), { status });
   }
 
-  successJSON(data: any): Response {
+  successJSON(data: any, enableCors: boolean = false): Response {
+    if (enableCors) {
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+          "content-type": "application/json;charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "PUT",
+          "Access-Control-Allow-Headers":
+            "Content-Type, helicone-jwt, helicone-org-id",
+        },
+      });
+    }
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: {
@@ -126,7 +138,6 @@ async function logAsync(
 }
 
 export const getAPIRouter = (router: BaseRouter) => {
-
   router.post(
     "/job",
     async (
@@ -338,7 +349,7 @@ export const getAPIRouter = (router: BaseRouter) => {
   );
 
   router.put(
-    '/request/:id/property',
+    "/v1/request/:id/property",
     async (
       { params: { id } },
       requestWrapper: RequestWrapper,
@@ -347,34 +358,77 @@ export const getAPIRouter = (router: BaseRouter) => {
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
-      
-      interface Body {
-        key: string,
-        value: string,
-      }
       if (authParams.error !== null) {
         return client.response.unauthorized();
-      }      
-      const property = await requestWrapper.getJson<Body>();
-      const {data, error} = await client.db.getRequestById(id);
+      }
 
+      interface Body {
+        key: string;
+        value: string;
+      }
+
+      const { data, error } = await client.db.getRequestById(id);
       if (error) {
         return client.response.newError(error, 500);
       }
-      
+
       if (!data) {
         return client.response.newError("Request not found.", 404);
       }
 
-      const properties = {
-        ...(data?.properties as Record<string, any> || {}),
-        [property.key]: property.value,
+      const property = await requestWrapper.getJson<Body>();
+      if (!property) {
+        return client.response.newError("Request body is missing.", 400);
       }
 
-      await client.queue.putRequestProperty(id, properties, property, authParams.data.organizationId, data)
-      return client.response.successJSON({"ok": 'true'});
+      if (!property.key) {
+        return client.response.newError(
+          "Invalid request body. 'key' is required.",
+          400
+        );
+      }
+
+      if (!property.value) {
+        return client.response.newError(
+          "Invalid request body. 'value' is required.",
+          400
+        );
+      }
+
+      const properties = {
+        ...((data?.properties as Record<string, any>) || {}),
+        [property.key]: property.value,
+      };
+
+      await client.queue.putRequestProperty(
+        id,
+        properties,
+        property,
+        authParams.data.organizationId,
+        data
+      );
+      return client.response.successJSON({ ok: "true" }, true);
     }
-  )
+  );
+
+  router.options(
+    "/v1/request/:id/property",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "PUT",
+          "Access-Control-Allow-Headers":
+            "Content-Type, helicone-jwt, helicone-org-id",
+        },
+      });
+    }
+  );
 
   // Proxy only + proxy forwarder
   router.all(

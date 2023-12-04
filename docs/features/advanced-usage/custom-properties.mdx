@@ -1,6 +1,6 @@
 ---
 title: "Custom Properties"
-description: "Helicone allows you to tag requests with any information you choose to segment, analyze, and visualize by"
+description: "Helicone allows you to tag requests with any information you choose to segment, analyze, and visualize by."
 ---
 
 ### What are Custom Properties?
@@ -17,9 +17,11 @@ Custom Properties allow you to add any additional information to your requests, 
 - Get the "unit economics" of your application, such as the average cost of a conversation or session
 - Slice and dice your requests and metrics by any custom property
 
-### Adding Custom Properties
+<br />
 
-Custom properties are added with headers to your OpenAI requests. For each header,
+<Accordion title="Adding Custom Properties at Request Time">
+
+Custom properties can be added with headers to your LLM requests. For each header,
 
 - The Key is `Helicone-Property-{Name}` with your property name in Name
 - The Value is the string value for the property in the request.
@@ -57,13 +59,11 @@ import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
-  baseOptions: {
-    headers: {
-      "Helicone-Auth": "Bearer HELICONE_API_KEY"
-      "Helicone-Property-Session": "24",
-      "Helicone-Property-Conversation": "support_issue_2",
-      "Helicone-Property-App": "mobile",
-    },
+  defaultHeaders: {
+    "Helicone-Auth": "Bearer HELICONE_API_KEY"
+    "Helicone-Property-Session": "24",
+    "Helicone-Property-Conversation": "support_issue_2",
+    "Helicone-Property-App": "mobile",
   },
 });
 const openai = new OpenAIApi(configuration);
@@ -73,7 +73,7 @@ const openai = new OpenAIApi(configuration);
 llm = ChatOpenAI(
     openai_api_key="<OPENAI_API_KEY>",
     openai_api_base="https://oai.hconeai.com/v1",
-    headers={
+    default_headers={
         "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
         "Helicone-Property-Type": "Course Outline"
     }
@@ -89,3 +89,18 @@ lesson = llm.predict("Generate a lesson for the AI course.")
 ```
 
 </CodeGroup>
+</Accordion>
+
+<Accordion title="Updating Custom Properties After Request">
+Helicone now allows you to update custom properties post-request submission by making a PUT request to a designated API endpoint.
+```bash Curl
+curl --request PUT \
+  --url 'https://api.hconeai.com/v1/request/{request-id}/property' \
+  --header 'Authorization: Bearer {your-helicone-api-key}' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "key": "{property-key}",
+    "value": "{new-property-value}"
+}'
+```
+</Accordion>

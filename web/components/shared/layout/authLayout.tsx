@@ -7,8 +7,10 @@ import {
   Bars3BottomLeftIcon,
   BeakerIcon,
   BookOpenIcon,
+  BriefcaseIcon,
   BuildingOfficeIcon,
   ChartBarIcon,
+  ChevronRightIcon,
   CircleStackIcon,
   CloudArrowUpIcon,
   Cog6ToothIcon,
@@ -19,6 +21,7 @@ import {
   LockClosedIcon,
   QuestionMarkCircleIcon,
   TableCellsIcon,
+  TagIcon,
   UserCircleIcon,
   UserGroupIcon,
   UsersIcon,
@@ -40,7 +43,7 @@ import Notification from "../notification/Notification";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
+
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -86,7 +89,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Properties",
       href: "/properties",
-      icon: BsTags,
+      icon: TagIcon,
       current: pathname.includes("/properties"),
     },
     {
@@ -98,7 +101,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {
       name: "Jobs",
       href: "/jobs",
-      icon: BsBriefcase,
+      icon: BriefcaseIcon,
       current: pathname.includes("/jobs"),
     },
     {
@@ -342,15 +345,15 @@ const AuthLayout = (props: AuthLayoutProps) => {
             </Transition.Root>
 
             {/* Static sidebar for desktop */}
-            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-60 md:flex-col z-10">
+            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-10">
               {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-                <div className="flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 dark:border-gray-800 h-16">
-                  <div className="flex flex-col absolute">
+              <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+                <div className="w-full bg-white dark:bg-black absolute flex flex-row justify-between items-center px-2 border-b border-r border-gray-200 dark:border-gray-800 h-16 min-h-[4rem]">
+                  <div className="flex flex-col w-full">
                     <OrgDropdown />
                   </div>
                 </div>
-                <div className="mt-1 flex flex-grow flex-col">
+                <div className="mt-16 flex flex-grow flex-col">
                   <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
                       {navigation.map((item) => {
@@ -362,7 +365,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               item.current
                                 ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
                                 : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                              "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                              "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
                             )}
                           >
                             <item.icon
@@ -370,7 +373,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                 item.current
                                   ? "text-black dark:text-white"
                                   : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                "mr-3 flex-shrink-0 h-5 w-5"
+                                "mr-3 flex-shrink-0 h-4 w-4"
                               )}
                               aria-hidden="true"
                             />
@@ -381,9 +384,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     </div>
 
                     <div>
-                      <button className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1">
+                      <div className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md px-2 py-1">
                         <p>Developer</p>
-                      </button>
+                      </div>
                       <div className="flex flex-col space-y-1">
                         {developerNav.map((item, i) => {
                           return (
@@ -391,8 +394,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                               key={item.name}
                               href={item.href}
                               className={clsx(
-                                "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
+                                item.current
+                                  ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
+                                "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
                               )}
                             >
                               <div className="flex items-center justify-between w-full">
@@ -402,7 +407,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                       item.current
                                         ? "text-black dark:text-white"
                                         : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                      "mr-3 flex-shrink-0 h-5 w-5"
+                                      "mr-3 flex-shrink-0 h-4 w-4"
                                     )}
                                     aria-hidden="true"
                                   />
@@ -428,13 +433,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
                             onClick={() => {
                               setOpenOrg(openOrg === "true" ? "false" : "true");
                             }}
-                            className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
+                            className="w-full mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
                           >
                             <p>Organization</p>
                             <ChevronRightIcon
                               className={clsx(
                                 open ? "transform rotate-90" : "",
-                                "h-4 w-4 inline"
+                                "h-3 w-3 inline"
                               )}
                             />
                           </Disclosure.Button>
@@ -453,8 +458,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                     key={item.name}
                                     href={item.href}
                                     className={clsx(
-                                      "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full"
+                                      item.current
+                                        ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
+                                      "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
                                     )}
                                   >
                                     <div className="flex items-center justify-between w-full">
@@ -464,7 +471,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                                             item.current
                                               ? "text-black dark:text-white"
                                               : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                            "mr-3 flex-shrink-0 h-5 w-5"
+                                            "mr-3 flex-shrink-0 h-4 w-4"
                                           )}
                                           aria-hidden="true"
                                         />
@@ -525,7 +532,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </>
         )}
         <div
-          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-60")}
+          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-56")}
         >
           <div className="sticky top-0 z-20 h-16 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-700">
             <button
@@ -676,7 +683,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               )}
               <OrgContext.Provider value={org}>
                 <div
-                  className="py-4 sm:py-8 mx-auto w-full max-w-7xl"
+                  className="py-4 sm:py-8 mx-auto w-full max-w-[100rem]"
                   key={org?.renderKey}
                 >
                   {children}
