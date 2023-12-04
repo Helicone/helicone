@@ -69,11 +69,9 @@ const model = new ChatOpenAI({
   azureOpenAIBasePath: "https://oai.hconeai.com",
   configuration: {
     organization: "[organization]",
-    baseOptions: {
-      headers: {
-        "Helicone-Auth": `Bearer ${heliconeApiKey}`,
-        "Helicone-<Header>": "<Value>",
-      },
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+      "Helicone-<Header>": "<Value>",
     },
   },
 });
