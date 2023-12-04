@@ -238,7 +238,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {viewHandler && (
                     <button
                       type="button"
-                      className="ml-3 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 p-1.5 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none  disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-3 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 p-1.5 text-xs text-white dark:text-black shadow-sm hover:bg-gray-900 dark:hover:bg-gray-100 focus:outline-none  disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => viewHandler(row)}
                     >
                       <EyeIcon className="h-3 w-3" />
@@ -247,7 +247,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {editHandler && (
                     <button
                       type="button"
-                      className="ml-3 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 p-1.5 text-xs text-white dark:text-black shadow-md hover:bg-gray-900 dark:hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-3 inline-flex items-center rounded-md bg-gray-700 dark:bg-gray-300 p-1.5 text-xs text-white dark:text-black shadow-sm hover:bg-gray-900 dark:hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => editHandler(row)}
                     >
                       <PencilIcon className="h-3 w-3" />
@@ -256,7 +256,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                   {deleteHandler && (
                     <button
                       type="button"
-                      className="ml-3 inline-flex items-center rounded-md bg-red-700 p-1.5 text-xs text-white shadow-md hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="ml-3 inline-flex items-center rounded-md bg-red-700 p-1.5 text-xs text-white shadow-sm hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => deleteHandler(row)}
                     >
                       <TrashIcon className="h-3 w-3" />
