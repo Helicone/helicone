@@ -8,12 +8,8 @@ create table
     url_href text not null,
     user_id text null,
     properties jsonb null,
-    formatted_prompt_id uuid null,
-    prompt_values jsonb null,
-    helicone_api_key_id bigint null,
     helicone_org_id uuid null,
     provider text not null default 'OPENAI'::text,
-    helicone_proxy_key_id uuid null,
     constraint request_pkey primary key (id)
   ) tablespace pg_default;
 
@@ -26,7 +22,7 @@ create table
     body jsonb not null,
     request uuid not null,
     delay_ms integer null,
-    status smallint null,
+    http_status smallint null,
     completion_tokens integer null,
     model text null,
     prompt_tokens integer null,
