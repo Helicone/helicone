@@ -24,8 +24,7 @@ class ValhallaDB implements IValhallaDB {
   client: Client;
   connected: boolean = false;
 
-  constructor() {
-    const auroraCreds = process.env.AURORA_CREDS || "";
+  constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
     const auroraPort = process.env.AURORA_PORT;
     const auroraDb = process.env.AURORA_DATABASE;
@@ -161,14 +160,20 @@ class ValhallaDB implements IValhallaDB {
 class StaticValhallaPool {
   private static client: ValhallaDB | null = null;
 
-  static getClient(): IValhallaDB {
+  static async getClient(): Promise<IValhallaDB> {
     if (this.client === null) {
-      this.client = new ValhallaDB();
+      const auroraCreds = process.env.AURORA_CREDS;
+      if (!auroraCreds) {
+        // TODO get from secrets manager?
+        throw new Error("No creds found in secret");
+      } else {
+        this.client = new ValhallaDB(auroraCreds);
+      }
     }
     return this.client;
   }
 }
 
-export function createValhallaClient(): IValhallaDB {
+export async function createValhallaClient(): Promise<IValhallaDB> {
   return StaticValhallaPool.getClient();
 }

@@ -1,10 +1,10 @@
 // src/index.ts
-import express, { Request, Response } from "express";
-import morgan from "morgan";
-import { createValhallaClient, withDB, withAuth } from "helicone-shared-ts";
+import express from "express";
 import * as OpenApiValidator from "express-openapi-validator";
-import { components, paths } from "./schema/types";
+import { withAuth, withDB } from "helicone-shared-ts";
+import morgan from "morgan";
 import { v4 as uuid } from "uuid";
+import { paths } from "./schema/types";
 
 const dirname = __dirname;
 console.log({ dirname });
@@ -25,7 +25,7 @@ app.use(express.json()); // for parsing application/json
 
 app.use(
   OpenApiValidator.middleware({
-    apiSpec: `${dirname}/schema/openapi.yml`,
+    apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
     validateRequests: true,
   })
 );

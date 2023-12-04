@@ -169,9 +169,8 @@ module "kms" {
   source  = "terraform-aws-modules/kms/aws"
   version = "~> 2.0"
 
-  deletion_window_in_days = 365
   description             = "KMS key for ${local.name} cluster activity stream."
-  enable_key_rotation     = true
+  enable_key_rotation     = false
   is_enabled              = true
   key_usage               = "ENCRYPT_DECRYPT"
 

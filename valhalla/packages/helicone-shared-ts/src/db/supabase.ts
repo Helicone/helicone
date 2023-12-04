@@ -35,8 +35,9 @@ export class SupabaseConnector {
   authCache: SupabaseAuthCache = SupabaseAuthCache.getInstance();
 
   constructor() {
-    const supabaseURL = process.env.SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
+    const supabaseURL = SUPABASE_CREDS?.url;
+    const supabaseServiceRoleKey = SUPABASE_CREDS?.service_role_key;
     if (!supabaseURL) {
       throw new Error("No Supabase URL");
     }
