@@ -89,7 +89,7 @@ const KeyPage = (props: KeyPageProps) => {
               ),
               created_at: (
                 <p className="text-gray-500">
-                  {getUSDateFromString(key.created_at)}
+                  {new Date(key.created_at).toLocaleString()}
                 </p>
               ),
             };
@@ -110,20 +110,12 @@ const KeyPage = (props: KeyPageProps) => {
     <>
       <div className="flex flex-col gap-2 max-w-2xl space-y-12 mt-8">
         <div className="text-gray-900 dark:text-gray-100 space-y-8 text-sm flex flex-col">
-          <div className="flex flex-row sm:items-center pb-2 mb-2 justify-between">
-            <div className="flex flex-col justify-between space-y-4">
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Helicone Keys for:{" "}
-                <span className="underline">
-                  {org?.currentOrg.name ?? "No Org Found"}
-                </span>
-              </h1>
-              <p className="text-md text-gray-900 dark:text-gray-100">
-                These keys can be used to read and write data to Helicone.
-                Please do not share these keys and make sure you store them
-                somewhere secure.
-              </p>
-            </div>
+          <div className="flex flex-row sm:items-center justify-between">
+            <p className="text-md text-gray-900 dark:text-gray-100">
+              These keys can be used to read and write data to Helicone. Please
+              do not share these keys and make sure you store them somewhere
+              secure.
+            </p>
           </div>
           {isLoading ? (
             <LoadingAnimation title={"Loading your keys..."} />
