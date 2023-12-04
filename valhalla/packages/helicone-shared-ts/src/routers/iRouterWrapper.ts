@@ -5,16 +5,17 @@ import {
   Response as ExpressResponse,
 } from "express";
 import { SupabaseConnector } from "../db/supabase";
+import { RequestWrapper } from "../requestWrapper";
 
-export interface IRouterWrapper {
-  req: ExpressRequest;
+export interface IRouterWrapper<T> {
+  request: RequestWrapper<T>;
   res: ExpressResponse;
 }
 
-export interface IRouterWrapperDB extends IRouterWrapper {
+export interface IRouterWrapperDB<T> extends IRouterWrapper<T> {
   db: IValhallaDB;
 }
 
-export interface IRouterWrapperAuth extends IRouterWrapperDB {
+export interface IRouterWrapperAuth<T> extends IRouterWrapperDB<T> {
   supabaseClient: SupabaseConnector;
 }
