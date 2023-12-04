@@ -12,29 +12,31 @@ title: "OpenAI"
   export HELICONE_API_KEY=<your API key>
   ```
 
-  Initialize OpenAI client. Can also be done via global client.
-  ```python
-  client = OpenAI(
-    api_key="your-api-key-here",  # Replace with your OpenAI API key
-    base_url="http://oai.hconeai.com/v1",  # Set the API endpoint
-    default_headers= {  # Optionally set default headers or set per request (see below)
-      "Helicone-Auth": "Bearer HELICONE_API_KEY" 
-    }
-  )
-  ```
+Initialize OpenAI client. Can also be done via global client.
 
-  Send request and attach extra headers
-  ```python
-  chat_completion = client.chat.completions.create(
-    model="gpt-4-vision-preview",
-    messages=[
-        {"role": "user", "content": "Hello world!"}
-    ],
-    extra_headers={ # Can also attach headers per request
-        "Helicone-Auth": "Bearer HELICONE_API_KEY"
-    },
-  )
-  ```
+```python
+client = OpenAI(
+  api_key="your-api-key-here",  # Replace with your OpenAI API key
+  base_url="http://oai.hconeai.com/v1",  # Set the API endpoint
+  default_headers= {  # Optionally set default headers or set per request (see below)
+    "Helicone-Auth": "Bearer HELICONE_API_KEY"
+  }
+)
+```
+
+Send request and attach extra headers
+
+```python
+chat_completion = client.chat.completions.create(
+  model="gpt-4-vision-preview",
+  messages=[
+      {"role": "user", "content": "Hello world!"}
+  ],
+  extra_headers={ # Can also attach headers per request
+      "Helicone-Auth": "Bearer HELICONE_API_KEY"
+  },
+)
+```
 
     That's it! Your OpenAI requests now log results to Helicone.
 
@@ -47,6 +49,7 @@ title: "OpenAI"
   ```
 
 Change the api base and add a Helicone-Auth header
+
 ```python
 import openai
 
@@ -63,7 +66,6 @@ openai.Completion.create(
 
   </Accordion>
 </AccordionGroup>
-
 
   </Tab>
   <Tab title="Python (w/ package)">
@@ -282,12 +284,10 @@ Here is an example cURL command:
       modelName: "gpt-3.5-turbo",
       configuration: {
         basePath: "https://oai.hconeai.com/v1",
-        baseOptions: {
-          headers: {
-            "Helicone-Auth": `Bearer HELICONE_API_KEY`,
-            }
-          }
-        }
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer HELICONE_API_KEY`,
+          },
+        },
       });
     ```
 
