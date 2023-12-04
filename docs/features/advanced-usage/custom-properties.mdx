@@ -59,13 +59,11 @@ import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
-  baseOptions: {
-    headers: {
-      "Helicone-Auth": "Bearer HELICONE_API_KEY"
-      "Helicone-Property-Session": "24",
-      "Helicone-Property-Conversation": "support_issue_2",
-      "Helicone-Property-App": "mobile",
-    },
+  defaultHeaders: {
+    "Helicone-Auth": "Bearer HELICONE_API_KEY"
+    "Helicone-Property-Session": "24",
+    "Helicone-Property-Conversation": "support_issue_2",
+    "Helicone-Property-App": "mobile",
   },
 });
 const openai = new OpenAIApi(configuration);
@@ -75,7 +73,7 @@ const openai = new OpenAIApi(configuration);
 llm = ChatOpenAI(
     openai_api_key="<OPENAI_API_KEY>",
     openai_api_base="https://oai.hconeai.com/v1",
-    headers={
+    default_headers={
         "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
         "Helicone-Property-Type": "Course Outline"
     }

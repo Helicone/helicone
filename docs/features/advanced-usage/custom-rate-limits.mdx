@@ -53,11 +53,9 @@ import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
-  baseOptions: {
-    headers: {
-      "Helicone-Property-IP": "111.1.1.1",
-      "Helicone-RateLimit-Policy": "1000;w=60;s=ip",
-    },
+  defaultHeaders: {
+    "Helicone-Property-IP": "111.1.1.1",
+    "Helicone-RateLimit-Policy": "1000;w=60;s=ip",
   },
 });
 const openai = new OpenAIApi(configuration);
@@ -68,7 +66,8 @@ const openai = new OpenAIApi(configuration);
 <Info>
   {" "}
   Fun fact: this policy format is an [IETF standard](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
-  for specifying rate limits! Except for the segment field, that's a Helicone special twist 🍬{" "}
+  for specifying rate limits! Except for the segment field, that's a Helicone special
+  twist 🍬{" "}
 </Info>
 
 ### Filtering by segments
@@ -81,8 +80,8 @@ You can rate limit for all of your requests made with the API key, by user, or b
 
 <Info>
   {" "}
-  The minimum value for the time window is 60. The only unit for the time window field is seconds, so for example, use 60
-  * 60 * 24 = 86400 for a single day.{" "}
+  The minimum value for the time window is 60. The only unit for the time window
+  field is seconds, so for example, use 60 * 60 * 24 = 86400 for a single day.{" "}
 </Info>
 
 ### Examples
@@ -147,6 +146,6 @@ These headers are only returned if a rate limit policy is active.
 
 <Info>
   {" "}
-  Test out your rate limit policy in a local environment before deploying to production. Contact `help@helicone.ai` if you
-  have any questions.{" "}
+  Test out your rate limit policy in a local environment before deploying to production.
+  Contact `help@helicone.ai` if you have any questions.{" "}
 </Info>
