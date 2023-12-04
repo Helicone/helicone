@@ -14,7 +14,7 @@ class Command(str, Enum):
     DOCKER_COMPOSE_BUILD_WORKER = "docker-compose -f docker-compose-local.yml build worker-openai-proxy"
     DOCKER_COMPOSE_LOGS = "docker-compose -f docker-compose-local.yml logs -f"
     DOCKER_COMPOSE_VALHALLA = "docker-compose -f docker-compose-local.yml up -d jawn helicone-be-db"
-    DOCKER_COMPOSE_VALHALLA_DB = "docker-compose -f docker-compose-local.yml up -d helicone-be-db"
+    DOCKER_COMPOSE_VALHALLA_DB = "docker-compose -f docker-compose-local.yml up -d helicone-be-db helicone-be-db-migration-runner"
     DOCKER_COMPOSE_WORKER = "docker-compose -f docker-compose-local.yml up -d worker-openai-proxy worker-anthropic-proxy worker-helicone-api"
     DOCKER_COMPOSE_FRONTEND = "docker-compose -f docker-compose-local.yml up -d web"
     DOCKER_COMPOSE_CLICKHOUSE = "docker-compose -f docker-compose-local.yml up -d clickhouse-migration-runner"
