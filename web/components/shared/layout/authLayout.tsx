@@ -347,9 +347,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
             {/* Static sidebar for desktop */}
             <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-10">
               {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-                <div className="bg-white dark:bg-black absolute flex flex-row justify-between items-center mx-2 pr-2 border-b border-gray-200 dark:border-gray-800 h-16 min-h-[4rem]">
-                  <div className="flex flex-col">
+              <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+                <div className="w-full bg-white dark:bg-black absolute flex flex-row justify-between items-center px-2 border-b border-r border-gray-200 dark:border-gray-800 h-16 min-h-[4rem]">
+                  <div className="flex flex-col w-full">
                     <OrgDropdown />
                   </div>
                 </div>
@@ -683,7 +683,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
               )}
               <OrgContext.Provider value={org}>
                 <div
-                  className="py-4 sm:py-8 mx-auto w-full max-w-7xl"
+                  className="py-4 sm:py-8 mx-auto w-full max-w-[100rem]"
                   key={org?.renderKey}
                 >
                   {children}

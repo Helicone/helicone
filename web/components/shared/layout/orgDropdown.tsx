@@ -59,11 +59,11 @@ export default function OrgDropdown(props: OrgDropdownProps) {
 
   return (
     <>
-      <Menu as="div" className="relative inline-block text-left">
+      <Menu as="div" className="relative inline-block text-left w-full">
         <Menu.Button
           className={clsx(
-            "text-gray-600 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-            "group flex justify-between w-52 items-center pl-2 pr-3 py-2 text-sm font-medium rounded-md"
+            "text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+            "group flex justify-between w-full items-center p-2 text-sm font-medium rounded-md"
           )}
         >
           <div className="flex space-x-1">
@@ -76,7 +76,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 aria-hidden="true"
               />
             )}
-            <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[9rem] text-left">
+            <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[8rem] text-left">
               {orgContext?.currentOrg.name}
             </p>
           </div>
