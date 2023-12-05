@@ -5,6 +5,9 @@ import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
 import Image from "next/image";
 import { useState } from "react";
+import { Database } from "../../supabase/database.types";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import useNotification from "../../components/shared/notification/useNotification";
 
 const faqs = [
   {
@@ -36,6 +39,59 @@ const faqs = [
 
 const OpenPipe = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const supabaseClient = useSupabaseClient<Database>();
+
+  const { setNotification } = useNotification();
+
+  const handleBetaSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const orgName = formData.get("org-name") as string;
+    const orgSize = formData.get("org-size") as string;
+
+    if (orgSize === "Select company size") {
+      setIsLoading(false);
+      setNotification("Please select a company size.", "info");
+      return;
+    }
+
+    fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: "",
+        lastName: "",
+        email: email,
+        companyName: orgName,
+        companyDescription: orgSize,
+        tag: "openpipe",
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          setNotification(
+            "Error submitting form. Please try again later.",
+            "error"
+          );
+        } else {
+          const formElement = e.target as HTMLFormElement;
+          formElement.reset();
+          setIsLoading(false);
+          setNotification(
+            "Form submitted successfully! We'll be in touch soon.",
+            "success"
+          );
+        }
+      });
+  };
 
   return (
     <MetaData title="Helicone - OpenPipe | The easiest way to fine-tune your models">
@@ -104,7 +160,10 @@ const OpenPipe = () => {
                 services using Helicone logs
               </p>
             </section>
-            <form className="mx-auto w-full max-w-xl border border-gray-300 bg-white shadow-lg rounded-lg p-8 space-y-8 mt-28">
+            <form
+              onSubmit={handleBetaSignup}
+              className="mx-auto w-full max-w-xl border border-gray-300 bg-white shadow-lg rounded-lg p-8 space-y-8 mt-28"
+            >
               <h2 className="text-2xl font-semibold text-gray-900">
                 Sign up for our beta
               </h2>
