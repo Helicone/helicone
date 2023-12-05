@@ -170,14 +170,16 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
         <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-          <TableCellsIcon className="h-12 w-12 text-gray-500" />
-          <p className="text-xl font-semibold text-gray-500">No Data Found</p>
+          <TableCellsIcon className="h-12 w-12 text-gray-900 dark:text-gray-200" />
+          <p className="text-xl font-semibold text-gray-900 dark:text-gray-200">
+            No Data Found
+          </p>
           {noDataCTA}
         </div>
       ) : table.getVisibleFlatColumns().length === 0 ? (
         <div className="bg-white dark:bg-black h-48 w-full rounded-lg border border-gray-300 dark:border-gray-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-          <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-500" />
-          <p className="text-xl font-semibold text-gray-500">
+          <AdjustmentsHorizontalIcon className="h-12 w-12 text-gray-900 dark:text-gray-200" />
+          <p className="text-xl font-semibold text-gray-900 dark:text-gray-200">
             No Columns Selected
           </p>
         </div>
