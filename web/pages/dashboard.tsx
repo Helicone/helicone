@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { Result } from "../lib/result";
 import { useGetAuthorized } from "../services/hooks/dashboard";
 import UpgradeProModal from "../components/shared/upgradeProModal";
+import { useTheme } from "../components/shared/theme/themeContext";
 
 interface DashboardProps {
   user: User;
@@ -21,18 +22,22 @@ interface DashboardProps {
 
 const Dashboard = (props: DashboardProps) => {
   const { user } = props;
+  const theme = useTheme();
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
     if (typeof window !== "undefined") {
       init(process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0 ?? "");
       window.CommandBar.boot(user.id);
+      theme?.theme === "dark"
+        ? window.CommandBar.setTheme("dark")
+        : window.CommandBar.setTheme("light");
     }
 
     return () => {
       window.CommandBar.shutdown();
     };
-  }, [user]);
+  }, [theme?.theme, user]);
 
   return (
     <MetaData title="Dashboard">
