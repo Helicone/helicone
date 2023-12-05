@@ -1,11 +1,9 @@
 import { BuildingOfficeIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import generateApiKey from "generate-api-key";
-import Link from "next/link";
+
 import { useEffect, useState } from "react";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { hashAuth } from "../../../lib/hashClient";
 
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
@@ -14,12 +12,8 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTable from "../../shared/themed/themedTable";
-import ThemedTabs from "../../shared/themed/themedTabs";
-import AddHeliconeKeyModal from "./addHeliconeKeyModal";
 import { useKeysPage } from "./useKeysPage";
-import { middleTruncString } from "../../../lib/stringHelpers";
 import AddKeyModal from "./addKeyModal";
-import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 
 interface KeyPageProps {
   hideTabs?: boolean;
