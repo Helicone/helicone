@@ -109,12 +109,10 @@ const model = new ChatOpenAI({
   azureOpenAIBasePath: "https://gateway.hconeai.com",
   configuration: {
     organization: "[organization]",
-    baseOptions: {
-      headers: {
-        "Helicone-Auth": `Bearer ${heliconeApiKey}`,
-        "Helicone-Target-Url": "https://api.lemonfox.ai",
-        "Helicone-Target-Provider": "LemonFox",
-      },
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${heliconeApiKey}`,
+      "Helicone-Target-Url": "https://api.lemonfox.ai",
+      "Helicone-Target-Provider": "LemonFox",
     },
   },
 });

@@ -5,13 +5,14 @@ import {
 } from "express";
 import { withDB } from "./withDB";
 import { SupabaseConnector } from "../db/supabase";
+import { RequestWrapper } from "../requestWrapper";
 
-export function withAuth<T extends ExpressRequest, K extends ExpressResponse>(
-  fn: ({ db, req, res, supabaseClient }: IRouterWrapperAuth) => void
+export function withAuth<T>(
+  fn: ({ db, request, res, supabaseClient }: IRouterWrapperAuth<T>) => void
 ) {
-  return withDB(async ({ db, req, res }) => {
+  return withDB<T>(async ({ db, request, res }) => {
     const supabaseClient = new SupabaseConnector();
-    const authorizationString = req.headers.authorization;
+    const authorizationString = request.authHeader();
     if ("string" !== typeof authorizationString) {
       res.status(401).json({
         error: "No authorization header",
@@ -21,7 +22,7 @@ export function withAuth<T extends ExpressRequest, K extends ExpressResponse>(
 
     const isAuthenticated = await supabaseClient.authenticate(
       authorizationString,
-      req.headers["helicone-org-id"] as string
+      request.heliconeOrgId()
     );
     if (isAuthenticated.error) {
       res.status(401).json({
@@ -32,7 +33,7 @@ export function withAuth<T extends ExpressRequest, K extends ExpressResponse>(
 
     fn({
       db,
-      req,
+      request,
       res,
       supabaseClient: supabaseClient,
     });
