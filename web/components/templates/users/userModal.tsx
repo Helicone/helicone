@@ -30,12 +30,15 @@ const UserModal = (props: UserModalProps) => {
   const { open, setOpen, user } = props;
 
   const [userRequests, setUserRequests] = useState<any[]>([]);
+  const [userCost, setUserCost] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCostLoading, setIsCostLoading] = useState(false);
 
   const { setNotification } = useNotification();
 
   useEffect(() => {
     setIsLoading(true);
+    setIsCostLoading(true);
     const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
 
     const userFilters = filterUIToFilterLeafs(filterMap, []).concat([
@@ -83,6 +86,36 @@ const UserModal = (props: UserModalProps) => {
       .finally(() => {
         setIsLoading(false);
       });
+    fetch("/api/metrics/costOverTime", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        timeFilter: {
+          start: timeFilter.start.toISOString(),
+          end: timeFilter.end.toISOString(),
+        },
+        filter: filterListToTree(userFilters, "and"),
+        apiKeyFilter: null,
+        dbIncrement: "day",
+        timeZoneDifference: new Date().getTimezoneOffset(),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const cleaned = data.data.map((d: any) => ({
+          cost: +d.cost,
+          date: getTimeMap("day")(new Date(d.time)),
+        }));
+        setUserCost(cleaned);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIsCostLoading(false);
+      });
   }, [open, user?.user_id]);
 
   return (
@@ -129,6 +162,23 @@ const UserModal = (props: UserModalProps) => {
               <AreaChart
                 data={userRequests}
                 categories={["requests"]}
+                index={"date"}
+                className="h-32 -ml-4 pt-4"
+                colors={["orange"]}
+                showLegend={false}
+              />
+            </StyledAreaChart>
+          </div>
+          <div>
+            <StyledAreaChart
+              title={"Requests cost last 30 days"}
+              value={undefined}
+              isDataOverTimeLoading={isCostLoading}
+              height={"128px"}
+            >
+              <AreaChart
+                data={userCost}
+                categories={["cost"]}
                 index={"date"}
                 className="h-32 -ml-4 pt-4"
                 colors={["orange"]}
