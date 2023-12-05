@@ -52,6 +52,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
           user_id: user?.id!,
           api_key_name: keyName.value,
           organization_id: org?.currentOrg?.id!,
+          created_at: new Date(),
         })
         .then(() => {
           setNotification("Successfully created API key", "success");
