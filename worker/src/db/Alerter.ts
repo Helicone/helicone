@@ -1,6 +1,5 @@
 import { Env } from "..";
-import { AuthParams as string } from "../lib/dbLogger/DBLoggable";
-import { Result } from "../results";
+import { Result, err, ok } from "../results";
 import { Alerts, ActiveAlerts, AlertMetricEvent } from "./AtomicAlerter";
 
 export class Alerter {
@@ -12,78 +11,66 @@ export class Alerter {
   async processMetricEvent(
     metricEvent: AlertMetricEvent
   ): Promise<Result<ActiveAlerts, string>> {
-    const alerterId = this.alerter.idFromName(this.organizationId);
-    const alerter = this.alerter.get(alerterId);
+    const alerterRes = await this.fetch<ActiveAlerts>("events", {
+      method: "POST",
+      body: JSON.stringify(metricEvent),
+    });
 
-    const alerterRes = await alerter.fetch(
-      "https://www.this_does_matter.helicone.ai/event",
-      {
-        method: "POST",
-        body: JSON.stringify(metricEvent),
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
-
-    if (!alerterRes.ok) {
-      return { data: null, error: "Failed to process event" };
+    if (alerterRes.error || !alerterRes.data) {
+      return err("Failed to process event");
     }
 
-    const alerts = (await alerterRes.json()) as ActiveAlerts;
-
-    return {
-      data: alerts,
-      error: null,
-    };
+    return ok(alerterRes.data);
   }
 
   async upsertAlerts(alerts: Alerts): Promise<Result<null, string>> {
-    const alerterId = this.alerter.idFromName(this.organizationId);
-    const alerter = this.alerter.get(alerterId);
+    const alerterRes = await this.fetch("alerts", {
+      method: "POST",
+      body: JSON.stringify(alerts),
+    });
 
-    const alerterRes = await alerter.fetch(
-      "https://www.this_does_matter.helicone.ai/alerts",
-      {
-        method: "POST",
-        body: JSON.stringify(alerts),
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
-
-    if (!alerterRes.ok) {
-      return { data: null, error: "Failed to upsert alerts" };
+    if (!alerterRes.error) {
+      return err("Failed to upsert alerts");
     }
 
-    return {
-      data: null,
-      error: null,
-    };
+    return ok(null);
   }
 
   async deleteAlert(alertId: string): Promise<Result<null, string>> {
+    const alerterRes = await this.fetch(`alerts/${alertId}`, {
+      method: "DELETE",
+    });
+
+    if (alerterRes.error) {
+      return err(alerterRes.error);
+    }
+
+    return ok(null);
+  }
+
+  private async fetch<T>(
+    path: string,
+    options: RequestInit<RequestInitCfProperties>
+  ): Promise<Result<T, string>> {
     const alerterId = this.alerter.idFromName(this.organizationId);
     const alerter = this.alerter.get(alerterId);
 
-    const alerterRes = await alerter.fetch(
-      `https://www.this_does_matter.helicone.ai/alert/${alertId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
-
-    if (!alerterRes.ok) {
-      return { data: null, error: "Failed to delete config" };
-    }
-
-    return {
-      data: null,
-      error: null,
+    const url = `https://www.this_does_matter.helicone.ai/${path}`;
+    options.headers = {
+      ...options.headers,
+      "content-type": "application/json",
     };
+    try {
+      const response = await alerter.fetch(url, options);
+
+      if (!response.ok) {
+        return err(`Failed to fetch. Status: ${response.status}`);
+      }
+
+      const data = (await response.json()) as T;
+      return ok(data);
+    } catch (error) {
+      return err(error instanceof Error ? error.message : "Unknown error");
+    }
   }
 }

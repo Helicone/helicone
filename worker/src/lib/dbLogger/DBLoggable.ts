@@ -430,6 +430,9 @@ export class DBLoggable {
         };
   }
 
+  isSuccessResponse = (status: number | undefined | null): boolean =>
+    status != null && status >= 200 && status <= 299;
+
   async log(
     db: {
       supabase: SupabaseClient<Database>; // TODO : Deprecate
@@ -516,11 +519,12 @@ export class DBLoggable {
       alerterDurableObject,
       authParams.organizationId
     );
+
     const metricEvent: AlertMetricEvent = {
       timestamp: Date.now(),
       metrics: {
         "response.status": {
-          count: responseResult.data.status === 200 ? 0 : 1,
+          count: this.isSuccessResponse(responseResult.data?.status) ? 0 : 1,
           total: 1,
         },
       },
@@ -529,39 +533,33 @@ export class DBLoggable {
     const alertRes = await alerter.processMetricEvent(metricEvent);
 
     if (alertRes.error !== null) {
-      console.error("Error processing metric event", alertRes.error);
-      return {
-        data: null,
-        error: alertRes.error,
-      };
+      return err(alertRes.error);
     }
 
-    const activeAlerts = alertRes.data;
-    const triggeredIds = activeAlerts?.triggered.map((x) => x.alertId) ?? [];
-    const resolvedIds = activeAlerts?.resolved.map((x) => x.alertId) ?? [];
+    const triggeredRes = await db.supabase
+      .from("alert_history")
+      .insert(alertRes.data.triggered);
 
-    const triggeredAlertsPromise = db.supabase
-      .from("alert")
-      .select("*")
-      .eq("org_id", authParams.organizationId)
-      .in("id", triggeredIds);
+    if (triggeredRes.error) {
+      console.error("Error inserting triggered alerts", triggeredRes.error);
+    }
 
-    const resolvedAlertsPromise = db.supabase
-      .from("alert")
-      .select("*")
-      .eq("org_id", authParams.organizationId)
-      .in("id", resolvedIds);
+    for (const alertUpdate of alertRes.data.resolved) {
+      const updateResult = await db.supabase
+        .from("alert_history")
+        .update({
+          alert_end_time: alertUpdate.alert_end_time,
+          status: alertUpdate.status,
+          triggered_value: alertUpdate.triggered_value,
+        })
+        .eq("alert_id", alertUpdate.alert_id)
+        .eq("status", "triggered");
 
-    const [triggeredAlerts, resolvedAlerts] = await Promise.all([
-      triggeredAlertsPromise,
-      resolvedAlertsPromise,
-    ]);
+      if (updateResult.error) {
+        console.error("Error updating alert", updateResult.error);
+      }
+    }
 
-    if()
-
-    return {
-      data: null,
-      error: null,
-    };
+    return ok(null);
   }
 }
