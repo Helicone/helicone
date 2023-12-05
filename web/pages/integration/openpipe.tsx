@@ -131,7 +131,24 @@ const OpenPipe = () => {
               id="hero"
               className="flex flex-col items-center w-full space-y-8"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-16">
+              <div className="flex flex-row sm:hidden items-center justify-center gap-4 mb-16">
+                <Image
+                  src="/assets/landing/helicone.webp"
+                  alt="helicone"
+                  width={150}
+                  height={150}
+                  className="rounded-md"
+                />
+                <div className="w-0.5 h-full bg-gray-500" />
+                <Image
+                  src="/assets/landing/openpipe.webp"
+                  alt="openpipe"
+                  width={150}
+                  height={150}
+                  className="rounded-md"
+                />
+              </div>
+              <div className="hidden sm:flex flex-row items-center justify-center gap-8">
                 <Image
                   src="/assets/landing/helicone.webp"
                   alt="helicone"
@@ -148,7 +165,7 @@ const OpenPipe = () => {
                   className="rounded-md"
                 />
               </div>
-              <h1 className="text-4xl sm:text-5xl font-semibold text-center">
+              <h1 className="text-4xl sm:text-5xl font-semibold text-center sm:pt-16">
                 Save up to{" "}
                 <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
                   95%
