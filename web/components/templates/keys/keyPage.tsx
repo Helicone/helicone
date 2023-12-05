@@ -20,6 +20,7 @@ import { useKeysPage } from "./useKeysPage";
 import { middleTruncString } from "../../../lib/stringHelpers";
 import AddKeyModal from "./addKeyModal";
 import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
+import { get } from "http";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -89,7 +90,7 @@ const KeyPage = (props: KeyPageProps) => {
               ),
               created_at: (
                 <p className="text-gray-500">
-                  {new Date(key.created_at).toLocaleString()}
+                  {getUSDateFromString(key.created_at)}
                 </p>
               ),
             };
