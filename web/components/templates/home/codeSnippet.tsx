@@ -54,7 +54,7 @@ openai.api_base = "${BASE_PATH}"
 llm = ChatOpenAI(
     openai_api_key='<>',
     headers={
-        "Helicone-Auth": f"Bearer {env.HELICONE_API_KEY}"
+        "Helicone-Auth": f"Bearer ${key}"
     },
 )
   
