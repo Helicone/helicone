@@ -107,7 +107,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
               ></div>
             </div>
             <div className="flex-1 w-full whitespace-nowrap">
-              <div className="flex flex-row gap-1.5 items-center text-black">
+              <div className="flex flex-row gap-1.5 items-center text-black dark:text-gray-100">
                 <span>{`${Number(count?.data).toLocaleString()}`}</span>
                 <span className="text-gray-500 text-sm">/</span>
                 <span className="text-sm text-gray-500">{`${Number(
@@ -218,7 +218,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
         >
           {org.tier === "free" && (
             <li className="flow-root">
-              <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white">
+              <div className="relative -m-3 flex items-center space-x-4 rounded-xl p-3 focus-within:ring-2 focus-within:ring-sky-500 hover:bg-white dark:hover:bg-black">
                 <div
                   className={clsx(
                     "bg-pink-500",
