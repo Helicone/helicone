@@ -25,9 +25,10 @@ export class RequestWrapper {
   providerAuth: string | undefined;
   headers: Headers;
   heliconeProxyKeyId: string | undefined;
-  baseURLOverride?: string;
+  baseURLOverride: string | null;
 
   private cachedText: string | null = null;
+  private bodyKeyOverride: object | null = null;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -77,6 +78,7 @@ export class RequestWrapper {
     this.url = new URL(request.url);
     this.headers = this.mutatedAuthorizationHeaders(request);
     this.heliconeHeaders = new HeliconeHeaders(request.headers);
+    this.baseURLOverride = null;
   }
 
   static async create(
@@ -102,24 +104,66 @@ export class RequestWrapper {
   }
 
   async auth(): Promise<HeliconeAuth> {
-    return this.heliconeProxyKeyId
-      ? {
-          heliconeProxyKeyId: this.heliconeProxyKeyId,
-          heliconeApiKeyAuthHash: undefined,
-        }
-      : {
-          heliconeApiKeyAuthHash: (await this.getProviderAuthHeader()) ?? "",
-          heliconeProxyKeyId: undefined,
+    switch (this.heliconeHeaders.heliconeAuthV2?._type) {
+      case "jwt":
+        return {
+          _type: "jwt",
+          token: this.heliconeHeaders.heliconeAuthV2.token,
+          orgId: this.heliconeHeaders.heliconeAuthV2.orgId,
         };
+      default:
+        return this.heliconeProxyKeyId
+          ? {
+              _type: "bearer",
+              _bearerType: "heliconeProxyKey",
+              token: this.heliconeProxyKeyId,
+            }
+          : {
+              _type: "bearer",
+              _bearerType: "heliconeApiKey",
+              token: (await this.getProviderAuthHeader()) ?? "",
+            };
+    }
   }
 
-  async getText(): Promise<string> {
+  setBodyKeyOverride(bodyKeyOverride: object): void {
+    this.bodyKeyOverride = bodyKeyOverride;
+  }
+
+  private overrideBody(body: any, override: object): object {
+    for (const [key, value] of Object.entries(override)) {
+      if (key in body && typeof value !== "object") {
+        body[key] = value;
+      } else {
+        body[key] = this.overrideBody(body[key], value);
+      }
+    }
+    return body;
+  }
+
+  private async getRawText(): Promise<string> {
     if (this.cachedText) {
       return this.cachedText;
     }
-
     this.cachedText = await this.request.text();
     return this.cachedText;
+  }
+
+  async getText(): Promise<string> {
+    let text = await this.getRawText();
+    if (this.bodyKeyOverride) {
+      try {
+        const bodyJson = await JSON.parse(text);
+        const bodyOverrideJson = await JSON.parse(
+          JSON.stringify(this.bodyKeyOverride)
+        );
+        const body = this.overrideBody(bodyJson, bodyOverrideJson);
+        text = JSON.stringify(body);
+      } catch (e) {
+        throw new Error("Could not stringify bodyKeyOverride");
+      }
+    }
+    return text;
   }
 
   async getJson<T>(): Promise<T> {
@@ -137,6 +181,10 @@ export class RequestWrapper {
 
   getHeaders(): Headers {
     return this.headers;
+  }
+
+  remapHeaders(headers: Headers): void {
+    this.headers = headers;
   }
 
   setHeader(key: string, value: string): void {

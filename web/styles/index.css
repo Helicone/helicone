@@ -31,6 +31,33 @@ th,
   opacity: 0;
 }
 
+.truncate-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.truncate-text::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4.5rem;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #f9fafb
+  ); /* Fades from transparent to gray-50 */
+}
+
+.dark .truncate-text::after {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #17191d /* Dark mode background color */
+  );
+}
+
 @media (hover: hover) {
   .hide {
     opacity: 0;

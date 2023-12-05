@@ -215,15 +215,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     return combinedArray || [];
   };
 
-  const combinePositiveAndNegativeFeedback = () => {
-    let combinedArray = overTimeData.feedback.data?.data?.map((feedback) => ({
-      date: getTimeMap(timeIncrement)(feedback.time),
-      positive: feedback.positiveCount > 0 ? feedback.positiveCount : null,
-      negative: feedback.negativeCount > 0 ? feedback.negativeCount : null,
-    }));
-    return combinedArray || [];
-  };
-
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "cost-req",
@@ -345,31 +336,21 @@ const DashboardPage = (props: DashboardPageProps) => {
       i: "models",
       x: 0,
       y: 4,
-      w: 4,
+      w: 3,
       h: 4,
       minW: 3,
       maxW: 8,
       minH: 4,
       maxH: 4,
     },
-    { i: "costs", x: 4, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    { i: "users", x: 8, y: 4, w: 4, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
-    {
-      i: "feedback",
-      x: 0,
-      y: 8,
-      w: 6,
-      h: 4,
-      minW: 3,
-      maxW: 8,
-      minH: 4,
-      maxH: 4,
-    },
+    { i: "costs", x: 3, y: 4, w: 3, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+    { i: "users", x: 6, y: 4, w: 3, h: 4, minW: 3, maxW: 8, minH: 4, maxH: 4 },
+
     {
       i: "latency",
-      x: 6,
-      y: 8,
-      w: 6,
+      x: 9,
+      y: 4,
+      w: 3,
       h: 4,
       minW: 3,
       maxW: 8,
@@ -440,7 +421,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "costs",
+      i: "models",
       x: 0,
       y: 8,
       w: 4,
@@ -452,7 +433,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "users",
+      i: "costs",
       x: 0,
       y: 12,
       w: 4,
@@ -464,7 +445,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       static: true,
     },
     {
-      i: "feedback",
+      i: "users",
       x: 0,
       y: 16,
       w: 4,
@@ -691,6 +672,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   title={"Users"}
                   value={metrics.activeUsers.data?.data ?? 0}
                   isDataOverTimeLoading={overTimeData.users.isLoading}
+                  // height={"212px"}
                 >
                   <BarChart
                     className="h-[14rem]"
@@ -703,28 +685,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                     index="date"
                     categories={["users"]}
                     colors={["orange"]}
-                    showYAxis={false}
-                  />
-                </StyledAreaChart>
-              </div>
-              <div key="feedback">
-                <StyledAreaChart
-                  title={"Feedback"}
-                  value={
-                    metrics.feedback?.data?.data
-                      ? `${formatNumberString(
-                          metrics.feedback?.data?.data.toFixed(2)
-                        )}`
-                      : "0"
-                  }
-                  isDataOverTimeLoading={overTimeData.feedback.isLoading}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={combinePositiveAndNegativeFeedback()}
-                    index="date"
-                    categories={["positive", "negative"]}
-                    colors={["green", "red"]}
                     showYAxis={false}
                   />
                 </StyledAreaChart>

@@ -10,6 +10,8 @@ const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
 const twoYFV = /^https:\/\/api\.2yfv\.com/;
 const togetherPattern = /^https:\/\/api\.together\.xyz/;
 const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
+const fireworks = /^https:\/\/api\.fireworks\.ai/;
+const perplexity = /^https:\/\/api\.perplexity\.ai/;
 
 export const approvedDomains = [
   openAiPattern,
@@ -23,4 +25,6 @@ export const approvedDomains = [
   twoYFV,
   togetherPattern,
   lemonFox,
+  fireworks,
+  perplexity,
 ];

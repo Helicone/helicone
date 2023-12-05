@@ -312,6 +312,8 @@ export class DBLoggable {
           status: -1,
           body: {
             helicone_error: "error getting response, " + e,
+            helicone_repsonse_body_as_string:
+              await this.response.getResponseBody(),
           },
         }
       );
@@ -421,12 +423,14 @@ export class DBLoggable {
   auth(): HeliconeAuth {
     return this.request.heliconeProxyKeyId
       ? {
-          heliconeProxyKeyId: this.request.heliconeProxyKeyId,
-          heliconeApiKeyAuthHash: undefined,
+          token: this.request.heliconeProxyKeyId,
+          _type: "bearer",
+          _bearerType: "heliconeProxyKey",
         }
       : {
-          heliconeApiKeyAuthHash: this.request.heliconeApiKeyAuthHash ?? "",
-          heliconeProxyKeyId: undefined,
+          token: this.request.heliconeApiKeyAuthHash ?? "",
+          _type: "bearer",
+          _bearerType: "heliconeApiKey",
         };
   }
 

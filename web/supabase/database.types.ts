@@ -633,6 +633,8 @@ export interface Database {
           is_personal: boolean
           name: string
           owner: string
+          referral: string | null
+          size: string | null
           soft_delete: boolean
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -648,6 +650,8 @@ export interface Database {
           is_personal?: boolean
           name: string
           owner: string
+          referral?: string | null
+          size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -663,6 +667,8 @@ export interface Database {
           is_personal?: boolean
           name?: string
           owner?: string
+          referral?: string | null
+          size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null

@@ -177,7 +177,7 @@ const UserModal = (props: UserModalProps) => {
                 Average Requests per Day
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {user.average_requests_per_day_active}
+                {formatNumber(user.average_requests_per_day_active)}
               </p>
             </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -185,7 +185,7 @@ const UserModal = (props: UserModalProps) => {
                 Average Tokens per Request
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {user.average_tokens_per_request}
+                {formatNumber(user.average_tokens_per_request)}
               </p>
             </li>
           </ul>

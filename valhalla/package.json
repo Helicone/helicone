@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {
     "dev:jawn": "nodemon --config nodemon.jawn.json",
-    "dev:slay": "nodemon --config nodemon.slay.json"
+    "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles",
+    "dev:slay": "nodemon --config nodemon.slay.json",
+    "test": "yarn test:jawn"
   },
   "workspaces": [
     "packages/*"

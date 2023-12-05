@@ -43,6 +43,8 @@ export class HeliconeAsyncOpenAI extends OpenAI {
       baseUrl: providedHeliconeMeta.baseUrl ?? "https://api.hconeai.com",
     };
 
+    options.heliconeMeta = heliconeMeta;
+
     this.helicone = new Helicone(heliconeMeta);
     this.logger = new HeliconeAsyncLogger(options);
     this.heliconeHeaders = new HeliconeHeaderBuilder(heliconeMeta)

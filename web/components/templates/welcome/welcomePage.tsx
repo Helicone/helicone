@@ -13,6 +13,8 @@ import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
 import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
+import CreateOrg from "./steps/createOrg";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface WelcomePageProps {}
 
@@ -20,6 +22,13 @@ export type HeliconeMethod = "proxy" | "async";
 
 export type UnionProviderMethods = `${keyof Providers &
   string}-${keyof IntegrationMethods & string}`;
+
+export type OrgProps = {
+  id: string;
+  name: string;
+  size: string;
+  referral: string;
+};
 
 const WelcomePage = (props: WelcomePageProps) => {
   const user = useUser();
@@ -29,7 +38,9 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const [step, setStep] = useState<number>(0);
   const [apiKey, setApiKey] = useState<string>("");
-  const [providerMethod, setProviderMethod] = useState<UnionProviderMethods>();
+  const [org, setOrg] = useState<OrgProps>();
+
+  const orgContext = useOrg();
 
   const nextStep = () => {
     setStep(step + 1);
@@ -45,55 +56,18 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const stepArray = [
     <GetStarted key={0} nextStep={nextStep} />,
+    <CreateOrg key={1} nextStep={nextStep} />,
     <GenerateAPIKey
       key={2}
       nextStep={nextStep}
       apiKey={apiKey}
       setApiKey={setApiKey}
     />,
-    <MethodFork
-      key={3}
-      nextStep={(provider, integration) => {
-        setProviderMethod(`${provider}-${integration}`);
-        nextStep();
-      }}
-      currentIntegration={
-        providerMethod?.split("-")[1] as keyof IntegrationMethods | undefined
-      }
-      currentProvider={
-        providerMethod?.split("-")[0] as keyof Providers | undefined
-      }
-    />,
-    <CodeIntegration
-      key={4}
-      nextStep={nextStep}
-      apiKey={apiKey}
-      providerMethod={providerMethod}
-    />,
+
+    <CodeIntegration key={4} nextStep={nextStep} apiKey={apiKey} />,
     <EventListen
       key={5}
       nextStep={async () => {
-        const { data: userSettings, error: userSettingsError } =
-          await supabaseClient
-            .from("user_settings")
-            .select("*")
-            .eq("user", user?.id)
-            .single();
-
-        if (userSettings === null) {
-          // add the user into the userSettings page
-          const { data: newUserSettings, error: newUserSettingsError } =
-            await supabaseClient
-              .from("user_settings")
-              .insert({
-                user: user?.id,
-                tier: "free",
-                request_limit: 100_000,
-              })
-              .select("*")
-              .single();
-        }
-
         router.push("/dashboard");
       }}
     />,
@@ -109,7 +83,7 @@ const WelcomePage = (props: WelcomePageProps) => {
   }
 
   return (
-    <div className="bg-gray-200 h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 relative">
+    <div className="bg-white h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 relative isolate">
       <div className="flex flex-row justify-between items-center w-full top-0 absolute">
         <button
           onClick={() => {
@@ -122,37 +96,41 @@ const WelcomePage = (props: WelcomePageProps) => {
           <ArrowLeftIcon className="h-3 w-3 inline" />
           Sign Out
         </button>
-        <button
-          onClick={async () => {
-            const { data: userSettings, error: userSettingsError } =
-              await supabaseClient
-                .from("user_settings")
-                .select("*")
-                .eq("user", user?.id)
-                .single();
-
-            if (userSettings === null) {
-              // add the user into the userSettings page
-              const { data: newUserSettings, error: newUserSettingsError } =
-                await supabaseClient
-                  .from("user_settings")
-                  .insert({
-                    user: user?.id,
-                    tier: "free",
-                    request_limit: 100_000,
-                  })
-                  .select("*")
-                  .single();
-            }
-
-            router.push("/dashboard");
-          }}
-          className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
-        >
-          Skip Onboarding
-          <ArrowRightIcon className="h-3 w-3 inline" />
-        </button>
+        {user?.email && (
+          <div className="flex flex-col gap-1 text-start p-8">
+            <p className="text-xs text-gray-500">Logged in as:</p>
+            <p className="text-sm text-gray-900">{user?.email}</p>
+          </div>
+        )}
       </div>
+      <svg
+        className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
+        aria-hidden="true"
+      >
+        <defs>
+          <pattern
+            id="abc"
+            width={25}
+            height={25}
+            x="50%"
+            y={-1}
+            patternUnits="userSpaceOnUse"
+          >
+            <path d="M25 200V.5M.5 .5H200" fill="none" />
+          </pattern>
+          <defs>
+            <pattern
+              id="123"
+              width="12.5"
+              height="12.5"
+              patternUnits="userSpaceOnUse"
+            >
+              <path d="M12.5 0V12.5M0 12.5H12.5" fill="none" />
+            </pattern>
+          </defs>
+        </defs>
+        <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
+      </svg>
 
       {stepArray[step]}
       <div className="h-4 w-full mx-auto bottom-0 mb-8 absolute flex">

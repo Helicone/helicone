@@ -2,6 +2,8 @@ import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
   BeakerIcon,
+  ChatBubbleLeftRightIcon,
+  ChevronDownIcon,
   CodeBracketIcon,
   EyeIcon,
   EyeSlashIcon,
@@ -12,7 +14,7 @@ import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import theme from "prism-react-renderer/themes/dracula";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@mui/material";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import Prism, { defaultProps } from "prism-react-renderer";
@@ -30,8 +32,10 @@ export type Message = {
     name: string;
     arguments: string;
   };
+  tool_calls?: any[];
   name?: string;
   model?: string;
+  latency?: number;
 };
 
 export const SingleChat = (props: {
@@ -52,17 +56,100 @@ export const SingleChat = (props: {
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  const [showButton, setShowButton] = useState(true);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const calculateContentHeight = () => {
+      const current = textContainerRef.current;
+      if (current) {
+        const lineHeight = 1.5 * 16; // Assuming 1.5rem line-height and 16px font-size
+        const maxContentHeight = lineHeight * 7; // For 7 lines of text
+        setShowButton(current.scrollHeight > maxContentHeight);
+      }
+    };
+
+    // Use requestAnimationFrame to ensure measurements occur after the DOM has updated
+    requestAnimationFrame(() => {
+      calculateContentHeight();
+    });
+
+    // Add resize listener to recalculate on window resize
+    window.addEventListener("resize", calculateContentHeight);
+
+    // Cleanup resize listener on component unmount
+    return () => window.removeEventListener("resize", calculateContentHeight);
+  }, []);
+
+  const handleToggle = () => {
+    setExpanded(!expanded);
+  };
+
   const isAssistant = message.role === "assistant";
   const isSystem = message.role === "system";
   const isFunction = message.role === "function";
-  const hasFunctionCall = message.function_call;
+
+  const hasFunctionCall = () => {
+    if (message.function_call) {
+      return true;
+    }
+    if (message.tool_calls) {
+      const tools = message.tool_calls;
+      return tools.some((tool) => tool.type === "function");
+    }
+    return false;
+  };
+
+  const renderFunctionCall = () => {
+    if (message?.function_call) {
+      return (
+        <div className="flex flex-col space-y-2">
+          {message.content !== null && message.content !== "" && (
+            <code className="text-xs whitespace-pre-wrap font-semibold">
+              {message.content}
+            </code>
+          )}
+          <pre className="text-xs whitespace-pre-wrap  rounded-lg overflow-auto">
+            {`${message.function_call?.name}(${message.function_call?.arguments})`}
+          </pre>
+        </div>
+      );
+    } else if (message.tool_calls) {
+      const tools = message.tool_calls;
+      const functionTools = tools.filter((tool) => tool.type === "function");
+      return (
+        <div className="flex flex-col space-y-2">
+          {message.content !== null && message.content !== "" && (
+            <code className="text-xs whitespace-pre-wrap font-semibold">
+              {message.content}
+            </code>
+          )}
+          {functionTools.map((tool, index) => {
+            const toolFunc = tool.function;
+            return (
+              <pre
+                key={index}
+                className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+              >
+                {`${toolFunc.name}(${toolFunc.arguments})`}
+              </pre>
+            );
+          })}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
 
   const { setNotification } = useNotification();
 
   const hasImage = () => {
     const arr = message.content;
     if (Array.isArray(arr)) {
-      return arr.some((item) => item.type === "image_url");
+      return arr.some(
+        (item) => item.type === "image_url" || item.type === "image"
+      );
     } else {
       return false;
     }
@@ -79,7 +166,7 @@ export const SingleChat = (props: {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="flex flex-wrap items-center pt-4">
             {arr.map((item, index) =>
-              item.type === "image_url" ? (
+              item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
                   {item.image_url.url ? (
                     <button
@@ -90,6 +177,20 @@ export const SingleChat = (props: {
                     >
                       <img
                         src={item.image_url.url}
+                        alt={""}
+                        width={200}
+                        height={200}
+                      />
+                    </button>
+                  ) : item.image_url ? (
+                    <button
+                      onClick={() => {
+                        setSelectedImageUrl(item.image_url);
+                        setOpen(true);
+                      }}
+                    >
+                      <img
+                        src={item.image_url}
                         alt={""}
                         width={200}
                         height={200}
@@ -115,35 +216,8 @@ export const SingleChat = (props: {
     message?.content?.toString() || ""
   );
 
-  const MAX_LENGTH = isLast ? 500 : 220;
-  const MAX_NEWLINES = isLast ? 10 : 3;
-
-  const checkShouldTruncate = (message: string) => {
-    const newlines = message.split("\n").length - 1;
-    return message.length > MAX_LENGTH || newlines > MAX_NEWLINES;
-  };
-
-  const possiblyTruncated = checkShouldTruncate(formattedMessageContent);
-  const needsTruncation = possiblyTruncated && !expanded;
-
-  if (needsTruncation) {
-    formattedMessageContent = `${formattedMessageContent.slice(
-      0,
-      MAX_LENGTH
-    )}...`;
-  }
-
   const getBgColor = () => {
-    if (isSystem) {
-      return "bg-gray-100 dark:bg-gray-800";
-    }
-    if (isAssistant) {
-      return "bg-gray-50 dark:bg-gray-900";
-    } else if (isFunction) {
-      return "bg-gray-100 dark:bg-gray-800";
-    } else {
-      return "bg-white dark:bg-black";
-    }
+    return "bg-gray-50 dark:bg-[#17191d]";
   };
 
   const isJSON = (content: string): boolean => {
@@ -183,7 +257,7 @@ export const SingleChat = (props: {
             <UserIcon className="h-6 w-6 bg-white dark:bg-black rounded-md p-1 border border-black text-black dark:border-white dark:text-white" />
           )}
         </div>
-        <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center">
+        <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center h-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -195,67 +269,45 @@ export const SingleChat = (props: {
                   : formattedMessageContent}
               </pre>
             </div>
-          ) : hasFunctionCall ? (
-            <div className="flex flex-col space-y-2">
-              {formattedMessageContent !== "" ? (
-                <>
-                  <p className="text-sm whitespace-pre-wrap">
-                    {formattedMessageContent}
-                  </p>
-                  <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded-lg">
-                    {`${message.function_call?.name}(${message.function_call?.arguments})`}
-                  </pre>
-                </>
-              ) : (
-                <pre className="text-xs whitespace-pre-wrap py-1 font-semibold break-words">
-                  {`${message.function_call?.name}(${message.function_call?.arguments})`}
-                </pre>
-              )}
-            </div>
+          ) : hasFunctionCall() ? (
+            renderFunctionCall()
           ) : hasImage() ? (
             renderImageRow()
           ) : (
-            <p className="text-sm whitespace-pre-wrap break-words leading-6">
-              {formattedMessageContent}
-            </p>
+            <div className="relative h-full">
+              <div
+                ref={textContainerRef}
+                className={clsx(
+                  !expanded && showButton ? "truncate-text" : "",
+                  "leading-6 pb-2"
+                )}
+                style={{ maxHeight: expanded ? "none" : "10.5rem" }}
+              >
+                {/* render the string or stringify the array/object */}
+                {isJSON(formattedMessageContent)
+                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                  : formattedMessageContent}
+                {/* {message?.content} */}
+              </div>
+              {showButton && (
+                <div className="w-full flex justify-center items-center pt-2">
+                  <button onClick={handleToggle}>
+                    {expanded ? (
+                      <ChevronDownIcon className="rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5 rotate-180" />
+                    ) : (
+                      <ChevronDownIcon className="rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5" />
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
-
-          {possiblyTruncated &&
-            (needsTruncation ? (
-              <>
-                <button
-                  className={clsx(
-                    getBgColor(),
-                    "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
-                  )}
-                  onClick={() => {
-                    setExpanded(true);
-                  }}
-                >
-                  Show More
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className={clsx(
-                    getBgColor(),
-                    "text-xs text-gray-500 opacity-50 py-2 font-semibold px-2 w-full"
-                  )}
-                  onClick={() => {
-                    setExpanded(false);
-                  }}
-                >
-                  Show Less
-                </button>
-              </>
-            ))}
         </div>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-4">
           {selectedImageUrl && (
-            <img
+            <Image
               src={selectedImageUrl}
               alt={selectedImageUrl}
               width={600}
@@ -293,20 +345,24 @@ export const Chat = (props: ChatProps) => {
   const { requestBody, responseBody, requestId, llmSchema, model } = props;
 
   const requestMessages =
-    llmSchema?.request.messages ?? requestBody?.messages ?? null;
+    llmSchema?.request.messages ?? requestBody?.messages ?? [];
   const responseMessage =
-    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? null;
+    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? "";
 
   const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
   }>(
     Object.fromEntries(
-      Array.from({ length: (requestMessages || []).length }, (_, i) => [
-        i,
-        false,
-      ])
+      Array.from(
+        {
+          length: [...requestMessages, responseMessage].filter(Boolean).length,
+        },
+        (_, i) => [i, false]
+      )
     )
   );
+
+  const [showAllMessages, setShowAllMessages] = useState(false);
 
   const router = useRouter();
 
@@ -323,10 +379,100 @@ export const Chat = (props: ChatProps) => {
     messages = messages.concat([responseMessage]);
   }
 
+  const renderMessages = (messages: Message[]) => {
+    if (!showAllMessages && messages.length >= 10) {
+      // slice the messages and display the first 2 and last 2. also throw in a button in the middle that says "show more"
+
+      const firstTwo = messages.slice(0, 2);
+      const lastTwo = messages.slice(messages.length - 2, messages.length);
+
+      return (
+        <>
+          {firstTwo.map((message, index) => {
+            return (
+              <SingleChat
+                message={message}
+                index={index}
+                isLast={index === messages.length - 1}
+                expandedProps={{
+                  expanded: expandedChildren[index],
+                  setExpanded: (expanded: boolean) => {
+                    setExpandedChildren({
+                      ...expandedChildren,
+                      [index]: expanded,
+                    });
+                  },
+                }}
+                key={index}
+              />
+            );
+          })}
+          <div className="flex flex-row justify-center items-center py-8 relative ">
+            <button
+              onClick={() => {
+                setShowAllMessages(true);
+              }}
+              className="absolute flex flex-row space-x-1 items-center border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+            >
+              <ChatBubbleLeftRightIcon className="h-4 w-4" />
+              <p className="text-xs font-semibold">
+                Show More{" "}
+                <span className="text-gray-500">
+                  ({messages.length - 4} hidden)
+                </span>
+              </p>
+            </button>
+          </div>
+          {lastTwo.map((message, index) => {
+            return (
+              <SingleChat
+                message={message}
+                index={index}
+                isLast={index === messages.length - 1}
+                expandedProps={{
+                  expanded: expandedChildren[index],
+                  setExpanded: (expanded: boolean) => {
+                    setExpandedChildren({
+                      ...expandedChildren,
+                      [index]: expanded,
+                    });
+                  },
+                }}
+                key={index}
+              />
+            );
+          })}
+        </>
+      );
+    } else if (messages.length > 0) {
+      return messages.map((message, index) => {
+        return (
+          <SingleChat
+            message={message}
+            index={index}
+            isLast={index === messages.length - 1}
+            expandedProps={{
+              expanded: expandedChildren[index],
+              setExpanded: (expanded: boolean) => {
+                setExpandedChildren({
+                  ...expandedChildren,
+                  [index]: expanded,
+                });
+              },
+            }}
+            key={index}
+          />
+        );
+      });
+    } else {
+      return <></>;
+    }
+  };
+
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-gray-300 dark:border-gray-700 rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
           <div className="flex flex-row items-center space-x-2">
             <button
               onClick={() => {
@@ -382,44 +528,26 @@ export const Chat = (props: ChatProps) => {
         </div>
 
         {mode === "json" ? (
-          <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-gray-900 relative text-black dark:text-white">
+          <div className="flex flex-col space-y-8 bg-gray-50 dark:bg-black relative text-black dark:text-white">
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
                 Request
               </p>
-              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(requestBody, null, 4)}
+              <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                {JSON.stringify(requestBody, null, 2)}
               </pre>
             </div>
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-md">
                 Response
               </p>
-              <pre className="text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-                {JSON.stringify(responseBody, null, 4)}
+              <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
+                {JSON.stringify(responseBody, null, 2)}
               </pre>
             </div>
           </div>
         ) : messages.length > 0 ? (
-          messages.map((message, index) => {
-            return (
-              <SingleChat
-                message={message}
-                index={index}
-                isLast={index === messages.length - 1}
-                expandedProps={{
-                  expanded: expandedChildren[index],
-                  setExpanded: (expanded: boolean) => {
-                    setExpandedChildren({
-                      ...expandedChildren,
-                      [index]: expanded,
-                    });
-                  },
-                }}
-                key={index}
-              />
-            );
-          })
+          <>{renderMessages(messages)}</>
         ) : (
           <div className="">
             <div

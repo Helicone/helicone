@@ -62,15 +62,79 @@ async function getHeliconeProxyKeyRow(
   };
 }
 
-export type HeliconeAuth =
-  | {
-      heliconeApiKeyAuthHash: string;
-      heliconeProxyKeyId: undefined;
-    }
-  | {
-      heliconeApiKeyAuthHash: undefined;
-      heliconeProxyKeyId: string;
+async function getHeliconeJwtAuthParams(
+  dbClient: SupabaseClient<Database>,
+  orgId: string,
+  heliconeJwt: string
+): Promise<Result<AuthParams, string>> {
+  const user = await dbClient.auth.getUser(heliconeJwt);
+  if (user.error) {
+    console.error("Error fetching user:", user.error.message);
+    return { error: user.error.message, data: null };
+  }
+
+  const orgOwner = await dbClient
+    .from("organization")
+    .select("*")
+    .eq("id", orgId)
+    .eq("owner", user.data.user.id)
+    .single();
+
+  if (orgOwner.error) {
+    console.error("Error fetching user:", orgOwner.error.message);
+    return { error: orgOwner.error.message, data: null };
+  }
+
+  if (orgOwner.data) {
+    return {
+      data: {
+        organizationId: orgOwner.data.id,
+        userId: user.data.user.id,
+        heliconeApiKeyId: undefined,
+      },
+      error: null,
     };
+  } else {
+    const orgMember = await dbClient
+      .from("organization_member")
+      .select("*")
+      .eq("member", user.data.user.id)
+      .eq("organization", orgId)
+      .single();
+
+    if (orgMember.error) {
+      console.error("Error fetching user:", orgMember.error.message);
+      return { error: orgMember.error.message, data: null };
+    }
+
+    if (orgMember.data) {
+      return {
+        data: {
+          organizationId: orgMember.data.organization,
+          userId: user.data.user.id,
+          heliconeApiKeyId: undefined,
+        },
+        error: null,
+      };
+    }
+
+    return { data: null, error: "Invalid authentication." };
+  }
+}
+
+export type JwtAuth = {
+  _type: "jwt";
+  token: string;
+  orgId?: string;
+};
+
+export type BearerAuth = {
+  _type: "bearer";
+  _bearerType: "heliconeProxyKey" | "heliconeApiKey";
+  token: string;
+};
+
+export type HeliconeAuth = JwtAuth | BearerAuth;
 
 export class DBWrapper {
   private supabaseClient: SupabaseClient<Database>;
@@ -121,24 +185,48 @@ export class DBWrapper {
       };
     }
 
-    const authParams = this.auth.heliconeProxyKeyId
-      ? await getHeliconeProxyKeyRow(
+    let authParams: Result<AuthParams, string> | undefined;
+    switch (this.auth._type) {
+      case "jwt":
+        if (!this.auth.orgId) {
+          return {
+            data: null,
+            error:
+              "Helicone organization id is required for JWT authentication.",
+          };
+        }
+        authParams = await getHeliconeJwtAuthParams(
           this.supabaseClient,
-          this.auth.heliconeProxyKeyId
-        )
-      : await getHeliconeApiKeyRow(
-          this.supabaseClient,
-          this.auth.heliconeApiKeyAuthHash
+          this.auth.orgId,
+          this.auth.token
         );
+        break;
 
-    if (authParams.error === null) {
-      await storeInCache(
-        cacheKey,
-        JSON.stringify(authParams.data),
-        this.secureCacheEnv
-      );
-      this.authParams = authParams.data;
+      case "bearer":
+        authParams =
+          this.auth._bearerType === "heliconeProxyKey"
+            ? await getHeliconeProxyKeyRow(this.supabaseClient, this.auth.token)
+            : await getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
+        break;
+
+      default:
+        return { data: null, error: "Invalid authentication." };
     }
+
+    if (!authParams || authParams.error || !authParams.data) {
+      return {
+        data: null,
+        error: authParams?.error || "Invalid authentication.",
+      };
+    }
+
+    await storeInCache(
+      cacheKey,
+      JSON.stringify(authParams.data),
+      this.secureCacheEnv
+    );
+    this.authParams = authParams.data;
+
     return authParams;
   }
 
@@ -240,7 +328,7 @@ export class DBWrapper {
   async getRequestById(
     requestId: string
   ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
-    const {data, error} = await this.supabaseClient
+    const { data, error } = await this.supabaseClient
       .from("request")
       .select("*")
       .match({
@@ -254,5 +342,4 @@ export class DBWrapper {
     }
     return { data: data, error: null };
   }
-
 }

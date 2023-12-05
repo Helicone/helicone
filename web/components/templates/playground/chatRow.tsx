@@ -48,7 +48,7 @@ const ChatRow = (props: ChatRowProps) => {
               item.type === "image_url" ? (
                 <div key={index}>
                   {item.image_url.url ? (
-                    <img
+                    <Image
                       src={item.image_url.url}
                       alt={""}
                       width={200}
@@ -85,8 +85,8 @@ const ChatRow = (props: ChatRowProps) => {
       className={clsx(
         index === 0 && "rounded-t-lg",
         role === "user"
-          ? "bg-gray-100 dark:bg-black"
-          : "bg-gray-200 dark:bg-gray-800",
+          ? "bg-white dark:bg-black"
+          : "bg-gray-100 dark:bg-[#17191d]",
         "flex flex-row justify-between px-8 py-6 gap-8 border-b border-gray-300 dark:border-gray-700"
       )}
     >

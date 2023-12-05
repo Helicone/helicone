@@ -12,7 +12,6 @@ import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Result } from "../lib/result";
-import { useUserSettings } from "../services/hooks/userSettings";
 import { useGetAuthorized } from "../services/hooks/dashboard";
 import UpgradeProModal from "../components/shared/upgradeProModal";
 

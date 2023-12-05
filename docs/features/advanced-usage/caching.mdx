@@ -63,10 +63,8 @@ import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
-  baseOptions: {
-    headers: {
-      "Helicone-Cache-Enabled": "true",
-    },
+  defaultHeaders: {
+    "Helicone-Cache-Enabled": "true",
   },
 });
 const openai = new OpenAIApi(configuration);
@@ -74,7 +72,7 @@ const openai = new OpenAIApi(configuration);
 
 </CodeGroup>
 
-The default caching limit is `7 days` , if you want a longer cache please refer to the [Cache Parameters](#Cache Parameters) section and add the Cache-Control header to your request.
+The default caching limit is `7 days` , if you want a longer cache please refer to the [Cache Parameters](#cache-parameters) section and add the Cache-Control header to your request.
 
 ### Limitations
 
@@ -135,11 +133,9 @@ import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: "https://oai.hconeai.com/v1",
-  baseOptions: {
-    headers: {
-      "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Bucket-Max-Size": "5",
-    },
+  defaultHeaders: {
+    "Helicone-Cache-Enabled": "true",
+    "Helicone-Cache-Bucket-Max-Size": "5",
   },
 });
 const openai = new OpenAIApi(configuration);

@@ -1,5 +1,14 @@
 type Nullable<T> = T | null;
 
+export type HeliconeFallbackCode = number | { from: number; to: number };
+
+export type HeliconeFallback = {
+  "target-url": string;
+  headers: Record<string, string>;
+  onCodes: HeliconeFallbackCode[];
+  bodyKeyOverride?: object;
+};
+
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
@@ -30,6 +39,7 @@ export interface IHeliconeHeaders {
     omitRequest: boolean;
   };
   nodeId: Nullable<string>;
+  fallBacks: Nullable<HeliconeFallback[]>;
 }
 
 export class HeliconeHeaders implements IHeliconeHeaders {
@@ -38,6 +48,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   heliconeAuthV2: Nullable<{
     _type: "jwt" | "bearer";
     token: string;
+    orgId?: string;
   }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: { streamForceFormat: boolean; increaseTimeout: boolean };
@@ -57,6 +68,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
   nodeId: Nullable<string>;
+  fallBacks: Nullable<HeliconeFallback[]>;
 
   constructor(private headers: Headers) {
     const heliconeHeaders = this.getHeliconeHeaders();
@@ -75,11 +87,65 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.userId = heliconeHeaders.userId;
     this.heliconeProperties = this.getHeliconeProperties();
     this.nodeId = heliconeHeaders.nodeId;
+    this.fallBacks = this.getFallBacks();
+  }
+
+  private getFallBacks(): Nullable<HeliconeFallback[]> {
+    const fallBacks = this.headers.get("helicone-fallbacks");
+    if (!fallBacks) {
+      return null;
+    }
+    const parsedFallBacks = JSON.parse(fallBacks);
+    if (!Array.isArray(parsedFallBacks)) {
+      throw new Error("helicone-fallbacks must be an array");
+    }
+    return parsedFallBacks.map((fb) => {
+      if (!fb["target-url"] || !fb.headers || !fb.onCodes) {
+        throw new Error(
+          "helicone-fallbacks must have target-url, headers, and onCodes"
+        );
+      }
+
+      if (typeof fb["target-url"] !== "string") {
+        throw new Error("helicone-fallbacks target-url must be a string");
+      }
+
+      if (
+        typeof fb.headers !== "object" &&
+        fb.headers.entries.every(
+          ([key, value]: [object, object]) =>
+            typeof key === "string" && typeof value === "string"
+        )
+      ) {
+        throw new Error("helicone-fallbacks headers must be an object");
+      }
+
+      if (
+        !Array.isArray(fb.onCodes) &&
+        fb.onCodes.every(
+          (x: HeliconeFallbackCode) =>
+            typeof x === "number" ||
+            (typeof x === "object" &&
+              typeof x.from === "number" &&
+              typeof x.to === "number")
+        )
+      ) {
+        throw new Error("helicone-fallbacks onCodes must be an array");
+      }
+
+      return {
+        "target-url": fb["target-url"],
+        headers: fb.headers,
+        onCodes: fb.onCodes,
+        bodyKeyOverride: fb.bodyKeyOverride,
+      };
+    });
   }
 
   private getHeliconeAuthV2(): Nullable<{
     _type: "jwt" | "bearer";
     token: string;
+    orgId?: string;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
@@ -93,6 +159,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "jwt",
         token: heliconeAuthJWT,
+        orgId: this.headers.get("helicone-org-id") ?? undefined,
       };
     }
     return null;
@@ -117,6 +184,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         omitRequest: this.headers.get("Helicone-Omit-Request") === "true",
       },
       nodeId: this.headers.get("Helicone-Node-Id") ?? null,
+      fallBacks: this.getFallBacks(),
     };
   }
 

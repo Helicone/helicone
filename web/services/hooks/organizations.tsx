@@ -69,13 +69,24 @@ const useGetOrgs = () => {
     },
     refetchOnWindowFocus: false,
   });
-  data && data.sort((a, b) => (a.name > b.name ? -1 : 1));
-  data && data.sort((a, b) => (a.is_personal ? -1 : 1));
+
+  data &&
+    data.sort((a, b) => {
+      if (a.name === b.name) {
+        return a.id < b.id ? -1 : 1;
+      }
+      return a.name < b.name ? -1 : 1;
+    });
+
   return {
     data,
     isLoading,
     refetch,
   };
+};
+
+const setOrgCookie = (orgId: string) => {
+  Cookies.set(ORG_ID_COOKIE_KEY, orgId, { expires: 30 });
 };
 
 const useOrgsContextManager = () => {
@@ -95,8 +106,6 @@ const useOrgsContextManager = () => {
     }
   }, [orgs]);
 
-  const orgOwner = useGetOrgOwner(org?.id ?? "");
-
   let orgContextValue: OrgContextValue | null = null;
   if (org && orgs) {
     orgContextValue = {
@@ -106,7 +115,7 @@ const useOrgsContextManager = () => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
-          Cookies.set(ORG_ID_COOKIE_KEY, org.id, { expires: 30 });
+          setOrgCookie(org.id);
           setRenderKey((key) => key + 1);
         }
       },
@@ -117,4 +126,10 @@ const useOrgsContextManager = () => {
   return orgContextValue;
 };
 
-export { useGetOrgMembers, useGetOrgOwner, useGetOrgs, useOrgsContextManager };
+export {
+  useGetOrgMembers,
+  useGetOrgOwner,
+  useGetOrgs,
+  useOrgsContextManager,
+  setOrgCookie,
+};

@@ -76,9 +76,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
                   onClick={() => {
                     setAddOpen(true);
                   }}
-                  className={clsx(
-                    "items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  )}
+                  className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Invite Members
                 </button>
@@ -90,12 +88,12 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
               {Array.from({ length: 3 }).map((_, index) => (
                 <li
                   key={index}
-                  className="h-6 flex flex-row justify-between gap-2 bg-gray-300 animate-pulse rounded-md"
+                  className="h-6 flex flex-row justify-between gap-2 bg-gray-500 animate-pulse rounded-md"
                 ></li>
               ))}
             </ul>
           ) : (
-            <ul className="divide-y divide-gray-200 border-t border-gray-200">
+            <ul className="divide-y divide-gray-200 dark:divide-gray-800 border-t border-gray-200 dark:border-gray-800">
               {orgMembers.map((member, index) => (
                 <OrgMemberItem
                   key={index}
