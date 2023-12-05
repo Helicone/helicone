@@ -37,12 +37,31 @@ services:
     restart: unless-stopped
     ports:
       - 25432:5432/tcp
-    volumes:
-      - ./volumes/postgres:/var/lib/postgresql/data:z
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: helicone
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  helicone-be-db-migration-runner:
+    container_name: helicone-be-db-migration-runner
+    image: flyway/flyway
+    depends_on:
+      helicone-be-db:
+        condition: service_healthy
+    volumes:
+      - ./valhalla/migrations:/flyway/sql:z
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://helicone-be-db:5432/helicone
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=password
+      - FLYWAY_SCHEMAS=public
+      - FLYWAY_LOCATIONS=filesystem:/flyway/sql
+    command: migrate
 
   jawn:
     image: jawn-local

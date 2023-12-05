@@ -62,10 +62,8 @@ const model = new OpenAI(
   {},
   {
     basePath: "${BASE_PATH}",
-    baseOptions: {
-      headers: {
-        "Helicone-Auth": "Bearer ${key}"
-      },
+    defaultHeaders: {
+      "Helicone-Auth": "Bearer ${key}"
     },
   }
 );

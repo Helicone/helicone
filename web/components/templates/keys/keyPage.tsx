@@ -90,7 +90,7 @@ const KeyPage = (props: KeyPageProps) => {
               ),
               created_at: (
                 <p className="text-gray-500">
-                  {getUSDateFromString(key.created_at)}
+                  {new Date(key.created_at).toLocaleString()}
                 </p>
               ),
             };
