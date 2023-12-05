@@ -431,16 +431,6 @@ export const getAPIRouter = (router: BaseRouter) => {
       });
     }
   );
-      await client.queue.putRequestProperty(
-        id,
-        properties,
-        property,
-        authParams.data.organizationId,
-        data
-      );
-      return client.response.successJSON({ ok: "true" });
-    }
-  );
 
   router.post(
     "/alerts",
@@ -459,7 +449,7 @@ export const getAPIRouter = (router: BaseRouter) => {
 
       const alertConfigMap = await requestWrapper.getJson<Alerts>();
 
-      const alerter = new Alerter(env.ALERTER, authParams);
+      const alerter = new Alerter(env.ALERTER, authParams.organizationId);
       const { error: configError } = await alerter.upsertAlerts(alertConfigMap);
 
       if (configError !== null) {
@@ -480,7 +470,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.unauthorized();
       }
 
-      const alerter = new Alerter(env.ALERTER, authParams);
+      const alerter = new Alerter(env.ALERTER, authParams.organizationId);
       const deleteRes = await alerter.deleteAlert(id);
 
       if (deleteRes.error) {
