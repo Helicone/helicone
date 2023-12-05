@@ -171,7 +171,7 @@ const UserModal = (props: UserModalProps) => {
           </div>
           <div>
             <StyledAreaChart
-              title={"Cost of Requests in the Last 30 Days"}
+              title={"Cost of requests in the last 30 days"}
               value={undefined}
               isDataOverTimeLoading={isCostLoading}
               height={"128px"}
