@@ -95,7 +95,11 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         return "";
       } else {
         // network error
-        return this.response.response_body?.error?.message || `network error`;
+        return (
+          this.response.response_body?.error?.message ||
+          this.response.response_body?.helicone_error ||
+          ""
+        );
       }
     };
 
@@ -130,7 +134,9 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 Error
               </p>
               <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-                {this.response.response_body?.error?.message || ""}
+                {this.response.response_body?.error?.message ||
+                  this.response.response_body?.helicone_error ||
+                  ""}
               </p>
             </div>
           </div>
