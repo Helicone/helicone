@@ -124,7 +124,8 @@ async function logAsync(
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
     },
-    env.RATE_LIMIT_KV
+    env.RATE_LIMIT_KV,
+    env.ALERTER
   );
 
   if (logError !== null) {
