@@ -21,7 +21,7 @@ openai.Completion.create(
     model="text-davinci-003",
     prompt="This is a test",
     headers={
-        "Helicone-Auth": "Bearer HELICONE_API_KEY",
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
         "Helicone-<Header>": "<Value>",
     }
 )
