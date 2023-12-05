@@ -41,6 +41,18 @@ const CreateOrg = (props: CreateOrgProps) => {
     const orgSize = formData.get("org-size") as string;
     const orgReferral = formData.get("org-referral") as string;
 
+    if (orgSize === "Select company size") {
+      setNotification("Please select a company size.", "info");
+      setIsLoading(false);
+      return;
+    }
+
+    if (orgReferral === "Select referral source") {
+      setNotification("Please select a referral source.", "info");
+      setIsLoading(false);
+      return;
+    }
+
     // update the current org
     const { error } = await supabaseClient
       .from("organization")
@@ -103,11 +115,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
-              placeholder={
-                orgContext?.currentOrg?.name === "Personal"
-                  ? "Your Organization Name"
-                  : orgContext?.currentOrg?.name
-              }
+              value={orgContext?.currentOrg?.name ?? ""}
             />
           </div>
         </div>
@@ -122,10 +130,11 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              defaultValue={"Select company size"}
+              value={orgContext?.currentOrg?.size || ""}
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
+              required
             >
               {[
                 "Select company size",
@@ -151,10 +160,11 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-referral"
               name="org-referral"
-              defaultValue={"Select referral source"}
+              value={orgContext?.currentOrg?.referral || ""}
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
+              required
             >
               {[
                 "Select referral source",
