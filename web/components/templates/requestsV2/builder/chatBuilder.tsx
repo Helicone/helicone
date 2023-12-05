@@ -56,7 +56,7 @@ class ChatBuilder extends AbstractRequestBuilder {
         }
       }
 
-      return "network error";
+      return "";
     };
 
     const renderChat = () => {

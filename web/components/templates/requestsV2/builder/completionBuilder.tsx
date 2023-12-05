@@ -27,7 +27,7 @@ class CompletionBuilder extends AbstractRequestBuilder {
         return completion ? JSON.stringify(completion) : "";
       }
 
-      return "network error";
+      return "";
     };
 
     const getRenderContent = () => {
