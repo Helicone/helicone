@@ -14,6 +14,7 @@ async function getAllUser(supabaseServer: SupabaseClient<Database>) {
     last_name?: string;
     created_at?: string;
     updated_at?: string;
+    tag?: string;
   }[] = [];
 
   const { data: contactUs, error: contactUsError } = await supabaseServer
@@ -26,7 +27,8 @@ async function getAllUser(supabaseServer: SupabaseClient<Database>) {
   }
   allUsers.push(
     ...contactUs.map((user) => ({
-      msft: true,
+      msft: user.tag === "mfs",
+      tag: user.tag ?? undefined,
       email: user.email_address ?? "",
       first_name: user.first_name ?? undefined,
       last_name: user.last_name ?? undefined,
@@ -111,7 +113,7 @@ export async function updateLoopUsers(env: Env) {
         email: user.email,
         firstName: user.first_name,
         lastName: user.last_name,
-        userGroup: user.msft ? "mfs" : undefined,
+        userGroup: user.tag,
         created_at: new Date(user.created_at ?? 0).toISOString(),
         updated_at: new Date(user.updated_at ?? 0).toISOString(),
       }),
