@@ -15,6 +15,7 @@ import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
 import { useOrg } from "../../shared/layout/organizationContext";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 interface WelcomePageProps {}
 
@@ -36,11 +37,8 @@ const WelcomePage = (props: WelcomePageProps) => {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
 
-  const [step, setStep] = useState<number>(0);
+  const [step, setStep] = useLocalStorage<number>("welcome-step", 0);
   const [apiKey, setApiKey] = useState<string>("");
-  const [org, setOrg] = useState<OrgProps>();
-
-  const orgContext = useOrg();
 
   const nextStep = () => {
     setStep(step + 1);
