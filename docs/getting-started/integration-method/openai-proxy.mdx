@@ -19,7 +19,7 @@ client = OpenAI(
   api_key="your-api-key-here",  # Replace with your OpenAI API key
   base_url="http://oai.hconeai.com/v1",  # Set the API endpoint
   default_headers= {  # Optionally set default headers or set per request (see below)
-    "Helicone-Auth": "Bearer HELICONE_API_KEY"
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
 )
 ```
@@ -33,7 +33,7 @@ chat_completion = client.chat.completions.create(
       {"role": "user", "content": "Hello world!"}
   ],
   extra_headers={ # Can also attach headers per request
-      "Helicone-Auth": "Bearer HELICONE_API_KEY"
+      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   },
 )
 ```
@@ -57,7 +57,7 @@ openai.api_base = "https://oai.hconeai.com/v1"
 openai.Completion.create(
   # ...other parameters
   headers={
-    "Helicone-Auth": "Bearer HELICONE_API_KEY",
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
   }
 )
 ```
