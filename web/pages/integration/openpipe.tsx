@@ -32,7 +32,7 @@ const faqs = [
     id: 4,
     question: "How do I tell if the fine-tuned model is better?",
     answer:
-      "OpenPipe will provide you with an evalaution dashboard that will show you the performance and allow you to experiment with comparisons to your original model.",
+      "OpenPipe will provide you with an evaluation dashboard that will show you the performance and allow you to experiment with comparisons to your original model.",
   },
   // More questions...
 ];
@@ -131,7 +131,7 @@ const OpenPipe = () => {
               id="hero"
               className="flex flex-col items-center w-full space-y-8"
             >
-              <div className="flex flex-row items-center justify-center space-x-8 mb-16">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-16">
                 <Image
                   src="/assets/landing/helicone.webp"
                   alt="helicone"
@@ -148,14 +148,14 @@ const OpenPipe = () => {
                   className="rounded-md"
                 />
               </div>
-              <h1 className="text-5xl font-semibold text-center">
+              <h1 className="text-4xl sm:text-5xl font-semibold text-center">
                 Save up to{" "}
                 <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
                   95%
                 </span>{" "}
                 on your OpenAI costs
               </h1>
-              <p className="text-xl text-gray-600">
+              <p className="text-lg sm:text-xl text-gray-600 text-center">
                 Helicone is partnering with OpenPipe to provide fine-tuning
                 services using Helicone logs
               </p>
@@ -200,8 +200,6 @@ const OpenPipe = () => {
                     id="org-name"
                     required
                     className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-
-                    // value={orgContext?.currentOrg?.name ?? ""}
                   />
                 </div>
               </div>
@@ -216,7 +214,6 @@ const OpenPipe = () => {
                   <select
                     id="org-size"
                     name="org-size"
-                    // value={orgContext?.currentOrg?.size || ""}
                     className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                     required
                   >
