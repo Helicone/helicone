@@ -131,7 +131,20 @@ export default function Example() {
   return (
     <div className="bg-white">
       <NavBarV2 />
+
       <div className="relative isolate">
+        <div className="w-full flex absolute overflow-hidden -space-x-1">
+          {Array.from(Array(50).keys()).map((_, idx) => (
+            <Image
+              key={idx}
+              className={""}
+              src="/assets/home/xmas.png"
+              alt="xmas"
+              width={200}
+              height={200}
+            />
+          ))}
+        </div>
         <svg
           className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
           aria-hidden="true"
@@ -163,11 +176,11 @@ export default function Example() {
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-36 flex flex-col space-y-4 md:space-y-8 items-center justify-center text-center lg:gap-x-10 lg:px-8 antialiased">
           <h1 className="text-4xl sm:text-6xl font-semibold leading-tight sm:leading-snug max-w-4xl">
             The{" "}
-            <span className="md:border-2 border-violet-700 border-dashed text-violet-700 md:py-2 md:px-4">
+            <span className="md:border-2 border-green-700 border-dashed text-green-700 md:py-2 md:px-4">
               easiest
             </span>{" "}
             way to monitor your LLM-applications at{" "}
-            <span className="md:border-2 border-pink-700 border-dashed text-pink-700 md:py-2 md:px-4">
+            <span className="md:border-2 border-red-700 border-dashed text-red-700 md:py-2 md:px-4">
               scale
             </span>
           </h1>
