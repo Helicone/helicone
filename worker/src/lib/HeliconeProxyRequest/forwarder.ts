@@ -14,9 +14,6 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
 import { InsertQueue } from "../dbLogger/insertQueue";
 import { DBWrapper } from "../../db/DBWrapper";
-import { Alerter } from "../../db/Alerter";
-import { Result } from "../../results";
-import { AlertMetricEvent } from "../../db/AtomicAlerter";
 
 export async function proxyForwarder(
   request: RequestWrapper,

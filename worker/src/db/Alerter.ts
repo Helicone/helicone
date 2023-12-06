@@ -1,6 +1,7 @@
 import { Env } from "..";
+import { Database } from "../../supabase/database.types";
 import { Result, err, ok } from "../results";
-import { Alerts, ActiveAlerts, AlertMetricEvent } from "./AtomicAlerter";
+import { ActiveAlerts, AlertMetricEvent } from "./AtomicAlerter";
 
 export class Alerter {
   constructor(
@@ -17,16 +18,18 @@ export class Alerter {
     });
 
     if (alerterRes.error || !alerterRes.data) {
-      return err("Failed to process event");
+      return err(`Failed to process event. ${alerterRes.error}`);
     }
 
     return ok(alerterRes.data);
   }
 
-  async upsertAlerts(alerts: Alerts): Promise<Result<null, string>> {
+  async upsertAlert(
+    alert: Database["public"]["Tables"]["alert"]["Row"]
+  ): Promise<Result<null, string>> {
     const alerterRes = await this.fetch("alerts", {
       method: "POST",
-      body: JSON.stringify(alerts),
+      body: JSON.stringify(alert),
     });
 
     if (!alerterRes.error) {

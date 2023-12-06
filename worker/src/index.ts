@@ -1,11 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
-import { feedbackCronHandler } from "./feedback";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { insertIntoRequest, updateResponse } from "./lib/dbLogger/insertQueue";
 import { buildRouter } from "./routers/routerFactory";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
+import { AtomicAlerter } from "./db/AtomicAlerter";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -189,4 +189,4 @@ function handleError(e: any): Response {
     }
   );
 }
-export { AtomicRateLimiter };
+export { AtomicRateLimiter, AtomicAlerter };

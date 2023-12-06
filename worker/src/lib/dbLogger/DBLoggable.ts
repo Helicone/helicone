@@ -554,7 +554,6 @@ export class DBLoggable {
         .update({
           alert_end_time: alertUpdate.alert_end_time,
           status: alertUpdate.status,
-          triggered_value: alertUpdate.triggered_value,
         })
         .eq("alert_id", alertUpdate.alert_id)
         .eq("status", "triggered");

@@ -14,36 +14,39 @@ export interface Database {
           created_at: string | null
           emails: string[]
           id: string
+          metric: string
           name: string
           org_id: string
           soft_delete: boolean
           threshold: number
+          time_block_duration: number
           time_window: number
-          type: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           emails: string[]
           id?: string
+          metric: string
           name: string
           org_id: string
           soft_delete?: boolean
           threshold: number
+          time_block_duration?: number
           time_window: number
-          type: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           emails?: string[]
           id?: string
+          metric?: string
           name?: string
           org_id?: string
           soft_delete?: boolean
           threshold?: number
+          time_block_duration?: number
           time_window?: number
-          type?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -59,8 +62,8 @@ export interface Database {
         Row: {
           alert_end_time: string | null
           alert_id: string | null
+          alert_metric: string
           alert_start_time: string
-          alert_type: string
           created_at: string | null
           id: string
           org_id: string
@@ -72,8 +75,8 @@ export interface Database {
         Insert: {
           alert_end_time?: string | null
           alert_id?: string | null
+          alert_metric: string
           alert_start_time: string
-          alert_type: string
           created_at?: string | null
           id?: string
           org_id: string
@@ -85,8 +88,8 @@ export interface Database {
         Update: {
           alert_end_time?: string | null
           alert_id?: string | null
+          alert_metric?: string
           alert_start_time?: string
-          alert_type?: string
           created_at?: string | null
           id?: string
           org_id?: string
@@ -633,6 +636,8 @@ export interface Database {
           is_personal: boolean
           name: string
           owner: string
+          referral: string | null
+          size: string | null
           soft_delete: boolean
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -648,6 +653,8 @@ export interface Database {
           is_personal?: boolean
           name: string
           owner: string
+          referral?: string | null
+          size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -663,6 +670,8 @@ export interface Database {
           is_personal?: boolean
           name?: string
           owner?: string
+          referral?: string | null
+          size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null

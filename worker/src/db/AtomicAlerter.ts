@@ -5,7 +5,9 @@ const ALERT_KEY = "alerts";
 
 export type Alerts = Record<string, Alert>;
 
-type Alert = Database["public"]["Tables"]["alert"]["Row"];
+export type Alert = Database["public"]["Tables"]["alert"]["Row"] & {
+  state: AlertState;
+};
 
 export type AlertMetricEvent = {
   timestamp: number;
@@ -13,16 +15,18 @@ export type AlertMetricEvent = {
 };
 
 type AlertState = {
-  timestamps: Array<{
-    timestamp: number;
-    count: number;
-    total: number;
-  }>;
+  timeBlocks: Array<TimeBlock>;
   metricValues: {
     counts: number;
     totals: number;
   };
   triggerState: AlertTriggerState;
+};
+
+type TimeBlock = {
+  startTimestamp: number;
+  count: number;
+  total: number;
 };
 
 type AlertTriggerState = {
@@ -43,19 +47,19 @@ export type ActiveAlerts = {
 };
 
 export class AtomicAlerter {
-  private state: DurableObjectState;
+  private metricsToAlerts: Record<string, string[]> = {};
   private alerts: Alerts | null = null;
 
-  constructor(state: DurableObjectState) {
-    this.state = state;
-
+  constructor(private state: DurableObjectState) {
     this.state.blockConcurrencyWhile(async () => {
       this.alerts = (await this.state.storage.get<Alerts>(ALERT_KEY)) || null;
+      this.metricsToAlerts = this.buildMetricsToAlertsMap(this.alerts);
     });
   }
 
   async hasAlertsEnabled(): Promise<boolean> {
-    const alerts = await this.state.storage.get<Alert>(ALERT_KEY);
+    const alerts =
+      this.alerts ?? (await this.state.storage.get<Alert>(ALERT_KEY));
     const hasAlerts = alerts !== undefined && Object.keys(alerts).length > 0;
     return hasAlerts;
   }
@@ -68,7 +72,7 @@ export class AtomicAlerter {
         return await this.processEvents(request);
 
       case url.pathname === "/alerts" && request.method === "POST":
-        return await this.upsertAlerts(request);
+        return await this.upsertAlert(request);
 
       case url.pathname.startsWith("/alerts/") && request.method === "DELETE":
         return await this.deleteAlert(request);
@@ -78,9 +82,9 @@ export class AtomicAlerter {
     }
   }
 
-  async upsertAlerts(request: Request): Promise<Response> {
-    const newAlerts = (await request.json()) as Alerts;
-    const upsertRes = await this.upsertAlertsTrx(newAlerts);
+  async upsertAlert(request: Request): Promise<Response> {
+    const newAlert = (await request.json()) as Alert;
+    const upsertRes = await this.upsertAlertsTrx(newAlert);
 
     if (upsertRes.error) {
       return new Response(upsertRes.error, { status: 400 });
@@ -89,18 +93,14 @@ export class AtomicAlerter {
     return new Response("OK");
   }
 
-  async upsertAlertsTrx(newAlerts: Alerts): Promise<Result<null, string>> {
+  async upsertAlertsTrx(newAlert: Alert): Promise<Result<null, string>> {
     await this.state.storage.transaction(async (txn) => {
-      let currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
-
-      for (const [alertId, alert] of Object.entries(newAlerts)) {
-        if (alert) {
-          currentAlerts[alertId] = alert;
-        }
-      }
-
+      const currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
+      currentAlerts[newAlert.id] = newAlert;
       await txn.put(ALERT_KEY, currentAlerts);
       this.alerts = currentAlerts;
+
+      this.metricsToAlerts = this.buildMetricsToAlertsMap(this.alerts);
     });
 
     return { data: null, error: null };
@@ -164,80 +164,99 @@ export class AtomicAlerter {
   async processEventTrx(
     event: AlertMetricEvent
   ): Promise<Result<ActiveAlerts, string>> {
-    const now = Date.now();
-    let activeAlerts: ActiveAlerts = {
+    const activeAlerts: ActiveAlerts = {
       triggered: [],
       resolved: [],
     };
 
     await this.state.storage.transaction(async (txn) => {
-      for (const [alertId, { count, total }] of Object.entries(event.metrics)) {
-        const alert = this.alerts?.[alertId];
-        if (!alert) {
-          console.error(`Alert for id ${alertId} not found`);
-          continue;
-        }
+      for (const [metric, { count, total }] of Object.entries(event.metrics)) {
+        const alertIds = this.metricsToAlerts[metric] || [];
+        for (const alertId of alertIds) {
+          const alert = this.alerts?.[alertId];
+          if (!alert) {
+            console.error(`Alert for id ${alertId} not found`);
+            continue;
+          }
 
-        const windowStart = now - alert.time_window;
-        let alertState: AlertState = (await txn.get<AlertState>(alertId)) || {
-          timestamps: [],
-          metricValues: { counts: 0, totals: 0 },
-          triggerState: {
-            triggered: false,
-          },
-        };
+          const eventTime = event.timestamp;
+          const timeBlockDuration = alert.time_block_duration;
+          const windowStart = eventTime - alert.time_window;
 
-        // Add the new event
-        alertState.metricValues.counts += count;
-        alertState.metricValues.totals += total;
-        alertState.timestamps.push({
-          timestamp: event.timestamp,
-          count,
-          total,
-        });
-
-        // Remove old events and subtract their values
-        while (
-          alertState.timestamps.length > 0 &&
-          alertState.timestamps[0].timestamp < windowStart
-        ) {
-          alertState.metricValues.counts -= alertState.timestamps[0].count;
-          alertState.metricValues.totals -= alertState.timestamps[0].total;
-          alertState.timestamps.shift();
-        }
-
-        const alertUpdate = await this.checkAlert(
-          alert,
-          alertState,
-          event.timestamp
-        );
-
-        switch (alertUpdate.status) {
-          case "triggered":
-            alertState.triggerState = {
-              triggered: true,
-              triggeredAt: alertUpdate.timestamp,
-              triggeredThreshold: alertUpdate.triggeredThreshold,
+          if (!alert.state) {
+            alert.state = {
+              timeBlocks: [],
+              metricValues: { counts: 0, totals: 0 },
+              triggerState: { triggered: false },
             };
-            activeAlerts.triggered.push(
-              this.mapAlertToInsert(alertUpdate, alertId, alert)
-            );
-            break;
-          case "resolved":
-            alertState.triggerState.triggered = false;
-            alertState.triggerState.triggeredAt = undefined; // Reset triggeredAt
-            activeAlerts.resolved.push(
-              this.mapAlertToUpdate(alertUpdate, alertId, alert)
-            );
-            break;
-          case "unchanged":
-            break;
-          default:
-            break;
-        }
+          } else if (!alert.state.timeBlocks) {
+            alert.state.timeBlocks = [];
+          }
 
-        await txn.put(alertId, alertState);
+          let latestBlock: TimeBlock | null = null;
+          let updatedBlocks: TimeBlock[] = [];
+          for (const block of alert.state.timeBlocks) {
+            if (block.startTimestamp >= windowStart) {
+              updatedBlocks.push(block);
+              latestBlock = block;
+            } else {
+              alert.state.metricValues.counts -= block.count;
+              alert.state.metricValues.totals -= block.total;
+            }
+          }
+
+          const isWithinCurrentBlock =
+            latestBlock &&
+            eventTime - latestBlock.startTimestamp < timeBlockDuration;
+          if (latestBlock && isWithinCurrentBlock) {
+            // Update the existing block
+            latestBlock.count += count;
+            latestBlock.total += total;
+            alert.state.metricValues.counts += count;
+            alert.state.metricValues.totals += total;
+          } else {
+            // The event starts a new block
+            updatedBlocks.push({
+              startTimestamp: eventTime - (eventTime % timeBlockDuration),
+              count,
+              total,
+            });
+          }
+
+          // Update the state with the processed blocks
+          alert.state.timeBlocks = updatedBlocks;
+
+          const alertUpdate = await this.checkAlert(
+            alert,
+            alert.state,
+            event.timestamp
+          );
+
+          switch (alertUpdate.status) {
+            case "triggered":
+              alert.state.triggerState = {
+                triggered: true,
+                triggeredAt: alertUpdate.timestamp,
+                triggeredThreshold: alertUpdate.triggeredThreshold,
+              };
+              activeAlerts.triggered.push(
+                this.mapAlertToInsert(alertUpdate, alertId, alert)
+              );
+              break;
+            case "resolved":
+              alert.state.triggerState.triggered = false;
+              alert.state.triggerState.triggeredAt = undefined; // Reset triggeredAt
+              activeAlerts.resolved.push(
+                this.mapAlertToUpdate(alertUpdate, alertId, alert)
+              );
+              break;
+            case "unchanged":
+            default:
+              break;
+          }
+        }
       }
+      await txn.put(ALERT_KEY, this.alerts);
     });
 
     return { data: activeAlerts, error: null };
@@ -251,7 +270,7 @@ export class AtomicAlerter {
     const rate =
       (alertState.metricValues.counts / alertState.metricValues.totals) * 100;
 
-    if (rate > alert.threshold && !alertState.triggerState.triggered) {
+    if (rate >= alert.threshold && !alertState.triggerState.triggered) {
       return {
         status: "triggered",
         timestamp: eventTimestamp,
@@ -275,7 +294,7 @@ export class AtomicAlerter {
     return {
       alert_id: alertId,
       alert_start_time: new Date(alertUpdate.timestamp).toISOString(),
-      alert_type: alert.type,
+      alert_metric: alert.metric,
       org_id: alert.org_id,
       soft_delete: false,
       status: "triggered",
@@ -291,11 +310,29 @@ export class AtomicAlerter {
     return {
       alert_id: alertId,
       alert_end_time: new Date(alertUpdate.timestamp).toISOString(),
-      alert_type: alert.type,
+      alert_metric: alert.metric,
       org_id: alert.org_id,
       soft_delete: false,
       status: "resolved",
       triggered_value: `${alertUpdate.triggeredThreshold}`,
     };
+  }
+
+  private buildMetricsToAlertsMap(
+    alerts: Alerts | null
+  ): Record<string, string[]> {
+    const map: Record<string, string[]> = {};
+    if (alerts) {
+      for (const [id, alert] of Object.entries(alerts)) {
+        if (alert && alert.metric) {
+          if (!map[alert.metric]) {
+            map[alert.metric] = [];
+          }
+          map[alert.metric].push(id);
+        }
+      }
+    }
+
+    return map;
   }
 }

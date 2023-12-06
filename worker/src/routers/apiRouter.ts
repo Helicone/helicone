@@ -15,7 +15,7 @@ import {
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
 import { Alerter } from "../db/Alerter";
-import { Alerts } from "../db/AtomicAlerter";
+import { validateAlertCreate } from "../lib/validators/alertValidators";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -442,16 +442,32 @@ export const getAPIRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
-      const { data: authParams, error } = await client.db.getAuthParams();
+      const { data: authParams, error: authError } =
+        await client.db.getAuthParams();
 
-      if (error !== null) {
+      if (authError !== null) {
         return client.response.unauthorized();
       }
 
-      const alertConfigMap = await requestWrapper.getJson<Alerts>();
+      const alert = await requestWrapper.getJson<
+        Database["public"]["Tables"]["alert"]["Insert"]
+      >();
+
+      const { error: validateError } = validateAlertCreate(alert);
+      if (validateError !== null) {
+        return client.response.newError(validateError, 400);
+      }
+
+      const { data: alertRow, error: alertError } = await client.db.insertAlert(
+        alert
+      );
+
+      if (alertError || !alertRow) {
+        return client.response.newError(alertError, 500);
+      }
 
       const alerter = new Alerter(env.ALERTER, authParams.organizationId);
-      const { error: configError } = await alerter.upsertAlerts(alertConfigMap);
+      const { error: configError } = await alerter.upsertAlert(alertRow);
 
       if (configError !== null) {
         return client.response.newError(configError, 500);
