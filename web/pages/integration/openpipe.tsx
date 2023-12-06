@@ -16,8 +16,11 @@ const faqs = [
     answer: (
       <>
         OpenPipe is a platform that helps you save money on OpenAI inference
-        costs by fine-tuning your models. You can learn more about OpenPipe at
-        <a href="https://openpipe.ai">https://openpipe.ai</a>,
+        costs by fine-tuning your models. You can learn more about OpenPipe at{" "}
+        <a href="https://openpipe.ai" className="text-blue-500">
+          https://openpipe.ai
+        </a>
+        ,
       </>
     ),
   },
