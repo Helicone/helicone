@@ -136,6 +136,7 @@ export default function Example() {
         <div className="w-full flex absolute overflow-hidden -space-x-1">
           {Array.from(Array(50).keys()).map((_, idx) => (
             <Image
+              key={idx}
               className={""}
               src="/assets/home/xmas.png"
               alt="xmas"
