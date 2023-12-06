@@ -20,7 +20,7 @@ const faqs = [
         <a href="https://openpipe.ai" className="text-blue-500">
           https://openpipe.ai
         </a>
-        ,
+        .
       </>
     ),
   },
