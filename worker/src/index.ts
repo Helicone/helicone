@@ -6,6 +6,8 @@ import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 import { AtomicAlerter } from "./db/AtomicAlerter";
+import { Database } from "../supabase/database.types";
+import { Alerts } from "./alerts";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -157,15 +159,17 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
+    const supabaseClient = createClient<Database>(
+      env.SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY
+    );
     if (controller.cron === "0 * * * *") {
-      const supabaseClient = createClient(
-        env.SUPABASE_URL,
-        env.SUPABASE_SERVICE_ROLE_KEY
-      );
       const rosetta = new RosettaWrapper(supabaseClient, env);
       await rosetta.generateMappers();
     } else {
       await updateLoopUsers(env);
+      const alerts = new Alerts(supabaseClient, env.ALERTER);
+      await alerts.resolveAlerts();
     }
   },
 };

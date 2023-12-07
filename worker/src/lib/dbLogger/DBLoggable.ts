@@ -6,11 +6,7 @@ import { logInClickhouse } from "./clickhouseLog";
 import { logRequest } from "./logResponse";
 import { Env, Provider } from "../..";
 import { getTokenCount } from "./tokenCounter";
-import { Result, err, ok, mapPostgrestErr } from "../../results";
-import {
-  consolidateTextFields,
-  getUsage,
-} from "./parsers/responseParserHelpers";
+import { Result, err, ok } from "../../results";
 import { Database } from "../../../supabase/database.types";
 import { HeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
@@ -21,8 +17,8 @@ import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
 import { INTERNAL_ERRORS } from "../constants";
-import { Alerter } from "../../db/Alerter";
 import { AlertMetricEvent } from "../../db/AtomicAlerter";
+import { Alerts } from "../../alerts";
 
 export interface DBLoggableProps {
   response: {
@@ -519,11 +515,6 @@ export class DBLoggable {
       };
     }
 
-    const alerter = new Alerter(
-      alerterDurableObject,
-      authParams.organizationId
-    );
-
     const metricEvent: AlertMetricEvent = {
       timestamp: Date.now(),
       metrics: {
@@ -534,33 +525,18 @@ export class DBLoggable {
       },
     };
 
-    const alertRes = await alerter.processMetricEvent(metricEvent);
+    const alerts = new Alerts(db.supabase, alerterDurableObject);
+    const alertResult = await alerts.processMetricEvent(
+      metricEvent,
+      authParams.organizationId
+    );
 
-    if (alertRes.error !== null) {
-      return err(alertRes.error);
-    }
-
-    const triggeredRes = await db.supabase
-      .from("alert_history")
-      .insert(alertRes.data.triggered);
-
-    if (triggeredRes.error) {
-      console.error("Error inserting triggered alerts", triggeredRes.error);
-    }
-
-    for (const alertUpdate of alertRes.data.resolved) {
-      const updateResult = await db.supabase
-        .from("alert_history")
-        .update({
-          alert_end_time: alertUpdate.alert_end_time,
-          status: alertUpdate.status,
-        })
-        .eq("alert_id", alertUpdate.alert_id)
-        .eq("status", "triggered");
-
-      if (updateResult.error) {
-        console.error("Error updating alert", updateResult.error);
-      }
+    if (alertResult.error) {
+      console.error("Error processing metric event", alertResult.error);
+      return {
+        data: null,
+        error: alertResult.error,
+      };
     }
 
     return ok(null);

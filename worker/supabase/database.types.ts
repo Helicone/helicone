@@ -61,7 +61,7 @@ export interface Database {
       alert_history: {
         Row: {
           alert_end_time: string | null
-          alert_id: string | null
+          alert_id: string
           alert_metric: string
           alert_start_time: string
           created_at: string | null
@@ -74,7 +74,7 @@ export interface Database {
         }
         Insert: {
           alert_end_time?: string | null
-          alert_id?: string | null
+          alert_id: string
           alert_metric: string
           alert_start_time: string
           created_at?: string | null
@@ -87,7 +87,7 @@ export interface Database {
         }
         Update: {
           alert_end_time?: string | null
-          alert_id?: string | null
+          alert_id?: string
           alert_metric?: string
           alert_start_time?: string
           created_at?: string | null

@@ -14,7 +14,7 @@ CREATE TABLE alert (
 CREATE TABLE alert_history (
     id uuid not null default gen_random_uuid() primary key,
     org_id UUID NOT NULL REFERENCES public.organization(id),
-    alert_id UUID REFERENCES alert(id),
+    alert_id UUID REFERENCES alert(id) NOT NULL,
     alert_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
     alert_end_time TIMESTAMP WITH TIME ZONE,
     alert_metric TEXT NOT NULL,

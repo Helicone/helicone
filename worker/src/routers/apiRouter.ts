@@ -466,7 +466,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError(alertError, 500);
       }
 
-      const alerter = new Alerter(env.ALERTER, authParams.organizationId);
+      const alerter = new Alerter(env.ALERTER);
       const { error: configError } = await alerter.upsertAlert(alertRow);
 
       if (configError !== null) {
@@ -487,8 +487,11 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.unauthorized();
       }
 
-      const alerter = new Alerter(env.ALERTER, authParams.organizationId);
-      const deleteRes = await alerter.deleteAlert(id);
+      const alerter = new Alerter(env.ALERTER);
+      const deleteRes = await alerter.deleteAlert(
+        id,
+        authParams.organizationId
+      );
 
       if (deleteRes.error) {
         return client.response.newError(deleteRes.error, 500);
