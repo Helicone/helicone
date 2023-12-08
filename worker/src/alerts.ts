@@ -93,7 +93,10 @@ export class Alerts {
     let resolvedAlerts: ResolvedAlert[] = [];
     for (const triggeredAlert of triggeredAlerts) {
       const { data: resAlert, error: resAlertsErr } =
-        await this.alerter.resolveTriggeredAlert(triggeredAlert);
+        await this.alerter.resolveTriggeredAlert(
+          triggeredAlert.alert_id,
+          triggeredAlert.org_id
+        );
 
       if (resAlertsErr || !resAlert) {
         console.log("Error resolving alert", resAlertsErr);

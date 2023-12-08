@@ -125,7 +125,8 @@ async function logAsync(
       ),
     },
     env.RATE_LIMIT_KV,
-    env.ALERTER
+    env.ALERTER,
+    env.RESEND_API_KEY
   );
 
   if (logError !== null) {
@@ -473,7 +474,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError(configError, 500);
       }
 
-      return client.response.successJSON({ ok: "true" });
+      return client.response.successJSON({ ok: "true" }, true);
     }
   );
 
@@ -487,6 +488,15 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.unauthorized();
       }
 
+      const { error: deleteErr } = await client.db.deleteAlert(
+        id,
+        authParams.organizationId
+      );
+
+      if (deleteErr) {
+        return client.response.newError(deleteErr, 500);
+      }
+
       const alerter = new Alerter(env.ALERTER);
       const deleteRes = await alerter.deleteAlert(
         id,
@@ -497,7 +507,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError(deleteRes.error, 500);
       }
 
-      return client.response.successJSON({ ok: "true" });
+      return client.response.successJSON({ ok: "true" }, true);
     }
   );
 

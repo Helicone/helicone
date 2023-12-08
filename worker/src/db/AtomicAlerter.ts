@@ -70,13 +70,6 @@ export class AtomicAlerter {
     });
   }
 
-  async hasAlertsEnabled(): Promise<boolean> {
-    const alerts =
-      this.alerts ?? (await this.state.storage.get<Alert>(ALERT_KEY));
-    const hasAlerts = alerts !== undefined && Object.keys(alerts).length > 0;
-    return hasAlerts;
-  }
-
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
 
@@ -96,33 +89,32 @@ export class AtomicAlerter {
         return await this.resolveAlert(request);
 
       default:
-        return new Response("Not Found", { status: 404 });
+        return this.createResponse("Not Found", 404);
     }
   }
 
   async resolveAlert(request: Request): Promise<Response> {
     if (request.method !== "POST") {
-      return new Response("Expected POST", { status: 405 });
+      return this.createResponse("Expected POST", 405);
     }
 
-    const alertToResolve = (await request.json()) as AlertHistory;
-    const activeAlerts = await this.resolveAlertStatusTrx(alertToResolve);
+    const url = new URL(request.url);
+    const alertId = url.pathname.split("/")[2];
+    const { data: resolvedAlert, error: resolvedAlertErr } =
+      await this.resolveAlertStatusTrx(alertId);
 
-    if (activeAlerts.error) {
-      return new Response(activeAlerts.error, { status: 400 });
+    if (resolvedAlertErr) {
+      return this.createResponse(resolvedAlertErr, 400);
     }
 
-    return new Response(JSON.stringify(activeAlerts), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return this.createResponse(resolvedAlert, 200);
   }
 
   async resolveAlertStatusTrx(
-    alertToResolve: AlertHistory
+    alertId: string
   ): Promise<Result<ResolvedAlert, null>> {
     let resolvedAlert: ResolvedAlert | null = null;
     await this.state.storage.transaction(async (txn) => {
-      const alertId = alertToResolve.alert_id;
       const alert = this.alerts?.[alertId];
 
       if (!alert) {
@@ -162,21 +154,19 @@ export class AtomicAlerter {
     const upsertRes = await this.upsertAlertsTrx(newAlert);
 
     if (upsertRes.error) {
-      return new Response(upsertRes.error, { status: 400 });
+      return this.createResponse(upsertRes.error, 400);
     }
 
-    return new Response("OK");
+    return this.createResponse("OK", 200);
   }
 
   async upsertAlertsTrx(newAlert: Alert): Promise<Result<null, string>> {
     await this.state.storage.transaction(async (txn) => {
-      // TODO: remove this
-      await txn.put(ALERT_KEY, {});
       const currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
       currentAlerts[newAlert.id] = newAlert;
+
       await txn.put(ALERT_KEY, currentAlerts);
       this.alerts = currentAlerts;
-
       this.metricsToAlerts = this.buildMetricsToAlertsMap(this.alerts);
     });
 
@@ -187,15 +177,15 @@ export class AtomicAlerter {
     const url = new URL(request.url);
     const alertId = url.pathname.split("/").pop();
     if (!alertId) {
-      return new Response("Bad Request: Missing id", { status: 400 });
+      return this.createResponse("Bad Request: Missing id", 400);
     }
 
     const deleteRes = await this.deleteAlertTrx(alertId);
     if (deleteRes.error) {
-      return new Response(deleteRes.error, { status: 400 });
+      return this.createResponse(deleteRes.error, 400);
     }
 
-    return new Response("OK");
+    return this.createResponse("OK", 200);
   }
 
   async deleteAlertTrx(alertId: string): Promise<Result<null, string>> {
@@ -203,9 +193,9 @@ export class AtomicAlerter {
 
     await this.state.storage.transaction(async (txn) => {
       let currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
+
       if (currentAlerts[alertId]) {
         delete currentAlerts[alertId];
-
         await txn.put(ALERT_KEY, currentAlerts);
         this.alerts = currentAlerts;
         this.metricsToAlerts = this.buildMetricsToAlertsMap(this.alerts);
@@ -219,19 +209,18 @@ export class AtomicAlerter {
 
   async processEvents(request: Request): Promise<Response> {
     if (request.method !== "POST") {
-      return new Response("Expected POST", { status: 405 });
+      return this.createResponse("Expected POST", 405);
     }
 
     const alertMetricEvent = (await request.json()) as AlertMetricEvent;
-    const activeAlerts = await this.processEventTrx(alertMetricEvent);
+    const { data: activeAlerts, error: activeAlertsErr } =
+      await this.processEventTrx(alertMetricEvent);
 
-    if (activeAlerts.error) {
-      return new Response(activeAlerts.error, { status: 400 });
+    if (activeAlertsErr) {
+      return this.createResponse(activeAlertsErr, 400);
     }
 
-    return new Response(JSON.stringify(activeAlerts.data ?? {}), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return this.createResponse(activeAlerts, 200);
   }
 
   async processEventTrx(
@@ -294,10 +283,9 @@ export class AtomicAlerter {
             });
           }
 
+          // Update alert state
           alert.state.metricValues.counts += count;
           alert.state.metricValues.totals += total;
-
-          // Update the state with the processed blocks
           alert.state.timeBlocks = updatedBlocks;
 
           const alertUpdate = await this.checkAlert(alert, event.timestamp);
@@ -427,5 +415,12 @@ export class AtomicAlerter {
     }
 
     return map;
+  }
+
+  private createResponse<T>(content: T, status: number): Response {
+    return new Response(JSON.stringify(content), {
+      headers: { "Content-Type": "application/json" },
+      status,
+    });
   }
 }

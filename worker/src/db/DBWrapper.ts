@@ -357,4 +357,21 @@ export class DBWrapper {
     }
     return { data: data, error: null };
   }
+
+  async deleteAlert(
+    alertId: string,
+    orgId: string
+  ): Promise<Result<null, string>> {
+    const { error } = await this.supabaseClient
+      .from("alert")
+      .update({ soft_delete: true })
+      .eq("id", alertId)
+      .eq("org_id", orgId);
+
+    if (error) {
+      return { error: error.message, data: null };
+    }
+
+    return { error: null, data: null };
+  }
 }

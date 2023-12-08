@@ -118,14 +118,12 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
-  const dbWrapper = new DBWrapper(env, loggable.auth());
-
   async function log() {
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        dbWrapper: dbWrapper,
+        dbWrapper: new DBWrapper(env, loggable.auth()),
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
           new ClickhouseClientWrapper(env),

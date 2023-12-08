@@ -27,15 +27,15 @@ export class Alerter {
   }
 
   async resolveTriggeredAlert(
-    triggeredAlert: Database["public"]["Tables"]["alert_history"]["Row"]
+    alertId: string,
+    orgId: string
   ): Promise<Result<ResolvedAlert, string>> {
     const response = await this.fetch<ResolvedAlert>(
-      `alerts/${triggeredAlert.id}/resolve`,
+      `alerts/${alertId}/resolve`,
       {
-        method: "POST",
-        body: JSON.stringify(triggeredAlert),
+        method: "GET",
       },
-      triggeredAlert.org_id
+      orgId
     );
 
     if (response.error || !response.data) {
@@ -57,7 +57,7 @@ export class Alerter {
       alert.org_id
     );
 
-    if (!alerterRes.error) {
+    if (alerterRes.error) {
       return err("Failed to upsert alerts");
     }
 
