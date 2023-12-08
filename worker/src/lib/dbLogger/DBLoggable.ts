@@ -441,7 +441,8 @@ export class DBLoggable {
       queue: InsertQueue;
     },
     rateLimitKV: KVNamespace,
-    alerterDurableObject: DurableObjectNamespace
+    alerterDurableObject: DurableObjectNamespace,
+    resendApiKey: Env["RESEND_API_KEY"]
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -525,7 +526,7 @@ export class DBLoggable {
       },
     };
 
-    const alerts = new Alerts(db.supabase, alerterDurableObject);
+    const alerts = new Alerts(db.supabase, alerterDurableObject, resendApiKey);
     const alertResult = await alerts.processMetricEvent(
       metricEvent,
       authParams.organizationId

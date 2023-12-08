@@ -32,7 +32,7 @@ export class Alerter {
     const response = await this.fetch<ResolvedAlert>(
       `alerts/${triggeredAlert.id}/resolve`,
       {
-        method: "GET",
+        method: "POST",
         body: JSON.stringify(triggeredAlert),
       },
       triggeredAlert.org_id

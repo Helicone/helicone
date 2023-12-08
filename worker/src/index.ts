@@ -44,6 +44,7 @@ export interface Env {
   ROSETTA_HELICONE_API_KEY: string;
   CUSTOMER_GATEWAY_URL?: string;
   ALERTER: DurableObjectNamespace;
+  RESEND_API_KEY: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -168,7 +169,11 @@ export default {
       await rosetta.generateMappers();
     } else {
       await updateLoopUsers(env);
-      const alerts = new Alerts(supabaseClient, env.ALERTER);
+      const alerts = new Alerts(
+        supabaseClient,
+        env.ALERTER,
+        env.RESEND_API_KEY
+      );
       await alerts.resolveAlerts();
     }
   },

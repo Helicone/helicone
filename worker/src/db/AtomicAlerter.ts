@@ -44,14 +44,21 @@ type AlertStatusUpdate = {
 };
 
 export type ResolvedAlert =
-  Database["public"]["Tables"]["alert_history"]["Update"];
-type TriggeredAlert = Database["public"]["Tables"]["alert_history"]["Insert"];
+  Database["public"]["Tables"]["alert_history"]["Update"] & {
+    alert: Omit<Alert, "state">;
+  };
+export type TriggeredAlert =
+  Database["public"]["Tables"]["alert_history"]["Insert"] & {
+    alert: Omit<Alert, "state">;
+  };
 
 export type ActiveAlerts = {
   triggered: TriggeredAlert[];
   resolved: ResolvedAlert[];
 };
 
+const uuidPattern =
+  "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 export class AtomicAlerter {
   private metricsToAlerts: Record<string, string[]> = {};
   private alerts: Alerts | null = null;
@@ -80,11 +87,12 @@ export class AtomicAlerter {
       case url.pathname === "/alerts" && request.method === "POST":
         return await this.upsertAlert(request);
 
-      case url.pathname.match("/^/alerts/w+$/") && request.method === "DELETE":
+      case url.pathname.match(new RegExp(`^/alerts/${uuidPattern}$`)) &&
+        request.method === "DELETE":
         return await this.deleteAlert(request);
 
-      case url.pathname.match(/^\/alerts\/\w+\/resolve$/) &&
-        request.method === "GET":
+      case url.pathname.match(new RegExp(`^/alerts/${uuidPattern}/resolve$`)) &&
+        request.method === "POST":
         return await this.resolveAlert(request);
 
       default:
@@ -93,6 +101,10 @@ export class AtomicAlerter {
   }
 
   async resolveAlert(request: Request): Promise<Response> {
+    if (request.method !== "POST") {
+      return new Response("Expected POST", { status: 405 });
+    }
+
     const alertToResolve = (await request.json()) as AlertHistory;
     const activeAlerts = await this.resolveAlertStatusTrx(alertToResolve);
 
@@ -112,13 +124,28 @@ export class AtomicAlerter {
     await this.state.storage.transaction(async (txn) => {
       const alertId = alertToResolve.alert_id;
       const alert = this.alerts?.[alertId];
+
       if (!alert) {
         console.error(`Alert for id ${alertId} not found`);
         return { data: null, error: "Alert not found" };
       }
 
+      const eventTime = Date.now();
+      const windowStart = eventTime - alert.time_window;
+      let updatedBlocks: TimeBlock[] = [];
+      for (const block of alert.state.timeBlocks) {
+        if (block.startTimestamp >= windowStart) {
+          updatedBlocks.push(block);
+        } else {
+          alert.state.metricValues.counts -= block.count;
+          alert.state.metricValues.totals -= block.total;
+        }
+      }
+
+      alert.state.timeBlocks = updatedBlocks;
+
       // Check if the alert is still triggered
-      const alertUpdate = await this.checkAlert(alert, Date.now());
+      const alertUpdate = await this.checkAlert(alert, eventTime);
 
       if (alertUpdate.status === "resolved") {
         resolvedAlert = this.resolveAlertState(alert, alertUpdate);
@@ -143,6 +170,7 @@ export class AtomicAlerter {
 
   async upsertAlertsTrx(newAlert: Alert): Promise<Result<null, string>> {
     await this.state.storage.transaction(async (txn) => {
+      // TODO: remove this
       await txn.put(ALERT_KEY, {});
       const currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
       currentAlerts[newAlert.id] = newAlert;
@@ -291,10 +319,11 @@ export class AtomicAlerter {
           }
         }
       }
+
       await txn.put(ALERT_KEY, this.alerts);
     });
 
-    console.log("Alert State", JSON.stringify(this.alerts, null, 2));
+    console.log("Alerts", JSON.stringify(this.alerts));
     console.log("Active alerts", activeAlerts);
 
     return { data: activeAlerts, error: null };
@@ -332,7 +361,7 @@ export class AtomicAlerter {
     alert.state.triggerState.triggeredAt = undefined;
     alert.state.triggerState.triggeredThreshold = undefined;
 
-    return this.mapAlertToUpdate(alertStatusUpdate, alert.id, alert);
+    return this.mapAlertToUpdate(alertStatusUpdate, alert, alert.emails);
   }
 
   private triggerAlertState(
@@ -345,38 +374,40 @@ export class AtomicAlerter {
       triggeredThreshold: alertStatusUpdate.triggeredThreshold,
     };
 
-    return this.mapAlertToInsert(alertStatusUpdate, alert.id, alert);
+    return this.mapAlertToInsert(alertStatusUpdate, alert, alert.emails);
   }
 
   private mapAlertToInsert(
     alertUpdate: AlertStatusUpdate,
-    alertId: string,
-    alert: Alert
-  ): Database["public"]["Tables"]["alert_history"]["Insert"] {
+    alert: Alert,
+    emails: string[]
+  ): TriggeredAlert {
     return {
-      alert_id: alertId,
+      alert_id: alert.id,
       alert_start_time: new Date(alertUpdate.timestamp).toISOString(),
       alert_metric: alert.metric,
       org_id: alert.org_id,
       soft_delete: false,
       status: "triggered",
       triggered_value: `${alertUpdate.triggeredThreshold}`,
+      alert: alert,
     };
   }
 
   private mapAlertToUpdate(
     alertUpdate: AlertStatusUpdate,
-    alertId: string,
-    alert: Alert
-  ): Database["public"]["Tables"]["alert_history"]["Update"] {
+    alert: Alert,
+    emails: string[]
+  ): ResolvedAlert {
     return {
-      alert_id: alertId,
+      alert_id: alert.id,
       alert_end_time: new Date(alertUpdate.timestamp).toISOString(),
       alert_metric: alert.metric,
       org_id: alert.org_id,
       soft_delete: false,
       status: "resolved",
       triggered_value: `${alertUpdate.triggeredThreshold}`,
+      alert: alert,
     };
   }
 
