@@ -63,7 +63,7 @@ export const Completion = (props: CompletionProps) => {
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Request
               </p>
-              <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <pre className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {JSON.stringify(rawRequest, null, 2)}
               </pre>
             </div>
@@ -71,7 +71,7 @@ export const Completion = (props: CompletionProps) => {
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 {response.title}
               </p>
-              <pre className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <pre className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {JSON.stringify(rawResponse, null, 2)}
               </pre>
             </div>
@@ -82,7 +82,7 @@ export const Completion = (props: CompletionProps) => {
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Request
               </p>
-              <p className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <p className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {removeLeadingWhitespace(request)}
               </p>
             </div>
@@ -90,7 +90,7 @@ export const Completion = (props: CompletionProps) => {
               <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 {response.title}
               </p>
-              <p className="text-gray-900 dark:text-gray-100 text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
+              <p className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {response && removeLeadingWhitespace(response.text)}
               </p>
             </div>

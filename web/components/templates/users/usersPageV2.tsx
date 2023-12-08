@@ -82,14 +82,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   );
   const { setNotification } = useNotification();
 
-  const onPageSizeChangeHandler = async (newPageSize: number) => {
-    refetch();
-  };
-
-  const onPageChangeHandler = async (newPageNumber: number) => {
-    refetch();
-  };
-
   return (
     <>
       <AuthHeader title={"Users"} />
@@ -120,8 +112,12 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           pageSize={pageSize}
           isCountLoading={isLoading}
           count={count || 0}
-          onPageChange={onPageChangeHandler}
-          onPageSizeChange={onPageSizeChangeHandler}
+          onPageChange={() => {
+            refetch();
+          }}
+          onPageSizeChange={() => {
+            refetch();
+          }}
           pageSizeOptions={[25, 50, 100]}
           showCount={true}
         />

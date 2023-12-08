@@ -18,17 +18,19 @@ export interface MetricsPanelProps {
     >;
     onInformationHref?: string;
   };
+  wFull?: boolean;
   hFull?: boolean;
 }
 
 export function MetricsPanel(props: MetricsPanelProps) {
-  const { metric, hFull = false } = props;
+  const { metric, hFull = false, wFull = true } = props;
 
   return (
     <Card
       className={clsx(
         hFull ? "h-full" : "h-full max-h-24",
-        "flex flex-col p-4 w-full justify-end dark:border dark:border-gray-700"
+        wFull ? "w-full" : "w-fit",
+        "flex flex-col p-4 justify-end dark:border dark:border-gray-700"
       )}
     >
       <p className="text-gray-500 text-xs text-left">{metric.label}</p>

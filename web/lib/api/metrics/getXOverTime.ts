@@ -62,6 +62,7 @@ export async function getXOverTime<T>(
     timeZoneDifference,
   }: DataOverTimeRequest,
   countColumn: string,
+  groupByColumns: string[] = [],
   printQuery = false
 ): Promise<
   Result<
@@ -126,17 +127,17 @@ export async function getXOverTime<T>(
   const query = `
 SELECT
   ${dateTrunc} as created_at_trunc,
-  ${countColumn}
+  ${groupByColumns.concat([countColumn]).join(", ")}
 FROM response_copy_v3
 WHERE (
   ${builtFilter}
 )
-GROUP BY ${dateTrunc}
+GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
 ORDER BY ${dateTrunc} ASC ${fill}
 `;
 
   if (printQuery) {
-    printRunnableQuery(query, argsAcc);
+    await printRunnableQuery(query, argsAcc);
   }
 
   type ResultType = T & {
