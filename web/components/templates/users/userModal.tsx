@@ -4,7 +4,11 @@ import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themed/themedModal";
 import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
 import { formatNumber } from "./initialColumns";
-import { ClipboardDocumentIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentIcon,
+  TableCellsIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 import StyledAreaChart from "../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
@@ -12,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useUserRequests } from "./useUserRequests";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
+  REQUEST_TABLE_FILTERS,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import {
@@ -19,6 +24,9 @@ import {
   filterUIToFilterLeafs,
 } from "../../../services/lib/filters/filterDefs";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
+import { useRouter } from "next/router";
+import { encodeFilter } from "../requestsV2/requestsPageV2";
+import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface UserModalProps {
   open: boolean;
@@ -35,6 +43,8 @@ const UserModal = (props: UserModalProps) => {
   const [isCostLoading, setIsCostLoading] = useState(false);
 
   const { setNotification } = useNotification();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setIsLoading(true);
@@ -123,10 +133,41 @@ const UserModal = (props: UserModalProps) => {
       {user ? (
         <div className="flex flex-col space-y-4 w-full min-w-[400px] h-full">
           <div className="w-full flex flex-row justify-between items-center">
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-xl truncate w-[325px]">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-xl truncate w-[300px]">
               {user.user_id}
             </h2>
-            <div className="flex flex-row items-center space-x-2">
+            <div className="flex flex-row items-center gap-3">
+              <Tooltip title="View Requests">
+                <button
+                  onClick={() => {
+                    const currentAdvancedFilters = encodeURIComponent(
+                      JSON.stringify(
+                        [
+                          {
+                            filterMapIdx: 3,
+                            operatorIdx: 0,
+                            value: user.user_id,
+                          },
+                        ]
+                          .map(encodeFilter)
+                          .join("|")
+                      )
+                    );
+
+                    router.push({
+                      pathname: "/requests",
+                      query: {
+                        t: "3m",
+                        filters: JSON.stringify(currentAdvancedFilters),
+                      },
+                    });
+                  }}
+                  tabIndex={-1}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
+                >
+                  <TableCellsIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              </Tooltip>
               <Tooltip title="Copy">
                 <button
                   onClick={() => {
