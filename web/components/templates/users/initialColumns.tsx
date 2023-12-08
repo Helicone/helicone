@@ -47,6 +47,15 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     },
   },
   {
+    accessorKey: "first_active",
+    header: "First Active",
+    cell: (info) => getUSDateFromString(info.getValue() as string),
+    meta: {
+      sortKey: "first_active",
+    },
+    minSize: 200,
+  },
+  {
     accessorKey: "last_active",
     header: "Last Active",
     cell: (info) => getUSDateFromString(info.getValue() as string),
