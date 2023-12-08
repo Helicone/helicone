@@ -115,6 +115,22 @@ export const useDashboardPage = ({
         );
       },
     }),
+    requestsWithStatus: useBackendMetricCall<
+      Result<(RequestsOverTime & { status: number })[], string>
+    >({
+      params,
+      endpoint: "/api/metrics/requestStatusOverTime",
+      key: "requestOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({
+            count: +d.count,
+            time: new Date(d.time),
+            status: d.status,
+          }))
+        );
+      },
+    }),
     costs: useBackendMetricCall<Result<CostOverTime[], string>>({
       params,
       endpoint: "/api/metrics/costOverTime",
