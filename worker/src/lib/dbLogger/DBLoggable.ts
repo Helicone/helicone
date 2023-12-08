@@ -440,9 +440,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
-    rateLimitKV: KVNamespace,
-    alerterDurableObject: DurableObjectNamespace,
-    resendApiKey: Env["RESEND_API_KEY"]
+    env: Env
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -526,7 +524,7 @@ export class DBLoggable {
       },
     };
 
-    const alerts = new Alerts(db.supabase, alerterDurableObject, resendApiKey);
+    const alerts = new Alerts(db.supabase, env.ALERTER, env.RESEND_API_KEY);
     const alertResult = await alerts.processMetricEvent(
       metricEvent,
       authParams.organizationId

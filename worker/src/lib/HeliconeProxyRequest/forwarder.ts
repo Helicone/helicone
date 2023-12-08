@@ -131,9 +131,7 @@ export async function proxyForwarder(
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
       },
-      env.RATE_LIMIT_KV,
-      env.ALERTER,
-      env.RESEND_API_KEY
+      env
     );
     if (res.error !== null) {
       request

@@ -35,10 +35,11 @@ type AlertTriggerState = {
   triggered: boolean;
   triggeredThreshold?: number;
   triggeredAt?: number;
+  firstBelowThresholdAt?: number;
 };
 
 type AlertStatusUpdate = {
-  status: "triggered" | "resolved" | "unchanged";
+  status: "triggered" | "resolved" | "below_threshold" | "unchanged";
   timestamp: number;
   triggeredThreshold?: number;
 };
@@ -59,6 +60,7 @@ export type ActiveAlerts = {
 
 const uuidPattern =
   "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+const COOLDOWN_PERIOD_MS = 5 * 60 * 1000;
 export class AtomicAlerter {
   private metricsToAlerts: Record<string, string[]> = {};
   private alerts: Alerts | null = null;
@@ -141,6 +143,8 @@ export class AtomicAlerter {
 
       if (alertUpdate.status === "resolved") {
         resolvedAlert = this.resolveAlertState(alert, alertUpdate);
+      } else if (alertUpdate.status === "below_threshold") {
+        alert.state.triggerState.firstBelowThresholdAt = alertUpdate.timestamp;
       }
 
       await txn.put(ALERT_KEY, this.alerts);
@@ -296,6 +300,10 @@ export class AtomicAlerter {
                 this.triggerAlertState(alert, alertUpdate)
               );
               break;
+            case "below_threshold":
+              alert.state.triggerState.firstBelowThresholdAt =
+                alertUpdate.timestamp;
+              break;
             case "resolved":
               activeAlerts.resolved.push(
                 this.resolveAlertState(alert, alertUpdate)
@@ -332,10 +340,22 @@ export class AtomicAlerter {
         triggeredThreshold: rate,
       };
     } else if (rate <= alert.threshold && alertState.triggerState.triggered) {
-      return {
-        status: "resolved",
-        timestamp: eventTimestamp,
-      };
+      if (!alertState.triggerState.firstBelowThresholdAt) {
+        alertState.triggerState.firstBelowThresholdAt = eventTimestamp;
+        return {
+          status: "below_threshold",
+          timestamp: eventTimestamp,
+        };
+      } else {
+        const timeSinceBelowThreshold =
+          eventTimestamp - alertState.triggerState.firstBelowThresholdAt;
+        if (timeSinceBelowThreshold >= COOLDOWN_PERIOD_MS) {
+          return {
+            status: "resolved",
+            timestamp: eventTimestamp,
+          };
+        }
+      }
     }
 
     return { status: "unchanged", timestamp: eventTimestamp };
@@ -348,6 +368,7 @@ export class AtomicAlerter {
     alert.state.triggerState.triggered = false;
     alert.state.triggerState.triggeredAt = undefined;
     alert.state.triggerState.triggeredThreshold = undefined;
+    alert.state.triggerState.firstBelowThresholdAt = undefined;
 
     return this.mapAlertToUpdate(alertStatusUpdate, alert, alert.emails);
   }
