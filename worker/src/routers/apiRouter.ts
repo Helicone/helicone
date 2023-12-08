@@ -415,25 +415,6 @@ export const getAPIRouter = (router: BaseRouter) => {
     }
   );
 
-  router.options(
-    "/v1/request/:id/property",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
-    ) => {
-      return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PUT",
-          "Access-Control-Allow-Headers":
-            "Content-Type, helicone-jwt, helicone-org-id",
-        },
-      });
-    }
-  );
-
   router.post(
     "/alerts",
     async (
@@ -508,6 +489,25 @@ export const getAPIRouter = (router: BaseRouter) => {
       }
 
       return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
+  router.options(
+    "*",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT",
+          "Access-Control-Allow-Headers":
+            "Content-Type, helicone-jwt, helicone-org-id",
+        },
+      });
     }
   );
 
