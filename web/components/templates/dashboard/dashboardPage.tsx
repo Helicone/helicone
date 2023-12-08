@@ -457,7 +457,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       JSON.stringify(
         [
           {
-            filterMapIdx: 4,
+            filterMapIdx: 0,
             operatorIdx: 0,
             value: model.model,
           },
@@ -468,18 +468,21 @@ const DashboardPage = (props: DashboardPageProps) => {
     );
 
     // Create a base URL
-    const url = new URL("/requests", window.location.origin);
+    const url = new URL("/dashboard", window.location.origin);
 
-    // Create query parameters
-    const params = new URLSearchParams();
-    params.append("t", "3m");
-    params.append("filters", currentAdvancedFilters);
+    // Capture existing query parameters
+    const params = new URLSearchParams(window.location.search);
 
-    // Append query parameters to the URL
+    // Append or update the 'filters' parameter
+    params.set("filters", `"${currentAdvancedFilters}"`);
+
+    // Append the updated query parameters to the URL
     url.search = params.toString();
 
     // Now you have your URL string
     const urlString = url.toString();
+
+    console.log("url string", urlString);
 
     // You can pass urlString as href
     return {
@@ -654,26 +657,28 @@ const DashboardPage = (props: DashboardPageProps) => {
                           : "0"}
                       </p>
                     </div>
-                    <MultiSelect
-                      placeholder="Select status codes"
-                      value={currentStatus}
-                      onValueChange={(values: string[]) => {
-                        setCurrentStatus(values);
-                      }}
-                      className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
-                    >
-                      {statusStrings
-                        .filter((status) => status !== "0")
-                        .map((status, idx) => (
-                          <MultiSelectItem
-                            value={status}
-                            key={idx}
-                            className="font-medium text-black"
-                          >
-                            {status}
-                          </MultiSelectItem>
-                        ))}
-                    </MultiSelect>
+                    {!overTimeData.requests.isLoading && (
+                      <MultiSelect
+                        placeholder="Select status codes"
+                        value={currentStatus}
+                        onValueChange={(values: string[]) => {
+                          setCurrentStatus(values);
+                        }}
+                        className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
+                      >
+                        {statusStrings
+                          .filter((status) => status !== "0")
+                          .map((status, idx) => (
+                            <MultiSelectItem
+                              value={status}
+                              key={idx}
+                              className="font-medium text-black"
+                            >
+                              {status}
+                            </MultiSelectItem>
+                          ))}
+                      </MultiSelect>
+                    )}
                   </div>
 
                   <div
