@@ -486,6 +486,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   };
 
+  console.log("req-status", overTimeData.requestsWithStatus.data?.data);
+
   const statusSet = overTimeData.requestsWithStatus.data?.data?.reduce<
     Set<number>
   >((acc, { status }) => {
@@ -493,14 +495,13 @@ const DashboardPage = (props: DashboardPageProps) => {
     return acc;
   }, new Set<number>());
 
-  const uniqueStatusCodes = Array.from(statusSet || []);
+  const uniqueStatusCodes = Array.from(statusSet || []).sort();
 
   const statusStrings = uniqueStatusCodes.map((status) => status.toString());
 
   const flattenedObject = overTimeData.requestsWithStatus.data?.data?.reduce(
     (acc, { count, status, time }) => {
-      const formattedTime = time.toISOString().split("T")[0];
-
+      const formattedTime = getTimeMap(timeIncrement)(new Date(time));
       if (!acc[formattedTime]) {
         acc[formattedTime] = statusStrings.reduce(
           (statusAcc: StatusCounts, status) => {
@@ -522,7 +523,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const flattenedArray = Object.entries(flattenedObject || {}).map(
     ([time, statuses]) => ({
-      date: getTimeMap(timeIncrement)(new Date(time)),
+      date: time,
       ...statuses,
     })
   );
@@ -647,7 +648,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                         placeholder="Select status codes"
                         value={currentStatus}
                         onValueChange={(values: string[]) => {
-                          setCurrentStatus(values);
+                          setCurrentStatus(
+                            values.sort((a, b) => {
+                              return Number(a) - Number(b);
+                            })
+                          );
                         }}
                         className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
                       >
