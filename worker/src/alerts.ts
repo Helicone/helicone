@@ -103,21 +103,21 @@ export class Alerts {
       resolvedAlerts.push(resAlert);
     }
 
-    for (const alertUpdate of resolvedAlerts) {
+    for (const resolvedAlert of resolvedAlerts) {
       const updateResult = await this.supabaseClient
         .from("alert_history")
         .update({
-          alert_end_time: alertUpdate.alert_end_time,
-          status: alertUpdate.status,
+          alert_end_time: resolvedAlert.alert_end_time,
+          status: resolvedAlert.status,
         })
-        .eq("alert_id", alertUpdate.alert_id)
+        .eq("alert_id", resolvedAlert.alert_id)
         .eq("status", "triggered");
 
       if (updateResult.error) {
         console.error("Error updating alert", updateResult.error);
       }
 
-      const { error: emailErr } = await this.sendAlertEmails(alertUpdate);
+      const { error: emailErr } = await this.sendAlertEmails(resolvedAlert);
 
       if (emailErr) {
         console.error("Error sending alert emails", emailErr);
@@ -179,8 +179,17 @@ export class Alerts {
         alertUpdate.triggered_value
       }'\n\nPlease take the necessary action.`;
       html = `<html>
-        <body>
-          <h1>Alert Triggered: '${alert.name}'</h1>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          h1 { color: #d32f2f; }
+          ul { padding-left: 20px; }
+          li { margin-bottom: 10px; }
+        </style>
+      </head>
+      <body>
+        <div style="max-width: 600px; margin: auto; padding: 20px;">
+          <h1 style="text-align: center;">Alert Triggered: '${alert.name}'</h1>
           <p>An alert has been triggered.</p>
           <p><strong>Details:</strong></p>
           <ul>
@@ -192,8 +201,9 @@ export class Alerts {
             <li>Triggered Threshold: '${alertUpdate.triggered_value}'</li>
           </ul>
           <p>Please take the necessary action.</p>
-        </body>
-        </html>`;
+        </div>
+      </body>
+      </html>`;
     } else if (alertUpdate.status === "resolved") {
       subject = `Alert Resolved: ${alert.name}`;
       text = `Alert '${
