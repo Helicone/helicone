@@ -467,24 +467,16 @@ const DashboardPage = (props: DashboardPageProps) => {
       )
     );
 
-    // Create a base URL
     const url = new URL("/dashboard", window.location.origin);
 
-    // Capture existing query parameters
     const params = new URLSearchParams(window.location.search);
 
-    // Append or update the 'filters' parameter
     params.set("filters", `"${currentAdvancedFilters}"`);
 
-    // Append the updated query parameters to the URL
     url.search = params.toString();
 
-    // Now you have your URL string
     const urlString = url.toString();
 
-    console.log("url string", urlString);
-
-    // You can pass urlString as href
     return {
       name: model.model || "n/a",
       value: model.total_requests,
@@ -494,7 +486,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   };
 
-  // Step 1: Extract all unique status codes
   const statusSet = overTimeData.requestsWithStatus.data?.data?.reduce<
     Set<number>
   >((acc, { status }) => {
@@ -502,18 +493,14 @@ const DashboardPage = (props: DashboardPageProps) => {
     return acc;
   }, new Set<number>());
 
-  // Convert the Set to an Array
   const uniqueStatusCodes = Array.from(statusSet || []);
 
-  // Convert each status code to a string
   const statusStrings = uniqueStatusCodes.map((status) => status.toString());
 
-  // Flatten the data
   const flattenedObject = overTimeData.requestsWithStatus.data?.data?.reduce(
     (acc, { count, status, time }) => {
       const formattedTime = time.toISOString().split("T")[0];
 
-      // Initialize each time entry with all statuses set to 0
       if (!acc[formattedTime]) {
         acc[formattedTime] = statusStrings.reduce(
           (statusAcc: StatusCounts, status) => {
@@ -524,7 +511,6 @@ const DashboardPage = (props: DashboardPageProps) => {
         );
       }
 
-      // Update the count for the current status
       const statusStr = String(status);
       acc[formattedTime][statusStr] =
         (acc[formattedTime][statusStr] || 0) + count;
@@ -534,7 +520,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     {} as { [key: string]: StatusCounts }
   );
 
-  // Convert the flattened object to an array
   const flattenedArray = Object.entries(flattenedObject || {}).map(
     ([time, statuses]) => ({
       date: getTimeMap(timeIncrement)(new Date(time)),
