@@ -40,26 +40,32 @@ title: "Anthropic"
     },
   });
 
-  const stream = await anthropic.completions.create({
-    prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
-    model: "claude-2",
-    stream: true,
-    max_tokens_to_sample: 300,
-  });
-  ```
+const stream = await anthropic.completions.create({
+prompt: `${Anthropic.HUMAN_PROMPT} Your prompt here${Anthropic.AI_PROMPT}`,
+model: "claude-2",
+stream: true,
+max_tokens_to_sample: 300,
+});
 
-  </Tab>
-  <Tab title="cURL">
-    **Replace the Anthropic Base url with Helicone's**
-   ```
-   - POST https://api.anthropic.com
-   + POST https://anthropic.hconeai.com
-   ```
+```
+
+</Tab>
+<Tab title="cURL">
+  **Replace the Anthropic Base url with Helicone's**
+```
+
+- POST https://api.anthropic.com
+
+* POST https://anthropic.hconeai.com
+
+```
 
 **Add a Helicone-Auth header into the requests**
 
 ```
+
 "Helicone-Auth": "Bearer HELICONE_API_KEY"
+
 ```
 
 Example cURL command
@@ -67,26 +73,28 @@ Example cURL command
 <Note>Please make sure to replace API keys with your own</Note>
 
 ```
+
 curl --request POST \
-  --url https://anthropic.hconeai.com/v1/complete \
-  --header 'Content-Type: application/json' \
-  --header 'Helicone-Auth: Bearer <<HELICONE_API_KEY>> \
-  --header 'x-api-key: <<ANTHROPIC_API_KEY>> \
-  --data '{
-	"prompt": "\n\nHuman: Tell me a haiku about trees\n\nAssistant:",
-	"model": "claude-v1-100k",
-	"max_tokens_to_sample": 300,
-	"stop_sequences": [
-		"\n\nHuman:"
-	]
+ --url https://anthropic.hconeai.com/v1/complete \
+ --header 'Content-Type: application/json' \
+ --header 'Helicone-Auth: Bearer <<HELICONE_API_KEY>> \
+ --header 'x-api-key: <<ANTHROPIC_API_KEY>> \
+ --data '{
+"prompt": "\n\nHuman: Tell me a haiku about trees\n\nAssistant:",
+"model": "claude-v1-100k",
+"max_tokens_to_sample": 300,
+"stop_sequences": [
+"\n\nHuman:"
+]
 }'
-```
+
+````
 
    </Tab>
 
    <Tab title="Langchain">
     **Python**
-    
+
     Change the api base and add a Helicone-Auth header
     ```python
     anthropic = ChatAnthropic(
@@ -96,10 +104,10 @@ curl --request POST \
       anthropic_api_key="ANTHROPIC_API_KEY",
       model_kwargs={
           "extra_headers":{
-              "Helicone-Auth": "Bearer HELICONE_API_KEY"
+              "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
           }
       }
-    ) 
+    )
     ```
     **Typescript**
 
@@ -117,3 +125,4 @@ curl --request POST \
     ```
   </Tab>
 </Tabs>
+````

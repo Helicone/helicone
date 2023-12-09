@@ -73,6 +73,29 @@ function getSortLeaf(
   }
 }
 
+export function encodeFilter(filter: UIFilterRow): string {
+  return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
+    filter.value
+  )}`;
+}
+
+export function decodeFilter(encoded: string): UIFilterRow | null {
+  try {
+    const parts = encoded.split(":");
+    if (parts.length !== 3) return null;
+    const filterMapIdx = parseInt(parts[0], 10);
+    const operatorIdx = parseInt(parts[1], 10);
+    const value = decodeURIComponent(parts[2]);
+
+    if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
+
+    return { filterMapIdx, operatorIdx, value };
+  } catch (error) {
+    console.error("Error decoding filter:", error);
+    return null;
+  }
+}
+
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const {
     currentPage,
@@ -264,29 +287,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedAdvancedFilter]);
 
-  function encodeFilter(filter: UIFilterRow): string {
-    return `${filter.filterMapIdx}:${filter.operatorIdx}:${encodeURIComponent(
-      filter.value
-    )}`;
-  }
-
-  function decodeFilter(encoded: string): UIFilterRow | null {
-    try {
-      const parts = encoded.split(":");
-      if (parts.length !== 3) return null;
-      const filterMapIdx = parseInt(parts[0], 10);
-      const operatorIdx = parseInt(parts[1], 10);
-      const value = decodeURIComponent(parts[2]);
-
-      if (isNaN(filterMapIdx) || isNaN(operatorIdx)) return null;
-
-      return { filterMapIdx, operatorIdx, value };
-    } catch (error) {
-      console.error("Error decoding filter:", error);
-      return null;
-    }
-  }
-
   const onPageSizeChangeHandler = async (newPageSize: number) => {
     setCurrentPageSize(newPageSize);
     refetch();
@@ -445,7 +445,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           count={count || 0}
           onPageChange={onPageChangeHandler}
           onPageSizeChange={onPageSizeChangeHandler}
-          pageSizeOptions={[10, 25, 50, 100]}
+          pageSizeOptions={[25, 50, 100]}
         />
       </div>
       <RequestDrawerV2

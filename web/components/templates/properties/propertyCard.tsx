@@ -12,6 +12,14 @@ import { usePropertyCard } from "./useProperty";
 import { MdLaunch } from "react-icons/md";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { INITIAL_COLUMNS } from "./initialColumns";
+import { Tooltip } from "@mui/material";
+import { useRouter } from "next/router";
+import { useGetProperties } from "../../../services/hooks/properties";
+import {
+  REQUEST_TABLE_FILTERS,
+  SingleFilterDef,
+} from "../../../services/lib/filters/frontendFilterDefs";
+import { encodeFilter } from "../requestsV2/requestsPageV2";
 
 interface PropertyCardPageProps {
   property: string;
@@ -25,10 +33,25 @@ interface PropertyCardPageProps {
 const PropertyCard = (props: PropertyCardPageProps) => {
   const { property, timeFilter, onDelete } = props;
 
+  const router = useRouter();
+
   const { keyMetrics, valueMetrics } = usePropertyCard({
     timeFilter,
     property,
   });
+
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+    propertyFilters,
+    searchPropertyFilters,
+  } = useGetProperties();
+
+  const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
+    propertyFilters
+  );
+
+  console.log(filterMap);
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
@@ -63,25 +86,29 @@ const PropertyCard = (props: PropertyCardPageProps) => {
 
   return (
     <>
-      <div className="bg-white dark:bg-black p-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm flex flex-col space-y-4">
+      <div className="bg-white dark:bg-black p-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm flex flex-col space-y-8">
         <div className="flex flex-row justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             {property}
           </h1>
-          <button
-            onClick={onDelete}
-            className="p-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700"
-          >
-            <XMarkIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-          </button>
+          <div className="flex flex-row items-center gap-2">
+            <Tooltip title="Close">
+              <button
+                onClick={onDelete}
+                className="p-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700"
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+              </button>
+            </Tooltip>
+          </div>
         </div>
-        <div className="mx-auto w-full grid grid-cols-1 sm:grid-cols-3 text-gray-900 dark:text-gray-100 gap-4">
+        <div className="mx-auto w-full flex flex-wrap text-gray-900 dark:text-gray-100 gap-4">
           {metricsData.map((m, i) => (
-            <MetricsPanel metric={m} key={i} />
+            <MetricsPanel metric={m} key={i} wFull={false} />
           ))}
         </div>
         <div className="flex flex-col gap-2 pt-4">
-          <div className="text-gray-500 italic text-sm">
+          <div className="text-gray-500 italic text-sm -mb-10">
             Showing top 10 results
           </div>
           <ThemedTableV5
@@ -95,6 +122,35 @@ const PropertyCard = (props: PropertyCardPageProps) => {
             }
             defaultColumns={INITIAL_COLUMNS}
             tableKey="propertyCardColumnVisibility"
+            onRowSelect={(row) => {
+              const value = row.property_value;
+
+              const filterMapIndex = filterMap.findIndex(
+                (f) => f.label === property
+              );
+
+              const currentAdvancedFilters = encodeURIComponent(
+                JSON.stringify(
+                  [
+                    {
+                      filterMapIdx: filterMapIndex,
+                      operatorIdx: 0,
+                      value,
+                    },
+                  ]
+                    .map(encodeFilter)
+                    .join("|")
+                )
+              );
+
+              router.push({
+                pathname: "/requests",
+                query: {
+                  t: "3m",
+                  filters: JSON.stringify(currentAdvancedFilters),
+                },
+              });
+            }}
           />
         </div>
       </div>
