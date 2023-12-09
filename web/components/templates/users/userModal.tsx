@@ -8,6 +8,8 @@ import {
   ClipboardDocumentIcon,
   TableCellsIcon,
   XMarkIcon,
+  CurrencyDollarIcon,
+  PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 import StyledAreaChart from "../dashboard/styledAreaChart";
@@ -27,7 +29,7 @@ import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useRouter } from "next/router";
 import { encodeFilter } from "../requestsV2/requestsPageV2";
 import useSearchParams from "../../shared/utils/useSearchParams";
-
+import ThemedTabs from "../../../components/shared/themed/themedTabs";
 interface UserModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -41,6 +43,7 @@ const UserModal = (props: UserModalProps) => {
   const [userCost, setUserCost] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCostLoading, setIsCostLoading] = useState(false);
+  const [graphOption, setGraphOption] = useState<string>("Request");
 
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -128,13 +131,27 @@ const UserModal = (props: UserModalProps) => {
       });
   }, [open, user?.user_id]);
 
+  const options = [
+    { label: "Request", icon: PresentationChartLineIcon },
+    { label: "Cost", icon: CurrencyDollarIcon },
+  ];
+
+  const handleOptionSelect = (option: string) => {
+    setGraphOption(option);
+  };
+
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       {user ? (
         <div className="flex flex-col space-y-4 w-full min-w-[400px] h-full">
           <div className="w-full flex flex-row justify-between items-center">
             <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-xl truncate w-[300px]">
-              {user.user_id}
+              <ThemedTabs
+                options={options}
+                onOptionSelect={handleOptionSelect}
+                initialIndex={0}
+                breakpoint="md"
+              />
             </h2>
             <div className="flex flex-row items-center gap-3">
               <Tooltip title="View Requests">
@@ -193,46 +210,57 @@ const UserModal = (props: UserModalProps) => {
               </Tooltip>
             </div>
           </div>
-          <div>
-            <StyledAreaChart
-              title={"Requests last 30 days"}
-              value={undefined}
-              isDataOverTimeLoading={isLoading}
-              height={"128px"}
-            >
-              <AreaChart
-                data={userRequests}
-                categories={["requests"]}
-                index={"date"}
-                className="h-32 -ml-4 pt-4"
-                colors={["orange"]}
-                showLegend={false}
-              />
-            </StyledAreaChart>
-          </div>
-          <div>
-            <StyledAreaChart
-              title={"Cost of requests in the last 30 days"}
-              value={undefined}
-              isDataOverTimeLoading={isCostLoading}
-              height={"128px"}
-            >
-              <AreaChart
-                data={userCost}
-                categories={["cost"]}
-                index={"date"}
-                className="h-32 -ml-4 pt-4"
-                colors={["orange"]}
-                showLegend={false}
-              />
-            </StyledAreaChart>
-          </div>
+          {graphOption === "Request" ? (
+            <div>
+              <StyledAreaChart
+                title={"Requests last 30 days"}
+                value={undefined}
+                isDataOverTimeLoading={isLoading}
+                height={"128px"}
+              >
+                <AreaChart
+                  data={userRequests}
+                  categories={["requests"]}
+                  index={"date"}
+                  className="h-32 -ml-4 pt-4"
+                  colors={["orange"]}
+                  showLegend={false}
+                />
+              </StyledAreaChart>
+            </div>
+          ) : (
+            <div>
+              <StyledAreaChart
+                title={"Cost of requests in the last 30 days"}
+                value={undefined}
+                isDataOverTimeLoading={isCostLoading}
+                height={"128px"}
+              >
+                <AreaChart
+                  data={userCost}
+                  categories={["cost"]}
+                  index={"date"}
+                  className="h-32 -ml-4 pt-4"
+                  colors={["orange"]}
+                  showLegend={false}
+                />
+              </StyledAreaChart>
+            </div>
+          )}
 
           <ul
             className={clsx(
               "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 dark:divide-gray-700 justify-between text-sm w-full"
             )}
           >
+            <li className="flex flex-row justify-between items-center py-2 gap-4">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                User ID
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">
+                {user.user_id ? user.user_id : "No User ID"}
+              </p>
+            </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Total Cost
