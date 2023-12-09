@@ -166,75 +166,148 @@ export class Alerts {
     html: string;
   } {
     const alert = alertUpdate.alert;
-    let subject: string;
-    let text: string;
-    let html: string;
+    const status = alertUpdate.status ?? "";
+    const capitalizedStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
-    if (alertUpdate.status === "triggered") {
-      subject = `Alert Triggered: ${alert.name}`;
-      text = `Alert '${
-        alert.name
-      }' has been triggered. \n\nDetails:\n- Triggered At: '${
-        alertUpdate.alert_start_time
-          ? new Date(alertUpdate.alert_start_time).toLocaleString()
-          : ""
-      }'\n- Triggered Threshold: '${
-        alertUpdate.triggered_value
-      }'\n\nPlease take the necessary action.`;
-      html = `<html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          h1 { color: #d32f2f; }
-          ul { padding-left: 20px; }
-          li { margin-bottom: 10px; }
-        </style>
-      </head>
-      <body>
-        <div style="max-width: 600px; margin: auto; padding: 20px;">
-          <h1 style="text-align: center;">Alert Triggered: '${alert.name}'</h1>
-          <p>An alert has been triggered.</p>
-          <p><strong>Details:</strong></p>
-          <ul>
-            <li>Triggered At: '${
-              alertUpdate.alert_start_time
-                ? new Date(alertUpdate.alert_start_time).toLocaleString()
-                : ""
-            }'</li>
-            <li>Triggered Threshold: '${alertUpdate.triggered_value}'</li>
-          </ul>
-          <p>Please take the necessary action.</p>
-        </div>
-      </body>
-      </html>`;
-    } else if (alertUpdate.status === "resolved") {
-      subject = `Alert Resolved: ${alert.name}`;
-      text = `Alert '${
-        alert.name
-      }' has been resolved. \n\nDetails:\n- Resolved At: '${
-        alertUpdate.alert_end_time
-          ? new Date(alertUpdate.alert_end_time).toLocaleString()
-          : ""
-      }'\n\nNo further action is required.`;
-      html = `<html>
-        <body>
-          <h1>Alert Resolved: '${alert.name}'</h1>
-          <p>An alert has been resolved.</p>
-          <p><strong>Details:</strong></p>
-          <ul>
-            <li>Resolved At: '${
-              alertUpdate.alert_end_time
-                ? new Date(alertUpdate.alert_end_time).toLocaleString()
-                : ""
-            }'</li>
-          </ul>
-          <p>No further action is required.</p>
-        </body>
-        </html>`;
-    } else {
-      throw new Error("Invalid alert status");
-    }
+    const formatTimestamp = (timestamp: any) =>
+      timestamp ? new Date(timestamp).toLocaleString() : "N/A";
+
+    const formatTimespan = (ms: any) => {
+      const minutes = Math.floor(ms / 60000);
+      const hours = Math.floor(minutes / 60);
+      return hours > 0 ? `${hours} hour(s)` : `${minutes} minute(s)`;
+    };
+
+    const subject = `Alert ${capitalizedStatus}: ${alert.name}`;
+    const alertTime =
+      status === "triggered"
+        ? alertUpdate.alert_start_time
+        : alertUpdate.alert_end_time;
+    const actionMessage =
+      status === "triggered"
+        ? "Please take the necessary action."
+        : "No further action is required.";
+
+    const text = `Alert '${
+      alert.name
+    }' has been ${capitalizedStatus}.\n\nDetails:\n- ${capitalizedStatus} At: ${formatTimestamp(
+      alertTime
+    )}\n- Threshold: ${alert.threshold}%\n\n${actionMessage}`;
+    const html = `<head>
+    <style>
+      body { font-family: Arial, sans-serif; color: #333; }
+      h1, h2 { text-align: center; margin: 10px 0; }
+      .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; }
+      .content { padding: 20px; }
+      .triggered-title { color: #d32f2f; }
+      .resolved-title { color: #4caf50; }
+      ul { list-style-type: none; margin: 0; padding: 0; }
+      li { margin-bottom: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="content">
+        <h1 class="${
+          status === "triggered" ? "triggered-title" : "resolved-title"
+        }">Alert ${capitalizedStatus}</h1>
+        <h2>${alert.name}</h2>
+        <ul>
+          <li><strong>${capitalizedStatus} At:</strong> ${formatTimestamp(
+      alertTime
+    )}</li>
+          <li><strong>Threshold:</strong> ${alert.threshold}%</li>
+          <li><strong>Metric:</strong> ${alert.metric}</li>
+          <li><strong>Time Window:</strong> ${formatTimespan(
+            alert.time_window
+          )}</li>
+        </ul>
+        <p>${actionMessage}</p>
+      </div>
+    </div>
+  </body>
+  </html>`;
 
     return { subject, text, html };
   }
+
+  // private formatAlertNotification(
+  //   alertUpdate: TriggeredAlert | ResolvedAlert
+  // ): {
+  //   subject: string;
+  //   text: string;
+  //   html: string;
+  // } {
+  //   const alert = alertUpdate.alert;
+  //   let subject: string;
+  //   let text: string;
+  //   let html: string;
+
+  //   if (alertUpdate.status === "triggered") {
+  //     subject = `Alert Triggered: ${alert.name}`;
+  //     text = `Alert '${
+  //       alert.name
+  //     }' has been triggered. \n\nDetails:\n- Triggered At: '${
+  //       alertUpdate.alert_start_time
+  //         ? new Date(alertUpdate.alert_start_time).toLocaleString()
+  //         : ""
+  //     }'\n- Triggered Threshold: '${
+  //       alertUpdate.triggered_value
+  //     }'\n\nPlease take the necessary action.`;
+  //     html = `<html>
+  //     <head>
+  //       <style>
+  //         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+  //         h1 { color: #d32f2f; }
+  //         ul { padding-left: 20px; }
+  //         li { margin-bottom: 10px; }
+  //       </style>
+  //     </head>
+  //     <body>
+  //       <div style="max-width: 600px; margin: auto; padding: 20px;">
+  //         <h1 style="text-align: center;">Alert Triggered: '${alert.name}'</h1>
+  //         <p>An alert has been triggered.</p>
+  //         <p><strong>Details:</strong></p>
+  //         <ul>
+  //           <li>Triggered At: '${
+  //             alertUpdate.alert_start_time
+  //               ? new Date(alertUpdate.alert_start_time).toLocaleString()
+  //               : ""
+  //           }'</li>
+  //           <li>Triggered Threshold: '${alertUpdate.triggered_value}'</li>
+  //         </ul>
+  //         <p>Please take the necessary action.</p>
+  //       </div>
+  //     </body>
+  //     </html>`;
+  //   } else if (alertUpdate.status === "resolved") {
+  //     subject = `Alert Resolved: ${alert.name}`;
+  //     text = `Alert '${
+  //       alert.name
+  //     }' has been resolved. \n\nDetails:\n- Resolved At: '${
+  //       alertUpdate.alert_end_time
+  //         ? new Date(alertUpdate.alert_end_time).toLocaleString()
+  //         : ""
+  //     }'\n\nNo further action is required.`;
+  //     html = `<html>
+  //       <body>
+  //         <h1>Alert Resolved: '${alert.name}'</h1>
+  //         <p>An alert has been resolved.</p>
+  //         <p><strong>Details:</strong></p>
+  //         <ul>
+  //           <li>Resolved At: '${
+  //             alertUpdate.alert_end_time
+  //               ? new Date(alertUpdate.alert_end_time).toLocaleString()
+  //               : ""
+  //           }'</li>
+  //         </ul>
+  //         <p>No further action is required.</p>
+  //       </body>
+  //       </html>`;
+  //   } else {
+  //     throw new Error("Invalid alert status");
+  //   }
+
+  //   return { subject, text, html };
+  // }
 }
