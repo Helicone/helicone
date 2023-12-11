@@ -4,22 +4,28 @@ import AuthHeader from "../../components/shared/authHeader";
 import MetaData from "../../components/shared/metaData";
 import AlertsPage from "../../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../../lib//api/handlerWrappers";
-
+import { Database } from "../../../supabase/database.types";
 interface AlertProps {
   user: User;
-  userId: string;
+  // userId: string;
   orgId: string;
-  alerts: Array<[]>;
+  alerts: Array<Database["public"]["Tables"]["alert"]["Row"]>;
+  alertHistory: Array<Database["public"]["Tables"]["alert_history"]["Row"]>;
 }
 
 const Alert = (props: AlertProps) => {
-  const { user, orgId, alerts } = props;
+  const { user, orgId, alerts, alertHistory } = props;
 
   return (
     <MetaData title="Alerts">
       <AuthLayout user={user}>
         <AuthHeader title={"Alerts"} />
-        <AlertsPage user={user} orgId={orgId} alerts={alerts} />
+        <AlertsPage
+          user={user}
+          orgId={orgId}
+          alerts={alerts}
+          alertHistory={alertHistory}
+        />
       </AuthLayout>
     </MetaData>
   );
@@ -36,8 +42,13 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   const supabase = supabaseClient.getClient();
 
   // Get 'alert' table from supabase using orgId
-  let { data: alert, error } = await supabase
+  let { data: alert } = await supabase
     .from("alert")
+    .select("*")
+    .eq("org_id", orgId);
+
+  let { data: alertHistory } = await supabase
+    .from("alert_history")
     .select("*")
     .eq("org_id", orgId);
 
@@ -47,6 +58,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       userId,
       orgId,
       alerts: alert,
+      alertHistory: alertHistory,
     },
   };
 });
