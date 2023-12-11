@@ -1,26 +1,23 @@
+import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { Env, Provider } from "../..";
+import { Database, Json } from "../../../supabase/database.types";
+import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
+import { withTimeout } from "../../helpers";
+import { Result, err, ok } from "../../results";
+import { HeliconeHeaders } from "../HeliconeHeaders";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { RequestWrapper } from "../RequestWrapper";
+import { INTERNAL_ERRORS } from "../constants";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
+import { AsyncLogModel } from "../models/AsyncLog";
 import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
-import { logRequest } from "./logResponse";
-import { Env, Provider } from "../..";
-import { getTokenCount } from "./tokenCounter";
-import { Result, err, ok, mapPostgrestErr } from "../../results";
-import {
-  consolidateTextFields,
-  getUsage,
-} from "./parsers/responseParserHelpers";
-import { Database } from "../../../supabase/database.types";
-import { HeliconeHeaders } from "../HeliconeHeaders";
-import { RequestWrapper } from "../RequestWrapper";
-import { AsyncLogModel } from "../models/AsyncLog";
 import { InsertQueue } from "./insertQueue";
-import { parseOpenAIStream } from "./parsers/openAIStreamParser";
+import { logRequest } from "./logResponse";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
-import { HeliconeAuth, DBWrapper as DBWrapper } from "../../db/DBWrapper";
-import { withTimeout } from "../../helpers";
-import { INTERNAL_ERRORS } from "../constants";
+import { parseOpenAIStream } from "./parsers/openAIStreamParser";
+import { getTokenCount } from "./tokenCounter";
 
 export interface DBLoggableProps {
   response: {
@@ -100,10 +97,10 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   provider: Provider;
 }
 
-function getResponseBody(json: any): string {
+function getResponseBody(json: Record<string, Json>): string {
   // This will mock the response as if it came from OpenAI
   if (json.streamed_data) {
-    const streamedData: any[] = json.streamed_data;
+    const streamedData = json.streamed_data as Json[];
     return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
   }
   return JSON.stringify(json);
@@ -191,6 +188,7 @@ export class DBLoggable {
   async parseResponse(
     responseBody: string,
     status: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Result<any, string>> {
     let result = responseBody;
     const isStream = this.request.isStream;
@@ -240,6 +238,7 @@ export class DBLoggable {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tryJsonParse(text: string): any {
     try {
       return JSON.parse(text);
@@ -439,7 +438,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
-    rateLimitKV: KVNamespace
+    _rateLimitKV: KVNamespace
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {

@@ -80,7 +80,7 @@ export class ClickhouseClientWrapper {
       });
 
       return { data: commandResult.query_id, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("dbUpdateClickhouseError", error);
       return {
         data: null,

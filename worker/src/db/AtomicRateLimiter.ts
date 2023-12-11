@@ -1,3 +1,5 @@
+import { Request } from "@cloudflare/workers-types";
+
 /**
  * This uses the transactional storage API from Cloudflare to ensure
  * there are no race conditions when updating our rate limit counters.

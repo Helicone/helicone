@@ -1,10 +1,12 @@
 import { Result } from "../../results";
-import { callProviderWithRetry } from "../providerCalls/retry";
 import { CompletedChunk, ReadableInterceptor } from "../ReadableInterceptor";
-import { DBLoggable } from "../dbLogger/DBLoggable";
+import {
+  DBLoggable,
+  dbLoggableRequestFromProxyRequest,
+} from "../dbLogger/DBLoggable";
 import { callPropsFromProxyRequest, callProvider } from "../providerCalls/call";
+import { callProviderWithRetry } from "../providerCalls/retry";
 import { HeliconeProxyRequest } from "./mapper";
-import { dbLoggableRequestFromProxyRequest } from "../dbLogger/DBLoggable";
 
 export type ProxyResult = {
   loggable: DBLoggable;
@@ -46,6 +48,7 @@ export async function handleProxyRequest(
   if (
     proxyRequest.requestWrapper.heliconeHeaders.featureFlags.streamForceFormat
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let buffer: any = null;
     const transformer = new TransformStream({
       transform(chunk, controller) {

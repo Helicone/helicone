@@ -1,5 +1,4 @@
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
-
 export interface CallProps {
   headers: Headers;
   method: string;
