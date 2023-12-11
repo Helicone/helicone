@@ -86,16 +86,12 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
       !selectedMetric ||
       !emails ||
       !alertName ||
-      !alertMetric ||
       !alertThreshold ||
-      !alertEmails ||
       !alertTimeWindow ||
       selectedMetric === "" ||
       emails.length === 0 ||
       alertName.value === "" ||
-      alertMetric.value === "" ||
       alertThreshold.value === "" ||
-      alertEmails.value === "" ||
       alertTimeWindow.value === ""
     ) {
       setNotification("Please fill out all fields", "error");
