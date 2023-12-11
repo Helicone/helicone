@@ -3,11 +3,16 @@ import useNotification from "../../shared/notification/useNotification";
 import { User } from "@supabase/auth-helpers-react";
 import { FormEvent, useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import Cookies from "js-cookie";
+import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
+import { ThemedPill } from "../../shared/themed/themedPill";
+import ThemedDropdown from "../../shared/themed/themedDropdown";
+
 interface CreateNewAlertModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   user: User | null;
-  orgId: string | null;
+  orgId: string;
   onSuccess: () => void;
 }
 
@@ -15,10 +20,51 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   const { open, setOpen, user, orgId, onSuccess } = props;
   const [isLoading, setIsLoading] = useState(false);
   const { setNotification } = useNotification();
+  const [emails, setEmails] = useState<string[]>([]); // State to manage emails
+  const [emailInput, setEmailInput] = useState(""); // State to track the email input field
+  const [selectedMetric, setSelectedMetric] = useState<string>("");
+
+  const availableMetrics = [
+    { label: "Response Status", value: "response.status" },
+    // { label: "Response Time", value: "response.time" },
+  ];
+  // Function to add email to the state
+  const handleAddEmails = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === " " || event.key === "Enter") {
+      const email = emailInput.trim();
+      if (email) {
+        setEmails((oldEmails: string[]) => [...oldEmails, email]); // Add email to the state
+        setEmailInput(""); // Clear input field
+      }
+    }
+  };
+
+  const handleRemoveEmail = (emailToRemove: string) => {
+    setEmails((oldEmails) =>
+      oldEmails.filter((email) => email !== emailToRemove)
+    );
+  };
+
+  const handleEmailInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setEmailInput(event.target.value);
+  };
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
+
+    // Auth
+    const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
+    if (!authFromCookie) {
+      setNotification("Please login to create an alert", "error");
+      return;
+    }
+    const decodedCookie = decodeURIComponent(authFromCookie);
+    const parsedCookie = JSON.parse(decodedCookie);
+    const jwtToken = parsedCookie[0];
+
     const alertName = event.currentTarget.elements.namedItem(
       "alert-name"
     ) as HTMLInputElement;
@@ -37,11 +83,15 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
 
     // Check if all fields are filled out
     if (
+      !selectedMetric ||
+      !emails ||
       !alertName ||
       !alertMetric ||
       !alertThreshold ||
       !alertEmails ||
       !alertTimeWindow ||
+      selectedMetric === "" ||
+      emails.length === 0 ||
       alertName.value === "" ||
       alertMetric.value === "" ||
       alertThreshold.value === "" ||
@@ -49,6 +99,13 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
       alertTimeWindow.value === ""
     ) {
       setNotification("Please fill out all fields", "error");
+      return;
+    }
+
+    const thresholdValue = parseInt(alertThreshold.value);
+    if (isNaN(thresholdValue) || thresholdValue < 1 || thresholdValue > 100) {
+      setNotification("Threshold must be between 1 and 100", "error");
+      setIsLoading(false);
       return;
     }
 
@@ -66,17 +123,20 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
     //   "org_id": "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
     // }
 
+    // TODO: Needs to be dynamic
     const res = fetch(`http://localhost:8787/alerts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "helicone-jwt": jwtToken,
+        "helicone-org-id": orgId,
       },
       body: JSON.stringify({
         name: alertName.value,
-        metric: alertMetric.value,
+        metric: selectedMetric,
         threshold: alertThreshold.value,
         time_window: alertTimeWindow.value,
-        emails: [alertEmails.value],
+        emails: emails,
         org_id: orgId,
       }),
     })
@@ -97,7 +157,7 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       <form
-        action="#"
+        action="javascript:void(0)"
         method="POST"
         onSubmit={handleSubmitHandler}
         className="flex flex-col space-y-4 w-[400px]"
@@ -115,20 +175,17 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
             id="alert-name"
             className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
             required
-            placeholder="Alert Name / Error Rate 50%"
+            placeholder="Request Error Rate 50%"
           />
         </div>
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="alert-name" className="text-gray-500">
             Alert Metric
           </label>
-          <input
-            type="text"
-            name="alert-metric"
-            id="alert-metric"
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            required
-            placeholder="Alert Metric / response.status"
+          <ThemedDropdown
+            options={availableMetrics}
+            selectedValue={selectedMetric}
+            onSelect={(value) => setSelectedMetric(value)}
           />
         </div>{" "}
         <div className="w-full space-y-1.5 text-sm">
@@ -136,38 +193,53 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
             Alert Threshold
           </label>
           <input
-            type="text"
+            type="number"
+            inputMode="numeric"
             name="alert-threshold"
             id="alert-threshold"
             className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
             required
-            placeholder="Alert Threshold / 50"
+            placeholder="Percentage (Between 0-100)"
+            min={1}
+            max={100}
           />
         </div>{" "}
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="alert-name" className="text-gray-500">
             Alert Emails
           </label>
+          <div>
+            {emails.map((email) => (
+              <ThemedPill
+                key={email}
+                label={email}
+                onDelete={() => handleRemoveEmail(email)}
+              />
+            ))}
+          </div>
           <input
             type="text"
             name="alert-emails"
             id="alert-emails"
+            value={emailInput}
+            onChange={handleEmailInputChange}
+            onKeyUp={handleAddEmails}
             className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            required
-            placeholder="Alert Emails / info@helicone.ai"
+            placeholder="Add emails by presing space"
           />
         </div>{" "}
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="alert-name" className="text-gray-500">
-            Alert Time Window
+            Alert Time Window (ms)
           </label>
           <input
-            type="text"
+            type="number"
+            inputMode="numeric"
             name="alert-time-window"
             id="alert-time-window"
             className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
             required
-            placeholder="Alert Time Window / 300000"
+            placeholder="300000"
           />
         </div>{" "}
         <div className="flex justify-end gap-2">

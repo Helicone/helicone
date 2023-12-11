@@ -16,6 +16,8 @@ interface AlertsPageProps {
 const AlertsPage = (props: AlertsPageProps) => {
   const { user, orgId, alerts, alertHistory } = props;
 
+  console.log(alerts);
+
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
 
   return (

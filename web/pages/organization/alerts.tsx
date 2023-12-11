@@ -5,6 +5,7 @@ import MetaData from "../../components/shared/metaData";
 import AlertsPage from "../../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../../lib//api/handlerWrappers";
 import { Database } from "../../../supabase/database.types";
+import { supabaseServer } from "../../lib/supabaseServer";
 interface AlertProps {
   user: User;
   // userId: string;
@@ -39,7 +40,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     supabaseClient,
   } = options;
 
-  const supabase = supabaseClient.getClient();
+  const supabase = supabaseServer;
 
   // Get 'alert' table from supabase using orgId
   let { data: alert } = await supabase
