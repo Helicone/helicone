@@ -54,7 +54,10 @@ function formatPrompt(prompt: Prompt): GenericResult<string> {
   };
 }
 
-export function extractPrompt(json: any): GenericResult<FormattedPrompt> {
+export function extractPrompt(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  json: Record<string, any>
+): GenericResult<FormattedPrompt> {
   try {
     if ("messages" in json) {
       return extractPromptMessages(json);
@@ -88,6 +91,7 @@ export function extractPrompt(json: any): GenericResult<FormattedPrompt> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractPromptMessages(json: any): GenericResult<FormattedPrompt> {
   const regexPrompt = json["messages"];
   const regexMessages = regexPrompt;
