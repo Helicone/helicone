@@ -1,6 +1,7 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env } from "..";
 import { Database } from "../../supabase/database.types";
+import { fetch } from "@cloudflare/workers-types";
 
 const MAX_REQUESTS_PER_SECOND = 10;
 const MAX_USERS_PER_PAGE = 1000;

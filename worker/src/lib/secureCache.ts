@@ -1,4 +1,5 @@
 import { Env, hash } from "..";
+import { Result, ok } from "../results";
 
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
@@ -67,19 +68,50 @@ export async function storeInCache(
   env: SecureCacheEnv
 ): Promise<void> {
   const encrypted = await encrypt(value, env);
-  await env.SECURE_CACHE.put(await hash(key), JSON.stringify(encrypted), {
-    expirationTtl: 60 * 60 * 10, // 10 minutes
-  });
+  await env.SECURE_CACHE.put(await hash(key), JSON.stringify(encrypted), {});
 }
 
 export async function getFromCache(
   key: string,
   env: SecureCacheEnv
 ): Promise<string | null> {
-  const encrypted = await env.SECURE_CACHE.get(await hash(key));
+  const hashedKey = await hash(key);
+  const encrypted = await env.SECURE_CACHE.get(hashedKey, {
+    cacheTtl: 3600,
+  });
   if (!encrypted) {
     return null;
   }
 
   return decrypt(JSON.parse(encrypted), env);
+}
+
+export async function getAndStoreInCache<T, K>(
+  key: string,
+  env: SecureCacheEnv,
+  fn: () => Promise<Result<T, K>>
+): Promise<Result<T, K>> {
+  const cached = await getFromCache(key, env);
+  if (cached !== null) {
+    const cachedResult = JSON.parse(cached);
+    if (cachedResult._helicone_cached_string) {
+      return ok(cachedResult._helicone_cached_string);
+    }
+    return ok(JSON.parse(cached) as T);
+  }
+  const value = await fn();
+  if (value.error !== null) {
+    return value;
+  }
+  if (typeof value.data === "string") {
+    await storeInCache(
+      key,
+      JSON.stringify({ _helicone_cached_string: value.data }),
+      env
+    );
+    return value;
+  } else {
+    await storeInCache(key, JSON.stringify(value.data), env);
+  }
+  return value;
 }

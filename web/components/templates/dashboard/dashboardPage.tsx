@@ -16,28 +16,19 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import { useDashboardPage } from "./useDashboardPage";
-import { useRouter } from "next/router";
 import { useGetAuthorized } from "../../../services/hooks/dashboard";
 import { User } from "@supabase/auth-helpers-nextjs";
 import UpgradeProModal from "../../shared/upgradeProModal";
-import MainGraph from "./graphs/mainGraph";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import StyledAreaChart from "./styledAreaChart";
-import { AreaChart, BarChart, BarList } from "@tremor/react";
-import { getUSDate, getUSDateShort } from "../../shared/utils/utils";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import * as boxbee from "../../../public/lottie/boxbee.json";
 import { formatNumber } from "../users/initialColumns";
 import { useQuery } from "@tanstack/react-query";
 import { Result } from "../../../lib/result";
 import { ModelMetric } from "../../../lib/api/models/models";
-import {
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -50,7 +41,11 @@ export type TimeFilter = {
   end: Date;
 };
 
-function formatNumberString(
+interface StatusCounts {
+  [key: string]: number;
+}
+
+export function formatNumberString(
   numString: string,
   minimumFractionDigits?: boolean
 ) {
@@ -198,21 +193,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
 
     setAdvancedFilters(filters);
-  };
-
-  const combineRequestsAndErrors = () => {
-    let combinedArray = overTimeData.requests.data?.data?.map(
-      (request, index) => ({
-        date: getTimeMap(timeIncrement)(request.time),
-        requests: request.count,
-        errors: overTimeData.errors.data?.data
-          ? overTimeData.errors.data?.data[index].count > 0
-            ? overTimeData.errors.data?.data[index].count
-            : 0
-          : 0,
-      })
-    );
-    return combinedArray || [];
   };
 
   const metricsData: MetricsPanelProps["metric"][] = [
@@ -474,6 +454,99 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const modelColors = ["purple", "blue", "green", "yellow", "orange"];
 
+  const modelMapper = (model: ModelMetric, index: number) => {
+    const currentAdvancedFilters = encodeURIComponent(
+      JSON.stringify(
+        [
+          {
+            filterMapIdx: 0,
+            operatorIdx: 0,
+            value: model.model,
+          },
+        ]
+          .map(encodeFilter)
+          .join("|")
+      )
+    );
+
+    const url = new URL("/dashboard", window.location.origin);
+
+    const params = new URLSearchParams(window.location.search);
+
+    params.set("filters", `"${currentAdvancedFilters}"`);
+
+    url.search = params.toString();
+
+    const urlString = url.toString();
+
+    return {
+      name: model.model || "n/a",
+      value: model.total_requests,
+      color: modelColors[index % modelColors.length],
+      href: urlString,
+      target: "_self",
+    };
+  };
+
+  const statusSet = overTimeData.requestsWithStatus.data?.data?.reduce<
+    Set<number>
+  >((acc, { status }) => {
+    acc.add(status);
+    return acc;
+  }, new Set<number>());
+
+  const uniqueStatusCodes = Array.from(statusSet || []).sort();
+
+  const statusStrings = uniqueStatusCodes.map((status) => {
+    if (status === -3) {
+      return "cancelled";
+    } else {
+      return status.toString();
+    }
+  });
+
+  const flattenedObject = overTimeData.requestsWithStatus.data?.data?.reduce(
+    (acc, { count, status, time }) => {
+      const formattedTime = getTimeMap(timeIncrement)(new Date(time));
+      if (!acc[formattedTime]) {
+        acc[formattedTime] = statusStrings.reduce(
+          (statusAcc: StatusCounts, status) => {
+            statusAcc[status] = 0;
+            return statusAcc;
+          },
+          {}
+        );
+      }
+
+      const statusStr = String(status);
+      acc[formattedTime][statusStr] =
+        (acc[formattedTime][statusStr] || 0) + count;
+
+      return acc;
+    },
+    {} as { [key: string]: StatusCounts }
+  );
+
+  const flattenedArray = Object.entries(flattenedObject || {}).map(
+    ([time, status]) => {
+      // create copy
+      let modifiedStatus = { ...status };
+
+      // if the status object has a `-3` key, rename the key to `cancelled`
+      if (modifiedStatus["-3"] !== undefined) {
+        modifiedStatus["cancelled"] = modifiedStatus["-3"];
+        delete modifiedStatus["-3"];
+      }
+
+      return {
+        date: time,
+        ...modifiedStatus,
+      };
+    }
+  );
+
+  const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
+
   return (
     <>
       <AuthHeader
@@ -568,34 +641,100 @@ const DashboardPage = (props: DashboardPageProps) => {
               }}
               autoSize={true}
               isBounded={true}
+              isDraggable={false}
               breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
               cols={gridCols}
               rowHeight={72}
               onLayoutChange={(currentLayout, allLayouts) => {}}
             >
               <div key="requests">
-                <StyledAreaChart
-                  title={"Requests"}
-                  value={
-                    metrics.totalRequests?.data?.data
-                      ? `${formatNumberString(
-                          metrics.totalRequests?.data?.data.toFixed(2)
-                        )}`
-                      : "0"
-                  }
-                  isDataOverTimeLoading={overTimeData.requests.isLoading}
-                  withAnimation={true}
-                >
-                  <AreaChart
-                    className="h-[14rem]"
-                    data={combineRequestsAndErrors()}
-                    index="date"
-                    categories={["requests", "errors"]}
-                    colors={["green", "red"]}
-                    showYAxis={false}
-                    curveType="monotone"
-                  />
-                </StyledAreaChart>
+                <Card>
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="flex flex-col space-y-0.5">
+                      <p className="text-gray-500 text-sm">Requests</p>
+                      <p className="text-black dark:text-white text-xl font-semibold">
+                        {metrics.totalRequests?.data?.data
+                          ? `${formatNumberString(
+                              metrics.totalRequests?.data?.data.toFixed(2)
+                            )}`
+                          : "0"}
+                      </p>
+                    </div>
+                    {!overTimeData.requests.isLoading && (
+                      <MultiSelect
+                        placeholder="Select status codes"
+                        value={currentStatus}
+                        onValueChange={(values: string[]) => {
+                          setCurrentStatus(
+                            values.sort((a, b) => {
+                              if (a === "200") {
+                                return -1;
+                              } else if (b === "200") {
+                                return 1;
+                              } else {
+                                return Number(a) - Number(b);
+                              }
+                            })
+                          );
+                        }}
+                        className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
+                      >
+                        {statusStrings
+                          .sort((a, b) => {
+                            if (a === "200") {
+                              return -1;
+                            } else if (b === "200") {
+                              return 1;
+                            } else {
+                              return Number(a) - Number(b);
+                            }
+                          })
+                          .filter((status) => status !== "0")
+                          .map((status, idx) => (
+                            <MultiSelectItem
+                              value={status}
+                              key={idx}
+                              className="font-medium text-black"
+                            >
+                              {status}
+                            </MultiSelectItem>
+                          ))}
+                      </MultiSelect>
+                    )}
+                  </div>
+
+                  <div
+                    className={clsx("p-2", "w-full")}
+                    style={{
+                      height: "224px",
+                    }}
+                  >
+                    {overTimeData.requests.isLoading ? (
+                      <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
+                        <LoadingAnimation height={175} width={175} />
+                      </div>
+                    ) : (
+                      <AreaChart
+                        className="h-[14rem]"
+                        data={flattenedArray}
+                        index="date"
+                        categories={currentStatus}
+                        colors={[
+                          "green",
+                          "red",
+                          "blue",
+                          "yellow",
+                          "orange",
+                          "indigo",
+                          "orange",
+                          "pink",
+                        ]}
+                        showYAxis={false}
+                        curveType="monotone"
+                      />
+                    )}
+                  </div>
+                </Card>
               </div>
               {metricsData.map((m, i) => (
                 <div key={m.id}>
@@ -617,11 +756,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <BarList
                     data={
                       models?.data
-                        ?.map((model, index) => ({
-                          name: model.model || "n/a",
-                          value: model.total_requests,
-                          color: modelColors[index % modelColors.length],
-                        }))
+                        ?.map((model, index) => modelMapper(model, index))
                         .sort(
                           (a, b) =>
                             b.value - a.value - (b.name === "n/a" ? 1 : 0)
