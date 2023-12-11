@@ -145,7 +145,7 @@ const PropertiesPage = (props: {}) => {
           {selectedProperties.length < 1 ? (
             <div className="h-96 p-8 flex flex-col space-y-4 w-full border border-dashed border-gray-300 rounded-xl justify-center items-center text-center">
               <TagIcon className="h-12 w-12 text-gray-700 dark:text-gray-300" />
-              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
                 No Properties Selected
               </p>
               <p className="text-gray-500 ">
