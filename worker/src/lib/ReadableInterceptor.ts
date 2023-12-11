@@ -1,4 +1,3 @@
-import { ReadableStream } from "@cloudflare/workers-types";
 import { EventEmitter } from "events";
 
 export interface CompletedChunk {
