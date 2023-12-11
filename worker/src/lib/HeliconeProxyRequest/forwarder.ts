@@ -14,6 +14,7 @@ import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { createClient } from "@supabase/supabase-js";
 import { InsertQueue } from "../dbLogger/insertQueue";
 import { DBWrapper } from "../../db/DBWrapper";
+import { Valhalla } from "../db/valhalla";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -125,6 +126,7 @@ export async function proxyForwarder(
         dbWrapper: new DBWrapper(env, loggable.auth()),
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+          new Valhalla(env.VALHALLA_URL, loggable.auth()),
           new ClickhouseClientWrapper(env),
           env.FALLBACK_QUEUE,
           env.REQUEST_AND_RESPONSE_QUEUE_KV

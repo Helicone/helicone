@@ -41,6 +41,7 @@ export interface Env {
   OPENAI_ORG_ID: string;
   ROSETTA_HELICONE_API_KEY: string;
   CUSTOMER_GATEWAY_URL?: string;
+  VALHALLA_URL: string;
 }
 
 export async function hash(key: string): Promise<string> {

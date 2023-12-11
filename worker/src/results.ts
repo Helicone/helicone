@@ -22,6 +22,26 @@ export function mapPostgrestErr<T>(
   return { data: null, error: result.error.message };
 }
 
+export function errMap<T, K, L>(
+  result: Result<T, K>,
+  map: (error: K) => L
+): Result<T, L> {
+  if (result.error === null) {
+    return ok(result.data as T);
+  }
+  return err(map(result.error));
+}
+
+export function map<T, K, L>(
+  result: Result<T, K>,
+  map: (data: T) => L
+): Result<L, K> {
+  if (result.error === null) {
+    return ok(map(result.data as T));
+  }
+  return err(result.error);
+}
+
 export function isErr<T, K>(result: Result<T, K>) {
   return result.error !== null;
 }

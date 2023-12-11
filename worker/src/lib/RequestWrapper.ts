@@ -114,14 +114,15 @@ export class RequestWrapper {
       default:
         return this.heliconeProxyKeyId
           ? {
-              _type: "bearer",
-              _bearerType: "heliconeProxyKey",
-              token: this.heliconeProxyKeyId,
+              _type: "bearerProxy",
+              proxyKeyId: this.heliconeProxyKeyId,
+              tokenHash: await hash(
+                this.heliconeHeaders.heliconeAuthV2?.token ?? ""
+              ),
             }
           : {
               _type: "bearer",
-              _bearerType: "heliconeApiKey",
-              token: (await this.getProviderAuthHeader()) ?? "",
+              tokenHash: (await this.getProviderAuthHeader()) ?? "",
             };
     }
   }

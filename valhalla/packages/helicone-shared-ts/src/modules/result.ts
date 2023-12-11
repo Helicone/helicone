@@ -11,6 +11,11 @@ interface ErrorResult<T> {
 
 export type GenericResult<T> = Result<T, string>;
 export type PromiseGenericResult<T> = Promise<GenericResult<T>>;
+export type UnwrapPromiseGenericResult<T> = T extends PromiseGenericResult<
+  infer U
+>
+  ? U
+  : never;
 
 export function isErr<T, K>(result: Result<T, K>) {
   return result.error !== null;

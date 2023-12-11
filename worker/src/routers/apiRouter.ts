@@ -14,6 +14,7 @@ import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
+import { Valhalla } from "../lib/db/valhalla";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -69,6 +70,7 @@ class APIClient {
     this.db = new DBWrapper(env, auth);
     this.queue = new InsertQueue(
       createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      new Valhalla(env.VALHALLA_URL, auth),
       new ClickhouseClientWrapper(env),
       env.FALLBACK_QUEUE,
       env.REQUEST_AND_RESPONSE_QUEUE_KV
@@ -117,6 +119,7 @@ async function logAsync(
       dbWrapper: new DBWrapper(env, loggable.auth()),
       queue: new InsertQueue(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new Valhalla(env.VALHALLA_URL, loggable.auth()),
         new ClickhouseClientWrapper(env),
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV

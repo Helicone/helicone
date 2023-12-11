@@ -4,6 +4,7 @@ import { Result } from "../../results";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ResponseCopyV3 } from "../db/clickhouse";
 import { formatTimeString } from "./clickhouseLog";
+import { Valhalla } from "../db/valhalla";
 
 export interface RequestPayload {
   request: Database["public"]["Tables"]["request"]["Insert"];
@@ -82,6 +83,7 @@ export interface ResponsePayload {
 export class InsertQueue {
   constructor(
     private database: SupabaseClient<Database>,
+    private valhalla: Valhalla,
     private clickhouseWrapper: ClickhouseClientWrapper,
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
@@ -175,6 +177,14 @@ export class InsertQueue {
       properties: propertiesData,
       responseId,
     };
+    console.log("adding request");
+    const val = await this.valhalla.post("/v1/request", {
+      provider: requestData.provider ?? "unknown",
+      url_href: requestData.path,
+      user_id: requestData.user_id,
+      body: requestData.body as any,
+    });
+    console.log("valhalla post", val);
     const res = await insertIntoRequest(this.database, payload);
     if (res.error) {
       const key = crypto.randomUUID();

@@ -4,7 +4,7 @@ import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
-import { SupabaseConnector } from "../db/supabase";
+import { AuthParams, SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 
 export interface IRouterWrapper<T> {
@@ -18,4 +18,5 @@ export interface IRouterWrapperDB<T> extends IRouterWrapper<T> {
 
 export interface IRouterWrapperAuth<T> extends IRouterWrapperDB<T> {
   supabaseClient: SupabaseConnector;
+  authParams: AuthParams;
 }

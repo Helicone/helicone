@@ -2,7 +2,7 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../supabase/database.types";
 import { Env, hash } from "..";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
-import { Result, err, ok } from "../results";
+import { Result, err, errMap, ok } from "../results";
 import { SecureCacheEnv, getFromCache, storeInCache } from "../lib/secureCache";
 import { RateLimiter } from "./RateLimiter";
 
@@ -36,30 +36,26 @@ async function getHeliconeApiKeyRow(
 
 async function getHeliconeProxyKeyRow(
   dbClient: SupabaseClient<Database>,
+  tokenHash: string,
   proxyKeyId: string
 ): Promise<Result<AuthParams, string>> {
   const result = await dbClient
     .from("helicone_proxy_keys")
     .select("org_id")
     .eq("id", proxyKeyId)
+    .eq("token_hash", tokenHash)
     .eq("soft_delete", false)
     .single();
 
   if (result.error || !result.data) {
-    return {
-      data: null,
-      error: result.error.message,
-    };
+    return err(result.error.message);
   }
 
-  return {
-    data: {
-      organizationId: result.data.org_id,
-      userId: undefined,
-      heliconeApiKeyId: undefined,
-    },
-    error: null,
-  };
+  return ok({
+    organizationId: result.data.org_id,
+    userId: undefined,
+    heliconeApiKeyId: undefined,
+  });
 }
 
 async function getHeliconeJwtAuthParams(
@@ -130,11 +126,15 @@ export type JwtAuth = {
 
 export type BearerAuth = {
   _type: "bearer";
-  _bearerType: "heliconeProxyKey" | "heliconeApiKey";
-  token: string;
+  tokenHash: string;
+};
+export type BearerProxyKey = {
+  _type: "bearerProxy";
+  tokenHash: string;
+  proxyKeyId: string;
 };
 
-export type HeliconeAuth = JwtAuth | BearerAuth;
+export type HeliconeAuth = JwtAuth | BearerAuth | BearerProxyKey;
 
 export class DBWrapper {
   private supabaseClient: SupabaseClient<Database>;
@@ -203,12 +203,18 @@ export class DBWrapper {
         break;
 
       case "bearer":
-        authParams =
-          this.auth._bearerType === "heliconeProxyKey"
-            ? await getHeliconeProxyKeyRow(this.supabaseClient, this.auth.token)
-            : await getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
+        authParams = await getHeliconeApiKeyRow(
+          this.supabaseClient,
+          this.auth.tokenHash
+        );
         break;
-
+      case "bearerProxy":
+        authParams = await getHeliconeProxyKeyRow(
+          this.supabaseClient,
+          this.auth.tokenHash,
+          this.auth.proxyKeyId
+        );
+        break;
       default:
         return { data: null, error: "Invalid authentication." };
     }

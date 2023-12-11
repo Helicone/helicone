@@ -36,8 +36,7 @@ app.post(
     paths["/v1/request"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, db }) => {
     // Handle your logic here
-    const { request: heliconeRequest, response: heliconeResponse } =
-      await request.getBody();
+    const heliconeRequest = await request.getBody();
     const heliconeRequestID = heliconeRequest.request_id ?? uuid();
     const insertRequestResult = await db.insertRequest({
       body: heliconeRequest.body,
@@ -52,11 +51,31 @@ app.post(
       userId: heliconeRequest.user_id ?? null,
     });
     if (insertRequestResult.error) {
+      console.log("insertRequestResult.error", insertRequestResult.error);
       res.status(500).json({
         error: insertRequestResult.error,
+        trace: "insertRequestResult.error",
       });
       return;
     }
+    console.log("insertRequestResult", insertRequestResult);
+
+    res.json({
+      message: "Request received! :)",
+      orgId: supabaseClient.organizationId,
+      requestId: heliconeRequestID,
+    });
+  })
+);
+
+app.post(
+  "/v1/response",
+  withAuth<
+    paths["/v1/response"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db }) => {
+    // Handle your logic here
+    const heliconeResponse = await request.getBody();
+
     const responseId = heliconeResponse.response_id ?? uuid();
 
     const insertResponseResult = await db.insertResponse({
@@ -68,20 +87,15 @@ app.post(
       id: responseId,
       model: heliconeResponse.model ?? null,
       promptTokens: heliconeResponse.prompt_tokens ?? null,
-      request: heliconeRequestID,
+      request: heliconeResponse.heliconeRequestId,
     });
     if (insertResponseResult.error) {
       res.status(500).json({
         error: insertResponseResult.error,
+        trace: "insertResponseResult.error",
       });
       return;
     }
-    res.json({
-      message: "Request received! :)",
-      orgId: supabaseClient.organizationId,
-      responseId: responseId,
-      requestId: heliconeRequestID,
-    });
   })
 );
 
@@ -94,6 +108,22 @@ app.get(
       return;
     }
     res.json({ status: "healthy :)", dataBase: now.data?.rows });
+  })
+);
+
+app.get(
+  "/healthcheck-auth",
+  withAuth(async ({ db, request, res, supabaseClient }) => {
+    const now = await db.now();
+    if (now.error) {
+      res.json({ status: "unhealthy :(", error: now.error });
+      return;
+    }
+    res.json({
+      status: "healthy :)",
+      dataBase: now.data?.rows,
+      orgId: supabaseClient.organizationId,
+    });
   })
 );
 

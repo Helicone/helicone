@@ -3,6 +3,7 @@ import { InMemoryCache } from "../memoryCache/staticMemCache";
 import { PromiseGenericResult, err, ok } from "../modules/result";
 import { Database } from "./database.types";
 import { hashAuth } from "./hash";
+import { HeliconeAuth } from "../requestWrapper";
 
 // SINGLETON
 class SupabaseAuthCache extends InMemoryCache {
@@ -24,9 +25,10 @@ class SupabaseAuthCache extends InMemoryCache {
   }
 }
 
-type AuthResult = PromiseGenericResult<{
+export interface AuthParams {
   organizationId: string;
-}>;
+}
+type AuthResult = PromiseGenericResult<AuthParams>;
 
 export class SupabaseConnector {
   client: SupabaseClient<Database>;
@@ -97,7 +99,7 @@ export class SupabaseConnector {
       .select("*")
       .eq("api_key_hash", await hashAuth(bearer.replace("Bearer ", "")));
     if (apiKey.error) {
-      return err(apiKey.error.message);
+      return err(JSON.stringify(apiKey.error));
     }
     if (apiKey.data.length === 0) {
       return err("No API key found");
@@ -108,23 +110,23 @@ export class SupabaseConnector {
   }
 
   async authenticate(
-    authorizationString: string,
+    authorization: HeliconeAuth,
     organizationId?: string
-  ): PromiseGenericResult<string> {
-    const cachedResult = this.authCache.get<string>(
-      await hashAuth(authorizationString + organizationId)
+  ): AuthResult {
+    const cachedResult = this.authCache.get<AuthParams>(
+      await hashAuth(JSON.stringify(authorization) + organizationId)
     );
     if (cachedResult) {
       console.log("Using cached result");
-      this.organizationId = cachedResult;
+      this.organizationId = (await cachedResult).organizationId;
       return ok(cachedResult);
     }
 
-    const isBearer = "Bearer " === authorizationString.substring(0, 7);
+    const result =
+      authorization._type === "bearer"
+        ? await this.authenticateBearer(authorization.token)
+        : await this.authenticateJWT(authorization.token, authorization.orgId);
 
-    const result = isBearer
-      ? await this.authenticateBearer(authorizationString)
-      : await this.authenticateJWT(authorizationString, organizationId);
     if (result.error) {
       return err(result.error);
     }
@@ -135,9 +137,11 @@ export class SupabaseConnector {
 
     this.organizationId = orgId;
     this.authCache.set(
-      await hashAuth(authorizationString + organizationId),
-      orgId
+      await hashAuth(JSON.stringify(authorization) + organizationId),
+      { organizationId: orgId }
     );
-    return ok(orgId);
+    return ok({
+      organizationId: orgId,
+    });
   }
 }

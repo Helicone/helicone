@@ -421,14 +421,13 @@ export class DBLoggable {
   auth(): HeliconeAuth {
     return this.request.heliconeProxyKeyId
       ? {
-          token: this.request.heliconeProxyKeyId,
-          _type: "bearer",
-          _bearerType: "heliconeProxyKey",
+          _type: "bearerProxy",
+          proxyKeyId: this.request.heliconeProxyKeyId,
+          tokenHash: this.request.heliconeApiKeyAuthHash ?? "",
         }
       : {
-          token: this.request.heliconeApiKeyAuthHash ?? "",
           _type: "bearer",
-          _bearerType: "heliconeApiKey",
+          tokenHash: this.request.heliconeApiKeyAuthHash ?? "",
         };
   }
 
@@ -443,7 +442,9 @@ export class DBLoggable {
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
-      return { data: null, error: error ?? "Helicone organization not found" };
+      return err(
+        `Auth fetch error: ${error}` ?? "Helicone organization not found"
+      );
     }
 
     const rateLimiter = await db.dbWrapper.getRateLimiter();

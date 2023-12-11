@@ -148,6 +148,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
+    const heliconeAuthOnly = this.headers.get("authorization");
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
     if (heliconeAuth) {
       return {
@@ -155,11 +156,18 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         token: heliconeAuth.replace("Bearer ", ""),
       };
     }
+
     if (heliconeAuthJWT) {
       return {
         _type: "jwt",
         token: heliconeAuthJWT,
         orgId: this.headers.get("helicone-org-id") ?? undefined,
+      };
+    }
+    if (heliconeAuthOnly) {
+      return {
+        _type: "bearer",
+        token: heliconeAuthOnly.replace("Bearer ", ""),
       };
     }
     return null;

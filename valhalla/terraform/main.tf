@@ -165,6 +165,40 @@ module "vpc" {
   tags = local.tags
 }
 
+# Create an EIP for each NAT Gateway
+resource "aws_eip" "nat" {
+  count = length(module.vpc.private_subnets)
+
+  domain   = "vpc"
+
+  tags = {
+    Name = "${local.name}-nat-${count.index}-${local.azs[count.index]}"
+  }
+}
+
+# Create a NAT Gateway for each private subnet
+resource "aws_nat_gateway" "private_nat" {
+  for_each = { for idx, subnet_id in module.vpc.public_subnets : idx => subnet_id }
+
+  allocation_id = aws_eip.nat[each.key].id
+  subnet_id     = each.value
+  connectivity_type = "public"
+
+  tags = {
+    Name = "${local.name}-nat-gateway-${each.key}-${local.azs[each.key]}"
+  }
+}
+
+# Assuming you have route tables for each private subnet
+# Update routes for each private route table to use the respective NAT Gateway
+resource "aws_route" "private_nat_route" {
+  for_each = { for idx, rt_id in module.vpc.private_route_table_ids : idx => rt_id }
+
+  route_table_id         = each.value
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.private_nat[each.key].id
+}
+
 module "kms" {
   source  = "terraform-aws-modules/kms/aws"
   version = "~> 2.0"
@@ -374,8 +408,8 @@ resource "aws_iam_role_policy_attachment" "apprunner_instance_secrets_access_att
 
 resource "aws_apprunner_vpc_connector" "connector" {
   vpc_connector_name = "connector-${local.name}"
-  subnets            = [module.vpc.database_subnets[0]]
-  security_groups    = [module.aurora.security_group_id]
+  subnets            = [module.vpc.private_subnets[1]]
+  security_groups    = [aws_security_group.bastion_sg.id]
 }
 
 resource "aws_apprunner_service" "app_service" {
