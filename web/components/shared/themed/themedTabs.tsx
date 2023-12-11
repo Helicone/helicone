@@ -47,7 +47,7 @@ export default function ThemedTabs(props: ThemedTabsProps) {
                   <option.icon
                     className={clsx(
                       selected
-                        ? "text-sky-500 dark:text-orange-500"
+                        ? "text-blue-500 dark:text-blue-500"
                         : "text-gray-500",
                       "w-5 h-5 inline-block"
                     )}

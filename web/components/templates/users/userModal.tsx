@@ -227,7 +227,7 @@ const UserModal = (props: UserModalProps) => {
                   categories={["requests"]}
                   index={"date"}
                   className="h-32 -ml-4 pt-4"
-                  colors={["orange"]}
+                  colors={["blue"]}
                   showLegend={false}
                 />
               </StyledAreaChart>
@@ -245,7 +245,7 @@ const UserModal = (props: UserModalProps) => {
                   categories={["cost"]}
                   index={"date"}
                   className="h-32 -ml-4 pt-4"
-                  colors={["orange"]}
+                  colors={["blue"]}
                   showLegend={false}
                   valueFormatter={valueFormatter}
                 />
