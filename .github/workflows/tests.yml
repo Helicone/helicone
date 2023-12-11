@@ -50,6 +50,16 @@ jobs:
           npm install
           npm test
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint worker
+        run: |
+          cd worker
+          npm install
+          npm run lint
+
   tests:
     name: Python E2E tests
     runs-on: ubuntu-latest

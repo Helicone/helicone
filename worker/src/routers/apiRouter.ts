@@ -8,7 +8,7 @@ import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
 import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
-import { Database } from "../../supabase/database.types";
+import { Database, Json } from "../../supabase/database.types";
 import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import {
   HeliconeNode as HeliconeNode,
@@ -23,7 +23,7 @@ class InternalResponse {
     return new Response(JSON.stringify({ error: message }), { status });
   }
 
-  successJSON(data: any, enableCors: boolean = false): Response {
+  successJSON(data: unknown, enableCors = false): Response {
     if (enableCors) {
       return new Response(JSON.stringify(data), {
         status: 200,
@@ -144,7 +144,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -186,7 +186,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       { params: { id } },
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -230,7 +230,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -275,7 +275,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       { params: { id } },
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -396,7 +396,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       }
 
       const properties = {
-        ...((data?.properties as Record<string, any>) || {}),
+        ...((data?.properties as Record<string, Json>) || {}),
         [property.key]: property.value,
       };
 
@@ -415,9 +415,9 @@ export const getAPIRouter = (router: BaseRouter) => {
     "/v1/request/:id/property",
     async (
       _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
     ) => {
       return new Response(null, {
         headers: {
@@ -435,9 +435,9 @@ export const getAPIRouter = (router: BaseRouter) => {
     "*",
     async (
       _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
     ) => {
       return new Response("invalid path", { status: 400 });
     }

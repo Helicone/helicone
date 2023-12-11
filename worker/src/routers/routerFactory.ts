@@ -27,7 +27,7 @@ const WORKER_MAP: {
         _,
         requestWrapper: RequestWrapper,
         env: Env,
-        ctx: ExecutionContext
+        _ctx: ExecutionContext
       ) => {
         console.log("CUSTOMER_GATEWAY", requestWrapper?.heliconeProxyKeyId);
         if (!env.CUSTOMER_GATEWAY_URL) {
@@ -56,7 +56,7 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       return await handleFeedback(requestWrapper, env);
     }
@@ -66,9 +66,9 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
     "/v1/feedback",
     async (
       _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
     ) => {
       return new Response(null, {
         headers: {
@@ -90,7 +90,7 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       return await handleLoggingEndpoint(requestWrapper, env);
     }

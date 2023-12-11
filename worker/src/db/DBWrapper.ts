@@ -1,9 +1,9 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Database, Json } from "../../supabase/database.types";
 import { Env, hash } from "..";
+import { Database } from "../../supabase/database.types";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
-import { Result, err, ok } from "../results";
 import { SecureCacheEnv, getFromCache, storeInCache } from "../lib/secureCache";
+import { Result, err, ok } from "../results";
 import { RateLimiter } from "./RateLimiter";
 
 async function getHeliconeApiKeyRow(

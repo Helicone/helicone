@@ -3,14 +3,15 @@
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
 
+import { Headers, ReadableStream, Request } from "@cloudflare/workers-types";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
+import { Database } from "../../supabase/database.types";
+import { HeliconeAuth } from "../db/DBWrapper";
 import { Result } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
-import { Database } from "../../supabase/database.types";
 import { checkLimits } from "./limits/check";
 import { getFromCache, storeInCache } from "./secureCache";
-import { HeliconeAuth } from "../db/DBWrapper";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -130,6 +131,7 @@ export class RequestWrapper {
     this.bodyKeyOverride = bodyKeyOverride;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private overrideBody(body: any, override: object): object {
     for (const [key, value] of Object.entries(override)) {
       if (key in body && typeof value !== "object") {
