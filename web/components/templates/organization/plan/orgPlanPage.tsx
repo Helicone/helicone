@@ -107,7 +107,7 @@ const OrgPlanPage = (props: OrgPlanPageProps) => {
               ></div>
             </div>
             <div className="flex-1 w-full whitespace-nowrap">
-              <div className="flex flex-row gap-1.5 items-center text-black dark:text-gray-100">
+              <div className="flex flex-row gap-1.5 items-center text-gray-900 dark:text-gray-100">
                 <span>{`${Number(count?.data).toLocaleString()}`}</span>
                 <span className="text-gray-500 text-sm">/</span>
                 <span className="text-sm text-gray-500">{`${Number(

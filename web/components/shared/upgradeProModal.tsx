@@ -96,13 +96,15 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                 className={clsx(`text-${currentColor?.name}-500`, "h-6 w-6")}
               />
             )}
-            <h1 className="text-xl font-semibold dark:text-gray-100">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               {orgContext?.currentOrg.name}
             </h1>
           </div>
-          <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 dark:text-grey-200 dark:border-gray-700 w-full gap-4">
+          <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 dark:text-gray-200 dark:border-gray-700 w-full gap-4">
             <div>
-              <p className="dark:text-gray-100">Your Free Plan Limit</p>
+              <p className="text-gray-900 dark:text-gray-100">
+                Your Free Plan Limit
+              </p>
             </div>
             <div className="flex flex-row gap-2 w-full h-4 items-center">
               <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
@@ -114,7 +116,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                 ></div>
               </div>
               <div className="flex-1 w-full whitespace-nowrap">
-                <div className="flex flex-row gap-1.5 items-center text-black dark:text-gray-100">
+                <div className="flex flex-row gap-1.5 items-center text-black text-gray-900 dark:text-gray-100">
                   <span>{`${Number(count?.data).toLocaleString()}`}</span>
                   <span className="text-gray-400 text-sm">/</span>
                   <span className="text-sm text-gray-400">{`${Number(
@@ -124,7 +126,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               </div>
             </div>
           </div>
-          <h1 className="text-sm text-gray-700 dark:text-gray-200">
+          <h1 className="text-sm text-gray-700 dark:text-gray-300">
             This organization is on the free plan. Upgrade to remove request
             limits and unlock the features below:
           </h1>
