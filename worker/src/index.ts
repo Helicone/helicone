@@ -1,11 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
-import { feedbackCronHandler } from "./feedback";
-import { RequestWrapper } from "./lib/RequestWrapper";
-import { insertIntoRequest, updateResponse } from "./lib/dbLogger/insertQueue";
-import { buildRouter } from "./routers/routerFactory";
-import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
+import { RequestWrapper } from "./lib/RequestWrapper";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
+import { updateLoopUsers } from "./lib/updateLoopsUsers";
+import { buildRouter } from "./routers/routerFactory";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -32,7 +30,7 @@ export interface Env {
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
-  FALLBACK_QUEUE: Queue<any>;
+  FALLBACK_QUEUE: Queue<unknown>;
   LOOPS_API_KEY: string;
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
@@ -116,37 +114,9 @@ export default {
       return handleError(e);
     }
   },
-  async queue(_batch: MessageBatch<string>, env: Env): Promise<void> {
+  async queue(_batch: MessageBatch<string>, _env: Env): Promise<void> {
     if (_batch.queue.includes(FALLBACK_QUEUE)) {
-      const batch = _batch as MessageBatch<string>;
-
-      let sawError = false;
-      for (const message of batch.messages) {
-        const payload =
-          await env.REQUEST_AND_RESPONSE_QUEUE_KV.get<RequestResponseQueuePayload>(
-            message.body
-          );
-        if (!payload) {
-          console.error(`No payload found for ${message.body}`);
-          sawError = true;
-          continue;
-        }
-        if (payload._type === "request") {
-          insertIntoRequest(
-            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-            payload.payload
-          );
-        } else if (payload._type === "response") {
-          updateResponse(
-            createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-            payload.payload
-          );
-        }
-      }
-      if (!sawError) {
-        batch.ackAll();
-        return;
-      }
+      throw new Error("Fallback queue not implemented");
     } else {
       console.error(`Unknown queue: ${_batch.queue}`);
     }
@@ -154,7 +124,7 @@ export default {
   async scheduled(
     controller: ScheduledController,
     env: Env,
-    ctx: ExecutionContext
+    _ctx: ExecutionContext
   ): Promise<void> {
     if (controller.cron === "0 * * * *") {
       const supabaseClient = createClient(
@@ -169,7 +139,7 @@ export default {
   },
 };
 
-function handleError(e: any): Response {
+function handleError(e: unknown): Response {
   console.error(e);
   return new Response(
     JSON.stringify({
