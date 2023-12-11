@@ -1,3 +1,4 @@
+import { Response } from "@cloudflare/workers-types";
 import retry from "async-retry";
 import { RetryOptions } from "../HeliconeProxyRequest/mapper";
 import { CallProps, callProvider } from "./call";
@@ -6,7 +7,6 @@ export async function callProviderWithRetry(
   callProps: CallProps,
   retryOptions: RetryOptions
 ): Promise<Response> {
-  let lastError;
   let lastResponse;
 
   try {
@@ -23,7 +23,6 @@ export async function callProviderWithRetry(
           }
           return res;
         } catch (e) {
-          lastError = e;
           // If we reach the maximum number of retries, bail with the error
           if (attempt >= retryOptions.retries) {
             bail(e as Error);

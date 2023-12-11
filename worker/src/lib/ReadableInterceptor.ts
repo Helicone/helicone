@@ -1,3 +1,4 @@
+import { ReadableStream } from "@cloudflare/workers-types";
 import { EventEmitter } from "events";
 
 export interface CompletedChunk {
@@ -88,7 +89,7 @@ export class ReadableInterceptor {
   }
 
   private once(eventName: string): Promise<CompletedChunk> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const timeoutId = setTimeout(() => {
         this.chunkEmitter.removeListener(eventName, listener);
         resolve({

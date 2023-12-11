@@ -9,8 +9,8 @@ export const getOpenAIProxyRouter = (router: BaseRouter) => {
     async (
       _,
       requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
+      _env: Env,
+      _ctx: ExecutionContext
     ) => {
       const properties = requestWrapper.heliconeHeaders.heliconeProperties;
       return new Response(

@@ -1,3 +1,5 @@
+import { Json } from "../../../supabase/database.types";
+
 export type AsyncLogModel = {
   providerRequest: ProviderRequest;
   providerResponse: ProviderResponse;
@@ -7,14 +9,14 @@ export type AsyncLogModel = {
 type ProviderRequest = {
   url: string;
   json: {
-    [key: string]: any;
+    [key: string]: Json;
   };
   meta: Record<string, string>;
 };
 
 type ProviderResponse = {
   json: {
-    [key: string]: any;
+    [key: string]: Json;
   };
   status: number;
   headers: Record<string, string>;

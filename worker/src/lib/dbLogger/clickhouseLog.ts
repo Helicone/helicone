@@ -20,7 +20,7 @@ function buildPropertyWithResponseInserts(
     status: response.status ?? 0,
     completion_tokens: response.completion_tokens ?? 0,
     prompt_tokens: response.prompt_tokens ?? 0,
-    model: ((response.body as any)?.model as string) || "",
+    model: ((response.body as { model?: string })?.model as string) || "",
     request_id: request.id,
     request_created_at: formatTimeString(request.created_at),
     auth_hash: request.auth_hash,
@@ -50,7 +50,7 @@ export async function logInClickhouse(
         request_id: request.id,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
-        model: ((response.body as any)?.model as string) || null,
+        model: ((response.body as { model?: string })?.model as string) || null,
         prompt_tokens: response.prompt_tokens ?? null,
         request_created_at: formatTimeString(request.created_at),
         response_created_at: response.created_at
@@ -67,7 +67,7 @@ export async function logInClickhouse(
         request_id: request.id,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
-        model: ((response.body as any)?.model as string) || null,
+        model: ((response.body as { model?: string })?.model as string) || null,
         prompt_tokens: response.prompt_tokens ?? null,
         request_created_at: formatTimeString(request.created_at),
         response_created_at: response.created_at
@@ -86,7 +86,7 @@ export async function logInClickhouse(
         request_id: request.id,
         completion_tokens: response.completion_tokens ?? null,
         latency: response.delay_ms ?? null,
-        model: ((response.body as any)?.model as string) || null,
+        model: ((response.body as { model?: string })?.model as string) || null,
         prompt_tokens: response.prompt_tokens ?? null,
         request_created_at: formatTimeString(request.created_at),
         response_created_at: response.created_at

@@ -223,7 +223,7 @@ export class DBWrapper {
       return err(authParams.error);
     }
 
-    const tier = await getAndStoreInCache<string>(
+    const tier = await getAndStoreInCache<string, string>(
       `tier-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {

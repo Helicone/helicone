@@ -1,4 +1,5 @@
 import { RateLimitOptions, RateLimitResponse } from "../rateLimit";
+import { Response, BodyInit, Headers } from "@cloudflare/workers-types";
 
 export interface BuildParams {
   body: BodyInit | null;

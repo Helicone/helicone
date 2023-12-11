@@ -71,10 +71,11 @@ export async function checkLimits(
   const timeWindows = limits.map((_, i) => generateSubquery(i));
   const query = `SELECT [${timeWindows.join(",")}]`;
   const client = new ClickhouseClientWrapper(env);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: keyMappings, error } = await client.dbQuery<any>(
     query,
     limits.flatMap((limit) => [
-      limit.timewindow_seconds!,
+      limit.timewindow_seconds ?? 0,
       limit.helicone_proxy_key,
     ])
   );

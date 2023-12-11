@@ -218,28 +218,26 @@ export class InsertQueue {
     requestId: string,
     properties: Json,
     property: {
-      key: string,
-      value: string,
+      key: string;
+      value: string;
     },
     orgId: string,
-    values: Database["public"]["Tables"]["request"]["Row"],
+    values: Database["public"]["Tables"]["request"]["Row"]
   ): Promise<void> {
     await this.database
-      .from('request')
-      .update({ "properties": properties})
+      .from("request")
+      .update({ properties: properties })
       .match({
         id: requestId,
       })
       .eq("helicone_org_id", orgId);
 
-    await this.database
-      .from('properties')
-      .insert({
-        request_id: requestId, 
-        key: property.key,
-        value: property.value,
-        auth_hash: values.auth_hash
-      })
+    await this.database.from("properties").insert({
+      request_id: requestId,
+      key: property.key,
+      value: property.value,
+      auth_hash: values.auth_hash,
+    });
 
     const query = `
         SELECT * 
@@ -249,44 +247,57 @@ export class InsertQueue {
           organization_id={val_1: UUID}
         )
     `;
-    const {data, error} = await this.clickhouseWrapper.dbQuery(query, [requestId, orgId])
+    const { data, error } = await this.clickhouseWrapper.dbQuery(query, [
+      requestId,
+      orgId,
+    ]);
 
     if (error || data === null || data?.length == 0) {
-      return Promise.reject("No response found.")
+      return Promise.reject("No response found.");
     }
-    const response: ResponseCopyV3 = data[0] as ResponseCopyV3
+    const response: ResponseCopyV3 = data[0] as ResponseCopyV3;
 
-    if (response.user_id === null || response.status === null || response.model === null) {
-      return Promise.reject("Missing response data.")
+    if (
+      response.user_id === null ||
+      response.status === null ||
+      response.model === null
+    ) {
+      return Promise.reject("Missing response data.");
     }
 
-    const {data: d, error: e} = await this.clickhouseWrapper.dbInsertClickhouse(
+    const { error: e } = await this.clickhouseWrapper.dbInsertClickhouse(
       "property_with_response_v1",
-      [{
-        response_id: response.response_id,
-        response_created_at: response.response_created_at,
-        latency: response.latency,
-        status: response.status,
-        completion_tokens: response.completion_tokens,
-        prompt_tokens: response.prompt_tokens,
-        model: response.model,
-        request_id: values.id,
-        request_created_at: formatTimeString(values.created_at),
-        auth_hash: values.auth_hash,
-        user_id: response.user_id,
+      [
+        {
+          response_id: response.response_id,
+          response_created_at: response.response_created_at,
+          latency: response.latency,
+          status: response.status,
+          completion_tokens: response.completion_tokens,
+          prompt_tokens: response.prompt_tokens,
+          model: response.model,
+          request_id: values.id,
+          request_created_at: formatTimeString(values.created_at),
+          auth_hash: values.auth_hash,
+          user_id: response.user_id,
+          organization_id: orgId,
+          property_key: property.key,
+          property_value: property.value,
+        },
+      ]
+    );
+    if (e) {
+      console.error("Error inserting into clickhouse:", e);
+    }
+    await this.clickhouseWrapper.dbInsertClickhouse("properties_copy_v2", [
+      {
+        id: 1,
+        request_id: requestId,
+        key: property.key,
+        value: property.value,
         organization_id: orgId,
-        property_key: property.key,
-        property_value: property.value,
-      }],
-    )
-    
-    this.clickhouseWrapper.dbInsertClickhouse("properties_copy_v2", [{
-      id: 1,
-      request_id: requestId,
-      key: property.key,
-      value: property.value,
-      organization_id: orgId,
-      created_at: formatTimeString(new Date().toISOString()),
-    }])
+        created_at: formatTimeString(new Date().toISOString()),
+      },
+    ]);
   }
 }
