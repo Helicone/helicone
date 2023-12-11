@@ -20,6 +20,8 @@ interface UsersProps {
 const Users = (props: UsersProps) => {
   const { user, page, pageSize, sort } = props;
 
+  console.log("Users props", page);
+
   return (
     <MetaData title="Users">
       <AuthLayout user={user}>

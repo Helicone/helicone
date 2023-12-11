@@ -26,6 +26,7 @@ import {
   UserGroupIcon,
   UsersIcon,
   XMarkIcon,
+  BellIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -136,6 +137,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       href: "/organization/members",
       icon: UserGroupIcon,
       current: pathname.includes("/members"),
+    },
+    {
+      name: "Alerts (Alpha)",
+      href: "/organization/alerts",
+      icon: BellIcon,
+      current: pathname.includes("/alerts"),
     },
   ];
 
