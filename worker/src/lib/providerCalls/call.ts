@@ -1,5 +1,4 @@
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
-import { Response, Headers, fetch } from "@cloudflare/workers-types";
 export interface CallProps {
   headers: Headers;
   method: string;
