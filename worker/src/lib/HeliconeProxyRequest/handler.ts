@@ -1,4 +1,3 @@
-import { Headers, Response } from "@cloudflare/workers-types";
 import { Result } from "../../results";
 import { CompletedChunk, ReadableInterceptor } from "../ReadableInterceptor";
 import {

@@ -2,8 +2,6 @@
 // It also allows us to add additional functionality to the request object
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
-
-import { Headers, ReadableStream, Request } from "@cloudflare/workers-types";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";

@@ -1,4 +1,3 @@
-import { Headers, Response } from "@cloudflare/workers-types";
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
