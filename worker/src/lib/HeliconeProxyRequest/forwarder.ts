@@ -1,4 +1,3 @@
-import { Response } from "@cloudflare/workers-types";
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider, hash } from "../..";
 import { DBWrapper } from "../../db/DBWrapper";
