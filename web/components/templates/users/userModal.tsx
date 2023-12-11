@@ -49,6 +49,10 @@ const UserModal = (props: UserModalProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const valueFormatter = function (number: number) {
+    return "$" + number;
+  };
+
   useEffect(() => {
     setIsLoading(true);
     setIsCostLoading(true);
@@ -243,6 +247,7 @@ const UserModal = (props: UserModalProps) => {
                   className="h-32 -ml-4 pt-4"
                   colors={["orange"]}
                   showLegend={false}
+                  valueFormatter={valueFormatter}
                 />
               </StyledAreaChart>
             </div>
