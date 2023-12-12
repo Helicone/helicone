@@ -46,11 +46,13 @@ const AlertsPage = (props: AlertsPageProps) => {
       });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        setNotification(
+          "We were unable to delete your alert successfully!\n Refresh your page to try again...",
+          "error"
+        );
       }
-
+      window.location.reload();
       // Handle the response
-      console.log("Alert deleted successfully");
     } catch (error) {
       setNotification(
         "We were unable to delete your alert successfully! Refresh your page to try again...",
