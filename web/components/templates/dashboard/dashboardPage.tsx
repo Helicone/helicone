@@ -40,9 +40,11 @@ export type TimeFilter = {
   start: Date;
   end: Date;
 };
+
 interface StatusCounts {
   [key: string]: number;
 }
+
 export function formatNumberString(
   numString: string,
   minimumFractionDigits?: boolean
@@ -486,8 +488,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     };
   };
 
-  console.log("req-status", overTimeData.requestsWithStatus.data?.data);
-
   const statusSet = overTimeData.requestsWithStatus.data?.data?.reduce<
     Set<number>
   >((acc, { status }) => {
@@ -497,7 +497,13 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const uniqueStatusCodes = Array.from(statusSet || []).sort();
 
-  const statusStrings = uniqueStatusCodes.map((status) => status.toString());
+  const statusStrings = uniqueStatusCodes.map((status) => {
+    if (status === -3) {
+      return "cancelled";
+    } else {
+      return status.toString();
+    }
+  });
 
   const flattenedObject = overTimeData.requestsWithStatus.data?.data?.reduce(
     (acc, { count, status, time }) => {
@@ -522,10 +528,21 @@ const DashboardPage = (props: DashboardPageProps) => {
   );
 
   const flattenedArray = Object.entries(flattenedObject || {}).map(
-    ([time, statuses]) => ({
-      date: time,
-      ...statuses,
-    })
+    ([time, status]) => {
+      // create copy
+      let modifiedStatus = { ...status };
+
+      // if the status object has a `-3` key, rename the key to `cancelled`
+      if (modifiedStatus["-3"] !== undefined) {
+        modifiedStatus["cancelled"] = modifiedStatus["-3"];
+        delete modifiedStatus["-3"];
+      }
+
+      return {
+        date: time,
+        ...modifiedStatus,
+      };
+    }
   );
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
@@ -650,13 +667,28 @@ const DashboardPage = (props: DashboardPageProps) => {
                         onValueChange={(values: string[]) => {
                           setCurrentStatus(
                             values.sort((a, b) => {
-                              return Number(a) - Number(b);
+                              if (a === "200") {
+                                return -1;
+                              } else if (b === "200") {
+                                return 1;
+                              } else {
+                                return Number(a) - Number(b);
+                              }
                             })
                           );
                         }}
                         className="border border-gray-400 rounded-lg w-fit min-w-[250px] max-w-xl"
                       >
                         {statusStrings
+                          .sort((a, b) => {
+                            if (a === "200") {
+                              return -1;
+                            } else if (b === "200") {
+                              return 1;
+                            } else {
+                              return Number(a) - Number(b);
+                            }
+                          })
                           .filter((status) => status !== "0")
                           .map((status, idx) => (
                             <MultiSelectItem

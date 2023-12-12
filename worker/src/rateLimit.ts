@@ -1,7 +1,4 @@
-import {
-  HeliconeProperties,
-  HeliconeProxyRequest,
-} from "./lib/HeliconeProxyRequest/mapper";
+import { HeliconeProperties } from "./lib/HeliconeProxyRequest/mapper";
 
 export interface RateLimitOptions {
   time_window: number;
@@ -15,27 +12,6 @@ export interface RateLimitResponse {
   limit: number;
   remaining: number;
   reset?: number;
-}
-
-function parsePolicy(input: string): RateLimitOptions {
-  const regex = /^(\d+);w=(\d+)(?:;u=(request|token|dollar))?(?:;s=([\w-]+))?$/;
-
-  const match = input.match(regex);
-  if (!match) {
-    throw new Error("Invalid rate limit string format");
-  }
-
-  const quota = parseInt(match[1], 10);
-  const time_window = parseInt(match[2], 10);
-  const unit = match[3] as "request" | "token" | "dollar" | undefined;
-  const segment = match[4];
-
-  return {
-    quota,
-    time_window,
-    unit: unit || "request",
-    segment,
-  };
 }
 
 async function getSegmentKeyValue(
