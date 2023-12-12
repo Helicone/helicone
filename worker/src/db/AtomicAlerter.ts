@@ -245,52 +245,11 @@ export class AtomicAlerter {
             continue;
           }
 
-          const eventTime = event.timestamp;
-          const timeBlockDuration = alert.time_block_duration;
-          const windowStart = eventTime - alert.time_window;
-
-          if (!alert.state) {
-            alert.state = {
-              timeBlocks: [],
-              metricValues: { counts: 0, totals: 0 },
-              triggerState: { triggered: false },
-            };
-          } else if (!alert.state.timeBlocks) {
-            alert.state.timeBlocks = [];
-          }
-
-          let latestBlock: TimeBlock | null = null;
-          let updatedBlocks: TimeBlock[] = [];
-          for (const block of alert.state.timeBlocks) {
-            if (block.startTimestamp >= windowStart) {
-              updatedBlocks.push(block);
-              latestBlock = block;
-            } else {
-              alert.state.metricValues.counts -= block.count;
-              alert.state.metricValues.totals -= block.total;
-            }
-          }
-
-          const isWithinCurrentBlock =
-            latestBlock &&
-            eventTime - latestBlock.startTimestamp < timeBlockDuration;
-          if (latestBlock && isWithinCurrentBlock) {
-            // Update the existing block
-            latestBlock.count += count;
-            latestBlock.total += total;
-          } else {
-            // The event starts a new block
-            updatedBlocks.push({
-              startTimestamp: eventTime - (eventTime % timeBlockDuration),
-              count,
-              total,
-            });
-          }
-
-          // Update alert state
-          alert.state.metricValues.counts += count;
-          alert.state.metricValues.totals += total;
-          alert.state.timeBlocks = updatedBlocks;
+          alert.state = this.updateAlertState(
+            alert,
+            { count, total },
+            event.timestamp
+          );
 
           const alertUpdate = await this.checkAlert(alert, event.timestamp);
 
@@ -323,6 +282,64 @@ export class AtomicAlerter {
     console.log("Active alerts", activeAlerts);
 
     return { data: activeAlerts, error: null };
+  }
+
+  updateAlertState(
+    alert: Alert,
+    eventMetrics: { count: number; total: number },
+    eventTime: number
+  ): AlertState {
+    if (!alert.state) {
+      alert.state = {
+        timeBlocks: [],
+        metricValues: { counts: 0, totals: 0 },
+        triggerState: { triggered: false },
+      };
+    } else if (!alert.state.timeBlocks) {
+      alert.state.timeBlocks = [];
+    }
+
+    const timeBlockDuration = alert.time_block_duration;
+    const windowStart = eventTime - alert.time_window;
+
+    let latestBlock: TimeBlock | null = null;
+    let updatedBlocks: TimeBlock[] = [];
+    let updatedMetricValues = { ...alert.state.metricValues };
+    for (const block of alert.state.timeBlocks) {
+      if (block.startTimestamp >= windowStart) {
+        updatedBlocks.push(block);
+        latestBlock = block;
+      } else {
+        updatedMetricValues.counts -= block.count;
+        updatedMetricValues.totals -= block.total;
+      }
+    }
+
+    const isWithinCurrentBlock =
+      latestBlock && eventTime - latestBlock.startTimestamp < timeBlockDuration;
+
+    if (latestBlock && isWithinCurrentBlock) {
+      // Update the existing block
+      latestBlock.count += eventMetrics.count;
+      latestBlock.total += eventMetrics.total;
+    } else {
+      // The event starts a new block
+      updatedBlocks.push({
+        startTimestamp: eventTime - (eventTime % timeBlockDuration),
+        count: eventMetrics.count,
+        total: eventMetrics.total,
+      });
+    }
+
+    // Update metric values
+    updatedMetricValues.counts += eventMetrics.count;
+    updatedMetricValues.totals += eventMetrics.total;
+
+    return {
+      timeBlocks: updatedBlocks,
+      metricValues: updatedMetricValues,
+      triggerState: { ...alert.state.triggerState },
+    };
   }
 
   private async checkAlert(
@@ -365,10 +382,12 @@ export class AtomicAlerter {
     alert: Alert,
     alertStatusUpdate: AlertStatusUpdate
   ): ResolvedAlert {
-    alert.state.triggerState.triggered = false;
-    alert.state.triggerState.triggeredAt = undefined;
-    alert.state.triggerState.triggeredThreshold = undefined;
-    alert.state.triggerState.firstBelowThresholdAt = undefined;
+    alert.state.triggerState = {
+      triggered: false,
+      triggeredAt: undefined,
+      triggeredThreshold: undefined,
+      firstBelowThresholdAt: undefined,
+    };
 
     return this.mapAlertToUpdate(alertStatusUpdate, alert, alert.emails);
   }
@@ -381,6 +400,7 @@ export class AtomicAlerter {
       triggered: true,
       triggeredAt: alertStatusUpdate.timestamp,
       triggeredThreshold: alertStatusUpdate.triggeredThreshold,
+      firstBelowThresholdAt: undefined,
     };
 
     return this.mapAlertToInsert(alertStatusUpdate, alert, alert.emails);
