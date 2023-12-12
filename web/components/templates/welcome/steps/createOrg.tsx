@@ -115,7 +115,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
-              value={orgContext?.currentOrg?.name ?? ""}
+              placeholder={orgContext?.currentOrg?.name}
             />
           </div>
         </div>
@@ -130,7 +130,10 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              value={orgContext?.currentOrg?.size || ""}
+              // value={orgContext?.currentOrg?.size || ""}
+              placeholder={
+                orgContext?.currentOrg?.size || "Select company size"
+              }
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
@@ -160,7 +163,9 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-referral"
               name="org-referral"
-              value={orgContext?.currentOrg?.referral || ""}
+              placeholder={
+                orgContext?.currentOrg?.referral || "Select referral source"
+              }
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
