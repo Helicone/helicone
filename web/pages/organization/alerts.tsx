@@ -6,6 +6,7 @@ import AlertsPage from "../../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../../lib//api/handlerWrappers";
 import { Database } from "../../../supabase/database.types";
 import { supabaseServer } from "../../lib/supabaseServer";
+
 interface AlertProps {
   user: User;
   // userId: string;
@@ -46,12 +47,14 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   let { data: alert } = await supabase
     .from("alert")
     .select("*")
-    .eq("org_id", orgId);
+    .eq("org_id", orgId)
+    .not("soft_delete", "eq", true);
 
   let { data: alertHistory } = await supabase
     .from("alert_history")
     .select("*")
-    .eq("org_id", orgId);
+    .eq("org_id", orgId)
+    .not("soft_delete", "eq", true);
 
   return {
     props: {
