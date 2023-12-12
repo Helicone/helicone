@@ -21,6 +21,7 @@ export function validateAlertCreate(
       .items(Joi.string().email({ tlds: false }))
       .min(1)
       .required(),
+    status: Joi.string().valid("resolved").required().default("resolved"),
   });
 
   const { error, value } = alertSchema.validate(alert);

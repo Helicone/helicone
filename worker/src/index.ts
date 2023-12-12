@@ -174,7 +174,11 @@ export default {
         env.ALERTER,
         env.RESEND_API_KEY
       );
-      await alerts.resolveAlerts();
+      const resolveAlertRes = await alerts.resolveAlertsCron();
+
+      if (!resolveAlertRes.error) {
+        console.log(`Error resolving alerts: ${resolveAlertRes.error}`);
+      }
     }
   },
 };

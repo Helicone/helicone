@@ -34,52 +34,28 @@ export class Alerts {
       return err(alertRes.error);
     }
 
-    // Insert triggered alerts
-    const triggeredRes = await this.supabaseClient
-      .from("alert_history")
-      .insert(
-        alertRes.data.triggered.map(({ alert, ...alertData }) => alertData)
-      );
+    if (alertRes.data.triggered.length > 0) {
+      const result = await this.handleTriggeredAlerts(alertRes.data.triggered);
 
-    if (triggeredRes.error) {
-      console.error("Error inserting triggered alerts", triggeredRes.error);
-    }
-
-    // Send triggered alert emails
-    for (const alertUpdate of alertRes.data.triggered) {
-      const { error: emailErr } = await this.sendAlertEmails(alertUpdate);
-
-      if (emailErr) {
-        console.error("Error sending alert emails", emailErr);
+      if (result.error) {
+        console.log(
+          `Error updating triggered alerts: ${result.error}. Attempting to resolve alerts.`
+        );
       }
     }
 
-    // Update resolved alerts & send emails
-    for (const alertUpdate of alertRes.data.resolved) {
-      const updateResult = await this.supabaseClient
-        .from("alert_history")
-        .update({
-          alert_end_time: alertUpdate.alert_end_time,
-          status: alertUpdate.status,
-        })
-        .eq("alert_id", alertUpdate.alert_id)
-        .eq("status", "triggered");
+    if (alertRes.data.resolved.length > 0) {
+      const result = await this.handleResolvedAlerts(alertRes.data.resolved);
 
-      if (updateResult.error) {
-        console.error("Error updating alert", updateResult.error);
-      }
-
-      const { error: emailErr } = await this.sendAlertEmails(alertUpdate);
-
-      if (emailErr) {
-        console.error("Error sending alert emails", emailErr);
+      if (result.error) {
+        console.log(`Error resolving alerts: ${result.error}.`);
       }
     }
 
     return ok(null);
   }
 
-  public async resolveAlerts() {
+  public async resolveAlertsCron(): Promise<Result<null, string>> {
     const { data: triggeredAlerts, error: triggeredAlertsErr } =
       await this.supabaseClient
         .from("alert_history")
@@ -87,7 +63,7 @@ export class Alerts {
         .eq("status", "triggered");
 
     if (triggeredAlertsErr || !triggeredAlerts) {
-      return;
+      return err(`Error fetching triggered alerts: ${triggeredAlertsErr}.`);
     }
 
     let resolvedAlerts: ResolvedAlert[] = [];
@@ -106,26 +82,121 @@ export class Alerts {
       resolvedAlerts.push(resAlert);
     }
 
-    for (const resolvedAlert of resolvedAlerts) {
-      const updateResult = await this.supabaseClient
-        .from("alert_history")
-        .update({
-          alert_end_time: resolvedAlert.alert_end_time,
-          status: resolvedAlert.status,
-        })
-        .eq("alert_id", resolvedAlert.alert_id)
-        .eq("status", "triggered");
+    if (resolvedAlerts.length > 0) {
+      const result = await this.handleResolvedAlerts(resolvedAlerts);
 
-      if (updateResult.error) {
-        console.error("Error updating alert", updateResult.error);
-      }
-
-      const { error: emailErr } = await this.sendAlertEmails(resolvedAlert);
-
-      if (emailErr) {
-        console.error("Error sending alert emails", emailErr);
+      if (result.error) {
+        return err(`Error resolving alerts: ${result.error}.`);
       }
     }
+
+    return ok(null);
+  }
+
+  private async handleTriggeredAlerts(
+    triggeredAlerts: TriggeredAlert[]
+  ): Promise<Result<null, string>> {
+    // Update alert status
+    const alertUpdates = await this.supabaseClient
+      .from("alert")
+      .update({
+        status: "triggered",
+        updated_at: triggeredAlerts[0].alert_start_time,
+      })
+      .in(
+        "id",
+        triggeredAlerts.map((alert) => alert.alert.id)
+      );
+
+    if (alertUpdates.error) {
+      return err(
+        `Error updating triggered alerts: ${JSON.stringify(alertUpdates.error)}`
+      );
+    }
+
+    // Insert triggered alerts
+    const alertHistoryIns = await this.supabaseClient
+      .from("alert_history")
+      .insert(
+        triggeredAlerts.map(
+          ({ alert, ...alertHistoryData }) => alertHistoryData
+        )
+      );
+
+    if (alertHistoryIns.error) {
+      return err(
+        `Error inserting triggered alerts: ${JSON.stringify(
+          alertHistoryIns.error
+        )}`
+      );
+    }
+
+    // Send emails
+    const triggeredAlertPromises: any = [];
+    triggeredAlerts.forEach((triggeredAlert) => {
+      triggeredAlertPromises.push(this.sendAlertEmails(triggeredAlert));
+    });
+
+    const emailRes = await Promise.all(triggeredAlertPromises);
+
+    emailRes.forEach((email) => {
+      if (email.error) {
+        console.error("Error sending alert emails", email.error);
+      }
+    });
+
+    return ok(null);
+  }
+
+  private async handleResolvedAlerts(
+    resolvedAlerts: ResolvedAlert[]
+  ): Promise<Result<null, string>> {
+    // Update alert status
+    const resolvedAlertIds = resolvedAlerts.map((alert) => alert.alert_id);
+    const alertUpdates = await this.supabaseClient
+      .from("alert")
+      .update({
+        status: "resolved",
+        updated_at: resolvedAlerts[0].alert_end_time,
+      })
+      .in("id", resolvedAlertIds);
+
+    if (alertUpdates.error) {
+      return err(
+        `Error updating resolved alerts: ${JSON.stringify(alertUpdates.error)}`
+      );
+    }
+
+    // Update alert history
+    const updateResult = await this.supabaseClient
+      .from("alert_history")
+      .update({
+        status: "resolved",
+        alert_end_time: resolvedAlerts[0].alert_end_time,
+      })
+      .in("alert_id", resolvedAlertIds);
+
+    if (updateResult.error) {
+      return err(
+        `Error updating alert history: ${JSON.stringify(updateResult.error)}`
+      );
+    }
+
+    // Send emails
+    const resolvedAlertPromises: any = [];
+    resolvedAlerts.forEach((resolvedAlert) => {
+      resolvedAlertPromises.push(this.sendAlertEmails(resolvedAlert));
+    });
+
+    const emailRes = await Promise.all(resolvedAlertPromises);
+
+    emailRes.forEach((email) => {
+      if (email.error) {
+        console.error("Error sending alert emails", email.error);
+      }
+    });
+
+    return ok(null);
   }
 
   private async sendAlertEmails(
@@ -254,7 +325,7 @@ export class Alerts {
                                   Helicone Alert ${
                                     headerClass.charAt(0).toUpperCase() +
                                     headerClass.slice(1)
-                                  }<br/>${alert.name}.
+                                  }<br/>${alert.name}
                                   </p>    
                                 </td>
                               </tr>
@@ -293,7 +364,7 @@ export class Alerts {
                             <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
                               <tr style="vertical-align:middle;" valign="middle">
                                 <td align="left" style="padding:0 0 0 30px;" class="content">
-                                  <a href="https://helicone.ai" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
+                                  <a href="https://helicone.ai/organization/alerts" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
                                     <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%;mso-text-raise:30pt" hidden>&nbsp;</i>
                                     <![endif]--><span style="mso-text-raise:15pt;">View alert here</span>
                                     <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%" hidden>&nbsp;</i>
@@ -319,7 +390,7 @@ export class Alerts {
                       <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;">
                         <tr style="vertical-align:middle;" valign="middle">
                           <td align="center" style="padding:30px 0;">
-                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
+                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai/organization/alerts" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
                             </td>
                         </tr>
                       </table>

@@ -413,6 +413,7 @@ export class AtomicAlerter {
   ): TriggeredAlert {
     return {
       alert_id: alert.id,
+      alert_name: alert.name,
       alert_start_time: new Date(alertUpdate.timestamp).toISOString(),
       alert_metric: alert.metric,
       org_id: alert.org_id,

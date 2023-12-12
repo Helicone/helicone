@@ -6,6 +6,7 @@ CREATE TABLE alert (
     time_window BIGINT NOT NULL,
     time_block_duration BIGINT NOT NULL DEFAULT 60000,
     emails TEXT [] NOT NULL,
+    status TEXT NOT NULL DEFAULT 'resolved',
     name TEXT NOT NULL,
     soft_delete boolean not null default false,
     created_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
@@ -18,6 +19,7 @@ CREATE TABLE alert_history (
     alert_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
     alert_end_time TIMESTAMP WITH TIME ZONE,
     alert_metric TEXT NOT NULL,
+    alert_name TEXT NOT NULL,
     triggered_value TEXT NOT NULL,
     -- Value that triggered the alert
     status TEXT NOT NULL,

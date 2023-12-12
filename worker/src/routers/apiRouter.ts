@@ -433,6 +433,8 @@ export const getAPIRouter = (router: BaseRouter) => {
         Database["public"]["Tables"]["alert"]["Insert"]
       >();
 
+      alert.status = "resolved";
+
       const { error: validateError } = validateAlertCreate(alert);
       if (validateError !== null) {
         return client.response.newError(validateError, 400);
