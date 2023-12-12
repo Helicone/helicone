@@ -23,22 +23,11 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   const [emails, setEmails] = useState<string[]>([]); // State to manage emails
   const [emailInput, setEmailInput] = useState(""); // State to track the email input field
   const [selectedMetric, setSelectedMetric] = useState<string>("");
-  const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>("");
 
   const availableMetrics = [
     { label: "Response Status", value: "response.status" },
     // { label: "Response Time", value: "response.time" },
   ];
-
-  const availableTimeWindows = [
-    // 5 min, 10, 15, 30 and 1 hour
-    { label: "5 Minutes", value: "300000" },
-    { label: "10 Minutes", value: "600000" },
-    { label: "15 Minutes", value: "900000" },
-    { label: "30 Minutes", value: "1800000" },
-    { label: "1 Hour", value: "3600000" },
-  ];
-
   // Function to add email to the state
   const handleAddEmails = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === " " || event.key === "Enter") {
@@ -79,8 +68,17 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
     const alertName = event.currentTarget.elements.namedItem(
       "alert-name"
     ) as HTMLInputElement;
+    const alertMetric = event.currentTarget.elements.namedItem(
+      "alert-metric"
+    ) as HTMLInputElement;
     const alertThreshold = event.currentTarget.elements.namedItem(
       "alert-threshold"
+    ) as HTMLInputElement;
+    const alertEmails = event.currentTarget.elements.namedItem(
+      "alert-emails"
+    ) as HTMLInputElement;
+    const alertTimeWindow = event.currentTarget.elements.namedItem(
+      "alert-time-window"
     ) as HTMLInputElement;
 
     // Check if all fields are filled out
@@ -89,19 +87,18 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
       !emails ||
       !alertName ||
       !alertThreshold ||
-      !selectedTimeWindow ||
+      !alertTimeWindow ||
       selectedMetric === "" ||
       emails.length === 0 ||
       alertName.value === "" ||
       alertThreshold.value === "" ||
-      selectedTimeWindow === ""
+      alertTimeWindow.value === ""
     ) {
       setNotification("Please fill out all fields", "error");
       return;
     }
 
     const thresholdValue = parseInt(alertThreshold.value);
-    const alertTimeWindow = parseInt(selectedTimeWindow);
     if (isNaN(thresholdValue) || thresholdValue < 1 || thresholdValue > 100) {
       setNotification("Threshold must be between 1 and 100", "error");
       setIsLoading(false);
@@ -134,7 +131,7 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
         name: alertName.value,
         metric: selectedMetric,
         threshold: alertThreshold.value,
-        time_window: alertTimeWindow,
+        time_window: alertTimeWindow.value,
         emails: emails,
         org_id: orgId,
       }),
@@ -162,82 +159,12 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
         className="flex flex-col space-y-4 w-[400px]"
       >
         <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Create Alert
+          Delete Alert
         </h1>
         <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Name
-          </label>
-          <input
-            type="text"
-            name="alert-name"
-            id="alert-name"
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            required
-            placeholder="Request Error Rate 50%"
-          />
+          <p>Are you sure you want to delete your alert?</p>
+          <p>This is final and irreversible.</p>
         </div>
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Metric
-          </label>
-          <ThemedDropdown
-            options={availableMetrics}
-            selectedValue={selectedMetric}
-            onSelect={(value) => setSelectedMetric(value)}
-          />
-        </div>{" "}
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Threshold
-          </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            name="alert-threshold"
-            id="alert-threshold"
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            required
-            placeholder="Percentage (Between 0-100)"
-            min={1}
-            max={100}
-          />
-        </div>{" "}
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Emails
-          </label>
-          <div>
-            {emails.map((email) => (
-              <ThemedPill
-                key={email}
-                label={email}
-                onDelete={() => handleRemoveEmail(email)}
-              />
-            ))}
-          </div>
-          <input
-            type="text"
-            name="alert-emails"
-            id="alert-emails"
-            value={emailInput}
-            onChange={handleEmailInputChange}
-            onKeyUp={handleAddEmails}
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            placeholder="Add emails by presing space"
-          />
-        </div>{" "}
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Time Window (ms)
-          </label>
-          <ThemedDropdown
-            options={availableTimeWindows}
-            selectedValue={selectedTimeWindow}
-            onSelect={(value) => setSelectedTimeWindow(value)}
-            verticalAlign="top"
-          />
-        </div>{" "}
         <div className="flex justify-end gap-2">
           <button
             onClick={() => setOpen(false)}
