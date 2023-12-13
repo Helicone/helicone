@@ -1,7 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import { Database } from "../supabase/database.types";
-import { Alerts } from "./alerts";
-import { AtomicAlerter } from "./db/AtomicAlerter";
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
@@ -42,8 +39,6 @@ export interface Env {
   OPENAI_ORG_ID: string;
   ROSETTA_HELICONE_API_KEY: string;
   CUSTOMER_GATEWAY_URL?: string;
-  ALERTER: DurableObjectNamespace;
-  RESEND_API_KEY: string;
 }
 
 export async function hash(key: string): Promise<string> {
@@ -131,25 +126,15 @@ export default {
     env: Env,
     _ctx: ExecutionContext
   ): Promise<void> {
-    const supabaseClient = createClient<Database>(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
     if (controller.cron === "0 * * * *") {
+      const supabaseClient = createClient(
+        env.SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY
+      );
       const rosetta = new RosettaWrapper(supabaseClient, env);
       await rosetta.generateMappers();
     } else {
       await updateLoopUsers(env);
-      const alerts = new Alerts(
-        supabaseClient,
-        env.ALERTER,
-        env.RESEND_API_KEY
-      );
-      const resolveAlertRes = await alerts.resolveAlertsCron();
-
-      if (!resolveAlertRes.error) {
-        console.log(`Error resolving alerts: ${resolveAlertRes.error}`);
-      }
     }
   },
 };
@@ -173,4 +158,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { AtomicAlerter, AtomicRateLimiter };
+export { AtomicRateLimiter };
