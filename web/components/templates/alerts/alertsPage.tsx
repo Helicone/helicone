@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { useOrg } from "../../shared/layout/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import CreateAlertModal from "./createAlertModal";
-import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
+import {
+  BellIcon,
+  ChevronDownIcon,
+  NewspaperIcon,
+} from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
+import { getUSDate } from "../../shared/utils/utils";
+import { Menu, Transition } from "@headlessui/react";
 
 interface AlertsPageProps {
   user: User;
@@ -78,16 +84,16 @@ const AlertsPage = (props: AlertsPageProps) => {
                   ),
                   created_at: (
                     <p className="text-gray-500">
-                      {new Date(key.created_at || "").toLocaleString()}
+                      {getUSDate(new Date(key.created_at))}
                     </p>
                   ),
                   threshold: (
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    <p className="text-gray-900 dark:text-gray-100">
                       {`${key.threshold}%`}
                     </p>
                   ),
                   metric: (
-                    <p className="text-gray-900 dark:text-gray-100">
+                    <p className="text-xs text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-2 py-1 w-fit">
                       {key.metric}
                     </p>
                   ),
@@ -98,9 +104,9 @@ const AlertsPage = (props: AlertsPageProps) => {
                     </p>
                   ),
                   emails: (
-                    <p className="text-gray-900 dark:text-gray-100">
+                    <div className="text-gray-900 dark:text-gray-100 overflow-auto">
                       {key.emails.join(", ")}
-                    </p>
+                    </div>
                   ),
                 };
               })}

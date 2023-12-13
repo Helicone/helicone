@@ -123,12 +123,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: BeakerIcon,
       current: pathname.includes("/playground"),
     },
-    {
-      name: "Alerts (Alpha)",
-      href: "/organization/alerts",
-      icon: BellIcon,
-      current: pathname.includes("/alerts"),
-    },
   ];
 
   const organizationNav = [
