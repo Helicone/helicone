@@ -112,4 +112,8 @@ VAULT_ENABLED = "true"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["AtomicRateLimiter", "AtomicAlerter"]
+new_classes = ["AtomicRateLimiter"]
+
+[[migrations]]
+tag = "v2"
+new_classes = ["AtomicAlerter"]
