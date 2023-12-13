@@ -24,7 +24,7 @@ export function validateAlertCreate(
     status: Joi.string().valid("resolved").required().default("resolved"),
   });
 
-  const { error, value } = alertSchema.validate(alert);
+  const { error } = alertSchema.validate(alert);
 
   if (error) {
     return { data: null, error: error.message };

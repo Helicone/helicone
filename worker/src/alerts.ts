@@ -66,7 +66,7 @@ export class Alerts {
       return err(`Error fetching triggered alerts: ${triggeredAlertsErr}.`);
     }
 
-    let resolvedAlerts: ResolvedAlert[] = [];
+    const resolvedAlerts: ResolvedAlert[] = [];
     for (const triggeredAlert of triggeredAlerts) {
       const { data: resAlert, error: resAlertsErr } =
         await this.alerter.resolveTriggeredAlert(
@@ -119,7 +119,7 @@ export class Alerts {
       .from("alert_history")
       .insert(
         triggeredAlerts.map(
-          ({ alert, ...alertHistoryData }) => alertHistoryData
+          ({ alert: _, ...alertHistoryData }) => alertHistoryData
         )
       );
 
@@ -132,7 +132,7 @@ export class Alerts {
     }
 
     // Send emails
-    const triggeredAlertPromises: any = [];
+    const triggeredAlertPromises: Promise<Result<null, string>>[] = [];
     triggeredAlerts.forEach((triggeredAlert) => {
       triggeredAlertPromises.push(this.sendAlertEmails(triggeredAlert));
     });
@@ -183,7 +183,7 @@ export class Alerts {
     }
 
     // Send emails
-    const resolvedAlertPromises: any = [];
+    const resolvedAlertPromises: Promise<Result<null, string>>[] = [];
     resolvedAlerts.forEach((resolvedAlert) => {
       resolvedAlertPromises.push(this.sendAlertEmails(resolvedAlert));
     });
@@ -240,10 +240,10 @@ export class Alerts {
     const status = alertUpdate.status ?? "";
     const capitalizedStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
-    const formatTimestamp = (timestamp: any) =>
+    const formatTimestamp = (timestamp: string) =>
       timestamp ? new Date(timestamp).toLocaleString() : "N/A";
 
-    const formatTimespan = (ms: any) => {
+    const formatTimespan = (ms: number) => {
       const minutes = Math.floor(ms / 60000);
       const hours = Math.floor(minutes / 60);
       return hours > 0 ? `${hours} hour(s)` : `${minutes} minute(s)`;

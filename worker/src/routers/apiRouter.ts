@@ -419,7 +419,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const { data: authParams, error: authError } =
