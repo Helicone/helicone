@@ -39,8 +39,6 @@ import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
 import { GrGraphQl } from "react-icons/gr";
-import { BsBriefcase, BsTags, BsTagsFill } from "react-icons/bs";
-import Notification from "../notification/Notification";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
@@ -87,19 +85,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: UsersIcon,
       current: pathname.includes("/users"),
     },
-    {
-      name: (
-        <div className="flex w-full space-x-2 items-center">
-          <p>Alerts</p>
-          <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
-            new
-          </div>
-        </div>
-      ),
-      href: "/alerts",
-      icon: BellIcon,
-      current: pathname.includes("/alerts"),
-    },
+    // {
+    //   name: (
+    //     <div className="flex w-full space-x-2 items-center">
+    //       <p>Alerts</p>
+    //       <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
+    //         new
+    //       </div>
+    //     </div>
+    //   ),
+    //   href: "/alerts",
+    //   icon: BellIcon,
+    //   current: pathname.includes("/alerts"),
+    // },
     {
       name: "Properties",
       href: "/properties",
