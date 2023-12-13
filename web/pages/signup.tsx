@@ -61,6 +61,19 @@ const SignUp = (props: SignUpProps) => {
             return;
           }
         }}
+        handleGithubSubmit={async () => {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "github",
+          });
+          if (error) {
+            setNotification(
+              "Error creating your account. Please try again.",
+              "error"
+            );
+            console.error(error);
+            return;
+          }
+        }}
         authFormType={"signup"}
       />
       <ThemedModal
