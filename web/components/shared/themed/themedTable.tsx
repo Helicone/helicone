@@ -141,7 +141,7 @@ const ThemedTable = (props: ThemedTableProps) => {
   const { columns, rows, viewHandler, editHandler, deleteHandler } = props;
 
   return (
-    <div className="ring-1 ring-gray-300 rounded-lg bg-white dark:bg-black dark:ring-gray-700">
+    <div className="ring-1 ring-gray-300 rounded-lg bg-white dark:bg-black dark:ring-gray-700 overflow-auto">
       <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
         <thead>
           <tr>
