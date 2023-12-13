@@ -88,7 +88,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/users"),
     },
     {
-      name: "Alerts",
+      name: (
+        <div className="flex w-full space-x-2 items-center">
+          <p>Alerts</p>
+          <div className="bg-yellow-100 text-yellow-700 ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:ring-yellow-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
+            new
+          </div>
+        </div>
+      ),
       href: "/alerts",
       icon: BellIcon,
       current: pathname.includes("/alerts"),
@@ -247,10 +254,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </div>
                       <div className="mt-5 h-0 flex-1 overflow-y-auto">
                         <nav className="space-y-1 px-2">
-                          {navigation.map((item) => {
+                          {navigation.map((item, idx) => {
                             return (
                               <Link
-                                key={item.name}
+                                key={idx}
                                 href={item.href}
                                 className={clsx(
                                   item.current
@@ -363,10 +370,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 <div className="mt-16 flex flex-grow flex-col">
                   <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
-                      {navigation.map((item) => {
+                      {navigation.map((item, idx) => {
                         return (
                           <Link
-                            key={item.name}
+                            key={idx}
                             href={item.href}
                             className={clsx(
                               item.current
