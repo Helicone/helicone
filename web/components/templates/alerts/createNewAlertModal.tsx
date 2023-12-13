@@ -1,19 +1,17 @@
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import Cookies from "js-cookie";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+
 import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
-import { User } from "@supabase/auth-helpers-react";
-import { FormEvent, useState, useEffect } from "react";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import Cookies from "js-cookie";
+import { FormEvent, useState } from "react";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import { ThemedPill } from "../../shared/themed/themedPill";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
-import { useOrg } from "../../shared/layout/organizationContext";
 import { useGetOrgMembersAndOwner } from "../../../services/hooks/organizations";
+
 interface CreateNewAlertModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  user: User | null;
   orgId: string;
   onSuccess: () => void;
 }
@@ -25,20 +23,18 @@ interface CreateNewAlertModalProps {
  * @param {object} props - The component props.
  * @param {boolean} props.open - Flag indicating whether the modal is open.
  * @param {function} props.setOpen - Function to set the open state of the modal.
- * @param {User | null} props.user - The user object.
  * @param {string} props.orgId - The organization ID.
  * @param {function} props.onSuccess - Function to be called on successful creation of an alert.
  * @returns {JSX.Element} The JSX element representing the create new alert modal.
  */
 const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
-  const { open, setOpen, user, orgId, onSuccess } = props;
+  const { open, setOpen, orgId, onSuccess } = props;
   const { data: orgMembers, isLoading: isOrgMembersLoading } =
     useGetOrgMembersAndOwner(orgId);
   const [isLoading, setIsLoading] = useState(false);
   const { setNotification } = useNotification();
   const [emails, setEmails] = useState<string[]>([]); // State to manage emails
   const [currentEmails, setCurrentEmails] = useState<string[]>([]); // State to manage emails
-  const [emailInput, setEmailInput] = useState(""); // State to track the email input field
   const [selectedMetric, setSelectedMetric] = useState<string>("");
   const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>("");
 
@@ -50,7 +46,7 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
     setEmails(combinedEmails);
   }
 
-  console.log(emails);
+  console.log(currentEmails);
 
   const availableMetrics = [
     { label: "Response Status", value: "response.status" },
@@ -95,7 +91,7 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
       !alertThreshold ||
       !selectedTimeWindow ||
       selectedMetric === "" ||
-      emails.length === 0 ||
+      currentEmails.length === 0 ||
       alertName.value === "" ||
       alertThreshold.value === "" ||
       selectedTimeWindow === ""
@@ -124,7 +120,7 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
         metric: selectedMetric,
         threshold: alertThreshold.value,
         time_window: alertTimeWindow,
-        emails: emails,
+        emails: currentEmails,
         org_id: orgId,
       }),
     })

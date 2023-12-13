@@ -1,12 +1,12 @@
+import { useState } from "react";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { BellSlashIcon, BellIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
-import { Database } from "../../../supabase/database.types";
-import ThemedTable from "../../shared/themed/themedTable";
 
 // Components
 import CreateNewAlertModal from "./createNewAlertModal";
 import DeleteAlertModal from "./deleteAlertModal";
+import { Database } from "../../../supabase/database.types";
+import ThemedTable from "../../shared/themed/themedTable";
 
 interface AlertsPageProps {
   user: User;
@@ -122,12 +122,12 @@ const AlertsPage = (props: AlertsPageProps) => {
                     ),
                     threshold: (
                       <p className="text-gray-900 dark:text-gray-100">
-                        {key.threshold}
+                        {key.threshold}%
                       </p>
                     ),
                     time_window: (
                       <p className="text-gray-900 dark:text-gray-100">
-                        {key.time_window}
+                        {key.time_window / 60000} minutes
                       </p>
                     ),
                     emails: (
@@ -225,12 +225,14 @@ const AlertsPage = (props: AlertsPageProps) => {
                     ),
                     alertStartTime: (
                       <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {key.alert_start_time}
+                        {new Date(key.alert_start_time).toLocaleDateString()}
                       </p>
                     ),
                     alertEndTime: (
                       <p className="text-gray-900 dark:text-gray-100">
-                        {key.alert_end_time}
+                        {new Date(
+                          key.alert_end_time as string
+                        ).toLocaleDateString()}
                       </p>
                     ),
                     triggeredValue: (
@@ -261,7 +263,6 @@ const AlertsPage = (props: AlertsPageProps) => {
       <CreateNewAlertModal
         open={createNewAlertModal}
         setOpen={setCreateNewAlertModal}
-        user={user}
         orgId={orgId}
         onSuccess={() => {
           refreshAlert();
@@ -271,7 +272,6 @@ const AlertsPage = (props: AlertsPageProps) => {
       <DeleteAlertModal
         open={deleteAlertModal}
         setOpen={setDeleteAlertModal}
-        user={user}
         orgId={orgId}
         alertId={selectedAlertId}
         onSuccess={() => {

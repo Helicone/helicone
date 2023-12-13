@@ -1,16 +1,15 @@
-import ThemedModal from "../../shared/themed/themedModal";
-import useNotification from "../../shared/notification/useNotification";
-import { User } from "@supabase/auth-helpers-react";
 import { FormEvent, useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Cookies from "js-cookie";
+
+import ThemedModal from "../../shared/themed/themedModal";
+import useNotification from "../../shared/notification/useNotification";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import { Database } from "../../../supabase/database.types";
 
 interface DeleteAlertModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  user: User | null;
   orgId: string;
   alertId: Database["public"]["Tables"]["alert_history"]["Row"] | null;
   onSuccess: () => void;
@@ -19,7 +18,6 @@ interface DeleteAlertModalProps {
 const DeleteAlertModal = ({
   open,
   setOpen,
-  user,
   orgId,
   alertId,
   onSuccess,
