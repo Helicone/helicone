@@ -91,7 +91,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       name: (
         <div className="flex w-full space-x-2 items-center">
           <p>Alerts</p>
-          <div className="bg-yellow-100 text-yellow-700 ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:ring-yellow-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
+          <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
             new
           </div>
         </div>
