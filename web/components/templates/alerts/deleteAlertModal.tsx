@@ -55,6 +55,7 @@ const DeleteAlertModal = (props: DeleteAlertModalProps) => {
 
       onSuccess();
       setOpen(false);
+      setNotification("Successfully deleted alert", "success");
     } catch (error) {
       setNotification(`Error: ${error}`, "error");
     }

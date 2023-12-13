@@ -30,6 +30,7 @@ const AlertsPage = (props: AlertsPageProps) => {
   const [selectedAlert, setSelectedAlert] =
     useState<Database["public"]["Tables"]["alert"]["Row"]>();
   const orgContext = useOrg();
+
   const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
     orgContext?.currentOrg.id || ""
   );
@@ -118,7 +119,6 @@ const AlertsPage = (props: AlertsPageProps) => {
                 setDeleteAlertOpen(true);
                 setSelectedAlert(row);
               }}
-              // editHandler={onEditHandler}
             />
           )}
         </ul>
@@ -166,7 +166,6 @@ const AlertsPage = (props: AlertsPageProps) => {
                 ),
                 alertName: (
                   <p className="text-gray-900 dark:text-gray-100">
-                    {/* Name will come later */}
                     {key.alert_metric}
                   </p>
                 ),
