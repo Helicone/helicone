@@ -169,7 +169,17 @@ const AlertsPage = (props: AlertsPageProps) => {
                 key: "alertStartTime",
                 hidden: false,
               },
+              {
+                name: "Alert End Time",
+                key: "alertEndTime",
+                hidden: false,
+              },
               { name: "Alert Name", key: "alertName", hidden: false },
+              {
+                name: "Trigger",
+                key: "triggered_value",
+                hidden: false,
+              },
               { name: "status", key: "status", hidden: false },
             ]}
             rows={alertHistory?.map((key) => {
@@ -177,19 +187,27 @@ const AlertsPage = (props: AlertsPageProps) => {
                 ...key,
                 alertStartTime: (
                   <p className="font-semibold text-gray-900 dark:text-gray-100">
-                    {key.alert_start_time}
+                    {getUSDate(new Date(key.alert_start_time))}
+                  </p>
+                ),
+                alertEndTime: (
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key.alert_end_time
+                      ? getUSDate(new Date(key.alert_end_time))
+                      : ""}
                   </p>
                 ),
                 alertName: (
                   <p className="text-gray-900 dark:text-gray-100">
-                    {key.alert_metric}
+                    {key.alert_name}
                   </p>
                 ),
-                status: (
-                  <p className="text-gray-500">
-                    {new Date(key.alert_start_time).toLocaleString()}
+                triggered_value: (
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {key.triggered_value}
                   </p>
                 ),
+                status: <p className="text-gray-500">{key.status}</p>,
               };
             })}
           />
