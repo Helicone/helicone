@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { User } from "@supabase/auth-helpers-nextjs";
 import { BellSlashIcon, BellIcon } from "@heroicons/react/24/solid";
 
 // Components
@@ -9,28 +8,17 @@ import { Database } from "../../../supabase/database.types";
 import ThemedTable from "../../shared/themed/themedTable";
 
 interface AlertsPageProps {
-  user: User;
   orgId: string;
-  // TODO: add types
+  // TODO: Add types
   alerts: any;
-  alertIsLoading: boolean;
   refreshAlert: () => void;
   alertHistory: any;
-  alertHistoryIsLoading: boolean;
   refreshAlertHistory: () => void;
 }
 
 const AlertsPage = (props: AlertsPageProps) => {
-  const {
-    user,
-    orgId,
-    alerts,
-    alertIsLoading,
-    refreshAlert,
-    alertHistory,
-    alertHistoryIsLoading,
-    refreshAlertHistory,
-  } = props;
+  const { orgId, alerts, refreshAlert, alertHistory, refreshAlertHistory } =
+    props;
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertModal, setDeleteAlertModal] = useState(false);
   const [selectedAlertId, setSelectedAlertId] = useState<
@@ -60,7 +48,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           </div>
           <button
             onClick={() => setCreateNewAlertModal(true)}
-            className="flex flex-row items-center gap-2 items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex flex-row gap-2 items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -133,10 +121,10 @@ const AlertsPage = (props: AlertsPageProps) => {
                     emails: (
                       // use bg-gray-100 dark:bg-gray-900 dont use ThemedPill
                       <p className="text-gray-900 dark:text-gray-100">
-                        {key.emails.map((email: string, index: number) => {
+                        {key.emails.map((email: string) => {
                           return (
                             <span
-                              key={index}
+                              key={email}
                               className="bg-gray-100 dark:bg-gray-900 rounded-md px-2 py-1 text-sm mr-1"
                             >
                               {email}
