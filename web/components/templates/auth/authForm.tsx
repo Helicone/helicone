@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { BsGoogle } from "react-icons/bs";
+import { BsGoogle, BsGithub } from "react-icons/bs";
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -11,11 +11,17 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
   handleGoogleSubmit?: () => void;
+  handleGithubSubmit?: () => void;
   authFormType: "signin" | "signup" | "reset" | "reset-password";
 }
 
 const AuthForm = (props: AuthFormProps) => {
-  const { handleEmailSubmit, handleGoogleSubmit, authFormType } = props;
+  const {
+    handleEmailSubmit,
+    handleGoogleSubmit,
+    handleGithubSubmit,
+    authFormType,
+  } = props;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -265,6 +271,21 @@ const AuthForm = (props: AuthFormProps) => {
                       <BsGoogle />
                       <span className="text-sm lg:text-md font-semibold leading-6">
                         Google
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+              {handleGithubSubmit && (
+                <div className="mt-6">
+                  <div className="grid grid-cols-1 gap-4">
+                    <button
+                      onClick={() => handleGithubSubmit()}
+                      className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white hover:bg-gray-200 px-3 py-1.5 text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                    >
+                      <BsGithub />
+                      <span className="text-sm lg:text-md font-semibold leading-6">
+                        Github
                       </span>
                     </button>
                   </div>

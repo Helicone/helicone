@@ -39,6 +39,17 @@ const SignIn = (props: SignInProps) => {
         }
         setNotification("Successfully signed in.", "success");
       }}
+      handleGithubSubmit={async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "github",
+        });
+        if (error) {
+          setNotification("Error logging in. Please try again.", "error");
+          console.error(error);
+          return;
+        }
+        setNotification("Successfully signed in.", "success");
+      }}
       authFormType={"signin"}
     />
   );
