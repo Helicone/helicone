@@ -41,7 +41,6 @@
     "events": "^3.3.0",
     "gpt3-tokenizer": "^1.1.5",
     "itty-router": "^4.0.13",
-    "joi": "^17.11.0",
     "js-tiktoken": "^1.0.7",
     "pg": "^8.11.2",
     "prettier": "^2.8.7",
