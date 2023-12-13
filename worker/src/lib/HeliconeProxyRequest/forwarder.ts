@@ -117,6 +117,7 @@ export async function proxyForwarder(
   if (cacheSettings.shouldReadFromCache) {
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
+
   async function log() {
     const res = await loggable.log(
       {
@@ -130,7 +131,7 @@ export async function proxyForwarder(
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
       },
-      env.RATE_LIMIT_KV
+      env
     );
     if (res.error !== null) {
       request
