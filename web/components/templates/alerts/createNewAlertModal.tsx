@@ -1,13 +1,15 @@
 import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
 import { User } from "@supabase/auth-helpers-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import { ThemedPill } from "../../shared/themed/themedPill";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
-
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import { useOrg } from "../../shared/layout/organizationContext";
+import { useGetOrgMembersAndOwner } from "../../../services/hooks/organizations";
 interface CreateNewAlertModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -30,12 +32,25 @@ interface CreateNewAlertModalProps {
  */
 const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   const { open, setOpen, user, orgId, onSuccess } = props;
+  const { data: orgMembers, isLoading: isOrgMembersLoading } =
+    useGetOrgMembersAndOwner(orgId);
   const [isLoading, setIsLoading] = useState(false);
   const { setNotification } = useNotification();
   const [emails, setEmails] = useState<string[]>([]); // State to manage emails
+  const [currentEmails, setCurrentEmails] = useState<string[]>([]); // State to manage emails
   const [emailInput, setEmailInput] = useState(""); // State to track the email input field
   const [selectedMetric, setSelectedMetric] = useState<string>("");
   const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>("");
+
+  const memberEmails =
+    orgMembers?.members?.data?.map((member) => member.email) ?? [];
+  const ownerEmail = orgMembers?.owner?.data?.map((owner) => owner.email) ?? [];
+  const combinedEmails = [...memberEmails, ...ownerEmail];
+  if (combinedEmails.length > 0 && emails.length === 0) {
+    setEmails(combinedEmails);
+  }
+
+  console.log(emails);
 
   const availableMetrics = [
     { label: "Response Status", value: "response.status" },
@@ -50,29 +65,6 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
     { label: "30 Minutes", value: "1800000" },
     { label: "1 Hour", value: "3600000" },
   ];
-
-  // Function to add email to the state
-  const handleAddEmails = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === " " || event.key === "Enter") {
-      const email = emailInput.trim();
-      if (email) {
-        setEmails((oldEmails: string[]) => [...oldEmails, email]); // Add email to the state
-        setEmailInput(""); // Clear input field
-      }
-    }
-  };
-
-  const handleRemoveEmail = (emailToRemove: string) => {
-    setEmails((oldEmails) =>
-      oldEmails.filter((email) => email !== emailToRemove)
-    );
-  };
-
-  const handleEmailInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setEmailInput(event.target.value);
-  };
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -136,14 +128,13 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
         org_id: orgId,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(() => {
         setNotification("Successfully created alert", "success");
         setIsLoading(false);
         onSuccess();
         setOpen(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setNotification("Failed to create alert", "error");
         setIsLoading(false);
       });
@@ -201,25 +192,28 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
           <label htmlFor="alert-name" className="text-gray-500">
             Alert Emails
           </label>
-          <div>
+          <MultiSelect
+            placeholder="Select emails"
+            value={currentEmails}
+            onValueChange={(values: string[]) => {
+              setCurrentEmails(
+                values.sort((a, b) => {
+                  return Number(a) - Number(b);
+                })
+              );
+            }}
+            className="border border-gray-400 rounded-lg"
+          >
             {emails.map((email) => (
-              <ThemedPill
+              <MultiSelectItem
                 key={email}
-                label={email}
-                onDelete={() => handleRemoveEmail(email)}
-              />
+                value={email}
+                className="font-medium text-black"
+              >
+                {email}
+              </MultiSelectItem>
             ))}
-          </div>
-          <input
-            type="text"
-            name="alert-emails"
-            id="alert-emails"
-            value={emailInput}
-            onChange={handleEmailInputChange}
-            onKeyUp={handleAddEmails}
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            placeholder="Add emails by presing space"
-          />
+          </MultiSelect>
         </div>{" "}
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="alert-name" className="text-gray-500">
