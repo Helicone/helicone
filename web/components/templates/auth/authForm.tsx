@@ -285,7 +285,7 @@ const AuthForm = (props: AuthFormProps) => {
                     >
                       <BsGithub />
                       <span className="text-sm lg:text-md font-semibold leading-6">
-                        Github
+                        GitHub
                       </span>
                     </button>
                   </div>
