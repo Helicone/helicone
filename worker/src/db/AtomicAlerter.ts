@@ -126,7 +126,7 @@ export class AtomicAlerter {
 
       const eventTime = Date.now();
       const windowStart = eventTime - alert.time_window;
-      let updatedBlocks: TimeBlock[] = [];
+      const updatedBlocks: TimeBlock[] = [];
       for (const block of alert.state.timeBlocks) {
         if (block.startTimestamp >= windowStart) {
           updatedBlocks.push(block);
@@ -196,7 +196,7 @@ export class AtomicAlerter {
     let error = null;
 
     await this.state.storage.transaction(async (txn) => {
-      let currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
+      const currentAlerts = (await txn.get<Alerts>(ALERT_KEY)) || {};
 
       if (currentAlerts[alertId]) {
         delete currentAlerts[alertId];
@@ -299,8 +299,8 @@ export class AtomicAlerter {
     const windowStart = eventTime - alert.time_window;
 
     let latestBlock: TimeBlock | null = null;
-    let updatedBlocks: TimeBlock[] = [];
-    let updatedMetricValues = { ...alert.state.metricValues };
+    const updatedBlocks: TimeBlock[] = [];
+    const updatedMetricValues = { ...alert.state.metricValues };
     for (const block of alert.state.timeBlocks) {
       if (block.startTimestamp >= windowStart) {
         updatedBlocks.push(block);

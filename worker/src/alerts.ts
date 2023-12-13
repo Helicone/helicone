@@ -66,7 +66,7 @@ export class Alerts {
       return err(`Error fetching triggered alerts: ${triggeredAlertsErr}.`);
     }
 
-    let resolvedAlerts: ResolvedAlert[] = [];
+    const resolvedAlerts: ResolvedAlert[] = [];
     for (const triggeredAlert of triggeredAlerts) {
       const { data: resAlert, error: resAlertsErr } =
         await this.alerter.resolveTriggeredAlert(
