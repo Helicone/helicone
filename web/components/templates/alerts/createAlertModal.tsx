@@ -17,6 +17,11 @@ interface CreateAlertModalProps {
   onSuccess: () => void;
 }
 
+const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
+
+// REMOVE THE TRAILING V1 from the API_BASE_PATH
+const API_BASE_PATH_WITHOUT_VERSION = API_BASE_PATH.replace("/v1", "");
+
 const CreateAlertModal = (props: CreateAlertModalProps) => {
   const { open, setOpen, onSuccess } = props;
 
@@ -85,7 +90,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       return;
     }
 
-    fetch(`http://localhost:8787/alerts`, {
+    fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
