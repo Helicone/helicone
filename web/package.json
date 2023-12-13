@@ -52,7 +52,6 @@
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "graphql-type-json": "^0.3.2",
-    "joi": "^17.11.0",
     "js-cookie": "^3.0.5",
     "micro": "^10.0.1",
     "moment": "^2.29.4",
@@ -106,5 +105,6 @@
     "postcss": "^8.4.31",
     "prettier": "^2.8.0",
     "tailwindcss": "^3.3.5"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }
