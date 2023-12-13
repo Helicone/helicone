@@ -49,7 +49,6 @@ export async function callProvider(props: CallProps): Promise<Response> {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    /// <reference types="@cloudflare/workers-types" />
     response = await fetch(new_url.href, {
       ...init,
       signal,
