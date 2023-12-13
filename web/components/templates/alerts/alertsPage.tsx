@@ -204,7 +204,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                 ),
                 triggered_value: (
                   <p className="text-gray-900 dark:text-gray-100">
-                    {key.triggered_value}
+                    {`${key.triggered_value}%`}
                   </p>
                 ),
                 status: <p className="text-gray-500">{key.status}</p>,
