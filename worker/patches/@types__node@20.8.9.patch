@@ -1,0 +1,20 @@
+diff --git a/index.workerd.d.ts b/index.workerd.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/package.json b/package.json
+index e9e15c90021711122a01a324f07f3675e13e1e14..b04e27142c8ef196d8bb3bb53661794fde3569e7 100644
+--- a/package.json
++++ b/package.json
+@@ -213,6 +213,12 @@
+     ],
+     "main": "",
+     "types": "index.d.ts",
++    "exports": {
++        "workerd": {
++            "types": "./index.workerd.d.ts"
++        },
++        "types": "./index.d.ts"
++    },
+     "typesVersions": {
+         "<=4.8": {
+             "*": [
