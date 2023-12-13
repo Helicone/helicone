@@ -1,11 +1,5 @@
 import { useState } from "react";
 
-// Components
-import CreateNewAlertModal from "./createNewAlertModal";
-
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import Cookies from "js-cookie";
-import { set } from "date-fns";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import CreateAlertModal from "./createAlertModal";
@@ -13,18 +7,13 @@ import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
-import useNotification from "../../shared/notification/useNotification";
 import { Database } from "../../../supabase/database.types";
 
 interface AlertsPageProps {
   user: User;
 }
 
-const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
-
 const AlertsPage = (props: AlertsPageProps) => {
-  const { user } = props;
-  const { setNotification } = useNotification();
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] =
