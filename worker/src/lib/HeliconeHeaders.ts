@@ -152,7 +152,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     const heliconeAuth = this.headers.get("helicone-auth");
 
     if (heliconeAuth) {
-      console.log("heliconeAuth", heliconeAuth);
       return {
         _type: "bearer",
         token: heliconeAuth,
@@ -160,7 +159,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     }
     const heliconeAuthFallback = this.headers.get("authorization");
     if (heliconeAuthFallback) {
-      console.log("heliconeAuthFallback", heliconeAuthFallback);
       return {
         _type: "bearer",
         token: heliconeAuthFallback,
@@ -168,7 +166,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     }
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
     if (heliconeAuthJWT) {
-      console.log("heliconeAuthJWT", heliconeAuthJWT);
       return {
         _type: "jwt",
         token: heliconeAuthJWT,

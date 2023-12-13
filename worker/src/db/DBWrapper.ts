@@ -164,7 +164,6 @@ export class DBWrapper {
   }
 
   private async _getAuthParams(): Promise<Result<AuthParams, string>> {
-    console.log("this.auth: ", this.auth);
     switch (this.auth._type) {
       case "jwt":
         if (!this.auth.orgId) {
