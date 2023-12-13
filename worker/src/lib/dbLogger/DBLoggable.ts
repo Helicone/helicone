@@ -11,7 +11,6 @@ import { RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../constants";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
 import { InsertQueue } from "./insertQueue";
 import { logRequest } from "./logResponse";
@@ -32,10 +31,6 @@ export interface DBLoggableProps {
     userId?: string;
     heliconeProxyKeyId?: string;
     promptId?: string;
-    promptFormatter?: {
-      prompt: Prompt | ChatPrompt;
-      name: string;
-    };
     startTime: Date;
     bodyText?: string;
     path: string;
@@ -66,13 +61,6 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
-    promptFormatter:
-      proxyRequest.formattedPrompt?.prompt && proxyRequest.formattedPrompt?.name
-        ? {
-            prompt: proxyRequest.formattedPrompt.prompt,
-            name: proxyRequest.formattedPrompt.name,
-          }
-        : undefined,
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
@@ -120,7 +108,6 @@ export async function dbLoggableRequestFromAsyncLogModel(
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: providerRequestHeaders.userId ?? undefined,
-      promptFormatter: undefined,
       startTime: new Date(
         asyncLogModel.timing.startTime.seconds * 1000 +
           asyncLogModel.timing.startTime.milliseconds

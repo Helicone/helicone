@@ -5,12 +5,7 @@ import { Result, ok } from "../../results";
 import { IHeliconeHeaders } from "../HeliconeHeaders";
 import { RequestWrapper } from "../RequestWrapper";
 import { approvedDomains } from "../gateway/approvedDomains";
-import {
-  ChatPrompt,
-  FormattedPrompt,
-  Prompt,
-  extractPrompt,
-} from "../promptFormater/prompt";
+
 import { RateLimitOptions, RateLimitOptionsBuilder } from "./rateLimit";
 
 export type RetryOptions = {
@@ -41,10 +36,6 @@ export interface HeliconeProxyRequest {
   heliconeProperties: HeliconeProperties;
   userId?: string;
   isStream: boolean;
-  formattedPrompt: Nullable<{
-    prompt: Prompt | ChatPrompt;
-    name: string;
-  }>;
   startTime: Date;
   url: URL;
   requestWrapper: RequestWrapper;
@@ -70,61 +61,9 @@ export class HeliconeProxyRequestMapper {
   ) {
     this.tokenCalcUrl = env["TOKEN_COUNT_URL"];
   }
-  // WARNING
-  // This function is really weird and mutates the request object.
-  // Please be careful when using this function.
-  // It is used in the following places:
-  //  - At the beginning when this class is instantiated
-  private async runPromptFormatter(): Promise<
-    Result<FormattedPrompt | null, string>
-  > {
-    if (this.isPromptFormatterEnabled()) {
-      console.log("Running prompt formatter");
-      const text = await this.request.getText();
-      const promptFormatter = extractPrompt(JSON.parse(text));
-
-      if (promptFormatter.error !== null) {
-        this.heliconeErrors.push(promptFormatter.error);
-        return {
-          data: null,
-          error: promptFormatter.error,
-        };
-      }
-      const body = promptFormatter.data.body;
-
-      const requestWrapper = await RequestWrapper.create(
-        new Request(this.request.url.href, {
-          method: this.request.getMethod(),
-          headers: this.request.getHeaders(),
-          body,
-        }),
-        this.env
-      );
-
-      if (requestWrapper.error || !requestWrapper.data) {
-        return {
-          data: null,
-          error: requestWrapper.error ?? "RequestWrapper is null",
-        };
-      }
-
-      this.request = requestWrapper.data;
-
-      this.request.setHeader("Content-Length", `${body.length}`);
-      return { data: promptFormatter.data, error: null };
-    }
-    return { data: null, error: null };
-  }
 
   async tryToProxyRequest(): Promise<Result<HeliconeProxyRequest, string>> {
     const startTime = new Date();
-
-    const { error: promptFormatterError, data: promptFormatter } =
-      await this.runPromptFormatter();
-    if (promptFormatterError !== null) {
-      return { data: null, error: promptFormatterError };
-    }
-
     const { data: api_base, error: api_base_error } = this.getApiBase();
     if (api_base_error !== null) {
       return { data: null, error: api_base_error };
@@ -148,12 +87,6 @@ export class HeliconeProxyRequestMapper {
         bodyText: await this.getBody(),
         startTime,
         url: this.request.url,
-        formattedPrompt: promptFormatter
-          ? {
-              name: this.request.heliconeHeaders.promptName ?? "",
-              prompt: promptFormatter.prompt,
-            }
-          : null,
         requestId:
           this.request.heliconeHeaders.requestId ?? crypto.randomUUID(),
         requestWrapper: this.request,

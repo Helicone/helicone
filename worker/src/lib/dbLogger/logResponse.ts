@@ -2,7 +2,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
-import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { AuthParams, DBLoggableProps } from "./DBLoggable";
 import { InsertQueue } from "./insertQueue";
 
