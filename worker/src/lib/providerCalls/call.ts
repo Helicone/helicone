@@ -1,4 +1,7 @@
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+/// <reference types="@cloudflare/workers-types" />
+import { Response } from "@cloudflare/workers-types";
+
 export interface CallProps {
   headers: Headers;
   method: string;
@@ -49,10 +52,13 @@ export async function callProvider(props: CallProps): Promise<Response> {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    response = await fetch(new_url.href, { ...init, signal });
+    /// <reference types="@cloudflare/workers-types" />
+    response = await fetch(new_url.href, {
+      ...init,
+      signal,
+    });
   } else {
     response = await fetch(new_url.href, init);
   }
-
   return response;
 }

@@ -132,33 +132,8 @@ export async function logRequest(
   >
 > {
   try {
-    if (!request.providerApiKeyAuthHash) {
-      return { data: null, error: "Missing providerApiKeyAuthHash" };
-    }
-
-    if (!request.heliconeApiKeyAuthHash && !request.heliconeProxyKeyId) {
-      return { data: null, error: "Missing helicone auth" };
-    }
-
-    // TODO KILL THIS ISH
     const prompt = request.promptFormatter?.prompt;
-    const formattedPromptResult =
-      prompt !== undefined
-        ? await getPromptId(
-            dbClient,
-            prompt,
-            request.promptFormatter?.name ?? "unknown",
-            request.providerApiKeyAuthHash
-          )
-        : null;
-    if (
-      formattedPromptResult !== null &&
-      formattedPromptResult.error !== null
-    ) {
-      return { data: null, error: formattedPromptResult.error };
-    }
-    const formattedPromptId =
-      formattedPromptResult !== null ? formattedPromptResult.data : null;
+
     const prompt_values = prompt !== undefined ? prompt.values : null;
 
     if (!authParams.organizationId) {
@@ -200,11 +175,11 @@ export async function logRequest(
       id: request.requestId,
       path: request.path,
       body: request.omitLog ? {} : unsupportedImage(requestBody),
-      auth_hash: request.providerApiKeyAuthHash,
+      auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
       properties: request.properties,
-      formatted_prompt_id: formattedPromptId,
+      formatted_prompt_id: null,
       prompt_values: prompt_values,
       helicone_user: authParams.userId ?? null,
       helicone_api_key_id: authParams.heliconeApiKeyId ?? null,
@@ -217,7 +192,7 @@ export async function logRequest(
     const customPropertyRows = Object.entries(request.properties).map(
       (entry) => ({
         request_id: request.requestId,
-        auth_hash: request.providerApiKeyAuthHash ?? null,
+        auth_hash: null,
         user_id: null,
         key: entry[0],
         value: entry[1],

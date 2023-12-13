@@ -1,6 +1,7 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
+import { getProviderKeyFromProxyCache } from "../lib/RequestWrapper";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
 import { SecureCacheEnv, getAndStoreInCache } from "../lib/secureCache";
 import { Result, err, ok } from "../results";
@@ -8,16 +9,12 @@ import { RateLimiter } from "./RateLimiter";
 
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
+  heliconeApi: string
 ): Promise<Result<AuthParams, string>> {
-  if (!heliconeApiKeyHash) {
-    return { data: null, error: "Helicone api key not found" };
-  }
-
   const { data, error } = await dbClient
     .from("helicone_api_keys")
     .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
+    .eq("api_key_hash", await hash(heliconeApi))
     .eq("soft_delete", false)
     .single();
 
@@ -33,33 +30,26 @@ async function getHeliconeApiKeyRow(
     error: null,
   };
 }
-
 async function getHeliconeProxyKeyRow(
   dbClient: SupabaseClient<Database>,
-  proxyKeyId: string
+  { token }: BearerAuthProxy,
+  env: Env
 ): Promise<Result<AuthParams, string>> {
-  const result = await dbClient
-    .from("helicone_proxy_keys")
-    .select("org_id")
-    .eq("id", proxyKeyId)
-    .eq("soft_delete", false)
-    .single();
+  const { data, error } = await getProviderKeyFromProxyCache(
+    token,
+    env,
+    dbClient
+  );
 
-  if (result.error || !result.data) {
-    return {
-      data: null,
-      error: result.error.message,
-    };
+  if (error || !data) {
+    return err(error);
   }
 
-  return {
-    data: {
-      organizationId: result.data.org_id,
-      userId: undefined,
-      heliconeApiKeyId: undefined,
-    },
-    error: null,
-  };
+  return ok({
+    organizationId: data.organizationId,
+    userId: undefined,
+    heliconeApiKeyId: undefined,
+  });
 }
 
 async function getHeliconeJwtAuthParams(
@@ -130,11 +120,15 @@ export type JwtAuth = {
 
 export type BearerAuth = {
   _type: "bearer";
-  _bearerType: "heliconeProxyKey" | "heliconeApiKey";
   token: string;
 };
 
-export type HeliconeAuth = JwtAuth | BearerAuth;
+export type BearerAuthProxy = {
+  _type: "bearerProxy";
+  token: string;
+};
+
+export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
 
 export class DBWrapper {
   private supabaseClient: SupabaseClient<Database>;
@@ -144,7 +138,7 @@ export class DBWrapper {
   private authParams?: AuthParams;
   private tier?: string;
 
-  constructor(env: Env, private auth: HeliconeAuth) {
+  constructor(private env: Env, private auth: HeliconeAuth) {
     this.supabaseClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
@@ -170,6 +164,7 @@ export class DBWrapper {
   }
 
   private async _getAuthParams(): Promise<Result<AuthParams, string>> {
+    console.log("this.auth: ", this.auth);
     switch (this.auth._type) {
       case "jwt":
         if (!this.auth.orgId) {
@@ -183,27 +178,23 @@ export class DBWrapper {
           this.auth.token
         );
 
+      case "bearerProxy":
+        return getHeliconeProxyKeyRow(this.supabaseClient, this.auth, this.env);
       case "bearer":
-        return this.auth._bearerType === "heliconeProxyKey"
-          ? getHeliconeProxyKeyRow(this.supabaseClient, this.auth.token)
-          : getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
-      default:
-        return err("Invalid authentication.");
+        return getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
     }
+    throw new Error("Invalid authentication."); // this is unreachable
   }
 
   async getAuthParams(): Promise<Result<AuthParams, string>> {
     if (this.authParams !== undefined) {
-      return {
-        data: this.authParams,
-        error: null,
-      };
+      return ok(this.authParams);
     }
     const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
     const authParams = await getAndStoreInCache(
-      cacheKey,
-      this.secureCacheEnv,
-      async () => this._getAuthParams()
+      `authParams-${cacheKey}`,
+      this.env,
+      async () => await this._getAuthParams()
     );
 
     if (!authParams || authParams.error || !authParams.data) {

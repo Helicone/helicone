@@ -119,10 +119,10 @@ export async function updateLoopUsers(env: Env) {
       }),
     });
 
-    const resultJson = await result.json<{
+    const resultJson = (await result.json()) as {
       message?: string;
       result: "success" | "error";
-    }>();
+    };
 
     if (
       resultJson.result === "success" ||

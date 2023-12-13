@@ -36,7 +36,6 @@ export interface HeliconeProxyRequest {
 
   heliconeErrors: string[];
   providerAuthHash?: string;
-  heliconeAuthHash?: string;
   heliconeProxyKeyId?: string;
   api_base: string;
   heliconeProperties: HeliconeProperties;
@@ -130,11 +129,6 @@ export class HeliconeProxyRequestMapper {
     if (api_base_error !== null) {
       return { data: null, error: api_base_error };
     }
-    const { data: heliconeAuthHash, error: heliconeAuthHashError } =
-      await this.request.getHeliconeAuthHeader();
-    if (heliconeAuthHashError !== null) {
-      return { data: null, error: heliconeAuthHashError };
-    }
 
     return {
       data: {
@@ -145,7 +139,6 @@ export class HeliconeProxyRequestMapper {
         tokenCalcUrl: this.tokenCalcUrl,
         providerAuthHash: await this.request.getProviderAuthHeader(),
         omitOptions: this.request.heliconeHeaders.omitHeaders,
-        heliconeAuthHash: heliconeAuthHash ?? undefined,
         heliconeProxyKeyId: this.request.heliconeProxyKeyId,
         heliconeProperties: this.request.heliconeHeaders.heliconeProperties,
         userId: await this.request.getUserId(),

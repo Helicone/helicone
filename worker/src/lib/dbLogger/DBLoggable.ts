@@ -2,7 +2,7 @@ import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
-import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
+import { DBWrapper } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
 import { Result, err, ok } from "../../results";
 import { HeliconeHeaders } from "../HeliconeHeaders";
@@ -30,8 +30,6 @@ export interface DBLoggableProps {
   request: {
     requestId: string;
     userId?: string;
-    heliconeApiKeyAuthHash?: string;
-    providerApiKeyAuthHash?: string;
     heliconeProxyKeyId?: string;
     promptId?: string;
     promptFormatter?: {
@@ -65,8 +63,6 @@ export function dbLoggableRequestFromProxyRequest(
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
-    heliconeApiKeyAuthHash: proxyRequest.heliconeAuthHash,
-    providerApiKeyAuthHash: proxyRequest.providerAuthHash,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
@@ -122,8 +118,6 @@ export async function dbLoggableRequestFromAsyncLogModel(
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      heliconeApiKeyAuthHash: await requestWrapper.getProviderAuthHeader(),
-      providerApiKeyAuthHash: "N/A",
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: providerRequestHeaders.userId ?? undefined,
       promptFormatter: undefined,
@@ -417,20 +411,6 @@ export class DBLoggable {
     };
   }
 
-  auth(): HeliconeAuth {
-    return this.request.heliconeProxyKeyId
-      ? {
-          token: this.request.heliconeProxyKeyId,
-          _type: "bearer",
-          _bearerType: "heliconeProxyKey",
-        }
-      : {
-          token: this.request.heliconeApiKeyAuthHash ?? "",
-          _type: "bearer",
-          _bearerType: "heliconeApiKey",
-        };
-  }
-
   async log(
     db: {
       supabase: SupabaseClient<Database>; // TODO : Deprecate
@@ -442,13 +422,14 @@ export class DBLoggable {
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
-      return { data: null, error: error ?? "Helicone organization not found" };
+      return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
     const rateLimiter = await db.dbWrapper.getRateLimiter();
     if (rateLimiter.error !== null) {
       return rateLimiter;
     }
+
     const tier = await db.dbWrapper.getTier();
 
     if (tier.error !== null) {

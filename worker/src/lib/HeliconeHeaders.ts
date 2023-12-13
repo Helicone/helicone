@@ -150,14 +150,25 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
-    const heliconeAuthJWT = this.headers.get("helicone-jwt");
+
     if (heliconeAuth) {
+      console.log("heliconeAuth", heliconeAuth);
       return {
         _type: "bearer",
-        token: heliconeAuth.replace("Bearer ", ""),
+        token: heliconeAuth,
       };
     }
+    const heliconeAuthFallback = this.headers.get("authorization");
+    if (heliconeAuthFallback) {
+      console.log("heliconeAuthFallback", heliconeAuthFallback);
+      return {
+        _type: "bearer",
+        token: heliconeAuthFallback,
+      };
+    }
+    const heliconeAuthJWT = this.headers.get("helicone-jwt");
     if (heliconeAuthJWT) {
+      console.log("heliconeAuthJWT", heliconeAuthJWT);
       return {
         _type: "jwt",
         token: heliconeAuthJWT,

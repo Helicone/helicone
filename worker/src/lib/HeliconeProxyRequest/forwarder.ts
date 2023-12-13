@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env, Provider, hash } from "../..";
+import { Env, Provider } from "../..";
 import { DBWrapper } from "../../db/DBWrapper";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
@@ -118,11 +118,16 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
   async function log() {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError !== null) {
+      console.error("Error getting auth", authError);
+      return;
+    }
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        dbWrapper: new DBWrapper(env, loggable.auth()),
+        dbWrapper: new DBWrapper(env, auth),
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
           new ClickhouseClientWrapper(env),
@@ -133,12 +138,7 @@ export async function proxyForwarder(
       env.RATE_LIMIT_KV
     );
     if (res.error !== null) {
-      request
-        .getHeliconeAuthHeader()
-        .then((x) => hash(x.data || ""))
-        .then((_hash) => {
-          console.error("Error logging", res.error);
-        });
+      console.error("Error logging", res.error);
     }
   }
 
