@@ -14,6 +14,7 @@ import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { Menu, Transition } from "@headlessui/react";
+import { Tooltip } from "@mui/material";
 
 interface AlertsPageProps {
   user: User;
@@ -68,13 +69,14 @@ const AlertsPage = (props: AlertsPageProps) => {
             <ThemedTable
               columns={[
                 { name: "Name", key: "key_name", hidden: false },
+                { name: "Status", key: "status", hidden: false },
                 { name: "Created", key: "created_at", hidden: false },
                 { name: "Threshold", key: "threshold", hidden: false },
                 { name: "Metric", key: "metric", hidden: false },
                 { name: "Time Window", key: "time_window", hidden: false },
                 { name: "Emails", key: "emails", hidden: false },
               ]}
-              rows={alerts?.map((key: any) => {
+              rows={alerts?.map((key) => {
                 return {
                   ...key,
                   key_name: (
@@ -82,9 +84,28 @@ const AlertsPage = (props: AlertsPageProps) => {
                       {key.name}
                     </p>
                   ),
+                  status: (
+                    <div>
+                      {key.status === "resolved" ? (
+                        <Tooltip title={"Resolved"}>
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                          </span>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip title={"Triggered"}>
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </div>
+                  ),
                   created_at: (
                     <p className="text-gray-500">
-                      {getUSDate(new Date(key.created_at))}
+                      {getUSDate(new Date(key.created_at || ""))}
                     </p>
                   ),
                   threshold: (
@@ -151,7 +172,7 @@ const AlertsPage = (props: AlertsPageProps) => {
               { name: "Alert Name", key: "alertName", hidden: false },
               { name: "status", key: "status", hidden: false },
             ]}
-            rows={alertHistory?.map((key: any) => {
+            rows={alertHistory?.map((key) => {
               return {
                 ...key,
                 alertStartTime: (
