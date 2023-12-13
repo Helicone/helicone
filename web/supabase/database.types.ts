@@ -18,6 +18,7 @@ export interface Database {
           name: string
           org_id: string
           soft_delete: boolean
+          status: string
           threshold: number
           time_block_duration: number
           time_window: number
@@ -31,6 +32,7 @@ export interface Database {
           name: string
           org_id: string
           soft_delete?: boolean
+          status?: string
           threshold: number
           time_block_duration?: number
           time_window: number
@@ -44,6 +46,7 @@ export interface Database {
           name?: string
           org_id?: string
           soft_delete?: boolean
+          status?: string
           threshold?: number
           time_block_duration?: number
           time_window?: number
@@ -63,6 +66,7 @@ export interface Database {
           alert_end_time: string | null
           alert_id: string
           alert_metric: string
+          alert_name: string
           alert_start_time: string
           created_at: string | null
           id: string
@@ -76,6 +80,7 @@ export interface Database {
           alert_end_time?: string | null
           alert_id: string
           alert_metric: string
+          alert_name: string
           alert_start_time: string
           created_at?: string | null
           id?: string
@@ -89,6 +94,7 @@ export interface Database {
           alert_end_time?: string | null
           alert_id?: string
           alert_metric?: string
+          alert_name?: string
           alert_start_time?: string
           created_at?: string | null
           id?: string
@@ -1395,13 +1401,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
@@ -1409,13 +1415,13 @@ export interface Database {
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }

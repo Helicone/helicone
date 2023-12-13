@@ -1,286 +1,216 @@
-import { useState } from "react";
-import { User } from "@supabase/auth-helpers-nextjs";
-import { BellSlashIcon, BellIcon } from "@heroicons/react/24/solid";
+import { Fragment, useState } from "react";
 
-// Components
-import CreateNewAlertModal from "./createNewAlertModal";
+import { useOrg } from "../../shared/layout/organizationContext";
+import useAlertsPage from "./useAlertsPage";
+import CreateAlertModal from "./createAlertModal";
+import {
+  BellIcon,
+  ChevronDownIcon,
+  NewspaperIcon,
+} from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
-import { Database } from "../../../supabase/database.types";
 import ThemedTable from "../../shared/themed/themedTable";
+import { User } from "@supabase/auth-helpers-react";
+import { Database } from "../../../supabase/database.types";
+import { getUSDate } from "../../shared/utils/utils";
+import { Menu, Transition } from "@headlessui/react";
+import { Tooltip } from "@mui/material";
 
 interface AlertsPageProps {
   user: User;
-  orgId: string;
-  // TODO: add types
-  alerts: any;
-  alertIsLoading: boolean;
-  refreshAlert: () => void;
-  alertHistory: any;
-  alertHistoryIsLoading: boolean;
-  refreshAlertHistory: () => void;
 }
 
 const AlertsPage = (props: AlertsPageProps) => {
-  const {
-    user,
-    orgId,
-    alerts,
-    alertIsLoading,
-    refreshAlert,
-    alertHistory,
-    alertHistoryIsLoading,
-    refreshAlertHistory,
-  } = props;
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
-  const [deleteAlertModal, setDeleteAlertModal] = useState(false);
-  const [selectedAlertId, setSelectedAlertId] = useState<
-    Database["public"]["Tables"]["alert_history"]["Row"] | null
-  >(null);
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [selectedAlert, setSelectedAlert] =
+    useState<Database["public"]["Tables"]["alert"]["Row"]>();
+  const orgContext = useOrg();
 
-  const handleOpenDeleteModal = (
-    alertId: Database["public"]["Tables"]["alert_history"]["Row"]
-  ) => {
-    setSelectedAlertId(alertId);
-    setDeleteAlertModal(true);
-  };
+  const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
+    orgContext?.currentOrg.id || ""
+  );
 
   return (
-    <>
-      <div className="border-b border-gray-200 dark:border-gray-800 pb-4 mb-4">
+    <div className="flex flex-col space-y-16">
+      <div className="flex flex-col space-y-8">
         {/* Active Alerts */}
-        <div className="items-start justify-between sm:flex ">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-center">
+          <div className="flex flex-col space-y-1">
             <h4 className="text-gray-800 text-xl font-semibold dark:text-gray-200">
               Active Alerts
             </h4>
-            <p className="mt-2 text-gray-600 text-base sm:text-sm dark:text-gray-400">
+            <p className="text-gray-600 text-base sm:text-sm dark:text-gray-400">
               These are the alerts that are currently active for your
               organization
             </p>
           </div>
           <button
             onClick={() => setCreateNewAlertModal(true)}
-            className="flex flex-row items-center gap-2 items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
             Create a new alert
           </button>
         </div>
-        <ul className="mt-4 divide-y overflow-auto">
-          {alerts?.data?.length === 0 ? (
-            // No alerts
+        <ul className="">
+          {alerts.length === 0 ? (
             <button
-              onClick={() => {
-                setCreateNewAlertModal(true);
-              }}
+              onClick={() => setCreateNewAlertModal(true)}
               className="relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <div className="w-full justify-center align-middle items-center">
-                <BellIcon className="h-10 w-10 mx-auto text-gray-800 dark:text-gray-200" />
+                <BellIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
               </div>
-
-              <span className="mt-2 block text-sm font-medium text-gray-800 dark:text-gray-200">
-                Click here to create a new alert
+              <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                Click here to generate a new alert
               </span>
             </button>
           ) : (
             <ThemedTable
               columns={[
-                { name: "Alert Name", key: "key_name", hidden: false },
-                { name: "Metric", key: "metric", hidden: false },
+                { name: "Name", key: "key_name", hidden: false },
+                { name: "Status", key: "status", hidden: false },
+                { name: "Created", key: "created_at", hidden: false },
                 { name: "Threshold", key: "threshold", hidden: false },
+                { name: "Metric", key: "metric", hidden: false },
                 { name: "Time Window", key: "time_window", hidden: false },
                 { name: "Emails", key: "emails", hidden: false },
-                { name: "Created", key: "created_at", hidden: false },
               ]}
-              rows={alerts?.data?.map(
-                (key: Database["public"]["Tables"]["alert"]["Row"]) => {
-                  return {
-                    ...key,
-                    key_name: (
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {key.name}
-                      </p>
-                    ),
-                    metric: (
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {key.metric}
-                      </p>
-                    ),
-                    threshold: (
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {key.threshold}%
-                      </p>
-                    ),
-                    time_window: (
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {key.time_window / 60000} minutes
-                      </p>
-                    ),
-                    emails: (
-                      // use bg-gray-100 dark:bg-gray-900 dont use ThemedPill
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {key.emails.map((email: string, index: number) => {
-                          return (
-                            <span
-                              key={index}
-                              className="bg-gray-100 dark:bg-gray-900 rounded-md px-2 py-1 text-sm mr-1"
-                            >
-                              {email}
-                            </span>
-                          );
-                        })}
-                      </p>
-                    ),
-                    created_at: (
-                      <p className="text-gray-500">
-                        {new Date(key.created_at as string).toLocaleString()}
-                      </p>
-                    ),
-                  };
-                }
-              )}
-              deleteHandler={handleOpenDeleteModal}
-              // editHandler={onEditHandler}
+              rows={alerts?.map((key) => {
+                return {
+                  ...key,
+                  key_name: (
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                      {key.name}
+                    </p>
+                  ),
+                  status: (
+                    <div>
+                      {key.status === "resolved" ? (
+                        <Tooltip title={"Resolved"}>
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                          </span>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip title={"Triggered"}>
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </div>
+                  ),
+                  created_at: (
+                    <p className="text-gray-500">
+                      {getUSDate(new Date(key.created_at || ""))}
+                    </p>
+                  ),
+                  threshold: (
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {`${key.threshold}%`}
+                    </p>
+                  ),
+                  metric: (
+                    <p className="text-xs text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-2 py-1 w-fit">
+                      {key.metric}
+                    </p>
+                  ),
+                  time_window: (
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {/* convert to minutes */}
+                      {`${key.time_window / 60000} minutes`}
+                    </p>
+                  ),
+                  emails: (
+                    <div className="text-gray-900 dark:text-gray-100 overflow-auto">
+                      {key.emails.join(", ")}
+                    </div>
+                  ),
+                };
+              })}
+              deleteHandler={(row) => {
+                setDeleteAlertOpen(true);
+                setSelectedAlert(row);
+              }}
             />
           )}
         </ul>
       </div>
-      <div>
-        {/* Alert History */}
-        <div className="items-start justify-between sm:flex ">
-          <div>
+      <div className="flex flex-col space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center">
+          <div className="flex flex-col space-y-1">
             <h4 className="text-gray-800 text-xl font-semibold dark:text-gray-200">
               Alert History
             </h4>
-            <p className="mt-2 text-gray-600 text-base sm:text-sm dark:text-gray-400">
+            <p className="text-gray-600 text-base sm:text-sm dark:text-gray-400">
               These are the alerts that have been triggered for your
               organization
             </p>
           </div>
         </div>
-        <ul className="mt-12 divide-y">
-          {alertHistory?.data?.length === 0 ? (
-            // No alerts
-            <div className="flex justify-center items-center flex-col mt-10">
-              <BellSlashIcon className="w-12 h-12 text-gray-400" />
-              <p className="text-sm text-gray-800 dark:text-gray-100">
-                No alert history
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                You can sleep easy knowing that no alerts have been triggered
-              </p>
+        {alertHistory.length === 0 ? (
+          <div className="relative block w-full rounded-lg border-2 border-dashed hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            <div className="w-full justify-center align-middle items-center">
+              <NewspaperIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
             </div>
-          ) : (
-            <ThemedTable
-              columns={[
-                {
-                  name: "Alert Name",
-                  key: "alertName",
-                  hidden: false,
-                },
-                {
-                  name: "Alert Start Time",
-                  key: "alertStartTime",
-                  hidden: false,
-                },
-                {
-                  name: "Alert End Time",
-                  key: "alertEndTime",
-                  hidden: false,
-                },
-                {
-                  name: "Triggered Value",
-                  key: "triggeredValue",
-                  hidden: false,
-                },
-                {
-                  name: "Status",
-                  key: "status",
-                  hidden: false,
-                },
-              ]}
-              rows={alertHistory?.data?.map(
-                (key: Database["public"]["Tables"]["alert_history"]["Row"]) => {
-                  return {
-                    ...key,
-                    alertName: (
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {/* Name will come later */}
-                        {key.alert_metric}
-                      </p>
-                    ),
-                    alertStartTime: (
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {new Date(key.alert_start_time).toLocaleDateString()}
-                      </p>
-                    ),
-                    alertEndTime: (
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {new Date(
-                          key.alert_end_time as string
-                        ).toLocaleDateString()}
-                      </p>
-                    ),
-                    triggeredValue: (
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {key.triggered_value}
-                      </p>
-                    ),
-                    status: (
-                      <p className="text-gray-500">
-                        {key.status === "triggered" ? (
-                          <span className="bg-red-100 dark:bg-red-900 rounded-md px-2 py-1 text-sm mr-1">
-                            {key.status}
-                          </span>
-                        ) : (
-                          <span className="bg-green-100 dark:bg-green-900 rounded-md px-2 py-1 text-sm mr-1">
-                            {key.status}
-                          </span>
-                        )}
-                      </p>
-                    ),
-                  };
-                }
-              )}
-            />
-          )}
-        </ul>
+            <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+              No alerts have been triggered yet
+            </span>
+          </div>
+        ) : (
+          // List alert history
+          <ThemedTable
+            columns={[
+              {
+                name: "Alert Start Time",
+                key: "alertStartTime",
+                hidden: false,
+              },
+              { name: "Alert Name", key: "alertName", hidden: false },
+              { name: "status", key: "status", hidden: false },
+            ]}
+            rows={alertHistory?.map((key) => {
+              return {
+                ...key,
+                alertStartTime: (
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    {key.alert_start_time}
+                  </p>
+                ),
+                alertName: (
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {key.alert_metric}
+                  </p>
+                ),
+                status: (
+                  <p className="text-gray-500">
+                    {new Date(key.alert_start_time).toLocaleString()}
+                  </p>
+                ),
+              };
+            })}
+          />
+        )}
       </div>
-      <CreateNewAlertModal
+      <CreateAlertModal
         open={createNewAlertModal}
         setOpen={setCreateNewAlertModal}
-        orgId={orgId}
         onSuccess={() => {
-          refreshAlert();
-          refreshAlertHistory();
+          refetch();
         }}
       />
       <DeleteAlertModal
-        open={deleteAlertModal}
-        setOpen={setDeleteAlertModal}
-        orgId={orgId}
-        alertId={selectedAlertId}
+        open={deleteAlertOpen}
+        setOpen={setDeleteAlertOpen}
         onSuccess={() => {
-          refreshAlert();
-          refreshAlertHistory();
-          setSelectedAlertId(null); // Reset selected alert ID
+          refetch();
         }}
+        alertId={selectedAlert?.id || ""}
       />
-    </>
+    </div>
   );
 };
 
