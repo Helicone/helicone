@@ -1,3 +1,5 @@
+import { Headers } from "@cloudflare/workers-types";
+
 type Nullable<T> = T | null;
 
 export type HeliconeFallbackCode = number | { from: number; to: number };

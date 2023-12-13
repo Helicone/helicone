@@ -2,15 +2,14 @@
 // It also allows us to add additional functionality to the request object
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
-
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
-import { Result } from "../results";
-import { HeliconeHeaders } from "./HeliconeHeaders";
 import { Database } from "../../supabase/database.types";
-import { checkLimits } from "./limits/check";
-import { getFromCache, storeInCache } from "./secureCache";
 import { HeliconeAuth } from "../db/DBWrapper";
+import { Result, err } from "../results";
+import { HeliconeHeaders } from "./HeliconeHeaders";
+import { checkLimits } from "./limits/check";
+import { getAndStoreInCache } from "./secureCache";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -130,6 +129,7 @@ export class RequestWrapper {
     this.bodyKeyOverride = bodyKeyOverride;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private overrideBody(body: any, override: object): object {
     for (const [key, value] of Object.entries(override)) {
       if (key in body && typeof value !== "object") {
@@ -257,26 +257,15 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      let providerKeyRow: {
-        providerKey?: string;
-        proxyKeyId?: string;
-      } | null = await getFromCache(authKey, env).then((x) =>
-        x ? JSON.parse(x) : null
+      const { data, error } = await getAndStoreInCache(
+        `getProviderKeyFromProxy-${authKey}`,
+        env,
+        async () => await this.getProviderKeyFromProxy(authKey, env)
       );
-      if (!providerKeyRow) {
-        const { data, error } = await this.getProviderKeyFromProxy(
-          authKey,
-          env
-        );
-        if (error || !data || !data.providerKey || !data.proxyKeyId) {
-          return {
-            data: null,
-            error: `Proxy key not found. Error: ${error}`,
-          };
-        }
-        providerKeyRow = data;
-        await storeInCache(authKey, JSON.stringify(providerKeyRow), this.env);
+      if (error || !data || !data.providerKey || !data.proxyKeyId) {
+        return err(`Proxy key not found. Error: ${error}`);
       }
+      const providerKeyRow = data;
 
       this.heliconeProxyKeyId = providerKeyRow.proxyKeyId;
       this.authorization = providerKeyRow.providerKey;

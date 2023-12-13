@@ -1,6 +1,6 @@
-import { HeliconeProxyRequestMapper } from "./mapper";
+import { createClient } from "@supabase/supabase-js";
 import { Env, Provider, hash } from "../..";
-import { getCacheSettings } from "../cache/cacheSettings";
+import { DBWrapper } from "../../db/DBWrapper";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
@@ -9,11 +9,11 @@ import {
   recordCacheHit,
   saveToCache,
 } from "../cache/cacheFunctions";
-import { handleProxyRequest } from "./handler";
+import { getCacheSettings } from "../cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
-import { createClient } from "@supabase/supabase-js";
 import { InsertQueue } from "../dbLogger/insertQueue";
-import { DBWrapper } from "../../db/DBWrapper";
+import { handleProxyRequest } from "./handler";
+import { HeliconeProxyRequestMapper } from "./mapper";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -137,7 +137,7 @@ export async function proxyForwarder(
       request
         .getHeliconeAuthHeader()
         .then((x) => hash(x.data || ""))
-        .then((hash) => {
+        .then((_hash) => {
           console.error("Error logging", res.error);
         });
     }

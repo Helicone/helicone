@@ -1,9 +1,9 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Database, Json } from "../../supabase/database.types";
 import { Env, hash } from "..";
+import { Database } from "../../supabase/database.types";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
+import { SecureCacheEnv, getAndStoreInCache } from "../lib/secureCache";
 import { Result, err, ok } from "../results";
-import { SecureCacheEnv, getFromCache, storeInCache } from "../lib/secureCache";
 import { RateLimiter } from "./RateLimiter";
 
 async function getHeliconeApiKeyRow(
@@ -169,6 +169,29 @@ export class DBWrapper {
     return ok(this.rateLimiter);
   }
 
+  private async _getAuthParams(): Promise<Result<AuthParams, string>> {
+    switch (this.auth._type) {
+      case "jwt":
+        if (!this.auth.orgId) {
+          return err(
+            "Helicone organization id is required for JWT authentication."
+          );
+        }
+        return getHeliconeJwtAuthParams(
+          this.supabaseClient,
+          this.auth.orgId,
+          this.auth.token
+        );
+
+      case "bearer":
+        return this.auth._bearerType === "heliconeProxyKey"
+          ? getHeliconeProxyKeyRow(this.supabaseClient, this.auth.token)
+          : getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
+      default:
+        return err("Invalid authentication.");
+    }
+  }
+
   async getAuthParams(): Promise<Result<AuthParams, string>> {
     if (this.authParams !== undefined) {
       return {
@@ -177,56 +200,17 @@ export class DBWrapper {
       };
     }
     const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
-    const cachedAuthParams = await getFromCache(cacheKey, this.secureCacheEnv);
-    if (cachedAuthParams !== null) {
-      return {
-        data: JSON.parse(cachedAuthParams),
-        error: null,
-      };
-    }
-
-    let authParams: Result<AuthParams, string> | undefined;
-    switch (this.auth._type) {
-      case "jwt":
-        if (!this.auth.orgId) {
-          return {
-            data: null,
-            error:
-              "Helicone organization id is required for JWT authentication.",
-          };
-        }
-        authParams = await getHeliconeJwtAuthParams(
-          this.supabaseClient,
-          this.auth.orgId,
-          this.auth.token
-        );
-        break;
-
-      case "bearer":
-        authParams =
-          this.auth._bearerType === "heliconeProxyKey"
-            ? await getHeliconeProxyKeyRow(this.supabaseClient, this.auth.token)
-            : await getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
-        break;
-
-      default:
-        return { data: null, error: "Invalid authentication." };
-    }
+    const authParams = await getAndStoreInCache(
+      cacheKey,
+      this.secureCacheEnv,
+      async () => this._getAuthParams()
+    );
 
     if (!authParams || authParams.error || !authParams.data) {
-      return {
-        data: null,
-        error: authParams?.error || "Invalid authentication.",
-      };
+      return err(authParams?.error || "Invalid authentication.");
     }
 
-    await storeInCache(
-      cacheKey,
-      JSON.stringify(authParams.data),
-      this.secureCacheEnv
-    );
     this.authParams = authParams.data;
-
     return authParams;
   }
 
@@ -238,32 +222,27 @@ export class DBWrapper {
     if (authParams.error !== null) {
       return err(authParams.error);
     }
-    const cachedTier = await getFromCache(
+
+    const tier = await getAndStoreInCache<string, string>(
       `tier-${authParams.data.organizationId}`,
-      this.secureCacheEnv
+      this.secureCacheEnv,
+      async () => {
+        const { data, error } = await this.supabaseClient
+          .from("organization")
+          .select("*")
+          .eq("id", authParams.data.organizationId)
+          .single();
+
+        if (error !== null) {
+          return err(error.message);
+        }
+        return ok(data?.tier ?? "free");
+      }
     );
-
-    if (cachedTier !== null) {
-      this.tier = cachedTier;
-      return ok(this.tier);
+    if (tier.error !== null) {
+      return err(tier.error);
     }
-
-    const { data, error } = await this.supabaseClient
-      .from("organization")
-      .select("*")
-      .eq("id", authParams.data.organizationId)
-      .single();
-
-    if (error !== null) {
-      return err(error.message);
-    }
-    this.tier = data?.tier ?? "free";
-
-    await storeInCache(
-      `tier-${authParams.data.organizationId}`,
-      this.tier,
-      this.secureCacheEnv
-    );
+    this.tier = tier.data;
 
     return ok(this.tier);
   }
