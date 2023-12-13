@@ -429,11 +429,15 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.unauthorized();
       }
 
-      const alert = await requestWrapper.getJson<
+      const requestData = await requestWrapper.getJson<
         Database["public"]["Tables"]["alert"]["Insert"]
       >();
 
-      alert.status = "resolved";
+      const alert = {
+        ...requestData,
+        status: "resolved",
+        org_id: authParams.organizationId,
+      };
 
       const { error: validateError } = validateAlertCreate(alert);
       if (validateError !== null) {
