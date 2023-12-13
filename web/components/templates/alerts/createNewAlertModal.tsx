@@ -16,6 +16,18 @@ interface CreateNewAlertModalProps {
   onSuccess: () => void;
 }
 
+/**
+ * Component for creating a new alert modal.
+ *
+ * @component
+ * @param {object} props - The component props.
+ * @param {boolean} props.open - Flag indicating whether the modal is open.
+ * @param {function} props.setOpen - Function to set the open state of the modal.
+ * @param {User | null} props.user - The user object.
+ * @param {string} props.orgId - The organization ID.
+ * @param {function} props.onSuccess - Function to be called on successful creation of an alert.
+ * @returns {JSX.Element} The JSX element representing the create new alert modal.
+ */
 const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   const { open, setOpen, user, orgId, onSuccess } = props;
   const [isLoading, setIsLoading] = useState(false);
@@ -108,22 +120,7 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
       return;
     }
 
-    // http://localhost:8787/alerts
-    //   curl --request POST \
-    //   --url http://localhost:8787/alerts \
-    //   --header 'Content-Type: application/json' \
-    //   --header 'User-Agent: insomnia/8.4.5' \
-    //   --data '{
-    //   "name": "Error Rate 50%",
-    //   "metric": "response.status",
-    //   "threshold": 50,
-    //   "time_window": 300000,
-    //   "emails": ["colegottdank@gmail.com"],
-    //   "org_id": "83635a30-5ba6-41a8-8cc6-fb7df941b24a"
-    // }
-
-    // TODO: Needs to be dynamic
-    const res = fetch(`http://localhost:8787/alerts`, {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH}/alerts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -141,13 +138,12 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         setNotification("Successfully created alert", "success");
         setIsLoading(false);
         onSuccess();
+        setOpen(false);
       })
       .catch((err) => {
-        console.log(err);
         setNotification("Failed to create alert", "error");
         setIsLoading(false);
       });
@@ -156,8 +152,6 @@ const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       <form
-        action="javascript:void(0)"
-        method="POST"
         onSubmit={handleSubmitHandler}
         className="flex flex-col space-y-4 w-[400px]"
       >

@@ -1,64 +1,47 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-import { BellSlashIcon } from "@heroicons/react/24/solid";
+import { BellSlashIcon, BellIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import ThemedTable from "../../shared/themed/themedTable";
-import useNotification from "../../shared/notification/useNotification";
 
 // Components
 import CreateNewAlertModal from "./createNewAlertModal";
-
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import Cookies from "js-cookie";
-import { set } from "date-fns";
+import DeleteAlertModal from "./deleteAlertModal";
 
 interface AlertsPageProps {
   user: User;
   orgId: string;
-  alerts: Array<Database["public"]["Tables"]["alert"]["Row"]>;
-  alertHistory: Array<Database["public"]["Tables"]["alert_history"]["Row"]>;
+  // TODO: add types
+  alerts: any;
+  alertIsLoading: boolean;
+  refreshAlert: () => void;
+  alertHistory: any;
+  alertHistoryIsLoading: boolean;
+  refreshAlertHistory: () => void;
 }
 
 const AlertsPage = (props: AlertsPageProps) => {
-  const { user, orgId, alerts, alertHistory } = props;
-  const { setNotification } = useNotification();
+  const {
+    user,
+    orgId,
+    alerts,
+    alertIsLoading,
+    refreshAlert,
+    alertHistory,
+    alertHistoryIsLoading,
+    refreshAlertHistory,
+  } = props;
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
+  const [deleteAlertModal, setDeleteAlertModal] = useState(false);
+  const [selectedAlertId, setSelectedAlertId] = useState<
+    Database["public"]["Tables"]["alert_history"]["Row"] | null
+  >(null);
 
-  const handleDeleteAlert = async (id: string) => {
-    try {
-      console.log("Deleting alert with id:", id);
-      // Auth
-      const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-      if (!authFromCookie) {
-        setNotification("Please login to create an alert", "error");
-        return;
-      }
-      const decodedCookie = decodeURIComponent(authFromCookie);
-      const parsedCookie = JSON.parse(decodedCookie);
-      const jwtToken = parsedCookie[0];
-      const response = await fetch(`http://localhost:8787/alert/${id["id"]}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "helicone-jwt": jwtToken,
-          "helicone-org-id": orgId,
-        },
-      });
-
-      if (!response.ok) {
-        setNotification(
-          "We were unable to delete your alert successfully!\n Refresh your page to try again...",
-          "error"
-        );
-      }
-      window.location.reload();
-      // Handle the response
-    } catch (error) {
-      setNotification(
-        "We were unable to delete your alert successfully! Refresh your page to try again...",
-        "error"
-      );
-    }
+  const handleOpenDeleteModal = (
+    alertId: Database["public"]["Tables"]["alert_history"]["Row"]
+  ) => {
+    setSelectedAlertId(alertId);
+    setDeleteAlertModal(true);
   };
 
   return (
@@ -77,7 +60,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           </div>
           <button
             onClick={() => setCreateNewAlertModal(true)}
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex flex-row items-center gap-2 items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -96,71 +79,83 @@ const AlertsPage = (props: AlertsPageProps) => {
             Create a new alert
           </button>
         </div>
-        <ul className="mt-12 divide-y overflow-auto">
-          {alerts.length === 0 ? (
+        <ul className="mt-4 divide-y overflow-auto">
+          {alerts?.data?.length === 0 ? (
             // No alerts
-            <div className="flex justify-center items-center flex-col mt-10">
-              <BellSlashIcon className="w-12 h-12 text-gray-400" />
-              <p className="text-sm text-gray-800 dark:text-gray-100">
-                No alerts
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                There are no alerts for your organization
-              </p>
-            </div>
+            <button
+              onClick={() => {
+                setCreateNewAlertModal(true);
+              }}
+              className="relative block w-full rounded-lg border-2 border-dashed bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              <div className="w-full justify-center align-middle items-center">
+                <BellIcon className="h-10 w-10 mx-auto text-gray-800 dark:text-gray-200" />
+              </div>
+
+              <span className="mt-2 block text-sm font-medium text-gray-800 dark:text-gray-200">
+                Click here to create a new alert
+              </span>
+            </button>
           ) : (
             <ThemedTable
               columns={[
-                { name: "Name", key: "key_name", hidden: false },
+                { name: "Alert Name", key: "key_name", hidden: false },
+                { name: "Metric", key: "metric", hidden: false },
+                { name: "Threshold", key: "threshold", hidden: false },
+                { name: "Time Window", key: "time_window", hidden: false },
                 { name: "Emails", key: "emails", hidden: false },
                 { name: "Created", key: "created_at", hidden: false },
               ]}
-              rows={alerts?.map((key) => {
-                return {
-                  ...key,
-                  key_name: (
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">
-                      {key.name}
-                    </p>
-                  ),
-                  emails: (
-                    <p className="text-gray-900 dark:text-gray-100">
-                      {key.emails}
-                    </p>
-                  ),
-                  created_at: (
-                    <p className="text-gray-500">
-                      {new Date(key.created_at).toLocaleString()}
-                    </p>
-                  ),
-                };
-              })}
-              deleteHandler={handleDeleteAlert}
+              rows={alerts?.data?.map(
+                (key: Database["public"]["Tables"]["alert"]["Row"]) => {
+                  return {
+                    ...key,
+                    key_name: (
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        {key.name}
+                      </p>
+                    ),
+                    metric: (
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {key.metric}
+                      </p>
+                    ),
+                    threshold: (
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {key.threshold}
+                      </p>
+                    ),
+                    time_window: (
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {key.time_window}
+                      </p>
+                    ),
+                    emails: (
+                      // use bg-gray-100 dark:bg-gray-900 dont use ThemedPill
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {key.emails.map((email: string, index: number) => {
+                          return (
+                            <span
+                              key={index}
+                              className="bg-gray-100 dark:bg-gray-900 rounded-md px-2 py-1 text-sm mr-1"
+                            >
+                              {email}
+                            </span>
+                          );
+                        })}
+                      </p>
+                    ),
+                    created_at: (
+                      <p className="text-gray-500">
+                        {new Date(key.created_at as string).toLocaleString()}
+                      </p>
+                    ),
+                  };
+                }
+              )}
+              deleteHandler={handleOpenDeleteModal}
               // editHandler={onEditHandler}
             />
-            // alerts.map((item, idx) => (
-            //   <li
-            //     key={item.id}
-            //     className="py-5 flex items-start justify-between"
-            //   >
-            //     <div className="flex gap-3">
-            //       <div>
-            //         <span className="block text-sm text-gray-700 font-semibold">
-            //           {item.name}
-            //         </span>
-            //         <span className="block text-sm text-gray-600">
-            //           {item.emails}
-            //         </span>
-            //       </div>
-            //     </div>
-            //     <a
-            //       href="javascript:void(0)"
-            //       className="text-red-700 text-sm border rounded-lg px-3 py-2 duration-150 bg-white hover:bg-red-100"
-            //     >
-            //       Delete
-            //     </a>
-            //   </li>
-            // ))
           )}
         </ul>
       </div>
@@ -178,7 +173,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           </div>
         </div>
         <ul className="mt-12 divide-y">
-          {alertHistory.length === 0 ? (
+          {alertHistory?.data?.length === 0 ? (
             // No alerts
             <div className="flex justify-center items-center flex-col mt-10">
               <BellSlashIcon className="w-12 h-12 text-gray-400" />
@@ -190,38 +185,75 @@ const AlertsPage = (props: AlertsPageProps) => {
               </p>
             </div>
           ) : (
-            // List alert history
             <ThemedTable
               columns={[
+                {
+                  name: "Alert Name",
+                  key: "alertName",
+                  hidden: false,
+                },
                 {
                   name: "Alert Start Time",
                   key: "alertStartTime",
                   hidden: false,
                 },
-                { name: "Alert Name", key: "alertName", hidden: false },
-                { name: "status", key: "status", hidden: false },
+                {
+                  name: "Alert End Time",
+                  key: "alertEndTime",
+                  hidden: false,
+                },
+                {
+                  name: "Triggered Value",
+                  key: "triggeredValue",
+                  hidden: false,
+                },
+                {
+                  name: "Status",
+                  key: "status",
+                  hidden: false,
+                },
               ]}
-              rows={alertHistory?.map((key) => {
-                return {
-                  ...key,
-                  alertStartTime: (
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">
-                      {key.alert_start_time}
-                    </p>
-                  ),
-                  alertName: (
-                    <p className="text-gray-900 dark:text-gray-100">
-                      {/* Name will come later */}
-                      {key.alert_metric}
-                    </p>
-                  ),
-                  status: (
-                    <p className="text-gray-500">
-                      {new Date(key.alert_start_time).toLocaleString()}
-                    </p>
-                  ),
-                };
-              })}
+              rows={alertHistory?.data?.map(
+                (key: Database["public"]["Tables"]["alert_history"]["Row"]) => {
+                  return {
+                    ...key,
+                    alertName: (
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {/* Name will come later */}
+                        {key.alert_metric}
+                      </p>
+                    ),
+                    alertStartTime: (
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        {key.alert_start_time}
+                      </p>
+                    ),
+                    alertEndTime: (
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {key.alert_end_time}
+                      </p>
+                    ),
+                    triggeredValue: (
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {key.triggered_value}
+                      </p>
+                    ),
+                    status: (
+                      <p className="text-gray-500">
+                        {key.status === "triggered" ? (
+                          <span className="bg-red-100 dark:bg-red-900 rounded-md px-2 py-1 text-sm mr-1">
+                            {key.status}
+                          </span>
+                        ) : (
+                          <span className="bg-green-100 dark:bg-green-900 rounded-md px-2 py-1 text-sm mr-1">
+                            {key.status}
+                          </span>
+                        )}
+                      </p>
+                    ),
+                  };
+                }
+              )}
             />
           )}
         </ul>
@@ -232,9 +264,20 @@ const AlertsPage = (props: AlertsPageProps) => {
         user={user}
         orgId={orgId}
         onSuccess={() => {
-          // refresh page
-          // TODO: just refresh the table
-          window.location.reload();
+          refreshAlert();
+          refreshAlertHistory();
+        }}
+      />
+      <DeleteAlertModal
+        open={deleteAlertModal}
+        setOpen={setDeleteAlertModal}
+        user={user}
+        orgId={orgId}
+        alertId={selectedAlertId}
+        onSuccess={() => {
+          refreshAlert();
+          refreshAlertHistory();
+          setSelectedAlertId(null); // Reset selected alert ID
         }}
       />
     </>
