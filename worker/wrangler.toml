@@ -117,3 +117,12 @@ new_classes = ["AtomicRateLimiter"]
 [[migrations]]
 tag = "v2"
 new_classes = ["AtomicAlerter"]
+
+
+[[migrations]]
+tag = "v3"
+delete_classes = ["AtomicAlerter"]
+
+[[migrations]]
+tag = "v4"
+new_classes = ["AtomicAlerter"]
