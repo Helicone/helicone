@@ -277,10 +277,6 @@ export class AtomicAlerter {
 
       await txn.put(ALERT_KEY, this.alerts);
     });
-
-    console.log("Alerts", JSON.stringify(this.alerts));
-    console.log("Active alerts", activeAlerts);
-
     return { data: activeAlerts, error: null };
   }
 
@@ -389,7 +385,7 @@ export class AtomicAlerter {
       firstBelowThresholdAt: undefined,
     };
 
-    return this.mapAlertToUpdate(alertStatusUpdate, alert, alert.emails);
+    return this.mapAlertToUpdate(alertStatusUpdate, alert);
   }
 
   private triggerAlertState(
@@ -403,13 +399,12 @@ export class AtomicAlerter {
       firstBelowThresholdAt: undefined,
     };
 
-    return this.mapAlertToInsert(alertStatusUpdate, alert, alert.emails);
+    return this.mapAlertToInsert(alertStatusUpdate, alert);
   }
 
   private mapAlertToInsert(
     alertUpdate: AlertStatusUpdate,
-    alert: Alert,
-    emails: string[]
+    alert: Alert
   ): TriggeredAlert {
     return {
       alert_id: alert.id,
@@ -426,8 +421,7 @@ export class AtomicAlerter {
 
   private mapAlertToUpdate(
     alertUpdate: AlertStatusUpdate,
-    alert: Alert,
-    emails: string[]
+    alert: Alert
   ): ResolvedAlert {
     return {
       alert_id: alert.id,
