@@ -87,12 +87,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: UsersIcon,
       current: pathname.includes("/users"),
     },
-    {
-      name: "Alerts",
-      href: "/alerts",
-      icon: BellIcon,
-      current: pathname.includes("/alerts"),
-    },
+    // {
+    //   name: "Alerts",
+    //   href: "/alerts",
+    //   icon: BellIcon,
+    //   current: pathname.includes("/alerts"),
+    // },
     {
       name: "Properties",
       href: "/properties",
