@@ -321,4 +321,36 @@ export class DBWrapper {
     }
     return { data: data, error: null };
   }
+
+  async insertAlert(
+    alert: Database["public"]["Tables"]["alert"]["Insert"]
+  ): Promise<Result<Database["public"]["Tables"]["alert"]["Row"], string>> {
+    const { data, error } = await this.supabaseClient
+      .from("alert")
+      .insert(alert)
+      .select("*")
+      .single();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
+
+  async deleteAlert(
+    alertId: string,
+    orgId: string
+  ): Promise<Result<null, string>> {
+    const { error } = await this.supabaseClient
+      .from("alert")
+      .update({ soft_delete: true })
+      .eq("id", alertId)
+      .eq("org_id", orgId);
+
+    if (error) {
+      return { error: error.message, data: null };
+    }
+
+    return { error: null, data: null };
+  }
 }
