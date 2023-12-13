@@ -10,7 +10,6 @@ node_compat = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
-	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
 
 kv_namespaces = [
@@ -48,7 +47,6 @@ routes = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
-	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
 
 kv_namespaces = [
@@ -96,7 +94,6 @@ kv_namespaces = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
-	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
 
 queues.producers = [
@@ -117,3 +114,7 @@ new_classes = ["AtomicRateLimiter"]
 [[migrations]]
 tag = "v2"
 new_classes = ["AtomicAlerter"]
+
+[[migrations]]
+tag = "v3"
+delete_classes = ["AtomicAlerter"]
