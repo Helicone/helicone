@@ -1,5 +1,6 @@
 .wrangler/
 
+yarn.lock
 # Logs
 
 logs
