@@ -1,4 +1,3 @@
-import Joi from "joi";
 import { Database } from "../../../supabase/database.types";
 import { Result } from "../../results";
 
@@ -8,34 +7,36 @@ const oneMonthInMs = 30 * 24 * 60 * 60 * 1000; // Roughly one month in milliseco
 export function validateAlertCreate(
   alert: Database["public"]["Tables"]["alert"]["Insert"]
 ): Result<null, string> {
-  const alertSchema = Joi.object({
-    created_at: Joi.string().isoDate().optional(),
-    id: Joi.string().uuid().optional(),
-    name: Joi.string().required(),
-    org_id: Joi.string().uuid().required(),
-    threshold: Joi.number().min(0).required(),
-    time_window: timePeriodValidator.required(),
-    metric: Joi.string().valid("response.status").insensitive().required(),
-    updated_at: Joi.string().isoDate().optional(),
-    emails: Joi.array()
-      .items(Joi.string().email({ tlds: false }))
-      .min(1)
-      .required(),
-    status: Joi.string().valid("resolved").required().default("resolved"),
-  });
+  // Custom validator for the time period
+  const isValidTimePeriod = (value: number) => {
+    return value >= thirtySecondsInMs && value <= oneMonthInMs;
+  };
 
-  const { error } = alertSchema.validate(alert);
+  // Custom validator for email array
+  const isValidEmailArray = (emails: string[]) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return (
+      Array.isArray(emails) && emails.every((email) => emailRegex.test(email))
+    );
+  };
 
-  if (error) {
-    return { data: null, error: error.message };
-  }
+  // Validating each field
+  if (alert.created_at && !Date.parse(alert.created_at))
+    return { data: null, error: "Invalid created_at date" };
+  if (alert.updated_at && !Date.parse(alert.updated_at))
+    return { data: null, error: "Invalid updated_at date" };
+  if (!alert.name) return { data: null, error: "Name is required" };
+  if (!alert.org_id) return { data: null, error: "org_id is required" };
+  if (typeof alert.threshold !== "number" || alert.threshold < 0)
+    return { data: null, error: "Invalid threshold" };
+  if (!isValidTimePeriod(alert.time_window))
+    return { data: null, error: "Invalid time_window" };
+  if (alert.metric !== "response.status")
+    return { data: null, error: "Invalid metric" };
+  if (!isValidEmailArray(alert.emails))
+    return { data: null, error: "Invalid emails" };
+  if (alert.status !== "resolved")
+    return { data: null, error: "Invalid status" };
 
   return { data: null, error: null };
 }
-
-const timePeriodValidator = Joi.number().custom((value, helpers) => {
-  if (value < thirtySecondsInMs || value > oneMonthInMs) {
-    return helpers.error("any.invalid");
-  }
-  return value;
-}, "Time Period Validation");
