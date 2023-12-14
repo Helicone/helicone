@@ -6,23 +6,16 @@ import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { Database } from "../../supabase/database.types";
 
-import { useRouter } from "next/router";
-
 interface AlertProps {
   user: User;
   // userId: string;
   orgId: string;
-  orgHasOnboarded: boolean;
   alerts: Array<Database["public"]["Tables"]["alert"]["Row"]>;
   alertHistory: Array<Database["public"]["Tables"]["alert_history"]["Row"]>;
 }
 
 const Alert = (props: AlertProps) => {
-  const { user, orgHasOnboarded } = props;
-  // const router = useRouter();
-  // if (!orgHasOnboarded) {
-  //   router.push("/welcome");
-  // }
+  const { user } = props;
 
   return (
     <MetaData title="Alerts">
@@ -38,14 +31,13 @@ export default Alert;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    userData: { user, userId, orgId, orgHasOnboarded },
+    userData: { user },
     supabaseClient,
   } = options;
 
   return {
     props: {
       user,
-      orgHasOnboarded,
     },
   };
 });

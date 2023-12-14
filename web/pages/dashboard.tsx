@@ -8,25 +8,19 @@ import { init } from "commandbar";
 
 import { useEffect, useState } from "react";
 import { useOrg } from "../components/shared/layout/organizationContext";
-import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Result } from "../lib/result";
 import { useGetAuthorized } from "../services/hooks/dashboard";
 import UpgradeProModal from "../components/shared/upgradeProModal";
+import { redirect } from "next/dist/server/api-utils";
 
 interface DashboardProps {
   user: User;
-  orgHasOnboarded: boolean;
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user, orgHasOnboarded } = props;
-  const router = useRouter();
-
-  if (!orgHasOnboarded) {
-    router.push("/welcome");
-  }
+  const { user } = props;
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
@@ -57,10 +51,18 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     supabaseClient,
   } = options;
 
+  if (!orgHasOnboarded) {
+    return {
+      redirect: {
+        destination: "/welcome",
+        permanent: false,
+      },
+    };
+  }
+
   return {
     props: {
       user,
-      orgHasOnboarded,
     },
   };
 });
