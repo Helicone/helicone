@@ -1,5 +1,5 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { clsx } from "../../components/shared/clsx";
+import { COMPANY_SIZES } from "../../components/templates/welcome/steps/createOrg";
 import Footer from "../../components/shared/layout/footer";
 import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
@@ -242,14 +242,7 @@ const OpenPipe = () => {
                     className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
                     required
                   >
-                    {[
-                      "Select company size",
-                      "Just me",
-                      "1-5",
-                      "5-25",
-                      "25-100",
-                      "100+",
-                    ].map((o) => (
+                    {COMPANY_SIZES.map((o) => (
                       <option key={o}>{o}</option>
                     ))}
                   </select>
