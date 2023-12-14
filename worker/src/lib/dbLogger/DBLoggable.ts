@@ -434,15 +434,12 @@ export class DBLoggable {
   isSuccessResponse = (status: number | undefined | null): boolean =>
     status != null && status >= 200 && status <= 299;
 
-  async log(
-    db: {
-      supabase: SupabaseClient<Database>; // TODO : Deprecate
-      dbWrapper: DBWrapper;
-      clickhouse: ClickhouseClientWrapper;
-      queue: InsertQueue;
-    },
-    env: Env
-  ): Promise<Result<null, string>> {
+  async log(db: {
+    supabase: SupabaseClient<Database>; // TODO : Deprecate
+    dbWrapper: DBWrapper;
+    clickhouse: ClickhouseClientWrapper;
+    queue: InsertQueue;
+  }): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
       return { data: null, error: error ?? "Helicone organization not found" };
