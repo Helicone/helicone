@@ -507,7 +507,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const flattenedObject = overTimeData.requestsWithStatus.data?.data?.reduce(
     (acc, { count, status, time }) => {
-      const formattedTime = getTimeMap(timeIncrement)(new Date(time));
+      const formattedTime = new Date(time).toUTCString();
       if (!acc[formattedTime]) {
         acc[formattedTime] = statusStrings.reduce(
           (statusAcc: StatusCounts, status) => {
@@ -527,8 +527,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     {} as { [key: string]: StatusCounts }
   );
 
-  const flattenedArray = Object.entries(flattenedObject || {}).map(
-    ([time, status]) => {
+  const flattenedArray = Object.entries(flattenedObject || {})
+    .map(([time, status]) => {
       // create copy
       let modifiedStatus = { ...status };
 
@@ -542,8 +542,11 @@ const DashboardPage = (props: DashboardPageProps) => {
         date: time,
         ...modifiedStatus,
       };
-    }
-  );
+    })
+    .map((obj) => ({
+      ...obj,
+      date: getTimeMap(timeIncrement)(new Date(obj.date)),
+    }));
 
   const [currentStatus, setCurrentStatus] = useState<string[]>(["200"]);
 
