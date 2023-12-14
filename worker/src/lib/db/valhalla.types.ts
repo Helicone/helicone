@@ -165,6 +165,11 @@ export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
     RequestInsert: {
+      /**
+       * Format: date-time
+       * @description The date and time when the request was received.
+       */
+      requestReceivedAt?: string | null;
       /** @description JSON object containing the request body. */
       body?: Record<string, never>;
       /**
@@ -197,6 +202,11 @@ export interface components {
       helicone_proxy_key_id?: string | null;
     };
     ResponseInsert: {
+      /**
+       * Format: date-time
+       * @description The date and time when the request was received.
+       */
+      responseReceivedAt?: string | null;
       /**
        * Format: uuid
        * @description The unique ID of the response.

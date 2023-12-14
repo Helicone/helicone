@@ -109,6 +109,54 @@ export class SupabaseConnector {
     });
   }
 
+  private async getProviderKeyFromProxy(authKey: string): AuthResult {
+    const proxyKey = authKey?.replace("Bearer ", "").trim();
+    const regex =
+      /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+    const match = proxyKey.match(regex);
+
+    if (!match) {
+      return err("Proxy key id not found");
+    }
+    const proxyKeyId = match[0];
+
+    const storedProxyKey = await this.client
+      .from("helicone_proxy_keys")
+      .select("*")
+      .eq("id", proxyKeyId)
+      .eq("soft_delete", "false")
+      .single();
+    if (storedProxyKey.error || !storedProxyKey.data) {
+      return err("Proxy key not found in storedProxyKey");
+    }
+
+    const verified = await this.client.rpc("verify_helicone_proxy_key", {
+      api_key: proxyKey,
+      stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
+    });
+
+    if (verified.error || !verified.data) {
+      return err("Proxy key not verified");
+    }
+
+    return ok({
+      organizationId: storedProxyKey.data.org_id,
+    });
+  }
+
+  private async getAuthParams(authorization: HeliconeAuth): AuthResult {
+    if (authorization._type === "bearerProxy") {
+      return this.getProviderKeyFromProxy(authorization.token);
+    }
+    if (authorization._type === "bearer") {
+      return this.authenticateBearer(authorization.token);
+    }
+    if (authorization._type === "jwt") {
+      return this.authenticateJWT(authorization.token, authorization.orgId);
+    }
+    return err("Invalid auth type");
+  }
+
   async authenticate(
     authorization: HeliconeAuth,
     organizationId?: string
@@ -122,10 +170,7 @@ export class SupabaseConnector {
       return ok(cachedResult);
     }
 
-    const result =
-      authorization._type === "bearer"
-        ? await this.authenticateBearer(authorization.token)
-        : await this.authenticateJWT(authorization.token, authorization.orgId);
+    const result = await this.getAuthParams(authorization);
 
     if (result.error) {
       return err(result.error);

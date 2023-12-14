@@ -7,16 +7,37 @@ import { Result, err, ok } from "../modules/result";
 export type JwtAuth = {
   _type: "jwt";
   token: string;
-  orgId?: string;
+  orgId: string;
 };
 
 export type BearerAuth = {
   _type: "bearer";
-  _bearerType: "heliconeProxyKey" | "heliconeApiKey";
   token: string;
 };
 
-export type HeliconeAuth = JwtAuth | BearerAuth;
+export type BearerAuthProxy = {
+  _type: "bearerProxy";
+  token: string;
+};
+
+export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
+
+function isValidHeliconeAuth(auth: HeliconeAuth): boolean {
+  if (typeof auth._type !== "string") {
+    return false;
+  }
+  if (auth._type === "bearerProxy") {
+    return typeof auth.token === "string";
+  }
+  if (auth._type === "bearer") {
+    return typeof auth.token === "string";
+  }
+  if (auth._type === "jwt") {
+    return typeof auth.token === "string" && typeof auth.orgId === "string";
+  }
+  return false;
+}
+
 export class RequestWrapper<T> {
   constructor(private request: ExpressRequest) {}
 
@@ -39,15 +60,8 @@ export class RequestWrapper<T> {
     }
 
     const parsedAuthHeader = JSON.parse(authHeader) as HeliconeAuth;
-    if (
-      (parsedAuthHeader._type !== "bearer" &&
-        parsedAuthHeader._type !== "jwt") ||
-      (parsedAuthHeader._type === "bearer" &&
-        !parsedAuthHeader._bearerType &&
-        typeof parsedAuthHeader.token !== "string") ||
-      (parsedAuthHeader._type === "jwt" &&
-        typeof parsedAuthHeader.token !== "string")
-    ) {
+
+    if (!isValidHeliconeAuth(parsedAuthHeader)) {
       return err("Invalid auth header");
     }
     return ok(parsedAuthHeader);

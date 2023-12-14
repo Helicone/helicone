@@ -157,6 +157,11 @@ components:
       nullable: false
       properties:
         # Request fields
+        requestReceivedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time when the request was received.
         body:
           type: object
           description: JSON object containing the request body.
@@ -203,6 +208,11 @@ components:
     ResponseInsert:
       type: object
       properties:
+        responseReceivedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time when the request was received.
         response_id:
           type: string
           format: uuid

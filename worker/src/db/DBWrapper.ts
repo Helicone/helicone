@@ -3,13 +3,8 @@ import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { getProviderKeyFromProxyCache } from "../lib/RequestWrapper";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
-<<<<<<< HEAD
-import { Result, err, errMap, ok } from "../results";
-import { SecureCacheEnv, getFromCache, storeInCache } from "../lib/secureCache";
-=======
 import { SecureCacheEnv, getAndStoreInCache } from "../lib/secureCache";
 import { Result, err, ok } from "../results";
->>>>>>> worker-auth-cleanup
 import { RateLimiter } from "./RateLimiter";
 
 async function getHeliconeApiKeyRow(

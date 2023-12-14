@@ -41,6 +41,7 @@ app.post(
     const insertRequestResult = await db.insertRequest({
       body: heliconeRequest.body,
       createdAt: new Date(),
+      requestCreatedAt: null,
       heliconeApiKeyID: null,
       heliconeOrgID: supabaseClient.organizationId ?? null,
       heliconeProxyKeyID: null,
@@ -51,14 +52,12 @@ app.post(
       userId: heliconeRequest.user_id ?? null,
     });
     if (insertRequestResult.error) {
-      console.log("insertRequestResult.error", insertRequestResult.error);
       res.status(500).json({
         error: insertRequestResult.error,
         trace: "insertRequestResult.error",
       });
       return;
     }
-    console.log("insertRequestResult", insertRequestResult);
 
     res.json({
       message: "Request received! :)",
@@ -80,13 +79,15 @@ app.post(
 
     const insertResponseResult = await db.insertResponse({
       body: heliconeResponse.body,
-      completionTokens: heliconeResponse.completion_tokens ?? null,
+
       createdAt: new Date(),
+      responseCreatedAt: null,
       delayMs: heliconeResponse.delay_ms ?? 0,
       http_status: heliconeResponse.http_status ?? null,
       id: responseId,
       model: heliconeResponse.model ?? null,
       promptTokens: heliconeResponse.prompt_tokens ?? null,
+      completionTokens: heliconeResponse.completion_tokens ?? null,
       request: heliconeResponse.heliconeRequestId,
     });
     if (insertResponseResult.error) {
