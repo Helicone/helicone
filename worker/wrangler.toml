@@ -9,8 +9,7 @@ logpush = true
 node_compat = true
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
-	{ name = "ALERTER", class_name = "AtomicAlerter" },
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
 ]
 
 kv_namespaces = [
@@ -47,8 +46,7 @@ routes = [
 ]
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
-	{ name = "ALERTER", class_name = "AtomicAlerter" },
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
 ]
 
 kv_namespaces = [
@@ -95,8 +93,7 @@ kv_namespaces = [
 ]
 
 durable_objects.bindings = [
-	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
-	{ name = "ALERTER", class_name = "AtomicAlerter" },
+	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" }
 ]
 
 queues.producers = [

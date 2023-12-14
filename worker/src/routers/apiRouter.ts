@@ -14,7 +14,6 @@ import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
-import { Alerter } from "../db/Alerter";
 import { validateAlertCreate } from "../lib/validators/alertValidators";
 
 class InternalResponse {
