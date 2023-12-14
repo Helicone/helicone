@@ -31,7 +31,7 @@ export default Alert;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    userData: { user, userId, orgId },
+    userData: { user },
     supabaseClient,
   } = options;
 
