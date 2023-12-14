@@ -75,7 +75,26 @@ const EventListen = (props: EventListenProps) => {
         "flex flex-col items-center w-full px-2"
       )}
     >
-      {data === undefined || data?.data === false ? (
+      {data && data.data ? (
+        <>
+          <LoadingAnimation animation={PartyParrot} height={75} width={75} />
+          <p className="text-2xl md:text-5xl font-semibold text-center mt-4">
+            Successfully received an event
+          </p>
+          <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
+            You&apos;re all set to use Helicone! Click below to get started.
+          </p>
+          <button
+            onClick={nextStepHandler}
+            className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
+          >
+            {loading && (
+              <ArrowPathIcon className="w-5 h-5 inline-block mr-2 animate-pulse" />
+            )}
+            View Dashboard
+          </button>
+        </>
+      ) : (
         <>
           <p className="text-2xl md:text-5xl font-semibold text-center">
             Listening for Events
@@ -103,25 +122,6 @@ const EventListen = (props: EventListenProps) => {
               }}
             />
           </div>
-        </>
-      ) : (
-        <>
-          <LoadingAnimation animation={PartyParrot} height={75} width={75} />
-          <p className="text-2xl md:text-5xl font-semibold text-center mt-4">
-            Successfully received an event
-          </p>
-          <p className="text-md md:text-lg text-gray-700 font-light mt-5 text-center">
-            You&apos;re all set to use Helicone! Click below to get started.
-          </p>
-          <button
-            onClick={nextStepHandler}
-            className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl mt-8"
-          >
-            {loading && (
-              <ArrowPathIcon className="w-5 h-5 inline-block mr-2 animate-pulse" />
-            )}
-            View Dashboard
-          </button>
         </>
       )}
     </div>
