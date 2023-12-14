@@ -354,8 +354,6 @@ export async function getProviderKeyFromProxy(
     if (!(await checkLimits(limits.data, env))) {
       return err("Limits are not valid");
     }
-  } else {
-    console.log("NO LIMITS");
   }
 
   const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
