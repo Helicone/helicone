@@ -31,6 +31,9 @@ const SignIn = (props: SignInProps) => {
       handleGoogleSubmit={async () => {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
+          options: {
+            redirectTo: `https://${origin}/welcome`,
+          },
         });
         if (error) {
           setNotification("Error logging in. Please try again.", "error");
@@ -42,6 +45,9 @@ const SignIn = (props: SignInProps) => {
       handleGithubSubmit={async () => {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "github",
+          options: {
+            redirectTo: `https://${origin}/welcome`,
+          },
         });
         if (error) {
           setNotification("Error logging in. Please try again.", "error");
