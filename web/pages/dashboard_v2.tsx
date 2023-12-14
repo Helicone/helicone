@@ -1,10 +1,8 @@
 import { User, useUser } from "@supabase/auth-helpers-react";
+import { init } from "commandbar";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
-import { init } from "commandbar";
 
 import { useEffect } from "react";
 
