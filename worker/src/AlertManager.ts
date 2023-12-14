@@ -26,6 +26,7 @@ export class AlertManager {
   }
 
   public async checkAlerts() {
+    console.log("Checking alerts");
     const { data: allAlerts, error: allAlertsErr } =
       await this.alertStore.getAlerts();
 
@@ -188,8 +189,9 @@ export class AlertManager {
             alert_start_time: now,
             org_id: triggeredAlert.alert.org_id,
             status: "triggered",
-            triggered_value:
-              triggeredAlert.triggeredThreshold?.toString() ?? "",
+            triggered_value: triggeredAlert.triggeredThreshold
+              ? triggeredAlert.triggeredThreshold.toFixed(2)
+              : "",
           };
         })
       );
@@ -286,23 +288,18 @@ export class AlertManager {
   private async sendAlertEmails(
     alertStatusUpdates: AlertStateUpdate[]
   ): Promise<Result<null, string>> {
-    try {
-      const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
-        const { error: emailResErr } = await this.sendAlertEmail(
-          alertStatusUpdate
-        );
+    const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
+      const { error: emailResErr } = await this.sendAlertEmail(
+        alertStatusUpdate
+      );
 
-        if (emailResErr) {
-          console.error(`Error sending email: ${emailResErr}`);
-          throw new Error(emailResErr); // Throw the error to catch it outside
-        }
-      });
+      if (emailResErr) {
+        console.error(`Error sending email: ${emailResErr}`);
+        throw new Error(emailResErr); // Throw the error to catch it outside
+      }
+    });
 
-      await Promise.all(promises);
-    } catch (error) {
-      console.error(`sendAlertEmails error: ${error}`);
-      return err(`sendAlertEmails failed: ${error}`);
-    }
+    await Promise.all(promises);
 
     return ok(null);
   }
@@ -349,7 +346,7 @@ export class AlertManager {
     const capitalizedStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
     const formatTimestamp = (timestamp: string) =>
-      timestamp ? new Date(timestamp).toLocaleString() : "N/A";
+      timestamp ? new Date(timestamp).toUTCString() : "N/A";
 
     const formatTimespan = (ms: number) => {
       const minutes = Math.floor(ms / 60000);
@@ -360,7 +357,7 @@ export class AlertManager {
     const headerClass =
       alertStatusUpdate.status === "triggered" ? "Triggered" : "Resolved";
     const subject = `Alert ${capitalizedStatus}: ${alert.name}`;
-    const alertTime = alertStatusUpdate.timestamp.toString();
+    const alertTime = new Date(alertStatusUpdate.timestamp).toUTCString();
     const actionMessage =
       status === "triggered"
         ? "Please take the necessary action."
@@ -444,9 +441,7 @@ export class AlertManager {
                                 <td class="content">
                                   <ul style="list-style-type: none; padding: 0; margin: 0; color:#000000; font-size:16px; line-height:24px; font-family:Arial, sans-serif;">
                                     <li><strong>Status:</strong> ${capitalizedStatus}</li>
-                                    <li><strong>Triggered At:</strong> ${formatTimestamp(
-                                      alertTime
-                                    )}</li>
+                                    <li><strong>Triggered At:</strong> ${alertTime}</li>
                                     <li><strong>Threshold:</strong> ${
                                       alert.threshold
                                     }%</li>
