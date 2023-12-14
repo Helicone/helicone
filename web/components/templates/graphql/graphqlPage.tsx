@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import mainTypeDefs from "../../../lib/api/graphql/schema/main.graphql";
 import { print } from "graphql/language/printer";
+import { useTheme } from "../../../components/shared/theme/themeContext";
 
 interface GraphQLPageProps {}
 
@@ -30,6 +31,7 @@ export const DEFAULT_EXAMPLE_QUERY = `query ExampleQuery($limit: Int, $offset: I
 const GraphQLPage = (props: GraphQLPageProps) => {
   //TODO add support for changing query after this https://github.com/apollographql/embeddable-explorer/issues/258
   const router = useRouter();
+  const theme = useTheme();
 
   const [showGraphqlHeader, setShowGraphqlHeader] = useState<boolean>(false);
 
@@ -72,7 +74,8 @@ const GraphQLPage = (props: GraphQLPageProps) => {
               "use-cookies": "true",
             },
             displayOptions: {
-              theme: "light",
+              // Make theme controlled by global switch
+              theme: theme?.theme === "dark" ? "dark" : "light",
               docsPanelState: "closed",
               showHeadersAndEnvVars: false,
             },

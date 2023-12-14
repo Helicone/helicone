@@ -49,7 +49,7 @@ const Keys = (props: KeysProps) => {
             </button>
             <div className="flex flex-row items-start gap-4 text-sm">
               <GraphQLLogo className="h-16 w-16 -mt-2" />
-              <div className="flex flex-col space-y-6">
+              <div className="flex flex-col space-y-6 dark:text-gray-100">
                 <p>
                   Please note our GraphQL API is currently in beta. If you have
                   any questions or feedback, please reach out to us on{" "}
