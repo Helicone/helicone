@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
-import { AtomicAlerter } from "./db/AtomicAlerter";
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
@@ -174,4 +173,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { AtomicAlerter, AtomicRateLimiter };
+export { AtomicRateLimiter };
