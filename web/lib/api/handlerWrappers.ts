@@ -66,6 +66,7 @@ export interface HandlerWrapperOptions<RetVal>
   supabaseClient: SupabaseServerWrapper<RetVal>;
   userData: {
     userId: string;
+    orgHasOnboarded: boolean;
     orgId: string;
     user: User;
     role: string;
