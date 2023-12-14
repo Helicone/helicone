@@ -1,10 +1,9 @@
-import { User, useUser } from "@supabase/auth-helpers-react";
+import { User } from "@supabase/auth-helpers-react";
+import { init } from "commandbar";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { checkOnboardedAndUpdate } from "./api/user/checkOnboarded";
-import { init } from "commandbar";
 
 import { useEffect, useState } from "react";
 import { useOrg } from "../components/shared/layout/organizationContext";
@@ -52,9 +51,18 @@ export default Dashboard;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    userData: { user },
+    userData: { user, orgHasOnboarded },
     supabaseClient,
   } = options;
+
+  if (!orgHasOnboarded) {
+    return {
+      redirect: {
+        destination: "/welcome",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
