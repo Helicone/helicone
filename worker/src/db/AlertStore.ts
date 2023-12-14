@@ -62,7 +62,8 @@ export class AlertStore {
         alert_end_time: alertEndTime,
         updated_at: new Date().toISOString(),
       })
-      .in("alert_id", alertIds);
+      .in("alert_id", alertIds)
+      .eq("status", "triggered");
 
     if (alertHistoryUpdateErr) {
       return err(
