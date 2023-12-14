@@ -126,6 +126,7 @@ export interface HandlerWrapperOptionsSSR<RetVal> {
   userData: {
     userId: string;
     orgId: string;
+    orgHasOnboarded: boolean;
     user: User;
   };
 }

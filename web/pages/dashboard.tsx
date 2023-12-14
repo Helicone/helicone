@@ -17,10 +17,16 @@ import UpgradeProModal from "../components/shared/upgradeProModal";
 
 interface DashboardProps {
   user: User;
+  orgHasOnboarded: boolean;
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const { user } = props;
+  const { user, orgHasOnboarded } = props;
+  const router = useRouter();
+
+  if (!orgHasOnboarded) {
+    router.push("/welcome");
+  }
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
@@ -47,13 +53,14 @@ export default Dashboard;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
-    userData: { user },
+    userData: { user, orgHasOnboarded },
     supabaseClient,
   } = options;
 
   return {
     props: {
       user,
+      orgHasOnboarded,
     },
   };
 });
