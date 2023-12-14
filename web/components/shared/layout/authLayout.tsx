@@ -319,7 +319,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p>View Documentation</p>
                         </Link>
                         <Link
-                          className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                          className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                           href={"https://discord.gg/zsSTcH2qhG"}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -511,7 +511,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>View Documentation</p>
                   </Link>
                   <Link
-                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-1 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                     href={"https://discord.gg/zsSTcH2qhG"}
                     target="_blank"
                     rel="noopener noreferrer"

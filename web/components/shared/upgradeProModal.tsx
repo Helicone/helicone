@@ -96,15 +96,17 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                 className={clsx(`text-${currentColor?.name}-500`, "h-6 w-6")}
               />
             )}
-            <h1 className="text-xl font-semibold">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               {orgContext?.currentOrg.name}
             </h1>
           </div>
-          <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 w-full gap-4">
+          <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 dark:text-gray-200 dark:border-gray-700 w-full gap-4">
             <div>
-              <p>Your Free Plan Limit</p>
+              <p className="text-gray-900 dark:text-gray-100">
+                Your Free Plan Limit
+              </p>
             </div>
-            <div className="flex flex-row gap-2 w-full h-4">
+            <div className="flex flex-row gap-2 w-full h-4 items-center">
               <div className="relative h-full w-full flex-auto bg-gray-300 rounded-md">
                 <div
                   className="aboslute h-full bg-purple-500 rounded-md"
@@ -114,7 +116,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
                 ></div>
               </div>
               <div className="flex-1 w-full whitespace-nowrap">
-                <div className="flex flex-row gap-1.5 items-center text-black">
+                <div className="flex flex-row gap-1.5 items-center text-black text-gray-900 dark:text-gray-100">
                   <span>{`${Number(count?.data).toLocaleString()}`}</span>
                   <span className="text-gray-400 text-sm">/</span>
                   <span className="text-sm text-gray-400">{`${Number(
@@ -124,7 +126,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               </div>
             </div>
           </div>
-          <h1 className="text-sm text-gray-700">
+          <h1 className="text-sm text-gray-700 dark:text-gray-300">
             This organization is on the free plan. Upgrade to remove request
             limits and unlock the features below:
           </h1>
@@ -142,20 +144,20 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
           ].map((item, i) => (
             <div key={i} className="text-sm flex flex-row items-center">
               <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
-              <span className="">{item}</span>
+              <span className="dark:text-gray-100">{item}</span>
             </div>
           ))}
         </div>
         <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
           <button
             onClick={() => setOpen(false)}
-            className="flex flex-row items-center rounded-md bg-white px-4 py-2 text-sm font-semibold border border-gray-300 hover:bg-gray-50 text-gray-900 shadow-sm hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
           >
             Cancel
           </button>
           <button
             onClick={() => handleCheckout()}
-            className="items-center rounded-md bg-black px-4 py-2 text-sm flex font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Upgrade to Pro
           </button>
