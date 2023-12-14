@@ -1,13 +1,14 @@
-import { User, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 import { init } from "commandbar";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
-
+import { useTheme } from "../components/shared/theme/themeContext";
 import { useEffect } from "react";
 
 const Dashboard = () => {
   const user = useUser();
+  const theme = useTheme();
 
   useEffect(() => {
     if (!user) return;

@@ -7,7 +7,15 @@ import MetaData from "../components/shared/metaData";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useOrg } from "../components/shared/layout/organizationContext";
+import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Result } from "../lib/result";
+import { useGetAuthorized } from "../services/hooks/dashboard";
+import UpgradeProModal from "../components/shared/upgradeProModal";
+import { useTheme } from "../components/shared/theme/themeContext";
 
 interface DashboardProps {
   user: User;
@@ -15,6 +23,7 @@ interface DashboardProps {
 
 const Dashboard = (props: DashboardProps) => {
   const { user } = props;
+  const theme = useTheme();
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_COMMAND_BAR_HELPHUB_0) return;
