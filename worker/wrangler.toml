@@ -126,3 +126,7 @@ delete_classes = ["AtomicAlerter"]
 [[migrations]]
 tag = "v4"
 new_classes = ["AtomicAlerter"]
+
+[[migrations]]
+tag = "v5"
+deleted_classes = ["AtomicAlerter"]
