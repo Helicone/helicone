@@ -26,6 +26,19 @@ export interface GraphDataState {
   requestsOverTime: Loading<Result<RequestsOverTime[], string>>;
   costOverTime: Loading<Result<CostOverTime[], string>>;
 }
+
+/**
+ * Fetches data over a specified time period.
+ *
+ * @template T - The type of data to fetch.
+ * @param {Object} timeFilter - The time filter object containing start and end dates.
+ * @param {Date} timeFilter.start - The start date of the time period.
+ * @param {Date} timeFilter.end - The end date of the time period.
+ * @param {FilterLeaf[]} userFilters - The user filters to apply.
+ * @param {TimeIncrement} dbIncrement - The time increment for the database.
+ * @param {string} path - The path for the API endpoint.
+ * @returns {Promise<Result<T[], string>>} - A promise that resolves to the fetched data or an error message.
+ */
 async function fetchDataOverTime<T>(
   timeFilter: {
     start: Date;
@@ -53,6 +66,13 @@ async function fetchDataOverTime<T>(
   }).then((res) => res.json() as Promise<Result<T[], string>>);
 }
 
+/**
+ * Retrieves dashboard data based on the specified time filter and user filters.
+ * @param timeFilter - The time filter object containing the start and end dates.
+ * @param userFilters - An array of filter leaf objects.
+ * @param setMetrics - A function to set the metrics state.
+ * @param setGraphData - A function to set the graph data state.
+ */
 export async function getDashboardData(
   timeFilter: {
     start: Date;

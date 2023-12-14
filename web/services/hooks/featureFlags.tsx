@@ -1,8 +1,13 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
-import { useOrg } from "../../components/shared/layout/organizationContext";
 
+/**
+ * Custom hook to fetch and manage feature flags.
+ * @param featureFlag - The feature flag to fetch.
+ * @param orgId - The organization ID.
+ * @returns An object containing the flag status, loading state, refetch function, and data.
+ */
 const useFeatureFlags = (featureFlag: string, orgId: string) => {
   const supabaseClient = useSupabaseClient<Database>();
   const oneDayInMilliseconds = 24 * 60 * 60 * 1000;

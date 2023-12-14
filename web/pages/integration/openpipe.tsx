@@ -1,12 +1,11 @@
+import Image from "next/image";
+import { useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+
 import { COMPANY_SIZES } from "../../components/templates/welcome/steps/createOrg";
 import Footer from "../../components/shared/layout/footer";
 import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
-import Image from "next/image";
-import { useState } from "react";
-import { Database } from "../../supabase/database.types";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../../components/shared/notification/useNotification";
 
 const faqs = [
@@ -20,7 +19,7 @@ const faqs = [
         <a href="https://openpipe.ai" className="text-blue-500">
           https://openpipe.ai
         </a>
-        .
+        {"."}
       </>
     ),
   },
@@ -47,8 +46,6 @@ const faqs = [
 
 const OpenPipe = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const supabaseClient = useSupabaseClient<Database>();
 
   const { setNotification } = useNotification();
 

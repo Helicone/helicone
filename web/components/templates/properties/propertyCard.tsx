@@ -9,7 +9,6 @@ import {
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
 import { usePropertyCard } from "./useProperty";
-import { MdLaunch } from "react-icons/md";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { Tooltip } from "@mui/material";

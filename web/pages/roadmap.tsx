@@ -1,21 +1,12 @@
 import { StarIcon } from "@heroicons/react/20/solid";
-import { useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import LoadingAnimation from "../components/shared/loadingAnimation";
 import MetaData from "../components/shared/metaData";
 import { HeliconeIssuesResolvedType } from "./api/issues";
 
-interface HomeProps {}
-
-const Home = (props: HomeProps) => {
-  const {} = props;
-  const router = useRouter();
-
-  const user = useUser();
-
+const Home = () => {
   const { isLoading, data } = useQuery({
     queryKey: ["issues"],
     queryFn: async () => {

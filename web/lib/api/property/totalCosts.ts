@@ -3,17 +3,10 @@ import {
   filterListToTree,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHousePropResponse,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 import { convertTextOperators } from "../graphql/query/helper";
 import { PropertyFilter } from "../graphql/schema/types/graphql";
 
@@ -21,6 +14,12 @@ export interface TotalCost {
   cost: number;
 }
 
+/**
+ * Converts an array of strings to a SQL array representation.
+ * @param arr - The array of strings to convert.
+ * @param argsAcc - The accumulator array to store the converted values.
+ * @returns An object containing the SQL representation and the updated accumulator array.
+ */
 function toSQLArray(
   arr: string[],
   argsAcc: any[]
@@ -41,6 +40,13 @@ function toSQLArray(
   };
 }
 
+/**
+ * Retrieves the total cost properties based on the provided filters.
+ *
+ * @param properties - An array of PropertyFilter objects representing the filters to apply.
+ * @param org_id - The organization ID.
+ * @returns A Promise that resolves to a Result object containing the total cost or an error message.
+ */
 export async function getTotalCostProperties(
   properties: PropertyFilter[],
   org_id: string
@@ -117,6 +123,12 @@ export async function getTotalCostProperties(
   return resultMap(res, (d) => d[0].cost);
 }
 
+/**
+ * Retrieves the total cost of properties based on the provided filter and organization ID.
+ * @param filter The filter node to apply to the query.
+ * @param org_id The ID of the organization.
+ * @returns A promise that resolves to a Result object containing the total cost or an error message.
+ */
 export async function getTotalCostRaw(
   filter: FilterNode,
   org_id: string
@@ -144,6 +156,13 @@ export async function getTotalCostRaw(
   return resultMap(res, (d) => d[0].cost);
 }
 
+/**
+ * Calculates the total cost based on the provided filter, time filter, and organization ID.
+ * @param filter - The filter node to apply.
+ * @param timeFilter - The time filter range.
+ * @param org_id - The organization ID.
+ * @returns A promise that resolves to the total cost or an error message.
+ */
 export async function getTotalCost(
   filter: FilterNode,
   timeFilter: {

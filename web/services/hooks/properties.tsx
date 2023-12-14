@@ -10,6 +10,11 @@ import { getProperties } from "../lib/properties";
 import { getPropertyParams } from "../lib/propertyParams";
 import { useDebounce } from "./debounce";
 
+/**
+ * Custom hook for fetching and managing properties.
+ *
+ * @returns An object containing properties, loading state, error, property filters, search function, and refetch function.
+ */
 const useGetProperties = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["properties"],

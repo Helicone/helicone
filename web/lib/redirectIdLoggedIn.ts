@@ -1,13 +1,13 @@
-import {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-  PreviewData,
-} from "next";
-import { ParsedUrlQuery } from "querystring";
 import { DEMO_EMAIL } from "./constants";
 import { SSRContext, SupabaseServerWrapper } from "./wrappers/supabase";
 
+/**
+ * Redirects the user if they are already logged in.
+ *
+ * @param destination - The destination URL to redirect to.
+ * @param getServerSideProps - A function that returns the server-side props for the current request.
+ * @returns A function that can be used as a server-side props function.
+ */
 export function redirectIfLoggedIn(
   destination: string,
   getServerSideProps: (ctx: SSRContext<any>) => Promise<any>

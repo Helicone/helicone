@@ -1,26 +1,18 @@
-import { ApolloError } from "apollo-server-errors";
-import { Context } from "../../../../pages/api/graphql";
 import {
-  FilterLeaf,
-  filterListToTree,
-  FilterNode,
   SingleKey,
-  TablesAndViews,
   TextOperators,
   TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
-import { getRequests } from "../../request/request";
-import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
-  HeliconeRequest,
-  QueryHeliconeRequestArgs,
-  HeliconeRequestFilter,
   TextOperators as GQLTextOperators,
-  PropertyFilter,
   DateOperators,
 } from "../schema/types/graphql";
-import { modelCost } from "../../metrics/costCalc";
 
+/**
+ * Converts the given GQLTextOperators object to a SingleKey<TextOperators> object.
+ * @param op - The GQLTextOperators object to convert.
+ * @returns The converted SingleKey<TextOperators> object.
+ */
 export function convertTextOperators(
   op: GQLTextOperators
 ): SingleKey<TextOperators> {
@@ -31,6 +23,12 @@ export function convertTextOperators(
   }
 }
 
+/**
+ * Converts a DateOperators object to a SingleKey<TimestampOperators> object.
+ * @param op - The DateOperators object to convert.
+ * @returns The converted SingleKey<TimestampOperators> object.
+ * @throws Error if the date operator is invalid.
+ */
 export function convertTimeOperators(
   op: DateOperators
 ): SingleKey<TimestampOperators> {

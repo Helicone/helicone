@@ -30,6 +30,13 @@ export interface ThemedTableProps {
   deleteHandler?: (row: any) => void;
 }
 
+/**
+ * A component that renders a table with themed styling.
+ *
+ * @component
+ * @param {ThemedTableProps} props - The props for the ThemedTable component.
+ * @returns {JSX.Element} The rendered ThemedTable component.
+ */
 const SecretInput = (props: { value: string }) => {
   const { value } = props;
   const [show, setShow] = useState(false);

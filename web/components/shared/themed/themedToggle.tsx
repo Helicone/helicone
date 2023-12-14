@@ -1,5 +1,12 @@
 import React from "react";
 
+/**
+ * A toggle component that allows users to switch between two states.
+ *
+ * @param onChange - A callback function that is called when the toggle state changes.
+ * @param value - The current state of the toggle.
+ * @param label - The label to display next to the toggle.
+ */
 export const Toggle = ({
   onChange,
   value,
@@ -29,6 +36,13 @@ export const Toggle = ({
   );
 };
 
+/**
+ * A toggle button component.
+ *
+ * @param onChange - The callback function called when the toggle button is clicked.
+ * @param value - The current value of the toggle button.
+ * @param label - The label to display next to the toggle button.
+ */
 export const ToggleButton = ({
   onChange,
   value,

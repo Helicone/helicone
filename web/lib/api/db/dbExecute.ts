@@ -3,6 +3,11 @@ import { Result } from "../../result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import dateFormat from "dateformat";
 
+/**
+ * Converts an array of parameters to an object with numbered keys.
+ * @param params - The array of parameters to be converted.
+ * @returns An object with numbered keys representing the parameters.
+ */
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
     .map((p) => {
@@ -21,7 +26,12 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
     }, {});
 }
 
-//Only for debugging purposes
+/**
+ * Prints the runnable query along with the parameter values.
+ * Only for debugging purposes
+ * @param query - The SQL query to be executed.
+ * @param parameters - An array of parameters to be used in the query.
+ */
 export function printRunnableQuery(
   query: string,
   parameters: (number | string | boolean | Date)[]
@@ -33,6 +43,13 @@ export function printRunnableQuery(
 
   console.log(`\n\n${setParams}\n\n${query}\n\n`);
 }
+
+/**
+ * Executes a Clickhouse query with the provided parameters.
+ * @param query - The Clickhouse query to execute.
+ * @param parameters - The parameters to be used in the query.
+ * @returns A promise that resolves to a Result object containing the query result data or an error message.
+ */
 export async function dbQueryClickhouse<T>(
   query: string,
   parameters: (number | string | boolean | Date)[]
@@ -69,6 +86,12 @@ export async function dbQueryClickhouse<T>(
   }
 }
 
+/**
+ * Executes a database query with the given parameters.
+ * @param query - The SQL query to execute.
+ * @param parameters - The parameters to be used in the query.
+ * @returns A promise that resolves to a Result object containing the query result or an error message.
+ */
 export async function dbExecute<T>(
   query: string,
   parameters: any[]

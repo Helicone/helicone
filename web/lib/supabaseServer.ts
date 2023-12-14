@@ -11,6 +11,11 @@ if (supabaseUrl === "" || supabaseServiceKey === "") {
   throw new Error(`URL or Anon ENV not set for Server - ${supabaseServiceKey}`);
 }
 
+/**
+ * Creates a Supabase client for server-side usage.
+ *
+ * @returns {SupabaseClient<Database>} The Supabase client instance.
+ */
 export const supabaseServer = createClient<Database>(
   supabaseUrl,
   supabaseServiceKey

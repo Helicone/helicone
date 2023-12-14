@@ -1,13 +1,15 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../components/shared/getPagination";
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
 
 export interface Value {
   value: string;
 }
 
+/**
+ * Retrieves the prompt values for a given user.
+ * @param user_id The ID of the user.
+ * @returns A promise that resolves to a Result object containing the prompt values or an error message.
+ */
 export async function getPromptValues(
   user_id: string
 ): Promise<Result<Value[], string>> {

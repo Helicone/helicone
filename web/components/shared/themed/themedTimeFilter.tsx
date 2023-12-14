@@ -14,7 +14,12 @@ interface ThemedTimeFilterProps {
   currentTimeFilter: TimeFilter;
   custom?: boolean;
 }
-
+/**
+ * Formats a Date object into a string representation suitable for input fields.
+ *
+ * @param date - The Date object to format.
+ * @returns A string representation of the date in the format "YYYY-MM-DDTHH:MI".
+ */
 function formatDateToInputString(date: Date): string {
   if (!date) {
     return "";

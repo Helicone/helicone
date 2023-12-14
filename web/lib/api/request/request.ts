@@ -17,6 +17,9 @@ import { LlmSchema } from "../models/requestResponseModel";
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000 / 10;
 
+/**
+ * Represents a Helicone request.
+ */
 export interface HeliconeRequest {
   response_id: string;
   response_created_at: string;
@@ -55,6 +58,17 @@ export interface HeliconeRequest {
   llmSchema: LlmSchema | null;
 }
 
+/**
+ * Retrieves a list of requests based on the provided parameters.
+ *
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter node to apply to the requests.
+ * @param offset - The offset value for pagination.
+ * @param limit - The limit value for pagination.
+ * @param sort - The sort leaf request to apply to the requests.
+ * @param supabaseServer - Optional. The Supabase client for making database queries.
+ * @returns A promise that resolves to a Result object containing the list of requests or an error message.
+ */
 export async function getRequests(
   orgId: string,
   filter: FilterNode,
@@ -128,6 +142,17 @@ export async function getRequests(
   });
 }
 
+/**
+ * Retrieves cached requests based on the specified parameters.
+ *
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter node to apply to the requests.
+ * @param offset - The offset value for pagination.
+ * @param limit - The maximum number of requests to retrieve.
+ * @param sort - The sorting criteria for the requests.
+ * @param supabaseServer - Optional Supabase client for additional data retrieval.
+ * @returns A promise that resolves to a Result object containing the retrieved requests or an error message.
+ */
 export async function getRequestsCached(
   orgId: string,
   filter: FilterNode,
@@ -202,6 +227,13 @@ export async function getRequestsCached(
   });
 }
 
+/**
+ * Maps Helicone requests to LLM calls.
+ *
+ * @param heliconeRequests - The array of Helicone requests.
+ * @param rosettaWrapper - The RosettaWrapper instance.
+ * @returns A promise that resolves to a Result object containing the mapped Helicone requests or an error message.
+ */
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
   rosettaWrapper: RosettaWrapper
@@ -246,6 +278,12 @@ async function mapLLMCalls(
   return ok<HeliconeRequest[], string>(await Promise.all(promises));
 }
 
+/**
+ * Extracts the model name from the given path.
+ *
+ * @param path - The path from which to extract the model name.
+ * @returns The model name if found, otherwise undefined.
+ */
 const getModelFromPath = (path: string) => {
   let regex = /\/engines\/([^\/]+)/;
   let match = path.match(regex);
@@ -257,6 +295,13 @@ const getModelFromPath = (path: string) => {
   }
 };
 
+/**
+ * Retrieves the minimum and maximum dates of requests within a specified date range.
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter criteria for the requests.
+ * @returns A promise that resolves to a Result object containing the minimum and maximum dates,
+ *          or an error message if the retrieval fails.
+ */
 export async function getRequestsDateRange(
   orgId: string,
   filter: FilterNode
@@ -287,6 +332,12 @@ export async function getRequestsDateRange(
   });
 }
 
+/**
+ * Truncates large data in an array of HeliconeRequest objects based on the specified maximum body size.
+ * @param data - The array of HeliconeRequest objects.
+ * @param maxBodySize - The maximum body size in bytes.
+ * @returns The array of truncated HeliconeRequest objects.
+ */
 function truncLargeData(
   data: HeliconeRequest[],
   maxBodySize: number
@@ -344,6 +395,12 @@ function truncLargeData(
   return trunced;
 }
 
+/**
+ * Retrieves the count of requests from the cache, based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply to the requests.
+ * @returns A promise that resolves to a Result object containing the count of requests (if successful) or an error message (if unsuccessful).
+ */
 export async function getRequestCountCached(
   org_id: string,
   filter: FilterNode
@@ -374,6 +431,12 @@ export async function getRequestCountCached(
   return { data: +data[0].count, error: null };
 }
 
+/**
+ * Retrieves the count of requests based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply to the requests.
+ * @returns A promise that resolves to a Result object containing the count of requests or an error message.
+ */
 export async function getRequestCount(
   org_id: string,
   filter: FilterNode
@@ -405,6 +468,12 @@ export async function getRequestCount(
   return { data: +data[0].count, error: null };
 }
 
+/**
+ * Retrieves the count of requests from ClickHouse database based on the provided filter.
+ * @param org_id - The organization ID.
+ * @param filter - The filter node to apply on the requests.
+ * @returns A promise that resolves to a Result object containing the count of requests or an error message.
+ */
 export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode

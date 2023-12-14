@@ -3,6 +3,9 @@ import { buildFilterWithAuthNodesTable } from "../../../services/lib/filters/fil
 import { Result } from "../../result";
 import { dbExecute } from "../db/dbExecute";
 
+/**
+ * Represents a Helicone Node.
+ */
 export interface HeliconeNode {
   id: string;
   name: string;
@@ -16,6 +19,14 @@ export interface HeliconeNode {
   };
 }
 
+/**
+ * Retrieves a list of nodes based on the provided parameters.
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter criteria for the nodes.
+ * @param offset - The offset value for pagination.
+ * @param limit - The maximum number of nodes to retrieve.
+ * @returns A promise that resolves to a Result object containing an array of HeliconeNode objects or an error message.
+ */
 export async function getNodes(
   orgId: string,
   filter: FilterNode,

@@ -8,7 +8,6 @@ import {
   BeakerIcon,
   BookOpenIcon,
   BriefcaseIcon,
-  BuildingOfficeIcon,
   ChartBarIcon,
   ChevronRightIcon,
   CircleStackIcon,
@@ -26,7 +25,6 @@ import {
   UserGroupIcon,
   UsersIcon,
   XMarkIcon,
-  BellIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
@@ -37,13 +35,12 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
-
 import { GrGraphQl } from "react-icons/gr";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
-
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+
 interface AuthLayoutProps {
   children: React.ReactNode;
   user: User;

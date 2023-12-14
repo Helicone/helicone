@@ -3,6 +3,13 @@ import { hashAuth } from "../../../hashGraphQL";
 
 import { supabaseServer } from "../../../supabaseServer";
 
+/**
+ * Retrieves the user ID associated with the provided authentication token.
+ * Throws an error if the authentication token is invalid or missing.
+ * @param auth The authentication token.
+ * @returns A Promise that resolves to the user ID.
+ * @throws {ApolloError} If the authentication token is invalid or missing.
+ */
 export async function getUserOrThrow(auth: string): Promise<string> {
   if (!auth.includes("Bearer ")) {
     throw new ApolloError(
@@ -27,6 +34,13 @@ export async function getUserOrThrow(auth: string): Promise<string> {
   return data.user_id;
 }
 
+/**
+ * Retrieves the organization ID from the authentication token.
+ * Throws an error if the authentication token is invalid or the organization is not found.
+ * @param auth The authentication token.
+ * @returns A Promise that resolves to the organization ID.
+ * @throws {ApolloError} If the authentication token is missing the "Bearer" keyword or if the organization is not found.
+ */
 export async function getOrgIdOrThrow(auth: string): Promise<string> {
   if (!auth.includes("Bearer ")) {
     throw new ApolloError(

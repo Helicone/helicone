@@ -1,8 +1,11 @@
-import { useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Value } from "../../lib/api/prompts/prompts";
 import { getPromptValues } from "../lib/promptValues";
 
+/**
+ * Custom hook to fetch prompt values.
+ * @returns An object containing the fetched values, loading state, and error state.
+ */
 const useGetPromptValues = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["promptValues"],

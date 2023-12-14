@@ -2,6 +2,10 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AddKeyObj, addKey } from "../lib/keys";
 
+/**
+ * Custom hook for adding a key.
+ * @returns An object containing the `addKey` function, `isLoading` boolean, and `error` object.
+ */
 const useAddKey = () => {
   const client = useSupabaseClient();
   const queryClient = useQueryClient();

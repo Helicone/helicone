@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { clsx } from "../../shared/clsx";
-import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 import Image from "next/image";
 
 interface BlogPageProps {}

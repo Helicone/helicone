@@ -267,6 +267,11 @@ export const userTableFilters: [
   },
 ];
 
+/**
+ * Creates an array of text operators with suggestions based on the input parameters.
+ * @param inputParams - An array of input parameters.
+ * @returns An array of text operators with suggestions.
+ */
 function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
   return textOperators.map((o) => ({
     ...o,
@@ -275,6 +280,12 @@ function textWithSuggestions(inputParams: InputParam[]): Operator<string>[] {
   }));
 }
 
+/**
+ * Returns an array of property filters based on the given properties and input parameters.
+ * @param properties - The list of properties to create filters for.
+ * @param inputParams - The input parameters used to generate filter operators.
+ * @returns An array of SingleFilterDef objects representing the property filters.
+ */
 export function getPropertyFilters(
   properties: string[],
   inputParams: InputParam[]
@@ -288,6 +299,12 @@ export function getPropertyFilters(
   }));
 }
 
+/**
+ * Returns an array of value filters based on the given properties and input parameters.
+ * @param properties - The list of properties.
+ * @param inputParams - The input parameters.
+ * @returns An array of SingleFilterDef<"values"> objects.
+ */
 export function getValueFilters(
   properties: string[],
   inputParams: InputParam[]

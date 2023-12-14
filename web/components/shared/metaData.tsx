@@ -24,9 +24,8 @@ const MetaData = (props: MetaDataProps) => {
         <meta
           property="og:image"
           content={
-            image
-              ? image
-              : "https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
+            image ??
+            "https://www.helicone.ai/_next/image?url=%2Fassets%2Flanding%2Fhelicone-mobile.webp&w=384&q=75"
           }
         />
       </Head>

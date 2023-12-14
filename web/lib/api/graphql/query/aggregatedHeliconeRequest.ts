@@ -15,8 +15,16 @@ import {
 } from "../schema/types/graphql";
 import { convertTextOperators } from "./helper";
 
+/**
+ * Executes an aggregated helicone request.
+ *
+ * @param args - The arguments for the helicone request.
+ * @param context - The context object.
+ * @param info - The GraphQL resolve info object.
+ * @returns A promise that resolves to the aggregated helicone request.
+ * @throws ApolloError if there is an internal server error.
+ */
 export async function aggregatedHeliconeRequest(
-  root: any,
   args: QueryAggregatedHeliconeRequestArgs,
   context: Context,
   info: any

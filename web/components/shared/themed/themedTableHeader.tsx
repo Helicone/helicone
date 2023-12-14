@@ -1,33 +1,10 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-
-import { Menu, Popover, Transition } from "@headlessui/react";
+import { Menu } from "@headlessui/react";
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
-  ArrowsPointingOutIcon,
   FunnelIcon,
-  MinusCircleIcon,
-  PlusCircleIcon,
-  PlusIcon,
-  Square3Stack3DIcon,
-  Squares2X2Icon,
-  TrashIcon,
-  ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
-import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
@@ -36,18 +13,18 @@ import ThemedTimeFilter from "./themedTimeFilter";
 
 import { Column } from "../../ThemedTableV2";
 import { AdvancedFilters, UIFilterRow } from "./themedAdvancedFilters";
-import ThemedToggle from "./themedTabs";
-import { Json } from "../../../supabase/database.types";
 import ThemedModal from "./themedModal";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import useNotification from "../notification/useNotification";
 import Link from "next/link";
 import { Result } from "../../../lib/result";
 import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
-import { Toggle } from "./themedToggle";
 import { TimeFilter } from "../../templates/dashboard/dashboardPage";
 
+/**
+ * Escapes special characters in a CSV string.
+ * @param s - The string to escape.
+ * @returns The escaped string.
+ */
 export function escapeCSVString(s: string | undefined): string | undefined {
   if (s === undefined) {
     return undefined;

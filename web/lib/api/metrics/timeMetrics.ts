@@ -7,6 +7,14 @@ export interface AverageResponseTime {
   average_response_time: number;
   average_tokens_per_response: number;
 }
+
+/**
+ * Retrieves the aggregated average metrics based on the provided filter and organization ID.
+ * @param filter - The filter node used to specify the conditions for the metrics.
+ * @param org_id - The ID of the organization.
+ * @returns A promise that resolves to a Result object containing the average response time and average tokens per response,
+ *          or an error message if the query fails.
+ */
 export async function getAggregatedAvgMetrics(
   filter: FilterNode,
   org_id: string

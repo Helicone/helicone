@@ -23,6 +23,15 @@ export interface HeliconeJob {
   };
 }
 
+/**
+ * Retrieves a list of jobs based on the provided parameters.
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter criteria for the jobs.
+ * @param offset - The number of jobs to skip before returning results.
+ * @param limit - The maximum number of jobs to return.
+ * @param sort - The sorting criteria for the jobs.
+ * @returns A promise that resolves to a Result object containing an array of HeliconeJob objects or an error message.
+ */
 export async function getJobs(
   orgId: string,
   filter: FilterNode,

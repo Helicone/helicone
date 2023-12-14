@@ -28,6 +28,14 @@ export interface AuthClient {
   orgId: string;
 }
 
+/**
+ * Calculates the average number of requests per day within a given time period.
+ *
+ * @param totalRequests - The total number of requests.
+ * @param startDate - The start date of the time period.
+ * @param endDate - The end date of the time period.
+ * @returns The average number of requests per day.
+ */
 function calculateAverageRequestsPerDay(
   totalRequests: number,
   startDate: Date,
@@ -38,6 +46,12 @@ function calculateAverageRequestsPerDay(
   return totalRequests / days;
 }
 
+/**
+ * Retrieves metrics data using the provided authentication client and options.
+ * @param authClient The authentication client.
+ * @param options The options for retrieving metrics.
+ * @returns An object containing the retrieved data and any error that occurred.
+ */
 async function getData(authClient: AuthClient, options: GetMetricsOptions) {
   const { client, orgId } = authClient;
   try {
@@ -57,6 +71,12 @@ async function getData(authClient: AuthClient, options: GetMetricsOptions) {
   }
 }
 
+/**
+ * Retrieves metrics using the provided authentication client and options.
+ * @param authClient The authentication client.
+ * @param options The options for retrieving metrics.
+ * @returns A promise that resolves to a Result object containing the metrics data or an error message.
+ */
 export async function getMetrics(
   authClient: AuthClient,
   options: GetMetricsOptions

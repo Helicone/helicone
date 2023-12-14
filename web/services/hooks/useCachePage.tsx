@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { Result, resultMap } from "../../lib/result";
 import {
-  getModelUsageOverTime,
   getTopModelUsage,
   getTopRequests,
   getTopUserUsage,
 } from "../../lib/api/cache/stats";
 import { getModelUsageOverTimeBackFill } from "../../pages/api/cache/over_time";
 
+/**
+ * Custom hook that retrieves cache page metrics.
+ * @returns An object containing the total cached, total savings, and total time saved.
+ */
 export function useCachePageMetrics() {
   const totalCached = useQuery({
     queryKey: ["totalCached"],
@@ -45,6 +48,10 @@ export function useCachePageMetrics() {
   };
 }
 
+/**
+ * Custom hook to fetch and cache top metrics data.
+ * @returns An object containing the top models and top users data.
+ */
 export function useCachePageTopMetrics() {
   const topModels = useQuery({
     queryKey: ["topModels"],
@@ -72,6 +79,10 @@ export function useCachePageTopMetrics() {
   };
 }
 
+/**
+ * Custom hook for caching data over time.
+ * @returns An object containing the `overTime` query result.
+ */
 export function useCacheOvertime() {
   const overTime = useQuery({
     queryKey: ["overTime"],
@@ -107,6 +118,10 @@ export function useCacheOvertime() {
   };
 }
 
+/**
+ * Custom hook for caching top requests.
+ * @returns An object containing the topRequests query.
+ */
 export function useCachePageTopRequests() {
   const topRequests = useQuery({
     queryKey: ["topRequests"],

@@ -6,6 +6,13 @@ const isValidSortDirection = (sort: SortDirection) => {
   return sort === "asc" || sort === "desc";
 };
 
+/**
+ * Asserts that the given sort direction is valid.
+ * Throws an error if the direction is invalid.
+ *
+ * @param direction - The sort direction to validate.
+ * @throws Error - If the direction is invalid.
+ */
 function assertValidSortDirection(direction: SortDirection) {
   if (!isValidSortDirection(direction)) {
     throw new Error(`Invalid sort direction: ${direction}`);
@@ -27,6 +34,12 @@ const sortMappings: { [K in keyof UserMetric]: string } = {
   cost: "cost",
 };
 
+/**
+ * Builds a user sort object based on the provided sort configuration.
+ * @param sort - The sort configuration object.
+ * @param argsAcc - Optional array to accumulate additional arguments.
+ * @returns An object containing the orderByString and argsAcc.
+ */
 export function buildUserSort(
   sort: SortLeafUsers,
   argsAcc: any[] = []
@@ -51,12 +64,5 @@ export function buildUserSort(
       orderByString: `{val_${argsAcc.length - 1}: Identifier} ${sortDirection}`,
       argsAcc,
     };
-
-    // const sortKey = sortKeys[0];
-    // const sortDirection = sort[sortKey as keyof UserMetric];
-    // assertValidSortDirection(sortDirection!);
-    // const sortColumn = sortMappings[sortKey as keyof UserMetric];
-    // const sortSQL = `${sortColumn} ${sortDirection}`;
-    // return { orderByString: sortSQL, argsAcc };
   }
 }

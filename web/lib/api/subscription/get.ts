@@ -3,6 +3,13 @@ import Stripe from "stripe";
 import { Result } from "../../../lib/result";
 import { getStripeCustomerFromNext } from "../../../utlis/stripeHelpers";
 
+/**
+ * Retrieves the subscriptions for a Stripe customer.
+ *
+ * @param req - The NextApiRequest object.
+ * @param res - The NextApiResponse object.
+ * @returns A Promise that resolves to a Result object containing an array of Stripe.Subscription objects or an error message.
+ */
 export async function getSubscriptions(
   req: NextApiRequest,
   res: NextApiResponse

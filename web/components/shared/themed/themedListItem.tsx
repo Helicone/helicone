@@ -15,6 +15,12 @@ interface ThemedListItemProps {
   secondarySubtitle?: string;
 }
 
+/**
+ * ThemedListItem component.
+ *
+ * @param {ThemedListItemProps} props - The props for the ThemedListItem component.
+ * @returns {JSX.Element} The rendered ThemedListItem component.
+ */
 const ThemedListItem = (props: ThemedListItemProps) => {
   const { onClickHandler, title, subtitle, value, pill, secondarySubtitle } =
     props;

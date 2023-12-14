@@ -1,10 +1,16 @@
-import { getUSDateFromString } from "../../components/shared/utils/utils";
-import useRequestsPage, {
-  PromptResponsePair,
-} from "../../components/templates/requests/useRequestsPage";
-import { Json } from "../../supabase/database.types";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
-
+/**
+ * Custom hook for the playground page.
+ * Retrieves requests data and processes it to generate chat messages.
+ * @param requestId - The ID of the request to retrieve.
+ * @returns An object containing the following properties:
+ *   - isLoading: A boolean indicating if the data is currently being loaded.
+ *   - data: An array of request data.
+ *   - chat: An array of chat messages.
+ *   - refetch: A function to manually trigger data refetch.
+ *   - hasData: A boolean indicating if there is data available.
+ *   - isChat: A boolean indicating if the chat has multiple messages.
+ */
 export const usePlaygroundPage = (requestId: string) => {
   const requests = useRequestsPageV2(
     1,

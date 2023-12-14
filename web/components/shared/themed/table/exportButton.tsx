@@ -5,7 +5,6 @@ import { useState } from "react";
 import { clsx } from "../../clsx";
 import useNotification from "../../notification/useNotification";
 import ThemedModal from "../themedModal";
-import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 
 interface ExportButtonProps<T> {
   rows: T[];

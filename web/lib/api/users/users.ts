@@ -22,6 +22,15 @@ export interface UserMetric {
   cost: number;
 }
 
+/**
+ * Retrieves user metrics based on the provided parameters.
+ * @param org_id - The ID of the organization.
+ * @param filter - The filter node to apply to the query.
+ * @param offset - The offset value for pagination.
+ * @param limit - The limit value for pagination.
+ * @param sort - The sorting criteria for the query.
+ * @returns A promise that resolves to a Result object containing the user metrics or an error message.
+ */
 export async function userMetrics(
   org_id: string,
   filter: FilterNode,
@@ -76,6 +85,12 @@ OFFSET ${offset}
   return { data: data, error: null };
 }
 
+/**
+ * Retrieves the count of user metrics based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter node to apply to the query.
+ * @returns A promise that resolves to a Result object containing the count of user metrics or an error message.
+ */
 export async function userMetricsCount(
   org_id: string,
   filter: FilterNode

@@ -2,6 +2,17 @@ import { Switch } from "@headlessui/react";
 import { clsx } from "../clsx";
 import { BoltIcon, BoltSlashIcon } from "@heroicons/react/24/outline";
 
+/**
+ * A themed switch component.
+ *
+ * @param {Object} props - The component props.
+ * @param {string} [props.label] - The label for the switch.
+ * @param {boolean} props.checked - The checked state of the switch.
+ * @param {Function} props.onChange - The callback function called when the switch is toggled.
+ * @param {React.ComponentType<any>} [props.OnIcon] - The icon component to display when the switch is on.
+ * @param {React.ComponentType<any>} [props.OffIcon] - The icon component to display when the switch is off.
+ * @returns {JSX.Element} The themed switch component.
+ */
 export const ThemedSwitch = ({
   checked,
   onChange,

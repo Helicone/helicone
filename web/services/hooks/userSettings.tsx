@@ -2,6 +2,12 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 
+/**
+ * Custom hook for fetching user settings.
+ *
+ * @param userId - The ID of the user.
+ * @returns An object containing user settings, loading state, error, and a function to refetch the data.
+ */
 const useUserSettings = (userId: string) => {
   const client = useSupabaseClient();
 

@@ -36,6 +36,12 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const API_BASE_PATH = process.env.NEXT_PUBLIC_API_BASE_PATH || "";
 
+/**
+ * Updates the feedback for a request.
+ * @param requestId - The ID of the request.
+ * @param rating - The rating for the request (true for positive, false for negative).
+ * @returns A Promise that resolves to the response from the server.
+ */
 export const updateRequestFeedback = async (
   requestId: string,
   rating: boolean
@@ -62,6 +68,14 @@ export const updateRequestFeedback = async (
   });
 };
 
+/**
+ * Adds a label to a request.
+ * @param requestId - The ID of the request.
+ * @param orgId - The ID of the organization.
+ * @param key - The label key.
+ * @param value - The label value.
+ * @returns A Promise that resolves to the response from the server.
+ */
 export const addRequestLabel = async (
   requestId: string,
   orgId: string,

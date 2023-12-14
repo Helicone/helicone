@@ -10,6 +10,13 @@ export interface ModelMetrics {
   sum_tokens: number;
 }
 
+/**
+ * Retrieves model metrics based on the provided filter, organization ID, and caching option.
+ * @param filter The filter node to apply to the query.
+ * @param org_id The ID of the organization.
+ * @param cached A boolean indicating whether to use cached data or not.
+ * @returns A promise that resolves to an array of model metrics.
+ */
 export async function getModelMetrics(
   filter: FilterNode,
   org_id: string,
@@ -62,6 +69,14 @@ export interface ModelMetricsUsers {
   sum_completion_tokens: number;
   user_id: string;
 }
+
+/**
+ * Retrieves model metrics for specified users.
+ * @param filter - The filter node to apply to the query.
+ * @param org_id - The organization ID.
+ * @param users - An array of user IDs.
+ * @returns A promise that resolves to an array of model metrics for the specified users.
+ */
 export async function getModelMetricsForUsers(
   filter: FilterNode,
   org_id: string,

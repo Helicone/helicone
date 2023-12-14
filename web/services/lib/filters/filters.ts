@@ -308,26 +308,28 @@ export function buildFilterLeaf(
       continue;
     }
 
-    const sqlOperator =
-      operatorKey === "equals"
-        ? "="
-        : operatorKey === "like"
-        ? "LIKE"
-        : operatorKey === "ilike"
-        ? "ILIKE"
-        : operatorKey === "gte"
-        ? ">="
-        : operatorKey === "gt"
-        ? ">"
-        : operatorKey === "lt"
-        ? "<"
-        : operatorKey === "lte"
-        ? "<="
-        : operatorKey === "not-equals"
-        ? "!="
-        : operatorKey === "contains"
-        ? "ILIKE"
-        : undefined;
+    let sqlOperator;
+    if (operatorKey === "equals") {
+      sqlOperator = "=";
+    } else if (operatorKey === "like") {
+      sqlOperator = "LIKE";
+    } else if (operatorKey === "ilike") {
+      sqlOperator = "ILIKE";
+    } else if (operatorKey === "gte") {
+      sqlOperator = ">=";
+    } else if (operatorKey === "gt") {
+      sqlOperator = ">";
+    } else if (operatorKey === "lt") {
+      sqlOperator = "<";
+    } else if (operatorKey === "lte") {
+      sqlOperator = "<=";
+    } else if (operatorKey === "not-equals") {
+      sqlOperator = "!=";
+    } else if (operatorKey === "contains") {
+      sqlOperator = "ILIKE";
+    } else {
+      sqlOperator = undefined;
+    }
 
     filters.push(
       `${column} ${sqlOperator} ${argPlaceHolder(argsAcc.length, value)}`

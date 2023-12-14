@@ -1,14 +1,16 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../components/shared/getPagination";
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
 
 export interface ValueParam {
   value_param: string;
   value_key: string;
 }
 
+/**
+ * Retrieves the value parameters for a given user.
+ * @param user_id - The ID of the user.
+ * @returns A promise that resolves to a Result object containing the value parameters or an error message.
+ */
 export async function getValueParams(
   user_id: string
 ): Promise<Result<ValueParam[], string>> {

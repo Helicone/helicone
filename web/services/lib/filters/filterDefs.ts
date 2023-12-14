@@ -219,6 +219,13 @@ export interface FilterBranch {
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
 
+/**
+ * Converts a time filter into a FilterNode based on the specified table.
+ * @param filter - The time filter to convert.
+ * @param table - The table to apply the filter on.
+ * @returns The FilterNode representing the converted time filter.
+ * @throws Error if the specified table is not supported.
+ */
 export function timeFilterToFilterNode(
   filter: TimeFilter,
   table: keyof TablesAndViews
@@ -282,6 +289,12 @@ export function timeFilterToFilterNode(
   throw new Error("Table not supported");
 }
 
+/**
+ * Converts a list of filter nodes into a filter tree.
+ * @param list - The list of filter nodes.
+ * @param operator - The logical operator to use for combining the filter nodes.
+ * @returns The filter tree.
+ */
 export function filterListToTree(
   list: FilterNode[],
   operator: "or" | "and"
@@ -299,6 +312,12 @@ export function filterListToTree(
   }
 }
 
+/**
+ * Converts UI filters to filter leafs.
+ * @param filterMap - The filter map containing the definitions of filters.
+ * @param filters - The UI filter rows to be converted.
+ * @returns An array of filter leafs.
+ */
 export function filterUIToFilterLeafs(
   filterMap: SingleFilterDef<any>[],
   filters: UIFilterRow[]
@@ -318,6 +337,11 @@ export function filterUIToFilterLeafs(
     });
 }
 
+/**
+ * Parses a key string and returns a FilterLeaf object.
+ * @param keyString - The key string to be parsed.
+ * @returns The FilterLeaf object with the parsed key string.
+ */
 export const parseKey = (keyString: string): FilterLeaf => {
   return {
     request: {

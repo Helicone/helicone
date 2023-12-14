@@ -5,11 +5,6 @@ import {
   filterListToTree,
   FilterNode,
 } from "../../../../services/lib/filters/filterDefs";
-import { resultMap } from "../../../result";
-import { getCacheCount, getModelMetrics } from "../../cache/stats";
-import { modelCost } from "../../metrics/costCalc";
-import { getTotalCostProperties } from "../../property/totalCosts";
-import { getRequestCount, getRequestsDateRange } from "../../request/request";
 import {
   QueryHeliconeNodeArgs,
   HeliconeNode,
@@ -87,6 +82,12 @@ const filterInputToFilterLeaf: {
   },
 };
 
+/**
+ * Converts a HeliconeNodeFilter object to a FilterNode object.
+ *
+ * @param filter - The HeliconeNodeFilter object to be converted.
+ * @returns The converted FilterNode object.
+ */
 function convertFilterInputToFilterLeaf(
   filter: HeliconeNodeFilter
 ): FilterNode {
@@ -103,11 +104,16 @@ function convertFilterInputToFilterLeaf(
   return filterListToTree(convertedFilters, "and");
 }
 
+/**
+ * Retrieves Helicone nodes based on the provided arguments.
+ * @param args - The query arguments.
+ * @param context - The execution context.
+ * @returns A promise that resolves to an array of HeliconeNode objects.
+ * @throws ApolloError if there is an error retrieving the nodes.
+ */
 export async function heliconeNode(
-  root: any,
   args: QueryHeliconeNodeArgs,
-  context: Context,
-  info: any
+  context: Context
 ): Promise<HeliconeNode[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters, jobId } = {

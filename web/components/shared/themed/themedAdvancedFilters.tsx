@@ -1,5 +1,4 @@
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Dispatch, SetStateAction } from "react";
 import { Result } from "../../../lib/result";
 import {
   ColumnType,
@@ -8,6 +7,15 @@ import {
 import ThemedDropdown from "./themedDropdown";
 import { ThemedTextDropDown } from "./themedTextDropDown";
 
+/**
+ * Renders the advanced filters component.
+ *
+ * @param filterMap - The array of filter definitions.
+ * @param filters - The array of UI filter rows.
+ * @param setAdvancedFilters - The function to set the advanced filters.
+ * @param searchPropertyFilters - The function to search property filters.
+ * @returns The JSX element representing the advanced filters component.
+ */
 export function AdvancedFilters({
   filterMap,
   filters,
@@ -85,6 +93,16 @@ export function AdvancedFilters({
   );
 }
 
+/**
+ * Renders an advanced filter input based on the specified type.
+ *
+ * @param type - The type of the column.
+ * @param value - The current value of the input.
+ * @param onChange - The callback function to handle value changes.
+ * @param inputParams - Optional array of input parameters for "text-with-suggestions" type.
+ * @param onSearchHandler - Optional callback function for handling search events.
+ * @returns The JSX element representing the advanced filter input.
+ */
 function AdvancedFilterInput({
   type,
   value,
@@ -165,6 +183,16 @@ export type UIFilterRow = {
   value: string;
 };
 
+/**
+ * Renders a row for advanced filtering.
+ *
+ * @param filterMap - An array of filter definitions.
+ * @param filter - The current filter row.
+ * @param setFilter - A function to update the filter rows.
+ * @param onDeleteHandler - A function to handle the delete action.
+ * @param onSearchHandler - A function to handle the search action.
+ * @returns The rendered advanced filter row.
+ */
 function AdvancedFilterRow({
   filterMap,
   filter,

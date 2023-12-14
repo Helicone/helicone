@@ -1,24 +1,17 @@
 import {
-  ArrowsPointingInIcon,
-  ArrowsPointingOutIcon,
   BeakerIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
   CodeBracketIcon,
   EyeIcon,
   EyeSlashIcon,
-  UserCircleIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
-import theme from "prism-react-renderer/themes/dracula";
 import React, { useEffect, useRef, useState } from "react";
-import { Tooltip } from "@mui/material";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import Prism, { defaultProps } from "prism-react-renderer";
-import { Completion } from "./completion";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -175,7 +168,7 @@ export const SingleChat = (props: {
                         setOpen(true);
                       }}
                     >
-                      <img
+                      <Image
                         src={item.image_url.url}
                         alt={""}
                         width={200}
@@ -189,7 +182,7 @@ export const SingleChat = (props: {
                         setOpen(true);
                       }}
                     >
-                      <img
+                      <Image
                         src={item.image_url}
                         alt={""}
                         width={200}

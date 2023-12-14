@@ -14,6 +14,14 @@ import {
 } from "../schema/types/graphql";
 import { convertTextOperators, convertTimeOperators } from "./helper";
 
+/**
+ * Converts the filter input to a filter leaf object.
+ * @remarks
+ * This object maps each key of the HeliconeJobFilter type to a function that converts the corresponding filter value to a FilterLeaf object.
+ * @typeParam HeliconeJobFilter - The type of the filter object.
+ * @param filter - The filter object to be converted.
+ * @returns The converted FilterLeaf object or undefined if the filter value is undefined or null.
+ */
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeJobFilter]: (
     filter: HeliconeJobFilter[key]
@@ -83,6 +91,11 @@ const filterInputToFilterLeaf: {
   },
 };
 
+/**
+ * Converts a HeliconeJobFilter object into a FilterNode object.
+ * @param filter - The HeliconeJobFilter object to be converted.
+ * @returns The converted FilterNode object.
+ */
 function convertFilterInputToFilterLeaf(filter: HeliconeJobFilter): FilterNode {
   const keys = Object.keys(filter) as (keyof HeliconeJobFilter)[];
   const convertedFilters = keys
@@ -97,11 +110,15 @@ function convertFilterInputToFilterLeaf(filter: HeliconeJobFilter): FilterNode {
   return filterListToTree(convertedFilters, "and");
 }
 
+/**
+ * Retrieves a list of Helicone jobs based on the provided arguments.
+ * @param args - The arguments for querying Helicone jobs.
+ * @param context - The context object containing additional information.
+ * @returns A promise that resolves to an array of HeliconeJob objects.
+ */
 export async function heliconeJob(
-  root: any,
   args: QueryHeliconeJobArgs,
-  context: Context,
-  info: any
+  context: Context
 ): Promise<HeliconeJob[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {

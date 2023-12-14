@@ -8,6 +8,11 @@ export interface FeedbackOverTime {
   negativeCount: number;
 }
 
+/**
+ * Retrieves feedback over time based on the provided data.
+ * @param data The data for the request.
+ * @returns A promise that resolves to a Result object containing an array of FeedbackOverTime objects or an error message.
+ */
 export async function getFeedbackOverTime(
   data: DataOverTimeRequest
 ): Promise<Result<FeedbackOverTime[], string>> {

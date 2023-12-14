@@ -4,6 +4,11 @@ import { Result } from "../lib/result";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { stripeServer } from "./stripeServer";
 
+/**
+ * Retrieves a Stripe customer based on their email.
+ * @param email - The email of the customer.
+ * @returns A promise that resolves to a Result object containing the customer data or an error message.
+ */
 export async function getStripeCustomer(
   email: string
 ): Promise<Result<Stripe.Customer, string>> {
@@ -28,6 +33,13 @@ export async function getStripeCustomer(
   }
 }
 
+/**
+ * Retrieves the Stripe customer associated with the provided email address.
+ *
+ * @param req - The NextApiRequest object.
+ * @param res - The NextApiResponse object.
+ * @returns A Promise that resolves to a Result object containing the Stripe customer or an error message.
+ */
 export async function getStripeCustomerFromNext(
   req: NextApiRequest,
   res: NextApiResponse
@@ -40,6 +52,12 @@ export async function getStripeCustomerFromNext(
   return await getStripeCustomer(email);
 }
 
+/**
+ * Formats the amount for Stripe payment.
+ * @param amount - The amount to be formatted.
+ * @param currency - The currency in which the amount is to be formatted.
+ * @returns The formatted amount.
+ */
 export function formatAmountForStripe(
   amount: number,
   currency: string

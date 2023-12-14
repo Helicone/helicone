@@ -8,6 +8,11 @@ import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/shared/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 
+/**
+ * Custom hook to fetch organization members.
+ * @param orgId - The ID of the organization.
+ * @returns An object containing the fetched data, loading state, and a function to manually refetch the data.
+ */
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["OrganizationsMembers", orgId],
@@ -26,6 +31,11 @@ const useGetOrgMembers = (orgId: string) => {
   };
 };
 
+/**
+ * Custom hook to fetch the owner of an organization.
+ * @param orgId - The ID of the organization.
+ * @returns An object containing the owner data and loading state.
+ */
 const useGetOrgOwner = (orgId: string) => {
   const { data, isLoading } = useQuery({
     queryKey: ["OrganizationsMembersOwner", orgId],
@@ -43,6 +53,12 @@ const useGetOrgOwner = (orgId: string) => {
   };
 };
 
+/**
+ * Custom hook to fetch organization members and owner data.
+ *
+ * @param orgId - The ID of the organization.
+ * @returns An object containing the owner and members data, as well as a boolean indicating if the data is loading.
+ */
 const useGetOrgMembersAndOwner = (orgId: string) => {
   const { data: members, isLoading: isMembersLoading } =
     useGetOrgMembers(orgId);
@@ -61,6 +77,10 @@ const useGetOrgMembersAndOwner = (orgId: string) => {
   };
 };
 
+/**
+ * Custom hook to fetch organizations data.
+ * @returns An object containing the fetched organizations data, loading state, and a function to manually refetch the data.
+ */
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
@@ -103,10 +123,18 @@ const useGetOrgs = () => {
   };
 };
 
+/**
+ * Sets the organization ID in a cookie.
+ * @param orgId - The ID of the organization.
+ */
 const setOrgCookie = (orgId: string) => {
   Cookies.set(ORG_ID_COOKIE_KEY, orgId, { expires: 30 });
 };
 
+/**
+ * Custom hook that manages the organization context.
+ * @returns The organization context value.
+ */
 const useOrgsContextManager = () => {
   const { data: orgs, refetch } = useGetOrgs();
 

@@ -6,6 +6,13 @@ import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/fil
 import { resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Retrieves error codes and their corresponding counts from the database.
+ * @param filter - The filter node to apply to the query.
+ * @param timeFilter - The time range to filter the data.
+ * @param org_id - The ID of the organization.
+ * @returns A promise that resolves to an array of error codes and their counts.
+ */
 export async function getErrorCodes(
   filter: FilterNode,
   timeFilter: {

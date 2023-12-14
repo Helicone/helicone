@@ -16,13 +16,8 @@
  */
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpDownIcon,
-} from "@heroicons/react/20/solid";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
-import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface DropdownOption<T> {
   label: string;
@@ -43,6 +38,13 @@ interface ThemedDropdownProps<T> {
   disabled?: boolean;
 }
 
+/**
+ * ThemedDropdown component.
+ *
+ * @template T - The type of the dropdown options.
+ * @param {ThemedDropdownProps<T>} props - The component props.
+ * @returns {JSX.Element} - The rendered ThemedDropdown component.
+ */
 export default function ThemedDropdown<T>(props: ThemedDropdownProps<T>) {
   const {
     selectedValue,

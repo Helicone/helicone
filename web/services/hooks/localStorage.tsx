@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 
+/**
+ * Custom hook for managing a value in local storage.
+ *
+ * @template T - The type of the value to be stored.
+ * @param {string} key - The key used to store the value in local storage.
+ * @param {T} initialValue - The initial value to be stored.
+ * @param {(setStored: (t: T) => void) => void} [onNothingStored] - Optional callback function to be called when no item is stored in local storage.
+ * @returns {[T, (t: T) => void]} - A tuple containing the stored value and a function to update the stored value.
+ */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,

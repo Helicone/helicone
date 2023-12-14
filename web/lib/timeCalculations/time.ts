@@ -2,6 +2,11 @@ import { TimeIncrement } from "./fetchTimeData";
 
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h" | "all" | "custom";
 
+/**
+ * Returns a Date object representing a time interval ago.
+ * @param interval - The time interval to calculate.
+ * @returns A Date object representing the calculated time interval ago.
+ */
 export function getTimeIntervalAgo(interval: TimeInterval): Date {
   const now = new Date();
   switch (interval) {
@@ -28,6 +33,11 @@ export interface TimeGraphConfig {
   end: Date;
 }
 
+/**
+ * Calculates the increment value based on the total time.
+ * @param totalTime - The total time in milliseconds.
+ * @returns The increment value in milliseconds.
+ */
 export const getIncrement = (totalTime: number) => {
   if (totalTime < 1000 * 60 * 60 * 2) {
     // less than 1 hour
@@ -59,6 +69,18 @@ export const getIncrement = (totalTime: number) => {
   return 1000 * 60 * 60 * 24 * 30;
 };
 
+/**
+ * Backfills time intervals with data using a reducer function.
+ *
+ * @template T - The type of the data elements.
+ * @template K - The type of the result elements.
+ * @param {Array<T & { created_at_trunc: Date }>} data - The array of data elements with a `created_at_trunc` property.
+ * @param {Date} start - The start date of the time interval.
+ * @param {Date} end - The end date of the time interval.
+ * @param {(acc: K, d: T) => K} reducer - The reducer function to apply to each data element.
+ * @param {K} initial - The initial value for the reducer.
+ * @returns {Array<K & { time: Date }>} - The backfilled result array with each element containing the time and the result of the reducer function.
+ */
 export function timeBackfill<T, K>(
   data: (T & { created_at_trunc: Date })[],
   start: Date,
@@ -87,6 +109,12 @@ export function timeBackfill<T, K>(
   return result;
 }
 
+/**
+ * Calculates the time interval between two dates.
+ * @param start - The start date.
+ * @param end - The end date.
+ * @returns The time increment, which can be "min", "hour", or "day".
+ */
 export const getTimeInterval = ({
   start,
   end,

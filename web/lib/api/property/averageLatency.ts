@@ -2,14 +2,17 @@ import {
   FilterNode,
   timeFilterToFilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHousePropResponse,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Calculates the average latency for a given filter and time range.
+ * @param filter - The filter node to apply.
+ * @param timeFilter - The time range to filter the data.
+ * @param org_id - The organization ID.
+ * @returns A promise that resolves to the average latency as a number, or an error message as a string.
+ */
 export async function getAverageLatency(
   filter: FilterNode,
   timeFilter: {

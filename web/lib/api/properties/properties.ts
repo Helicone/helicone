@@ -2,10 +2,18 @@ import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/f
 import { Result } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Represents a property.
+ */
 export interface Property {
   property: string;
 }
 
+/**
+ * Retrieves properties based on the provided organization ID.
+ * @param org_id The organization ID.
+ * @returns A promise that resolves to a Result object containing an array of Property objects on success, or an error message on failure.
+ */
 export async function getProperties(
   org_id: string
 ): Promise<Result<Property[], string>> {

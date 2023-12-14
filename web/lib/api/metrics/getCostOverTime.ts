@@ -9,6 +9,11 @@ export interface DateCountDBModel {
   cost: number;
 }
 
+/**
+ * Retrieves the cost over time based on the provided data.
+ * @param data The data for the request.
+ * @returns A promise that resolves to an array of DateCountDBModel objects representing the cost over time, or a string error message.
+ */
 export async function getCostOverTime(
   data: DataOverTimeRequest
 ): Promise<Result<DateCountDBModel[], string>> {

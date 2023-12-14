@@ -4,9 +4,15 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Retrieves the total number of requests based on the provided filter, time filter, and organization ID.
+ * @param filter - The filter node to apply to the requests.
+ * @param timeFilter - The time range to filter the requests.
+ * @param org_id - The ID of the organization.
+ * @returns A promise that resolves to the total number of requests, or an error message if the request fails.
+ */
 export async function getTotalRequests(
   filter: FilterNode,
   timeFilter: {

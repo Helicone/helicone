@@ -1,12 +1,19 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { UserMetric } from "../../lib/api/users/users";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
-import { DailyActiveUsers } from "../../pages/api/request_users/dau";
 
+/**
+ * Custom hook for fetching users data.
+ *
+ * @param currentPage - The current page number.
+ * @param currentPageSize - The number of users per page.
+ * @param sortLeaf - The sorting criteria for the users.
+ * @param advancedFilter - Optional advanced filter for the users.
+ * @returns An object containing the fetched users data and related properties.
+ */
 const useUsers = (
   currentPage: number,
   currentPageSize: number,

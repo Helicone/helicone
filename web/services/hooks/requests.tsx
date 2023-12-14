@@ -1,11 +1,14 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
-import { updateRequestFeedback } from "../lib/requests";
 
+/**
+ * Custom hook for making a GET request to fetch data.
+ * @param requestId - The ID of the request.
+ * @returns An object containing the request data and loading state.
+ */
 const useGetRequest = (requestId: string) => {
   const { data, isLoading } = useQuery({
     queryKey: ["requestData", requestId],
@@ -38,6 +41,16 @@ const useGetRequest = (requestId: string) => {
   };
 };
 
+/**
+ * Custom hook for fetching requests data and count.
+ * @param currentPage - The current page number.
+ * @param currentPageSize - The number of items per page.
+ * @param advancedFilter - The advanced filter for the requests.
+ * @param sortLeaf - The sort leaf for the requests.
+ * @param isCached - Indicates whether to use cached data.
+ * @param isLive - Indicates whether to enable live updates.
+ * @returns An object containing the requests data and count.
+ */
 const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
@@ -112,6 +125,13 @@ const useGetRequests = (
   };
 };
 
+/**
+ * Custom hook to fetch the count of requests from Clickhouse.
+ * @param startDateISO - The start date in ISO format.
+ * @param endDateISO - The end date in ISO format.
+ * @param orgId - Optional organization ID.
+ * @returns An object containing the count, loading state, and a function to refetch the data.
+ */
 const useGetRequestCountClickhouse = (
   startDateISO: string,
   endDateISO: string,

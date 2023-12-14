@@ -1,14 +1,8 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
-import {
-  AdjustmentsHorizontalIcon,
-  MinusCircleIcon,
-  PlusCircleIcon,
-  ViewColumnsIcon,
-} from "@heroicons/react/24/outline";
+import { Fragment } from "react";
+import { CheckIcon } from "@heroicons/react/20/solid";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
-import { clsx } from "../../shared/clsx";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];

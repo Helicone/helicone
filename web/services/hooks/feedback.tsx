@@ -6,6 +6,13 @@ interface Feedback {
   dataType: string;
 }
 
+/**
+ * Custom hook to fetch feedback data.
+ * @returns {Object} An object containing feedback data, loading state, and error state.
+ * @property {Feedback[]} feedback - An array of feedback objects.
+ * @property {boolean} isLoading - A boolean indicating if the data is currently being loaded.
+ * @property {Error | null} error - An error object if there was an error while fetching the data, otherwise null.
+ */
 const useGetFeedback = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["feedback"],

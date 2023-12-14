@@ -1,20 +1,13 @@
 import {
-  Bars4Icon,
   BuildingOffice2Icon,
-  CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CloudArrowUpIcon,
   CreditCardIcon,
-  CubeIcon,
   LightBulbIcon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
-  format,
   subMonths,
   startOfMonth,
   endOfMonth,

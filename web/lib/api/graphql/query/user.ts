@@ -1,11 +1,18 @@
 import { ApolloError } from "apollo-server-core";
 import { buildFilterWithAuthClickHouse } from "../../../../services/lib/filters/filters";
-import { dbQueryClickhouse, printRunnableQuery } from "../../db/dbExecute";
-import { getUserOrThrow } from "../helpers/auth";
+import { dbQueryClickhouse } from "../../db/dbExecute";
 import { QueryUserArgs, User } from "../schema/types/graphql";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 import { resultMap } from "../../../result";
 
+/**
+ * Retrieves a list of users based on the provided parameters.
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter node to apply to the query.
+ * @param offset - The offset value for pagination.
+ * @param limit - The limit value for pagination.
+ * @returns An object containing the user data and an error message if applicable.
+ */
 export async function getUsers(
   orgId: string,
   filter: FilterNode,
@@ -53,6 +60,15 @@ export async function getUsers(
   });
 }
 
+/**
+ * Queries user data based on the provided arguments.
+ *
+ * @param root - The root value of the GraphQL query.
+ * @param args - The arguments passed to the query.
+ * @param context - The context object containing additional data and functions.
+ * @param info - The GraphQL resolve info object.
+ * @returns A promise that resolves to an array of User objects.
+ */
 export async function queryUser(
   root: any,
   args: QueryUserArgs,

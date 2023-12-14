@@ -6,6 +6,13 @@ import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/fil
 import { Result, resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Retrieves the number of active users based on the provided filter, time filter, and organization ID.
+ * @param filter - The filter node to apply.
+ * @param timeFilter - The time range to filter the data.
+ * @param org_id - The ID of the organization.
+ * @returns A promise that resolves to the number of active users or an error message.
+ */
 export async function getActiveUsers(
   filter: FilterNode,
   timeFilter: {

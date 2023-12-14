@@ -2,6 +2,12 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { getRequestCountClickhouse } from "./api/request/request";
 
+/**
+ * Checks if the request count for a given organization has exceeded the request limit set in the user settings.
+ * @param client - The Supabase client.
+ * @param orgId - The ID of the organization.
+ * @returns A boolean indicating whether the request count is over the limit.
+ */
 export async function requestOverLimit(
   client: SupabaseClient<Database>,
   orgId: string

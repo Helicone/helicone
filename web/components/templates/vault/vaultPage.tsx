@@ -1,7 +1,5 @@
 // pages/Vault.tsx
-import { useEffect, useState } from "react";
-import { Result } from "../../../lib/result";
-import generateApiKey from "generate-api-key";
+import { useState } from "react";
 import {
   DecryptedProviderKey,
   DecryptedProviderKeyMapping,
@@ -9,7 +7,6 @@ import {
 import ThemedTable, { ThemedTableProps } from "../../shared/themed/themedTable";
 import { useVaultPage } from "./useVaultPage";
 import ThemedModal from "../../shared/themed/themedModal";
-import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import { KeyIcon } from "@heroicons/react/24/outline";
 import CreateProviderKeyModal from "./createProviderKeyModal";

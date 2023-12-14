@@ -3,6 +3,12 @@ import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/fil
 import { resultMap } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Retrieves the daily active users based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply to the query.
+ * @returns An array of objects containing the time step, user count step, and request count step.
+ */
 export async function getDailyActiveUsers(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id,

@@ -1,10 +1,12 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { NextRouter } from "next/router";
-import Stripe from "stripe";
-// import { Tier } from "../components/templates/usage/usagePage";
 import getStripe from "../utlis/getStripe";
-import { DEMO_EMAIL } from "./constants";
-import { Result } from "./result";
+
+/**
+ * Fetches data from the specified URL using the POST method and returns the response as JSON.
+ * @param url - The URL to fetch data from.
+ * @param data - The data to send in the request body (optional).
+ * @returns A Promise that resolves to the parsed JSON response.
+ * @throws If an error occurs during the fetch request.
+ */
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
     // Default options are marked with *
@@ -30,6 +32,10 @@ export async function fetchPostJSON(url: string, data?: {}) {
   }
 }
 
+/**
+ * Subscribes to the Pro plan using the provided discount code.
+ * @param discountCode The discount code to apply to the subscription.
+ */
 const subscribeToPro = async (discountCode: string) => {
   const response = await fetchPostJSON(
     `/api/checkout_sessions?discountCode=${discountCode}`

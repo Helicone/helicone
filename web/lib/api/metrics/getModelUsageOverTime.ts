@@ -1,7 +1,6 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-
 import { Result } from "../../result";
 import {
   isValidTimeIncrement,
@@ -24,6 +23,15 @@ export interface ModelUsageOverTime {
   model: string;
 }
 
+/**
+ * Retrieves model usage over time based on the provided filters.
+ * @param timeFilter - The time filter to apply.
+ * @param userFilter - The user filter to apply.
+ * @param orgId - The organization ID.
+ * @param dbIncrement - The time increment for grouping the data.
+ * @param timeZoneDifference - The time zone difference in minutes.
+ * @returns A promise that resolves to a Result object containing the model usage data or an error message.
+ */
 export async function getModelUsageOverTime({
   timeFilter,
   userFilter,

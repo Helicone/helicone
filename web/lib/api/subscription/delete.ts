@@ -4,6 +4,13 @@ import { Result } from "../../result";
 import { getStripeCustomerFromNext } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
 
+/**
+ * Deletes a subscription from Stripe.
+ *
+ * @param req - The NextApiRequest object.
+ * @param res - The NextApiResponse object.
+ * @returns A Promise that resolves to a Result object containing the deleted subscription or an error message.
+ */
 export async function deleteSubscription(
   req: NextApiRequest,
   res: NextApiResponse

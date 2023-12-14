@@ -12,6 +12,11 @@ export class RosettaStore implements IDatabaseService {
     this.supabaseClient = supabaseClient;
   }
 
+  /**
+   * Retrieves Rosetta mappers based on their status.
+   * @param statuses - An array of RosettaMapperStatus values.
+   * @returns A promise that resolves to an array of RosettaMapper objects.
+   */
   public async getMappersByStatus(
     statuses: RosettaMapperStatus[]
   ): Promise<RosettaMapper[]> {
@@ -28,6 +33,11 @@ export class RosettaStore implements IDatabaseService {
     return data?.map((mapper) => this.ToRosettaMapper(mapper)) ?? [];
   }
 
+  /**
+   * Retrieves an array of Rosetta mappers based on the provided mapper key.
+   * @param mapperKey The key used to filter the Rosetta mappers.
+   * @returns A promise that resolves to an array of RosettaMapper objects.
+   */
   public async getMappers(mapperKey: string): Promise<RosettaMapper[]> {
     const { data, error } = await this.supabaseClient
       .from("rosetta_mappers")
@@ -42,6 +52,12 @@ export class RosettaStore implements IDatabaseService {
     return data?.map((mapper) => this.ToRosettaMapper(mapper)) ?? [];
   }
 
+  /**
+   * Updates the rosetta mapper in the database.
+   *
+   * @param rosettaMapper - The rosetta mapper object to update.
+   * @returns A promise that resolves when the update is complete.
+   */
   public async updateMapper(rosettaMapper: RosettaMapper): Promise<void> {
     const newMapper = this.ToDbMapper(rosettaMapper);
     const { error } = await this.supabaseClient
@@ -54,6 +70,12 @@ export class RosettaStore implements IDatabaseService {
     }
   }
 
+  /**
+   * Inserts a RosettaMapper into the database.
+   *
+   * @param mapper - The RosettaMapper to be inserted.
+   * @returns A Promise that resolves to void.
+   */
   public async insertMapper(mapper: RosettaMapper): Promise<void> {
     const newMapper = this.ToDbMapper(mapper);
     const { error } = await this.supabaseClient
@@ -68,6 +90,12 @@ export class RosettaStore implements IDatabaseService {
     }
   }
 
+  /**
+   * Maps a RosettaMapper object to the corresponding database insert object.
+   *
+   * @param rosettaMapper - The RosettaMapper object to be mapped.
+   * @returns The mapped database insert object.
+   */
   private ToDbMapper(
     rosettaMapper: RosettaMapper
   ): Database["public"]["Tables"]["rosetta_mappers"]["Insert"] {
@@ -87,6 +115,12 @@ export class RosettaStore implements IDatabaseService {
     };
   }
 
+  /**
+   * Maps a database mapper object to a RosettaMapper object.
+   *
+   * @param dbMapper - The database mapper object to be mapped.
+   * @returns The mapped RosettaMapper object.
+   */
   private ToRosettaMapper(
     dbMapper: Database["public"]["Tables"]["rosetta_mappers"]["Row"]
   ): RosettaMapper {

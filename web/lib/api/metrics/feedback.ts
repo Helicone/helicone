@@ -6,6 +6,13 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 
+/**
+ * Retrieves the total feedback count based on the provided filter, time filter, and organization ID.
+ * @param filter The filter node to apply to the feedback data.
+ * @param timeFilter The time range to filter the feedback data.
+ * @param org_id The ID of the organization.
+ * @returns A promise that resolves to the total feedback count.
+ */
 export async function getTotalFeedback(
   filter: FilterNode,
   timeFilter: {

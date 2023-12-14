@@ -1,6 +1,5 @@
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { CheckIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
 import { useTheme } from "../theme/themeContext";
 
@@ -10,6 +9,16 @@ interface ThemedModalProps {
   children: React.ReactNode;
 }
 
+/**
+ * ThemedModal component.
+ *
+ * @component
+ * @param {ThemedModalProps} props - The props for the ThemedModal component.
+ * @param {boolean} props.open - Determines whether the modal is open or not.
+ * @param {function} props.setOpen - Callback function to set the open state of the modal.
+ * @param {ReactNode} props.children - The content to be rendered inside the modal.
+ * @returns {JSX.Element} The ThemedModal component.
+ */
 const ThemedModal = (props: ThemedModalProps) => {
   const { open, setOpen, children } = props;
 

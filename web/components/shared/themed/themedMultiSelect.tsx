@@ -4,10 +4,24 @@ import {
   MinusCircleIcon,
   PlusCircleIcon,
   TagIcon,
-  ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
-import { ForwardRefExoticComponent, Fragment, SVGProps } from "react";
+import { Fragment } from "react";
 
+/**
+ * ThemedMultiSelect component.
+ *
+ * @component
+ * @param {Object[]} columns - The columns configuration for the multi-select.
+ * @param {string} columns[].label - The label of the column.
+ * @param {boolean} columns[].active - Indicates if the column is active.
+ * @param {string} columns[].value - The value of the column.
+ * @param {string} buttonLabel - The label of the button.
+ * @param {Function} onSelect - The callback function called when a column is selected.
+ * @param {Function} deselectAll - The callback function called when "Deselect All" button is clicked.
+ * @param {Function} selectAll - The callback function called when "Select All" button is clicked.
+ * @param {string} [align="left"] - The alignment of the popover. Can be "left" or "right".
+ * @returns {JSX.Element} The ThemedMultiSelect component.
+ */
 export const ThemedMultiSelect = ({
   columns,
   buttonLabel,

@@ -5,8 +5,15 @@ import {
 import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
+/**
+ * Retrieves aggregated key metrics based on the provided filter, time filter, and organization ID.
+ * @param filter The filter node to apply to the query.
+ * @param timeFilter The time range to filter the data.
+ * @param org_id The ID of the organization.
+ * @returns A Promise that resolves to an array of objects containing the aggregated key metrics.
+ */
 export async function getAggregatedKeyMetrics(
   filter: FilterNode,
   timeFilter: {

@@ -1,10 +1,10 @@
 import moment from "moment";
+
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
-
 import { Result, resultMap } from "../../result";
 import {
   isValidTimeFilter,
@@ -13,9 +13,17 @@ import {
 } from "../../sql/timeHelpers";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
-
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
+/**
+ * Builds the fill string and updates the arguments accumulator for a given date range.
+ * @param startDate The start date of the range.
+ * @param endDate The end date of the range.
+ * @param dbIncrement The time increment for the database.
+ * @param timeZoneDifference The time zone difference.
+ * @param argsAcc The arguments accumulator.
+ * @returns An object containing the fill string and updated arguments accumulator.
+ */
 function buildFill(
   startDate: Date,
   endDate: Date,
@@ -41,6 +49,13 @@ function buildFill(
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
 
+/**
+ * Builds a date truncation expression for a given database increment, time zone difference, and column.
+ * @param dbIncrement The database increment to truncate the date to.
+ * @param timeZoneDifference The time zone difference in minutes.
+ * @param column The column to truncate the date from.
+ * @returns The date truncation expression.
+ */
 function buildDateTrunc(
   dbIncrement: TimeIncrement,
   timeZoneDifference: number,
@@ -53,6 +68,19 @@ function buildDateTrunc(
   }, 'UTC')`;
 }
 
+/**
+ * Retrieves data over time for a given set of filters.
+ *
+ * @param timeFilter - The time filter specifying the start and end dates.
+ * @param userFilter - The filter for user-specific data.
+ * @param orgId - The organization ID.
+ * @param dbIncrement - The time increment for the database query.
+ * @param timeZoneDifference - The time zone difference in minutes.
+ * @param countColumn - The column to count.
+ * @param groupByColumns - The columns to group by.
+ * @param printQuery - Whether to print the query.
+ * @returns A promise that resolves to the result of the query.
+ */
 export async function getXOverTime<T>(
   {
     timeFilter,

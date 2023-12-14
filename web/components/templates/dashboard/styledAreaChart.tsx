@@ -1,7 +1,5 @@
-import { Card, Title, AreaChart } from "@tremor/react";
-import { Style } from "util";
+import { Card } from "@tremor/react";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import * as boxbee from "../../../public/lottie/boxbee.json";
 import clsx from "clsx";
 
 interface StyledAreaChartProps {

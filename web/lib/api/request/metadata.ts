@@ -1,11 +1,20 @@
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
 
+/**
+ * Represents the metadata associated with a request.
+ */
 export interface RequestMetaData {
   request_id: string;
   cached_created_at: string;
 }
 
+/**
+ * Retrieves the metadata for a specific request.
+ * @param user_id - The ID of the user making the request.
+ * @param request_id - The ID of the request.
+ * @returns A promise that resolves to a Result object containing the request metadata or an error message.
+ */
 export async function getRequestMetaData(
   user_id: string,
   request_id: string

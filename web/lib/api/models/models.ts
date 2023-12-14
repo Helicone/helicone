@@ -16,6 +16,16 @@ export interface ModelMetric {
   cost: number;
 }
 
+/**
+ * Retrieves model metrics based on the provided parameters.
+ *
+ * @param orgId - The ID of the organization.
+ * @param filter - The filter node to apply to the query.
+ * @param offset - The offset value for pagination.
+ * @param limit - The limit value for pagination.
+ * @param timeFilter - The time filter object with start and end dates.
+ * @returns A promise that resolves to a Result object containing the model metrics or an error message.
+ */
 export async function modelMetrics(
   orgId: string,
   filter: FilterNode,

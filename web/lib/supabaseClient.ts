@@ -7,6 +7,11 @@ if (supabaseUrl === "" || supabaseAnonKey === "") {
   throw new Error("URL or Anon ENV not set");
 }
 
+/**
+ * Creates a Supabase client with authentication using the provided authhash.
+ * @param authhash - The authentication hash.
+ * @returns A Supabase client instance.
+ */
 export const supabaseClientAuthHash = async (authhash: string) =>
   createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: true },

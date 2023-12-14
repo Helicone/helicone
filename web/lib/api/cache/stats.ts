@@ -1,26 +1,20 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
-import {
-  SortLeafRequest,
-  buildRequestSort,
-} from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../db/dbExecute";
+import { dbExecute } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
 
+/**
+ * Retrieves the count of cache hits based on the provided organization ID and filter.
+ * @param orgId The ID of the organization.
+ * @param filter The filter to apply to the cache hits.
+ * @returns A promise that resolves to the count of cache hits, or an error message if the retrieval fails.
+ */
 export async function getCacheCount(
   orgId: string,
   filter: FilterNode
@@ -45,6 +39,12 @@ export async function getCacheCount(
   );
 }
 
+/**
+ * Retrieves model metrics from the cache based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply to the query.
+ * @returns A promise that resolves to an array of ModelMetrics.
+ */
 export async function getModelMetrics(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -67,6 +67,12 @@ GROUP BY response.body ->> 'model'::text;
   return dbExecute<ModelMetrics>(query, builtFilter.argsAcc);
 }
 
+/**
+ * Retrieves the total time saved in milliseconds for a given organization and filter.
+ * @param org_id - The ID of the organization.
+ * @param filter - The filter to apply to the query.
+ * @returns The total time saved in seconds.
+ */
 export async function getTimeSaved(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -91,6 +97,12 @@ WHERE (
   return res;
 }
 
+/**
+ * Retrieves the top model usage based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply.
+ * @returns A promise that resolves to an array of objects containing the model name and its count.
+ */
 export async function getTopModelUsage(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -124,6 +136,12 @@ LIMIT 10;
   );
 }
 
+/**
+ * Retrieves the top user usage based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply.
+ * @returns A promise that resolves to an array of objects containing the user ID and count.
+ */
 export async function getTopUserUsage(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -149,6 +167,12 @@ LIMIT 5;
   );
 }
 
+/**
+ * Retrieves the top requests based on the provided organization ID and filter.
+ * @param org_id The ID of the organization.
+ * @param filter The filter to apply to the requests.
+ * @returns A promise that resolves to an array of objects containing the request ID, count, last used date, first used date, prompt, and model.
+ */
 export async function getTopRequests(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -188,8 +212,15 @@ LIMIT 10;
   }>(query, builtFilter.argsAcc);
 }
 
+/**
+ * Retrieves model usage over time based on the provided parameters.
+ * @param userFilter The filter to apply to the data.
+ * @param orgId The ID of the organization.
+ * @param dbIncrement The time increment for grouping the data.
+ * @param timeZoneDifference The time zone difference in minutes.
+ * @returns An object containing the model, created_at_trunc, and sum_tokens.
+ */
 export async function getModelUsageOverTime({
-  timeFilter,
   userFilter,
   orgId,
   dbIncrement,

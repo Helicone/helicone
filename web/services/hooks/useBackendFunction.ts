@@ -7,6 +7,10 @@ import {
   filterListToTree,
 } from "../lib/filters/filterDefs";
 
+/**
+ * Represents a backend metrics call.
+ * @template T - The type of data returned by the backend call.
+ */
 export interface BackendMetricsCall<T> {
   params: {
     timeFilter: TimeFilter;
@@ -19,6 +23,9 @@ export interface BackendMetricsCall<T> {
   postProcess?: (data: T) => T;
 }
 
+/**
+ * Represents the body of a metrics backend request.
+ */
 export type MetricsBackendBody = {
   timeFilter: {
     start: string;
@@ -29,6 +36,12 @@ export type MetricsBackendBody = {
   timeZoneDifference: number;
 };
 
+/**
+ * Custom hook for making backend metric calls.
+ * @template T - The type of the response data.
+ * @param {BackendMetricsCall<T>} options - The options for the backend metric call.
+ * @returns {QueryResult<T>} - The query result object.
+ */
 export function useBackendMetricCall<T>({
   params,
   endpoint,

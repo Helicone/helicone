@@ -1,15 +1,11 @@
 import { Tab } from "@headlessui/react";
 import { useState } from "react";
 import { clsx } from "../../../../shared/clsx";
-import theme from "prism-react-renderer/themes/nightOwl";
 import { DiffHighlight } from "../../diffHighlight";
-import Prism, { defaultProps } from "prism-react-renderer";
 
 interface AnthropicProxyProps {
   apiKey: string;
 }
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const CODE_CONVERTS = {
   curl: (key: string) => `
@@ -103,94 +99,6 @@ const AnthropicProxy = (props: AnthropicProxyProps) => {
           newLines={DIFF_LINES[lang]}
           oldLines={[]}
         />
-        {/* {lang === "curl" && (
-          <div className="flex flex-col space-y-8 py-8">
-            <div className="flex flex-col">
-              <p className="text-md text-gray-700 font-light">
-                Step 1: Install the Helicone package
-              </p>
-              <DiffHighlight
-                code={`npm install helicone`}
-                language="bash"
-                newLines={[]}
-                oldLines={[]}
-                minHeight={false}
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-md text-gray-700 font-light">
-                Step 2: Add HELICONE_API_KEY to your environment variables.
-              </p>
-              <DiffHighlight
-                code={`export HELICONE_API_KEY=${apiKey}`}
-                language="python"
-                newLines={[]}
-                oldLines={[]}
-                minHeight={false}
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-md text-gray-700 font-light">
-                Step 3: Replace the import and use openai you would normally
-              </p>
-              <DiffHighlight
-                code={`
-- const { Configuration, OpenAIApi } = require("openai");
-      
-+ const { HeliconeAsyncConfiguration as Configuration, HeliconeAsyncOpenAIApi as OpenAIApi } = require("helicone");
-                  `}
-                language="python"
-                newLines={[2]}
-                oldLines={[0]}
-                minHeight={false}
-              />
-            </div>
-          </div>
-        )}
-        {lang === "python" && (
-          <div className="flex flex-col space-y-8 py-8">
-            <div className="flex flex-col">
-              <p className="text-md text-gray-700 font-light">
-                Step 1: Install the Helicone package
-              </p>
-              <DiffHighlight
-                code={`pip install helicone`}
-                language="bash"
-                newLines={[]}
-                oldLines={[]}
-                minHeight={false}
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-md text-gray-700 font-light">
-                Step 2: Add HELICONE_API_KEY to your environment variables.
-              </p>
-              <DiffHighlight
-                code={`export HELICONE_API_KEY=${apiKey}`}
-                language="python"
-                newLines={[]}
-                oldLines={[]}
-                minHeight={false}
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-md text-gray-700 font-light">
-                Step 3: Replace the import and use openai you would normally
-              </p>
-              <DiffHighlight
-                code={`
-- from openai import openai
-      
-+ from helicone.openai_async import openai
-                  `}
-                language="python"
-                newLines={[2]}
-                oldLines={[0]}
-                minHeight={false}
-              />
-            </div>
-          </div>
-        )} */}
       </Tab.Group>
     </div>
   );

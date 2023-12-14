@@ -25,12 +25,22 @@ export interface SortLeafRequest {
   };
 }
 
+/**
+ * Asserts that the given sort direction is valid.
+ * Throws an error if the direction is invalid.
+ * @param direction - The sort direction to validate.
+ */
 function assertValidSortDirection(direction: SortDirection) {
   if (!isValidSortDirection(direction)) {
     throw new Error(`Invalid sort direction: ${direction}`);
   }
 }
 
+/**
+ * Builds a request sort based on the provided SortLeafRequest object.
+ * @param sort - The SortLeafRequest object containing the sort criteria.
+ * @returns The constructed request sort string.
+ */
 export function buildRequestSort(sort: SortLeafRequest) {
   if (sort.cache_created_at) {
     assertValidSortDirection(sort.cache_created_at);
@@ -117,6 +127,11 @@ export interface SortLeafJob {
   };
 }
 
+/**
+ * Builds a sort string based on the provided SortLeafJob object.
+ * @param sort - The SortLeafJob object containing the sort criteria.
+ * @returns The sort string.
+ */
 export function buildJobSort(sort: SortLeafJob): string {
   if (sort.created_at) {
     assertValidSortDirection(sort.created_at);

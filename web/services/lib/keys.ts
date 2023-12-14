@@ -25,6 +25,13 @@ export type AddKeyObj = {
   keyName: string;
 };
 
+/**
+ * Adds a new key to the user_api_keys table.
+ *
+ * @param client - The Supabase client.
+ * @param key - The key object containing the necessary information.
+ * @returns An object with the inserted data and any error that occurred.
+ */
 const addKey = async (client: SupabaseClient<Database>, key: AddKeyObj) => {
   const { data, error } = await client.from("user_api_keys").insert([
     {
@@ -38,6 +45,13 @@ const addKey = async (client: SupabaseClient<Database>, key: AddKeyObj) => {
   return { data, error };
 };
 
+/**
+ * Retrieves decrypted provider keys by organization ID.
+ *
+ * @param client - The Supabase client.
+ * @param orgId - The organization ID.
+ * @returns A promise that resolves to a Result object containing an array of DecryptedProviderKey objects or an error message.
+ */
 async function getDecryptedProviderKeysByOrgId(
   client: SupabaseClient<Database>,
   orgId: string
@@ -65,6 +79,12 @@ async function getDecryptedProviderKeysByOrgId(
   return { data: providerKeys, error: null };
 }
 
+/**
+ * Retrieves a decrypted provider key by its ID.
+ * @param client - The Supabase client.
+ * @param providerKeyId - The ID of the provider key to retrieve.
+ * @returns A promise that resolves to a Result object containing the decrypted provider key or an error message.
+ */
 async function getDecryptedProviderKeyById(
   client: SupabaseClient<Database>,
   providerKeyId: string

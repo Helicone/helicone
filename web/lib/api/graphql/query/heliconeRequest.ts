@@ -4,20 +4,12 @@ import {
   FilterLeaf,
   filterListToTree,
   FilterNode,
-  SingleKey,
-  TablesAndViews,
-  TextOperators,
-  TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
 import { getRequests } from "../../request/request";
-import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
   HeliconeRequest,
   QueryHeliconeRequestArgs,
   HeliconeRequestFilter,
-  TextOperators as GQLTextOperators,
-  PropertyFilter,
-  DateOperators,
 } from "../schema/types/graphql";
 import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators, convertTimeOperators } from "./helper";
@@ -105,6 +97,11 @@ const filterInputToFilterLeaf: {
   },
 };
 
+/**
+ * Converts a HeliconeRequestFilter object into a FilterNode object.
+ * @param filter - The HeliconeRequestFilter object to be converted.
+ * @returns The converted FilterNode object.
+ */
 function convertFilterInputToFilterLeaf(
   filter: HeliconeRequestFilter
 ): FilterNode {
@@ -121,11 +118,17 @@ function convertFilterInputToFilterLeaf(
   return filterListToTree(convertedFilters, "and");
 }
 
+/**
+ * Executes a Helicone request.
+ *
+ * @param args - The arguments for the query.
+ * @param context - The context object.
+ * @returns A promise that resolves to an array of HeliconeRequest objects.
+ * @throws ApolloError if there is an error during the request.
+ */
 export async function heliconeRequest(
-  root: any,
   args: QueryHeliconeRequestArgs,
-  context: Context,
-  info: any
+  context: Context
 ): Promise<HeliconeRequest[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {

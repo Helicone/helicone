@@ -6,6 +6,14 @@ import { dbExecute } from "../db/dbExecute";
 export interface CreatedAt {
   created_at: number;
 }
+
+/**
+ * Retrieves the date of the first or last request that matches the given filter.
+ * @param filter - The filter node to apply to the query.
+ * @param org_id - The ID of the organization.
+ * @param first - Determines whether to retrieve the date of the first request (true) or the last request (false).
+ * @returns A promise that resolves to a Result object containing the date of the request or an error message.
+ */
 export async function getXRequestDate(
   filter: FilterNode,
   org_id: string,

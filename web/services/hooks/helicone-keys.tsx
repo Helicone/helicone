@@ -1,9 +1,12 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { getUSDateFromString } from "../../components/shared/utils/utils";
 import { Database } from "../../supabase/database.types";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 
+/**
+ * Custom hook for fetching and managing Helicone keys.
+ * @returns An object containing the fetched keys, loading state, refetch function, and error.
+ */
 export const useHeliconeKeys = () => {
   const client = useSupabaseClient<Database>();
   const org = useOrg();

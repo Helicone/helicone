@@ -1,4 +1,3 @@
-import { Database } from "../../../supabase/database.types";
 import { ModelMetrics } from "./modelMetrics";
 
 // Note: all pricing is per 1k tokens, make sure to divide Anthropic pricing by 1000 as it is per 1M tokens
@@ -67,6 +66,11 @@ const OPENAI_FINETUNE_COSTS_COMPLETIONS = {
   davinci: 0.12,
 };
 
+/**
+ * Calculates the cost of a model based on its metrics.
+ * @param modelRow The metrics of the model.
+ * @returns The cost of the model.
+ */
 export function modelCost(modelRow: ModelMetrics): number {
   const model = modelRow.model;
   const tokens = modelRow.sum_tokens;

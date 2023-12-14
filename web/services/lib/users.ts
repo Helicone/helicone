@@ -12,6 +12,15 @@ export interface UserRow {
   cost: number;
 }
 
+/**
+ * Retrieves a paginated list of users from the Supabase database.
+ *
+ * @param client - The Supabase client instance.
+ * @param currentPage - The current page number.
+ * @param pageSize - The number of items per page.
+ * @param advancedFilter - An optional array of advanced filters to apply to the query.
+ * @returns An object containing the paginated user data, error, count, from, and to values.
+ */
 const getUsers = async (
   client: SupabaseClient<any, "public", any>,
   currentPage: number,

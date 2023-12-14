@@ -28,11 +28,23 @@ export type OverTimeRequestQueryParams = {
   timeZoneDifference: number;
 };
 
+/**
+ * Represents the parameters for backfilling data.
+ * @template T The type of data to be processed.
+ * @template K The type of the accumulator.
+ */
 export interface BackFillParams<T, K> {
   reducer: (acc: K, d: T) => K;
   initial: K;
 }
 
+/**
+ * Retrieves data over time and performs backfilling.
+ * @param requestParams - The parameters for the data retrieval.
+ * @param dataExtractor - The function that extracts the data over time.
+ * @param backFillParams - The parameters for the backfilling process.
+ * @returns A promise that resolves to the result of the backfilled data.
+ */
 export async function getSomeDataOverTime<T, K>(
   requestParams: DataOverTimeRequest,
   dataExtractor: (
@@ -57,6 +69,12 @@ export async function getSomeDataOverTime<T, K>(
   };
 }
 
+/**
+ * Retrieves time-based data using the provided dataExtractor function and handles the response.
+ * @param options - The options for the handler wrapper, including the request, response, and user data.
+ * @param dataExtractor - The function that extracts the time-based data.
+ * @returns A Promise that resolves to the response data.
+ */
 export async function getTimeDataHandler<T>(
   options: HandlerWrapperOptions<Result<T[], string>>,
   dataExtractor: (d: DataOverTimeRequest) => Promise<Result<T[], string>>

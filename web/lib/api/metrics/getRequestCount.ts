@@ -7,6 +7,13 @@ export interface Count {
   count: number;
 }
 
+/**
+ * Retrieves the count of requests based on the provided filter.
+ * @param filter - The filter node to apply to the query.
+ * @param org_id - The organization ID.
+ * @param cached - Indicates whether to use cached data or not.
+ * @returns A promise that resolves to a Result object containing the request count or an error message.
+ */
 export async function getRequestCount(
   filter: FilterNode,
   org_id: string,

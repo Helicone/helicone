@@ -7,6 +7,15 @@ import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import { Tier } from "../../pages/api/organization/tier";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 
+/**
+ * Custom hook to fetch top users data.
+ *
+ * @param currentPage - The current page number.
+ * @param currentPageSize - The number of items per page.
+ * @param sortLeaf - The sorting criteria for the users.
+ * @param advancedFilter - Optional advanced filter for the users.
+ * @returns An object containing the fetched data and loading state.
+ */
 const useGetTopUsers = (
   currentPage: number,
   currentPageSize: number,
@@ -51,6 +60,10 @@ const useGetTopUsers = (
   };
 };
 
+/**
+ * Custom hook to fetch organization tier data.
+ * @returns {QueryResult<Result<Tier, string>>} The query result containing the organization tier data.
+ */
 const useOrgTier = () => {
   return useQuery({
     queryKey: [`orgTierQueryKey`],
@@ -64,12 +77,19 @@ const useOrgTier = () => {
   });
 };
 
+/**
+ * Custom hook to get the authorized status and loading state.
+ * @param userId - The ID of the user.
+ * @returns An object containing the authorized status and loading state.
+ */
 const useGetAuthorized = (userId: string) => {
+  // Function to get the beginning of the current month
   function getBeginningOfMonth() {
     const today = new Date();
     const firstDateOfMonth = format(today, "yyyy-MM-01");
     return firstDateOfMonth;
   }
+
   const org = useOrg();
 
   const { data: count, isLoading: isCountLoading } = useQuery({

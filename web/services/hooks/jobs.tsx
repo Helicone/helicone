@@ -1,4 +1,3 @@
-// import { useQuery } from "@tanstack/react-query";
 import { useQuery } from "@apollo/client";
 import { gql } from "../../lib/api/graphql/client";
 import { HeliconeJobFilter } from "../../lib/api/graphql/schema/types/graphql";
@@ -24,6 +23,17 @@ export const GET_JOBS = gql(/* GraphQL */ `
   }
 `);
 
+/**
+ * Custom hook to fetch jobs based on provided parameters.
+ *
+ * @param props - The hook parameters.
+ * @param props.currentPage - The current page number.
+ * @param props.currentPageSize - The number of jobs to fetch per page.
+ * @param props.advancedFilter - The advanced filters to apply.
+ * @param props.sortLeaf - The sort leaf for job sorting (optional).
+ * @param props.isLive - Flag indicating whether to enable live updates.
+ * @returns An object containing the fetched jobs.
+ */
 export const useGetJobs = (props: {
   currentPage: number;
   currentPageSize: number;

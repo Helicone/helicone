@@ -5,12 +5,19 @@ import {
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface TotalCost {
   cost: number;
 }
 
+/**
+ * Calculates the total cost based on the provided filter, time filter, and organization ID.
+ * @param filter The filter node to apply.
+ * @param timeFilter The time range to filter the data.
+ * @param org_id The ID of the organization.
+ * @returns A promise that resolves to the total cost as a number, or an error message as a string.
+ */
 export async function getTotalCost(
   filter: FilterNode,
   timeFilter: {

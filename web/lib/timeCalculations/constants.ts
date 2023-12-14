@@ -1,12 +1,3 @@
-import { getIncrement, TimeGraphConfig, TimeInterval } from "./time";
-import {
-  getXDaysAgoFloored,
-  getXHoursAgoFloored,
-  getXMinutesAgoFloored,
-  getXMinutesAgoCeiling,
-  getXHoursAgoCeiling,
-  getXDaysAgoCeiling,
-} from "./getXHoursAgo";
 import { TimeIncrement } from "./fetchTimeData";
 
 const INC_TO_TIME: {
@@ -46,6 +37,12 @@ const INC_TO_TIME: {
       day: "2-digit",
     }),
 };
+
+/**
+ * Returns the time map for the given time increment.
+ * @param inc - The time increment.
+ * @returns The time map for the given time increment.
+ */
 export function getTimeMap(inc: TimeIncrement) {
   return INC_TO_TIME[inc];
 }

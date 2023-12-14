@@ -1,10 +1,9 @@
 import { AcademicCapIcon } from "@heroicons/react/20/solid";
-import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDropdown from "../../shared/themed/themedDropdown";

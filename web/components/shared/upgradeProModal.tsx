@@ -1,14 +1,8 @@
-import {
-  BuildingOffice2Icon,
-  CloudArrowUpIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
+import { SparklesIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useOrg } from "./layout/organizationContext";
 import ThemedModal from "./themed/themedModal";
-import Stripe from "stripe";
 import getStripe from "../../utlis/getStripe";
 import {
   ORGANIZATION_COLORS,
@@ -17,7 +11,6 @@ import {
 import { clsx } from "./clsx";
 import { useGetRequestCountClickhouse } from "../../services/hooks/requests";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
-import { Database } from "../../supabase/database.types";
 
 interface UpgradeProModalProps {
   open: boolean;
