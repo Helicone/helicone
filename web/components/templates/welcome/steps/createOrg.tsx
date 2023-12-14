@@ -1,13 +1,19 @@
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { clsx } from "../../../shared/clsx";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { Database } from "../../../../supabase/database.types";
-import useNotification from "../../../shared/notification/useNotification";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { setOrgCookie } from "../../../../services/hooks/organizations";
-import { OrgProps } from "../welcomePage";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
+import { Database } from "../../../../supabase/database.types";
+import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../shared/layout/organizationContext";
+import useNotification from "../../../shared/notification/useNotification";
+
+export const COMPANY_SIZES = [
+  "Select company size",
+  "Just me",
+  "2-5",
+  "5-25",
+  "25-100",
+  "100+",
+];
 
 interface CreateOrgProps {
   nextStep: () => void;
@@ -139,14 +145,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               )}
               required
             >
-              {[
-                "Select company size",
-                "Just me",
-                "1-5",
-                "5-25",
-                "25-100",
-                "100+",
-              ].map((o) => (
+              {COMPANY_SIZES.map((o) => (
                 <option key={o}>{o}</option>
               ))}
             </select>
