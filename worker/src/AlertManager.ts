@@ -1,208 +1,315 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Alerter } from "./db/Alerter";
-import { Database } from "../supabase/database.types";
-import {
-  AlertMetricEvent,
-  ResolvedAlert,
-  TriggeredAlert,
-} from "./db/AtomicAlerter";
-import { Result, err, ok } from "./results";
 import { Env } from ".";
+import { Database } from "../supabase/database.types";
+import { Result, err, ok } from "./results";
+import { AlertStore } from "./db/AlertStore";
 
-export class Alerts {
-  private alerter: Alerter;
+type AlertStateUpdate = {
+  alert: Database["public"]["Tables"]["alert"]["Row"];
+  status: "triggered" | "resolved" | "unchanged";
+  timestamp: number;
+  triggeredThreshold?: number;
+};
 
-  constructor(
-    private supabaseClient: SupabaseClient<Database>,
-    atomicAlerter: DurableObjectNamespace,
-    private resendApiKey: Env["RESEND_API_KEY"]
-  ) {
-    this.supabaseClient = supabaseClient;
-    this.alerter = new Alerter(atomicAlerter);
+type AlertState = {
+  totalCount: number;
+  errorCount: number;
+};
+
+export class AlertManager {
+  COOLDOWN_PERIOD_MS = 5 * 60 * 1000;
+  private utilityKv: Env["UTILITY_KV"];
+  private resendApiKey: Env["RESEND_API_KEY"];
+
+  constructor(private alertStore: AlertStore, private env: Env) {
+    this.utilityKv = env.UTILITY_KV;
+    this.resendApiKey = env.RESEND_API_KEY;
   }
 
-  public async processMetricEvent(
-    metricEvent: AlertMetricEvent,
-    organizationId: string
-  ): Promise<Result<null, string>> {
-    const alertRes = await this.alerter.processMetricEvent(
-      metricEvent,
-      organizationId
+  public async checkAlerts() {
+    console.log("Checking alerts");
+    const { data: allAlerts, error: allAlertsErr } =
+      await this.alertStore.getAlerts();
+
+    if (allAlertsErr) {
+      return err(`Error fetching alerts: ${allAlertsErr}`);
+    }
+
+    if (!allAlerts) {
+      return ok(`No alerts found`);
+    }
+
+    const timestamp = Date.now();
+    const alertStatePromises = allAlerts.map(async (alert) => {
+      const { data: alertState, error: alertStateErr } =
+        await this.alertStore.checkAlertClickhouse(
+          alert.org_id,
+          alert.time_window
+        );
+
+      if (alertStateErr || !alertState) {
+        console.error(
+          `Error retrieving alert state for alert ID ${alert.id}: ${alertStateErr}`
+        );
+        return;
+      }
+
+      return await this.getAlertStateUpdate(alert, alertState, timestamp);
+    });
+
+    const alertStateUpdates = await Promise.all(alertStatePromises);
+
+    const triggeredAlerts: AlertStateUpdate[] = [];
+    const resolvedAlerts: AlertStateUpdate[] = [];
+    for (const alertStateUpdate of alertStateUpdates) {
+      if (!alertStateUpdate) continue;
+
+      if (alertStateUpdate.status === "resolved") {
+        resolvedAlerts.push(alertStateUpdate);
+      }
+      if (alertStateUpdate.status === "triggered") {
+        triggeredAlerts.push(alertStateUpdate);
+      }
+    }
+
+    const now = new Date(timestamp).toISOString();
+    const { error: updatedStateErr } = await this.handleAlertStateUpdates(
+      triggeredAlerts,
+      resolvedAlerts,
+      now
     );
 
-    if (alertRes.error !== null) {
-      return err(alertRes.error);
-    }
-
-    if (alertRes.data.triggered.length > 0) {
-      const result = await this.handleTriggeredAlerts(alertRes.data.triggered);
-
-      if (result.error) {
-        console.log(
-          `Error updating triggered alerts: ${result.error}. Attempting to resolve alerts.`
-        );
-      }
-    }
-
-    if (alertRes.data.resolved.length > 0) {
-      const result = await this.handleResolvedAlerts(alertRes.data.resolved);
-
-      if (result.error) {
-        console.log(`Error resolving alerts: ${result.error}.`);
-      }
+    if (updatedStateErr) {
+      return err(`Error updating alert states: ${updatedStateErr}`);
     }
 
     return ok(null);
   }
 
-  public async resolveAlertsCron(): Promise<Result<null, string>> {
-    const { data: triggeredAlerts, error: triggeredAlertsErr } =
-      await this.supabaseClient
-        .from("alert_history")
-        .select("*")
-        .eq("status", "triggered");
+  async handleAlertStateUpdates(
+    triggeredAlerts: AlertStateUpdate[],
+    resolvedAlerts: AlertStateUpdate[],
+    now: string
+  ): Promise<Result<null, string>> {
+    if (triggeredAlerts && triggeredAlerts.length > 0) {
+      const { error: triggerAlertsErr } = await this.updateTriggeredAlerts(
+        triggeredAlerts,
+        now
+      );
 
-    if (triggeredAlertsErr || !triggeredAlerts) {
-      return err(`Error fetching triggered alerts: ${triggeredAlertsErr}.`);
-    }
-
-    const resolvedAlerts: ResolvedAlert[] = [];
-    for (const triggeredAlert of triggeredAlerts) {
-      const { data: resAlert, error: resAlertsErr } =
-        await this.alerter.resolveTriggeredAlert(
-          triggeredAlert.alert_id,
-          triggeredAlert.org_id
-        );
-
-      if (resAlertsErr || !resAlert) {
-        console.log("Error resolving alert", resAlertsErr);
-        continue;
+      if (triggerAlertsErr) {
+        console.error(`Failed to trigger alerts: ${triggerAlertsErr}`);
       }
 
-      resolvedAlerts.push(resAlert);
+      const { error: sendEmailErr } = await this.sendAlertEmails(
+        triggeredAlerts
+      );
+
+      if (sendEmailErr) {
+        console.error(`Failed to send alert emails: ${sendEmailErr}`);
+      }
     }
 
     if (resolvedAlerts.length > 0) {
-      const result = await this.handleResolvedAlerts(resolvedAlerts);
+      const { error: resolvedAlertsErr } = await this.updateResolvedAlerts(
+        resolvedAlerts,
+        now
+      );
 
-      if (result.error) {
-        return err(`Error resolving alerts: ${result.error}.`);
+      if (resolvedAlertsErr) {
+        console.error(`Failed to resolve alerts: ${resolvedAlertsErr}`);
+      }
+
+      const { error: sendEmailErr } = await this.sendAlertEmails(
+        resolvedAlerts
+      );
+
+      if (sendEmailErr) {
+        console.error(`Failed to send resolve emails: ${sendEmailErr}`);
       }
     }
 
     return ok(null);
   }
 
-  private async handleTriggeredAlerts(
-    triggeredAlerts: TriggeredAlert[]
+  async updateResolvedAlerts(
+    resolvedAlerts: AlertStateUpdate[],
+    now: string
   ): Promise<Result<null, string>> {
-    // Update alert status
-    const alertUpdates = await this.supabaseClient
-      .from("alert")
-      .update({
+    const alertIds = resolvedAlerts.map((alert) => alert.alert.id);
+    const { error: alertUpdateErr } = await this.alertStore.updateAlertStatuses(
+      "resolved",
+      alertIds
+    );
+
+    if (alertUpdateErr) {
+      return err(
+        `Error updating resolved alerts: ${JSON.stringify(alertUpdateErr)}`
+      );
+    }
+
+    const { error: alertHistUpdateErr } =
+      await this.alertStore.updateAlertHistoryStatuses(
+        "resolved",
+        alertIds,
+        now
+      );
+
+    if (alertHistUpdateErr) {
+      return err(
+        `Error updating alert history: ${JSON.stringify(alertHistUpdateErr)}`
+      );
+    }
+
+    return ok(null);
+  }
+
+  async updateTriggeredAlerts(
+    triggeredAlerts: AlertStateUpdate[],
+    now: string
+  ): Promise<Result<null, string>> {
+    // Insert into alert history, update alert table status.
+    const { error: alertUpdateErr } = await this.alertStore.updateAlertStatuses(
+      "triggered",
+      triggeredAlerts.map((alert) => alert.alert.id)
+    );
+
+    if (alertUpdateErr) {
+      return err(
+        `Error updating triggered alerts: ${JSON.stringify(alertUpdateErr)}`
+      );
+    }
+
+    const { error: alertHistoryUpdateErr } =
+      await this.alertStore.insertAlertHistory(
+        triggeredAlerts.map((triggeredAlert) => {
+          return {
+            alert_id: triggeredAlert.alert.id,
+            alert_metric: triggeredAlert.alert.metric,
+            alert_name: triggeredAlert.alert.name,
+            alert_start_time: now,
+            org_id: triggeredAlert.alert.org_id,
+            status: "triggered",
+            triggered_value: triggeredAlert.triggeredThreshold
+              ? triggeredAlert.triggeredThreshold.toFixed(2)
+              : "",
+          };
+        })
+      );
+
+    if (alertHistoryUpdateErr) {
+      return err(`Error inserting triggered alerts: ${alertHistoryUpdateErr}`);
+    }
+
+    return ok(null);
+  }
+
+  async getAlertStateUpdate(
+    alert: Database["public"]["Tables"]["alert"]["Row"],
+    alertState: AlertState,
+    timestamp: number
+  ): Promise<AlertStateUpdate> {
+    const rate =
+      alertState.totalCount > 0
+        ? (alertState.errorCount / alertState.totalCount) * 100
+        : 0;
+    const isRateBelowThreshold = rate < alert.threshold;
+
+    // Handle scenarios where rate is below threshold
+    if (isRateBelowThreshold) {
+      return this.handleRateBelowThreshold(alert, timestamp);
+    }
+
+    // Handle scenarios where rate is above or equal to threshold
+    return this.handleRateAboveThreshold(alert, rate, timestamp);
+  }
+
+  async handleRateBelowThreshold(
+    alert: Database["public"]["Tables"]["alert"]["Row"],
+    timestamp: number
+  ): Promise<AlertStateUpdate> {
+    if (alert.status === "resolved") {
+      return { status: "unchanged", timestamp, alert };
+    }
+
+    const cooldownStart = await this.getCooldownStart(alert.id);
+    if (!cooldownStart) {
+      await this.setCooldownStart(alert.id, timestamp);
+      return { status: "unchanged", timestamp, alert };
+    }
+
+    if (timestamp - cooldownStart >= this.COOLDOWN_PERIOD_MS) {
+      await this.deleteCooldown(alert.id);
+      return { status: "resolved", timestamp, alert };
+    }
+
+    return { status: "unchanged", timestamp, alert };
+  }
+
+  async handleRateAboveThreshold(
+    alert: Database["public"]["Tables"]["alert"]["Row"],
+    rate: number,
+    timestamp: number
+  ): Promise<AlertStateUpdate> {
+    if (alert.status === "resolved") {
+      await this.deleteCooldown(alert.id);
+      return {
         status: "triggered",
-        updated_at: triggeredAlerts[0].alert_start_time,
-      })
-      .in(
-        "id",
-        triggeredAlerts.map((alert) => alert.alert.id)
-      );
-
-    if (alertUpdates.error) {
-      return err(
-        `Error updating triggered alerts: ${JSON.stringify(alertUpdates.error)}`
-      );
+        timestamp,
+        triggeredThreshold: rate,
+        alert,
+      };
     }
 
-    // Insert triggered alerts
-    const alertHistoryIns = await this.supabaseClient
-      .from("alert_history")
-      .insert(
-        triggeredAlerts.map(
-          ({ alert: _, ...alertHistoryData }) => alertHistoryData
-        )
-      );
-
-    if (alertHistoryIns.error) {
-      return err(
-        `Error inserting triggered alerts: ${JSON.stringify(
-          alertHistoryIns.error
-        )}`
-      );
-    }
-
-    // Send emails
-    const triggeredAlertPromises: Promise<Result<null, string>>[] = [];
-    triggeredAlerts.forEach((triggeredAlert) => {
-      triggeredAlertPromises.push(this.sendAlertEmails(triggeredAlert));
-    });
-
-    const emailRes = await Promise.all(triggeredAlertPromises);
-
-    emailRes.forEach((email) => {
-      if (email.error) {
-        console.error("Error sending alert emails", email.error);
-      }
-    });
-
-    return ok(null);
+    return { status: "unchanged", timestamp, alert };
   }
 
-  private async handleResolvedAlerts(
-    resolvedAlerts: ResolvedAlert[]
-  ): Promise<Result<null, string>> {
-    // Update alert status
-    const resolvedAlertIds = resolvedAlerts.map((alert) => alert.alert_id);
-    const alertUpdates = await this.supabaseClient
-      .from("alert")
-      .update({
-        status: "resolved",
-        updated_at: resolvedAlerts[0].alert_end_time,
-      })
-      .in("id", resolvedAlertIds);
-
-    if (alertUpdates.error) {
-      return err(
-        `Error updating resolved alerts: ${JSON.stringify(alertUpdates.error)}`
-      );
-    }
-
-    // Update alert history
-    const updateResult = await this.supabaseClient
-      .from("alert_history")
-      .update({
-        status: "resolved",
-        alert_end_time: resolvedAlerts[0].alert_end_time,
-      })
-      .in("alert_id", resolvedAlertIds);
-
-    if (updateResult.error) {
-      return err(
-        `Error updating alert history: ${JSON.stringify(updateResult.error)}`
-      );
-    }
-
-    // Send emails
-    const resolvedAlertPromises: Promise<Result<null, string>>[] = [];
-    resolvedAlerts.forEach((resolvedAlert) => {
-      resolvedAlertPromises.push(this.sendAlertEmails(resolvedAlert));
-    });
-
-    const emailRes = await Promise.all(resolvedAlertPromises);
-
-    emailRes.forEach((email) => {
-      if (email.error) {
-        console.error("Error sending alert emails", email.error);
-      }
-    });
-
-    return ok(null);
+  async deleteCooldown(alertId: string): Promise<void> {
+    await this.utilityKv.delete(this.getCooldownStartTimestamp(alertId));
   }
+
+  async getCooldownStart(alertId: string): Promise<number | null> {
+    const timestampString = await this.utilityKv.get<string>(
+      this.getCooldownStartTimestamp(alertId)
+    );
+    return timestampString !== null ? parseInt(timestampString, 10) : null;
+  }
+
+  async setCooldownStart(alertId: string, timestamp: number): Promise<void> {
+    await this.utilityKv.put(
+      this.getCooldownStartTimestamp(alertId),
+      timestamp.toString(),
+      { expirationTtl: 600 }
+    );
+  }
+
+  private getCooldownStartTimestamp = (alertId: string) =>
+    `alert:${alertId}:cooldown_start_timestamp`;
 
   private async sendAlertEmails(
-    alertUpdate: TriggeredAlert | ResolvedAlert
+    alertStatusUpdates: AlertStateUpdate[]
   ): Promise<Result<null, string>> {
-    const { subject, text, html } = this.formatAlertNotification(alertUpdate);
+    const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
+      const { error: emailResErr } = await this.sendAlertEmail(
+        alertStatusUpdate
+      );
+
+      if (emailResErr) {
+        console.error(`Error sending email: ${emailResErr}`);
+        throw new Error(emailResErr); // Throw the error to catch it outside
+      }
+    });
+
+    await Promise.all(promises);
+
+    return ok(null);
+  }
+
+  private async sendAlertEmail(
+    alertStatusUpdate: AlertStateUpdate
+  ): Promise<Result<null, string>> {
+    const { subject, text, html } =
+      this.formatAlertNotification(alertStatusUpdate);
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -211,7 +318,7 @@ export class Alerts {
       },
       body: JSON.stringify({
         from: "Helicone Alert <alerts@helicone.ai>",
-        to: alertUpdate.alert.emails,
+        to: alertStatusUpdate.alert.emails,
         html: html,
         subject: subject,
         text: text,
@@ -229,19 +336,17 @@ export class Alerts {
     return ok(null);
   }
 
-  private formatAlertNotification(
-    alertUpdate: TriggeredAlert | ResolvedAlert
-  ): {
+  private formatAlertNotification(alertStatusUpdate: AlertStateUpdate): {
     subject: string;
     text: string;
     html: string;
   } {
-    const alert = alertUpdate.alert;
-    const status = alertUpdate.status ?? "";
+    const alert = alertStatusUpdate.alert;
+    const status = alertStatusUpdate.status ?? "";
     const capitalizedStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
     const formatTimestamp = (timestamp: string) =>
-      timestamp ? new Date(timestamp).toLocaleString() : "N/A";
+      timestamp ? new Date(timestamp).toUTCString() : "N/A";
 
     const formatTimespan = (ms: number) => {
       const minutes = Math.floor(ms / 60000);
@@ -250,12 +355,9 @@ export class Alerts {
     };
 
     const headerClass =
-      alertUpdate.status === "triggered" ? "Triggered" : "Resolved";
+      alertStatusUpdate.status === "triggered" ? "Triggered" : "Resolved";
     const subject = `Alert ${capitalizedStatus}: ${alert.name}`;
-    const alertTime =
-      status === "triggered"
-        ? alertUpdate.alert_start_time
-        : alertUpdate.alert_end_time;
+    const alertTime = new Date(alertStatusUpdate.timestamp).toUTCString();
     const actionMessage =
       status === "triggered"
         ? "Please take the necessary action."
@@ -339,9 +441,7 @@ export class Alerts {
                                 <td class="content">
                                   <ul style="list-style-type: none; padding: 0; margin: 0; color:#000000; font-size:16px; line-height:24px; font-family:Arial, sans-serif;">
                                     <li><strong>Status:</strong> ${capitalizedStatus}</li>
-                                    <li><strong>Triggered At:</strong> ${formatTimestamp(
-                                      alertTime
-                                    )}</li>
+                                    <li><strong>Triggered At:</strong> ${alertTime}</li>
                                     <li><strong>Threshold:</strong> ${
                                       alert.threshold
                                     }%</li>
@@ -408,3 +508,10 @@ export class Alerts {
     return { subject, text, html };
   }
 }
+
+/*
+1. Get triggered & resolved alerts from DB
+2. Check if triggered alerts are resolved (below threshold and past cooldown)
+3. Check if resolved alerts are triggered (above threshold)
+4. 
+*/
