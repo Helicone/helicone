@@ -28,7 +28,7 @@ export default function ThemedTabs(props: ThemedTabsProps) {
   return (
     <div className="inline-flex px-2 sm:px-0">
       <Tab.Group defaultIndex={initialIndex}>
-        <Tab.List className="flex space-x-1 rounded-lg bg-gray-200 shadow-sm p-0.5">
+        <Tab.List className="flex space-x-1 rounded-lg bg-gray-200 dark:bg-gray-800 shadow-sm p-0.5">
           {options.map((option, idx) => (
             <Tab
               key={idx}
@@ -46,7 +46,9 @@ export default function ThemedTabs(props: ThemedTabsProps) {
                 <div className="flex flex-row space-x-2 items-center w-fit">
                   <option.icon
                     className={clsx(
-                      selected ? "text-sky-500" : "text-gray-500",
+                      selected
+                        ? "text-blue-500 dark:text-blue-500"
+                        : "text-gray-500",
                       "w-5 h-5 inline-block"
                     )}
                   />
