@@ -37,37 +37,41 @@ const openai = new OpenAI({
   `,
 
   python: (key: string) => `
-openai.api_base = "${BASE_PATH}"
+import OpenAI
 
-openai.Completion.create(
-    # ...other parameters
-    headers={
-      "Helicone-Auth": "Bearer ${key}",
-    }
+client = OpenAI(
+  api_key="your-api-key-here", 
+  base_url="${BASE_PATH}", 
+  default_headers={ 
+    "Helicone-Auth": f"Bearer ${key}",
+  }
 )
 `,
 
   langchain_python: (key: string) => `
 openai.api_base = "${BASE_PATH}"
 
-llm = OpenAI(
-  temperature=0.9,
-  headers={
-    "Helicone-Auth": "Bearer ${key}"
-  }
+llm = ChatOpenAI(
+    openai_api_key='<>',
+    headers={
+        "Helicone-Auth": f"Bearer ${key}"
+    },
 )
+  
 `,
   langchain_typescript: (key: string) => `
-const model = new OpenAI(
-  {},
-  {
-    basePath: "${BASE_PATH}",
+import OpenAI from "openai";
+
+const llm = new OpenAI({
+  modelName: "gpt-3.5-turbo",
+  configuration: {
+    basePath: "https://oai.hconeai.com/v1",
     defaultHeaders: {
-      "Helicone-Auth": "Bearer ${key}"
+      "Helicone-Auth": "Bearer ${key}",
     },
-  }
-);
-  `,
+  },
+});
+`,
 };
 
 type SupportedLanguages = keyof typeof CODE_CONVERTS;
@@ -76,10 +80,10 @@ const DIFF_LINES: {
   [key in SupportedLanguages]: number[];
 } = {
   typescript: [4, 6],
-  python: [0, 5],
+  python: [4, 6],
   curl: [1, 3],
   langchain_python: [0, 5],
-  langchain_typescript: [3, 6],
+  langchain_typescript: [5, 7],
 };
 
 const NAMES: {

@@ -1,5 +1,3 @@
-import { consolidateTextFields, getUsage } from "./responseParserHelpers";
-
 export async function anthropicAIStream(
   result: string,
   tokenCounter: (text: string) => Promise<number>,

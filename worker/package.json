@@ -1,6 +1,9 @@
 {
   "name": "helicone-worker",
   "version": "0.0.0",
+  "resolutions": {
+    "@types/node": "18.15.3"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
     "@types/async-retry": "^1.4.5",
@@ -19,7 +22,7 @@
   "scripts": {
     "start": "wrangler dev",
     "deploy": "wrangler publish",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
+    "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
     "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix",
     "test": "jest"
   },

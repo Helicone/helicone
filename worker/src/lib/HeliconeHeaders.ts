@@ -1,3 +1,5 @@
+import { Headers } from "@cloudflare/workers-types";
+
 type Nullable<T> = T | null;
 
 export type HeliconeFallbackCode = number | { from: number; to: number };
@@ -148,26 +150,25 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
-    const heliconeAuthOnly = this.headers.get("authorization");
-    const heliconeAuthJWT = this.headers.get("helicone-jwt");
     if (heliconeAuth) {
       return {
         _type: "bearer",
-        token: heliconeAuth.replace("Bearer ", ""),
+        token: heliconeAuth,
       };
     }
-
+    const heliconeAuthFallback = this.headers.get("authorization");
+    if (heliconeAuthFallback) {
+      return {
+        _type: "bearer",
+        token: heliconeAuthFallback,
+      };
+    }
+    const heliconeAuthJWT = this.headers.get("helicone-jwt");
     if (heliconeAuthJWT) {
       return {
         _type: "jwt",
         token: heliconeAuthJWT,
         orgId: this.headers.get("helicone-org-id") ?? undefined,
-      };
-    }
-    if (heliconeAuthOnly) {
-      return {
-        _type: "bearer",
-        token: heliconeAuthOnly.replace("Bearer ", ""),
       };
     }
     return null;

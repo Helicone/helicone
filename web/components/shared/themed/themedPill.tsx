@@ -1,3 +1,14 @@
+/**
+ * A themed pill component.
+ *
+ * @param label - The label text for the pill.
+ * @param onDelete - Optional callback function to handle delete action.
+ * @returns The themed pill component.
+ *
+ * @example
+ * // Example usage of ThemedPill component
+ * <ThemedPill label="Example Pill" onDelete={() => console.log('Pill deleted')} />
+ */
 export const ThemedPill = ({
   onDelete,
   label,

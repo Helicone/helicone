@@ -8,13 +8,15 @@ import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
 import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
 import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
-import { Database } from "../../supabase/database.types";
+import { Database, Json } from "../../supabase/database.types";
 import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
 import { Valhalla } from "../lib/db/valhalla";
+import { Alerter } from "../db/Alerter";
+import { validateAlertCreate } from "../lib/validators/alertValidators";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -24,7 +26,7 @@ class InternalResponse {
     return new Response(JSON.stringify({ error: message }), { status });
   }
 
-  successJSON(data: any, enableCors: boolean = false): Response {
+  successJSON(data: unknown, enableCors = false): Response {
     if (enableCors) {
       return new Response(JSON.stringify(data), {
         status: 200,
@@ -53,7 +55,11 @@ class InternalResponse {
 // TODO Move to API middleware so that it is always constructed
 
 async function createAPIClient(env: Env, requestWrapper: RequestWrapper) {
-  return new APIClient(env, requestWrapper, await requestWrapper.auth());
+  const auth = await requestWrapper.auth();
+  if (auth.error !== null) {
+    throw new Error(auth.error);
+  }
+  return new APIClient(env, requestWrapper, auth.data);
 }
 class APIClient {
   public queue: InsertQueue;
@@ -112,11 +118,18 @@ async function logAsync(
     providerResponseHeaders: responseHeaders,
     provider: provider,
   });
+
+  const { data: auth, error: authError } = await requestWrapper.auth();
+  if (authError !== null) {
+    return new Response(JSON.stringify({ error: authError }), {
+      status: 401,
+    });
+  }
   const { error: logError } = await loggable.log(
     {
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      dbWrapper: new DBWrapper(env, loggable.auth()),
+      dbWrapper: new DBWrapper(env, auth),
       queue: new InsertQueue(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
         new Valhalla(env.VALHALLA_URL, loggable.auth()),
@@ -125,7 +138,7 @@ async function logAsync(
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
     },
-    env.RATE_LIMIT_KV
+    env
   );
 
   if (logError !== null) {
@@ -147,7 +160,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -189,7 +202,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       { params: { id } },
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -233,7 +246,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -278,7 +291,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       { params: { id } },
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
     ) => {
       const client = await createAPIClient(env, requestWrapper);
       const authParams = await client.db.getAuthParams();
@@ -399,7 +412,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       }
 
       const properties = {
-        ...((data?.properties as Record<string, any>) || {}),
+        ...((data?.properties as Record<string, Json>) || {}),
         [property.key]: property.value,
       };
 
@@ -414,18 +427,101 @@ export const getAPIRouter = (router: BaseRouter) => {
     }
   );
 
-  router.options(
-    "/v1/request/:id/property",
+  router.post(
+    "/alerts",
     async (
       _,
       requestWrapper: RequestWrapper,
       env: Env,
-      ctx: ExecutionContext
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error: authError } =
+        await client.db.getAuthParams();
+
+      if (authError !== null) {
+        return client.response.unauthorized();
+      }
+
+      const requestData = await requestWrapper.getJson<
+        Database["public"]["Tables"]["alert"]["Insert"]
+      >();
+
+      const alert = {
+        ...requestData,
+        status: "resolved",
+        org_id: authParams.organizationId,
+      };
+
+      const { error: validateError } = validateAlertCreate(alert);
+      if (validateError !== null) {
+        return client.response.newError(validateError, 400);
+      }
+
+      const { data: alertRow, error: alertError } = await client.db.insertAlert(
+        alert
+      );
+
+      if (alertError || !alertRow) {
+        return client.response.newError(alertError, 500);
+      }
+
+      const alerter = new Alerter(env.ALERTER);
+      const { error: configError } = await alerter.upsertAlert(alertRow);
+
+      if (configError !== null) {
+        return client.response.newError(configError, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
+  router.delete(
+    "/alert/:id",
+    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error } = await client.db.getAuthParams();
+
+      if (error !== null) {
+        return client.response.unauthorized();
+      }
+
+      const { error: deleteErr } = await client.db.deleteAlert(
+        id,
+        authParams.organizationId
+      );
+
+      if (deleteErr) {
+        return client.response.newError(deleteErr, 500);
+      }
+
+      const alerter = new Alerter(env.ALERTER);
+      const deleteRes = await alerter.deleteAlert(
+        id,
+        authParams.organizationId
+      );
+
+      if (deleteRes.error) {
+        return client.response.newError(deleteRes.error, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
+  router.options(
+    "*",
+    async (
+      _,
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
     ) => {
       return new Response(null, {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PUT",
+          "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT",
           "Access-Control-Allow-Headers":
             "Content-Type, helicone-jwt, helicone-org-id",
         },
@@ -438,9 +534,9 @@ export const getAPIRouter = (router: BaseRouter) => {
     "*",
     async (
       _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      ctx: ExecutionContext
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
     ) => {
       return new Response("invalid path", { status: 400 });
     }

@@ -275,30 +275,31 @@ export class InsertQueue {
       return Promise.reject("Missing response data.");
     }
 
-    const { data: d, error: e } =
-      await this.clickhouseWrapper.dbInsertClickhouse(
-        "property_with_response_v1",
-        [
-          {
-            response_id: response.response_id,
-            response_created_at: response.response_created_at,
-            latency: response.latency,
-            status: response.status,
-            completion_tokens: response.completion_tokens,
-            prompt_tokens: response.prompt_tokens,
-            model: response.model,
-            request_id: values.id,
-            request_created_at: formatTimeString(values.created_at),
-            auth_hash: values.auth_hash,
-            user_id: response.user_id,
-            organization_id: orgId,
-            property_key: property.key,
-            property_value: property.value,
-          },
-        ]
-      );
-
-    this.clickhouseWrapper.dbInsertClickhouse("properties_copy_v2", [
+    const { error: e } = await this.clickhouseWrapper.dbInsertClickhouse(
+      "property_with_response_v1",
+      [
+        {
+          response_id: response.response_id,
+          response_created_at: response.response_created_at,
+          latency: response.latency,
+          status: response.status,
+          completion_tokens: response.completion_tokens,
+          prompt_tokens: response.prompt_tokens,
+          model: response.model,
+          request_id: values.id,
+          request_created_at: formatTimeString(values.created_at),
+          auth_hash: values.auth_hash,
+          user_id: response.user_id,
+          organization_id: orgId,
+          property_key: property.key,
+          property_value: property.value,
+        },
+      ]
+    );
+    if (e) {
+      console.error("Error inserting into clickhouse:", e);
+    }
+    await this.clickhouseWrapper.dbInsertClickhouse("properties_copy_v2", [
       {
         id: 1,
         request_id: requestId,

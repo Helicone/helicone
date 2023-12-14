@@ -1,8 +1,48 @@
 import { Env, hash } from "..";
+import { Result, ok } from "../results";
 
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
+}
+
+class InMemoryCache<T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static instance: InMemoryCache<any>;
+  private cache: Map<string, T>;
+  private maxEntries: number;
+
+  private constructor(maxEntries = 100) {
+    this.cache = new Map<string, T>();
+    this.maxEntries = maxEntries;
+  }
+
+  public static getInstance<T>(maxEntries = 100): InMemoryCache<T> {
+    if (!InMemoryCache.instance) {
+      InMemoryCache.instance = new InMemoryCache<T>(maxEntries);
+    }
+    return InMemoryCache.instance;
+  }
+
+  set(key: string, value: T): void {
+    if (this.cache.size >= this.maxEntries) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+    this.cache.set(key, value);
+  }
+
+  get(key: string): T | undefined {
+    return this.cache.get(key);
+  }
+
+  delete(key: string): boolean {
+    return this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
 }
 
 async function getCacheKey(env: SecureCacheEnv): Promise<CryptoKey> {
@@ -67,19 +107,62 @@ export async function storeInCache(
   env: SecureCacheEnv
 ): Promise<void> {
   const encrypted = await encrypt(value, env);
-  await env.SECURE_CACHE.put(await hash(key), JSON.stringify(encrypted), {
-    expirationTtl: 60 * 60 * 10, // 10 minutes
-  });
+  const hashedKey = await hash(key);
+  await env.SECURE_CACHE.put(hashedKey, JSON.stringify(encrypted), {});
+  InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
 }
 
 export async function getFromCache(
   key: string,
   env: SecureCacheEnv
 ): Promise<string | null> {
-  const encrypted = await env.SECURE_CACHE.get(await hash(key));
-  if (!encrypted) {
+  const hashedKey = await hash(key);
+  const encryptedMemory = InMemoryCache.getInstance<string>().get(hashedKey);
+  if (encryptedMemory !== undefined) {
+    console.log("Using in-memory cache");
+    return decrypt(JSON.parse(encryptedMemory), env);
+  }
+
+  const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
+    cacheTtl: 3600,
+  });
+  if (!encryptedRemote) {
     return null;
   }
 
-  return decrypt(JSON.parse(encrypted), env);
+  return decrypt(JSON.parse(encryptedRemote), env);
+}
+
+export async function getAndStoreInCache<T, K>(
+  key: string,
+  env: SecureCacheEnv,
+  fn: () => Promise<Result<T, K>>
+): Promise<Result<T, K>> {
+  const cached = await getFromCache(key, env);
+  if (cached !== null) {
+    try {
+      const cachedResult = JSON.parse(cached);
+      if (cachedResult._helicone_cached_string) {
+        return ok(cachedResult._helicone_cached_string);
+      }
+      return ok(JSON.parse(cached) as T);
+    } catch (e) {
+      console.log("Error parsing cached result", e);
+    }
+  }
+  const value = await fn();
+  if (value.error !== null) {
+    return value;
+  }
+  if (typeof value.data === "string") {
+    await storeInCache(
+      key,
+      JSON.stringify({ _helicone_cached_string: value.data }),
+      env
+    );
+    return value;
+  } else {
+    await storeInCache(key, JSON.stringify(value.data), env);
+  }
+  return value;
 }

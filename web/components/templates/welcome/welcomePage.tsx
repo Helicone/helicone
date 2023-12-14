@@ -15,6 +15,7 @@ import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
 import { useOrg } from "../../shared/layout/organizationContext";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 interface WelcomePageProps {}
 
@@ -36,11 +37,8 @@ const WelcomePage = (props: WelcomePageProps) => {
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
 
-  const [step, setStep] = useState<number>(0);
+  const [step, setStep] = useLocalStorage<number>("welcome-step", 0);
   const [apiKey, setApiKey] = useState<string>("");
-  const [org, setOrg] = useState<OrgProps>();
-
-  const orgContext = useOrg();
 
   const nextStep = () => {
     setStep(step + 1);
@@ -135,6 +133,20 @@ const WelcomePage = (props: WelcomePageProps) => {
       {stepArray[step]}
       <div className="h-4 w-full mx-auto bottom-0 mb-8 absolute flex">
         <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
+          <button className="mr-6">
+            <ChevronLeftIcon
+              className={clsx(
+                step === 0
+                  ? "text-gray-300"
+                  : "text-gray-900 hover:cursor-pointer",
+                "h-6 w-6"
+              )}
+              onClick={() => {
+                if (step === 0) return;
+                setStep(step - 1);
+              }}
+            />
+          </button>
           {Array.from({ length: stepArray.length }).map((_, i) => (
             <li
               key={i}
@@ -145,6 +157,20 @@ const WelcomePage = (props: WelcomePageProps) => {
               )}
             />
           ))}
+          <button className="ml-6">
+            <ChevronLeftIcon
+              className={clsx(
+                step === stepArray.length - 1
+                  ? "text-gray-300"
+                  : "text-gray-900 hover:cursor-pointer",
+                "h-6 w-6 rotate-180"
+              )}
+              onClick={() => {
+                if (step === stepArray.length - 1) return;
+                setStep(step + 1);
+              }}
+            />
+          </button>
         </ul>
       </div>
     </div>

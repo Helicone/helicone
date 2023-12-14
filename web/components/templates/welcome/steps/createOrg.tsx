@@ -1,13 +1,19 @@
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { clsx } from "../../../shared/clsx";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { Database } from "../../../../supabase/database.types";
-import useNotification from "../../../shared/notification/useNotification";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { setOrgCookie } from "../../../../services/hooks/organizations";
-import { OrgProps } from "../welcomePage";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
+import { Database } from "../../../../supabase/database.types";
+import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../shared/layout/organizationContext";
+import useNotification from "../../../shared/notification/useNotification";
+
+export const COMPANY_SIZES = [
+  "Select company size",
+  "Just me",
+  "2-5",
+  "5-25",
+  "25-100",
+  "100+",
+];
 
 interface CreateOrgProps {
   nextStep: () => void;
@@ -40,6 +46,18 @@ const CreateOrg = (props: CreateOrgProps) => {
     const orgName = formData.get("org-name") as string;
     const orgSize = formData.get("org-size") as string;
     const orgReferral = formData.get("org-referral") as string;
+
+    if (orgSize === "Select company size") {
+      setNotification("Please select a company size.", "info");
+      setIsLoading(false);
+      return;
+    }
+
+    if (orgReferral === "Select referral source") {
+      setNotification("Please select a referral source.", "info");
+      setIsLoading(false);
+      return;
+    }
 
     // update the current org
     const { error } = await supabaseClient
@@ -103,11 +121,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
-              placeholder={
-                orgContext?.currentOrg?.name === "Personal"
-                  ? "Your Organization Name"
-                  : orgContext?.currentOrg?.name
-              }
+              placeholder={orgContext?.currentOrg?.name}
             />
           </div>
         </div>
@@ -122,19 +136,16 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              defaultValue={"Select company size"}
+              // value={orgContext?.currentOrg?.size || ""}
+              placeholder={
+                orgContext?.currentOrg?.size || "Select company size"
+              }
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
+              required
             >
-              {[
-                "Select company size",
-                "Just me",
-                "1-5",
-                "5-25",
-                "25-100",
-                "100+",
-              ].map((o) => (
+              {COMPANY_SIZES.map((o) => (
                 <option key={o}>{o}</option>
               ))}
             </select>
@@ -151,10 +162,13 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-referral"
               name="org-referral"
-              defaultValue={"Select referral source"}
+              placeholder={
+                orgContext?.currentOrg?.referral || "Select referral source"
+              }
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
+              required
             >
               {[
                 "Select referral source",

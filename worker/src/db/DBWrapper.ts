@@ -1,23 +1,25 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { Database, Json } from "../../supabase/database.types";
 import { Env, hash } from "..";
+import { Database } from "../../supabase/database.types";
+import { getProviderKeyFromProxyCache } from "../lib/RequestWrapper";
 import { AuthParams } from "../lib/dbLogger/DBLoggable";
+<<<<<<< HEAD
 import { Result, err, errMap, ok } from "../results";
 import { SecureCacheEnv, getFromCache, storeInCache } from "../lib/secureCache";
+=======
+import { SecureCacheEnv, getAndStoreInCache } from "../lib/secureCache";
+import { Result, err, ok } from "../results";
+>>>>>>> worker-auth-cleanup
 import { RateLimiter } from "./RateLimiter";
 
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
-  heliconeApiKeyHash?: string
+  heliconeApi: string
 ): Promise<Result<AuthParams, string>> {
-  if (!heliconeApiKeyHash) {
-    return { data: null, error: "Helicone api key not found" };
-  }
-
   const { data, error } = await dbClient
     .from("helicone_api_keys")
     .select("*")
-    .eq("api_key_hash", heliconeApiKeyHash)
+    .eq("api_key_hash", await hash(heliconeApi))
     .eq("soft_delete", false)
     .single();
 
@@ -33,26 +35,23 @@ async function getHeliconeApiKeyRow(
     error: null,
   };
 }
-
 async function getHeliconeProxyKeyRow(
   dbClient: SupabaseClient<Database>,
-  tokenHash: string,
-  proxyKeyId: string
+  { token }: BearerAuthProxy,
+  env: Env
 ): Promise<Result<AuthParams, string>> {
-  const result = await dbClient
-    .from("helicone_proxy_keys")
-    .select("org_id")
-    .eq("id", proxyKeyId)
-    .eq("token_hash", tokenHash)
-    .eq("soft_delete", false)
-    .single();
+  const { data, error } = await getProviderKeyFromProxyCache(
+    token,
+    env,
+    dbClient
+  );
 
-  if (result.error || !result.data) {
-    return err(result.error.message);
+  if (error || !data) {
+    return err(error);
   }
 
   return ok({
-    organizationId: result.data.org_id,
+    organizationId: data.organizationId,
     userId: undefined,
     heliconeApiKeyId: undefined,
   });
@@ -126,15 +125,15 @@ export type JwtAuth = {
 
 export type BearerAuth = {
   _type: "bearer";
-  tokenHash: string;
-};
-export type BearerProxyKey = {
-  _type: "bearerProxy";
-  tokenHash: string;
-  proxyKeyId: string;
+  token: string;
 };
 
-export type HeliconeAuth = JwtAuth | BearerAuth | BearerProxyKey;
+export type BearerAuthProxy = {
+  _type: "bearerProxy";
+  token: string;
+};
+
+export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
 
 export class DBWrapper {
   private supabaseClient: SupabaseClient<Database>;
@@ -144,7 +143,7 @@ export class DBWrapper {
   private authParams?: AuthParams;
   private tier?: string;
 
-  constructor(env: Env, private auth: HeliconeAuth) {
+  constructor(private env: Env, private auth: HeliconeAuth) {
     this.supabaseClient = createClient(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
@@ -169,70 +168,44 @@ export class DBWrapper {
     return ok(this.rateLimiter);
   }
 
-  async getAuthParams(): Promise<Result<AuthParams, string>> {
-    if (this.authParams !== undefined) {
-      return {
-        data: this.authParams,
-        error: null,
-      };
-    }
-    const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
-    const cachedAuthParams = await getFromCache(cacheKey, this.secureCacheEnv);
-    if (cachedAuthParams !== null) {
-      return {
-        data: JSON.parse(cachedAuthParams),
-        error: null,
-      };
-    }
-
-    let authParams: Result<AuthParams, string> | undefined;
+  private async _getAuthParams(): Promise<Result<AuthParams, string>> {
     switch (this.auth._type) {
       case "jwt":
         if (!this.auth.orgId) {
-          return {
-            data: null,
-            error:
-              "Helicone organization id is required for JWT authentication.",
-          };
+          return err(
+            "Helicone organization id is required for JWT authentication."
+          );
         }
-        authParams = await getHeliconeJwtAuthParams(
+        return getHeliconeJwtAuthParams(
           this.supabaseClient,
           this.auth.orgId,
           this.auth.token
         );
-        break;
 
-      case "bearer":
-        authParams = await getHeliconeApiKeyRow(
-          this.supabaseClient,
-          this.auth.tokenHash
-        );
-        break;
       case "bearerProxy":
-        authParams = await getHeliconeProxyKeyRow(
-          this.supabaseClient,
-          this.auth.tokenHash,
-          this.auth.proxyKeyId
-        );
-        break;
-      default:
-        return { data: null, error: "Invalid authentication." };
+        return getHeliconeProxyKeyRow(this.supabaseClient, this.auth, this.env);
+      case "bearer":
+        return getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
     }
+    throw new Error("Invalid authentication."); // this is unreachable
+  }
+
+  async getAuthParams(): Promise<Result<AuthParams, string>> {
+    if (this.authParams !== undefined) {
+      return ok(this.authParams);
+    }
+    const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
+    const authParams = await getAndStoreInCache(
+      `authParams-${cacheKey}`,
+      this.env,
+      async () => await this._getAuthParams()
+    );
 
     if (!authParams || authParams.error || !authParams.data) {
-      return {
-        data: null,
-        error: authParams?.error || "Invalid authentication.",
-      };
+      return err(authParams?.error || "Invalid authentication.");
     }
 
-    await storeInCache(
-      cacheKey,
-      JSON.stringify(authParams.data),
-      this.secureCacheEnv
-    );
     this.authParams = authParams.data;
-
     return authParams;
   }
 
@@ -244,32 +217,27 @@ export class DBWrapper {
     if (authParams.error !== null) {
       return err(authParams.error);
     }
-    const cachedTier = await getFromCache(
+
+    const tier = await getAndStoreInCache<string, string>(
       `tier-${authParams.data.organizationId}`,
-      this.secureCacheEnv
+      this.secureCacheEnv,
+      async () => {
+        const { data, error } = await this.supabaseClient
+          .from("organization")
+          .select("*")
+          .eq("id", authParams.data.organizationId)
+          .single();
+
+        if (error !== null) {
+          return err(error.message);
+        }
+        return ok(data?.tier ?? "free");
+      }
     );
-
-    if (cachedTier !== null) {
-      this.tier = cachedTier;
-      return ok(this.tier);
+    if (tier.error !== null) {
+      return err(tier.error);
     }
-
-    const { data, error } = await this.supabaseClient
-      .from("organization")
-      .select("*")
-      .eq("id", authParams.data.organizationId)
-      .single();
-
-    if (error !== null) {
-      return err(error.message);
-    }
-    this.tier = data?.tier ?? "free";
-
-    await storeInCache(
-      `tier-${authParams.data.organizationId}`,
-      this.tier,
-      this.secureCacheEnv
-    );
+    this.tier = tier.data;
 
     return ok(this.tier);
   }
@@ -347,5 +315,37 @@ export class DBWrapper {
       return { data: null, error: error.message };
     }
     return { data: data, error: null };
+  }
+
+  async insertAlert(
+    alert: Database["public"]["Tables"]["alert"]["Insert"]
+  ): Promise<Result<Database["public"]["Tables"]["alert"]["Row"], string>> {
+    const { data, error } = await this.supabaseClient
+      .from("alert")
+      .insert(alert)
+      .select("*")
+      .single();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data, error: null };
+  }
+
+  async deleteAlert(
+    alertId: string,
+    orgId: string
+  ): Promise<Result<null, string>> {
+    const { error } = await this.supabaseClient
+      .from("alert")
+      .update({ soft_delete: true })
+      .eq("id", alertId)
+      .eq("org_id", orgId);
+
+    if (error) {
+      return { error: error.message, data: null };
+    }
+
+    return { error: null, data: null };
   }
 }

@@ -8,6 +8,9 @@ import * as pumpkinCat from "../../public/lottie/pumpkinCat.json";
 import * as bat from "../../public/lottie/bat.json";
 import * as halloween from "../../public/lottie/halloween.json";
 import * as PartyParrot from "../../public/lottie/PartyParrot.json";
+import * as Tree from "../../public/lottie/tree.json";
+import * as Santa from "../../public/lottie/santa.json";
+import * as Ornaments from "../../public/lottie/ornaments.json";
 import { useEffect, useState } from "react";
 
 type Animation =
@@ -19,7 +22,10 @@ type Animation =
   | typeof pumpkinCat
   | typeof bat
   | typeof halloween
-  | typeof PartyParrot;
+  | typeof PartyParrot
+  | typeof Tree
+  | typeof Santa
+  | typeof Ornaments;
 
 interface LoadingAnimationProps {
   title?: string;
@@ -47,7 +53,10 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
     if (animation !== undefined) return;
 
     // Regular
-    const animationItems = [chicky, hamster, plane, boxbee];
+    // const animationItems = [chicky, hamster, plane, boxbee];
+
+    // Xmas
+    const animationItems = [Tree, Santa, Ornaments];
 
     const randomIndex = randomIntFromInterval(0, animationItems.length - 1);
     setAnimation(animationItems[randomIndex]);

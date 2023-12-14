@@ -2,15 +2,14 @@
 // It also allows us to add additional functionality to the request object
 // without modifying the request object itself.
 // This also allows us to not have to redefine other objects repetitively like URL.
-
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
-import { Result } from "../results";
-import { HeliconeHeaders } from "./HeliconeHeaders";
 import { Database } from "../../supabase/database.types";
-import { checkLimits } from "./limits/check";
-import { getFromCache, storeInCache } from "./secureCache";
 import { HeliconeAuth } from "../db/DBWrapper";
+import { Result, err, ok } from "../results";
+import { HeliconeHeaders } from "./HeliconeHeaders";
+import { checkLimits } from "./limits/check";
+import { getAndStoreInCache } from "./secureCache";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -103,34 +102,41 @@ export class RequestWrapper {
     this.baseURLOverride = url;
   }
 
-  async auth(): Promise<HeliconeAuth> {
-    switch (this.heliconeHeaders.heliconeAuthV2?._type) {
-      case "jwt":
-        return {
-          _type: "jwt",
-          token: this.heliconeHeaders.heliconeAuthV2.token,
-          orgId: this.heliconeHeaders.heliconeAuthV2.orgId,
-        };
-      default:
-        return this.heliconeProxyKeyId
-          ? {
-              _type: "bearerProxy",
-              proxyKeyId: this.heliconeProxyKeyId,
-              tokenHash: await hash(
-                this.heliconeHeaders.heliconeAuthV2?.token ?? ""
-              ),
-            }
-          : {
-              _type: "bearer",
-              tokenHash: (await this.getProviderAuthHeader()) ?? "",
-            };
+  async auth(): Promise<Result<HeliconeAuth, string>> {
+    if (!this.heliconeHeaders.heliconeAuthV2?._type) {
+      return err("invalid auth key");
     }
+    const tokenType = this.heliconeHeaders.heliconeAuthV2._type;
+    const token = this.heliconeHeaders.heliconeAuthV2.token;
+
+    if (tokenType === "jwt") {
+      return ok({
+        _type: "jwt",
+        token,
+        orgId: this.heliconeHeaders.heliconeAuthV2.orgId,
+      });
+    } else if (tokenType === "bearer" && this.heliconeProxyKeyId) {
+      return ok({
+        _type: "bearerProxy",
+        token,
+      });
+    } else if (tokenType === "bearer") {
+      const res = await this.validateHeliconeAuthHeader(
+        this.heliconeHeaders.heliconeAuthV2.token ?? this.authorization
+      );
+      if (res.error) {
+        return err(res.error);
+      }
+      return ok({ _type: "bearer", token });
+    }
+    throw new Error("Unreachable");
   }
 
   setBodyKeyOverride(bodyKeyOverride: object): void {
     this.bodyKeyOverride = bodyKeyOverride;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private overrideBody(body: any, override: object): object {
     for (const [key, value] of Object.entries(override)) {
       if (key in body && typeof value !== "object") {
@@ -200,8 +206,9 @@ export class RequestWrapper {
     return this.request.url;
   }
 
-  async getHeliconeAuthHeader(): Promise<Result<string | null, string>> {
-    const heliconeAuth = this.heliconeHeaders.heliconeAuth;
+  private async validateHeliconeAuthHeader(
+    heliconeAuth: string
+  ): Promise<Result<null, string>> {
     if (!heliconeAuth) {
       return { data: null, error: null };
     }
@@ -216,13 +223,9 @@ export class RequestWrapper {
       /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
     if (!(apiKeyPattern.test(apiKey) || apiKeyPatternV2.test(apiKey))) {
-      return {
-        data: null,
-        error: "API Key is not well formed",
-      };
+      return err("API Key is not well formed");
     }
-    const apiKeyHash = await hash(`Bearer ${apiKey}`);
-    return { data: apiKeyHash, error: null };
+    return ok(null);
   }
 
   async getProviderAuthHeader(): Promise<string | undefined> {
@@ -258,26 +261,12 @@ export class RequestWrapper {
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
-      let providerKeyRow: {
-        providerKey?: string;
-        proxyKeyId?: string;
-      } | null = await getFromCache(authKey, env).then((x) =>
-        x ? JSON.parse(x) : null
-      );
-      if (!providerKeyRow) {
-        const { data, error } = await this.getProviderKeyFromProxy(
-          authKey,
-          env
-        );
-        if (error || !data || !data.providerKey || !data.proxyKeyId) {
-          return {
-            data: null,
-            error: `Proxy key not found. Error: ${error}`,
-          };
-        }
-        providerKeyRow = data;
-        await storeInCache(authKey, JSON.stringify(providerKeyRow), this.env);
+      const { data, error } = await this.getProviderKeyFromProxy(authKey, env);
+
+      if (error || !data || !data.providerKey || !data.proxyKeyId) {
+        return err(`Proxy key not found. Error: ${error}`);
       }
+      const providerKeyRow = data;
 
       this.heliconeProxyKeyId = providerKeyRow.proxyKeyId;
       this.authorization = providerKeyRow.providerKey;
@@ -295,100 +284,101 @@ export class RequestWrapper {
   private async getProviderKeyFromProxy(
     authKey: string,
     env: Env
-  ): Promise<
-    Result<
-      {
-        providerKey?: string;
-        proxyKeyId?: string;
-      },
-      string
-    >
-  > {
+  ): Promise<Result<ProxyKeyRow, string>> {
     const supabaseClient: SupabaseClient<Database> = createClient(
       this.env.SUPABASE_URL,
       this.env.SUPABASE_SERVICE_ROLE_KEY
     );
+    return getProviderKeyFromProxyCache(authKey, env, supabaseClient);
+  }
+}
 
-    const proxyKey = authKey?.replace("Bearer ", "").trim();
-    const regex =
-      /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
-    const match = proxyKey.match(regex);
+export interface ProxyKeyRow {
+  providerKey: string;
+  proxyKeyId: string;
+  organizationId: string;
+}
 
-    if (!match) {
-      return {
-        data: null,
-        error: "Proxy key id not found",
-      };
-    }
-    const proxyKeyId = match[0];
+export async function getProviderKeyFromProxyCache(
+  authKey: string,
+  env: Env,
+  supabaseClient: SupabaseClient<Database>
+): Promise<Result<ProxyKeyRow, string>> {
+  return await getAndStoreInCache(
+    `getProxyKey-${authKey}`,
+    env,
+    async () => await getProviderKeyFromProxy(authKey, env, supabaseClient)
+  );
+}
 
-    //TODO figure out how to make this into one query with this syntax
-    // https://supabase.com/docs/guides/api/joins-and-nesting
+export async function getProviderKeyFromProxy(
+  authKey: string,
+  env: Env,
+  supabaseClient: SupabaseClient<Database>
+): Promise<Result<ProxyKeyRow, string>> {
+  const proxyKey = authKey?.replace("Bearer ", "").trim();
+  const regex =
+    /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+  const match = proxyKey.match(regex);
 
-    const [storedProxyKey, limits] = await Promise.all([
-      supabaseClient
-        .from("helicone_proxy_keys")
-        .select("*")
-        .eq("id", proxyKeyId)
-        .eq("soft_delete", "false")
-        .single(),
-      supabaseClient
-        .from("helicone_proxy_key_limits")
-        .select("*")
-        .eq("helicone_proxy_key", proxyKeyId),
-    ]);
-
-    if (storedProxyKey.error || !storedProxyKey.data) {
-      return {
-        data: null,
-        error: "Proxy key not found in storedProxyKey",
-      };
-    }
-
-    if (limits.data && limits.data.length > 0) {
-      console.log("CHECKING LIMITS");
-      if (!(await checkLimits(limits.data, env))) {
-        return {
-          data: null,
-          error: "Limits are not valid",
-        };
-      }
-    } else {
-      console.log("NO LIMITS");
-    }
-
-    const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
-      api_key: proxyKey,
-      stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
-    });
-
-    if (verified.error || !verified.data) {
-      return {
-        data: null,
-        error: "Proxy key not verified",
-      };
-    }
-
-    const providerKey = await supabaseClient
-      .from("decrypted_provider_keys")
-      .select("decrypted_provider_key")
-      .eq("id", storedProxyKey.data.provider_key_id)
-      .eq("soft_delete", "false")
-      .single();
-
-    if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
-      return {
-        data: null,
-        error: "Provider key not found",
-      };
-    }
-
+  if (!match) {
     return {
-      data: {
-        providerKey: providerKey.data.decrypted_provider_key,
-        proxyKeyId: storedProxyKey.data.id,
-      },
-      error: null,
+      data: null,
+      error: "Proxy key id not found",
     };
   }
+  const proxyKeyId = match[0];
+
+  //TODO figure out how to make this into one query with this syntax
+  // https://supabase.com/docs/guides/api/joins-and-nesting
+
+  const [storedProxyKey, limits] = await Promise.all([
+    supabaseClient
+      .from("helicone_proxy_keys")
+      .select("*")
+      .eq("id", proxyKeyId)
+      .eq("soft_delete", "false")
+      .single(),
+    supabaseClient
+      .from("helicone_proxy_key_limits")
+      .select("*")
+      .eq("helicone_proxy_key", proxyKeyId),
+  ]);
+
+  if (storedProxyKey.error || !storedProxyKey.data) {
+    return err("Proxy key not found in storedProxyKey");
+  }
+
+  if (limits.data && limits.data.length > 0) {
+    console.log("CHECKING LIMITS");
+    if (!(await checkLimits(limits.data, env))) {
+      return err("Limits are not valid");
+    }
+  }
+
+  const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
+    api_key: proxyKey,
+    stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
+  });
+
+  if (verified.error || !verified.data) {
+    return err("Proxy key not verified");
+  }
+
+  const providerKey = await supabaseClient
+    .from("decrypted_provider_keys")
+    .select("decrypted_provider_key")
+    .eq("id", storedProxyKey.data.provider_key_id)
+    .eq("soft_delete", "false")
+    .single();
+
+  if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
+    return err("Provider key not found");
+  }
+
+  return ok({
+    providerKey: providerKey.data.decrypted_provider_key,
+    proxyKeyId: storedProxyKey.data.id,
+    organizationId: storedProxyKey.data.org_id,
+  });
 }

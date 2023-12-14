@@ -9,6 +9,116 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      alert: {
+        Row: {
+          created_at: string | null
+          emails: string[]
+          id: string
+          metric: string
+          name: string
+          org_id: string
+          soft_delete: boolean
+          status: string
+          threshold: number
+          time_block_duration: number
+          time_window: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          emails: string[]
+          id?: string
+          metric: string
+          name: string
+          org_id: string
+          soft_delete?: boolean
+          status?: string
+          threshold: number
+          time_block_duration?: number
+          time_window: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          emails?: string[]
+          id?: string
+          metric?: string
+          name?: string
+          org_id?: string
+          soft_delete?: boolean
+          status?: string
+          threshold?: number
+          time_block_duration?: number
+          time_window?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      alert_history: {
+        Row: {
+          alert_end_time: string | null
+          alert_id: string
+          alert_metric: string
+          alert_name: string
+          alert_start_time: string
+          created_at: string | null
+          id: string
+          org_id: string
+          soft_delete: boolean
+          status: string
+          triggered_value: string
+          updated_at: string | null
+        }
+        Insert: {
+          alert_end_time?: string | null
+          alert_id: string
+          alert_metric: string
+          alert_name: string
+          alert_start_time: string
+          created_at?: string | null
+          id?: string
+          org_id: string
+          soft_delete?: boolean
+          status: string
+          triggered_value: string
+          updated_at?: string | null
+        }
+        Update: {
+          alert_end_time?: string | null
+          alert_id?: string
+          alert_metric?: string
+          alert_name?: string
+          alert_start_time?: string
+          created_at?: string | null
+          id?: string
+          org_id?: string
+          soft_delete?: boolean
+          status?: string
+          triggered_value?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_history_alert_id_fkey"
+            columns: ["alert_id"]
+            referencedRelation: "alert"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_history_org_id_fkey"
+            columns: ["org_id"]
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       cache_hits: {
         Row: {
           created_at: string
@@ -1291,13 +1401,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
@@ -1305,13 +1415,13 @@ export interface Database {
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }

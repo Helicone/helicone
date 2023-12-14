@@ -255,6 +255,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     owner: user?.id!,
                     color: selectedColor.name,
                     icon: selectedIcon.name,
+                    has_onboarded: true,
                   },
                 ])
                 .select("*");

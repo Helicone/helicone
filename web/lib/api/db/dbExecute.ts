@@ -22,7 +22,7 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
 }
 
 //Only for debugging purposes
-export async function printRunnableQuery(
+export function printRunnableQuery(
   query: string,
   parameters: (number | string | boolean | Date)[]
 ) {
@@ -30,6 +30,8 @@ export async function printRunnableQuery(
   const setParams = Object.entries(queryParams)
     .map(([key, value]) => `SET param_${key} = '${value}';`)
     .join("\n");
+
+  console.log(`\n\n${setParams}\n\n${query}\n\n`);
 }
 export async function dbQueryClickhouse<T>(
   query: string,

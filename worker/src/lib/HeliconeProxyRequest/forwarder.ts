@@ -1,6 +1,6 @@
-import { HeliconeProxyRequestMapper } from "./mapper";
-import { Env, Provider, hash } from "../..";
-import { getCacheSettings } from "../cache/cacheSettings";
+import { createClient } from "@supabase/supabase-js";
+import { Env, Provider } from "../..";
+import { DBWrapper } from "../../db/DBWrapper";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
@@ -9,12 +9,13 @@ import {
   recordCacheHit,
   saveToCache,
 } from "../cache/cacheFunctions";
-import { handleProxyRequest } from "./handler";
+import { getCacheSettings } from "../cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
-import { createClient } from "@supabase/supabase-js";
 import { InsertQueue } from "../dbLogger/insertQueue";
-import { DBWrapper } from "../../db/DBWrapper";
+
 import { Valhalla } from "../db/valhalla";
+import { handleProxyRequest } from "./handler";
+import { HeliconeProxyRequestMapper } from "./mapper";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -118,12 +119,18 @@ export async function proxyForwarder(
   if (cacheSettings.shouldReadFromCache) {
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
+
   async function log() {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError !== null) {
+      console.error("Error getting auth", authError);
+      return;
+    }
     const res = await loggable.log(
       {
         clickhouse: new ClickhouseClientWrapper(env),
         supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        dbWrapper: new DBWrapper(env, loggable.auth()),
+        dbWrapper: new DBWrapper(env, auth),
         queue: new InsertQueue(
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
           new Valhalla(env.VALHALLA_URL, loggable.auth()),
@@ -132,15 +139,10 @@ export async function proxyForwarder(
           env.REQUEST_AND_RESPONSE_QUEUE_KV
         ),
       },
-      env.RATE_LIMIT_KV
+      env
     );
     if (res.error !== null) {
-      request
-        .getHeliconeAuthHeader()
-        .then((x) => hash(x.data || ""))
-        .then((hash) => {
-          console.error("Error logging", res.error);
-        });
+      console.error("Error logging", res.error);
     }
   }
 
