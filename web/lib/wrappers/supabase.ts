@@ -40,6 +40,7 @@ export class SupabaseServerWrapper<T> {
       {
         userId: string;
         orgId: string;
+        orgHasOnboarded: boolean;
         user: User;
         role: string;
       },
@@ -70,6 +71,7 @@ export class SupabaseServerWrapper<T> {
         data: {
           userId: user.data.user.id,
           orgId: orgAccessCheck.data.id,
+          orgHasOnboarded: orgAccessCheck.data.has_onboarded,
           user: user.data.user,
           role: "owner",
         },
@@ -96,6 +98,7 @@ export class SupabaseServerWrapper<T> {
       data: {
         userId: user.data.user.id,
         orgId: orgAccessCheck.data.id,
+        orgHasOnboarded: orgAccessCheck.data.has_onboarded,
         user: user.data.user,
         role: orgMember.data.org_role,
       },

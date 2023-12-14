@@ -10,6 +10,7 @@ node_compat = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
+	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
 
 kv_namespaces = [
@@ -33,7 +34,7 @@ VAULT_ENABLED = "true"
 REQUEST_CACHE_KEY = "9984c295ec7d0f506b8af65e9d60773480eb0c9347a6bd8a2b08fb57b5117701"
 
 [triggers]
-crons = ["*/5 * * * *", "0 * * * *"]
+crons = ["* * * * *", "0 * * * *"]
 
 [env.production]
 name = "helicone-worker-prod"
@@ -47,6 +48,7 @@ routes = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
+	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
 
 kv_namespaces = [
@@ -59,7 +61,7 @@ kv_namespaces = [
 ]
 
 [env.production.triggers]
-crons = ["*/5 * * * *", "0 * * * *"]
+crons = ["* * * * *", "0 * * * *"]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-prod" },
@@ -94,6 +96,7 @@ kv_namespaces = [
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "AtomicRateLimiter" },
+	{ name = "ALERTER", class_name = "AtomicAlerter" },
 ]
 
 queues.producers = [
@@ -110,3 +113,16 @@ VAULT_ENABLED = "true"
 [[migrations]]
 tag = "v1"
 new_classes = ["AtomicRateLimiter"]
+
+[[migrations]]
+tag = "v2"
+new_classes = ["AtomicAlerter"]
+
+
+[[migrations]]
+tag = "v3"
+delete_classes = ["AtomicAlerter"]
+
+[[migrations]]
+tag = "v4"
+new_classes = ["AtomicAlerter"]

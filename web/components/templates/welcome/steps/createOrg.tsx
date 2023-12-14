@@ -1,13 +1,19 @@
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { clsx } from "../../../shared/clsx";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { Database } from "../../../../supabase/database.types";
-import useNotification from "../../../shared/notification/useNotification";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { setOrgCookie } from "../../../../services/hooks/organizations";
-import { OrgProps } from "../welcomePage";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
+import { Database } from "../../../../supabase/database.types";
+import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../shared/layout/organizationContext";
+import useNotification from "../../../shared/notification/useNotification";
+
+export const COMPANY_SIZES = [
+  "Select company size",
+  "Just me",
+  "2-5",
+  "5-25",
+  "25-100",
+  "100+",
+];
 
 interface CreateOrgProps {
   nextStep: () => void;
@@ -115,7 +121,7 @@ const CreateOrg = (props: CreateOrgProps) => {
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-4 text-md text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
-              value={orgContext?.currentOrg?.name ?? ""}
+              placeholder={orgContext?.currentOrg?.name}
             />
           </div>
         </div>
@@ -130,20 +136,16 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              value={orgContext?.currentOrg?.size || ""}
+              // value={orgContext?.currentOrg?.size || ""}
+              placeholder={
+                orgContext?.currentOrg?.size || "Select company size"
+              }
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
               required
             >
-              {[
-                "Select company size",
-                "Just me",
-                "1-5",
-                "5-25",
-                "25-100",
-                "100+",
-              ].map((o) => (
+              {COMPANY_SIZES.map((o) => (
                 <option key={o}>{o}</option>
               ))}
             </select>
@@ -160,7 +162,9 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-referral"
               name="org-referral"
-              value={orgContext?.currentOrg?.referral || ""}
+              placeholder={
+                orgContext?.currentOrg?.referral || "Select referral source"
+              }
               className={clsx(
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}

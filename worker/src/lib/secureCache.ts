@@ -140,12 +140,15 @@ export async function getAndStoreInCache<T, K>(
 ): Promise<Result<T, K>> {
   const cached = await getFromCache(key, env);
   if (cached !== null) {
-    console.log("Using cached value");
-    const cachedResult = JSON.parse(cached);
-    if (cachedResult._helicone_cached_string) {
-      return ok(cachedResult._helicone_cached_string);
+    try {
+      const cachedResult = JSON.parse(cached);
+      if (cachedResult._helicone_cached_string) {
+        return ok(cachedResult._helicone_cached_string);
+      }
+      return ok(JSON.parse(cached) as T);
+    } catch (e) {
+      console.log("Error parsing cached result", e);
     }
-    return ok(JSON.parse(cached) as T);
   }
   const value = await fn();
   if (value.error !== null) {

@@ -3,6 +3,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
 import { DBWrapper } from "../../db/DBWrapper";
+import { Alerts } from "../../alerts";
+import { AlertMetricEvent } from "../../db/AtomicAlerter";
+import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
 import { Result, err, ok } from "../../results";
 import { HeliconeHeaders } from "../HeliconeHeaders";
@@ -398,6 +401,9 @@ export class DBLoggable {
     };
   }
 
+  isSuccessResponse = (status: number | undefined | null): boolean =>
+    status != null && status >= 200 && status <= 299;
+
   async log(
     db: {
       supabase: SupabaseClient<Database>; // TODO : Deprecate
@@ -405,7 +411,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: InsertQueue;
     },
-    _rateLimitKV: KVNamespace
+    env: Env
   ): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
@@ -480,9 +486,30 @@ export class DBLoggable {
       };
     }
 
-    return {
-      data: null,
-      error: null,
+    const metricEvent: AlertMetricEvent = {
+      timestamp: Date.now(),
+      metrics: {
+        "response.status": {
+          count: this.isSuccessResponse(responseResult.data?.status) ? 0 : 1,
+          total: 1,
+        },
+      },
     };
+
+    const alerts = new Alerts(db.supabase, env.ALERTER, env.RESEND_API_KEY);
+    const alertResult = await alerts.processMetricEvent(
+      metricEvent,
+      authParams.organizationId
+    );
+
+    if (alertResult.error) {
+      console.error("Error processing metric event", alertResult.error);
+      return {
+        data: null,
+        error: alertResult.error,
+      };
+    }
+
+    return ok(null);
   }
 }

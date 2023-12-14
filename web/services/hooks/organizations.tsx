@@ -43,6 +43,24 @@ const useGetOrgOwner = (orgId: string) => {
   };
 };
 
+const useGetOrgMembersAndOwner = (orgId: string) => {
+  const { data: members, isLoading: isMembersLoading } =
+    useGetOrgMembers(orgId);
+  const { data: owner, isLoading: isOwnerLoading } = useGetOrgOwner(orgId);
+
+  const isLoading = isMembersLoading || isOwnerLoading;
+
+  const data = {
+    owner,
+    members,
+  };
+
+  return {
+    data,
+    isLoading,
+  };
+};
+
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
@@ -132,4 +150,5 @@ export {
   useGetOrgs,
   useOrgsContextManager,
   setOrgCookie,
+  useGetOrgMembersAndOwner,
 };

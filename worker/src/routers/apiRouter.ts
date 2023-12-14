@@ -14,6 +14,8 @@ import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
+import { Alerter } from "../db/Alerter";
+import { validateAlertCreate } from "../lib/validators/alertValidators";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -133,7 +135,7 @@ async function logAsync(
         env.REQUEST_AND_RESPONSE_QUEUE_KV
       ),
     },
-    env.RATE_LIMIT_KV
+    env
   );
 
   if (logError !== null) {
@@ -422,8 +424,91 @@ export const getAPIRouter = (router: BaseRouter) => {
     }
   );
 
+  router.post(
+    "/alerts",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error: authError } =
+        await client.db.getAuthParams();
+
+      if (authError !== null) {
+        return client.response.unauthorized();
+      }
+
+      const requestData = await requestWrapper.getJson<
+        Database["public"]["Tables"]["alert"]["Insert"]
+      >();
+
+      const alert = {
+        ...requestData,
+        status: "resolved",
+        org_id: authParams.organizationId,
+      };
+
+      const { error: validateError } = validateAlertCreate(alert);
+      if (validateError !== null) {
+        return client.response.newError(validateError, 400);
+      }
+
+      const { data: alertRow, error: alertError } = await client.db.insertAlert(
+        alert
+      );
+
+      if (alertError || !alertRow) {
+        return client.response.newError(alertError, 500);
+      }
+
+      const alerter = new Alerter(env.ALERTER);
+      const { error: configError } = await alerter.upsertAlert(alertRow);
+
+      if (configError !== null) {
+        return client.response.newError(configError, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
+  router.delete(
+    "/alert/:id",
+    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error } = await client.db.getAuthParams();
+
+      if (error !== null) {
+        return client.response.unauthorized();
+      }
+
+      const { error: deleteErr } = await client.db.deleteAlert(
+        id,
+        authParams.organizationId
+      );
+
+      if (deleteErr) {
+        return client.response.newError(deleteErr, 500);
+      }
+
+      const alerter = new Alerter(env.ALERTER);
+      const deleteRes = await alerter.deleteAlert(
+        id,
+        authParams.organizationId
+      );
+
+      if (deleteRes.error) {
+        return client.response.newError(deleteRes.error, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
   router.options(
-    "/v1/request/:id/property",
+    "*",
     async (
       _,
       _requestWrapper: RequestWrapper,
@@ -433,7 +518,7 @@ export const getAPIRouter = (router: BaseRouter) => {
       return new Response(null, {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PUT",
+          "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT",
           "Access-Control-Allow-Headers":
             "Content-Type, helicone-jwt, helicone-org-id",
         },
