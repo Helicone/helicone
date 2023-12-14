@@ -2,8 +2,6 @@ import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
-import { Alerts } from "../../alerts";
-import { AlertMetricEvent } from "../../db/AtomicAlerter";
 import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
 import { Result, err, ok } from "../../results";
@@ -514,30 +512,6 @@ export class DBLoggable {
       return {
         data: null,
         error: webhookError,
-      };
-    }
-
-    const metricEvent: AlertMetricEvent = {
-      timestamp: Date.now(),
-      metrics: {
-        "response.status": {
-          count: this.isSuccessResponse(responseResult.data?.status) ? 0 : 1,
-          total: 1,
-        },
-      },
-    };
-
-    const alerts = new Alerts(db.supabase, env.ALERTER, env.RESEND_API_KEY);
-    const alertResult = await alerts.processMetricEvent(
-      metricEvent,
-      authParams.organizationId
-    );
-
-    if (alertResult.error) {
-      console.error("Error processing metric event", alertResult.error);
-      return {
-        data: null,
-        error: alertResult.error,
       };
     }
 
