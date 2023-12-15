@@ -58,12 +58,14 @@ export class RequestWrapper<T> {
     if (!authHeader) {
       return err("No authorization header");
     }
-
-    const parsedAuthHeader = JSON.parse(authHeader) as HeliconeAuth;
-
-    if (!isValidHeliconeAuth(parsedAuthHeader)) {
+    try {
+      const parsedAuthHeader = JSON.parse(authHeader) as HeliconeAuth;
+      if (!isValidHeliconeAuth(parsedAuthHeader)) {
+        return err("Invalid auth header");
+      }
+      return ok(parsedAuthHeader);
+    } catch (e) {
       return err("Invalid auth header");
     }
-    return ok(parsedAuthHeader);
   }
 }

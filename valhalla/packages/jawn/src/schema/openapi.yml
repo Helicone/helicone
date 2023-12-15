@@ -49,6 +49,7 @@ paths:
           description: Internal server error.
       security:
         - authorization: []
+        - helicone-authorization: []
   /v1/request:
     post:
       tags:
@@ -86,6 +87,7 @@ paths:
           description: Internal server error.
       security:
         - authorization: []
+        - helicone-authorization: []
 
   /v1/response:
     post:
@@ -124,6 +126,7 @@ paths:
           description: Internal server error.
       security:
         - authorization: []
+        - helicone-authorization: []
     patch:
       tags:
         - request
@@ -160,6 +163,7 @@ paths:
           description: Internal server error.
       security:
         - authorization: []
+        - helicone-authorization: []
 
   /healthcheck-db:
     get:
@@ -349,6 +353,10 @@ components:
 
   securitySchemes:
     authorization:
+      type: apiKey
+      name: authorization
+      in: header
+    helicone-authorization:
       type: apiKey
       name: helicone-authorization
       in: header
