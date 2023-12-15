@@ -1,4 +1,3 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
 
 const getPromptValues = async () => {

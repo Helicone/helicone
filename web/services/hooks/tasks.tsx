@@ -1,4 +1,3 @@
-// import { useQuery } from "@tanstack/react-query";
 import { gql } from "../../lib/api/graphql/client";
 
 export const GET_NODES = gql(/* GraphQL */ `

@@ -1,6 +1,5 @@
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { Result, resultMap } from "../../result";
-
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 

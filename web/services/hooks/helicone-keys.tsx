@@ -1,6 +1,5 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { getUSDateFromString } from "../../components/shared/utils/utils";
 import { Database } from "../../supabase/database.types";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 

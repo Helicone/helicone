@@ -14,7 +14,6 @@ import {
   RequestsOverTime,
   TimeIncrement,
 } from "./timeCalculations/fetchTimeData";
-
 import { getTimeInterval } from "./timeCalculations/time";
 
 export const initialGraphDataState: GraphDataState = {
