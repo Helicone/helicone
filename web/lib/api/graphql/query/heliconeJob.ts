@@ -83,11 +83,6 @@ const filterInputToFilterLeaf: {
   },
 };
 
-/**
- * Converts a HeliconeJobFilter object into a FilterNode object.
- * @param filter - The HeliconeJobFilter object to be converted.
- * @returns The converted FilterNode object.
- */
 function convertFilterInputToFilterLeaf(filter: HeliconeJobFilter): FilterNode {
   const keys = Object.keys(filter) as (keyof HeliconeJobFilter)[];
   const convertedFilters = keys
