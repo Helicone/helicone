@@ -16,17 +16,6 @@ interface CreateNewAlertModalProps {
   onSuccess: () => void;
 }
 
-/**
- * Component for creating a new alert modal.
- *
- * @component
- * @param {object} props - The component props.
- * @param {boolean} props.open - Flag indicating whether the modal is open.
- * @param {function} props.setOpen - Function to set the open state of the modal.
- * @param {string} props.orgId - The organization ID.
- * @param {function} props.onSuccess - Function to be called on successful creation of an alert.
- * @returns {JSX.Element} The JSX element representing the create new alert modal.
- */
 const CreateNewAlertModal = (props: CreateNewAlertModalProps) => {
   const { open, setOpen, orgId, onSuccess } = props;
   const { data: orgMembers, isLoading: isOrgMembersLoading } =
