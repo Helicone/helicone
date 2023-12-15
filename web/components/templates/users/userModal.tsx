@@ -8,6 +8,8 @@ import {
   ClipboardDocumentIcon,
   TableCellsIcon,
   XMarkIcon,
+  CurrencyDollarIcon,
+  PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import useNotification from "../../shared/notification/useNotification";
 import StyledAreaChart from "../dashboard/styledAreaChart";
@@ -27,7 +29,7 @@ import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useRouter } from "next/router";
 import { encodeFilter } from "../requestsV2/requestsPageV2";
 import useSearchParams from "../../shared/utils/useSearchParams";
-
+import ThemedTabs from "../../../components/shared/themed/themedTabs";
 interface UserModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -38,14 +40,22 @@ const UserModal = (props: UserModalProps) => {
   const { open, setOpen, user } = props;
 
   const [userRequests, setUserRequests] = useState<any[]>([]);
+  const [userCost, setUserCost] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCostLoading, setIsCostLoading] = useState(false);
+  const [graphOption, setGraphOption] = useState<string>("Request");
 
   const { setNotification } = useNotification();
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const valueFormatter = function (number: number) {
+    return "$" + number;
+  };
+
   useEffect(() => {
     setIsLoading(true);
+    setIsCostLoading(true);
     const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
 
     const userFilters = filterUIToFilterLeafs(filterMap, []).concat([
@@ -93,7 +103,46 @@ const UserModal = (props: UserModalProps) => {
       .finally(() => {
         setIsLoading(false);
       });
+    fetch("/api/metrics/costOverTime", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        timeFilter: {
+          start: timeFilter.start.toISOString(),
+          end: timeFilter.end.toISOString(),
+        },
+        filter: filterListToTree(userFilters, "and"),
+        apiKeyFilter: null,
+        dbIncrement: "day",
+        timeZoneDifference: new Date().getTimezoneOffset(),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const cleaned = data.data.map((d: any) => ({
+          cost: +d.cost,
+          date: getTimeMap("day")(new Date(d.time)),
+        }));
+        setUserCost(cleaned);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIsCostLoading(false);
+      });
   }, [open, user?.user_id]);
+
+  const options = [
+    { label: "Request", icon: PresentationChartLineIcon },
+    { label: "Cost", icon: CurrencyDollarIcon },
+  ];
+
+  const handleOptionSelect = (option: string) => {
+    setGraphOption(option);
+  };
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
@@ -101,7 +150,12 @@ const UserModal = (props: UserModalProps) => {
         <div className="flex flex-col space-y-4 w-full min-w-[400px] h-full">
           <div className="w-full flex flex-row justify-between items-center">
             <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-xl truncate w-[300px]">
-              {user.user_id}
+              <ThemedTabs
+                options={options}
+                onOptionSelect={handleOptionSelect}
+                initialIndex={0}
+                breakpoint="md"
+              />
             </h2>
             <div className="flex flex-row items-center gap-3">
               <Tooltip title="View Requests">
@@ -160,29 +214,58 @@ const UserModal = (props: UserModalProps) => {
               </Tooltip>
             </div>
           </div>
-          <div>
-            <StyledAreaChart
-              title={"Requests last 30 days"}
-              value={undefined}
-              isDataOverTimeLoading={isLoading}
-              height={"128px"}
-            >
-              <AreaChart
-                data={userRequests}
-                categories={["requests"]}
-                index={"date"}
-                className="h-32 -ml-4 pt-4"
-                colors={["orange"]}
-                showLegend={false}
-              />
-            </StyledAreaChart>
-          </div>
+          {graphOption === "Request" ? (
+            <div>
+              <StyledAreaChart
+                title={"Requests last 30 days"}
+                value={undefined}
+                isDataOverTimeLoading={isLoading}
+                height={"128px"}
+              >
+                <AreaChart
+                  data={userRequests}
+                  categories={["requests"]}
+                  index={"date"}
+                  className="h-32 -ml-4 pt-4"
+                  colors={["blue"]}
+                  showLegend={false}
+                />
+              </StyledAreaChart>
+            </div>
+          ) : (
+            <div>
+              <StyledAreaChart
+                title={"Cost of requests in the last 30 days"}
+                value={undefined}
+                isDataOverTimeLoading={isCostLoading}
+                height={"128px"}
+              >
+                <AreaChart
+                  data={userCost}
+                  categories={["cost"]}
+                  index={"date"}
+                  className="h-32 -ml-4 pt-4"
+                  colors={["blue"]}
+                  showLegend={false}
+                  valueFormatter={valueFormatter}
+                />
+              </StyledAreaChart>
+            </div>
+          )}
 
           <ul
             className={clsx(
               "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 dark:divide-gray-700 justify-between text-sm w-full"
             )}
           >
+            <li className="flex flex-row justify-between items-center py-2 gap-4">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">
+                User ID
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 truncate">
+                {user.user_id ? user.user_id : "No User ID"}
+              </p>
+            </li>
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Total Cost

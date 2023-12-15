@@ -1,22 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "..";
+import { Database, Json } from "../../supabase/database.types";
+import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import { HeliconeHeaders } from "../lib/HeliconeHeaders";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
-import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
-import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
-import { BaseRouter } from "./routerFactory";
-import { InsertQueue } from "../lib/dbLogger/insertQueue";
-import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
-import { Database, Json } from "../../supabase/database.types";
-import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
-import {
-  HeliconeNode as HeliconeNode,
-  validateHeliconeNode as validateHeliconeNode,
-} from "../lib/models/Tasks";
 import { Valhalla } from "../lib/db/valhalla";
-import { Alerter } from "../db/Alerter";
+import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
+import { InsertQueue } from "../lib/dbLogger/insertQueue";
+import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
+import { Job, isValidStatus, validateRun } from "../lib/models/Runs";
+import { HeliconeNode, validateHeliconeNode } from "../lib/models/Tasks";
 import { validateAlertCreate } from "../lib/validators/alertValidators";
+import { BaseRouter } from "./routerFactory";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -466,13 +462,6 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError(alertError, 500);
       }
 
-      const alerter = new Alerter(env.ALERTER);
-      const { error: configError } = await alerter.upsertAlert(alertRow);
-
-      if (configError !== null) {
-        return client.response.newError(configError, 500);
-      }
-
       return client.response.successJSON({ ok: "true" }, true);
     }
   );
@@ -494,16 +483,6 @@ export const getAPIRouter = (router: BaseRouter) => {
 
       if (deleteErr) {
         return client.response.newError(deleteErr, 500);
-      }
-
-      const alerter = new Alerter(env.ALERTER);
-      const deleteRes = await alerter.deleteAlert(
-        id,
-        authParams.organizationId
-      );
-
-      if (deleteRes.error) {
-        return client.response.newError(deleteRes.error, 500);
       }
 
       return client.response.successJSON({ ok: "true" }, true);

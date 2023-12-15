@@ -32,7 +32,7 @@ export interface Database {
           name: string
           org_id: string
           soft_delete?: boolean
-          status: string
+          status?: string
           threshold: number
           time_block_duration?: number
           time_window: number
