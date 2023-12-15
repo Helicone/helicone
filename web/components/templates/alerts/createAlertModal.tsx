@@ -173,9 +173,15 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
                 label: "Response status",
                 value: "response.status",
               },
+              {
+                label: "Cost (coming soon)",
+                value: "costs",
+              },
             ]}
             selectedValue={selectedMetric}
-            onSelect={(value) => setSelectedMetric(value)}
+            onSelect={(value) =>
+              value === "response.status" ? setSelectedMetric(value) : ""
+            }
           />
         </div>
         <div className="w-full space-y-1.5 text-sm">
