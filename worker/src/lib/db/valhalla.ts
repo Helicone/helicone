@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HeliconeAuth } from "../../db/DBWrapper";
 import { Result, err, ok } from "../../results";
-import { AuthParams } from "../dbLogger/DBLoggable";
 import { paths } from "./valhalla.types";
 
 type PostMethods<T> = {
