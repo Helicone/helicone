@@ -14,7 +14,6 @@ import {
   HeliconeNode as HeliconeNode,
   validateHeliconeNode as validateHeliconeNode,
 } from "../lib/models/Tasks";
-import { Alerter } from "../db/Alerter";
 import { validateAlertCreate } from "../lib/validators/alertValidators";
 
 class InternalResponse {
@@ -463,13 +462,6 @@ export const getAPIRouter = (router: BaseRouter) => {
         return client.response.newError(alertError, 500);
       }
 
-      const alerter = new Alerter(env.ALERTER);
-      const { error: configError } = await alerter.upsertAlert(alertRow);
-
-      if (configError !== null) {
-        return client.response.newError(configError, 500);
-      }
-
       return client.response.successJSON({ ok: "true" }, true);
     }
   );
@@ -491,16 +483,6 @@ export const getAPIRouter = (router: BaseRouter) => {
 
       if (deleteErr) {
         return client.response.newError(deleteErr, 500);
-      }
-
-      const alerter = new Alerter(env.ALERTER);
-      const deleteRes = await alerter.deleteAlert(
-        id,
-        authParams.organizationId
-      );
-
-      if (deleteRes.error) {
-        return client.response.newError(deleteRes.error, 500);
       }
 
       return client.response.successJSON({ ok: "true" }, true);

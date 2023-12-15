@@ -85,19 +85,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: UsersIcon,
       current: pathname.includes("/users"),
     },
-    // {
-    //   name: (
-    //     <div className="flex w-full space-x-2 items-center">
-    //       <p>Alerts</p>
-    //       <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
-    //         new
-    //       </div>
-    //     </div>
-    //   ),
-    //   href: "/alerts",
-    //   icon: BellIcon,
-    //   current: pathname.includes("/alerts"),
-    // },
+    {
+      name: (
+        <div className="flex w-full space-x-2 items-center">
+          <p>Alerts</p>
+          <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
+            new
+          </div>
+        </div>
+      ),
+      href: "/alerts",
+      icon: BellIcon,
+      current: pathname.includes("/alerts"),
+    },
     {
       name: "Properties",
       href: "/properties",
@@ -319,7 +319,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           <p>View Documentation</p>
                         </Link>
                         <Link
-                          className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                          className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                           href={"https://discord.gg/zsSTcH2qhG"}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -511,7 +511,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>View Documentation</p>
                   </Link>
                   <Link
-                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-1 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                     href={"https://discord.gg/zsSTcH2qhG"}
                     target="_blank"
                     rel="noopener noreferrer"

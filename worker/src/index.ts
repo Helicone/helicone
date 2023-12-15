@@ -1,12 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
-import { Alerts } from "./alerts";
-import { AtomicAlerter } from "./db/AtomicAlerter";
 import { AtomicRateLimiter } from "./db/AtomicRateLimiter";
 import { RequestWrapper } from "./lib/RequestWrapper";
 import { RosettaWrapper } from "./lib/rosetta/RosettaWrapper";
 import { updateLoopUsers } from "./lib/updateLoopsUsers";
 import { buildRouter } from "./routers/routerFactory";
+import { AlertManager } from "./AlertManager";
+import { AlertStore } from "./db/AlertStore";
+import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -42,7 +43,6 @@ export interface Env {
   OPENAI_ORG_ID: string;
   ROSETTA_HELICONE_API_KEY: string;
   CUSTOMER_GATEWAY_URL?: string;
-  ALERTER: DurableObjectNamespace;
   RESEND_API_KEY: string;
 }
 
@@ -140,15 +140,15 @@ export default {
       await rosetta.generateMappers();
     } else {
       await updateLoopUsers(env);
-      const alerts = new Alerts(
-        supabaseClient,
-        env.ALERTER,
-        env.RESEND_API_KEY
+      const alertManager = new AlertManager(
+        new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
+        env
       );
-      const resolveAlertRes = await alerts.resolveAlertsCron();
 
-      if (!resolveAlertRes.error) {
-        console.log(`Error resolving alerts: ${resolveAlertRes.error}`);
+      const { error: checkAlertErr } = await alertManager.checkAlerts();
+
+      if (checkAlertErr) {
+        console.error(`Failed to check alerts: ${checkAlertErr}`);
       }
     }
   },
@@ -173,4 +173,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { AtomicAlerter, AtomicRateLimiter };
+export { AtomicRateLimiter };
