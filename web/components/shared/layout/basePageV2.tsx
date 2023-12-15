@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
-import NavBar from "./navbar";
 import Footer from "./footer";
 import NavBarV2 from "./navbar/navBarV2";
 

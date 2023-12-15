@@ -1,7 +1,5 @@
-import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Chat } from "../../requests/chat";
 import AbstractRequestBuilder, {
-  NormalizedRequest,
   SpecificFields,
 } from "./abstractRequestBuilder";
 

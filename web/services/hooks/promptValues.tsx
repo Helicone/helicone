@@ -1,4 +1,3 @@
-import { useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { Value } from "../../lib/api/prompts/prompts";
 import { getPromptValues } from "../lib/promptValues";

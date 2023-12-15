@@ -4,7 +4,6 @@ import MetaData from "../components/shared/metaData";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { User } from "@supabase/auth-helpers-react";
 import AuthHeader from "../components/shared/authHeader";
-// import CachePage from "../components/templates/requests/CachePage";
 import CachePage from "../components/templates/cache/cachePage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 

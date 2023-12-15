@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import {
   CheckCircleIcon,
   InformationCircleIcon,
@@ -8,11 +7,7 @@ import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
 import Image from "next/image";
 
-interface ExampleBlogProps {}
-
-const ExampleBlog = (props: ExampleBlogProps) => {
-  const {} = props;
-
+const ExampleBlog = () => {
   return (
     <MetaData title="Example">
       <NavBarV2 />
@@ -40,7 +35,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                 volutpat. Dignissim sed eget risus enim. Mattis mauris semper
                 sed amet vitae sed turpis id.
               </p>
-              <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+              <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
                 <li className="flex gap-x-3">
                   <CheckCircleIcon
                     className="mt-1 h-5 w-5 flex-none text-indigo-600"
@@ -112,7 +107,9 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                 <figcaption className="mt-6 flex gap-x-4">
                   <Image
                     className="h-6 w-6 flex-none rounded-full bg-gray-50"
-                    src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    src="/assets/blog/person1.png"
+                    height={256}
+                    width={256}
                     alt=""
                   />
                   <div className="text-sm leading-6">
@@ -133,7 +130,9 @@ const ExampleBlog = (props: ExampleBlogProps) => {
             <figure className="mt-16">
               <Image
                 className="aspect-video rounded-xl bg-gray-50 object-cover"
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&w=1310&h=873&q=80&facepad=3"
+                src="/assets/blog/person.png"
+                height={873}
+                width={1310}
                 alt=""
               />
               <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">

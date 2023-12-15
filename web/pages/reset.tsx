@@ -1,15 +1,11 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useRouter } from "next/router";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
 import { useState } from "react";
 import ThemedModal from "../components/shared/themed/themedModal";
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 
-interface ResetProps {}
-
-const Reset = (props: ResetProps) => {
-  const router = useRouter();
+const Reset = () => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
   const [open, setOpen] = useState(false);
@@ -18,12 +14,9 @@ const Reset = (props: ResetProps) => {
     <>
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
-          const { data, error } = await supabase.auth.resetPasswordForEmail(
-            email,
-            {
-              redirectTo: `${window.location.origin}/reset-password`,
-            }
-          );
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`,
+          });
 
           if (error) {
             setNotification(

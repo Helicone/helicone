@@ -1,6 +1,4 @@
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { Card, Metric, Text } from "@tremor/react";
+import { Card } from "@tremor/react";
 import { clsx } from "../clsx";
 
 export interface MetricsPanelProps {

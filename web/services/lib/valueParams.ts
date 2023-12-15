@@ -1,6 +1,4 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
-import { PropertyParam } from "../../lib/api/properties/propertyParams";
 import { ValueParam } from "../../lib/api/values/valueParams";
 import { Result } from "../../lib/result";
 

@@ -98,10 +98,8 @@ function convertFilterInputToFilterLeaf(filter: HeliconeJobFilter): FilterNode {
 }
 
 export async function heliconeJob(
-  root: any,
   args: QueryHeliconeJobArgs,
-  context: Context,
-  info: any
+  context: Context
 ): Promise<HeliconeJob[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {

@@ -1,28 +1,7 @@
-/**
- * ThemedDropdown component for selecting options from a dropdown menu.
- *
- * @template T - The type of the selected value.
- * @param {ThemedDropdownProps<T>} props - The component props.
- * @param {DropdownOption<T>[]} props.options - The list of dropdown options.
- * @param {T} props.selectedValue - The currently selected value.
- * @param {(option: T) => void} props.onSelect - The callback function called when an option is selected.
- * @param {"top" | "bottom"} [props.verticalAlign="bottom"] - The vertical alignment of the dropdown menu.
- * @param {"left" | "right"} [props.align="left"] - The horizontal alignment of the dropdown menu.
- * @param {string} [props.className] - The CSS class name for the dropdown component.
- * @param {string} [props.label] - The label for the dropdown component.
- * @param {string} [props.placeholder="Select an option"] - The placeholder text for the dropdown button.
- * @param {boolean} [props.disabled=false] - Whether the dropdown is disabled or not.
- * @returns {JSX.Element} The ThemedDropdown component.
- */
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpDownIcon,
-} from "@heroicons/react/20/solid";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../clsx";
-import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface DropdownOption<T> {
   label: string;

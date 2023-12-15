@@ -1,19 +1,14 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 import { useOrg } from "../../shared/layout/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import CreateAlertModal from "./createAlertModal";
-import {
-  BellIcon,
-  ChevronDownIcon,
-  NewspaperIcon,
-} from "@heroicons/react/24/outline";
+import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { Menu, Transition } from "@headlessui/react";
 import { Tooltip } from "@mui/material";
 
 interface AlertsPageProps {

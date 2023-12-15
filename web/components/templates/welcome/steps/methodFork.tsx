@@ -1,5 +1,4 @@
 import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/20/solid";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 

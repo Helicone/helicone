@@ -1,15 +1,10 @@
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../../../lib/api/db/dbExecute";
+import { dbQueryClickhouse } from "../../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { Result } from "../../../../lib/result";
 import { CLICKHOUSE_PRICE_CALC } from "../../../../lib/sql/constants";
-import { buildFilterWithAuthClickHouse } from "../../../../services/lib/filters/filters";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { Permission } from "../../../../services/lib/user";
 const generateSubquery = (

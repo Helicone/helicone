@@ -1,4 +1,3 @@
-import { Database } from "./../../../../../supabase/database.types";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
