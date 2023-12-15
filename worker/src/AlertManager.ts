@@ -365,9 +365,9 @@ export class AlertManager {
 
     const text = `Alert '${
       alert.name
-    }' has been ${capitalizedStatus}.\n\nDetails:\n- ${capitalizedStatus} At: ${formatTimestamp(
-      alertTime
-    )}\n- Threshold: ${alert.threshold}%\n\n${actionMessage}`;
+    }' has been ${capitalizedStatus}.\n\nDetails:\n- ${capitalizedStatus} At: ${
+      alertTime ? formatTimestamp(alertTime) : "alertTime not found"
+    }\n- Threshold: ${alert.threshold}%\n\n${actionMessage}`;
     const html = `<!DOCTYPE html>
     <html lang="en" dir="ltr" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" style="color-scheme:light dark;supported-color-schemes:light dark;">
       <head>
@@ -441,7 +441,11 @@ export class AlertManager {
                                 <td class="content">
                                   <ul style="list-style-type: none; padding: 0; margin: 0; color:#000000; font-size:16px; line-height:24px; font-family:Arial, sans-serif;">
                                     <li><strong>Status:</strong> ${capitalizedStatus}</li>
-                                    <li><strong>Triggered At:</strong> ${alertTime}</li>
+                                    <li><strong>Triggered At:</strong> ${
+                                      alertTime
+                                        ? formatTimestamp(alertTime)
+                                        : "alertTime not found"
+                                    }</li>
                                     <li><strong>Threshold:</strong> ${
                                       alert.threshold
                                     }%</li>

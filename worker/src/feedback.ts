@@ -155,7 +155,9 @@ export async function isApiKeyAuthenticated(
   heliconeAuth: IHeliconeHeaders["heliconeAuthV2"]
 ): Promise<Result<boolean, string>> {
   if (heliconeAuth?._type === "bearer") {
-    const heliconeApiKeyHash = await hash(`Bearer ${heliconeAuth.token}`);
+    const heliconeApiKeyHash = await hash(
+      `Bearer ${heliconeAuth.token.replace("Bearer ", "")}`
+    );
     const { data: apiKey, error: apiKeyError } = await dbClient
       .from("helicone_api_keys")
       .select("*")
