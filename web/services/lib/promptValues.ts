@@ -1,8 +1,7 @@
-import axios from "axios";
-
 const getPromptValues = async () => {
-  const resp = await axios.get("/api/prompt_values");
-  return resp.data;
+  const resp = await fetch("/api/prompt_values");
+  const data = await resp.json();
+  return data;
 };
 
 export { getPromptValues };

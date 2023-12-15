@@ -1,8 +1,8 @@
-import axios from "axios";
 import { ValueParam } from "../../lib/api/values/valueParams";
 import { Result } from "../../lib/result";
 
 export const getValueParams = async () => {
-  const resp = await axios.get("/api/prompt_values/params");
-  return resp.data as Result<ValueParam[], string>;
+  const resp = await fetch("/api/prompt_values/params");
+  const data = await resp.json();
+  return data as Result<ValueParam[], string>;
 };
