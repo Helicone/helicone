@@ -62,27 +62,31 @@ export class Valhalla {
     method: string,
     body: string
   ): Promise<Result<T, string>> {
-    const response = await fetch(this.route(path), {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        "Helicone-Authorization": JSON.stringify(this.heliconeAuth),
-      },
-      body: body,
-    });
-    const responseText = await response.text();
-    if (response.status !== 200) {
-      return err(`Failed to send request to Valhalla ${responseText}`);
-    }
-
-    if (responseText === "") {
-      return err("Failed to send request to Valhalla");
-    }
-
     try {
-      return ok(JSON.parse(responseText) as T);
+      const response = await fetch(this.route(path), {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Helicone-Authorization": JSON.stringify(this.heliconeAuth),
+        },
+        body: body,
+      });
+      const responseText = await response.text();
+      if (response.status !== 200) {
+        return err(`Failed to send request to Valhalla ${responseText}`);
+      }
+
+      if (responseText === "") {
+        return err("Failed to send request to Valhalla");
+      }
+
+      try {
+        return ok(JSON.parse(responseText) as T);
+      } catch (e) {
+        return err(`Failed to parse ${JSON.stringify(e)}`);
+      }
     } catch (e) {
-      return err(`Failed to parse ${JSON.stringify(e)}`);
+      return err(`Failed to send request to Valhalla ${JSON.stringify(e)}`);
     }
   }
 }
