@@ -45,7 +45,12 @@ export default function AISafety() {
       </Head>
       <NavBarV2 />
       <div className="flex w-full justify-center bg-gray-900">
-        <Image src={"/assets/blog/AI.webp"} width={500} height={200} alt={""} />
+        <Image
+          src={"/assets/blog/AI.webp"}
+          width={500}
+          height={200}
+          alt="R2-D2"
+        />
       </div>
 
       <div
@@ -60,7 +65,9 @@ export default function AISafety() {
               <Image
                 className="inline-block h-8 w-8 rounded-full"
                 src={"/assets/blog/scottnguyen-headshot.webp"}
-                alt=""
+                width={32}
+                height={32}
+                alt="Scott Nguyen"
               />
               <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                 Scott Nguyen
@@ -142,7 +149,7 @@ export default function AISafety() {
             ethical boundaries. Specific features that enhance observability
             include:
           </p>
-          <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+          <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
               <MagnifyingGlassIcon
                 className="mt-1 h-5 w-5 flex-none text-sky-500"

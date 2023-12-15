@@ -31,7 +31,6 @@ if (
 
 export default function MyApp({
   Component,
-  router,
   pageProps,
 }: AppProps<{
   initialSession: Session;

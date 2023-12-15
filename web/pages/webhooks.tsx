@@ -5,7 +5,6 @@ import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-
 import WebhooksPage from "../components/templates/webhooks/webhooksPage";
 
 interface WebhooksProps {

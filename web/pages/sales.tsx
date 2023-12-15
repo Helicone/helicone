@@ -18,18 +18,16 @@ const Sales = () => {
           <p className="mt-6 w-full text-xl leading-8 text-gray-700 text-center max-w-xl mx-auto">
             We would love to hear about your use case and how we can help you.
             Click{" "}
-            <span>
-              <Link
-                href={
-                  "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
-                }
-                className="text-blue-500 hover:text-blue-600 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                here
-              </Link>{" "}
-            </span>
+            <Link
+              href={
+                "https://calendly.com/d/x5d-9q9-v7x/helicone-discovery-call"
+              }
+              className="text-blue-500 hover:text-blue-600 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              here
+            </Link>{" "}
             to schedule a demo or fill out the form below and we will get back
             to you as soon as possible.
           </p>

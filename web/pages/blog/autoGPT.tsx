@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import {
   CheckCircleIcon,
   InformationCircleIcon,
@@ -8,11 +7,7 @@ import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import MetaData from "../../components/shared/metaData";
 import Image from "next/image";
 
-interface ExampleBlogProps {}
-
-const ExampleBlog = (props: ExampleBlogProps) => {
-  const {} = props;
-
+const ExampleBlog = () => {
   return (
     <MetaData
       title="AutoGPT x Helicone: Optimizing Evaluation Pipelines"
@@ -26,6 +21,8 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               className="h-full w-full sm:w-auto mx-auto max-w-2xl"
               src="/assets/autoGPTxHelicone.png"
               alt="Workflow"
+              width={800}
+              height={400}
             />
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               AutoGPT {"<>"} Helicone
@@ -42,12 +39,12 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                 >
                   Auto-GPT-Benchmarks repository
                 </a>
-                . Their goal? To construct the optimal evaluation pipeline for
-                comparing different agents. AutoGPT is fully leveraging the
+                {"."} Their goal? To construct the optimal evaluation pipeline
+                for comparing different agents. AutoGPT is fully leveraging the
                 capabilities of Helicone without modifying a single line of
                 code. Here are the key features that facilitate this synergy:
               </p>
-              <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+              <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
                 <li className="flex gap-x-3">
                   <CheckCircleIcon
                     className="mt-1 h-5 w-5 flex-none text-indigo-600"
@@ -65,7 +62,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                     >
                       MITM Proxy documentation
                     </a>
-                    .
+                    {"."}
                   </span>
                 </li>
                 <li className="flex gap-x-3">
@@ -87,7 +84,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
                     >
                       Caching documentation
                     </a>
-                    .
+                    {"."}
                   </span>
                 </li>
                 <li className="flex gap-x-3">
@@ -141,7 +138,7 @@ const ExampleBlog = (props: ExampleBlogProps) => {
               >
                 Custom Properties documentation
               </a>
-              .
+              {"."}
             </p>
             <pre className="mt-6 p-4 w-[80vw] lg:w-full max-w-3xl bg-gray-800 text-white rounded-md text-xs  overflow-scroll">
               <code>{`HeliconeLockManager.write_custom_property("job_id", "1")
@@ -170,6 +167,8 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/agentComparisons.png"
                 alt="Agent Comparisons"
+                width={800}
+                height={400}
               />
               <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
                 <InformationCircleIcon
@@ -188,6 +187,8 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/agentFilters.png"
                 alt="Agent Filters"
+                width={800}
+                height={400}
               />
               <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
                 <InformationCircleIcon
@@ -211,6 +212,8 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/cachePageStats.png"
                 alt="Cache Page Stats"
+                width={800}
+                height={400}
               />
               <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
                 <InformationCircleIcon
@@ -230,6 +233,8 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/cacheRequestTable.png"
                 alt="Cache Request Table"
+                width={800}
+                height={400}
               />
               <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
                 <InformationCircleIcon
@@ -252,6 +257,8 @@ HeliconeLockManager.write_custom_property("agent", "smol-developer")`}</code>
                 className="aspect-video rounded-xl bg-gray-50 object-cover w-full sm:max-w-2xl"
                 src="/assets/blog/graphQL.png"
                 alt="GraphQL"
+                width={800}
+                height={400}
               />
               <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
                 <InformationCircleIcon
@@ -322,14 +329,18 @@ Challenge send-email
               excited to be partnering with AutoGPT to enable rich logging for
               them and deliver value using Helicone. If you are interested in
               learning more about Helicone or would like to meet the team,
-              please email me at justin @ helicone.ai or join our{" "}
+              please email me at{" "}
+              <a href="mailto:justin@helicone.ai" className="text-indigo-600">
+                justin@helicone.ai
+              </a>{" "}
+              or join our{" "}
               <a
                 href="https://discord.gg/2TkeWdXNPQ"
                 className="text-indigo-600"
               >
                 discord
               </a>
-              !
+              {"!"}
             </p>
           </div>
         </div>

@@ -24,7 +24,7 @@ const Members = (props: MembersProps) => {
         {!org?.currentOrg ? (
           <h1>Loading...</h1>
         ) : (
-          <OrgMembersPage org={org?.currentOrg!} />
+          <OrgMembersPage org={org.currentOrg} />
         )}
       </AuthLayout>
     </MetaData>

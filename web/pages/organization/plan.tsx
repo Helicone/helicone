@@ -23,7 +23,7 @@ const Plan = (props: PlanProps) => {
         {!org?.currentOrg ? (
           <h1>Loading...</h1>
         ) : (
-          <OrgPlanPage org={org?.currentOrg!} />
+          <OrgPlanPage org={org.currentOrg} />
         )}
       </AuthLayout>
     </MetaData>

@@ -1,5 +1,4 @@
 import { useUser } from "@supabase/auth-helpers-react";
-
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 
@@ -9,10 +8,7 @@ import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import HomePageV2 from "../components/templates/home/homePageV2";
 import Head from "next/head";
 
-interface HomeProps {}
-
-export const Home = (props: HomeProps) => {
-  const {} = props;
+export const Home = () => {
   const router = useRouter();
 
   const user = useUser();
@@ -66,7 +62,7 @@ export const getServerSideProps = async (
   } = await supabase.auth.getSession();
 
   if (session) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("user_settings")
       .select("*")
       .eq("user", session.user.id)

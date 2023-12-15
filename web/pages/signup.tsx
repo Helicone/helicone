@@ -7,11 +7,7 @@ import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";
 import { DEMO_EMAIL } from "../lib/constants";
 
-interface SignUpProps {}
-
-const SignUp = (props: SignUpProps) => {
-  const {} = props;
-
+const SignUp = () => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);

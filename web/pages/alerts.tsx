@@ -4,14 +4,9 @@ import AuthHeader from "../components/shared/authHeader";
 import MetaData from "../components/shared/metaData";
 import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { Database } from "../../supabase/database.types";
 
 interface AlertProps {
   user: User;
-  // userId: string;
-  orgId: string;
-  alerts: Array<Database["public"]["Tables"]["alert"]["Row"]>;
-  alertHistory: Array<Database["public"]["Tables"]["alert_history"]["Row"]>;
 }
 
 const Alert = (props: AlertProps) => {
@@ -32,7 +27,6 @@ export default Alert;
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {
     userData: { user },
-    supabaseClient,
   } = options;
 
   return {
