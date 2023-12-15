@@ -1,20 +1,15 @@
 import { ArrowLeftIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import Image from "next/image";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { getOrCreateUserSettings } from "../../../pages/api/user_settings";
 import { clsx } from "../../shared/clsx";
 import CodeIntegration from "./steps/codeIntegration";
 import EventListen from "./steps/eventListen";
-import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
-import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
+import { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
-import { useOrg } from "../../shared/layout/organizationContext";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 interface WelcomePageProps {}

@@ -1,6 +1,6 @@
 import { Transition } from "@headlessui/react";
 
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "./useNotification";
 import {

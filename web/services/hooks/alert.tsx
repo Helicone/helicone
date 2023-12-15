@@ -1,10 +1,6 @@
 import { supabaseServer } from "../../lib/supabaseServer";
 import { useQuery } from "@tanstack/react-query";
 
-/**
- * Custom hook for fetching alert data from Supabase.
- * @returns An object containing the fetched alert data, loading state, refetch function, and error.
- */
 export const useAlert = (orgId: string) => {
   const supabase = supabaseServer;
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
@@ -27,10 +23,6 @@ export const useAlert = (orgId: string) => {
   };
 };
 
-/**
- * Custom hook for retrieving alert history.
- * @returns An object containing alert history data, loading state, refetch function, and error state.
- */
 export const useAlertHistory = (orgId: string) => {
   const supabase = supabaseServer;
   const { data, isLoading, refetch, isRefetching, error } = useQuery({

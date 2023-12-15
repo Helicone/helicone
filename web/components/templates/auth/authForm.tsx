@@ -1,10 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { BsGoogle, BsGithub } from "react-icons/bs";
-import Image from "next/image";
 import { FormEvent, useState } from "react";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import useNotification from "../../shared/notification/useNotification";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 

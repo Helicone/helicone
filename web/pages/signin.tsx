@@ -3,11 +3,7 @@ import { useRouter } from "next/router";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
 
-interface SignInProps {}
-
-const SignIn = (props: SignInProps) => {
-  const {} = props;
-
+const SignIn = () => {
   const router = useRouter();
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();

@@ -8,7 +8,6 @@ import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
 // import { Tier } from "../../../components/templates/usage/usagePage";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
-import { stripeServer } from "../../../utlis/stripeServer";
 // import { REQUEST_LIMITS } from "../../../lib/constants";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 

@@ -7,11 +7,9 @@ import {
   useGetOrgMembers,
   useGetOrgOwner,
 } from "../../../services/hooks/organizations";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import useNotification from "../../shared/notification/useNotification";
-import { set } from "date-fns";
 import { useUser } from "@supabase/auth-helpers-react";
 
 interface CreateAlertModalProps {

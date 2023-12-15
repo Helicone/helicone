@@ -5,5 +5,9 @@
     "lib/api/graphql/schema/types/graphql.tsx",
     "lib/api/graphql/client/fragment-masking.ts",
     "lib/api/graphql/client/index.ts"
-  ]
+  ],
+  "plugins": ["unused-imports"],
+  "rules": {
+		"unused-imports/no-unused-imports": "error"
+	}
 }

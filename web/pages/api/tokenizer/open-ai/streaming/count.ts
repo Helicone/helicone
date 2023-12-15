@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { encoding_for_model, Tiktoken } from "@dqbd/tiktoken";
+import { encoding_for_model } from "@dqbd/tiktoken";
 
 export default async function handler(
   req: NextApiRequest,

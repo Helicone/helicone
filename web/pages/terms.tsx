@@ -1,11 +1,7 @@
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 
-interface TermsProps {}
-
-const Terms = (props: TermsProps) => {
-  const {} = props;
-
+const Terms = () => {
   const privacyPageSection = (
     index: number,
     title: string,

@@ -1,7 +1,6 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-
 import { Result } from "../../result";
 import {
   isValidTimeIncrement,
