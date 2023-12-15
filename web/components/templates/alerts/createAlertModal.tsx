@@ -1,15 +1,16 @@
-import { FormEvent, useState } from "react";
-import ThemedModal from "../../shared/themed/themedModal";
-import ThemedDropdown from "../../shared/themed/themedDropdown";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
-import { useOrg } from "../../shared/layout/organizationContext";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import Cookies from "js-cookie";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import useNotification from "../../shared/notification/useNotification";
-import { set } from "date-fns";
 import { useUser } from "@supabase/auth-helpers-react";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import Cookies from "js-cookie";
+import { FormEvent, useState } from "react";
+import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
+import {
+  useGetOrgMembers,
+  useGetOrgOwner,
+} from "../../../services/hooks/organizations";
+import { useOrg } from "../../shared/layout/organizationContext";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedDropdown from "../../shared/themed/themedDropdown";
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface CreateAlertModalProps {
   open: boolean;
@@ -37,6 +38,10 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     orgContext?.currentOrg.id || ""
   );
 
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    orgContext?.currentOrg.id || ""
+  );
+
   const { setNotification } = useNotification();
 
   const members: {
@@ -45,8 +50,8 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     org_role: string;
   }[] = [
     {
-      email: user?.email || "",
-      member: user?.email || "",
+      email: orgOwner?.data?.at(0)?.email || "",
+      member: "",
       org_role: "admin",
     },
     ...(data?.data || []),
@@ -174,7 +179,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
                 value: "response.status",
               },
               {
-                label: "Cost",
+                label: "Cost (coming soon)",
                 value: "costs",
               },
             ]}

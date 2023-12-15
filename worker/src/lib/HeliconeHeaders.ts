@@ -150,6 +150,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     orgId?: string;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
+
     if (heliconeAuth) {
       return {
         _type: "bearer",
