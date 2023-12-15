@@ -16,7 +16,6 @@
     "@apollo/explorer": "^3.4.0",
     "@apollo/sandbox": "^2.4.0",
     "@clickhouse/client": "^0.0.14",
-    "@dqbd/tiktoken": "^1.0.2",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@graphql-tools/schema": "^9.0.17",
