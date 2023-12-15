@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { usePlaygroundPage } from "../../../services/hooks/playground";
 import { clsx } from "../../shared/clsx";
 import ChatPlayground from "./chatPlayground";
-import ThemedDropdown from "../../shared/themed/themedDropdown";
 import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
 import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
@@ -10,9 +9,8 @@ import useNotification from "../../shared/notification/useNotification";
 import {
   CodeBracketSquareIcon,
   InformationCircleIcon,
-  PlusCircleIcon,
 } from "@heroicons/react/24/outline";
-import { MultiSelect, MultiSelectItem, Text } from "@tremor/react";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
 

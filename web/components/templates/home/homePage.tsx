@@ -20,20 +20,15 @@ import { DEMO_EMAIL } from "../../../lib/constants";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowPathIcon,
-  ArrowTopRightOnSquareIcon,
   BanknotesIcon,
-  ChevronRightIcon,
   CloudArrowDownIcon,
   CloudArrowUpIcon,
   CurrencyDollarIcon,
-  SparklesIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import Link from "next/link";
 import {
   ChartPieIcon,
-  CircleStackIcon,
   CloudIcon,
   CodeBracketIcon,
   UserGroupIcon,
@@ -42,9 +37,8 @@ import CodeSnippet from "./codeSnippet";
 import Footer from "../../shared/layout/footer";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
 import ManageHostedButton from "./manageHostedButton";
-import ContactForm, { ContactFormData } from "../../shared/contactForm";
+import ContactForm from "../../shared/contactForm";
 import Image from "next/image";
-import useNotification from "../../shared/notification/useNotification";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 
 const faqs = [

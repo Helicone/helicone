@@ -3,23 +3,17 @@ import {
   CircleStackIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
-import { request } from "https";
 import { useState } from "react";
-import { truncString } from "../../../lib/stringHelpers";
 import {
   useCacheOvertime,
   useCachePageMetrics,
   useCachePageTopMetrics,
   useCachePageTopRequests,
 } from "../../../services/hooks/useCachePage";
-import { clsx } from "../../shared/clsx";
 import { MetricsPanel } from "../../shared/metrics/metricsPanel";
-import { RenderPieChart } from "../../shared/metrics/pieChart";
 import { StackedBarChart } from "../../shared/metrics/stackedBarChart";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
-import ThemedModal from "../../shared/themed/themedModal";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";

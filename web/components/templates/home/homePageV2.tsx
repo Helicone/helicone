@@ -1,25 +1,20 @@
 import { useState } from "react";
-import { Dialog, Disclosure } from "@headlessui/react";
+import { Disclosure } from "@headlessui/react";
 import {
   ArrowPathIcon,
-  Bars3Icon,
   BellAlertIcon,
   CircleStackIcon,
   CodeBracketIcon,
   HandThumbUpIcon,
   LockClosedIcon,
   MinusSmallIcon,
-  PencilSquareIcon,
   PlusSmallIcon,
   RectangleStackIcon,
   TagIcon,
   UserIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronRightIcon, HeartIcon } from "@heroicons/react/20/solid";
+import { HeartIcon } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
-import CodeSnippet from "./codeSnippet";
-import { DiffHighlight } from "../welcome/diffHighlight";
 import Footer from "../../shared/layout/footer";
 import Link from "next/link";
 import { useRouter } from "next/router";

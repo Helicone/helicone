@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
@@ -21,7 +21,6 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
 import { HeliconeRequest } from "../../../lib/api/request/request";
-import getRequestBuilder from "./builder/requestBuilder";
 import { Result } from "../../../lib/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 

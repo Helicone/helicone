@@ -1,25 +1,12 @@
-import { ApolloError } from "apollo-server-errors";
-import { Context } from "../../../../pages/api/graphql";
 import {
-  FilterLeaf,
-  filterListToTree,
-  FilterNode,
   SingleKey,
-  TablesAndViews,
   TextOperators,
   TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
-import { getRequests } from "../../request/request";
-import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
-  HeliconeRequest,
-  QueryHeliconeRequestArgs,
-  HeliconeRequestFilter,
   TextOperators as GQLTextOperators,
-  PropertyFilter,
   DateOperators,
 } from "../schema/types/graphql";
-import { modelCost } from "../../metrics/costCalc";
 
 export function convertTextOperators(
   op: GQLTextOperators

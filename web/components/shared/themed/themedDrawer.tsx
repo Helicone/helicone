@@ -3,15 +3,10 @@ import {
   ArrowsPointingOutIcon,
   ChevronDoubleRightIcon,
 } from "@heroicons/react/20/solid";
-import {
-  ArrowsPointingInIcon,
-  ClipboardDocumentListIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowsPointingInIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { clsx } from "../clsx";
-import useNotification from "../notification/useNotification";
 import { useTheme } from "../theme/themeContext";
 
 interface ThemedDrawerProps {

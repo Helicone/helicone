@@ -7,7 +7,6 @@ import {
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";

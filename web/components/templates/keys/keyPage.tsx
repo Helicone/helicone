@@ -1,4 +1,4 @@
-import { BuildingOfficeIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { KeyIcon } from "@heroicons/react/24/outline";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 

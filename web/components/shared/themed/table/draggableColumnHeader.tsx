@@ -1,8 +1,6 @@
 import {
   BarsArrowDownIcon,
   BarsArrowUpIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   EllipsisVerticalIcon,
 } from "@heroicons/react/20/solid";
 import {
@@ -14,7 +12,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { useRouter } from "next/router";
-import { FC, Fragment } from "react";
+import { Fragment } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { clsx } from "../../clsx";
 import { Menu, Transition } from "@headlessui/react";

@@ -4,9 +4,8 @@ import {
   MinusCircleIcon,
   PlusCircleIcon,
   TagIcon,
-  ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
-import { ForwardRefExoticComponent, Fragment, SVGProps } from "react";
+import { Fragment } from "react";
 
 export const ThemedMultiSelect = ({
   columns,
