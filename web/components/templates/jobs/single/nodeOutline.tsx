@@ -1,9 +1,4 @@
-import {
-  ArrowsPointingOutIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/20/solid";
-import { Tooltip } from "@mui/material";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import React, { memo, useState } from "react";
 import { useReactFlow, useStoreApi } from "reactflow";
 import { HeliconeNode } from "../../../../lib/api/graphql/client/graphql";

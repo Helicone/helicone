@@ -2,10 +2,7 @@ import {
   FilterLeaf,
   FilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseProperties,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/filters/filters";
 import { Result } from "../../result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 

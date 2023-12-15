@@ -16,11 +16,7 @@ import { OrgContextProvider } from "../components/shared/layout/organizationCont
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import {
-  ThemeContextProvider,
-  useTheme,
-} from "../components/shared/theme/themeContext";
-import { clsx } from "../components/shared/clsx";
+import { ThemeContextProvider } from "../components/shared/theme/themeContext";
 
 if (
   typeof window !== "undefined" &&

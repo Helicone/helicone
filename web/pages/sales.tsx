@@ -1,10 +1,8 @@
-import { useState } from "react";
 import Footer from "../components/shared/layout/footer";
 import NavBarV2 from "../components/shared/layout/navbar/navBarV2";
 import MetaData from "../components/shared/metaData";
-import useNotification from "../components/shared/notification/useNotification";
 import Link from "next/link";
-import ContactForm, { ContactFormData } from "../components/shared/contactForm";
+import ContactForm from "../components/shared/contactForm";
 
 const Sales = () => {
   return (

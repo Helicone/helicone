@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { clsx } from "../clsx";
 

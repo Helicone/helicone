@@ -1,7 +1,6 @@
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { clsx } from "./clsx";
 
 interface AuthHeaderProps {
   title: string;

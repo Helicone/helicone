@@ -5,7 +5,6 @@ import StatusBadge from "../../../templates/requestsV2/statusBadge";
 import { formatNumber } from "../../../templates/users/initialColumns";
 import { clsx } from "../../clsx";
 import { useState } from "react";
-import { Transition } from "@headlessui/react";
 
 interface RequestRowProps {
   index: number;

@@ -4,7 +4,6 @@ import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 
 import LoadingAnimation from "../components/shared/loadingAnimation";
-import MetaData from "../components/shared/metaData";
 import { DEMO_EMAIL } from "../lib/constants";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import HomePageV2 from "../components/templates/home/homePageV2";

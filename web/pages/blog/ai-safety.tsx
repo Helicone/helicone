@@ -1,21 +1,11 @@
-import {
-  CheckCircleIcon,
-  CircleStackIcon,
-  InformationCircleIcon,
-  LockClosedIcon,
-  UserCircleIcon,
-} from "@heroicons/react/20/solid";
+import { CircleStackIcon } from "@heroicons/react/20/solid";
 import NavBarV2 from "../../components/shared/layout/navbar/navBarV2";
 import Image from "next/image";
 import Head from "next/head";
-import Link from "next/link";
 import { clsx } from "../../components/shared/clsx";
 import {
-  BuildingStorefrontIcon,
-  ChatBubbleLeftRightIcon,
   MagnifyingGlassIcon,
   TableCellsIcon,
-  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
 export default function AISafety() {

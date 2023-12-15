@@ -1,15 +1,8 @@
 import { clsx } from "../../shared/clsx";
 import Image from "next/image";
-import {
-  CheckIcon,
-  PencilIcon,
-  TrashIcon,
-  UserCircleIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState } from "react";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 import ResizeTextArea from "./resizeTextArea";
-import { ChatCompletionRequestMessage } from "openai";
 import { Message } from "../requests/chat";
 
 interface ChatRowProps {

@@ -4,20 +4,12 @@ import {
   FilterLeaf,
   filterListToTree,
   FilterNode,
-  SingleKey,
-  TablesAndViews,
-  TextOperators,
-  TimestampOperators,
 } from "../../../../services/lib/filters/filterDefs";
 import { getRequests } from "../../request/request";
-import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
   HeliconeRequest,
   QueryHeliconeRequestArgs,
   HeliconeRequestFilter,
-  TextOperators as GQLTextOperators,
-  PropertyFilter,
-  DateOperators,
 } from "../schema/types/graphql";
 import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators, convertTimeOperators } from "./helper";

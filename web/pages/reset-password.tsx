@@ -2,9 +2,6 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
-import { useState } from "react";
-import ThemedModal from "../components/shared/themed/themedModal";
-import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 
 interface ResetPasswordProps {}
 

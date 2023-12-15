@@ -2,7 +2,6 @@ import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import LoadingAnimation from "../components/shared/loadingAnimation";
 import useNotification from "../components/shared/notification/useNotification";
 import ThemedModal from "../components/shared/themed/themedModal";
 import AuthForm from "../components/templates/auth/authForm";

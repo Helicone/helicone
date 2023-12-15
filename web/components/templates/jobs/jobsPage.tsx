@@ -1,22 +1,13 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { HeliconeJob } from "../../../lib/api/graphql/client/graphql";
-import { HeliconeRequest } from "../../../lib/api/request/request";
-import { Result } from "../../../lib/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";
-import { NormalizedRequest } from "../requestsV2/builder/abstractRequestBuilder";
-import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
-import TableFooter from "../requestsV2/tableFooter";
 import { getInitialColumns } from "./initialColumns";
 import { useJobPage } from "./useJobPage";
 import Link from "next/link";

@@ -1,23 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import { Dialog, Popover, Transition } from "@headlessui/react";
-import {
-  BanknotesIcon,
-  Bars3Icon,
-  BookOpenIcon,
-  ChatBubbleLeftRightIcon,
-  CodeBracketIcon,
-  QuestionMarkCircleIcon,
-  StarIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Dialog } from "@headlessui/react";
+import { Bars3Icon, StarIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import { Fragment, useState } from "react";
-import OnboardingButton from "../../auth/onboardingButton";
-import { SocialMeta } from "../basePageV2";
+import { useState } from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import LoginButton from "../../auth/loginButton";
 import { clsx } from "../../clsx";
 import SolutionsButton from "./solutionsButton";
 import DeveloperButton from "./developerButton";

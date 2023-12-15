@@ -1,4 +1,3 @@
-import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { Result, resultMap } from "../../result";
 

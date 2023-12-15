@@ -1,6 +1,5 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 
-import { LightBulbIcon } from "@heroicons/react/24/outline";
 import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import AuthHeader from "../components/shared/authHeader";

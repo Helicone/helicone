@@ -1,6 +1,5 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
-import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { Result } from "../../../../lib/result";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";

@@ -1,23 +1,15 @@
 import {
   ArrowPathIcon,
-  CubeTransparentIcon,
   PaperAirplaneIcon,
-  PencilIcon,
   PlusIcon,
-  UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
-import {
-  ChatCompletionRequestMessage,
-  CreateChatCompletionResponse,
-} from "openai";
+import { ChatCompletionRequestMessage } from "openai";
 import ChatRow from "./chatRow";
 import { fetchOpenAI } from "../../../services/lib/openAI";
 import { Message } from "../requests/chat";
-import { Tooltip } from "@mui/material";
 import ModelPill from "../requestsV2/modelPill";
 
 interface ChatPlaygroundProps {

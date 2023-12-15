@@ -5,7 +5,6 @@ import {
   useGetOrgOwner,
 } from "../../../../services/hooks/organizations";
 import { useState } from "react";
-import { clsx } from "../../../shared/clsx";
 import OrgMemberItem from "../orgMemberItem";
 import { useOrg } from "../../../shared/layout/organizationContext";
 import AddMemberModal from "../addMemberModal";

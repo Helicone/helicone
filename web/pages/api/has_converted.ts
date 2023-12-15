@@ -1,10 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import type { NextApiRequest, NextApiResponse } from "next";
-import { Database } from "../../supabase/database.types";
 import { getRequests } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
-import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { HandlerWrapperOptions, withAuth } from "../../lib/api/handlerWrappers";
 
 async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {

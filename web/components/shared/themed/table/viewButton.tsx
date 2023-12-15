@@ -1,10 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Fragment } from "react";
 import {
-  ArrowDownTrayIcon,
   CheckIcon,
-  ChevronDoubleDownIcon,
   Square2StackIcon,
   Square3Stack3DIcon,
   Squares2X2Icon,
