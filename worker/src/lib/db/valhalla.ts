@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HeliconeAuth } from "../../db/DBWrapper";
 import { Result, err, ok } from "../../results";
 import { AuthParams } from "../dbLogger/DBLoggable";
@@ -29,9 +30,6 @@ export class Valhalla {
     this.url = new URL(this.database_url);
   }
 
-  authenticateClient(params: AuthParams): Promise<Result<null, string>> {
-    throw new Error("Method not implemented.");
-  }
   private route(path: string): string {
     const urlCopy = new URL(this.url.toString());
     urlCopy.pathname = path;

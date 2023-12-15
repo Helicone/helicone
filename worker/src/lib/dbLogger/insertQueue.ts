@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
 import { Result, err, ok } from "../../results";
@@ -303,6 +304,7 @@ export class InsertQueue {
       completion_tokens: response.completion_tokens ?? null,
       prompt_tokens: response.prompt_tokens ?? null,
       delay_ms: response.delay_ms ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       body: (response.body as any) ?? null,
     });
 
