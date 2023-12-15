@@ -25,7 +25,7 @@ const tiers = [
       "Monitoring and Dashboards",
       "Custom Properties",
       "Basic Exporting",
-      "1 Seat",
+      "5 Seats",
       "Unlimited Proxy Requests per minute",
       "1,000 logs per minute",
     ],
@@ -41,30 +41,26 @@ const tiers = [
     price: (
       <p className="mt-6 flex items-baseline gap-x-1">
         <span className="text-5xl font-bold tracking-tight text-gray-900">
-          $40
+          $25
         </span>
         <span className="text-sm font-semibold leading-6 text-gray-600">
-          / month per seat
+          / month per organization
         </span>
-        <>Best for 2-50 users</>
       </p>
     ),
     description:
       "Everything in Free, plus essential tools for scaling up your business.",
     features: [
-      "1 Million Requests",
-      "Bucket Caching (1 GB)",
-      "Playground (10,000) requests",
+      "Unlimited Requests",
+      "Bucket Caching",
       "User Management and Rate Limiting",
-      "GraphQL API (1 Million requests)",
+      "GraphQL API",
       "Request Retries",
-      "Key Vault (100 keys)",
-      "Up to 50GB of storage",
+      "Key Vault",
+      "10 Seats",
+      "Up to 2GB of storage",
       "Unlimited Proxy Requests per minute",
       "10,000 logs per minute",
-      "Gateway fallback",
-      "Feedback",
-      "Alerts",
     ],
     buttonText: "Get Started",
     backgroundColor: "bg-pink-600",
