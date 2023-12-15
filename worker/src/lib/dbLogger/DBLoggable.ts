@@ -2,7 +2,7 @@ import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
-import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
+import { DBWrapper } from "../../db/DBWrapper";
 import { withTimeout } from "../../helpers";
 import { Result, err, ok } from "../../results";
 import { HeliconeHeaders } from "../HeliconeHeaders";
@@ -11,7 +11,6 @@ import { RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../constants";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { AsyncLogModel } from "../models/AsyncLog";
-import { ChatPrompt, Prompt } from "../promptFormater/prompt";
 import { logInClickhouse } from "./clickhouseLog";
 import { InsertQueue } from "./insertQueue";
 import { logRequest } from "./logResponse";
@@ -30,14 +29,8 @@ export interface DBLoggableProps {
   request: {
     requestId: string;
     userId?: string;
-    heliconeApiKeyAuthHash?: string;
-    providerApiKeyAuthHash?: string;
     heliconeProxyKeyId?: string;
     promptId?: string;
-    promptFormatter?: {
-      prompt: Prompt | ChatPrompt;
-      name: string;
-    };
     startTime: Date;
     bodyText?: string;
     path: string;
@@ -65,18 +58,9 @@ export function dbLoggableRequestFromProxyRequest(
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
-    heliconeApiKeyAuthHash: proxyRequest.heliconeAuthHash,
-    providerApiKeyAuthHash: proxyRequest.providerAuthHash,
     heliconeProxyKeyId: proxyRequest.heliconeProxyKeyId,
     promptId: proxyRequest.requestWrapper.heliconeHeaders.promptId ?? undefined,
     userId: proxyRequest.userId,
-    promptFormatter:
-      proxyRequest.formattedPrompt?.prompt && proxyRequest.formattedPrompt?.name
-        ? {
-            prompt: proxyRequest.formattedPrompt.prompt,
-            name: proxyRequest.formattedPrompt.name,
-          }
-        : undefined,
     startTime: proxyRequest.startTime,
     bodyText: proxyRequest.bodyText ?? undefined,
     path: proxyRequest.requestWrapper.url.href,
@@ -122,11 +106,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
-      heliconeApiKeyAuthHash: await requestWrapper.getProviderAuthHeader(),
-      providerApiKeyAuthHash: "N/A",
       promptId: providerRequestHeaders.promptId ?? undefined,
       userId: providerRequestHeaders.userId ?? undefined,
-      promptFormatter: undefined,
       startTime: new Date(
         asyncLogModel.timing.startTime.seconds * 1000 +
           asyncLogModel.timing.startTime.milliseconds
@@ -417,20 +398,6 @@ export class DBLoggable {
     };
   }
 
-  auth(): HeliconeAuth {
-    return this.request.heliconeProxyKeyId
-      ? {
-          token: this.request.heliconeProxyKeyId,
-          _type: "bearer",
-          _bearerType: "heliconeProxyKey",
-        }
-      : {
-          token: this.request.heliconeApiKeyAuthHash ?? "",
-          _type: "bearer",
-          _bearerType: "heliconeApiKey",
-        };
-  }
-
   isSuccessResponse = (status: number | undefined | null): boolean =>
     status != null && status >= 200 && status <= 299;
 
@@ -442,13 +409,14 @@ export class DBLoggable {
   }): Promise<Result<null, string>> {
     const { data: authParams, error } = await db.dbWrapper.getAuthParams();
     if (error || !authParams?.organizationId) {
-      return { data: null, error: error ?? "Helicone organization not found" };
+      return err(`Auth failed! ${error}` ?? "Helicone organization not found");
     }
 
     const rateLimiter = await db.dbWrapper.getRateLimiter();
     if (rateLimiter.error !== null) {
       return rateLimiter;
     }
+
     const tier = await db.dbWrapper.getTier();
 
     if (tier.error !== null) {
