@@ -2,8 +2,6 @@ import { createContext, ReactNode, useState } from "react";
 
 const ALERT_TIME = 3000;
 type NotificationVariants = "success" | "info" | "error";
-// type XPosition = "left" | "middle" | "right";
-// type YPosition = "top" | "middle" | "bottom";
 
 const initialState: {
   variant: NotificationVariants;
@@ -11,8 +9,6 @@ const initialState: {
 } = {
   variant: "info", //  variant?: "success" | "info" | "error";
   title: "",
-
-  // description: "",
 };
 
 const NotificationContext = createContext({
@@ -31,7 +27,6 @@ interface NotificationProviderProps {
 export const NotificationProvider = (props: NotificationProviderProps) => {
   const { children } = props;
   const [title, setTitle] = useState("");
-  // const [description, setDescription] = useState("");
   const [variant, setVariant] = useState<NotificationVariants>("success");
 
   const setNotification = (
@@ -40,12 +35,10 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
     variant: NotificationVariants
   ) => {
     setTitle(title);
-    // setDescription(description);
     setVariant(variant);
 
     setTimeout(() => {
       setTitle("");
-      // setDescription("");
       setVariant("success");
     }, ALERT_TIME);
   };
@@ -54,7 +47,6 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
     <NotificationContext.Provider
       value={{
         title,
-        // description,
         variant,
         setNotification,
       }}
