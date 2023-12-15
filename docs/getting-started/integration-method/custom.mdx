@@ -18,7 +18,7 @@ export HELICONE_API_KEY=sk-<your-api-key>
 
 ```typescript
 import {
-  HeliconeAsyncConfiguration,
+  IHeliconeAsyncClientOptions,
   HeliconeLogBuilder,
   HeliconeLogger,
   ResponseBody,
@@ -26,13 +26,11 @@ import {
 
 const heliconeApiKey = process.env.HELICONE_API_KEY;
 
-const config = new HeliconeAsyncConfiguration({
+const logger = new HeliconeLogger({
   heliconeMeta: {
     apiKey: heliconeApiKey,
   },
 });
-
-const logger = new HeliconeLogger(config);
 
 const llmArgs = {
   model: "llama-2",
@@ -82,8 +80,8 @@ POST https://api.hconeai.com/custom/v1/log
 
 ### Headers
 
-| Name          | Value            |
-| ------------- | ---------------- |
+| Name          | Value              |
+| ------------- | ------------------ |
 | Authorization | Bearer `{API_KEY}` |
 
 Replace `{API_KEY}` with your actual API Key.

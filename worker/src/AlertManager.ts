@@ -512,10 +512,3 @@ export class AlertManager {
     return { subject, text, html };
   }
 }
-
-/*
-1. Get triggered & resolved alerts from DB
-2. Check if triggered alerts are resolved (below threshold and past cooldown)
-3. Check if resolved alerts are triggered (above threshold)
-4. 
-*/
