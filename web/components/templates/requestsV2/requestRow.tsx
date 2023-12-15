@@ -85,7 +85,7 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-  }, [properties]);
+  }, [properties, request.customProperties]);
 
   const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
     updateRequestFeedback(requestId, rating)

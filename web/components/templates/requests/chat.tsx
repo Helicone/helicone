@@ -168,7 +168,7 @@ export const SingleChat = (props: {
                         setOpen(true);
                       }}
                     >
-                      <img
+                      <Image
                         src={item.image_url.url}
                         alt={""}
                         width={200}
@@ -182,7 +182,7 @@ export const SingleChat = (props: {
                         setOpen(true);
                       }}
                     >
-                      <img
+                      <Image
                         src={item.image_url}
                         alt={""}
                         width={200}
