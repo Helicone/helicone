@@ -121,21 +121,18 @@ async function logAsync(
       status: 401,
     });
   }
-  const { error: logError } = await loggable.log(
-    {
-      clickhouse: new ClickhouseClientWrapper(env),
-      supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-      dbWrapper: new DBWrapper(env, auth),
-      queue: new InsertQueue(
-        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        new Valhalla(env.VALHALLA_URL, auth),
-        new ClickhouseClientWrapper(env),
-        env.FALLBACK_QUEUE,
-        env.REQUEST_AND_RESPONSE_QUEUE_KV
-      ),
-    },
-    env
-  );
+  const { error: logError } = await loggable.log({
+    clickhouse: new ClickhouseClientWrapper(env),
+    supabase: createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+    dbWrapper: new DBWrapper(env, auth),
+    queue: new InsertQueue(
+      createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      new Valhalla(env.VALHALLA_URL, auth),
+      new ClickhouseClientWrapper(env),
+      env.FALLBACK_QUEUE,
+      env.REQUEST_AND_RESPONSE_QUEUE_KV
+    ),
+  });
 
   if (logError !== null) {
     return new Response(JSON.stringify({ error: logError }), {

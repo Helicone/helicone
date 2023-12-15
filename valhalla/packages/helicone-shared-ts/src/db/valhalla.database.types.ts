@@ -1,6 +1,7 @@
 export interface ValhallaRequest {
   id: string; // uuid
   createdAt: Date; // timestamp with time zone
+  requestReceivedAt: Date; // timestamp with time zone
   body: any; // jsonb
   urlHref: string; // text
   userId: string | null; // text, nullable
@@ -9,11 +10,13 @@ export interface ValhallaRequest {
   heliconeOrgID: string | null; // uuid, nullable
   provider: string; // text with default value 'OPENAI'
   heliconeProxyKeyID: string | null; // uuid, nullable
+  model: string | null; // text, nullable
 }
 
 export interface ValhallaResponse {
   id: string; // uuid
   createdAt: Date; // timestamp with time zone
+  responseReceivedAt: Date | null; // timestamp with time zone, nullable
   body: any; // jsonb
   request: string; // uuid (foreign key to Request)
   delayMs: number | null; // integer, nullable
@@ -21,6 +24,7 @@ export interface ValhallaResponse {
   completionTokens: number | null; // integer, nullable
   model: string | null; // text, nullable
   promptTokens: number | null; // integer, nullable
+  heliconeOrgID?: string; // uuid, nullable
 }
 
 export interface ValhallaCacheHits {
@@ -32,5 +36,4 @@ export interface ValhallaFeedback {
   responseID: string; // uuid (foreign key to Response)
   rating: boolean; // boolean
   createdAt: Date; // timestamp with time zone
-  id: string; // uuid
 }

@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { Result } from "../../results";
+import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ResponseCopyV3 } from "../db/clickhouse";
 import { formatTimeString } from "./clickhouseLog";
@@ -167,6 +167,98 @@ export class InsertQueue {
     return { data: null, error: null };
   }
 
+  private getModelFromPath = (path: string) => {
+    const regex = /\/engines\/([^/]+)/;
+    const match = path.match(regex);
+
+    if (match && match[1]) {
+      return match[1];
+    } else {
+      return undefined;
+    }
+  };
+
+  private getModelFromRequest(
+    requestData: Database["public"]["Tables"]["request"]["Insert"]
+  ) {
+    try {
+      if (typeof requestData.body !== "object" || !requestData.body) {
+        return "unknown";
+      }
+      if (Array.isArray(requestData.body)) {
+        return "unknown";
+      }
+
+      return (
+        (requestData.body["model"] ||
+          (requestData.body.body as any)["model"] ||
+          this.getModelFromPath(requestData.path)) ??
+        "unknown"
+      );
+    } catch (e) {
+      return this.getModelFromPath(requestData.path) ?? "unknown";
+    }
+  }
+
+  private getModelFromResponse(
+    responseData: Database["public"]["Tables"]["response"]["Update"]
+  ) {
+    try {
+      if (typeof responseData.body !== "object" || !responseData.body) {
+        return "unknown";
+      }
+      if (Array.isArray(responseData.body)) {
+        return "unknown";
+      }
+
+      return (
+        responseData.body["model"] ||
+        (responseData.body.body as any)["model"] ||
+        "unknown"
+      );
+    } catch (e) {
+      return "unknown";
+    }
+  }
+
+  private async addRequestToValhalla(
+    requestData: Database["public"]["Tables"]["request"]["Insert"],
+    responseId: string
+  ): Promise<Result<null, string>> {
+    if (!requestData.id) {
+      return { data: null, error: "Missing request.id" };
+    }
+
+    const val = await this.valhalla.post("/v1/request", {
+      provider: requestData.provider ?? "unknown",
+      url_href: requestData.path,
+      user_id: requestData.user_id,
+      body: requestData.body as any,
+      requestReceivedAt: requestData.created_at ?? new Date().toISOString(),
+      model: this.getModelFromRequest(requestData),
+      request_id: requestData.id,
+    });
+
+    if (val.error) {
+      console.error("Error inserting into valhalla:", val.error);
+      return err(val.error);
+    }
+
+    const response = await this.valhalla.post("/v1/response", {
+      heliconeRequestId: requestData.id,
+      response_id: responseId,
+      delay_ms: -1,
+      body: {},
+      http_status: -2,
+      responseReceivedAt: new Date(0).toISOString(),
+    });
+    if (response.error) {
+      console.error("Error inserting response into valhalla:", response.error);
+      return err(response.error);
+    }
+    return ok(null);
+  }
+
   async addRequest(
     requestData: Database["public"]["Tables"]["request"]["Insert"],
     propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],
@@ -177,22 +269,14 @@ export class InsertQueue {
       properties: propertiesData,
       responseId,
     };
-    console.log("adding request");
-    const val = await this.valhalla.post("/v1/request", {
-      provider: requestData.provider ?? "unknown",
-      url_href: requestData.path,
-      user_id: requestData.user_id,
-      body: requestData.body as any,
-    });
-    console.log("valhalla post", val);
+
+    const val = await this.addRequestToValhalla(requestData, responseId);
     const res = await insertIntoRequest(this.database, payload);
+    if (val.error) {
+      return val;
+    }
     if (res.error) {
-      const key = crypto.randomUUID();
-      await this.responseAndResponseQueueKV.put(
-        key,
-        JSON.stringify({ _type: "request", payload })
-      );
-      await this.fallBackQueue.send(key);
+      console.error("Error inserting into request:", res.error);
       return res;
     }
     return { data: null, error: null };
@@ -209,16 +293,25 @@ export class InsertQueue {
       response,
     };
     const res = await updateResponse(this.database, payload);
-    if (res.error) {
-      // delay the insert to the fallBackQueue to mitigate any race conditions
 
-      await new Promise((resolve) => setTimeout(resolve, 5_000)); // 5 seconds
-      const key = crypto.randomUUID();
-      await this.responseAndResponseQueueKV.put(
-        key,
-        JSON.stringify({ _type: "response", payload })
-      );
-      await this.fallBackQueue.send(key);
+    const responseUpdate = await this.valhalla.patch("/v1/response", {
+      model: this.getModelFromResponse(response),
+      response_id: responseId,
+      heliconeRequestId: requestId,
+      http_status: response.status ?? null,
+      responseReceivedAt: new Date().toISOString(),
+      completion_tokens: response.completion_tokens ?? null,
+      prompt_tokens: response.prompt_tokens ?? null,
+      delay_ms: response.delay_ms ?? null,
+      body: (response.body as any) ?? null,
+    });
+
+    if (responseUpdate.error) {
+      console.error("Error updating response in valhalla:", responseUpdate);
+      return err(responseUpdate.error);
+    }
+    if (res.error) {
+      console.error("Error inserting into response:", res.error);
       return res;
     }
     return { data: null, error: null };

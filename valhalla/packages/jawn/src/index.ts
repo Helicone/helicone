@@ -37,11 +37,11 @@ app.post(
   >(async ({ request, res, supabaseClient, db }) => {
     // Handle your logic here
     const heliconeRequest = await request.getBody();
-    const heliconeRequestID = heliconeRequest.request_id ?? uuid();
+    const heliconeRequestID = heliconeRequest.request_id;
     const insertRequestResult = await db.insertRequest({
       body: heliconeRequest.body,
       createdAt: new Date(),
-      requestCreatedAt: null,
+      requestReceivedAt: new Date(heliconeRequest.requestReceivedAt),
       heliconeApiKeyID: null,
       heliconeOrgID: supabaseClient.organizationId ?? null,
       heliconeProxyKeyID: null,
@@ -50,6 +50,7 @@ app.post(
       provider: heliconeRequest.provider,
       urlHref: heliconeRequest.url_href,
       userId: heliconeRequest.user_id ?? null,
+      model: heliconeRequest.model ?? null,
     });
     if (insertRequestResult.error) {
       res.status(500).json({
@@ -66,7 +67,32 @@ app.post(
     });
   })
 );
+app.put(
+  "/v1/feedback",
+  withAuth<
+    paths["/v1/feedback"]["put"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db }) => {
+    // Handle your logic here
+    const heliconeFeedback = await request.getBody();
 
+    const insertFeedbackResult = await db.upsertFeedback({
+      createdAt: new Date(),
+      rating: heliconeFeedback.rating,
+      responseID: heliconeFeedback.response_id,
+    });
+
+    if (insertFeedbackResult.error) {
+      res.status(500).json({
+        error: insertFeedbackResult.error,
+        trace: "insertFeedbackResult.error",
+      });
+      return;
+    }
+    res.json({
+      message: "Feedback received! :)",
+    });
+  })
+);
 app.post(
   "/v1/response",
   withAuth<
@@ -79,9 +105,46 @@ app.post(
 
     const insertResponseResult = await db.insertResponse({
       body: heliconeResponse.body,
-
       createdAt: new Date(),
-      responseCreatedAt: null,
+      responseReceivedAt: new Date(heliconeResponse.responseReceivedAt),
+      delayMs: heliconeResponse.delay_ms ?? 0,
+      http_status: heliconeResponse.http_status ?? null,
+      id: responseId,
+      model: heliconeResponse.model ?? null,
+      promptTokens: heliconeResponse.prompt_tokens ?? null,
+      completionTokens: heliconeResponse.completion_tokens ?? null,
+      request: heliconeResponse.heliconeRequestId,
+      heliconeOrgID: supabaseClient.organizationId,
+    });
+    if (insertResponseResult.error) {
+      res.status(500).json({
+        error: insertResponseResult.error,
+        trace: "insertResponseResult.error",
+      });
+      return;
+    }
+    res.json({
+      message: "Response received! :)",
+      orgId: supabaseClient.organizationId,
+      responseId,
+    });
+  })
+);
+
+app.patch(
+  "/v1/response",
+  withAuth<
+    paths["/v1/response"]["patch"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db }) => {
+    // Handle your logic here
+    const heliconeResponse = await request.getBody();
+
+    const responseId = heliconeResponse.response_id ?? uuid();
+
+    const insertResponseResult = await db.updateResponse({
+      body: heliconeResponse.body,
+      createdAt: new Date(),
+      responseReceivedAt: new Date(heliconeResponse.responseReceivedAt),
       delayMs: heliconeResponse.delay_ms ?? 0,
       http_status: heliconeResponse.http_status ?? null,
       id: responseId,
@@ -97,6 +160,11 @@ app.post(
       });
       return;
     }
+    res.json({
+      message: "Response received! :)",
+      orgId: supabaseClient.organizationId,
+      responseId,
+    });
   })
 );
 

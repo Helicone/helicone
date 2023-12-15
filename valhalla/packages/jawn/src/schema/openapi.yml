@@ -16,6 +16,39 @@ servers:
     description: Production server
 
 paths:
+  /v1/feedback:
+    put:
+      tags:
+        - feedback
+      summary: Insert a new feedback
+      description: Adds a new entry to the 'feedback' table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInsert"
+      responses:
+        "201":
+          description: Successfully inserted the new feedback.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  feedbackId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted feedback.
+                  message:
+                    type: string
+                    example: Feedback successfully inserted.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
   /v1/request:
     post:
       tags:
@@ -91,6 +124,42 @@ paths:
           description: Internal server error.
       security:
         - authorization: []
+    patch:
+      tags:
+        - request
+      summary: Update a response
+      description: Updates the response associated with the given request ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseInsert"
+      responses:
+        "200":
+          description: Successfully updated the response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted request.
+                  responseId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the associated response.
+                  message:
+                    type: string
+                    example: Response successfully updated.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
 
   /healthcheck-db:
     get:
@@ -152,6 +221,24 @@ paths:
 
 components:
   schemas:
+    FeedbackInsert:
+      type: object
+      nullable: false
+      properties:
+        # Feedback fields
+        rating:
+          type: boolean
+          nullable: false
+          description: The rating of the response.
+        response_id:
+          type: string
+          format: uuid
+          nullable: false
+          description: The unique ID of the response.
+      required:
+        - rating
+        - response_id
+
     RequestInsert:
       type: object
       nullable: false
@@ -160,15 +247,19 @@ components:
         requestReceivedAt:
           type: string
           format: date-time
-          nullable: true
+          nullable: false
           description: The date and time when the request was received.
+        model:
+          type: string
+          nullable: true
+          description: The model used for generating the response.
         body:
           type: object
           description: JSON object containing the request body.
         request_id:
           type: string
           format: uuid
-          nullable: true
+          nullable: false
           description: The unique ID of the request.
         url_href:
           type: string
@@ -202,6 +293,9 @@ components:
           nullable: true
           description: The proxy key ID for Helicone.
       required:
+        - request_id
+        - requestReceivedAt
+        - body
         - url_href
         - provider
 
@@ -211,7 +305,7 @@ components:
         responseReceivedAt:
           type: string
           format: date-time
-          nullable: true
+          nullable: false
           description: The date and time when the request was received.
         response_id:
           type: string
@@ -248,6 +342,7 @@ components:
           format: uuid
           description: JSON object containing the response body.
       required:
+        - responseReceivedAt
         - body
         - http_status
         - heliconeRequestId

@@ -7,7 +7,17 @@ type PostMethods<T> = {
   [K in keyof T]: T[K] extends { post: any } ? T[K] : never;
 };
 
+type PatchMethods<T> = {
+  [K in keyof T]: T[K] extends { patch: any } ? T[K] : never;
+};
+
+type PutMethods<T> = {
+  [K in keyof T]: T[K] extends { put: any } ? T[K] : never;
+};
+
 type OnlyPostMethods = PostMethods<paths>;
+type OnlyPatchMethods = PatchMethods<paths>;
+type OnlyPutMethods = PutMethods<paths>;
 
 export class Valhalla {
   private url: URL;
@@ -33,6 +43,20 @@ export class Valhalla {
     data: OnlyPostMethods[K]["post"]["requestBody"]["content"]["application/json"]
   ) {
     return this.send<T>(path, "POST", JSON.stringify(data));
+  }
+
+  async patch<T, K extends keyof OnlyPatchMethods>(
+    path: K,
+    data: OnlyPatchMethods[K]["patch"]["requestBody"]["content"]["application/json"]
+  ) {
+    return this.send<T>(path, "PATCH", JSON.stringify(data));
+  }
+
+  async put<T, K extends keyof OnlyPutMethods>(
+    path: K,
+    data: OnlyPutMethods[K]["put"]["requestBody"]["content"]["application/json"]
+  ) {
+    return this.send<T>(path, "PUT", JSON.stringify(data));
   }
 
   private async send<T>(

@@ -5,6 +5,43 @@
 
 
 export interface paths {
+  "/v1/feedback": {
+    /**
+     * Insert a new feedback
+     * @description Adds a new entry to the 'feedback' table.
+     */
+    put: {
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["FeedbackInsert"];
+        };
+      };
+      responses: {
+        /** @description Successfully inserted the new feedback. */
+        201: {
+          content: {
+            "application/json": {
+              /**
+               * Format: uuid
+               * @description The unique ID of the newly inserted feedback.
+               */
+              feedbackId?: string;
+              /** @example Feedback successfully inserted. */
+              message?: string;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/request": {
     /**
      * Insert a new request and its response
@@ -74,6 +111,46 @@ export interface paths {
                */
               responseId?: string;
               /** @example Request and Response successfully inserted. */
+              message?: string;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+    /**
+     * Update a response
+     * @description Updates the response associated with the given request ID.
+     */
+    patch: {
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["ResponseInsert"];
+        };
+      };
+      responses: {
+        /** @description Successfully updated the response. */
+        200: {
+          content: {
+            "application/json": {
+              /**
+               * Format: uuid
+               * @description The unique ID of the newly inserted request.
+               */
+              requestId?: string;
+              /**
+               * Format: uuid
+               * @description The unique ID of the associated response.
+               */
+              responseId?: string;
+              /** @example Response successfully updated. */
               message?: string;
             };
           };
@@ -164,19 +241,30 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    FeedbackInsert: {
+      /** @description The rating of the response. */
+      rating: boolean;
+      /**
+       * Format: uuid
+       * @description The unique ID of the response.
+       */
+      response_id: string;
+    };
     RequestInsert: {
       /**
        * Format: date-time
        * @description The date and time when the request was received.
        */
-      requestReceivedAt?: string | null;
+      requestReceivedAt: string;
+      /** @description The model used for generating the response. */
+      model?: string | null;
       /** @description JSON object containing the request body. */
-      body?: Record<string, never>;
+      body: Record<string, never>;
       /**
        * Format: uuid
        * @description The unique ID of the request.
        */
-      request_id?: string | null;
+      request_id: string;
       /** @description The URL associated with the request. */
       url_href: string;
       /** @description The provider associated with the request. */
@@ -206,7 +294,7 @@ export interface components {
        * Format: date-time
        * @description The date and time when the request was received.
        */
-      responseReceivedAt?: string | null;
+      responseReceivedAt: string;
       /**
        * Format: uuid
        * @description The unique ID of the response.
