@@ -37,6 +37,7 @@ const INC_TO_TIME: {
       day: "2-digit",
     }),
 };
+
 export function getTimeMap(inc: TimeIncrement) {
   return INC_TO_TIME[inc];
 }

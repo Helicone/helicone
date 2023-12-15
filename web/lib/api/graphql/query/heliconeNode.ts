@@ -99,10 +99,8 @@ function convertFilterInputToFilterLeaf(
 }
 
 export async function heliconeNode(
-  root: any,
   args: QueryHeliconeNodeArgs,
-  context: Context,
-  info: any
+  context: Context
 ): Promise<HeliconeNode[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters, jobId } = {

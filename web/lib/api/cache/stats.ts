@@ -1,6 +1,5 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
-
 import { Result, resultMap } from "../../result";
 import {
   isValidTimeIncrement,
@@ -178,7 +177,6 @@ LIMIT 10;
 }
 
 export async function getModelUsageOverTime({
-  timeFilter,
   userFilter,
   orgId,
   dbIncrement,

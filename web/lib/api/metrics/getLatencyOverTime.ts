@@ -1,6 +1,5 @@
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { Result, resultMap } from "../../result";
-
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 

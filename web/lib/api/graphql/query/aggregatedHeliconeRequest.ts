@@ -16,7 +16,6 @@ import {
 import { convertTextOperators } from "./helper";
 
 export async function aggregatedHeliconeRequest(
-  root: any,
   args: QueryAggregatedHeliconeRequestArgs,
   context: Context,
   info: any

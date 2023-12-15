@@ -39,6 +39,14 @@ export class RosettaWrapper {
     });
   }
 
+  /**
+   * Maps an LLM call to a JSON response using Rosetta.
+   * @param llmCall - The LLM call object containing the request and response.
+   * @param requestPath - The request path.
+   * @param provider - The provider.
+   * @param model - The model.
+   * @returns A Promise that resolves to a JSON object or null if mapping fails.
+   */
   public async mapLLMCall(
     llmCall: {
       request: string;
@@ -64,10 +72,21 @@ export class RosettaWrapper {
     }
   }
 
+  /**
+   * Generates mappers using the Rosetta API.
+   * @returns {Promise<void>} A promise that resolves when the mappers are generated.
+   */
   public async generateMappers() {
     await this.rosetta.generateMappers();
   }
 
+  /**
+   * Cleans the request path by removing unnecessary parts and returning the cleaned path.
+   * If the request path matches certain regex patterns, it returns a specific cleaned path.
+   * If the request path is "/", it returns null.
+   * @param requestPath The original request path to be cleaned.
+   * @returns The cleaned request path, or null if the path should be ignored.
+   */
   private cleanPath(requestPath: string): string | null {
     if (THREAD_REGEX.test(requestPath)) {
       return null;
