@@ -3,7 +3,10 @@ import ThemedModal from "../../shared/themed/themedModal";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useOrg } from "../../shared/layout/organizationContext";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
+import {
+  useGetOrgMembers,
+  useGetOrgOwner,
+} from "../../../services/hooks/organizations";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
@@ -37,6 +40,10 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     orgContext?.currentOrg.id || ""
   );
 
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    orgContext?.currentOrg.id || ""
+  );
+
   const { setNotification } = useNotification();
 
   const members: {
@@ -45,8 +52,8 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     org_role: string;
   }[] = [
     {
-      email: user?.email || "",
-      member: user?.email || "",
+      email: orgOwner?.data?.at(0)?.email || "",
+      member: "",
       org_role: "admin",
     },
     ...(data?.data || []),
