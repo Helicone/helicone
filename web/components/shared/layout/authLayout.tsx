@@ -5,6 +5,7 @@ import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
+  BellIcon,
   BeakerIcon,
   BookOpenIcon,
   BriefcaseIcon,

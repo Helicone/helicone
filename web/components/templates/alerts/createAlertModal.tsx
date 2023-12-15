@@ -3,7 +3,10 @@ import ThemedModal from "../../shared/themed/themedModal";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useOrg } from "../../shared/layout/organizationContext";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
+import {
+  useGetOrgMembers,
+  useGetOrgOwner,
+} from "../../../services/hooks/organizations";
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import useNotification from "../../shared/notification/useNotification";
