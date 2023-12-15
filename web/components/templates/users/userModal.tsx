@@ -2,7 +2,7 @@ import { Tooltip } from "@mui/material";
 import { UserMetric } from "../../../lib/api/users/users";
 import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themed/themedModal";
-import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import { formatNumber } from "./initialColumns";
 import {
   ClipboardDocumentIcon,
@@ -15,10 +15,8 @@ import useNotification from "../../shared/notification/useNotification";
 import StyledAreaChart from "../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
 import { useEffect, useState } from "react";
-import { useUserRequests } from "./useUserRequests";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
-  REQUEST_TABLE_FILTERS,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import {

@@ -1,5 +1,4 @@
 import {
-  CheckCircleIcon,
   CircleStackIcon,
   InformationCircleIcon,
   LockClosedIcon,
@@ -70,6 +69,8 @@ export default function OpenSourceMonitoringForOpenAI() {
                 className="inline-block h-8 w-8 rounded-full"
                 src={"/assets/blog/scottnguyen-headshot.webp"}
                 alt=""
+                width={32}
+                height={32}
               />
               <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                 Scott Nguyen
@@ -103,7 +104,7 @@ export default function OpenSourceMonitoringForOpenAI() {
             introduce how Helicone revolutionizes this space:
           </p>
 
-          <ul role="list" className="mt-6 max-w-xl space-y-4 text-gray-600">
+          <ul className="mt-6 max-w-xl space-y-4 text-gray-600">
             <li className="flex gap-x-3">
               -
               <Link href="#introduction">
@@ -223,6 +224,8 @@ export default function OpenSourceMonitoringForOpenAI() {
                 src="/assets/blog/dashboard.webp"
                 alt="App screenshot"
                 className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"
+                width={1000}
+                height={500}
               />
             </div>
             <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
@@ -240,6 +243,8 @@ export default function OpenSourceMonitoringForOpenAI() {
                 src="/assets/blog/request.webp"
                 alt="App screenshot"
                 className="w-full h-full rounded-lg shadow-sm ring-1 ring-gray-900/10"
+                width={1000}
+                height={500}
               />
             </div>
             <figcaption className="mt-4 flex gap-x-2 text-sm leading-6 text-gray-500">
@@ -279,7 +284,7 @@ export default function OpenSourceMonitoringForOpenAI() {
             advantage.
           </p>
 
-          <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+          <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
               <UserCircleIcon
                 className="mt-1 h-5 w-5 flex-none text-sky-500"

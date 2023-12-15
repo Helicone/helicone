@@ -1,8 +1,3 @@
-import { Dialog } from "@headlessui/react";
-import {
-  ClipboardDocumentIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { UserMetric } from "../../../lib/api/users/users";
 import { useDebounce } from "../../../services/hooks/debounce";
@@ -13,18 +8,13 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import {
-  SortDirection,
-  SortLeafUsers,
-} from "../../../services/lib/sorts/users/sorts";
+import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import ThemedModal from "../../shared/themed/themedModal";
 import TableFooter from "../requestsV2/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import { RenderBarChart } from "../../shared/metrics/barChart";
 import UserModal from "./userModal";
 
 function formatNumber(num: number) {

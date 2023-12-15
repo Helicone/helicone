@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import CodeSnippet from "../../home/codeSnippet";
-import { UnionProviderMethods } from "../welcomePage";
-import AnthropicProxy from "./codeSnippets/anthropic-proxy";
-import OpenAIAsync from "./codeSnippets/openai-async";
 import Link from "next/link";
-import { useOrg } from "../../../shared/layout/organizationContext";
 
 interface CodeIntegrationProps {
   nextStep: () => void;

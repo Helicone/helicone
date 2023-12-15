@@ -1,7 +1,6 @@
 import { ApolloError } from "apollo-server-core";
 import { buildFilterWithAuthClickHouse } from "../../../../services/lib/filters/filters";
-import { dbQueryClickhouse, printRunnableQuery } from "../../db/dbExecute";
-import { getUserOrThrow } from "../helpers/auth";
+import { dbQueryClickhouse } from "../../db/dbExecute";
 import { QueryUserArgs, User } from "../schema/types/graphql";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 import { resultMap } from "../../../result";

@@ -1,10 +1,10 @@
 import moment from "moment";
+
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
-
 import { Result, resultMap } from "../../result";
 import {
   isValidTimeFilter,
@@ -13,7 +13,6 @@ import {
 } from "../../sql/timeHelpers";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
-
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 
 function buildFill(

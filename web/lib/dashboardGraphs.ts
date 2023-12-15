@@ -14,7 +14,6 @@ import {
   RequestsOverTime,
   TimeIncrement,
 } from "./timeCalculations/fetchTimeData";
-
 import { getTimeInterval } from "./timeCalculations/time";
 
 export const initialGraphDataState: GraphDataState = {
@@ -26,6 +25,7 @@ export interface GraphDataState {
   requestsOverTime: Loading<Result<RequestsOverTime[], string>>;
   costOverTime: Loading<Result<CostOverTime[], string>>;
 }
+
 async function fetchDataOverTime<T>(
   timeFilter: {
     start: Date;

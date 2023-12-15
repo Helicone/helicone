@@ -2,7 +2,6 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getTotalCost } from "../../../lib/api/metrics/totalCosts";
 import { getTotalRequests } from "../../../lib/api/property/totalRequests";
 import { Result, resultsAll } from "../../../lib/result";
 

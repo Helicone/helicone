@@ -1,9 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
+import { getUSDate } from "../../shared/utils/utils";
 import StatusBadge from "./statusBadge";
 import { HeliconeJob } from "../../../lib/api/graphql/schema/types/graphql";
-import ModelPill from "../requestsV2/modelPill";
-import { RocketLaunchIcon } from "@heroicons/react/24/outline";
 import { JobStatus } from "../../../lib/sql/jobs";
 
 function formatNumber(num: number) {

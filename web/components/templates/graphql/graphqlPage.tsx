@@ -1,13 +1,10 @@
 import { ApolloExplorer } from "@apollo/explorer/react";
 
-import { ChevronDownIcon, LightBulbIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { BsBoxArrowUpRight } from "react-icons/bs";
 import { clsx } from "../../shared/clsx";
-import GraphQLLogo from "./logo";
-import Link from "next/link";
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 import mainTypeDefs from "../../../lib/api/graphql/schema/main.graphql";
 import { print } from "graphql/language/printer";
 import { useTheme } from "../../../components/shared/theme/themeContext";

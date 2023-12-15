@@ -1,15 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
-import StatusBadge from "../../../templates/requestsV2/statusBadge";
-import ModelPill from "../../../templates/requestsV2/modelPill";
-import { formatNumber } from "../../../templates/users/initialColumns";
-import { getUSDate } from "../../utils/utils";
-import { clsx } from "../../clsx";
-import LoadingAnimation from "../../loadingAnimation";
-import {
-  ChevronRightIcon,
-  Square2StackIcon,
-} from "@heroicons/react/24/outline";
+import { Square2StackIcon } from "@heroicons/react/24/outline";
 import RequestRow from "./requestRow";
 
 interface RequestRowViewProps {

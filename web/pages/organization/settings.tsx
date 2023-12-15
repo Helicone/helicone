@@ -2,13 +2,12 @@ import {
   createServerSupabaseClient,
   User,
 } from "@supabase/auth-helpers-nextjs";
-
 import { GetServerSidePropsContext } from "next";
+
 import AuthHeader from "../../components/shared/authHeader";
 import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
 import { useOrg } from "../../components/shared/layout/organizationContext";
-import { getOrCreateUserSettings } from "../api/user_settings";
 import OrgSettingsPage from "../../components/templates/organization/settings/orgSettingsPage";
 
 interface SettingsProps {

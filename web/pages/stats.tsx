@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 import { RenderBarChart } from "../components/shared/metrics/barChart";

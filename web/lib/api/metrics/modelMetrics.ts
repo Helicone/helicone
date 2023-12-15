@@ -62,6 +62,7 @@ export interface ModelMetricsUsers {
   sum_completion_tokens: number;
   user_id: string;
 }
+
 export async function getModelMetricsForUsers(
   filter: FilterNode,
   org_id: string,

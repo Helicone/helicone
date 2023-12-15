@@ -1,25 +1,16 @@
 import { useState } from "react";
 
 import {
-  getTimeInterval,
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
-import { useDebounce } from "../../../services/hooks/debounce";
-import { MultiSelect, MultiSelectItem, Text } from "@tremor/react";
+import { MultiSelect, MultiSelectItem } from "@tremor/react";
 
 import AuthHeader from "../../shared/authHeader";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
-import { ThemedMultiSelect } from "../../shared/themed/themedMultiSelect";
-import { ThemedPill } from "../../shared/themed/themedPill";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import PropertyCard from "./propertyCard";
-import {
-  ArrowPathIcon,
-  CalculatorIcon,
-  TagIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowPathIcon, TagIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";

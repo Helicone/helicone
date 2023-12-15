@@ -1,5 +1,4 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { getUSDateFromString } from "../../../shared/utils/utils";
 import { NormalizedRequest } from "../../requestsV2/builder/abstractRequestBuilder";
 import ModelPill from "../../requestsV2/modelPill";
 import StatusBadge from "../../requestsV2/statusBadge";

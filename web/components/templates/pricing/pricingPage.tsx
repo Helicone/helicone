@@ -2,7 +2,6 @@ import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
 import Footer from "../../shared/layout/footer";
 import NavBarV2 from "../../shared/layout/navbar/navBarV2";
-import Link from "next/link";
 
 const tiers = [
   {

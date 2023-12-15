@@ -7,11 +7,6 @@ th,
   height: 30px;
 }
 
-/* td,
-.td {
-  height: 30px;
-} */
-
 .resizer {
   position: absolute;
   right: 0;

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useStoreApi, useReactFlow, Panel } from "reactflow";
+import { useStoreApi, useReactFlow } from "reactflow";
 
 const panelStyle = {
   color: "#777",

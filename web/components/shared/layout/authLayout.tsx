@@ -5,10 +5,10 @@ import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
+  BellIcon,
   BeakerIcon,
   BookOpenIcon,
   BriefcaseIcon,
-  BuildingOfficeIcon,
   ChartBarIcon,
   ChevronRightIcon,
   CircleStackIcon,
@@ -26,7 +26,6 @@ import {
   UserGroupIcon,
   UsersIcon,
   XMarkIcon,
-  BellIcon,
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Link from "next/link";
