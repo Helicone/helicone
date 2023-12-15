@@ -1,11 +1,7 @@
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 
-interface PrivacyProps {}
-
-const Privacy = (props: PrivacyProps) => {
-  const {} = props;
-
+const Privacy = () => {
   const privacyPageSection = (
     index: number,
     title: string,

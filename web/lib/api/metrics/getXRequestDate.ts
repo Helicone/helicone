@@ -6,6 +6,7 @@ import { dbExecute } from "../db/dbExecute";
 export interface CreatedAt {
   created_at: number;
 }
+
 export async function getXRequestDate(
   filter: FilterNode,
   org_id: string,

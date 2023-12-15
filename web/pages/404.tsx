@@ -3,11 +3,7 @@ import { useRouter } from "next/router";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 
-interface ErrorProps {}
-
-const Error = (props: ErrorProps) => {
-  const {} = props;
-
+const ErrorPage = () => {
   const router = useRouter();
 
   return (
@@ -64,4 +60,4 @@ const Error = (props: ErrorProps) => {
   );
 };
 
-export default Error;
+export default ErrorPage;

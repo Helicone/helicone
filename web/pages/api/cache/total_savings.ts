@@ -1,4 +1,4 @@
-import { getCacheCount, getModelMetrics } from "../../../lib/api/cache/stats";
+import { getModelMetrics } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,

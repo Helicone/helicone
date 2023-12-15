@@ -1,6 +1,6 @@
 import { User } from "@supabase/auth-helpers-nextjs";
-
 import { GetServerSidePropsContext } from "next";
+
 import AuthHeader from "../components/shared/authHeader";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";

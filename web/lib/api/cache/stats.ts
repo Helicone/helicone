@@ -1,23 +1,11 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
-import {
-  SortLeafRequest,
-  buildRequestSort,
-} from "../../../services/lib/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../db/dbExecute";
+import { dbExecute } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
 
@@ -189,7 +177,6 @@ LIMIT 10;
 }
 
 export async function getModelUsageOverTime({
-  timeFilter,
   userFilter,
   orgId,
   dbIncrement,

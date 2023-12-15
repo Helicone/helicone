@@ -1,7 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Property } from "../../lib/api/properties/properties";
-import { getProperties } from "../lib/properties";
-import { getPropertyParams } from "../lib/propertyParams";
 import { getValueParams } from "../lib/valueParams";
 
 export const useGetValueParams = () => {

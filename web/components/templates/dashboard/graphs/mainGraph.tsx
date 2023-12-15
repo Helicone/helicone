@@ -1,4 +1,3 @@
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { RenderAreaChart } from "../../../shared/metrics/areaChart";
 import { BarChartData, RenderBarChart } from "../../../shared/metrics/barChart";
 import {

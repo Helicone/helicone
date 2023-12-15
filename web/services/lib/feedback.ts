@@ -1,8 +1,7 @@
-import axios from "axios";
-
 const getFeedback = async () => {
-  const resp = await axios.get("/api/feedback");
-  return resp.data.data;
+  const resp = await fetch("/api/feedback");
+  const data = await resp.json();
+  return data;
 };
 
 export { getFeedback };

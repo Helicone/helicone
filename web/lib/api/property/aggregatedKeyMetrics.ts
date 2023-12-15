@@ -5,7 +5,7 @@ import {
 import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
 import { resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getAggregatedKeyMetrics(
   filter: FilterNode,

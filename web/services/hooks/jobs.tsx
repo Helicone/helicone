@@ -1,4 +1,3 @@
-// import { useQuery } from "@tanstack/react-query";
 import { useQuery } from "@apollo/client";
 import { gql } from "../../lib/api/graphql/client";
 import { HeliconeJobFilter } from "../../lib/api/graphql/schema/types/graphql";
