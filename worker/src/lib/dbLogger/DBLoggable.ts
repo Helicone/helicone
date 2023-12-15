@@ -271,9 +271,7 @@ export class DBLoggable {
   ): Promise<
     Result<Database["public"]["Tables"]["response"]["Insert"], string>
   > {
-    console.log("Waiting for response");
     try {
-      console.log("Waiting for response");
       const response = await withTimeout(this.getResponse(), 1000 * 60 * 30); // 30 minutes
       const { error } = await queue.updateResponse(
         this.response.responseId,
@@ -447,12 +445,12 @@ export class DBLoggable {
       db.queue,
       authParams
     );
-    console.log("Waiting for response");
+
     // If no data or error, return
     if (!requestResult.data || requestResult.error) {
       return requestResult;
     }
-    console.log("Waiting for response");
+
     const responseResult = await this.readAndLogResponse(db.queue);
 
     // If no data or error, return

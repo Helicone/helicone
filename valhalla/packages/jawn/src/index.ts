@@ -7,7 +7,6 @@ import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
 
 const dirname = __dirname;
-console.log({ dirname });
 
 require("dotenv").config({
   path: "./.env",
