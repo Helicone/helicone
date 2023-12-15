@@ -35,6 +35,10 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     orgContext?.currentOrg.id || ""
   );
 
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
+    orgContext?.currentOrg.id || ""
+  );
+
   const { setNotification } = useNotification();
 
   const members: {
@@ -43,8 +47,8 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     org_role: string;
   }[] = [
     {
-      email: user?.email || "",
-      member: user?.email || "",
+      email: orgOwner?.data?.at(0)?.email || "",
+      member: "",
       org_role: "admin",
     },
     ...(data?.data || []),
@@ -171,9 +175,15 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
                 label: "Response status",
                 value: "response.status",
               },
+              {
+                label: "Cost (coming soon)",
+                value: "costs",
+              },
             ]}
             selectedValue={selectedMetric}
-            onSelect={(value) => setSelectedMetric(value)}
+            onSelect={(value) =>
+              value === "response.status" ? setSelectedMetric(value) : ""
+            }
           />
         </div>
         <div className="w-full space-y-1.5 text-sm">
