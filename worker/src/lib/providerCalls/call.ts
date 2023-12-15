@@ -49,10 +49,12 @@ export async function callProvider(props: CallProps): Promise<Response> {
     const controller = new AbortController();
     const signal = controller.signal;
     setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    response = await fetch(new_url.href, { ...init, signal });
+    response = await fetch(new_url.href, {
+      ...init,
+      signal,
+    });
   } else {
     response = await fetch(new_url.href, init);
   }
-
   return response;
 }

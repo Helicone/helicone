@@ -58,8 +58,8 @@ jobs:
       - name: Lint worker
         run: |
           cd worker
-          npm install
-          npm run lint
+          yarn install
+          yarn lint
 
   tests:
     name: Python E2E tests
