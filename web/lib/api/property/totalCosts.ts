@@ -12,6 +12,7 @@ import { PropertyFilter } from "../graphql/schema/types/graphql";
 
 export interface TotalCost {
   cost: number;
+  count?: number;
 }
 
 function toSQLArray(
@@ -37,12 +38,17 @@ function toSQLArray(
 export async function getTotalCostProperties(
   properties: PropertyFilter[],
   org_id: string
-): Promise<Result<number, string>> {
-  if (
-    properties
-      .map((p) => p.value.equals === undefined)
-      .reduce((a, b) => a || b, false)
-  ) {
+): Promise<
+  Result<
+    {
+      cost: number;
+      count?: number;
+    },
+    string
+  >
+> {
+  // Validation to ensure all properties have 'equals' defined
+  if (properties.some((p) => p.value.equals === undefined)) {
     return {
       data: null,
       error:
@@ -50,6 +56,7 @@ export async function getTotalCostProperties(
     };
   }
 
+  // Constructing the filter array
   const filter: FilterNode[] = properties.map((p) => ({
     left: {
       property_with_response_v1: {
@@ -73,41 +80,73 @@ export async function getTotalCostProperties(
       argsAcc: [],
     });
 
-  const propertyKeys = properties.map((p) => p.name);
-  const propertyValues = properties.map((p) => p.value.equals as string);
+  // Aggregating the arguments for the query
+  // ...
 
-  const propertyKeyFilter = toSQLArray(propertyKeys, filterArgs);
-  const propertyValueFilter = toSQLArray(
-    propertyValues,
-    propertyKeyFilter.argsAcc
-  );
+  // Aggregating the arguments for the query
+  const argsAcc = [org_id]; // Start with org_id
 
-  const argsAcc = propertyValueFilter.argsAcc;
+  properties.forEach((p) => {
+    argsAcc.push(p.name, p.value.equals as string); // Append property key and value
+  });
+
+  const propertyFilterConditions = properties
+    .map(
+      (_, index) =>
+        `(property_with_response_v1.property_key = {val_${
+          index * 2 + 1
+        } : String} and property_with_response_v1.property_value = {val_${
+          index * 2 + 2
+        } : String})`
+    )
+    .join(" or ");
+
+  const groupArrayKeyConditions = properties
+    .map(
+      (_, index) => `{val_${index * 2 + properties.length * 2 - 1} : String}`
+    )
+    .join(", ");
+  const groupArrayValueConditions = properties
+    .map((_, index) => `{val_${index * 2 + properties.length * 2} : String}`)
+    .join(", ");
 
   const query = `
-  SELECT ${CLICKHOUSE_PRICE_CALC("property_with_response_x")} as cost FROM (
-    SELECT response_id,
-      first_value(prompt_tokens) as prompt_tokens,
-      first_value(completion_tokens) as completion_tokens,
-      first_value(model) as model,
-      arraySort(groupArray(30)(property_key)),
-      arraySort(groupArray(30)(property_value))
-     FROM property_with_response_v1
-        WHERE (
-          ((property_with_response_v1.organization_id = {val_0 : String} and ((property_with_response_v1.property_key = {val_1 : String} and property_with_response_v1.property_value = {val_2 : String}) or ((property_with_response_v1.property_key = {val_3 : String} and property_with_response_v1.property_value = {val_4 : String}) or (property_with_response_v1.property_key = {val_5 : String} and property_with_response_v1.property_value = {val_6 : String})))))
-        )
-        group by response_id
-        HAVING (
-            arraySort(groupArray(3)(property_key)) = [{val_7 : String}, {val_8 : String}, {val_9 : String}]
-            and arraySort(groupArray(3)(property_value)) = [{val_10 : String}, {val_11 : String}, {val_12 : String}]
-        )
-        ORDER BY response_id
-    ) as property_with_response_x
-    `;
+    SELECT 
+    ${CLICKHOUSE_PRICE_CALC("property_with_response_x")} as cost,
+    count(*) as count
+     FROM (
+      SELECT response_id,
+        first_value(prompt_tokens) as prompt_tokens,
+        first_value(completion_tokens) as completion_tokens,
+        first_value(model) as model,
+        arraySort(groupArray(30)(property_key)),
+        arraySort(groupArray(30)(property_value)),
+       FROM property_with_response_v1
+          WHERE (
+            ((property_with_response_v1.organization_id = {val_0 : String}) and (${filterString}) and (${propertyFilterConditions}))
+          )
+          group by response_id
+          HAVING (
+              arraySort(groupArray(${
+                properties.length
+              })(property_key)) = [${groupArrayKeyConditions}]
+              and arraySort(groupArray(${
+                properties.length
+              })(property_value)) = [${groupArrayValueConditions}]
+          )
+          ORDER BY response_id
+      ) as property_with_response_x
+  `;
 
-  const res = await dbQueryClickhouse<TotalCost>(query, argsAcc);
+  const res = await dbQueryClickhouse<TotalCost>(
+    query,
+    argsAcc.concat(filterArgs)
+  );
 
-  return resultMap(res, (d) => d[0].cost);
+  return resultMap(res, (d) => ({
+    cost: d[0].cost,
+    count: d[0].count,
+  }));
 }
 
 export async function getTotalCostRaw(
