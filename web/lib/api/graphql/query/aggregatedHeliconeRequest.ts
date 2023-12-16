@@ -17,6 +17,7 @@ import { convertTextOperators } from "./helper";
 import { getTotalCost } from "../../metrics/totalCosts";
 
 export async function aggregatedHeliconeRequest(
+  _root: any,
   args: QueryAggregatedHeliconeRequestArgs,
   context: Context,
   info: any
