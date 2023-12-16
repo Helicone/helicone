@@ -1,4 +1,3 @@
-import { print } from "graphql";
 import {
   FilterNode,
   filterListToTree,
@@ -13,7 +12,7 @@ import { PropertyFilter } from "../graphql/schema/types/graphql";
 
 export interface TotalCost {
   cost: number;
-  count: number;
+  count?: number;
 }
 
 function toSQLArray(
@@ -43,7 +42,7 @@ export async function getTotalCostProperties(
   Result<
     {
       cost: number;
-      count: number;
+      count?: number;
     },
     string
   >
@@ -138,7 +137,6 @@ export async function getTotalCostProperties(
           ORDER BY response_id
       ) as property_with_response_x
   `;
-  await printRunnableQuery(query, argsAcc);
 
   const res = await dbQueryClickhouse<TotalCost>(
     query,

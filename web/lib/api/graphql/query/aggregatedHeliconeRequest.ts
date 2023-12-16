@@ -103,7 +103,7 @@ export async function aggregatedHeliconeRequest(
     id: "1",
     cost: cost.cost,
     costUSD: cost.cost,
-    count: cost.count,
+    count: cost.count ?? -1,
     firstRequest: dateRange.min.toISOString(),
     lastRequest: dateRange.max.toISOString(),
     cache: requestedFields.includes("cache") ? await getCacheData() : undefined,
