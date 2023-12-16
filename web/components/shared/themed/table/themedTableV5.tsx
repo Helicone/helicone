@@ -25,6 +25,8 @@ import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import RequestRowView from "./requestRowView";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
+import { Menu } from "@headlessui/react";
+import FilterBadge from "../../../ui/filters/filterBadge";
 
 interface ThemedTableV5Props<T> {
   defaultData: T[];
@@ -158,7 +160,79 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         }
         rows={exportData || []}
       />
-
+      <div className="flex flex-row space-x-2 items-center">
+        <FilterBadge title={"Model"}>
+          <fieldset className="w-full">
+            <button className="w-full flex font-semibold text-gray-500 justify-center items-center bg-gray-200 rounded-lg text-xs py-1 border border-gray-300">
+              Clear All
+            </button>
+            <div className="divide-y divide-gray-200 w-full mt-1">
+              {[
+                { id: 1, name: "gpt-4-0613" },
+                { id: 2, name: "gpt-3.5-turbo" },
+                { id: 3, name: "claude-2.0" },
+                { id: 4, name: "mistral-7b" },
+              ].map((person, personIdx) => (
+                <div
+                  key={personIdx}
+                  className="relative flex items-start py-2 w-full"
+                >
+                  <div className="min-w-0 flex-1 text-sm leading-6 truncate w-24 overflow-hidden">
+                    <label
+                      htmlFor={`person-${person.id}`}
+                      className="select-none font-medium text-gray-900"
+                    >
+                      {person.name}
+                    </label>
+                  </div>
+                  <div className="ml-3 flex h-6 items-center">
+                    <input
+                      id={`person-${person.id}`}
+                      name={`person-${person.id}`}
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        </FilterBadge>
+        <FilterBadge title={"Status"}>
+          <fieldset className="w-full">
+            <div className="divide-y divide-gray-200 w-full">
+              {[
+                { id: 1, name: "Success (200)" },
+                { id: 2, name: "400" },
+                { id: 3, name: "404" },
+                { id: 4, name: "500" },
+              ].map((person, personIdx) => (
+                <div
+                  key={personIdx}
+                  className="relative flex items-start py-2 w-full"
+                >
+                  <div className="min-w-0 flex-1 text-sm leading-6 truncate w-24 overflow-hidden">
+                    <label
+                      htmlFor={`person-${person.id}`}
+                      className="select-none font-medium text-gray-900"
+                    >
+                      {person.name}
+                    </label>
+                  </div>
+                  <div className="ml-3 flex h-6 items-center">
+                    <input
+                      id={`person-${person.id}`}
+                      name={`person-${person.id}`}
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        </FilterBadge>
+      </div>
       {dataLoading ? (
         <LoadingAnimation title="Loading Data..." />
       ) : rows.length === 0 ? (
