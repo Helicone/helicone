@@ -53,6 +53,7 @@ type AggregatedHeliconeRequest {
   id: ID!
   cost: Float
   costUSD: Float
+  count: Int!
   firstRequest: String!
   lastRequest: String!
   cache: Cache

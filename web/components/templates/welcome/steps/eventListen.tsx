@@ -20,6 +20,8 @@ const EventListen = (props: EventListenProps) => {
   const [notification, setNotification] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [after1minute, setAfter1minute] = useState(false);
+
   const nextStepHandler = async () => {
     setLoading(true);
     nextStep();

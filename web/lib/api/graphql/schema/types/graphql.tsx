@@ -23,6 +23,7 @@ export type AggregatedHeliconeRequest = {
   cache?: Maybe<Cache>;
   cost?: Maybe<Scalars['Float']['output']>;
   costUSD?: Maybe<Scalars['Float']['output']>;
+  count: Scalars['Int']['output'];
   firstRequest: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastRequest: Scalars['String']['output'];
