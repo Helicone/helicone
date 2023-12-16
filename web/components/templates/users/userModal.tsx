@@ -140,8 +140,6 @@ const UserModal = (props: UserModalProps) => {
     setGraphOption(option);
   };
 
-  console.log(userCost);
-
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       {user ? (
