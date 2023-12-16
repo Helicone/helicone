@@ -1,67 +1,69 @@
-// // src/index.ts
-// import express from "express";
-// import morgan from "morgan";
-// // import { Client } from "pg";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import cors from "cors";
+import express from "express";
+import { readFileSync } from "fs";
+import http from "http";
+import { QueryResolvers } from "./generated/graphql";
+import bodyParser from "body-parser";
+import { withAuth } from "helicone-shared-ts";
+import { IRouterWrapperAuth } from "helicone-shared-ts/dist/routers/iRouterWrapper";
 
-// async function testConnection() {
-//   const client = new Client({
-//     host: "YOUR_AURORA_ENDPOINT", // e.g., mydb-instance.123456789012.us-west-1.rds.amazonaws.com
-//     port: 5432, // Default PostgreSQL port
-//     user: "YOUR_DB_USERNAME",
-//     password: "YOUR_DB_PASSWORD",
-//     database: "YOUR_DATABASE_NAME",
-//     ssl: {
-//       // Depending on your Aurora PostgreSQL setup, you might need to configure SSL
-//       rejectUnauthorized: false,
-//     },
-//   });
+const graphQLFile =
+  process.env.GRAPHQL_SCHEMA_FILE ?? `./packages/slay/src/schema/main.graphql`;
+const typeDefs = readFileSync(graphQLFile, { encoding: "utf-8" });
 
-//   try {
-//     await client.connect();
+const queryResolvers: QueryResolvers<IRouterWrapperAuth<unknown>> = {
+  heliconeRequest: (_, requestArgs, contextValue) => {
+    return [];
+  },
+};
 
-//     // Test the connection
-//     const result = await client.query("SELECT NOW() as now");
-//     console.log(result.rows[0].now);
-//   } catch (err) {
-//     console.error("Failed to connect to the database:", err);
-//   } finally {
-//     await client.end();
-//   }
-// }
+const app = express();
+// Our httpServer handles incoming requests to our Express app.
+// Below, we tell Apollo Server to "drain" this httpServer,
+// enabling our servers to shut down gracefully.
+const httpServer = http.createServer(app);
 
-// const app = express();
+const server = new ApolloServer({
+  typeDefs,
+  resolvers: {
+    Query: queryResolvers,
+  },
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+});
 
-// // for logs
-// app.use(morgan("combined"));
+await server.start();
+app.use("/helicone-health", (req, res) => {
+  res.send("OK");
+});
+app.use(
+  "/",
+  bodyParser.json({ limit: "50mb" }),
+  expressMiddleware(server, {
+    context: async ({ req, res }) => {
+      const auth: Promise<IRouterWrapperAuth<unknown>> = new Promise(
+        async (resolve) => {
+          await withAuth((params) => {
+            resolve(params);
+          })(req, res);
+        }
+      );
+      return auth;
+    },
+  })
+);
+await new Promise<void>((resolve) =>
+  httpServer.listen(
+    {
+      port: 4000,
+      host: process.env.HOST ?? "127.0.0.1",
+    },
+    resolve
+  )
+);
 
-// app.use(express.json()); // for parsing application/json
-
-// app.post("/v1/request", (req, res) => {
-//   // Handle your logic here
-//   res.json({ message: "Request received!" });
-// });
-
-// app.get("/healthcheck", (req, res) => {
-//   const auroraCreds = process.env.AURORA_CREDS;
-//   if (!auroraCreds) {
-//     res.json({ status: "healthy :)", dataBase: "no creds :(" });
-//     return;
-//   }
-
-//   const {
-//     username,
-//     password,
-//   }: {
-//     username: string;
-//     password: string;
-//   } = JSON.parse(auroraCreds);
-//   testConnection();
-
-//   res.json({ status: "healthy :)" });
-// });
-
-// app.listen(8586, "0.0.0.0", () => {
-//   console.log(`Server is running on http://localhost:8586`);
-// });
-
-// console.log("Hello, world!");
+console.log(
+  `🚀  Server ready at: http://${process.env.HOST ?? "127.0.0.1"}:${4000}`
+);
