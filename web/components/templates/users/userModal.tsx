@@ -26,7 +26,6 @@ import {
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useRouter } from "next/router";
 import { encodeFilter } from "../requestsV2/requestsPageV2";
-import useSearchParams from "../../shared/utils/useSearchParams";
 import ThemedTabs from "../../../components/shared/themed/themedTabs";
 interface UserModalProps {
   open: boolean;
@@ -45,7 +44,6 @@ const UserModal = (props: UserModalProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const valueFormatter = function (number: number) {
     return "$" + number;
@@ -141,6 +139,8 @@ const UserModal = (props: UserModalProps) => {
   const handleOptionSelect = (option: string) => {
     setGraphOption(option);
   };
+
+  console.log(userCost);
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
