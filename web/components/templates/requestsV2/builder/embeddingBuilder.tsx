@@ -1,4 +1,3 @@
-import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Completion } from "../../requests/completion";
 import AbstractRequestBuilder, {
   SpecificFields,

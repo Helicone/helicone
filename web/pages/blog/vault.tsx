@@ -109,7 +109,7 @@ export default function VaultFeature() {
           <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
             Why Vault Matters for Your Business
           </h2>
-          <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+          <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
               <CheckCircleIcon
                 className="mt-1 h-5 w-5 flex-none text-green-500"
@@ -159,7 +159,7 @@ export default function VaultFeature() {
             applicability is vast. Here are some scenarios where Vault can be a
             game-changer:
           </p>
-          <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+          <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
               <BuildingStorefrontIcon
                 className="mt-1 h-5 w-5 flex-none text-blue-500"
@@ -259,7 +259,7 @@ export default function VaultFeature() {
             As we continue to refine and expand Vault, here&apos;s a glimpse
             into the future additions we&apos;re excited about:
           </p>
-          <ul role="list" className="mt-8 max-w-xl space-y-8 text-gray-600">
+          <ul className="mt-8 max-w-xl space-y-8 text-gray-600">
             <li className="flex gap-x-3">
               <CircleStackIcon
                 className="mt-1 h-5 w-5 flex-none text-blue-500"

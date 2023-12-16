@@ -4,8 +4,7 @@ import {
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getTokensPerRequest(
   filter: FilterNode,

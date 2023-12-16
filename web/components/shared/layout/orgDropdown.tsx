@@ -1,9 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useState } from "react";
 import {
-  BuildingOffice2Icon,
   CheckIcon,
-  ChevronDownIcon,
   MoonIcon,
   PlusIcon,
   SunIcon,
@@ -18,10 +16,7 @@ import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../../templates/organization/createOrgForm";
-import Link from "next/link";
 import ThemedModal from "../themed/themedModal";
-import useNotification from "../notification/useNotification";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import AddMemberModal from "../../templates/organization/addMemberModal";
 import { ThemedSwitch } from "../themed/themedSwitch";
 import { useTheme } from "../theme/themeContext";

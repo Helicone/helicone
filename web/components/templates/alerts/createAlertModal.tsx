@@ -7,12 +7,12 @@ import {
   useGetOrgMembers,
   useGetOrgOwner,
 } from "../../../services/hooks/organizations";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import useNotification from "../../shared/notification/useNotification";
-import { set } from "date-fns";
 import { useUser } from "@supabase/auth-helpers-react";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { Tooltip } from "@mui/material";
 
 interface CreateAlertModalProps {
   open: boolean;
@@ -82,6 +82,11 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       10
     );
 
+    if (isNaN(alertThreshold) || alertThreshold < 0 || alertThreshold > 100) {
+      setNotification("Please enter a valid threshold", "error");
+      return;
+    }
+
     if (selectedEmails.length < 1) {
       setNotification("Please select at least one email", "error");
       return;
@@ -128,12 +133,12 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     <ThemedModal open={open} setOpen={setOpen}>
       <form
         onSubmit={handleCreateAlert}
-        className="flex flex-col space-y-4 w-[400px] h-full"
+        className="grid grid-cols-4 gap-6 w-full sm:w-[450px] max-w-[450px] h-full"
       >
-        <h1 className="font-semibold text-xl text-gray-900 dark:text-gray-100">
+        <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
           Create Alert
         </h1>
-        <div className="w-full space-y-1.5 text-sm">
+        <div className="col-span-4 w-full space-y-1.5 text-sm">
           <label htmlFor="alert-name" className="text-gray-500">
             Name
           </label>
@@ -146,12 +151,12 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             placeholder="Alert Name"
           />
         </div>
-        <div className="w-full space-y-1.5 text-sm z-50">
+        <div className="col-span-4 w-full space-y-1.5 text-sm">
           <label htmlFor="alert-emails" className="text-gray-500">
             Emails
           </label>
           <MultiSelect
-            placeholder="Select a Custom Property..."
+            placeholder="Select emails to send alerts to"
             value={selectedEmails}
             onValueChange={(values: string[]) => {
               setSelectedEmails(values);
@@ -170,9 +175,9 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             })}
           </MultiSelect>
         </div>
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Metric
+        <div className="col-span-2 w-full space-y-1.5 text-sm">
+          <label htmlFor="alert-metric" className="text-gray-500">
+            Metric
           </label>
           <ThemedDropdown
             options={[
@@ -191,25 +196,41 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             }
           />
         </div>
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Threshold (%)
+        <div className="col-span-2 w-full space-y-1.5 text-sm ">
+          <label
+            htmlFor="alert-threshold"
+            className="text-gray-500 items-center flex gap-1"
+          >
+            Threshold
+            <Tooltip title="Specify the percentage at which the alert should be triggered. For instance, entering '10%' will trigger an alert when the metric exceeds 10% of the set value.">
+              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            </Tooltip>
           </label>
-          <input
-            type="number"
-            inputMode="numeric"
-            name="alert-threshold"
-            id="alert-threshold"
-            className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-            required
-            placeholder="Percentage (Between 0-100)"
-            min={1}
-            max={100}
-          />
-        </div>{" "}
-        <div className="w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-name" className="text-gray-500">
-            Alert Time Window (ms)
+          <div className="relative">
+            <input
+              type="text"
+              name="alert-threshold"
+              id="alert-threshold"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+              required
+              placeholder="Threshold (0-100)"
+            />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span className="text-gray-500 sm:text-sm" id="price-currency">
+                %
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="col-span-4 w-full space-y-1.5 text-sm">
+          <label
+            htmlFor="time-frame"
+            className="text-gray-500 items-center flex gap-1"
+          >
+            Time Frame{" "}
+            <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
+              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            </Tooltip>
           </label>
           <ThemedDropdown
             options={[
@@ -225,7 +246,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             verticalAlign="top"
           />
         </div>
-        <div className="flex justify-end gap-2 pt-4">
+        <div className="col-span-4 flex justify-end gap-2 pt-4">
           <button
             onClick={() => setOpen(false)}
             type="button"

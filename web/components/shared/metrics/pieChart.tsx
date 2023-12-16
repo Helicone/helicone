@@ -6,7 +6,6 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { clsx } from "../clsx";
 
 interface RenderPieChartProps {
   data: {

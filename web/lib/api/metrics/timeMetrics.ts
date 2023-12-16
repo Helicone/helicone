@@ -7,6 +7,7 @@ export interface AverageResponseTime {
   average_response_time: number;
   average_tokens_per_response: number;
 }
+
 export async function getAggregatedAvgMetrics(
   filter: FilterNode,
   org_id: string

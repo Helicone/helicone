@@ -6,7 +6,6 @@ import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { clsx } from "../../shared/clsx";
-import RequestView from "./requestRow";
 import RequestRow from "./requestRow";
 
 interface RequestDrawerV2Props {

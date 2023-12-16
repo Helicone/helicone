@@ -2,7 +2,6 @@ import dagre from "dagre";
 import { memo, useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   Background,
-  BackgroundVariant,
   Edge,
   MiniMap,
   Node,

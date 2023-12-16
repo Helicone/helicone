@@ -1,6 +1,5 @@
 import { dbExecute } from "../../lib/api/db/dbExecute";
 import { HandlerWrapperOptions, withAuth } from "../../lib/api/handlerWrappers";
-import { getRequests } from "../../lib/api/request/request";
 import { Result, resultMap } from "../../lib/result";
 
 async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {

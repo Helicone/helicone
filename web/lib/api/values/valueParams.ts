@@ -1,8 +1,5 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { getPagination } from "../../../components/shared/getPagination";
 import { dbExecute } from "../db/dbExecute";
 import { Result } from "../../result";
-import { Database } from "../../../supabase/database.types";
 
 export interface ValueParam {
   value_param: string;

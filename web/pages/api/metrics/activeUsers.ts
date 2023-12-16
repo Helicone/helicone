@@ -3,9 +3,6 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getActiveUsers } from "../../../lib/api/metrics/activeUsers";
-import { getAverageLatency } from "../../../lib/api/metrics/averageLatency";
-import { getTotalCost } from "../../../lib/api/metrics/totalCosts";
-import { getTotalRequests } from "../../../lib/api/metrics/totalRequests";
 import { Result, resultsAll } from "../../../lib/result";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {

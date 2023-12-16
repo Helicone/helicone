@@ -1,19 +1,14 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 import { useOrg } from "../../shared/layout/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import CreateAlertModal from "./createAlertModal";
-import {
-  BellIcon,
-  ChevronDownIcon,
-  NewspaperIcon,
-} from "@heroicons/react/24/outline";
+import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { Menu, Transition } from "@headlessui/react";
 import { Tooltip } from "@mui/material";
 
 interface AlertsPageProps {
@@ -152,7 +147,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           </div>
         </div>
         {alertHistory.length === 0 ? (
-          <div className="relative block w-full rounded-lg border-2 border-dashed hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          <div className="relative block w-full rounded-lg border-2 border-dashed border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
             <div className="w-full justify-center align-middle items-center">
               <NewspaperIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
             </div>

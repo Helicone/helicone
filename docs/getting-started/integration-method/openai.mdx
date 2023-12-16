@@ -3,7 +3,7 @@ title: "OpenAI"
 ---
 
 This page will show you how to log requests in Helicone when using OpenAI. This does not use the Helicone Proxy.
-For more information on Async Logging, see the [Proxy vs Async](/getting-started/proxy-vs-asyn) page.
+For more information on Async Logging, see the [Proxy vs Async](/getting-started/proxy-vs-async) page.
 
 <Tabs>
   <Tab title="Python">
@@ -104,7 +104,7 @@ x = openai.ChatCompletion.create(
       console.log(chatCompletion.data.choices[0].message);
       ```
       </Step>
-    </Steps>    
+    </Steps>
 
     ## Send feedback
     With Async logging, you must retrieve the `helicone-id` header from the log response (not LLM response).
@@ -162,7 +162,7 @@ POST https://api.hconeai.com/oai/v1/log
 
 | Name          | Value            |
 | ------------- | ---------------- |
-| Authorization | Bearer {API_KEY} |
+| Authorization | Bearer `{API_KEY}` |
 
 Replace `{API_KEY}` with your actual API Key.
 

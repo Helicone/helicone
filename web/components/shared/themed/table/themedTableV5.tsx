@@ -1,4 +1,3 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import {
   AdjustmentsHorizontalIcon,
   TableCellsIcon,
@@ -12,20 +11,14 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { useRouter } from "next/router";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
+import React, { useEffect, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../../services/lib/sorts/requests/sorts";
+import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { UIFilterRow } from "../themedAdvancedFilters";
-import ThemedTimeFilter from "../themedTimeFilter";
 import ThemedTableHeader from "./themedTableHeader";
 import DraggableColumnHeader from "./draggableColumnHeader";
 import { TimeFilter } from "../../../templates/dashboard/dashboardPage";

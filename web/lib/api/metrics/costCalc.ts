@@ -1,4 +1,3 @@
-import { Database } from "../../../supabase/database.types";
 import { ModelMetrics } from "./modelMetrics";
 
 // Note: all pricing is per 1k tokens, make sure to divide Anthropic pricing by 1000 as it is per 1M tokens

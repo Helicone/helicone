@@ -1,9 +1,7 @@
 import { Tab } from "@headlessui/react";
 import { useState } from "react";
 import { clsx } from "../../../../shared/clsx";
-import theme from "prism-react-renderer/themes/nightOwl";
 import { DiffHighlight } from "../../diffHighlight";
-import Prism, { defaultProps } from "prism-react-renderer";
 
 interface AnthropicProxyProps {
   apiKey: string;

@@ -1,4 +1,4 @@
-import { getCacheCount, getTimeSaved } from "../../../lib/api/cache/stats";
+import { getTimeSaved } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
