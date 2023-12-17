@@ -468,7 +468,7 @@ export class AlertManager {
                             <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
                               <tr style="vertical-align:middle;" valign="middle">
                                 <td align="left" style="padding:0 0 0 30px;" class="content">
-                                  <a href="https://helicone.ai/organization/alerts" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
+                                  <a href="https://helicone.ai/alerts" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
                                     <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%;mso-text-raise:30pt" hidden>&nbsp;</i>
                                     <![endif]--><span style="mso-text-raise:15pt;">View alert here</span>
                                     <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%" hidden>&nbsp;</i>
@@ -494,7 +494,7 @@ export class AlertManager {
                       <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;">
                         <tr style="vertical-align:middle;" valign="middle">
                           <td align="center" style="padding:30px 0;">
-                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai/organization/alerts" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
+                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai/alerts" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
                             </td>
                         </tr>
                       </table>
