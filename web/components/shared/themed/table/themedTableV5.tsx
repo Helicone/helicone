@@ -160,13 +160,135 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         }
         rows={exportData || []}
       />
-      <div className="flex flex-row space-x-2 items-center">
+      <div className="flex flex-row space-x-2 items-center w-full">
+        <FilterBadge title="Created At">
+          <div className="flex flex-col space-y-4">
+            <div className="flex flex-row">
+              {[
+                { key: "24h", value: "24H" },
+                { key: "7d", value: "7D" },
+                { key: "1m", value: "1M" },
+                { key: "3m", value: "3M" },
+                { key: "all", value: "All" },
+              ].map((option, idx) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  // disabled={isFetching}
+                  onClick={() => {
+                    // searchParams.set("t", option.key);
+                    // setActive(option.key);
+                    // onSelect(option.key, option.value);
+                  }}
+                  className={clsx(
+                    idx === 0 ? "rounded-l-lg" : "",
+                    idx === 4 ? "rounded-r-lg" : "",
+                    "w-full flex border border-gray-300 dark:border-gray-700 justify-center p-2 text-xs font-semibold"
+                  )}
+                >
+                  {option.value}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div>
+                <label
+                  htmlFor="startDate"
+                  className="block text-xs font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Start Date
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="datetime-local"
+                    name="startDate"
+                    id="startDate"
+                    onChange={(e) => {
+                      // setStartDate(e.target.value);
+                    }}
+                    // value={startDate}
+                    className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="endDate"
+                  className="block text-xs font-medium text-gray-700 dark:text-gray-300"
+                >
+                  End Date
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="datetime-local"
+                    name="endDate"
+                    id="endDate"
+                    onChange={(e) => {
+                      // setEndDate(e.target.value);
+                    }}
+                    // value={endDate}
+                    className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="py-1 w-full flex flex-row gap-3 items-center justify-end">
+              <button
+                onClick={() => close()}
+                className="items-center rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm flex font-semibold text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // if (!startDate || !endDate) {
+                  //   setNotification(
+                  //     "Please select a start and end date",
+                  //     "error"
+                  //   );
+                  //   return;
+                  // }
+                  // if (endDate && startDate > endDate) {
+                  //   setNotification(
+                  //     "Start date must be before end date",
+                  //     "error"
+                  //   );
+                  //   return;
+                  // }
+                  // if (startDate && startDate < startDate) {
+                  //   setNotification(
+                  //     "End date must be after start date",
+                  //     "error"
+                  //   );
+                  //   return;
+                  // }
+                  // const start = new Date(startDate as string);
+                  // const end = new Date(endDate as string);
+                  // searchParams.set(
+                  //   "t",
+                  //   `custom_${start.toISOString()}_${end.toISOString()}`
+                  // );
+                  // setActive("custom");
+                  // onSelect(
+                  //   "custom",
+                  //   `${start.toISOString()}_${end.toISOString()}`
+                  // );
+                  // close();
+                }}
+                className="items-center rounded-md bg-black dark:bg-white px-3 py-1.5 text-sm flex font-semibold text-white dark:text-black dark:hover:bg-gray-200 shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </FilterBadge>
         <FilterBadge title={"Model"}>
           <fieldset className="w-full">
-            <button className="w-full flex font-semibold text-gray-500 justify-center items-center bg-gray-200 rounded-lg text-xs py-1 border border-gray-300">
+            <button className="w-full flex font-semibold text-gray-500 justify-center items-center bg-gray-200 dark:bg-gray-800 rounded-lg text-xs py-1 border border-gray-300 dark:border-gray-700">
               Clear All
             </button>
-            <div className="divide-y divide-gray-200 w-full mt-1">
+            <div className="divide-y divide-gray-200 dark:divide-gray-800 w-full mt-1">
               {[
                 { id: 1, name: "gpt-4-0613" },
                 { id: 2, name: "gpt-3.5-turbo" },
@@ -180,7 +302,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                   <div className="min-w-0 flex-1 text-sm leading-6 truncate w-24 overflow-hidden">
                     <label
                       htmlFor={`person-${person.id}`}
-                      className="select-none font-medium text-gray-900"
+                      className="select-none font-semibold"
                     >
                       {person.name}
                     </label>
@@ -190,7 +312,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                       id={`person-${person.id}`}
                       name={`person-${person.id}`}
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-sky-500 focus:ring-sky-500"
                     />
                   </div>
                 </div>
@@ -200,7 +322,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
         </FilterBadge>
         <FilterBadge title={"Status"}>
           <fieldset className="w-full">
-            <div className="divide-y divide-gray-200 w-full">
+            <div className="divide-y divide-gray-200 dark:divide-gray-800 w-full">
               {[
                 { id: 1, name: "Success (200)" },
                 { id: 2, name: "400" },
@@ -214,7 +336,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                   <div className="min-w-0 flex-1 text-sm leading-6 truncate w-24 overflow-hidden">
                     <label
                       htmlFor={`person-${person.id}`}
-                      className="select-none font-medium text-gray-900"
+                      className="select-none font-semibold"
                     >
                       {person.name}
                     </label>
@@ -224,7 +346,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
                       id={`person-${person.id}`}
                       name={`person-${person.id}`}
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-sky-500 focus:ring-sky-500"
                     />
                   </div>
                 </div>
