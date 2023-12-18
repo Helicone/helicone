@@ -79,7 +79,13 @@ export async function proxyForwarder(
       env.CACHE_KV
     );
     if (cachedResponse) {
-      ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
+      ctx.waitUntil(
+        recordCacheHit(
+          cachedResponse.headers,
+          env,
+          new ClickhouseClientWrapper(env)
+        )
+      );
       return cachedResponse;
     }
   }

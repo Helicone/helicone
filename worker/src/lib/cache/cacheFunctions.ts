@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
@@ -62,7 +63,8 @@ export async function saveToCache(
 
 export async function recordCacheHit(
   headers: Headers,
-  env: Env
+  env: Env,
+  clickhouseDb: ClickhouseClientWrapper
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
@@ -78,6 +80,26 @@ export async function recordCacheHit(
     .insert({ request_id: requestId });
   if (error) {
     console.error(error);
+  }
+  // This is a hack get org_id from header
+  const { data: org_id } = await dbClient
+    .from("request")
+    .select("helicone_org_id")
+    .eq("id", requestId)
+    .single();
+  const organization_id = org_id?.helicone_org_id;
+  const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
+    "cache_hits",
+    [
+      {
+        request_id: requestId,
+        organization_id: organization_id,
+        created_at: null,
+      },
+    ]
+  );
+  if (clickhouseError) {
+    console.error(clickhouseError);
   }
 }
 export async function getCachedResponse(
