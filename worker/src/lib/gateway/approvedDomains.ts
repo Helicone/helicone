@@ -12,7 +12,7 @@ const togetherPattern = /^https:\/\/api\.together\.xyz/;
 const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
 const fireworks = /^https:\/\/api\.fireworks\.ai/;
 const perplexity = /^https:\/\/api\.perplexity\.ai/;
-const googleapis = /^https:\/\/(www\.)?googleapis\.com/;
+const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
 
 export const approvedDomains = [
   openAiPattern,
