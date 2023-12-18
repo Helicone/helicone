@@ -1,7 +1,6 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import cors from "cors";
 import express from "express";
 import { readFileSync } from "fs";
 import http from "http";
