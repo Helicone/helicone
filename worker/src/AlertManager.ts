@@ -203,7 +203,7 @@ export class AlertManager {
         alert.org_id,
         alert.time_window
       );
-    } else if (alert.metric === "response.costs") {
+    } else if (alert.metric === "response.cost") {
       return await this.alertStore.getCost(alert.org_id, alert.time_window);
     }
 
@@ -215,6 +215,13 @@ export class AlertManager {
     alertState: AlertState,
     timestamp: number
   ): Promise<AlertStateUpdate> {
+    if (
+      alert.minimum_request_count &&
+      alertState.requestCount < alert.minimum_request_count
+    ) {
+      return { status: "unchanged", timestamp, alert };
+    }
+
     let isRateBelowThreshold = false;
     let triggerThreshold = 0;
     if (alert.metric === "response.status") {
@@ -224,17 +231,27 @@ export class AlertManager {
           : 0;
 
       isRateBelowThreshold = triggerThreshold < alert.threshold;
-    } else if (alert.metric === "costs") {
+    } else if (alert.metric === "response.cost") {
+      console.log(`TotalCount: ${alertState.totalCount}`);
+      console.log(`RequestCount: ${alertState.requestCount}`);
+      console.log(`Alert Threshold: ${alert.threshold}`);
+      triggerThreshold = alertState.totalCount;
       isRateBelowThreshold = alertState.totalCount < alert.threshold;
+    } else {
+      throw new Error(`Unsupported metric: ${alert.metric}`);
     }
 
     // Handle scenarios where rate is below threshold
     if (isRateBelowThreshold) {
-      return this.handleRateBelowThreshold(alert, timestamp);
+      return await this.handleRateBelowThreshold(alert, timestamp);
     }
 
     // Handle scenarios where rate is above or equal to threshold
-    return this.handleRateAboveThreshold(alert, triggerThreshold, timestamp);
+    return await this.handleRateAboveThreshold(
+      alert,
+      triggerThreshold,
+      timestamp
+    );
   }
 
   async handleRateBelowThreshold(

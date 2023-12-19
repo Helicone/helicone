@@ -9,6 +9,7 @@ type Alert = Database["public"]["Tables"]["alert"]["Row"];
 export type AlertState = {
   totalCount: number;
   errorCount?: number;
+  requestCount: number;
 };
 
 export class AlertStore {
@@ -96,7 +97,8 @@ export class AlertStore {
     timeWindowMs: number
   ): Promise<Result<AlertState, string>> {
     const query = `SELECT 
-    ${CLICKHOUSE_PRICE_CALC} as totalCount 
+    ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as totalCount,
+    COUNT() AS requestCount
     FROM response_copy_v3
     WHERE
     organization_id = {val_0: UUID} AND
@@ -123,7 +125,8 @@ export class AlertStore {
   ): Promise<Result<AlertState, string>> {
     const query = `SELECT
     COUNT() AS totalCount,
-    COUNTIf(status BETWEEN 400 AND 599) AS errorCount
+    COUNTIf(status BETWEEN 400 AND 599) AS errorCount,
+    COUNT() AS requestCount
   FROM response_copy_v3
   WHERE 
     organization_id = {val_0: UUID} AND
