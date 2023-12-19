@@ -16,6 +16,40 @@ servers:
     description: Production server
 
 paths:
+  /v1/feedback:
+    put:
+      tags:
+        - feedback
+      summary: Insert a new feedback
+      description: Adds a new entry to the 'feedback' table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInsert"
+      responses:
+        "201":
+          description: Successfully inserted the new feedback.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  feedbackId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted feedback.
+                  message:
+                    type: string
+                    example: Feedback successfully inserted.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
   /v1/request:
     post:
       tags:
@@ -27,7 +61,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RequestResponseInsert"
+              $ref: "#/components/schemas/RequestInsert"
       responses:
         "201":
           description: Successfully inserted the new request and response.
@@ -53,8 +87,104 @@ paths:
           description: Internal server error.
       security:
         - authorization: []
+        - helicone-authorization: []
+
+  /v1/response:
+    post:
+      tags:
+        - request
+      summary: Insert a new request and its response
+      description: Adds a new entry to the 'request' and 'response' tables.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseInsert"
+      responses:
+        "201":
+          description: Successfully inserted the new request and response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted request.
+                  responseId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the associated response.
+                  message:
+                    type: string
+                    example: Request and Response successfully inserted.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
+    patch:
+      tags:
+        - request
+      summary: Update a response
+      description: Updates the response associated with the given request ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseInsert"
+      responses:
+        "200":
+          description: Successfully updated the response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted request.
+                  responseId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the associated response.
+                  message:
+                    type: string
+                    example: Response successfully updated.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
 
   /healthcheck-db:
+    get:
+      tags:
+        - healthcheck
+      summary: Check the status of the database
+      description: Checks the status of the database.
+      responses:
+        "200":
+          description: Database is up and running.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Database is up and running.
+        "500":
+          description: Internal server error.
+  /healthcheck-auth:
     get:
       tags:
         - healthcheck
@@ -95,99 +225,138 @@ paths:
 
 components:
   schemas:
-    RequestResponseInsert:
+    FeedbackInsert:
+      type: object
+      nullable: false
+      properties:
+        # Feedback fields
+        rating:
+          type: boolean
+          nullable: false
+          description: The rating of the response.
+        response_id:
+          type: string
+          format: uuid
+          nullable: false
+          description: The unique ID of the response.
+      required:
+        - rating
+        - response_id
+
+    RequestInsert:
+      type: object
+      nullable: false
+      properties:
+        # Request fields
+        requestReceivedAt:
+          type: string
+          format: date-time
+          nullable: false
+          description: The date and time when the request was received.
+        model:
+          type: string
+          nullable: true
+          description: The model used for generating the response.
+        body:
+          type: object
+          description: JSON object containing the request body.
+        request_id:
+          type: string
+          format: uuid
+          nullable: false
+          description: The unique ID of the request.
+        url_href:
+          type: string
+          description: The URL associated with the request.
+          nullable: false
+        provider:
+          type: string
+          description: The provider associated with the request.
+          nullable: false
+        user_id:
+          type: string
+          nullable: true
+          description: The user ID associated with the request.
+        properties:
+          type: object
+          nullable: true
+          description: JSON object containing additional properties.
+        helicone_api_key_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: The API key ID for Helicone.
+        helicone_org_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: The organization ID for Helicone.
+        helicone_proxy_key_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: The proxy key ID for Helicone.
+      required:
+        - request_id
+        - requestReceivedAt
+        - body
+        - url_href
+        - provider
+
+    ResponseInsert:
       type: object
       properties:
-        request:
-          type: object
+        responseReceivedAt:
+          type: string
+          format: date-time
           nullable: false
-          properties:
-            # Request fields
-            body:
-              type: object
-              description: JSON object containing the request body.
-            request_id:
-              type: string
-              format: uuid
-              nullable: true
-              description: The unique ID of the request.
-            url_href:
-              type: string
-              description: The URL associated with the request.
-              nullable: false
-            provider:
-              type: string
-              description: The provider associated with the request.
-              nullable: false
-            user_id:
-              type: string
-              nullable: true
-              description: The user ID associated with the request.
-            properties:
-              type: object
-              nullable: true
-              description: JSON object containing additional properties.
-            helicone_api_key_id:
-              type: integer
-              format: int64
-              nullable: true
-              description: The API key ID for Helicone.
-            helicone_org_id:
-              type: string
-              format: uuid
-              nullable: true
-              description: The organization ID for Helicone.
-            helicone_proxy_key_id:
-              type: string
-              format: uuid
-              nullable: true
-              description: The proxy key ID for Helicone.
-          required:
-            - url_href
-            - provider
-        # Response fields
-        response:
+          description: The date and time when the request was received.
+        response_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: The unique ID of the response.
+        delay_ms:
+          type: integer
+          nullable: true
+          description: The delay in milliseconds.
+        http_status:
+          type: integer
+          format: int16
+          nullable: true
+          description: The status code.
+        completion_tokens:
+          type: integer
+          nullable: true
+          description: Number of tokens used for completion.
+        model:
+          type: string
+          nullable: true
+          description: The model used for generating the response.
+        prompt_tokens:
+          type: integer
+          nullable: true
+          description: Number of tokens used in the prompt.
+        body:
           type: object
-          properties:
-            response_id:
-              type: string
-              format: uuid
-              nullable: true
-              description: The unique ID of the response.
-            delay_ms:
-              type: integer
-              nullable: true
-              description: The delay in milliseconds.
-            http_status:
-              type: integer
-              format: int16
-              nullable: true
-              description: The status code.
-            completion_tokens:
-              type: integer
-              nullable: true
-              description: Number of tokens used for completion.
-            model:
-              type: string
-              nullable: true
-              description: The model used for generating the response.
-            prompt_tokens:
-              type: integer
-              nullable: true
-              description: Number of tokens used in the prompt.
-            body:
-              type: object
-              nullable: true
-              description: JSON object containing the response body.
-          required:
-            - body
-            - http_status
+          nullable: true
+          description: JSON object containing the response body.
+        heliconeRequestId:
+          type: string
+          format: uuid
+          description: JSON object containing the response body.
       required:
-        - request
-        - response
+        - responseReceivedAt
+        - body
+        - http_status
+        - heliconeRequestId
 
   securitySchemes:
     authorization:
       type: apiKey
       name: authorization
+      in: header
+    helicone-authorization:
+      type: apiKey
+      name: helicone-authorization
       in: header
