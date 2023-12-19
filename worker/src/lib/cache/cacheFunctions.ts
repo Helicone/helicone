@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
+import { DBWrapper } from "../../db/DBWrapper";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
@@ -64,10 +65,10 @@ export async function saveToCache(
 export async function recordCacheHit(
   headers: Headers,
   env: Env,
-  clickhouseDb: ClickhouseClientWrapper,
-  organizationId: string | null
+  clickhouseDb: ClickhouseClientWrapper
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
+  let organizationId;
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
@@ -88,7 +89,7 @@ export async function recordCacheHit(
     [
       {
         request_id: requestId,
-        organization_id: organizationId,
+        organization_id: organizationId || null,
         created_at: null,
       },
     ]
