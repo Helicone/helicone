@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS default.cache_hits
 (
    `request_id` UUID,
-   `organization_id` UUID,
+   `organization_id` Nullable(UUID),
    `created_at` DateTime64 DEFAULT now(),
 )
 ENGINE = MergeTree

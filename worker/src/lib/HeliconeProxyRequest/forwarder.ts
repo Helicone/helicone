@@ -19,7 +19,8 @@ export async function proxyForwarder(
   request: RequestWrapper,
   env: Env,
   ctx: ExecutionContext,
-  provider: Provider
+  provider: Provider,
+  db: DBWrapper
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(
@@ -79,13 +80,18 @@ export async function proxyForwarder(
       env.CACHE_KV
     );
     if (cachedResponse) {
-      ctx.waitUntil(
-        recordCacheHit(
-          cachedResponse.headers,
-          env,
-          new ClickhouseClientWrapper(env)
-        )
-      );
+      const { data: authParams, error } = await db.getAuthParams();
+      if (error || !authParams?.organizationId) {
+        console.error("Error getting auth params", error);
+      } else
+        ctx.waitUntil(
+          recordCacheHit(
+            cachedResponse.headers,
+            env,
+            new ClickhouseClientWrapper(env),
+            authParams.organizationId
+          )
+        );
       return cachedResponse;
     }
   }

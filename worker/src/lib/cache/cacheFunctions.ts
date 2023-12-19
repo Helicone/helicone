@@ -64,13 +64,15 @@ export async function saveToCache(
 export async function recordCacheHit(
   headers: Headers,
   env: Env,
-  clickhouseDb: ClickhouseClientWrapper
+  clickhouseDb: ClickhouseClientWrapper,
+  organizationId: string | null
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
   }
+
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
@@ -81,19 +83,12 @@ export async function recordCacheHit(
   if (error) {
     console.error(error);
   }
-  // This is a hack get org_id from header
-  const { data: org_id } = await dbClient
-    .from("request")
-    .select("helicone_org_id")
-    .eq("id", requestId)
-    .single();
-  const organization_id = org_id?.helicone_org_id;
   const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
     "cache_hits",
     [
       {
         request_id: requestId,
-        organization_id: organization_id,
+        organization_id: organizationId,
         created_at: null,
       },
     ]
