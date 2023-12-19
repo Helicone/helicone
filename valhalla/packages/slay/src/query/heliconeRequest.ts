@@ -21,6 +21,7 @@ import {
 } from "../schema/types/graphql";
 import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators, convertTimeOperators } from "./helper";
+import { HeliconeQueryResolvers } from "..";
 
 const filterInputToFilterLeaf: {
   [key in keyof HeliconeRequestFilter]: (
@@ -121,69 +122,65 @@ function convertFilterInputToFilterLeaf(
   return filterListToTree(convertedFilters, "and");
 }
 
-export async function heliconeRequest(
-  root: any,
-  args: QueryHeliconeRequestArgs,
-  context: Context,
-  info: any
-): Promise<HeliconeRequest[]> {
-  const orgId = await context.getOrgIdOrThrow();
-  const { limit, offset, filters } = {
-    limit: args.limit ?? 100,
-    offset: args.offset ?? 0,
-    filters: args.filters ?? [],
-  };
+export const heliconeRequest: HeliconeQueryResolvers["heliconeRequest"] =
+  async (root, args, context, info) => {
+    const orgId = await context.getOrgIdOrThrow();
+    const { limit, offset, filters } = {
+      limit: args.limit ?? 100,
+      offset: args.offset ?? 0,
+      filters: args.filters ?? [],
+    };
 
-  // Convert GraphQL filter inputs to TypeScript filters
-  const convertedFilters: FilterNode[] = filters.map((f) =>
-    convertFilterInputToFilterLeaf(f)
-  );
-  const filter = filterListToTree(convertedFilters, "and");
+    // Convert GraphQL filter inputs to TypeScript filters
+    const convertedFilters: FilterNode[] = filters.map((f) =>
+      convertFilterInputToFilterLeaf(f)
+    );
+    const filter = filterListToTree(convertedFilters, "and");
 
-  const { data, error } = await getRequests(orgId, filter, offset, limit, {
-    created_at: "desc",
-  });
+    const { data, error } = await getRequests(orgId, filter, offset, limit, {
+      created_at: "desc",
+    });
 
-  if (error !== null) {
-    throw new ApolloError(error, "UNAUTHENTICATED");
-  }
+    if (error !== null) {
+      throw new ApolloError(error, "UNAUTHENTICATED");
+    }
 
-  return data.map((r) => ({
-    id: r.request_id,
-    createdAt: r.request_created_at,
-    model: r.response_body?.model ?? r.request_body?.model ?? null,
-    costUSD: modelCost({
+    return data.map((r) => ({
+      id: r.request_id,
+      createdAt: r.request_created_at,
       model: r.response_body?.model ?? r.request_body?.model ?? null,
-      sum_completion_tokens: r.completion_tokens ?? 0,
-      sum_prompt_tokens: r.prompt_tokens ?? 0,
-      sum_tokens: (r.total_tokens ?? 0) + (r.completion_tokens ?? 0),
-    }),
-    prompt: r.request_prompt,
-    response: r.response_prompt,
-    user: r.request_user_id
-      ? {
-          id: r.request_user_id,
-        }
-      : null,
-    properties: r.request_properties
-      ? Object.entries(r.request_properties).map(([k, v]) => ({
-          name: k,
-          value: v as string,
-        }))
-      : [],
-    values: r.request_prompt_values
-      ? Object.entries(r.request_prompt_values).map(([k, v]) => ({
-          name: k,
-          value: v as string,
-        }))
-      : [],
-    requestBody: r.request_body,
-    responseBody: r.response_body,
-    latency: r.delay_ms,
-    feedback: r.feedback_rating
-      ? {
-          rating: r.feedback_rating,
-        }
-      : undefined,
-  }));
-}
+      costUSD: modelCost({
+        model: r.response_body?.model ?? r.request_body?.model ?? null,
+        sum_completion_tokens: r.completion_tokens ?? 0,
+        sum_prompt_tokens: r.prompt_tokens ?? 0,
+        sum_tokens: (r.total_tokens ?? 0) + (r.completion_tokens ?? 0),
+      }),
+      prompt: r.request_prompt,
+      response: r.response_prompt,
+      user: r.request_user_id
+        ? {
+            id: r.request_user_id,
+          }
+        : null,
+      properties: r.request_properties
+        ? Object.entries(r.request_properties).map(([k, v]) => ({
+            name: k,
+            value: v as string,
+          }))
+        : [],
+      values: r.request_prompt_values
+        ? Object.entries(r.request_prompt_values).map(([k, v]) => ({
+            name: k,
+            value: v as string,
+          }))
+        : [],
+      requestBody: r.request_body,
+      responseBody: r.response_body,
+      latency: r.delay_ms,
+      feedback: r.feedback_rating
+        ? {
+            rating: r.feedback_rating,
+          }
+        : undefined,
+    }));
+  };
