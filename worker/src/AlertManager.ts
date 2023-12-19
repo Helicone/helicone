@@ -1,18 +1,13 @@
 import { Env } from ".";
 import { Database } from "../supabase/database.types";
 import { Result, err, ok } from "./results";
-import { AlertStore } from "./db/AlertStore";
+import { AlertState, AlertStore } from "./db/AlertStore";
 
 type AlertStateUpdate = {
   alert: Database["public"]["Tables"]["alert"]["Row"];
   status: "triggered" | "resolved" | "unchanged";
   timestamp: number;
   triggeredThreshold?: number;
-};
-
-type AlertState = {
-  totalCount: number;
-  errorCount: number;
 };
 
 export class AlertManager {
@@ -41,10 +36,7 @@ export class AlertManager {
     const timestamp = Date.now();
     const alertStatePromises = allAlerts.map(async (alert) => {
       const { data: alertState, error: alertStateErr } =
-        await this.alertStore.checkAlertClickhouse(
-          alert.org_id,
-          alert.time_window
-        );
+        await this.getAlertState(alert);
 
       if (alertStateErr || !alertState) {
         console.error(
@@ -203,16 +195,38 @@ export class AlertManager {
     return ok(null);
   }
 
+  async getAlertState(
+    alert: Database["public"]["Tables"]["alert"]["Row"]
+  ): Promise<Result<AlertState, string>> {
+    if (alert.metric === "response.status") {
+      return await this.alertStore.getErrorRate(
+        alert.org_id,
+        alert.time_window
+      );
+    } else if (alert.metric === "response.costs") {
+      return await this.alertStore.getCost(alert.org_id, alert.time_window);
+    }
+
+    return err(`Unsupported metric: ${alert.metric}`);
+  }
+
   async getAlertStateUpdate(
     alert: Database["public"]["Tables"]["alert"]["Row"],
     alertState: AlertState,
     timestamp: number
   ): Promise<AlertStateUpdate> {
-    const rate =
-      alertState.totalCount > 0
-        ? (alertState.errorCount / alertState.totalCount) * 100
-        : 0;
-    const isRateBelowThreshold = rate < alert.threshold;
+    let isRateBelowThreshold = false;
+    let triggerThreshold = 0;
+    if (alert.metric === "response.status") {
+      triggerThreshold =
+        alertState.totalCount > 0 && alertState.errorCount
+          ? (alertState.errorCount / alertState.totalCount) * 100
+          : 0;
+
+      isRateBelowThreshold = triggerThreshold < alert.threshold;
+    } else if (alert.metric === "costs") {
+      isRateBelowThreshold = alertState.totalCount < alert.threshold;
+    }
 
     // Handle scenarios where rate is below threshold
     if (isRateBelowThreshold) {
@@ -220,7 +234,7 @@ export class AlertManager {
     }
 
     // Handle scenarios where rate is above or equal to threshold
-    return this.handleRateAboveThreshold(alert, rate, timestamp);
+    return this.handleRateAboveThreshold(alert, triggerThreshold, timestamp);
   }
 
   async handleRateBelowThreshold(
@@ -247,7 +261,7 @@ export class AlertManager {
 
   async handleRateAboveThreshold(
     alert: Database["public"]["Tables"]["alert"]["Row"],
-    rate: number,
+    triggerThreshold: number,
     timestamp: number
   ): Promise<AlertStateUpdate> {
     if (alert.status === "resolved") {
@@ -255,7 +269,7 @@ export class AlertManager {
       return {
         status: "triggered",
         timestamp,
-        triggeredThreshold: rate,
+        triggeredThreshold: triggerThreshold,
         alert,
       };
     }
@@ -512,10 +526,3 @@ export class AlertManager {
     return { subject, text, html };
   }
 }
-
-/*
-1. Get triggered & resolved alerts from DB
-2. Check if triggered alerts are resolved (below threshold and past cooldown)
-3. Check if resolved alerts are triggered (above threshold)
-4. 
-*/
