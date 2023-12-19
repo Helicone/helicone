@@ -83,7 +83,8 @@ export async function proxyForwarder(
         recordCacheHit(
           cachedResponse.headers,
           env,
-          new ClickhouseClientWrapper(env)
+          new ClickhouseClientWrapper(env),
+          proxyRequest.requestWrapper
         )
       );
       return cachedResponse;

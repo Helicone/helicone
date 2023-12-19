@@ -3,6 +3,7 @@ import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 import { DBWrapper } from "../../db/DBWrapper";
+import { RequestWrapper } from "../RequestWrapper";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
@@ -65,15 +66,28 @@ export async function saveToCache(
 export async function recordCacheHit(
   headers: Headers,
   env: Env,
-  clickhouseDb: ClickhouseClientWrapper
+  clickhouseDb: ClickhouseClientWrapper,
+  request: RequestWrapper
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
-  let organizationId;
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
   }
-
+  let organizationId;
+  const { data: auth, error: authError } = await request.auth();
+  if (authError !== null) {
+    console.error("Error getting auth", authError);
+    return;
+  }
+  const db = new DBWrapper(env, auth);
+  const { data: orgData, error: orgError } = await db.getAuthParams();
+  if (orgError !== null) {
+    console.error("Error getting org", orgError);
+    return;
+  } else {
+    organizationId = orgData.organizationId;
+  }
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
