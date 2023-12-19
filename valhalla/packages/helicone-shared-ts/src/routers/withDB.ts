@@ -10,7 +10,7 @@ export function withDB<T>(
   fn: ({ db, request, res }: IRouterWrapperDB<T>) => void
 ) {
   return async (req: ExpressRequest, res: ExpressResponse) => {
-    const valhallaDB = createValhallaClient();
+    const valhallaDB = await createValhallaClient();
     fn({
       db: valhallaDB,
       request: new RequestWrapper<T>(req),

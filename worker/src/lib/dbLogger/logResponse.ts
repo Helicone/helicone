@@ -138,6 +138,7 @@ export async function logRequest(
       customPropertyRows,
       responseId
     );
+
     if (requestResult.error) {
       return { data: null, error: requestResult.error };
     }
