@@ -31,7 +31,7 @@ export function validateAlertCreate(
     return { data: null, error: "Invalid threshold" };
   if (!isValidTimePeriod(alert.time_window))
     return { data: null, error: "Invalid time_window" };
-  if (alert.metric !== "response.status" && alert.metric !== "response.cost")
+  if (alert.metric !== "response.status" && alert.metric !== "cost")
     return { data: null, error: "Invalid metric" };
   if (!isValidEmailArray(alert.emails))
     return { data: null, error: "Invalid emails" };

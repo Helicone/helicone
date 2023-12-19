@@ -203,7 +203,7 @@ export class AlertManager {
         alert.org_id,
         alert.time_window
       );
-    } else if (alert.metric === "response.cost") {
+    } else if (alert.metric === "cost") {
       return await this.alertStore.getCost(alert.org_id, alert.time_window);
     }
 
@@ -224,10 +224,7 @@ export class AlertManager {
           : 0;
 
       isRateBelowThreshold = triggerThreshold < alert.threshold;
-    } else if (alert.metric === "response.cost") {
-      console.log(`TotalCount: ${alertState.totalCount}`);
-      console.log(`RequestCount: ${alertState.requestCount}`);
-      console.log(`Alert Threshold: ${alert.threshold}`);
+    } else if (alert.metric === "cost") {
       triggerThreshold = alertState.totalCount;
       isRateBelowThreshold = alertState.totalCount < alert.threshold;
     } else {
