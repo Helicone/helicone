@@ -215,13 +215,6 @@ export class AlertManager {
     alertState: AlertState,
     timestamp: number
   ): Promise<AlertStateUpdate> {
-    if (
-      alert.minimum_request_count &&
-      alertState.requestCount < alert.minimum_request_count
-    ) {
-      return { status: "unchanged", timestamp, alert };
-    }
-
     let isRateBelowThreshold = false;
     let triggerThreshold = 0;
     if (alert.metric === "response.status") {
@@ -250,7 +243,8 @@ export class AlertManager {
     return await this.handleRateAboveThreshold(
       alert,
       triggerThreshold,
-      timestamp
+      timestamp,
+      alertState.requestCount
     );
   }
 
@@ -279,9 +273,14 @@ export class AlertManager {
   async handleRateAboveThreshold(
     alert: Database["public"]["Tables"]["alert"]["Row"],
     triggerThreshold: number,
+    requestCount: number,
     timestamp: number
   ): Promise<AlertStateUpdate> {
-    if (alert.status === "resolved") {
+    if (
+      alert.status === "resolved" &&
+      alert.minimum_request_count &&
+      requestCount >= alert.minimum_request_count
+    ) {
       await this.deleteCooldown(alert.id);
       return {
         status: "triggered",
