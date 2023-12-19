@@ -12,21 +12,32 @@ export function withAuth<T>(
 ) {
   return withDB<T>(async ({ db, request, res }) => {
     const supabaseClient = new SupabaseConnector();
-    const authorizationString = request.authHeader();
-    if ("string" !== typeof authorizationString) {
+    const authorization = request.authHeader();
+
+    if (authorization.error) {
       res.status(401).json({
-        error: "No authorization header",
+        error: authorization.error,
       });
       return;
     }
 
-    const isAuthenticated = await supabaseClient.authenticate(
-      authorizationString,
-      request.heliconeOrgId()
-    );
-    if (isAuthenticated.error) {
+    const authParams = await supabaseClient.authenticate(authorization.data!);
+
+    if (authParams.error) {
+      console.error("authParams.error", authParams.error);
+
+      console.error("Authorization header", authorization);
+      const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
+      const supabaseURL = SUPABASE_CREDS?.url;
+      const pingUrl = `${supabaseURL}`;
+
       res.status(401).json({
-        error: isAuthenticated.error,
+        error: authParams.error,
+        trace: "isAuthenticated.error",
+        authorizationString: authorization,
+        supabaseURL: supabaseURL,
+        pingUrl,
+        // pingResponse,
       });
       return;
     }
@@ -35,6 +46,7 @@ export function withAuth<T>(
       db,
       request,
       res,
+      authParams: authParams.data!,
       supabaseClient: supabaseClient,
     });
   });
