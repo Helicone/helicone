@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
-import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
+import { DBWrapper } from "../../db/DBWrapper";
 import { checkRateLimit, updateRateLimitCounter } from "../../rateLimit";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
