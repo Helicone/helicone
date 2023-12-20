@@ -246,6 +246,7 @@ export class DBLoggable {
           body: this.response.omitLog
             ? {
                 usage: parsedResponse.data?.usage,
+                model: parsedResponse.data?.model,
               }
             : parsedResponse.data,
           status: await this.response.status(),
