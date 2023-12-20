@@ -5,6 +5,7 @@ import MetaData from "../components/shared/metaData";
 import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
+import RequestsPage from "../components/templates/requestsV3/requestsPage";
 
 interface RequestsV2Props {
   user: User;
@@ -15,15 +16,18 @@ interface RequestsV2Props {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
+  query: any;
   initialRequestId: string | null;
 }
 
 const RequestsV2 = (props: RequestsV2Props) => {
-  const { user, currentPage, pageSize, sort, initialRequestId } = props;
+  const { user, currentPage, pageSize, sort, query, initialRequestId } = props;
 
   return (
     <MetaData title={"Requests"}>
       <AuthLayout user={user}>
+        <RequestsPage />
+        {JSON.stringify(query)}
         <RequestsPageV2
           currentPage={currentPage}
           pageSize={pageSize}
@@ -72,6 +76,7 @@ export const getServerSideProps = async (
     props: {
       user: user,
       currentPage,
+      query: context.query,
       pageSize,
       sort: {
         sortKey: sortKey ? (sortKey as string) : null,

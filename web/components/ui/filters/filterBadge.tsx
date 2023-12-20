@@ -8,10 +8,11 @@ interface FilterBadgeProps {
   title: string;
   children?: React.ReactNode;
   width?: string; // width in rem
+  showTitle?: boolean;
 }
 
 const FilterBadge = (props: FilterBadgeProps) => {
-  const { title, children, width = "14rem" } = props;
+  const { title, children, width = "14rem", showTitle = true } = props;
 
   return (
     <div className="z-10 flex">
@@ -37,9 +38,11 @@ const FilterBadge = (props: FilterBadgeProps) => {
                   "absolute block flex-col space-y-3 -left-2 mt-2 origin-top-left rounded-lg py-2 px-3 bg-white dark:bg-black shadow-lg border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 )}
               >
-                <p className="mt-1 font-semibold text-gray-700 dark:text-gray-300 text-sm">
-                  Filter by {title.toLowerCase()}
-                </p>
+                {showTitle && (
+                  <p className="mt-1 font-semibold text-gray-700 dark:text-gray-300 text-sm">
+                    Filter by {title.toLowerCase()}
+                  </p>
+                )}
                 <div className="w-full flex">{children}</div>
               </Popover.Panel>
             </Transition>
