@@ -59,8 +59,12 @@ export class Valhalla {
   private async send<T>(
     path: string,
     method: string,
-    body: string
+    body: string,
+    timeout = 5000
   ): Promise<Result<T, string>> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
     try {
       const response = await fetch(this.route(path), {
         method,
@@ -69,7 +73,10 @@ export class Valhalla {
           "Helicone-Authorization": JSON.stringify(this.heliconeAuth),
         },
         body: body,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
       const responseText = await response.text();
       if (response.status !== 200) {
         return err(`Failed to send request to Valhalla ${responseText}`);
@@ -84,7 +91,12 @@ export class Valhalla {
       } catch (e) {
         return err(`Failed to parse ${JSON.stringify(e)}`);
       }
-    } catch (e) {
+    } catch (e: any) {
+      clearTimeout(timeoutId);
+
+      if (e?.name === "AbortError") {
+        return err("Request timed out");
+      }
       return err(`Failed to send request to Valhalla ${JSON.stringify(e)}`);
     }
   }
