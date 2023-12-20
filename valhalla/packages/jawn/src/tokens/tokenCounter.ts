@@ -24,5 +24,7 @@ export async function getTokenCountGPT3(inputText: string): Promise<number> {
 export async function getTokenCountAnthropic(
   inputText: string
 ): Promise<number> {
+  // Normalize the potentially unicode input to Anthropic standard of normalization
+  // https://github.com/anthropics/anthropic-tokenizer-typescript/blob/bd241051066ea37120f2898419e3fc8662fab280/index.ts#L7C19-L7C19
   return anthropicTokenizer.encode(inputText.normalize("NFKC"), "all").length;
 }
