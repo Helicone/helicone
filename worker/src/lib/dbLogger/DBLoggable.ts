@@ -280,7 +280,8 @@ export class DBLoggable {
         response
       );
       if (error !== null) {
-        return err(error);
+        console.error("Error updating response", error);
+        // return err(error);
       }
       return ok(response);
     } catch (e) {
