@@ -79,9 +79,13 @@ class ValhallaDB implements IValhallaDB {
   }
 
   private async connect() {
-    if (!this.connected) {
-      await this.client.connect();
-      this.connected = true;
+    try {
+      if (!this.connected) {
+        await this.client.connect();
+        this.connected = true;
+      }
+    } catch (thrownErr) {
+      console.error("Error in connect", thrownErr);
     }
   }
 
