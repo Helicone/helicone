@@ -138,7 +138,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
           asyncLogModel.timing.endTime.milliseconds
       ),
     },
-    tokenCalcUrl: env.TOKEN_COUNT_URL,
+    tokenCalcUrl: env.VALHALLA_URL,
   });
 }
 
