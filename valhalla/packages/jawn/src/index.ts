@@ -5,6 +5,10 @@ import { withAuth, withDB } from "helicone-shared-ts";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
+import {
+  getTokenCountAnthropic,
+  getTokenCountGPT3,
+} from "./tokens/tokenCounter";
 
 const dirname = __dirname;
 
@@ -92,6 +96,19 @@ app.put(
     });
   })
 );
+
+app.post("/v1/tokens/anthropic", async (req, res) => {
+  const body = req.body;
+  const content = body?.content;
+  const tokens = await getTokenCountAnthropic(content ?? "");
+  res.json({ tokens });
+});
+app.post("/v1/tokens/gpt3", async (req, res) => {
+  const body = req.body;
+  const content = body?.content;
+  const tokens = await getTokenCountGPT3(content ?? "");
+  res.json({ tokens });
+});
 app.post(
   "/v1/response",
   withAuth<
