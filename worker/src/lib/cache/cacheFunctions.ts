@@ -67,27 +67,14 @@ export async function recordCacheHit(
   headers: Headers,
   env: Env,
   clickhouseDb: ClickhouseClientWrapper,
-  request: RequestWrapper
+  organizationId: string | null
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
   }
-  let organizationId;
-  const { data: auth, error: authError } = await request.auth();
-  if (authError !== null) {
-    console.error("Error getting auth", authError);
-    return;
-  }
-  const db = new DBWrapper(env, auth);
-  const { data: orgData, error: orgError } = await db.getAuthParams();
-  if (orgError !== null) {
-    console.error("Error getting org", orgError);
-    return;
-  } else {
-    organizationId = orgData.organizationId;
-  }
+  // Dual writing for now
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY

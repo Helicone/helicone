@@ -21,6 +21,18 @@ export async function proxyForwarder(
   ctx: ExecutionContext,
   provider: Provider
 ): Promise<Response> {
+  let organizationId = null;
+  const { data: auth, error: authError } = await request.auth();
+  if (authError == null) {
+    const db = new DBWrapper(env, auth);
+    const { data: orgData, error: orgError } = await db.getAuthParams();
+    if (orgError !== null) {
+      console.error("Error getting org", orgError);
+    } else {
+      organizationId = orgData.organizationId;
+    }
+  }
+
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(
       request,
@@ -84,7 +96,7 @@ export async function proxyForwarder(
           cachedResponse.headers,
           env,
           new ClickhouseClientWrapper(env),
-          proxyRequest.requestWrapper
+          organizationId
         )
       );
       return cachedResponse;
@@ -100,7 +112,11 @@ export async function proxyForwarder(
   }
   const { loggable, response } = data;
 
-  if (cacheSettings.shouldSaveToCache && response.status === 200) {
+  if (
+    cacheSettings.shouldSaveToCache &&
+    response.status === 200 &&
+    organizationId !== null
+  ) {
     ctx.waitUntil(
       loggable
         .waitForResponse()
