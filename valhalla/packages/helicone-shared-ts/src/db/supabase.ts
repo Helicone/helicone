@@ -165,7 +165,6 @@ export class SupabaseConnector {
       await hashAuth(JSON.stringify(authorization) + organizationId)
     );
     if (cachedResult) {
-      console.log("Using cached result");
       this.organizationId = (await cachedResult).organizationId;
       return ok(cachedResult);
     }
