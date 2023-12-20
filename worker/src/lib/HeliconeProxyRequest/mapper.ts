@@ -59,7 +59,7 @@ export class HeliconeProxyRequestMapper {
     private provider: Provider,
     private env: Env
   ) {
-    this.tokenCalcUrl = env["TOKEN_COUNT_URL"];
+    this.tokenCalcUrl = env.VALHALLA_URL;
   }
 
   async tryToProxyRequest(): Promise<Result<HeliconeProxyRequest, string>> {
