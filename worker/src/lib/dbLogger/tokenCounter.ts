@@ -11,10 +11,13 @@ export async function getTokenCount(
     if (!inputText) return 0;
     const url = new URL(_tokenCalcUrl);
     url.pathname = "/v1/tokens/gpt3";
-    const result = await fetch(url.toString(), {
+    const urlBuilt = url.toString();
+
+    const result = await fetch(urlBuilt, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        authorization: "Bearer " + process.env.TOKEN_KEY,
       },
       body: JSON.stringify({ content: inputText }),
     });
@@ -27,6 +30,7 @@ export async function getTokenCount(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        authorization: "Bearer " + process.env.TOKEN_KEY,
       },
       body: JSON.stringify({ content: inputText }),
     });
