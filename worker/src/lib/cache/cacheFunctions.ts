@@ -77,7 +77,6 @@ export async function recordCacheHit(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
-  console.log(requestId);
   const { error } = await dbClient
     .from("cache_hits")
     .insert({ request_id: requestId });
