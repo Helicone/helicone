@@ -6,7 +6,6 @@ export async function getTokenCount(
   _tokenCalcUrl: string
 ): Promise<number> {
   if (!inputText) return 0;
-  console.log("_tokenCalcUrl", _tokenCalcUrl);
 
   if (provider === "OPENAI") {
     if (!inputText) return 0;
