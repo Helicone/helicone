@@ -2,8 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
-import { DBWrapper } from "../../db/DBWrapper";
-import { RequestWrapper } from "../RequestWrapper";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
