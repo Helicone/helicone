@@ -242,7 +242,7 @@ export class InsertQueue {
 
     if (val.error) {
       console.error("Error inserting into valhalla:", val.error);
-      return err(val.error);
+      // return err(val.error);
     }
 
     const response = await this.valhalla.post("/v1/response", {
@@ -255,7 +255,7 @@ export class InsertQueue {
     });
     if (response.error) {
       console.error("Error inserting response into valhalla:", response.error);
-      return err(response.error);
+      // return err(response.error);
     }
     return ok(null);
   }
@@ -274,7 +274,8 @@ export class InsertQueue {
     const val = await this.addRequestToValhalla(requestData, responseId);
     const res = await insertIntoRequest(this.database, payload);
     if (val.error) {
-      return val;
+      console.error("Error inserting into valhalla:", val.error);
+      // return val;
     }
     if (res.error) {
       console.error("Error inserting into request:", res.error);
@@ -310,7 +311,7 @@ export class InsertQueue {
 
     if (responseUpdate.error) {
       console.error("Error updating response in valhalla:", responseUpdate);
-      return err(responseUpdate.error);
+      // return err(responseUpdate.error);
     }
     if (res.error) {
       console.error("Error inserting into response:", res.error);
