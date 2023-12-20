@@ -188,9 +188,24 @@ export const SingleChat = (props: {
     }
   };
 
-  let formattedMessageContent = removeLeadingWhitespace(
-    message?.content?.toString() || ""
-  );
+  const getFormattedMessageContent = () => {
+    // if message content is a string, remove the leading white space
+    // if it is an object, find the text inside of the content array
+
+    if (Array.isArray(message.content)) {
+      if (typeof message.content[0] === "string") {
+        return message.content[0];
+      }
+      const textMessage = message.content.find(
+        (message) => message.type === "text"
+      );
+      return textMessage?.text;
+    } else {
+      return removeLeadingWhitespace(message?.content?.toString() || "");
+    }
+  };
+
+  const formattedMessageContent = getFormattedMessageContent();
 
   const getBgColor = () => {
     return "bg-gray-50 dark:bg-[#17191d]";
@@ -263,7 +278,6 @@ export const SingleChat = (props: {
                 {isJSON(formattedMessageContent)
                   ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                   : formattedMessageContent}
-                {/* {message?.content} */}
               </div>
               {showButton && (
                 <div className="w-full flex justify-center items-center pt-2">
