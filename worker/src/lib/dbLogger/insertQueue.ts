@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, Json } from "../../../supabase/database.types";
-import { Result, err, ok } from "../../results";
+import { Result, ok } from "../../results";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { ResponseCopyV3 } from "../db/clickhouse";
 import { formatTimeString } from "./clickhouseLog";
