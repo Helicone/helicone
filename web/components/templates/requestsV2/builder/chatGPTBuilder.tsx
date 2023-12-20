@@ -22,12 +22,25 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           const content = messages.at(-1).content;
 
           if (Array.isArray(content)) {
+            // if the first element inside of content is a string, return the string
+            if (typeof content[0] === "string") {
+              return content[0];
+            }
             // image handling
-            const textMessage = content.find(
-              (message) => message.type === "text"
-            );
+            // find the last message that has the key text OR type:text is inside of `content`
+            const textMessage = messages
+              .slice()
+              .reverse()
+              .find(
+                (message: any) =>
+                  message.text ||
+                  (message.content &&
+                    message.content.some(
+                      (content: any) => content.type === "text"
+                    ))
+              );
 
-            return textMessage?.text ?? content ?? "";
+            return textMessage?.text || textMessage?.content[0].text || "";
           } else {
             return content;
           }
