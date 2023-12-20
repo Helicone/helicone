@@ -65,7 +65,7 @@ export async function recordCacheHit(
   headers: Headers,
   env: Env,
   clickhouseDb: ClickhouseClientWrapper,
-  organizationId: string | null
+  organizationId: string
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
@@ -77,6 +77,7 @@ export async function recordCacheHit(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
+  console.log(requestId);
   const { error } = await dbClient
     .from("cache_hits")
     .insert({ request_id: requestId });
@@ -88,7 +89,7 @@ export async function recordCacheHit(
     [
       {
         request_id: requestId,
-        organization_id: organizationId || null,
+        organization_id: organizationId,
         created_at: null,
       },
     ]

@@ -22,16 +22,6 @@ export async function proxyForwarder(
   provider: Provider
 ): Promise<Response> {
   let organizationId = null;
-  const { data: auth, error: authError } = await request.auth();
-  if (authError == null) {
-    const db = new DBWrapper(env, auth);
-    const { data: orgData, error: orgError } = await db.getAuthParams();
-    if (orgError !== null) {
-      console.error("Error getting org", orgError);
-    } else {
-      organizationId = orgData.organizationId;
-    }
-  }
 
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(
@@ -85,6 +75,19 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null) {
+        console.error("Error getting org", orgError);
+      } else {
+        organizationId = orgData.organizationId;
+      }
+    }
+  }
+
+  if (cacheSettings.shouldReadFromCache && organizationId !== null) {
     const cachedResponse = await getCachedResponse(
       proxyRequest,
       cacheSettings.bucketSettings,

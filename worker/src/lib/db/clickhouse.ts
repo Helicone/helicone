@@ -195,7 +195,7 @@ export interface PropertyWithResponseV1 {
 
 export interface CacheHits {
   request_id: string;
-  organization_id: Nullable<string>;
+  organization_id: string;
   created_at: Nullable<string>;
 }
 
