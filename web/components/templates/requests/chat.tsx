@@ -14,7 +14,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
-import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
 
 export type Message = {
