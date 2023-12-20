@@ -1,11 +1,6 @@
-import { Client, QueryResult } from "pg";
+import { Pool, QueryResult } from "pg";
 import { getEnvironment } from "../environment/get";
-import {
-  GenericResult,
-  PromiseGenericResult,
-  err,
-  ok,
-} from "../modules/result";
+import { PromiseGenericResult, err, ok } from "../modules/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
@@ -31,8 +26,7 @@ export interface IValhallaDB {
 }
 
 class ValhallaDB implements IValhallaDB {
-  client: Client;
-  connected: boolean = false;
+  pool: Pool;
 
   constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
@@ -63,7 +57,7 @@ class ValhallaDB implements IValhallaDB {
       password: string;
     } = JSON.parse(auroraCreds);
 
-    this.client = new Client({
+    this.pool = new Pool({
       host: auroraHost,
       port: parseInt(auroraPort),
       user: username,
@@ -78,19 +72,8 @@ class ValhallaDB implements IValhallaDB {
     });
   }
 
-  private async connect() {
-    try {
-      if (!this.connected) {
-        await this.client.connect();
-        this.connected = true;
-      }
-    } catch (thrownErr) {
-      console.error("Error in connect", thrownErr);
-    }
-  }
-
   async close() {
-    await this.client.end();
+    await this.pool.end();
   }
 
   async query(
@@ -98,8 +81,10 @@ class ValhallaDB implements IValhallaDB {
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
     try {
-      this.connect();
-      return ok(await this.client.query(query, values));
+      const client = await this.pool.connect();
+      const result = await client.query(query, values);
+      client.release();
+      return ok(result);
     } catch (thrownErr) {
       console.error("Error in query", query, thrownErr);
       return err(JSON.stringify(thrownErr));
