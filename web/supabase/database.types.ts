@@ -15,6 +15,7 @@ export interface Database {
           emails: string[]
           id: string
           metric: string
+          minimum_request_count: number | null
           name: string
           org_id: string
           soft_delete: boolean
@@ -29,6 +30,7 @@ export interface Database {
           emails: string[]
           id?: string
           metric: string
+          minimum_request_count?: number | null
           name: string
           org_id: string
           soft_delete?: boolean
@@ -43,6 +45,7 @@ export interface Database {
           emails?: string[]
           id?: string
           metric?: string
+          minimum_request_count?: number | null
           name?: string
           org_id?: string
           soft_delete?: boolean
@@ -1401,13 +1404,13 @@ export interface Database {
         | {
             Args: {
               this_associated_request_id: string
+              this_user_id: string
             }
             Returns: boolean
           }
         | {
             Args: {
               this_associated_request_id: string
-              this_user_id: string
             }
             Returns: boolean
           }
@@ -1415,13 +1418,13 @@ export interface Database {
         | {
             Args: {
               time_increment: string
+              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }
         | {
             Args: {
               time_increment: string
-              prev_period: string
             }
             Returns: Record<string, unknown>[]
           }

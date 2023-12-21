@@ -15,6 +15,7 @@ export interface Database {
           emails: string[]
           id: string
           metric: string
+          minimum_request_count: number | null
           name: string
           org_id: string
           soft_delete: boolean
@@ -29,6 +30,7 @@ export interface Database {
           emails: string[]
           id?: string
           metric: string
+          minimum_request_count?: number | null
           name: string
           org_id: string
           soft_delete?: boolean
@@ -43,6 +45,7 @@ export interface Database {
           emails?: string[]
           id?: string
           metric?: string
+          minimum_request_count?: number | null
           name?: string
           org_id?: string
           soft_delete?: boolean

@@ -2,12 +2,14 @@ import { ClickhouseClientWrapper } from "./../lib/db/clickhouse";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../results";
 import { Database } from "../../supabase/database.types";
+import { CLICKHOUSE_PRICE_CALC } from "../lib/limits/check";
 
 type AlertStatus = "triggered" | "resolved";
 type Alert = Database["public"]["Tables"]["alert"]["Row"];
 export type AlertState = {
   totalCount: number;
-  errorCount: number;
+  errorCount?: number;
+  requestCount: number;
 };
 
 export class AlertStore {
@@ -90,13 +92,41 @@ export class AlertStore {
     return ok(null);
   }
 
-  public async checkAlertClickhouse(
+  public async getCost(
+    organizationId: string,
+    timeWindowMs: number
+  ): Promise<Result<AlertState, string>> {
+    const query = `SELECT 
+    ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as totalCount,
+    COUNT() AS requestCount
+    FROM response_copy_v3
+    WHERE
+    organization_id = {val_0: UUID} AND
+    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND`;
+
+    const { data: cost, error: alertStateErr } =
+      await this.clickhouseClient.dbQuery<AlertState>(query, [
+        organizationId,
+        timeWindowMs,
+      ]);
+
+    if (alertStateErr || !cost || cost.length === 0) {
+      return err(
+        `Failed to check alert state from clickhouse: ${alertStateErr}`
+      );
+    }
+
+    return ok(cost[0]);
+  }
+
+  public async getErrorRate(
     organizationId: string,
     timeWindowMs: number
   ): Promise<Result<AlertState, string>> {
     const query = `SELECT
     COUNT() AS totalCount,
-    COUNTIf(status BETWEEN 400 AND 599) AS errorCount
+    COUNTIf(status BETWEEN 400 AND 599) AS errorCount,
+    COUNT() AS requestCount
   FROM response_copy_v3
   WHERE 
     organization_id = {val_0: UUID} AND

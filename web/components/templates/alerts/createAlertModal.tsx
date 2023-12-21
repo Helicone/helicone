@@ -1,7 +1,11 @@
 import { FormEvent, useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
-import ThemedDropdown from "../../shared/themed/themedDropdown";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
+import {
+  MultiSelect,
+  MultiSelectItem,
+  Select,
+  SelectItem,
+} from "@tremor/react";
 import { useOrg } from "../../shared/layout/organizationContext";
 import {
   useGetOrgMembers,
@@ -11,8 +15,14 @@ import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import useNotification from "../../shared/notification/useNotification";
 import { useUser } from "@supabase/auth-helpers-react";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import {
+  CodeBracketSquareIcon,
+  CurrencyDollarIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
+import { clsx } from "../../shared/clsx";
+import { alertTimeWindows } from "./alertsPage";
 
 interface CreateAlertModalProps {
   open: boolean;
@@ -76,15 +86,23 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     const jwtToken = parsedCookie[0];
 
     const formData = new FormData(event.currentTarget);
-    const alertName = formData.get("alert-name") as string;
-    const alertThreshold = parseInt(
-      formData.get("alert-threshold") as string,
-      10
-    );
 
-    if (isNaN(alertThreshold) || alertThreshold < 0 || alertThreshold > 100) {
-      setNotification("Please enter a valid threshold", "error");
-      return;
+    const alertName = formData.get("alert-name") as string;
+    const alertThreshold = Number(formData.get("alert-threshold") as string);
+    const alertMinRequests = Number(formData.get("min-requests") as string);
+
+    if (selectedMetric === "response.status") {
+      if (isNaN(alertThreshold) || alertThreshold < 0 || alertThreshold > 100) {
+        setNotification("Please enter a valid threshold", "error");
+        return;
+      }
+    }
+
+    if (selectedMetric === "cost") {
+      if (isNaN(alertThreshold) || alertThreshold < 0) {
+        setNotification("Please enter a valid threshold", "error");
+        return;
+      }
     }
 
     if (selectedEmails.length < 1) {
@@ -116,6 +134,9 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
         time_window: selectedTimeWindow,
         emails: selectedEmails,
         org_id: orgContext?.currentOrg.id,
+        minimum_request_count: isNaN(alertMinRequests)
+          ? undefined
+          : alertMinRequests,
       }),
     })
       .then((res) => res.json())
@@ -133,7 +154,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     <ThemedModal open={open} setOpen={setOpen}>
       <form
         onSubmit={handleCreateAlert}
-        className="grid grid-cols-4 gap-6 w-full sm:w-[450px] max-w-[450px] h-full"
+        className="grid grid-cols-4 gap-8 w-full sm:w-[450px] max-w-[450px] h-full"
       >
         <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
           Create Alert
@@ -149,6 +170,134 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
             required
             placeholder="Alert Name"
+          />
+        </div>
+
+        <div className="col-span-2 w-full space-y-1.5 text-sm">
+          <label htmlFor="alert-metric" className="text-gray-500">
+            Metric
+          </label>
+          <Select
+            placeholder="Select a metric"
+            value={selectedMetric}
+            defaultValue="response.status"
+            onValueChange={(values: string) => {
+              setSelectedMetric(values);
+            }}
+            enableClear={false}
+          >
+            {[
+              {
+                icon: CodeBracketSquareIcon,
+                label: "status",
+                value: "response.status",
+              },
+              {
+                icon: CurrencyDollarIcon,
+                label: "cost",
+                value: "cost",
+              },
+            ].map((option, idx) => {
+              return (
+                <SelectItem value={option.value} key={idx} icon={option.icon}>
+                  {option.label}
+                </SelectItem>
+              );
+            })}
+          </Select>
+        </div>
+        <div className="col-span-2 w-full space-y-1.5 text-sm ">
+          <label
+            htmlFor="alert-threshold"
+            className="text-gray-500 items-center flex gap-1"
+          >
+            Threshold
+            <Tooltip
+              title={
+                selectedMetric === "response.status"
+                  ? "Specify the percentage at which the alert should be triggered. For instance, entering '10%' will trigger an alert when the metric exceeds 10% of the set value."
+                  : "Specify the amount at which the alert should be triggered. For instance, entering '10' will trigger an alert when the metric exceeds $10."
+              }
+            >
+              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            </Tooltip>
+          </label>
+          <div className="relative">
+            {selectedMetric === "cost" && (
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-gray-500 sm:text-sm" id="price-currency">
+                  $
+                </span>
+              </div>
+            )}
+            <input
+              type="number"
+              name="alert-threshold"
+              id="alert-threshold"
+              className={clsx(
+                selectedMetric === "response.status" && "pr-8",
+                selectedMetric === "cost" && "pl-8",
+                "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+              )}
+              min={selectedMetric === "response.status" ? 1 : 0.01}
+              step={0.01}
+              required
+            />
+            {selectedMetric === "response.status" && (
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <span className="text-gray-500 sm:text-sm" id="price-currency">
+                  %
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="col-span-2 w-full space-y-1.5 text-sm">
+          <label
+            htmlFor="time-frame"
+            className="text-gray-500 items-center flex gap-1"
+          >
+            Time Frame{" "}
+            <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
+              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            </Tooltip>
+          </label>
+          <Select
+            placeholder="Select a time frame"
+            value={selectedTimeWindow}
+            onValueChange={(values: string) => {
+              setSelectedTimeWindow(values);
+            }}
+            enableClear={false}
+          >
+            {Object.entries(alertTimeWindows).map(([key, value], idx) => {
+              return (
+                <SelectItem value={value.toString()} key={idx}>
+                  {key}
+                </SelectItem>
+              );
+            })}
+          </Select>
+        </div>
+        <div className="col-span-2 w-full space-y-1.5 text-sm">
+          <label
+            htmlFor="min-requests"
+            className="text-gray-500 items-center flex gap-1"
+          >
+            Min Requests (optional){" "}
+            <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
+              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            </Tooltip>
+          </label>
+          <input
+            type="number"
+            name="min-requests"
+            id="min-requests"
+            className={clsx(
+              "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+            )}
+            min={1}
+            step={1}
           />
         </div>
         <div className="col-span-4 w-full space-y-1.5 text-sm">
@@ -174,77 +323,6 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
               );
             })}
           </MultiSelect>
-        </div>
-        <div className="col-span-2 w-full space-y-1.5 text-sm">
-          <label htmlFor="alert-metric" className="text-gray-500">
-            Metric
-          </label>
-          <ThemedDropdown
-            options={[
-              {
-                label: "Response status",
-                value: "response.status",
-              },
-              {
-                label: "Cost (coming soon)",
-                value: "costs",
-              },
-            ]}
-            selectedValue={selectedMetric}
-            onSelect={(value) =>
-              value === "response.status" ? setSelectedMetric(value) : ""
-            }
-          />
-        </div>
-        <div className="col-span-2 w-full space-y-1.5 text-sm ">
-          <label
-            htmlFor="alert-threshold"
-            className="text-gray-500 items-center flex gap-1"
-          >
-            Threshold
-            <Tooltip title="Specify the percentage at which the alert should be triggered. For instance, entering '10%' will trigger an alert when the metric exceeds 10% of the set value.">
-              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
-            </Tooltip>
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              name="alert-threshold"
-              id="alert-threshold"
-              className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-              required
-              placeholder="Threshold (0-100)"
-            />
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <span className="text-gray-500 sm:text-sm" id="price-currency">
-                %
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="col-span-4 w-full space-y-1.5 text-sm">
-          <label
-            htmlFor="time-frame"
-            className="text-gray-500 items-center flex gap-1"
-          >
-            Time Frame{" "}
-            <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
-              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
-            </Tooltip>
-          </label>
-          <ThemedDropdown
-            options={[
-              // 5 min, 10, 15, 30 and 1 hour
-              { label: "5 Minutes", value: "300000" },
-              { label: "10 Minutes", value: "600000" },
-              { label: "15 Minutes", value: "900000" },
-              { label: "30 Minutes", value: "1800000" },
-              { label: "1 Hour", value: "3600000" },
-            ]}
-            selectedValue={selectedTimeWindow}
-            onSelect={(value) => setSelectedTimeWindow(value)}
-            verticalAlign="top"
-          />
         </div>
         <div className="col-span-4 flex justify-end gap-2 pt-4">
           <button
