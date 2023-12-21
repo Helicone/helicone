@@ -12,6 +12,8 @@ import {
 import { getCacheSettings } from "../cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { InsertQueue } from "../dbLogger/insertQueue";
+
+import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
 
@@ -155,6 +157,7 @@ export async function proxyForwarder(
       dbWrapper: new DBWrapper(env, auth),
       queue: new InsertQueue(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new Valhalla(env.VALHALLA_URL, auth),
         new ClickhouseClientWrapper(env),
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV

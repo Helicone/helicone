@@ -138,7 +138,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
           asyncLogModel.timing.endTime.milliseconds
       ),
     },
-    tokenCalcUrl: env.TOKEN_COUNT_URL,
+    tokenCalcUrl: env.VALHALLA_URL,
   });
 }
 
@@ -246,6 +246,7 @@ export class DBLoggable {
           body: this.response.omitLog
             ? {
                 usage: parsedResponse.data?.usage,
+                model: parsedResponse.data?.model,
               }
             : parsedResponse.data,
           status: await this.response.status(),
@@ -279,7 +280,8 @@ export class DBLoggable {
         response
       );
       if (error !== null) {
-        return err(error);
+        console.error("Error updating response", error);
+        // return err(error);
       }
       return ok(response);
     } catch (e) {
