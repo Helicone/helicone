@@ -431,7 +431,61 @@ resource "aws_apprunner_service" "app_service" {
         }
         runtime_environment_variables = {
           # proxy endpoint
-          AURORA_HOST     = aws_db_proxy.aurora_reader_proxy.endpoint
+          AURORA_HOST     = aws_db_proxy.aurora_writer_proxy.endpoint
+          AURORA_PORT     = "5432"
+          AURORA_DATABASE = local.database_name
+          ENV             = "production"
+        }  
+      }
+    }
+  }
+  network_configuration{
+     egress_configuration {
+      egress_type       = "VPC"
+      vpc_connector_arn = aws_apprunner_vpc_connector.connector.arn
+    }
+  }
+  
+  health_check_configuration {
+    protocol = "HTTP"
+    path     = "/healthcheck"
+    interval = 10
+    timeout  = 5
+  }
+
+
+  instance_configuration {
+    cpu    = "2 vCPU"
+    memory = "4 GB"
+    instance_role_arn = aws_iam_role.apprunner_instance_role.arn 
+  }
+  # More configurations like auto scaling, tags, etc. can be added if needed.
+}
+
+
+
+
+resource "aws_apprunner_service" "valhalla_jawn_staging" {
+
+  service_name = "${local.name}-valhalla-jawn-staging"
+
+  source_configuration {
+    auto_deployments_enabled = true
+    authentication_configuration {
+      access_role_arn = aws_iam_role.apprunner_service_role.arn
+    }
+    image_repository {
+      image_identifier      = "${var.image_url}-staging:latest"
+      image_repository_type = "ECR"
+      image_configuration {
+        port                = "8585"
+        runtime_environment_secrets = {
+          AURORA_CREDS = module.aurora.cluster_master_user_secret[0].secret_arn
+          SUPABASE_CREDS = var.supabase_creds_secret_arn
+        }
+        runtime_environment_variables = {
+          # proxy endpoint
+          AURORA_HOST     = aws_db_proxy.aurora_writer_proxy.endpoint
           AURORA_PORT     = "5432"
           AURORA_DATABASE = local.database_name
           ENV             = "production"
@@ -460,5 +514,7 @@ resource "aws_apprunner_service" "app_service" {
     instance_role_arn = aws_iam_role.apprunner_instance_role.arn 
   }
 
+
   # More configurations like auto scaling, tags, etc. can be added if needed.
 }
+

@@ -1,6 +1,6 @@
 import { Pool, QueryResult } from "pg";
 import { getEnvironment } from "../environment/get";
-import { PromiseGenericResult, err, ok } from "../modules/result";
+import { PromiseGenericResult, Result, err, ok } from "../modules/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
@@ -23,6 +23,22 @@ export interface IValhallaDB {
     feedback: ValhallaFeedback
   ): PromiseGenericResult<QueryResult<any>>;
   close(): Promise<void>;
+}
+
+async function timeoutPromise<T>(
+  ms: number,
+  promise: Promise<T>,
+  errString?: string
+): Promise<Result<T, string>> {
+  let timeout = new Promise((resolve, reject) => {
+    let id = setTimeout(() => {
+      clearTimeout(id);
+      resolve(err(errString ?? "rejected"));
+    }, ms);
+  });
+  return (await Promise.race([promise.then((e) => ok(e)), timeout])) as Promise<
+    Result<T, string>
+  >;
 }
 
 class ValhallaDB implements IValhallaDB {
@@ -63,7 +79,7 @@ class ValhallaDB implements IValhallaDB {
       user: username,
       password: password,
       database: auroraDb,
-      max: 100,
+      max: 1_000,
       idleTimeoutMillis: 1000, // close idle clients after 1 second
       connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
       maxUses: 7_200,
@@ -79,20 +95,72 @@ class ValhallaDB implements IValhallaDB {
   async close() {
     await this.pool.end();
   }
-
-  async query(
+  private async _query(
     query: string,
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
     try {
-      const client = await this.pool.connect();
-      const result = await client.query(query, values);
+      const queryId = Math.random().toString(36).substring(7);
+
+      console.log(
+        `Attempting to connect to the database at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      const { data: client, error: clientError } = await timeoutPromise(
+        1000,
+        this.pool.connect(),
+        "Connection timed out"
+      );
+      if (clientError || !client) {
+        console.error("Error connecting to the database, timeout", clientError);
+        return err(clientError);
+      }
+      console.log(
+        `Connected to the database at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+
+      const { data: result, error: resultError } = await timeoutPromise(
+        2000,
+        client.query(query, values).then(async (res) => {
+          // sleep for 1 second to simulate a slow query
+          // await new Promise((resolve) => setTimeout(resolve, 10_000));
+          return res;
+        }),
+        "Query timed out"
+      );
+
+      if (resultError || !result) {
+        console.error("Error in query", query, resultError);
+        return err(resultError);
+      }
+
+      console.log(
+        `Query complete at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
       client.release();
       return ok(result);
     } catch (thrownErr) {
       console.error("Error in query", query, thrownErr);
-      return err(JSON.stringify(thrownErr));
+      return err(`There was an exception: ${JSON.stringify(thrownErr)}`);
     }
+  }
+  async query(
+    query: string,
+    values: any[] = []
+  ): PromiseGenericResult<QueryResult<any>> {
+    const { data: queryResult, error: queryResultError } = await timeoutPromise(
+      3000,
+      this._query(query, values).then(async (res) => {
+        // sleep for 1 second to simulate a slow query
+        // await new Promise((resolve) => setTimeout(resolve, 10_000));
+        return res;
+      }),
+      "this.query timed out"
+    );
+    if (queryResultError || !queryResult) {
+      console.error("Error in query", query, queryResultError);
+      return err(queryResultError);
+    }
+    return queryResult;
   }
 
   async now() {

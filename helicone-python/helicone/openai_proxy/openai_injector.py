@@ -1,3 +1,5 @@
+import threading
+import logging
 from dataclasses import dataclass
 import functools
 from typing import Optional, TypedDict, Union
@@ -6,16 +8,8 @@ import inspect
 from helicone.globals import helicone_global
 import openai
 import requests
-from openai.api_resources import (
-    ChatCompletion,
-    Completion,
-    Edit,
-    Embedding,
-    Image,
-    Moderation,
-)
-import logging
-import threading
+from openai.resources.chat import Completions
+
 
 logger = logging.getLogger(__name__)
 
@@ -268,12 +262,7 @@ class OpenAIInjector:
         openai.api_requestor.APIRequestor.arequest_raw = arequest_raw_patched
 
         api_resources_classes = [
-            (ChatCompletion, "create", "acreate"),
-            (Completion, "create", "acreate"),
-            (Edit, "create", "acreate"),
-            (Embedding, "create", "acreate"),
-            (Image, "create", "acreate"),
-            (Moderation, "create", "acreate"),
+            (Completions, "create", "acreate"),
         ]
 
         for api_resource_class, method, async_method in api_resources_classes:

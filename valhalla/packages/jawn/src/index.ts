@@ -175,7 +175,7 @@ app.patch(
     if (insertResponseResult.error) {
       res.status(500).json({
         error: insertResponseResult.error,
-        trace: "insertResponseResult.error",
+        trace: "patch.insertResponseResult.error",
       });
       return;
     }
