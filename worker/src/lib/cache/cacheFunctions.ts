@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
@@ -62,13 +63,16 @@ export async function saveToCache(
 
 export async function recordCacheHit(
   headers: Headers,
-  env: Env
+  env: Env,
+  clickhouseDb: ClickhouseClientWrapper,
+  organizationId: string
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
   }
+  // Dual writing for now
   const dbClient = createClient(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
@@ -78,6 +82,19 @@ export async function recordCacheHit(
     .insert({ request_id: requestId });
   if (error) {
     console.error(error);
+  }
+  const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
+    "cache_hits",
+    [
+      {
+        request_id: requestId,
+        organization_id: organizationId,
+        created_at: null,
+      },
+    ]
+  );
+  if (clickhouseError) {
+    console.error(clickhouseError);
   }
 }
 export async function getCachedResponse(
