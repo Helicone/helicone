@@ -15,6 +15,16 @@ interface AlertsPageProps {
   user: User;
 }
 
+export const alertTimeWindows: { [key: string]: number } = {
+  "5 minutes": 5 * 60 * 1000,
+  "10 minutes": 10 * 60 * 1000,
+  "15 minutes": 15 * 60 * 1000,
+  "30 minutes": 30 * 60 * 1000,
+  "1 hour": 60 * 60 * 1000,
+  "1 day": 24 * 60 * 60 * 1000,
+  "1 week": 7 * 24 * 60 * 60 * 1000,
+};
+
 const AlertsPage = (props: AlertsPageProps) => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
@@ -25,6 +35,19 @@ const AlertsPage = (props: AlertsPageProps) => {
   const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
     orgContext?.currentOrg.id || ""
   );
+
+  function formatTimeWindow(milliseconds: number): string {
+    // Define the time windows with an index signature
+
+    let closest = Object.keys(alertTimeWindows).reduce((a, b) => {
+      return Math.abs(alertTimeWindows[a] - milliseconds) <
+        Math.abs(alertTimeWindows[b] - milliseconds)
+        ? a
+        : b;
+    });
+
+    return closest;
+  }
 
   return (
     <div className="flex flex-col space-y-16">
@@ -82,7 +105,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                   status: (
                     <div>
                       {key.status === "resolved" ? (
-                        <Tooltip title={"Resolved"}>
+                        <Tooltip title={"Healthy"}>
                           <span className="relative flex h-2.5 w-2.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
@@ -115,8 +138,8 @@ const AlertsPage = (props: AlertsPageProps) => {
                   ),
                   time_window: (
                     <p className="text-gray-900 dark:text-gray-100">
-                      {/* convert to minutes */}
-                      {`${key.time_window / 60000} minutes`}
+                      {/* convert to the minutes, hours, days, or week. depndending on what is smallest */}
+                      {formatTimeWindow(key.time_window)}
                     </p>
                   ),
                   emails: (
