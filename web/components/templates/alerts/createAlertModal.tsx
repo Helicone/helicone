@@ -87,16 +87,10 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     const jwtToken = parsedCookie[0];
 
     const formData = new FormData(event.currentTarget);
-    const alertName = formData.get("alert-name") as string;
-    const alertThreshold = parseInt(
-      formData.get("alert-threshold") as string,
-      10
-    );
 
-    const alertMinRequests = parseInt(
-      formData.get("min-requests") as string,
-      10
-    );
+    const alertName = formData.get("alert-name") as string;
+    const alertThreshold = Number(formData.get("alert-threshold") as string);
+    const alertMinRequests = Number(formData.get("min-requests") as string);
 
     if (selectedMetric === "response.status") {
       if (isNaN(alertThreshold) || alertThreshold < 0 || alertThreshold > 100) {
@@ -127,14 +121,9 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       return;
     }
 
-    fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "helicone-jwt": jwtToken,
-        "helicone-org-id": orgContext?.currentOrg.id,
-      },
-      body: JSON.stringify({
+    console.log(
+      "body",
+      JSON.stringify({
         name: alertName,
         metric: selectedMetric,
         threshold: alertThreshold,
@@ -144,17 +133,37 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
         minimum_request_count: isNaN(alertMinRequests)
           ? undefined
           : alertMinRequests,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setNotification("Successfully created alert", "success");
-        setOpen(false);
-        onSuccess();
       })
-      .catch((err) => {
-        setNotification(`Failed to create alert ${err}`, "error");
-      });
+    );
+
+    // fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "helicone-jwt": jwtToken,
+    //     "helicone-org-id": orgContext?.currentOrg.id,
+    //   },
+    //   body: JSON.stringify({
+    //     name: alertName,
+    //     metric: selectedMetric,
+    //     threshold: alertThreshold,
+    //     time_window: selectedTimeWindow,
+    //     emails: selectedEmails,
+    //     org_id: orgContext?.currentOrg.id,
+    //     minimum_request_count: isNaN(alertMinRequests)
+    //       ? undefined
+    //       : alertMinRequests,
+    //   }),
+    // })
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     setNotification("Successfully created alert", "success");
+    //     setOpen(false);
+    //     onSuccess();
+    //   })
+    //   .catch((err) => {
+    //     setNotification(`Failed to create alert ${err}`, "error");
+    //   });
   };
 
   return (
@@ -191,11 +200,12 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             onValueChange={(values: string) => {
               setSelectedMetric(values);
             }}
+            enableClear={false}
           >
             {[
               {
                 icon: CodeBracketSquareIcon,
-                label: "Response Status",
+                label: "status",
                 value: "response.status",
               },
               {
@@ -237,14 +247,16 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
               </div>
             )}
             <input
-              type="text"
+              type="number"
               name="alert-threshold"
               id="alert-threshold"
               className={clsx(
-                selectedMetric === "response.status" && "pr-4",
+                selectedMetric === "response.status" && "pr-8",
                 selectedMetric === "cost" && "pl-8",
                 "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
               )}
+              min={selectedMetric === "response.status" ? 1 : 0.01}
+              step={0.01}
               required
             />
             {selectedMetric === "response.status" && (
@@ -272,6 +284,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             onValueChange={(values: string) => {
               setSelectedTimeWindow(values);
             }}
+            enableClear={false}
           >
             {Object.entries(alertTimeWindows).map(([key, value], idx) => {
               return (
@@ -299,7 +312,8 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             className={clsx(
               "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
             )}
-            min={0}
+            min={1}
+            step={1}
           />
         </div>
         <div className="col-span-4 w-full space-y-1.5 text-sm">

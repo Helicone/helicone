@@ -10,6 +10,7 @@ import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { Tooltip } from "@mui/material";
+import { Select, SelectItem } from "@tremor/react";
 
 interface AlertsPageProps {
   user: User;
@@ -23,6 +24,7 @@ export const alertTimeWindows: { [key: string]: number } = {
   "1 hour": 60 * 60 * 1000,
   "1 day": 24 * 60 * 60 * 1000,
   "1 week": 7 * 24 * 60 * 60 * 1000,
+  "1 month": 30 * 24 * 60 * 60 * 1000,
 };
 
 const AlertsPage = (props: AlertsPageProps) => {
@@ -133,12 +135,17 @@ const AlertsPage = (props: AlertsPageProps) => {
                   ),
                   threshold: (
                     <p className="text-gray-900 dark:text-gray-100">
-                      {`${key.threshold}%`}
+                      {key.metric === "response.status" && (
+                        <span>{`${key.threshold}%`}</span>
+                      )}
+                      {key.metric === "cost" && (
+                        <span>{`$${key.threshold.toFixed(2)}`}</span>
+                      )}
                     </p>
                   ),
                   metric: (
                     <p className="text-xs text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-2 py-1 w-fit">
-                      {key.metric}
+                      {key.metric === "response.status" ? "status" : key.metric}
                     </p>
                   ),
                   time_window: (
@@ -152,7 +159,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                     </p>
                   ),
                   emails: (
-                    <div className="text-gray-900 dark:text-gray-100 overflow-auto">
+                    <div className="text-gray-900 dark:text-gray-100 flex">
                       {key.emails.join(", ")}
                     </div>
                   ),
