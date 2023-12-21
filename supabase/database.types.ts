@@ -15,9 +15,11 @@ export interface Database {
           emails: string[]
           id: string
           metric: string
+          minimum_request_count: number | null
           name: string
           org_id: string
           soft_delete: boolean
+          status: string
           threshold: number
           time_block_duration: number
           time_window: number
@@ -28,9 +30,11 @@ export interface Database {
           emails: string[]
           id?: string
           metric: string
+          minimum_request_count?: number | null
           name: string
           org_id: string
           soft_delete?: boolean
+          status?: string
           threshold: number
           time_block_duration?: number
           time_window: number
@@ -41,9 +45,11 @@ export interface Database {
           emails?: string[]
           id?: string
           metric?: string
+          minimum_request_count?: number | null
           name?: string
           org_id?: string
           soft_delete?: boolean
+          status?: string
           threshold?: number
           time_block_duration?: number
           time_window?: number
@@ -63,6 +69,7 @@ export interface Database {
           alert_end_time: string | null
           alert_id: string
           alert_metric: string
+          alert_name: string
           alert_start_time: string
           created_at: string | null
           id: string
@@ -76,6 +83,7 @@ export interface Database {
           alert_end_time?: string | null
           alert_id: string
           alert_metric: string
+          alert_name: string
           alert_start_time: string
           created_at?: string | null
           id?: string
@@ -89,6 +97,7 @@ export interface Database {
           alert_end_time?: string | null
           alert_id?: string
           alert_metric?: string
+          alert_name?: string
           alert_start_time?: string
           created_at?: string | null
           id?: string
