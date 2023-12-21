@@ -237,7 +237,12 @@ const AlertsPage = (props: AlertsPageProps) => {
                 ),
                 triggered_value: (
                   <p className="text-gray-900 dark:text-gray-100">
-                    {`${key.triggered_value}%`}
+                    {key.alert_metric === "response.status" && (
+                      <span>{`${key.triggered_value}%`}</span>
+                    )}
+                    {key.alert_metric === "cost" && (
+                      <span>{`$${key.triggered_value}`}</span>
+                    )}
                   </p>
                 ),
                 status: <p className="text-gray-500">{key.status}</p>,
