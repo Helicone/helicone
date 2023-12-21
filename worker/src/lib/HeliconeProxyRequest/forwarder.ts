@@ -21,8 +21,6 @@ export async function proxyForwarder(
   ctx: ExecutionContext,
   provider: Provider
 ): Promise<Response> {
-  let organizationId = null;
-
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(
       request,
@@ -82,27 +80,23 @@ export async function proxyForwarder(
       if (orgError !== null) {
         console.error("Error getting org", orgError);
       } else {
-        organizationId = orgData.organizationId;
+        const cachedResponse = await getCachedResponse(
+          proxyRequest,
+          cacheSettings.bucketSettings,
+          env.CACHE_KV
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(
+            recordCacheHit(
+              cachedResponse.headers,
+              env,
+              new ClickhouseClientWrapper(env),
+              orgData.organizationId
+            )
+          );
+          return cachedResponse;
+        }
       }
-    }
-  }
-
-  if (cacheSettings.shouldReadFromCache && organizationId !== null) {
-    const cachedResponse = await getCachedResponse(
-      proxyRequest,
-      cacheSettings.bucketSettings,
-      env.CACHE_KV
-    );
-    if (cachedResponse) {
-      ctx.waitUntil(
-        recordCacheHit(
-          cachedResponse.headers,
-          env,
-          new ClickhouseClientWrapper(env),
-          organizationId
-        )
-      );
-      return cachedResponse;
     }
   }
 
@@ -115,25 +109,30 @@ export async function proxyForwarder(
   }
   const { loggable, response } = data;
 
-  if (
-    cacheSettings.shouldSaveToCache &&
-    response.status === 200 &&
-    organizationId !== null
-  ) {
-    ctx.waitUntil(
-      loggable
-        .waitForResponse()
-        .then((responseBody) =>
-          saveToCache(
-            proxyRequest,
-            response,
-            responseBody,
-            cacheSettings.cacheControl,
-            cacheSettings.bucketSettings,
-            env.CACHE_KV
-          )
-        )
-    );
+  if (cacheSettings.shouldSaveToCache && response.status === 200) {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { error: orgError } = await db.getAuthParams();
+      if (orgError !== null) {
+        console.error("Error getting org", orgError);
+      } else {
+        ctx.waitUntil(
+          loggable
+            .waitForResponse()
+            .then((responseBody) =>
+              saveToCache(
+                proxyRequest,
+                response,
+                responseBody,
+                cacheSettings.cacheControl,
+                cacheSettings.bucketSettings,
+                env.CACHE_KV
+              )
+            )
+        );
+      }
+    }
   }
 
   response.headers.forEach((value, key) => {
