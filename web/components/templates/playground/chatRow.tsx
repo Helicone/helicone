@@ -1,5 +1,4 @@
 import { clsx } from "../../shared/clsx";
-import Image from "next/image";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import ResizeTextArea from "./resizeTextArea";
