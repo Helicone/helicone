@@ -121,9 +121,14 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       return;
     }
 
-    console.log(
-      "body",
-      JSON.stringify({
+    fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "helicone-jwt": jwtToken,
+        "helicone-org-id": orgContext?.currentOrg.id,
+      },
+      body: JSON.stringify({
         name: alertName,
         metric: selectedMetric,
         threshold: alertThreshold,
@@ -133,37 +138,17 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
         minimum_request_count: isNaN(alertMinRequests)
           ? undefined
           : alertMinRequests,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setNotification("Successfully created alert", "success");
+        setOpen(false);
+        onSuccess();
       })
-    );
-
-    // fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "helicone-jwt": jwtToken,
-    //     "helicone-org-id": orgContext?.currentOrg.id,
-    //   },
-    //   body: JSON.stringify({
-    //     name: alertName,
-    //     metric: selectedMetric,
-    //     threshold: alertThreshold,
-    //     time_window: selectedTimeWindow,
-    //     emails: selectedEmails,
-    //     org_id: orgContext?.currentOrg.id,
-    //     minimum_request_count: isNaN(alertMinRequests)
-    //       ? undefined
-    //       : alertMinRequests,
-    //   }),
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     setNotification("Successfully created alert", "success");
-    //     setOpen(false);
-    //     onSuccess();
-    //   })
-    //   .catch((err) => {
-    //     setNotification(`Failed to create alert ${err}`, "error");
-    //   });
+      .catch((err) => {
+        setNotification(`Failed to create alert ${err}`, "error");
+      });
   };
 
   return (
