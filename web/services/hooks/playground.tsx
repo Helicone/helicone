@@ -36,10 +36,16 @@ export const usePlaygroundPage = (requestId: string) => {
       return [];
     }
 
-    const sourcePrompt = [
-      ...sourceChat.messages,
-      sourceResponse.choices[0].message,
-    ];
+    const sourcePrompt = [...sourceChat.messages];
+
+    if (
+      sourceResponse &&
+      sourceResponse.choices &&
+      sourceResponse.choices[0].message &&
+      sourceResponse.choices[0].message !== ""
+    ) {
+      sourcePrompt.push(sourceResponse.choices[0].message);
+    }
 
     // give all the messages in sourcePrompt an id
     sourcePrompt.forEach((message: any, index: number) => {
