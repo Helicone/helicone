@@ -14,7 +14,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { LlmSchema } from "../../../lib/api/models/requestResponseModel";
-import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
 
 export type Message = {
@@ -46,8 +45,6 @@ export const SingleChat = (props: {
     isLast,
     expandedProps: { expanded, setExpanded },
   } = props;
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
 
   const [showButton, setShowButton] = useState(true);
   const textContainerRef = useRef<HTMLDivElement>(null);
@@ -162,33 +159,19 @@ export const SingleChat = (props: {
               item.type === "image_url" || item.type === "image" ? (
                 <div key={index}>
                   {item.image_url.url ? (
-                    <button
-                      onClick={() => {
-                        setSelectedImageUrl(item.image_url.url);
-                        setOpen(true);
-                      }}
-                    >
-                      <Image
-                        src={item.image_url.url}
-                        alt={""}
-                        width={200}
-                        height={200}
-                      />
-                    </button>
+                    <img
+                      src={item.image_url.url}
+                      alt={""}
+                      width={200}
+                      height={200}
+                    />
                   ) : item.image_url ? (
-                    <button
-                      onClick={() => {
-                        setSelectedImageUrl(item.image_url);
-                        setOpen(true);
-                      }}
-                    >
-                      <Image
-                        src={item.image_url}
-                        alt={""}
-                        width={200}
-                        height={200}
-                      />
-                    </button>
+                    <img
+                      src={item.image_url}
+                      alt={""}
+                      width={200}
+                      height={200}
+                    />
                   ) : (
                     <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
                       Unsupported Image Type
@@ -205,9 +188,24 @@ export const SingleChat = (props: {
     }
   };
 
-  let formattedMessageContent = removeLeadingWhitespace(
-    message?.content?.toString() || ""
-  );
+  const getFormattedMessageContent = () => {
+    // if message content is a string, remove the leading white space
+    // if it is an object, find the text inside of the content array
+
+    if (Array.isArray(message.content)) {
+      if (typeof message.content[0] === "string") {
+        return message.content[0];
+      }
+      const textMessage = message.content.find(
+        (message) => message.type === "text"
+      );
+      return textMessage?.text;
+    } else {
+      return removeLeadingWhitespace(message?.content?.toString() || "");
+    }
+  };
+
+  const formattedMessageContent = getFormattedMessageContent();
 
   const getBgColor = () => {
     return "bg-gray-50 dark:bg-[#17191d]";
@@ -280,7 +278,6 @@ export const SingleChat = (props: {
                 {isJSON(formattedMessageContent)
                   ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
                   : formattedMessageContent}
-                {/* {message?.content} */}
               </div>
               {showButton && (
                 <div className="w-full flex justify-center items-center pt-2">
@@ -297,30 +294,6 @@ export const SingleChat = (props: {
           )}
         </div>
       </div>
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="flex flex-col space-y-4">
-          {selectedImageUrl && (
-            <Image
-              src={selectedImageUrl}
-              alt={selectedImageUrl}
-              width={600}
-              height={200}
-            />
-          )}
-          <div className="flex flex-row justify-between items-center">
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(selectedImageUrl || "");
-                setNotification("Copied to clipboard", "success");
-              }}
-            >
-              <p className="text-xs truncate max-w-[600px]">
-                {selectedImageUrl}
-              </p>
-            </button>
-          </div>
-        </div>
-      </ThemedModal>
     </>
   );
 };

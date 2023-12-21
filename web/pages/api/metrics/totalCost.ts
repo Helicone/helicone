@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getTotalCost } from "../../../lib/api/metrics/totalCosts";
-import { Result, resultsAll } from "../../../lib/result";
+import { Result, resultMap, resultsAll } from "../../../lib/result";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   const { req, res, userData } = options;
@@ -23,7 +23,7 @@ async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   }
 
   const metrics = await getTotalCost(filter, timeFilter, userData.orgId);
-  res.status(200).json(metrics);
+  res.status(200).json(resultMap(metrics, (data) => data.cost));
 }
 
 export default withAuth(handler);

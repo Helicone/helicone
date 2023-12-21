@@ -193,6 +193,12 @@ export interface PropertyWithResponseV1 {
   property_value: string;
 }
 
+export interface CacheHits {
+  request_id: string;
+  organization_id: string;
+  created_at: Nullable<string>;
+}
+
 export interface ClickhouseDB {
   Tables: {
     response_copy_v1: ResponseCopyV1;
@@ -201,5 +207,6 @@ export interface ClickhouseDB {
     properties_copy_v2: PropertiesCopyV2;
     response_copy_v3: ResponseCopyV3;
     property_with_response_v1: PropertyWithResponseV1;
+    cache_hits: CacheHits;
   };
 }

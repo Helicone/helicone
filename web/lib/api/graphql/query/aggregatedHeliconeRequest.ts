@@ -14,8 +14,10 @@ import {
   QueryAggregatedHeliconeRequestArgs,
 } from "../schema/types/graphql";
 import { convertTextOperators } from "./helper";
+import { getTotalCost } from "../../metrics/totalCosts";
 
 export async function aggregatedHeliconeRequest(
+  _root: any,
   args: QueryAggregatedHeliconeRequestArgs,
   context: Context,
   info: any
@@ -31,10 +33,17 @@ export async function aggregatedHeliconeRequest(
     },
   }));
 
-  const { data: cost, error: costError } = await getTotalCostProperties(
-    properties,
-    orgId
-  );
+  const { data: cost, error: costError } =
+    postgrestPropertyFilter.length === 0
+      ? await getTotalCost(
+          "all",
+          {
+            start: new Date(0),
+            end: new Date(),
+          },
+          orgId
+        )
+      : await getTotalCostProperties(properties, orgId);
 
   const { data: dateRange, error: dateError } = await getRequestsDateRange(
     orgId,
@@ -93,8 +102,9 @@ export async function aggregatedHeliconeRequest(
 
   return {
     id: "1",
-    cost: cost,
-    costUSD: cost,
+    cost: cost.cost,
+    costUSD: cost.cost,
+    count: cost.count ?? -1,
     firstRequest: dateRange.min.toISOString(),
     lastRequest: dateRange.max.toISOString(),
     cache: requestedFields.includes("cache") ? await getCacheData() : undefined,

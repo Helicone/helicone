@@ -15,5 +15,7 @@ RUN npx lerna run build
 
 RUN yarn install
 
+ENV OPENAPI_SCHEMA_FILE=/usr/src/app/packages/jawn/src/schema/openapi.yml
+
 #yarn workspace jawn serve
 CMD [ "yarn", "workspace", "jawn", "serve" ]

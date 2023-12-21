@@ -114,8 +114,10 @@ function convertFilterInputToFilterLeaf(
 }
 
 export async function heliconeRequest(
+  _root: any,
   args: QueryHeliconeRequestArgs,
-  context: Context
+  context: Context,
+  _info: any
 ): Promise<HeliconeRequest[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {
