@@ -93,6 +93,11 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       10
     );
 
+    const alertMinRequests = parseInt(
+      formData.get("min-requests") as string,
+      10
+    );
+
     if (selectedMetric === "response.status") {
       if (isNaN(alertThreshold) || alertThreshold < 0 || alertThreshold > 100) {
         setNotification("Please enter a valid threshold", "error");
@@ -136,6 +141,9 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
         time_window: selectedTimeWindow,
         emails: selectedEmails,
         org_id: orgContext?.currentOrg.id,
+        minimum_request_count: isNaN(alertMinRequests)
+          ? undefined
+          : alertMinRequests,
       }),
     })
       .then((res) => res.json())
@@ -248,7 +256,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
             )}
           </div>
         </div>
-        <div className="col-span-4 w-full space-y-1.5 text-sm">
+        <div className="col-span-2 w-full space-y-1.5 text-sm">
           <label
             htmlFor="time-frame"
             className="text-gray-500 items-center flex gap-1"
@@ -273,6 +281,26 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
               );
             })}
           </Select>
+        </div>
+        <div className="col-span-2 w-full space-y-1.5 text-sm">
+          <label
+            htmlFor="min-requests"
+            className="text-gray-500 items-center flex gap-1"
+          >
+            Min Requests (optional){" "}
+            <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
+              <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
+            </Tooltip>
+          </label>
+          <input
+            type="number"
+            name="min-requests"
+            id="min-requests"
+            className={clsx(
+              "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+            )}
+            min={0}
+          />
         </div>
         <div className="col-span-4 w-full space-y-1.5 text-sm">
           <label htmlFor="alert-emails" className="text-gray-500">

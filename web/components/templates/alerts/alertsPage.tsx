@@ -92,6 +92,11 @@ const AlertsPage = (props: AlertsPageProps) => {
                 { name: "Threshold", key: "threshold", hidden: false },
                 { name: "Metric", key: "metric", hidden: false },
                 { name: "Time Window", key: "time_window", hidden: false },
+                {
+                  name: "Min Requests",
+                  key: "minimum_request_count",
+                  hidden: false,
+                },
                 { name: "Emails", key: "emails", hidden: false },
               ]}
               rows={alerts?.map((key) => {
@@ -138,8 +143,12 @@ const AlertsPage = (props: AlertsPageProps) => {
                   ),
                   time_window: (
                     <p className="text-gray-900 dark:text-gray-100">
-                      {/* convert to the minutes, hours, days, or week. depndending on what is smallest */}
                       {formatTimeWindow(key.time_window)}
+                    </p>
+                  ),
+                  minimum_request_count: (
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {key.minimum_request_count}
                     </p>
                   ),
                   emails: (
