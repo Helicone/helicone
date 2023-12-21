@@ -66,7 +66,7 @@ class ValhallaDB implements IValhallaDB {
       max: 100,
       idleTimeoutMillis: 1000, // close idle clients after 1 second
       connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
-      maxUses: 100_000,
+      maxUses: 7_200,
       ssl:
         getEnvironment() === "development"
           ? undefined
