@@ -6,6 +6,7 @@ import { Result } from "./results";
 import { ClickhouseClientWrapper } from "./lib/db/clickhouse";
 import { addFeedbackToResponse } from "./lib/dbLogger/clickhouseLog";
 import { IHeliconeHeaders } from "./lib/HeliconeHeaders";
+import { Valhalla } from "./lib/db/valhalla";
 
 const FEEDBACK_LATEST_CREATED_AT = "feedback-latest-created-at";
 
@@ -63,6 +64,11 @@ interface FeedbackRequestBodyV2 {
 }
 
 export async function handleFeedback(request: RequestWrapper, env: Env) {
+  const auth = await request.auth();
+  if (auth.error || !auth.data) {
+    return new Response(auth.error, { status: 401 });
+  }
+
   const body = await request.getJson<FeedbackRequestBodyV2>();
   const heliconeId = body["helicone-id"];
   const rating = body["rating"];
@@ -124,6 +130,18 @@ export async function handleFeedback(request: RequestWrapper, env: Env) {
     return new Response(`Error: ${authenticationError}`, { status: 401 });
   }
 
+  const valhalla = new Valhalla(env.VALHALLA_URL, auth.data);
+
+  const { error: valhallaError } = await valhalla.put("/v1/feedback", {
+    response_id: responseData?.id,
+    rating: rating,
+  });
+
+  if (valhallaError) {
+    console.error("Error sending feedback to Valhalla. ", valhallaError);
+    // TODO - Throw error after killing Supabase
+  }
+
   const { data: feedbackData, error: feedbackDataError } =
     await upsertFeedbackPostgres(responseData?.id, rating, dbClient);
 
@@ -170,6 +188,7 @@ export async function isApiKeyAuthenticated(
     }
 
     if (apiKey.length === 0) {
+      console.log("No api key found for orgId:", orgId);
       return { error: "Invalid authentication.", data: null };
     }
 

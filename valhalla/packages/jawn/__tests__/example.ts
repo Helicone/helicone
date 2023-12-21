@@ -2,14 +2,10 @@ import { describe, expect, test, afterAll } from "@jest/globals";
 import e from "express";
 // import { helloWorld } from "../src";
 import { createValhallaClient } from "helicone-shared-ts";
+import { uuid } from "uuidv4";
 
 require("dotenv").config({
   path: "./.env",
-});
-const valhallaDB = createValhallaClient();
-
-afterAll(async () => {
-  await valhallaDB.close();
 });
 
 describe("make sure the healthcheck endpoints are working (sanity check)", () => {
@@ -24,24 +20,16 @@ describe("make sure the healthcheck endpoints are working (sanity check)", () =>
 const exampleTestKey = "Bearer sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa";
 
 const exampleRequestV1 = JSON.stringify({
-  request: {
-    body: { h: "b" },
-    url_href: "string",
-    provider: "string",
-    user_id: "string",
-    properties: {},
-    helicone_api_key_id: 0,
-    helicone_org_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    helicone_proxy_key_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  },
-  response: {
-    body: {},
-    delay_ms: 0,
-    http_status: 0,
-    completion_tokens: 0,
-    model: "string",
-    prompt_tokens: 0,
-  },
+  body: { h: "b" },
+  url_href: "string",
+  provider: "string",
+  user_id: "string",
+  properties: {},
+  helicone_api_key_id: 0,
+  helicone_org_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  helicone_proxy_key_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  request_id: uuid(),
+  requestReceivedAt: new Date().toISOString(),
 });
 
 describe("Make sure the OpenAPI validator is working", () => {
@@ -50,7 +38,7 @@ describe("Make sure the OpenAPI validator is working", () => {
       method: "POST",
       headers: {
         accept: "application/json",
-        Authorization: exampleTestKey,
+        "Helicone-Authorization": exampleTestKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -77,12 +65,14 @@ describe("checks to make sure an invalid authorization header is being blocked",
       },
       body: exampleRequestV1,
     });
+    console.log(await response.text());
     expect(response.status).toBe(401);
   });
 });
 
 describe("Check adding a request puts it into the DB", () => {
   test("Post Request", async () => {
+    const valhallaDB = await createValhallaClient();
     const response = await fetch("http://127.0.0.1:8585/v1/request", {
       method: "POST",
       headers: {
@@ -92,8 +82,9 @@ describe("Check adding a request puts it into the DB", () => {
       },
       body: exampleRequestV1,
     });
-    expect(response.status).toBe(200);
     const res: any = await response.json();
+
+    expect(response.status).toBe(200);
 
     expect(res).toMatchObject({
       message: "Request received! :)",
@@ -101,7 +92,6 @@ describe("Check adding a request puts it into the DB", () => {
     });
 
     expect(res.requestId).toBeDefined();
-    expect(res.responseId).toBeDefined();
 
     const request = await valhallaDB.query(
       "SELECT * FROM request WHERE id = $1",
@@ -109,14 +99,6 @@ describe("Check adding a request puts it into the DB", () => {
     );
     expect(request.error).toBeNull();
     expect(request?.data?.rows.length).toBe(1);
-
-    const responseDB = await valhallaDB.query(
-      "SELECT * FROM response WHERE id = $1",
-      [res.responseId]
-    );
-
-    expect(responseDB.error).toBeNull();
-    expect(responseDB?.data?.rows.length).toBe(1);
 
     // Handle the response here
   });

@@ -85,103 +85,76 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               Please enter in a request ID to load it into the playground
             </p>
           </div>
+        ) : isLoading ? (
+          <div className="col-span-8 flex w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
         ) : hasData && isChat && singleRequest !== null ? (
           <>
             <div className="col-span-8">
-              {isLoading ? (
-                <div className="w-full border border-gray-300 rounded-lg bg-gray-200 h-96 animate-pulse" />
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-8">
-                  <div className="order-2 sm:order-1 flex w-full">
-                    <ChatPlayground
-                      requestId={requestId || ""}
-                      chat={chat}
-                      models={selectedModels}
-                      temperature={temperature}
-                      maxTokens={maxTokens}
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-8 w-full sm:max-w-[15rem] order-1 sm:order-2 relative">
-                    <div className="h-fit sticky top-8 flex flex-col space-y-8">
-                      <div className="flex flex-col space-y-2 w-full">
-                        <div className="flex flex-row w-full space-x-1 items-center">
-                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                            Models
-                          </p>
-                          <button
-                            onClick={() => {
-                              setInfoOpen(true);
-                            }}
-                            className="hover:cursor-pointer"
-                          >
-                            <InformationCircleIcon className="h-5 w-5 text-gray-500" />
-                          </button>
-                        </div>
-
-                        <MultiSelect
-                          placeholder="Select your models..."
-                          value={selectedModels}
-                          onValueChange={(values: string[]) => {
-                            setSelectedModels(values);
+              <div className="flex flex-col sm:flex-row gap-8">
+                <div className="order-2 sm:order-1 flex w-full">
+                  <ChatPlayground
+                    requestId={requestId || ""}
+                    chat={chat}
+                    models={selectedModels}
+                    temperature={temperature}
+                    maxTokens={maxTokens}
+                  />
+                </div>
+                <div className="flex flex-col space-y-8 w-full sm:max-w-[15rem] order-1 sm:order-2 relative">
+                  <div className="h-fit sticky top-8 flex flex-col space-y-8">
+                    <div className="flex flex-col space-y-2 w-full">
+                      <div className="flex flex-row w-full space-x-1 items-center">
+                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                          Models
+                        </p>
+                        <button
+                          onClick={() => {
+                            setInfoOpen(true);
                           }}
-                          className="border border-gray-500 rounded-lg"
+                          className="hover:cursor-pointer"
                         >
-                          {[
-                            "gpt-3.5-turbo",
-                            "gpt-3.5-turbo-0613",
-                            "gpt-3.5-turbo-16k",
-                            "gpt-4",
-                            "gpt-4-0613",
-                            "gpt-4-32k",
-                          ].map((model, idx) => (
-                            <MultiSelectItem
-                              value={model}
-                              key={idx}
-                              className="font-medium text-black"
-                            >
-                              {model}
-                            </MultiSelectItem>
-                          ))}
-                        </MultiSelect>
+                          <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+                        </button>
                       </div>
-                      <div className="flex flex-col space-y-3 w-full">
-                        <div className="flex flex-row w-full justify-between items-center">
-                          <label
-                            htmlFor="temp"
-                            className="font-semibold text-sm text-gray-900 dark:text-gray-100"
+
+                      <MultiSelect
+                        placeholder="Select your models..."
+                        value={selectedModels}
+                        onValueChange={(values: string[]) => {
+                          setSelectedModels(values);
+                        }}
+                        className="border border-gray-500 rounded-lg"
+                      >
+                        {[
+                          "gpt-3.5-turbo",
+                          "gpt-3.5-turbo-0613",
+                          "gpt-3.5-turbo-16k",
+                          "gpt-4",
+                          "gpt-4-0613",
+                          "gpt-4-32k",
+                        ].map((model, idx) => (
+                          <MultiSelectItem
+                            value={model}
+                            key={idx}
+                            className="font-medium text-black"
                           >
-                            Temperature
-                          </label>
-                          <input
-                            type="number"
-                            id="temp"
-                            name="temp"
-                            value={temperature}
-                            onChange={(e) => {
-                              const value = parseFloat(e.target.value);
-                              if (value < 0.01) {
-                                setTemperature(0.01);
-                                return;
-                              }
-                              if (value > 1.99) {
-                                setTemperature(1.99);
-                                return;
-                              }
-                              setTemperature(parseFloat(e.target.value));
-                            }}
-                            min={0}
-                            max={1}
-                            step={0.01}
-                            className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
-                          />
-                        </div>
+                            {model}
+                          </MultiSelectItem>
+                        ))}
+                      </MultiSelect>
+                    </div>
+                    <div className="flex flex-col space-y-3 w-full">
+                      <div className="flex flex-row w-full justify-between items-center">
+                        <label
+                          htmlFor="temp"
+                          className="font-semibold text-sm text-gray-900 dark:text-gray-100"
+                        >
+                          Temperature
+                        </label>
                         <input
-                          type="range"
-                          id="temp-range"
-                          name="temp-range"
-                          min={0}
-                          max={1.99}
-                          step={0.01}
+                          type="number"
+                          id="temp"
+                          name="temp"
                           value={temperature}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
@@ -195,50 +168,50 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                             }
                             setTemperature(parseFloat(e.target.value));
                           }}
-                          className="text-black"
-                          style={{
-                            accentColor: "black",
-                          }}
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                         />
                       </div>
-                      <div className="flex flex-col space-y-3 w-full">
-                        <div className="flex flex-row w-full justify-between items-center">
-                          <label
-                            htmlFor="tokens"
-                            className="font-semibold text-sm text-gray-900 dark:text-gray-100"
-                          >
-                            Max Tokens
-                          </label>
-                          <input
-                            type="number"
-                            id="tokens"
-                            name="tokens"
-                            value={maxTokens}
-                            onChange={(e) => {
-                              const value = parseFloat(e.target.value);
-                              if (value < 1) {
-                                setMaxTokens(1);
-                                return;
-                              }
-                              if (value > 2048) {
-                                setMaxTokens(2048);
-                                return;
-                              }
-                              setMaxTokens(parseFloat(e.target.value));
-                            }}
-                            min={1}
-                            max={2048}
-                            step={1}
-                            className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
-                          />
-                        </div>
+                      <input
+                        type="range"
+                        id="temp-range"
+                        name="temp-range"
+                        min={0}
+                        max={1.99}
+                        step={0.01}
+                        value={temperature}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value);
+                          if (value < 0.01) {
+                            setTemperature(0.01);
+                            return;
+                          }
+                          if (value > 1.99) {
+                            setTemperature(1.99);
+                            return;
+                          }
+                          setTemperature(parseFloat(e.target.value));
+                        }}
+                        className="text-black"
+                        style={{
+                          accentColor: "black",
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-3 w-full">
+                      <div className="flex flex-row w-full justify-between items-center">
+                        <label
+                          htmlFor="tokens"
+                          className="font-semibold text-sm text-gray-900 dark:text-gray-100"
+                        >
+                          Max Tokens
+                        </label>
                         <input
-                          type="range"
-                          id="token-range"
-                          name="token-range"
-                          min={1}
-                          max={2048}
-                          step={1}
+                          type="number"
+                          id="tokens"
+                          name="tokens"
                           value={maxTokens}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
@@ -252,15 +225,40 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                             }
                             setMaxTokens(parseFloat(e.target.value));
                           }}
-                          style={{
-                            accentColor: "black",
-                          }}
+                          min={1}
+                          max={2048}
+                          step={1}
+                          className="w-16 text-sm px-2 py-1 rounded-lg border border-gray-500"
                         />
                       </div>
+                      <input
+                        type="range"
+                        id="token-range"
+                        name="token-range"
+                        min={1}
+                        max={2048}
+                        step={1}
+                        value={maxTokens}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value);
+                          if (value < 1) {
+                            setMaxTokens(1);
+                            return;
+                          }
+                          if (value > 2048) {
+                            setMaxTokens(2048);
+                            return;
+                          }
+                          setMaxTokens(parseFloat(e.target.value));
+                        }}
+                        style={{
+                          accentColor: "black",
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </>
         ) : !isChat ? (
