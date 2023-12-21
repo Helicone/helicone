@@ -37,12 +37,13 @@ module "aurora" {
   master_username = "root"
   storage_type    = "aurora-iopt1"
   storage_encrypted   = true
-  instance_class  = "db.r5.large" 
+  instance_class  = "db.r6g.2xlarge" 
+  monitoring_interval = 60
   backup_retention_period = 7
   preferred_backup_window = "03:00-06:00"
   preferred_maintenance_window = "Sat:06:00-Sat:09:00"
   instances = {
-    one = { }
+    one = {}
     two = {
       identifier     = "static-member-1"
       instance_class = "db.r6g.2xlarge"
