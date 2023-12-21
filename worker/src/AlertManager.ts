@@ -240,8 +240,8 @@ export class AlertManager {
     return await this.handleRateAboveThreshold(
       alert,
       triggerThreshold,
-      timestamp,
-      alertState.requestCount
+      alertState.requestCount,
+      timestamp
     );
   }
 
@@ -275,8 +275,7 @@ export class AlertManager {
   ): Promise<AlertStateUpdate> {
     if (
       alert.status === "resolved" &&
-      alert.minimum_request_count &&
-      requestCount >= alert.minimum_request_count
+      requestCount >= (alert.minimum_request_count ?? 0)
     ) {
       await this.deleteCooldown(alert.id);
       return {
