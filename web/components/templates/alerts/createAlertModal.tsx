@@ -1,6 +1,5 @@
 import { FormEvent, useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
-import ThemedDropdown from "../../shared/themed/themedDropdown";
 import {
   MultiSelect,
   MultiSelectItem,

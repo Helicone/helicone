@@ -10,7 +10,6 @@ import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { Tooltip } from "@mui/material";
-import { Select, SelectItem } from "@tremor/react";
 
 interface AlertsPageProps {
   user: User;
