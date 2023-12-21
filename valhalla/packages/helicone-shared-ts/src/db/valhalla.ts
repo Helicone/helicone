@@ -63,6 +63,10 @@ class ValhallaDB implements IValhallaDB {
       user: username,
       password: password,
       database: auroraDb,
+      max: 100,
+      idleTimeoutMillis: 1000, // close idle clients after 1 second
+      connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
+      maxUses: 7_200,
       ssl:
         getEnvironment() === "development"
           ? undefined
@@ -198,7 +202,6 @@ class ValhallaDB implements IValhallaDB {
       helicone_org_id
     )
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    RETURNING *
   `;
     return this.query(query, [
       response.id,
