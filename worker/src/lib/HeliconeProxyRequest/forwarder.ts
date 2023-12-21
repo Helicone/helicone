@@ -79,7 +79,7 @@ export async function proxyForwarder(
     if (authError == null) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (orgError !== null) {
+      if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
         const cachedResponse = await getCachedResponse(
@@ -115,8 +115,8 @@ export async function proxyForwarder(
     const { data: auth, error: authError } = await request.auth();
     if (authError == null) {
       const db = new DBWrapper(env, auth);
-      const { error: orgError } = await db.getAuthParams();
-      if (orgError !== null) {
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
         ctx.waitUntil(
