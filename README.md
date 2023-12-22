@@ -6,7 +6,7 @@
 [![Twitter](https://img.shields.io/twitter/follow/Helicone_ai?style=social)](https://twitter.com/helicone_ai)
 
 ## Open-source observability platform for LLMs
-
+,
 Helicone is an open-source observability platform for Language Learning Models (LLMs). It offers the following features:
 
 - 📝 Logs all of your requests to OpenAI in a user-friendly UI
