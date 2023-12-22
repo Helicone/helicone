@@ -5,7 +5,7 @@
 [![](https://img.shields.io/badge/Join%20our%20community-Discord-blue)](https://discord.gg/zsSTcH2qhG)
 [![Twitter](https://img.shields.io/twitter/follow/Helicone_ai?style=social)](https://twitter.com/helicone_ai)
 
-## Open-source observability platform for LLMs
+## Open-source observability platform for LLMs cdfda
 
 Helicone is an open-source observability platform for Language Learning Models (LLMs). It offers the following features:
 
