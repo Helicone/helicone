@@ -4,6 +4,7 @@
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
+  "ignorePatterns": ["/src/lib/db/valhalla.types.ts"],
   "plugins": ["prettier"],
   "rules": {
     "@typescript-eslint/no-unused-vars": [

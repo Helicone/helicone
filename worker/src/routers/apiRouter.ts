@@ -1,20 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, Provider } from "..";
+import { Database, Json } from "../../supabase/database.types";
+import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
 import { HeliconeHeaders } from "../lib/HeliconeHeaders";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
+import { Valhalla } from "../lib/db/valhalla";
 import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
-import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
-import { BaseRouter } from "./routerFactory";
 import { InsertQueue } from "../lib/dbLogger/insertQueue";
-import { Job as Job, isValidStatus, validateRun } from "../lib/models/Runs";
-import { Database, Json } from "../../supabase/database.types";
-import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
-import {
-  HeliconeNode as HeliconeNode,
-  validateHeliconeNode as validateHeliconeNode,
-} from "../lib/models/Tasks";
+import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
+import { Job, isValidStatus, validateRun } from "../lib/models/Runs";
+import { HeliconeNode, validateHeliconeNode } from "../lib/models/Tasks";
 import { validateAlertCreate } from "../lib/validators/alertValidators";
+import { BaseRouter } from "./routerFactory";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -74,6 +72,7 @@ class APIClient {
     this.db = new DBWrapper(env, auth);
     this.queue = new InsertQueue(
       createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      new Valhalla(env.VALHALLA_URL, auth),
       new ClickhouseClientWrapper(env),
       env.FALLBACK_QUEUE,
       env.REQUEST_AND_RESPONSE_QUEUE_KV
@@ -128,6 +127,7 @@ async function logAsync(
     dbWrapper: new DBWrapper(env, auth),
     queue: new InsertQueue(
       createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+      new Valhalla(env.VALHALLA_URL, auth),
       new ClickhouseClientWrapper(env),
       env.FALLBACK_QUEUE,
       env.REQUEST_AND_RESPONSE_QUEUE_KV

@@ -12,6 +12,8 @@ import {
 import { getCacheSettings } from "../cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 import { InsertQueue } from "../dbLogger/insertQueue";
+
+import { Valhalla } from "../db/valhalla";
 import { handleProxyRequest } from "./handler";
 import { HeliconeProxyRequestMapper } from "./mapper";
 
@@ -73,14 +75,30 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-    const cachedResponse = await getCachedResponse(
-      proxyRequest,
-      cacheSettings.bucketSettings,
-      env.CACHE_KV
-    );
-    if (cachedResponse) {
-      ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
-      return cachedResponse;
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
+        console.error("Error getting org", orgError);
+      } else {
+        const cachedResponse = await getCachedResponse(
+          proxyRequest,
+          cacheSettings.bucketSettings,
+          env.CACHE_KV
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(
+            recordCacheHit(
+              cachedResponse.headers,
+              env,
+              new ClickhouseClientWrapper(env),
+              orgData.organizationId
+            )
+          );
+          return cachedResponse;
+        }
+      }
     }
   }
 
@@ -94,20 +112,29 @@ export async function proxyForwarder(
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache && response.status === 200) {
-    ctx.waitUntil(
-      loggable
-        .waitForResponse()
-        .then((responseBody) =>
-          saveToCache(
-            proxyRequest,
-            response,
-            responseBody,
-            cacheSettings.cacheControl,
-            cacheSettings.bucketSettings,
-            env.CACHE_KV
-          )
-        )
-    );
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
+        console.error("Error getting org", orgError);
+      } else {
+        ctx.waitUntil(
+          loggable
+            .waitForResponse()
+            .then((responseBody) =>
+              saveToCache(
+                proxyRequest,
+                response,
+                responseBody,
+                cacheSettings.cacheControl,
+                cacheSettings.bucketSettings,
+                env.CACHE_KV
+              )
+            )
+        );
+      }
+    }
   }
 
   response.headers.forEach((value, key) => {
@@ -130,6 +157,7 @@ export async function proxyForwarder(
       dbWrapper: new DBWrapper(env, auth),
       queue: new InsertQueue(
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
+        new Valhalla(env.VALHALLA_URL, auth),
         new ClickhouseClientWrapper(env),
         env.FALLBACK_QUEUE,
         env.REQUEST_AND_RESPONSE_QUEUE_KV

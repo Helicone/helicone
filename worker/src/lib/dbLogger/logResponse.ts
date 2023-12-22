@@ -100,7 +100,14 @@ export async function logRequest(
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: request.omitLog ? {} : unsupportedImage(requestBody),
+      body: request.omitLog
+        ? {
+            model:
+              (requestBody as any).model !== "undefined"
+                ? (requestBody as any).model
+                : null,
+          }
+        : unsupportedImage(requestBody),
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -131,6 +138,7 @@ export async function logRequest(
       customPropertyRows,
       responseId
     );
+
     if (requestResult.error) {
       return { data: null, error: requestResult.error };
     }
