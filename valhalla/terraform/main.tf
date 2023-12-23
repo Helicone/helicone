@@ -570,9 +570,12 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name = "/ecs/valhalla_jawn_staging"  # Update with the name you're using in your task definition
+  name = "/ecs/valhalla_jawn"  # Update with the name you're using in your task definition
 }
 
+resource "aws_cloudwatch_log_group" "ecs_logs_staging" {
+  name = "/ecs/valhalla_jawn_staging_v2"  # Update with the name you're using in your task definition
+}
 resource "aws_iam_policy" "ecs_logging" {
   name        = "ecs_logging"
   description = "Allow ECS tasks to log to CloudWatch"
@@ -599,12 +602,12 @@ resource "aws_iam_role_policy_attachment" "ecs_logging_attachment" {
 
 
 # https://repost.aws/knowledge-center/ecs-fargate-service-auto-scaling
-resource "aws_ecs_task_definition" "valhalla_jawn_staging" {
-  family                   = "valhalla_jawn_staging"
+resource "aws_ecs_task_definition" "valhalla_jawn_production" {
+  family                   = "valhalla_jawn_production"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "512"  # Adjust as needed
-  memory                   = "1024" # Adjust as needed
+  cpu                      = "4096" # Adjust as needed
+  memory                   = "8192" # Adjust as needed
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
 
   container_definitions = jsonencode([
@@ -652,8 +655,81 @@ resource "aws_ecs_task_definition" "valhalla_jawn_staging" {
           name  = "AURORA_DATABASE"
           value = local.database_name
         }
-
       ]
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:8585/healthcheck || exit 1"]
+        interval    = 30
+        timeout     = 5
+        startPeriod = 60
+        retries     = 3
+      }
+    }
+  ])
+}
+
+
+# https://repost.aws/knowledge-center/ecs-fargate-service-auto-scaling
+resource "aws_ecs_task_definition" "valhalla_jawn_staging" {
+  family                   = "valhalla_jawn_staging"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "512" # Adjust as needed
+  memory                   = "1024" # Adjust as needed
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "valhalla_jawn_staging"
+      image = "${var.image_url}-staging:latest"
+      portMappings = [
+        {
+          containerPort = 8585
+          hostPort      = 8585
+        }
+      ]
+      secrets = [
+        {
+          name      = "AURORA_CREDS",
+          valueFrom = module.aurora.cluster_master_user_secret[0].secret_arn
+        },
+        {
+          name      = "SUPABASE_CREDS",
+          valueFrom = var.supabase_creds_secret_arn
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_logs_staging.name
+          awslogs-region        = "us-west-2"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      environment = [
+        {
+          name  = "ENV"
+          value = "production"
+        },
+        {
+          name  = "AURORA_HOST"
+          value = aws_db_proxy.aurora_writer_proxy.endpoint
+        },
+        {
+          name  = "AURORA_PORT"
+          value = "5432"
+        },
+        {
+          name  = "AURORA_DATABASE"
+          value = local.database_name
+        }
+      ]
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:8585/healthcheck || exit 1"]
+        interval    = 30
+        timeout     = 5
+        startPeriod = 60
+        retries     = 3
+      }
     }
   ])
 }
@@ -685,3 +761,29 @@ resource "aws_iam_role_policy_attachment" "ecs_secrets_access_attachment" {
 }
 
 
+resource "aws_security_group" "alb_sg" {
+  name        = "${local.name}-alb-sg"
+  description = "Security group for the ALB"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 80  # Add port 80 for HTTP traffic
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Restrict this to known IP ranges for better security
+  }
+
+  ingress {
+    from_port   = 443  # Adjust if your ALB listens on a different port
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Restrict this to known IP ranges for better security
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
