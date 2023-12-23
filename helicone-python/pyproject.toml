@@ -9,10 +9,9 @@ repository = "https://github.com/helicone/helicone/helicone-python"
 
 [tool.poetry.dependencies]
 python = ">=3.8.1"
+openai = "^0.27.0"
 lockfile = "^0.12.2"
 pyhumps = "^3.8.0"
-openai = "^1.6.0"
-requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
