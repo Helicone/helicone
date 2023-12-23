@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 export interface CompletedChunk {
   body: string;
   reason: "cancel" | "done" | "timeout";
+  endTimeUnix: number;
 }
 
 export class ReadableInterceptor {
@@ -32,7 +33,8 @@ export class ReadableInterceptor {
       this.chunkEmitter.emit(this.chunkEventName, {
         body: this.responseBody,
         reason,
-      });
+        endTimeUnix: new Date().getTime(),
+      } as CompletedChunk);
     };
 
     const onChunk = (chunk: Uint8Array) => {
@@ -94,6 +96,7 @@ export class ReadableInterceptor {
         resolve({
           body: this.responseBody,
           reason: "timeout",
+          endTimeUnix: new Date().getTime(),
         });
       }, this.chunkTimeoutMs);
 
