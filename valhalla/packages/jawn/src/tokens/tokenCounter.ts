@@ -1,3 +1,4 @@
+import { parentPort } from "worker_threads";
 import claudeRanks from "@anthropic-ai/tokenizer/claude.json";
 import GPT3Tokenizer from "gpt3-tokenizer";
 import { Tiktoken } from "js-tiktoken";

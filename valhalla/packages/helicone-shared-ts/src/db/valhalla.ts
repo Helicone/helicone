@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from "pg";
+import { Pool, QueryResult, Client } from "pg";
 import { getEnvironment } from "../environment/get";
 import { PromiseGenericResult, Result, err, ok } from "../modules/result";
 import {
@@ -42,14 +42,18 @@ async function timeoutPromise<T>(
 }
 
 class ValhallaDB implements IValhallaDB {
-  pool: Pool;
+  client: Client;
+  private connected: boolean = false; // New state tracking variable
 
-  constructor(auroraCreds: string) {
+  constructor(private auroraCreds: string) {
+    this.client = this.getNewClient();
+  }
+  private getNewClient() {
     const auroraHost = process.env.AURORA_HOST;
     const auroraPort = process.env.AURORA_PORT;
     const auroraDb = process.env.AURORA_DATABASE;
 
-    if (!auroraCreds) {
+    if (!this.auroraCreds) {
       throw new Error("No creds");
     }
 
@@ -71,18 +75,18 @@ class ValhallaDB implements IValhallaDB {
     }: {
       username: string;
       password: string;
-    } = JSON.parse(auroraCreds);
+    } = JSON.parse(this.auroraCreds);
 
-    this.pool = new Pool({
+    const client = new Client({
       host: auroraHost,
       port: parseInt(auroraPort),
       user: username,
       password: password,
       database: auroraDb,
-      max: 1_000,
-      idleTimeoutMillis: 1000, // close idle clients after 1 second
+      // max: 1_000,
+      // idleTimeoutMillis: 1000, // close idle clients after 1 second
       connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
-      maxUses: 7_200,
+      // maxUses: 7_200,
       ssl:
         getEnvironment() === "development"
           ? undefined
@@ -90,10 +94,70 @@ class ValhallaDB implements IValhallaDB {
               rejectUnauthorized: true, // This should be set to true for better security
             },
     });
+    client.connect((err) => {
+      if (err) {
+        console.error("Connection error", err.stack);
+        this.connected = false; // Set connected to false on error
+        // Implement reconnection logic here
+        setTimeout(() => this.reconnect(), 1000); // Reconnect after 1 second
+      } else {
+        console.log("Connected to database");
+        this.connected = true; // Set connected to true on connection
+      }
+    });
+
+    // Handle errors after the initial connection has been established
+    client.on("error", (err) => {
+      console.error("Unexpected error on idle client", err);
+      this.reconnect(); // Attempt to reconnect
+    });
+    return client;
+  }
+  // New method to wait for connection
+  async waitForConnection(timeout: number = 10_000): Promise<ValhallaDB> {
+    console.log("Waiting for connection...");
+    const startTime = Date.now();
+    await new Promise(async (resolve, reject) => {
+      const checkConnection = async () => {
+        if (this.connected) {
+          console.log("Connected to database");
+          await this.now().then((res) => {
+            if (res.error) {
+              console.error("Error getting now() after connection", res.error);
+              reject(res.error);
+            } else {
+              console.log("Got now() after connection");
+              resolve(null);
+            }
+          });
+        } else if (Date.now() - startTime > timeout) {
+          console.error("Connection to DB timed out");
+          reject(new Error("Connection timed out when waiting for connection"));
+        } else {
+          console.log("Waiting for connection...");
+          setTimeout(checkConnection, 100); // Check connection status every 100ms
+        }
+      };
+      await checkConnection();
+    });
+    return this;
+  }
+
+  async reconnect() {
+    this.connected = false; // Ensure connected is set to false when starting reconnection
+
+    console.log("Attempting to reconnect...");
+    try {
+      await this.client.end(); // Ensure the old client is fully closed
+    } catch (e) {
+      console.error("Error closing the client", e);
+    }
+    this.client = this.getNewClient(); // Attempt to create a new client connection
+    this.waitForConnection(); // Wait for the new connection to be established
   }
 
   async close() {
-    await this.pool.end();
+    await this.client.end();
   }
   private async _query(
     query: string,
@@ -105,22 +169,10 @@ class ValhallaDB implements IValhallaDB {
       console.log(
         `Attempting to connect to the database at ${new Date().toISOString()}, queryId: ${queryId}`
       );
-      const { data: client, error: clientError } = await timeoutPromise(
-        1000,
-        this.pool.connect(),
-        "Connection timed out"
-      );
-      if (clientError || !client) {
-        console.error("Error connecting to the database, timeout", clientError);
-        return err(clientError);
-      }
-      console.log(
-        `Connected to the database at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
 
       const { data: result, error: resultError } = await timeoutPromise(
         2000,
-        client.query(query, values).then(async (res) => {
+        this.client.query(query, values).then(async (res) => {
           // sleep for 1 second to simulate a slow query
           // await new Promise((resolve) => setTimeout(resolve, 10_000));
           return res;
@@ -136,7 +188,7 @@ class ValhallaDB implements IValhallaDB {
       console.log(
         `Query complete at ${new Date().toISOString()}, queryId: ${queryId}`
       );
-      client.release();
+
       return ok(result);
     } catch (thrownErr) {
       console.error("Error in query", query, thrownErr);
@@ -290,7 +342,7 @@ class ValhallaDB implements IValhallaDB {
 class StaticValhallaPool {
   private static client: ValhallaDB | null = null;
 
-  static async getClient(): Promise<IValhallaDB> {
+  static async getClient(): Promise<ValhallaDB> {
     if (this.client === null) {
       const auroraCreds = process.env.AURORA_CREDS;
       if (!auroraCreds) {
@@ -304,6 +356,6 @@ class StaticValhallaPool {
   }
 }
 
-export async function createValhallaClient(): Promise<IValhallaDB> {
-  return StaticValhallaPool.getClient();
+export async function createValhallaClient(): Promise<ValhallaDB> {
+  return (await StaticValhallaPool.getClient()).waitForConnection();
 }

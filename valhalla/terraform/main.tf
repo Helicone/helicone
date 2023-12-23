@@ -518,3 +518,170 @@ resource "aws_apprunner_service" "valhalla_jawn_staging" {
   # More configurations like auto scaling, tags, etc. can be added if needed.
 }
 
+module "ecs" {
+  source  = "terraform-aws-modules/ecs/aws"
+  version = "5.7.4"
+
+  cluster_name = "valhalla_cluster"
+
+  cluster_configuration = {
+    execute_command_configuration = {
+      logging = "OVERRIDE"
+      log_configuration = {
+        cloud_watch_log_group_name = "/aws/ecs/aws-ec2"
+      }
+    }
+  }
+
+  fargate_capacity_providers = {
+    FARGATE = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+    FARGATE_SPOT = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_execution_role" {
+  name = "ecs_execution_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_cloudwatch_log_group" "ecs_logs" {
+  name = "/ecs/valhalla_jawn_staging"  # Update with the name you're using in your task definition
+}
+
+resource "aws_iam_policy" "ecs_logging" {
+  name        = "ecs_logging"
+  description = "Allow ECS tasks to log to CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect   = "Allow",
+        Resource = aws_cloudwatch_log_group.ecs_logs.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_logging_attachment" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = aws_iam_policy.ecs_logging.arn
+}
+
+
+# https://repost.aws/knowledge-center/ecs-fargate-service-auto-scaling
+resource "aws_ecs_task_definition" "valhalla_jawn_staging" {
+  family                   = "valhalla_jawn_staging"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "512"  # Adjust as needed
+  memory                   = "1024" # Adjust as needed
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "valhalla_jawn_staging"
+      image = "${var.image_url}-staging:latest"
+      portMappings = [
+        {
+          containerPort = 8585
+          hostPort      = 8585
+        }
+      ]
+      secrets = [
+        {
+          name      = "AURORA_CREDS",
+          valueFrom = module.aurora.cluster_master_user_secret[0].secret_arn
+        },
+        {
+          name      = "SUPABASE_CREDS",
+          valueFrom = var.supabase_creds_secret_arn
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_logs.name
+          awslogs-region        = "us-west-2"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      environment = [
+        {
+          name  = "ENV"
+          value = "production"
+        },
+        {
+          name  = "AURORA_HOST"
+          value = aws_db_proxy.aurora_writer_proxy.endpoint
+        },
+        {
+          name  = "AURORA_PORT"
+          value = "5432"
+        },
+        {
+          name  = "AURORA_DATABASE"
+          value = local.database_name
+        }
+
+      ]
+    }
+  ])
+}
+
+resource "aws_iam_policy" "ecs_secrets_access" {
+  name        = "ecs_secrets_access"
+  description = "Allow ECS tasks to retrieve secrets from Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "secretsmanager:GetSecretValue",
+        Effect   = "Allow",
+        Resource = module.aurora.cluster_master_user_secret[0].secret_arn
+      },
+      {
+        Action   = "secretsmanager:GetSecretValue",
+        Effect   = "Allow",
+        Resource = var.supabase_creds_secret_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_secrets_access_attachment" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = aws_iam_policy.ecs_secrets_access.arn
+}
+
+
