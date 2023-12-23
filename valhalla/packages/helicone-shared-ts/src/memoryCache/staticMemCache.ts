@@ -5,8 +5,14 @@ export class CacheItem<T> {
 export class InMemoryCache {
   private cache: Map<string, CacheItem<any>> = new Map();
 
+  constructor(private maxEntries = 100) {}
+
   // Sets a value in the cache with a TTL (in milliseconds)
   set<T>(key: string, value: T, ttl: number): void {
+    if (this.cache.size >= this.maxEntries) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
     const expiry = Date.now() + ttl;
     this.cache.set(key, new CacheItem(value, expiry));
     setTimeout(() => this.removeIfExpired(key), ttl);
