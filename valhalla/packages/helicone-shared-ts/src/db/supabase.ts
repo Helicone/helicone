@@ -161,13 +161,13 @@ export class SupabaseConnector {
     authorization: HeliconeAuth,
     organizationId?: string
   ): AuthResult {
-    // const cachedResult = this.authCache.get<AuthParams>(
-    //   await hashAuth(JSON.stringify(authorization) + organizationId)
-    // );
-    // if (cachedResult) {
-    //   this.organizationId = (await cachedResult).organizationId;
-    //   return ok(cachedResult);
-    // }
+    const cachedResult = this.authCache.get<AuthParams>(
+      await hashAuth(JSON.stringify(authorization) + organizationId)
+    );
+    if (cachedResult) {
+      this.organizationId = (await cachedResult).organizationId;
+      return ok(cachedResult);
+    }
 
     const result = await this.getAuthParams(authorization);
 
@@ -180,10 +180,10 @@ export class SupabaseConnector {
     }
 
     this.organizationId = orgId;
-    // this.authCache.set(
-    //   await hashAuth(JSON.stringify(authorization) + organizationId),
-    //   { organizationId: orgId }
-    // );
+    this.authCache.set(
+      await hashAuth(JSON.stringify(authorization) + organizationId),
+      { organizationId: orgId }
+    );
     return ok({
       organizationId: orgId,
     });
