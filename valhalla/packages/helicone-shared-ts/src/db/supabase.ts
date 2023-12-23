@@ -10,7 +10,7 @@ class SupabaseAuthCache extends InMemoryCache {
   private static instance: SupabaseAuthCache;
   private API_KEY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   constructor() {
-    super();
+    super(500);
   }
 
   static getInstance(): SupabaseAuthCache {
