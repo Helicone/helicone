@@ -17,7 +17,6 @@ import { logRequest } from "./logResponse";
 import { anthropicAIStream } from "./parsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./parsers/openAIStreamParser";
 import { getTokenCount } from "./tokenCounter";
-import { getAndStoreInCache } from "../secureCache";
 
 export interface DBLoggableProps {
   response: {
