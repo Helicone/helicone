@@ -195,7 +195,11 @@ app.get(
       res.json({ status: "unhealthy :(", error: now.error });
       return;
     }
-    res.json({ status: "healthy :)", dataBase: now.data?.rows });
+    res.json({
+      status: "healthy :)",
+      dataBase: now.data?.rows,
+      version: "jawn prod - pools",
+    });
   })
 );
 

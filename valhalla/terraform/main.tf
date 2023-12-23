@@ -613,7 +613,7 @@ resource "aws_ecs_task_definition" "valhalla_jawn_production" {
   container_definitions = jsonencode([
     {
       name  = "valhalla_jawn_staging"
-      image = "${var.image_url}-staging:latest"
+      image = "${var.image_url}:latest"
       portMappings = [
         {
           containerPort = 8585
