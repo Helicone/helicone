@@ -16,7 +16,6 @@ RUN npx lerna run build
 RUN yarn install
 
 ENV OPENAPI_SCHEMA_FILE=/usr/src/app/packages/jawn/src/schema/openapi.yml
-ENV TOKEN_FILE_WORKER=/usr/src/app/packages/jawn/src/tokens/tokenCounter.js
 
 #yarn workspace jawn serve
 CMD [ "yarn", "workspace", "jawn", "serve" ]
