@@ -126,7 +126,7 @@ export async function proxyForwarder(
               saveToCache(
                 proxyRequest,
                 response,
-                responseBody,
+                responseBody.body,
                 cacheSettings.cacheControl,
                 cacheSettings.bucketSettings,
                 env.CACHE_KV
