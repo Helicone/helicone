@@ -1,4 +1,4 @@
-import { Pool, QueryResult, PoolClient } from "pg";
+import { Pool, PoolClient, QueryResult } from "pg";
 import { getEnvironment } from "../environment/get";
 import { PromiseGenericResult, Result, err, ok } from "../modules/result";
 import {
@@ -148,8 +148,6 @@ class ValhallaDB implements IValhallaDB {
     const { data: queryResult, error: queryResultError } = await timeoutPromise(
       30_000,
       this._query(query, values).then(async (res) => {
-        // sleep for 1 second to simulate a slow query
-        // await new Promise((resolve) => setTimeout(resolve, 10_000));
         return res;
       }),
       "this._query timed out"
@@ -253,7 +251,6 @@ class ValhallaDB implements IValhallaDB {
   async insertResponse(
     response: ValhallaResponse
   ): PromiseGenericResult<QueryResult<any>> {
-    // return err("Not implemented");
     const query = `
     INSERT INTO response (
       id,
