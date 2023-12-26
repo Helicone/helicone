@@ -473,8 +473,10 @@ export class AlertManager {
                                         : "alertTime not found"
                                     }</li>
                                     <li><strong>Threshold:</strong> ${
-                                      alert.threshold
-                                    }%</li>
+                                      alert.metric === "cost"
+                                        ? `$${alert.threshold}`
+                                        : `${alert.threshold}%`
+                                    }</li>
                                     <li><strong>Metric:</strong> ${
                                       alert.metric
                                     }</li>
