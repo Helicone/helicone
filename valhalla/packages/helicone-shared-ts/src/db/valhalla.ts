@@ -1,6 +1,6 @@
 import { Pool, QueryResult } from "pg";
 import { getEnvironment } from "../environment/get";
-import { PromiseGenericResult, err, ok } from "../modules/result";
+import { PromiseGenericResult, Result, err, ok } from "../modules/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
@@ -25,8 +25,30 @@ export interface IValhallaDB {
   close(): Promise<void>;
 }
 
+async function timeoutPromise<T>(
+  ms: number,
+  promise: Promise<T>,
+  errString?: string
+): Promise<Result<T, string>> {
+  try {
+    let timeout = new Promise((resolve, reject) => {
+      let id = setTimeout(() => {
+        clearTimeout(id);
+        resolve(err(errString ?? "rejected"));
+      }, ms);
+    });
+    return (await Promise.race([
+      promise.then((e) => ok(e)),
+      timeout,
+    ])) as Promise<Result<T, string>>;
+  } catch (e) {
+    return err(`Promise was rejected: ${JSON.stringify(e)}, ${errString}`);
+  }
+}
+
 class ValhallaDB implements IValhallaDB {
   pool: Pool;
+  onLogSubscribers: Map<string, (msg: string) => void> = new Map();
 
   constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
@@ -63,10 +85,17 @@ class ValhallaDB implements IValhallaDB {
       user: username,
       password: password,
       database: auroraDb,
-      max: 100,
-      idleTimeoutMillis: 1000, // close idle clients after 1 second
-      connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
-      maxUses: 7_200,
+      log: (msg) => {
+        console.log(msg);
+        this.onLogSubscribers.forEach((fn) => fn(msg));
+      },
+      // idle_in_transaction_session_timeout: 5_000,
+      // query_timeout: 5_000, // 5 second query timeout
+      // statement_timeout: 5_000, // 5 second statement timeout
+      max: 20,
+      idleTimeoutMillis: 20_000, // close idle clients after 2 second
+      connectionTimeoutMillis: 3_000,
+      maxUses: undefined,
       ssl:
         getEnvironment() === "development"
           ? undefined
@@ -80,19 +109,108 @@ class ValhallaDB implements IValhallaDB {
     await this.pool.end();
   }
 
+  private async _query(
+    query: string,
+    values: any[] = []
+  ): PromiseGenericResult<QueryResult<any>> {
+    let errorLogs: string[] = [];
+    const loggerId = Math.random().toString(36).substring(7);
+    this.onLogSubscribers.set(loggerId, (msg) => {
+      errorLogs.push(msg);
+    });
+    const localErr: (e: string) => Result<QueryResult<any>, string> = (
+      e: string
+    ) => {
+      this.onLogSubscribers.delete(loggerId);
+      return errorLogs ? err(`${e}, Logs: ${errorLogs.join(", ")}`) : err(e);
+    };
+    const localOK: (e: QueryResult<any>) => Result<QueryResult<any>, string> = (
+      e: QueryResult<any>
+    ) => {
+      this.onLogSubscribers.delete(loggerId);
+      return ok(e);
+    };
+    try {
+      const queryId = Math.random().toString(36).substring(7);
+
+      console.log(
+        `Attempting to connect to the database at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      errorLogs.push(
+        `Attempting to connect to the database at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      const { data: client, error: clientError } = await timeoutPromise(
+        10_000,
+        this.pool.connect(),
+        "Connection timed out"
+      );
+      if (clientError || !client) {
+        console.error("Error connecting to the database, timeout", clientError);
+        return localErr(clientError);
+      }
+      console.log(
+        `Connected to the database at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      errorLogs.push(
+        `Connected to the database at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+
+      const { data: result, error: resultError } = await timeoutPromise(
+        2000,
+        client.query(query, values).then(async (res) => {
+          // sleep for 1 second to simulate a slow query
+          // await new Promise((resolve) => setTimeout(resolve, 10_000));
+          return res;
+        }),
+        "Query timed out"
+      );
+
+      if (resultError || !result) {
+        console.error("Error in query", query, resultError);
+        client.release();
+        return localErr(resultError);
+      }
+
+      console.log(
+        `Query complete at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      errorLogs.push(
+        `Query complete at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      client.release();
+      console.log(
+        `Client released at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      errorLogs.push(
+        `Client released at ${new Date().toISOString()}, queryId: ${queryId}`
+      );
+      return localOK(result);
+    } catch (thrownErr) {
+      console.error("Error in query", query, thrownErr);
+      return localErr(
+        `There was an exception: ${JSON.stringify(thrownErr)}
+        Error Logs: ${errorLogs.join(", ")}`
+      );
+    }
+  }
   async query(
     query: string,
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
-    try {
-      const client = await this.pool.connect();
-      const result = await client.query(query, values);
-      client.release();
-      return ok(result);
-    } catch (thrownErr) {
-      console.error("Error in query", query, thrownErr);
-      return err(JSON.stringify(thrownErr));
+    const { data: queryResult, error: queryResultError } = await timeoutPromise(
+      30_000,
+      this._query(query, values).then(async (res) => {
+        // sleep for 1 second to simulate a slow query
+        // await new Promise((resolve) => setTimeout(resolve, 10_000));
+        return res;
+      }),
+      "this._query timed out"
+    );
+    if (queryResultError || !queryResult) {
+      console.error("Error in query", query, queryResultError);
+      return err(queryResultError);
     }
+    return queryResult;
   }
 
   async now() {
@@ -187,6 +305,7 @@ class ValhallaDB implements IValhallaDB {
   async insertResponse(
     response: ValhallaResponse
   ): PromiseGenericResult<QueryResult<any>> {
+    // return err("Not implemented");
     const query = `
     INSERT INTO response (
       id,
