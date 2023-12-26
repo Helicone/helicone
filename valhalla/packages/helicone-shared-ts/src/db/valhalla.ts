@@ -87,12 +87,9 @@ class ValhallaDB implements IValhallaDB {
       log: (msg) => {
         console.log(msg);
       },
-      // idle_in_transaction_session_timeout: 5_000,
-      // query_timeout: 5_000, // 5 second query timeout
-      // statement_timeout: 5_000, // 5 second statement timeout
-      max: 20,
-      idleTimeoutMillis: 20_000, // close idle clients after 2 second
-      connectionTimeoutMillis: 3_000,
+      max: 20, // we can probably increase this
+      idleTimeoutMillis: 5_000, // close idle clients after 5 second
+      connectionTimeoutMillis: 10_000,
       maxUses: undefined,
       ssl:
         getEnvironment() === "development"
