@@ -90,7 +90,7 @@ class ValhallaDB implements IValhallaDB {
       max: 20, // we can probably increase this
       idleTimeoutMillis: 5_000, // close idle clients after 5 second
       connectionTimeoutMillis: 10_000,
-      maxUses: undefined,
+      maxUses: 10_000,
       ssl:
         getEnvironment() === "development"
           ? undefined
