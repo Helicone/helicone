@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from "pg";
+import { Pool, QueryResult, PoolClient } from "pg";
 import { getEnvironment } from "../environment/get";
 import { PromiseGenericResult, Result, err, ok } from "../modules/result";
 import {
@@ -48,7 +48,6 @@ async function timeoutPromise<T>(
 
 class ValhallaDB implements IValhallaDB {
   pool: Pool;
-  onLogSubscribers: Map<string, (msg: string) => void> = new Map();
 
   constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
@@ -87,7 +86,6 @@ class ValhallaDB implements IValhallaDB {
       database: auroraDb,
       log: (msg) => {
         console.log(msg);
-        this.onLogSubscribers.forEach((fn) => fn(msg));
       },
       // idle_in_transaction_session_timeout: 5_000,
       // query_timeout: 5_000, // 5 second query timeout
@@ -109,89 +107,39 @@ class ValhallaDB implements IValhallaDB {
     await this.pool.end();
   }
 
+  private async withConnection<T>(
+    fn: (client: PoolClient) => PromiseGenericResult<T>
+  ): PromiseGenericResult<T> {
+    const { data: client, error: clientError } = await timeoutPromise(
+      10_000,
+      this.pool.connect(),
+      "Pool failed to connect"
+    );
+    if (clientError || !client) {
+      return err(clientError);
+    }
+    try {
+      return await fn(client);
+    } catch (e) {
+      return err(`Error in withConnection: ${e}`);
+    } finally {
+      client.release();
+    }
+  }
+
   private async _query(
     query: string,
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
-    let errorLogs: string[] = [];
-    const loggerId = Math.random().toString(36).substring(7);
-    this.onLogSubscribers.set(loggerId, (msg) => {
-      errorLogs.push(msg);
-    });
-    const localErr: (e: string) => Result<QueryResult<any>, string> = (
-      e: string
-    ) => {
-      this.onLogSubscribers.delete(loggerId);
-      return errorLogs ? err(`${e}, Logs: ${errorLogs.join(", ")}`) : err(e);
-    };
-    const localOK: (e: QueryResult<any>) => Result<QueryResult<any>, string> = (
-      e: QueryResult<any>
-    ) => {
-      this.onLogSubscribers.delete(loggerId);
-      return ok(e);
-    };
-    try {
-      const queryId = Math.random().toString(36).substring(7);
-
-      console.log(
-        `Attempting to connect to the database at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      errorLogs.push(
-        `Attempting to connect to the database at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      const { data: client, error: clientError } = await timeoutPromise(
-        10_000,
-        this.pool.connect(),
-        "Connection timed out"
-      );
-      if (clientError || !client) {
-        console.error("Error connecting to the database, timeout", clientError);
-        return localErr(clientError);
-      }
-      console.log(
-        `Connected to the database at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      errorLogs.push(
-        `Connected to the database at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-
-      const { data: result, error: resultError } = await timeoutPromise(
-        2000,
+    return await this.withConnection(async (client) => {
+      return await timeoutPromise(
+        5_000,
         client.query(query, values).then(async (res) => {
-          // sleep for 1 second to simulate a slow query
-          // await new Promise((resolve) => setTimeout(resolve, 10_000));
           return res;
         }),
         "Query timed out"
       );
-
-      if (resultError || !result) {
-        console.error("Error in query", query, resultError);
-        client.release();
-        return localErr(resultError);
-      }
-
-      console.log(
-        `Query complete at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      errorLogs.push(
-        `Query complete at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      client.release();
-      console.log(
-        `Client released at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      errorLogs.push(
-        `Client released at ${new Date().toISOString()}, queryId: ${queryId}`
-      );
-      return localOK(result);
-    } catch (thrownErr) {
-      console.error("Error in query", query, thrownErr);
-      return localErr(
-        `There was an exception: ${JSON.stringify(thrownErr)}
-        Error Logs: ${errorLogs.join(", ")}`
-      );
-    }
+    });
   }
   async query(
     query: string,
