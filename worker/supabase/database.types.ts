@@ -643,9 +643,12 @@ export interface Database {
           icon: string
           id: string
           is_personal: boolean
+          logo_url: string | null
           name: string
+          organization_type: string
           owner: string
           referral: string | null
+          reseller_id: string | null
           size: string | null
           soft_delete: boolean
           stripe_customer_id: string | null
@@ -660,9 +663,12 @@ export interface Database {
           icon?: string
           id?: string
           is_personal?: boolean
+          logo_url?: string | null
           name: string
+          organization_type?: string
           owner: string
           referral?: string | null
+          reseller_id?: string | null
           size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
@@ -677,9 +683,12 @@ export interface Database {
           icon?: string
           id?: string
           is_personal?: boolean
+          logo_url?: string | null
           name?: string
+          organization_type?: string
           owner?: string
           referral?: string | null
+          reseller_id?: string | null
           size?: string | null
           soft_delete?: boolean
           stripe_customer_id?: string | null
@@ -692,6 +701,12 @@ export interface Database {
             foreignKeyName: "organization_owner_fkey"
             columns: ["owner"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_reseller_id_fkey"
+            columns: ["reseller_id"]
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           }
         ]
