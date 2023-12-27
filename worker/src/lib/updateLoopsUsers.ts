@@ -103,20 +103,25 @@ export async function updateLoopUsers(env: Env) {
     await new Promise((resolve) =>
       setTimeout(resolve, sleepTime * (1 + sleepPadding))
     );
-    const result = await fetch("https://app.loops.so/api/v1/contacts/create", {
+
+    const body: Record<string, unknown> = {
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      created_at: new Date(user.created_at ?? 0).toISOString(),
+      updated_at: new Date(user.updated_at ?? 0).toISOString(),
+    };
+    if (user.tag) {
+      body[user.tag] = true;
+    }
+
+    const result = await fetch("https://app.loops.so/api/v1/contacts/update", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${env.LOOPS_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        userGroup: user.tag,
-        created_at: new Date(user.created_at ?? 0).toISOString(),
-        updated_at: new Date(user.updated_at ?? 0).toISOString(),
-      }),
+      body: JSON.stringify(body),
     });
 
     const resultJson = await result.json<{
@@ -132,8 +137,11 @@ export async function updateLoopUsers(env: Env) {
     }
 
     await env.UTILITY_KV.put(
-      "loop_user_emails",
-      JSON.stringify(cachedUserEmails)
+      "loop_user_emails_v2",
+      JSON.stringify(cachedUserEmails),
+      {
+        expirationTtl: 60 * 60 * 24,
+      }
     );
   }
 }
