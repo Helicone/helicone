@@ -486,6 +486,59 @@ export const getAPIRouter = (router: BaseRouter) => {
     }
   );
 
+  router.post(
+    "/organizations/:id/logo",
+    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
+      if (requestWrapper.getMethod() === "POST") {
+        const { error: formDataErr, data: formData } =
+          await requestWrapper.getFormData();
+
+        if (formDataErr || !formData) {
+          return new Response("Expected a POST request with a logo file", {
+            status: 400,
+          });
+        }
+
+        const logoFile = formData.get("logo");
+
+        if (!logoFile || !(logoFile instanceof File)) {
+          return new Response("Expected a POST request with a logo file", {
+            status: 400,
+          });
+        }
+
+        const client = await createAPIClient(env, requestWrapper);
+        const { data: authParams, error: authParamsErr } =
+          await client.db.getAuthParams();
+
+        const orgId = authParams?.organizationId;
+
+        if (authParamsErr || !orgId) {
+          return client.response.unauthorized();
+        }
+
+        const logoId = crypto.randomUUID();
+        const logoUrl = `organization/${orgId}/logo/${logoId}`;
+
+        const { error: uploadErr } = await client.db.uploadLogo(
+          logoFile,
+          logoUrl,
+          orgId
+        );
+
+        if (uploadErr) {
+          return client.response.newError(uploadErr, 500);
+        }
+
+        return client.response.successJSON({ ok: "true" }, true);
+      }
+
+      return new Response("Expected a POST request with a logo file", {
+        status: 400,
+      });
+    }
+  );
+
   router.options(
     "*",
     async (

@@ -343,4 +343,31 @@ export class DBWrapper {
 
     return { error: null, data: null };
   }
+
+  async uploadLogo(
+    logoFile: File,
+    logoUrl: string,
+    orgId: string
+  ): Promise<Result<null, string>> {
+    const { data, error } = await this.supabaseClient.storage
+      .from("organization_assets")
+      .upload(logoUrl, logoFile);
+
+    if (error || !data) {
+      return err(error.message);
+    }
+
+    const { error: updateError } = await this.supabaseClient
+      .from("organization")
+      .update({
+        logo_path: data.path,
+      })
+      .eq("id", orgId);
+
+    if (updateError) {
+      return err(updateError.message);
+    }
+
+    return ok(null);
+  }
 }

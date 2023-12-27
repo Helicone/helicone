@@ -643,7 +643,7 @@ export interface Database {
           icon: string
           id: string
           is_personal: boolean
-          logo_url: string | null
+          logo_path: string | null
           name: string
           organization_type: string
           owner: string
@@ -663,7 +663,7 @@ export interface Database {
           icon?: string
           id?: string
           is_personal?: boolean
-          logo_url?: string | null
+          logo_path?: string | null
           name: string
           organization_type?: string
           owner: string
@@ -683,7 +683,7 @@ export interface Database {
           icon?: string
           id?: string
           is_personal?: boolean
-          logo_url?: string | null
+          logo_path?: string | null
           name?: string
           organization_type?: string
           owner?: string
