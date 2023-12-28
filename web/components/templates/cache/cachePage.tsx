@@ -11,12 +11,13 @@ import {
   useCachePageTopRequests,
 } from "../../../services/hooks/useCachePage";
 import { MetricsPanel } from "../../shared/metrics/metricsPanel";
-import { StackedBarChart } from "../../shared/metrics/stackedBarChart";
+import { BarChart } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
+import { getTimeMap } from "../../../lib/timeCalculations/constants";
 
 interface CachePageProps {
   currentPage: number;
@@ -84,28 +85,10 @@ const CachePage = (props: CachePageProps) => {
 
   const cacheData = cacheOverTime.overTime.data?.data ?? [];
 
-  const timeMap = (x: Date) => new Date(x).toDateString();
-
   const chartData = cacheData.map((d) => ({
     ...d,
-    time: timeMap(d.time),
+    date: getTimeMap("day")(new Date(d.time)),
   }));
-
-  const getCacheModels = () => {
-    const cacheModels = new Set<string>();
-    chartData.forEach((d) => {
-      Object.keys(d).forEach((key) => {
-        if (key !== "time") {
-          cacheModels.add(key);
-        }
-      });
-    });
-    const cacheModelsArray = Array.from(cacheModels);
-    cacheModelsArray.sort();
-    return cacheModelsArray;
-  };
-
-  const cacheModels = getCacheModels();
 
   const cacheDist =
     topMetrics.topModels.data?.data?.map((x) => ({
@@ -114,6 +97,8 @@ const CachePage = (props: CachePageProps) => {
     })) ?? [];
 
   cacheDist.sort((a, b) => a.name.localeCompare(b.name));
+
+  console.log(chartData);
 
   return (
     <>
@@ -162,7 +147,16 @@ const CachePage = (props: CachePageProps) => {
                       <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
                     </div>
                   ) : (
-                    <StackedBarChart data={chartData} keys={cacheModels} />
+                    <div className="h-full w-full">
+                      <BarChart
+                        data={chartData}
+                        categories={["cache"]}
+                        index={"date"}
+                        className="h-full -ml-4 pt-4"
+                        colors={["blue"]}
+                        showLegend={false}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
