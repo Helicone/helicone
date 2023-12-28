@@ -370,4 +370,29 @@ export class DBWrapper {
 
     return ok(null);
   }
+
+  async getLogoPath(orgId: string): Promise<Result<string, string>> {
+    const { data, error } = await this.supabaseClient
+      .from("organization")
+      .select(
+        `
+        logo_path,
+        reseller:organization!reseller_id (logo_path)
+      `
+      )
+      .eq("id", orgId)
+      .single();
+
+    if (error) {
+      return err(error.message);
+    }
+
+    const resellerLogoPath = Array.isArray(data?.reseller)
+      ? data?.reseller[0]?.logo_path
+      : data?.reseller?.logo_path;
+
+    const logoPath = data?.logo_path ?? resellerLogoPath ?? "";
+
+    return ok(logoPath);
+  }
 }
