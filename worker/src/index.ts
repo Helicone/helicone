@@ -137,11 +137,11 @@ export default {
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
+    await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
       const rosetta = new RosettaWrapper(supabaseClient, env);
       await rosetta.generateMappers();
     } else {
-      await updateLoopUsers(env);
       const alertManager = new AlertManager(
         new AlertStore(supabaseClient, new ClickhouseClientWrapper(env)),
         env
