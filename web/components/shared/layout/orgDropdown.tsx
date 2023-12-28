@@ -172,7 +172,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                     </span>
                   )}
                 </p>
-                <div className="h-full max-h-60 overflow-auto">
+                <div className="h-full max-h-60 w-full overflow-x-auto">
                   {memberOrgs.map((org, idx) => {
                     const icon = ORGANIZATION_ICONS.find(
                       (icon) => icon.name === org.icon
@@ -194,8 +194,15 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                               {icon && (
                                 <icon.icon className="h-4 w-4 text-gray-500" />
                               )}
-                              <div className="flex flex-row space-x-1">
-                                <p className="w-full max-w-[10rem] text-left truncate">
+                              <div className="flex flex-row space-x-1 w-full">
+                                <p
+                                  className={clsx(
+                                    org.tier === "pro"
+                                      ? "max-w-[7.5rem]"
+                                      : "max-w-[10rem]",
+                                    "w-full text-left truncate"
+                                  )}
+                                >
                                   {org.name}
                                 </p>
                                 <span className="text-sky-500">
