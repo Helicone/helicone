@@ -387,10 +387,14 @@ export class DBWrapper {
       return err(error.message);
     }
 
-    const resellerLogoPath = Array.isArray(data?.reseller)
-      ? data?.reseller[0]?.logo_path
-      : data?.reseller?.logo_path;
-
+    let resellerLogoPath: string | null = null;
+    if (data?.reseller) {
+      if (Array.isArray(data.reseller)) {
+        resellerLogoPath = data.reseller[0]?.logo_path ?? null;
+      } else {
+        resellerLogoPath = data.reseller.logo_path;
+      }
+    }
     const logoPath = data?.logo_path ?? resellerLogoPath ?? "";
 
     return ok(logoPath);
