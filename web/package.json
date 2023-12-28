@@ -75,7 +75,6 @@
     "react-resizable": "^3.0.5",
     "react-syntax-highlighter": "^15.5.0",
     "reactflow": "^11.8.3",
-    "recharts": "^2.1.16",
     "stripe": "^11.8.0",
     "typescript": "5.1.6",
     "use-deep-compare-effect": "^1.8.1"
