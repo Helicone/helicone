@@ -372,31 +372,42 @@ export class DBWrapper {
   }
 
   async getLogoPath(orgId: string): Promise<Result<string, string>> {
-    const { data, error } = await this.supabaseClient
-      .from("organization")
-      .select(
-        `
-        logo_path,
-        reseller:organization!reseller_id (logo_path)
-      `
-      )
-      .eq("id", orgId)
-      .single();
+    const { data: organization, error: organizationErr } =
+      await this.supabaseClient
+        .from("organization")
+        .select("*")
+        .eq("id", orgId)
+        .single();
 
-    if (error) {
-      return err(error.message);
+    console.log(`organization: ${JSON.stringify(organization)}`);
+
+    if (organizationErr || !organization) {
+      return err(organizationErr?.message ?? "Failed to get organization.");
     }
 
-    let resellerLogoPath: string | null = null;
-    if (data?.reseller) {
-      if (Array.isArray(data.reseller)) {
-        resellerLogoPath = data.reseller[0]?.logo_path ?? null;
-      } else {
-        resellerLogoPath = data.reseller.logo_path;
-      }
+    // If logo path is already set, return it
+    if (organization.logo_path) {
+      return ok(organization.logo_path);
     }
-    const logoPath = data?.logo_path ?? resellerLogoPath ?? "";
 
-    return ok(logoPath);
+    if (!organization.reseller_id) {
+      return err("Reseller id not found on organization.");
+    }
+
+    // Get logo path from reseller id
+    const { data: resellerOrg, error: resellerOrgErr } =
+      await this.supabaseClient
+        .from("organization")
+        .select("*")
+        .eq("organization_id", organization.reseller_id)
+        .single();
+
+    if (resellerOrgErr || !resellerOrg?.logo_path) {
+      return err(
+        resellerOrgErr?.message ?? "Failed to get logo path from reseller id."
+      );
+    }
+
+    return ok(resellerOrg.logo_path);
   }
 }
