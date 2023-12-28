@@ -3,7 +3,7 @@ import FilterBadge from "../../../../ui/filters/filterBadge";
 import { getTimeIntervalAgo } from "../../../../../lib/timeCalculations/time";
 
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ListFilterBadgeProps {
   listKey: string; // the key for the query
@@ -20,20 +20,36 @@ const ListFilterBadge = (props: ListFilterBadgeProps) => {
 
   const query = router.query[listKey];
 
-  const [selectedData, setSelectedData] = useState<string[]>(
-    query ? (Array.isArray(query) ? query : [query]) : []
-  );
+  const [selectedData, setSelectedData] = useState<string[]>([]);
+
+  const handleClearFilter = () => {
+    setSelectedData([]);
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, [listKey]: [] },
+    });
+  };
+
+  useEffect(() => {
+    if (query === undefined) {
+      return;
+    } else {
+      setSelectedData(Array.isArray(query) ? query : [query]);
+    }
+  }, [query]);
 
   return (
-    <FilterBadge title={listKey.charAt(0).toUpperCase() + listKey.slice(1)}>
+    <FilterBadge
+      title={listKey.charAt(0).toUpperCase() + listKey.slice(1)}
+      label={selectedData.length > 0 ? `${selectedData.join(", ")}` : undefined}
+      clearFilter={() => {
+        handleClearFilter();
+      }}
+    >
       <fieldset className="w-full">
         <button
           onClick={() => {
-            setSelectedData([]);
-            router.push({
-              pathname: router.pathname,
-              query: { ...router.query, [listKey]: [] },
-            });
+            handleClearFilter();
           }}
           className="w-full flex font-semibold text-gray-500 justify-center items-center bg-gray-200 dark:bg-gray-800 rounded-lg text-xs py-1 border border-gray-300 dark:border-gray-700"
         >
@@ -56,8 +72,6 @@ const ListFilterBadge = (props: ListFilterBadgeProps) => {
                   name={`item-${idx}`}
                   type="checkbox"
                   checked={selectedData.includes(item.value)}
-                  // if I click this, also add it to the URL
-
                   onClick={() => {
                     const newSelectedData = [...selectedData];
                     if (selectedData.includes(item.value)) {
@@ -66,6 +80,8 @@ const ListFilterBadge = (props: ListFilterBadgeProps) => {
                     } else {
                       newSelectedData.push(item.value);
                     }
+                    // sort the selected data
+                    newSelectedData.sort();
                     setSelectedData(newSelectedData);
                     router.push({
                       pathname: router.pathname,

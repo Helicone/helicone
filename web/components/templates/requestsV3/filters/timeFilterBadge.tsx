@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import FilterBadge from "../../../ui/filters/filterBadge";
 import { clsx } from "../../../shared/clsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TimeFilter } from "../../dashboard/dashboardPage";
 import {
   TimeInterval,
@@ -72,8 +72,35 @@ const TimeFilterBadge = (props: TimeFilterBadgeProps) => {
     { key: "all", value: "All" },
   ];
 
+  const timeQuery = router.query.t as string;
+
+  const [timeLabel, setTimeLabel] = useState<string>();
+
+  useEffect(() => {
+    if (timeQuery === undefined) {
+      return;
+    } else {
+      if (timeQuery.split("_")[0] === "custom") {
+        setTimeLabel("Custom");
+      } else {
+        setTimeLabel(timeQuery);
+      }
+    }
+  }, [timeQuery]);
+
   return (
-    <FilterBadge title="Created At">
+    <FilterBadge
+      title="Created At"
+      label={timeLabel || undefined}
+      clearFilter={() => {
+        // remove t from query params
+        const query = { ...router.query };
+        delete query.t;
+        router.push({ pathname: router.pathname, query }, undefined, {
+          shallow: false,
+        });
+      }}
+    >
       <div className="flex flex-col space-y-4">
         <div className="flex flex-row divide-x divide-gray-300 dark:divide-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg">
           {timeOptions.map((option, idx) => (
@@ -86,7 +113,6 @@ const TimeFilterBadge = (props: TimeFilterBadgeProps) => {
                   query: { ...router.query, t: option.key },
                 });
 
-                // update the start date and end date based on the option selected
                 const range = getTimeIntervalAgo(option.key as TimeInterval);
                 setStartDate(formatDateToInputString(range));
                 setEndDate(formatDateToInputString(new Date()));
@@ -94,11 +120,10 @@ const TimeFilterBadge = (props: TimeFilterBadgeProps) => {
               className={clsx(
                 idx === timeOptions.length - 1 ? "rounded-r-lg" : "",
                 idx === 0 ? "rounded-l-lg" : "",
-                // if the route contains the query param t = option.key, then add the bg-black text-white
                 router.query.t === option.key
-                  ? "bg-black text-white"
-                  : "bg-white dark:bg-black dark:text-white",
-                "w-full flex justify-center p-2 text-xs font-semibold"
+                  ? "bg-sky-200 border-sky-300 dark:bg-sky-800 dark:border-sky-700"
+                  : "bg-white hover:bg-sky-50 border-gray-300 dark:bg-black dark:hover:bg-sky-900 dark:border-gray-700",
+                " text-black w-full flex justify-center p-2 text-xs font-semibold"
               )}
             >
               {option.value}

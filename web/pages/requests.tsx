@@ -26,7 +26,11 @@ const RequestsV2 = (props: RequestsV2Props) => {
   return (
     <MetaData title={"Requests"}>
       <AuthLayout user={user}>
-        <RequestsPage />
+        <RequestsPage
+          page={currentPage}
+          currentPageSize={pageSize}
+          sort={sort}
+        />
         {JSON.stringify(query)}
         <RequestsPageV2
           currentPage={currentPage}

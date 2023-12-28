@@ -56,7 +56,25 @@ const TokenFilterBadge = (props: TokenFilterBadgeProps) => {
   }, []);
 
   return (
-    <FilterBadge title="Tokens">
+    <FilterBadge
+      title="Tokens"
+      clearFilter={() => {
+        updateURL("gt", 0);
+        setTokenCount(0);
+        setOperator("gt");
+      }}
+      label={
+        tokenCount > 0
+          ? `${
+              operator === "gt"
+                ? "greater than"
+                : operator === "lt"
+                ? "less than"
+                : "equal to"
+            } ${tokenCount}`
+          : undefined
+      }
+    >
       <div className="flex flex-col space-y-2">
         <div className="flex items-center justify-between w-full text-sm space-x-2">
           <p className="flex w-[6rem]">Tokens is</p>
