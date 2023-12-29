@@ -488,7 +488,7 @@ export const getAPIRouter = (router: BaseRouter) => {
 
   router.post(
     "/v1/organizations/:id/logo",
-    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
+    async (_, requestWrapper: RequestWrapper, env: Env) => {
       const { error: formDataErr, data: formData } =
         await requestWrapper.getFormData();
 
@@ -498,7 +498,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         });
       }
 
-      const logoFile = formData.get("logo") as any;
+      const logoFile = formData.get("logo") as unknown;
 
       if (!logoFile || !(logoFile instanceof File)) {
         return new Response("Expected a POST request with a logo file", {
@@ -535,7 +535,7 @@ export const getAPIRouter = (router: BaseRouter) => {
 
   router.get(
     "/v1/organizations/:id/logo",
-    async ({ params: { id } }, requestWrapper: RequestWrapper, env: Env) => {
+    async (_, requestWrapper: RequestWrapper, env: Env) => {
       const client = await createAPIClient(env, requestWrapper);
       const { data: authParams, error: authParamsErr } =
         await client.db.getAuthParams();
