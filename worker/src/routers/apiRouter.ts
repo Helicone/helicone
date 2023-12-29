@@ -498,7 +498,7 @@ export const getAPIRouter = (router: BaseRouter) => {
         });
       }
 
-      const logoFile = formData.get("logo");
+      const logoFile = formData.get("logo") as any;
 
       if (!logoFile || !(logoFile instanceof File)) {
         return new Response("Expected a POST request with a logo file", {
