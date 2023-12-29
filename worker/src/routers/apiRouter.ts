@@ -500,7 +500,7 @@ export const getAPIRouter = (router: BaseRouter) => {
 
       const logoFile = formData.get("logo");
 
-      if (!(logoFile && logoFile instanceof File)) {
+      if (!logoFile || !(logoFile instanceof File)) {
         return new Response("Expected a POST request with a logo file", {
           status: 400,
         });
