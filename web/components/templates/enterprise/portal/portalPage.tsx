@@ -19,14 +19,21 @@ import {
 import { useOrg } from "../../../shared/layout/organizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../../../supabase/database.types";
-import { EllipsisHorizontalIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  BuildingStorefrontIcon,
+  ChartPieIcon,
+  EllipsisHorizontalIcon,
+  EnvelopeIcon,
+  PlusIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import { getUSDateFromString } from "../../../shared/utils/utils";
-import { UserGroupIcon } from "@heroicons/react/20/solid";
 import CustomerRow from "./customerRow";
+import { ArrowRightIcon } from "@heroicons/react/20/solid";
 
 interface PortalPageProps {}
 
@@ -75,9 +82,40 @@ const PortalPage = (props: PortalPageProps) => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <div className="mt-8 flex">
+            <div className="flex mt-8">
               {isLoading ? (
                 <div>Loading...</div>
+              ) : data?.length === 0 ? (
+                <div className="flex flex-col w-full h-96 justify-center items-center">
+                  <div className="flex flex-col w-2/5">
+                    <UserGroupIcon className="h-12 w-12 text-gray-900 dark:tex-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                    <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                      You don&apos;t have any customers yet!
+                    </p>
+                    <p className="text-sm text-gray-500 max-w-sm mt-2">
+                      Create a new customer to get started or reach out to our
+                      support team for help getting started.
+                    </p>
+                    <div className="flex flex-row items-center justify-between mt-2">
+                      <a
+                        href="mailto:engineering@helicone.ai"
+                        className="font-semibold text-blue-500 underline text-xs flex items-center space-x-1"
+                      >
+                        Contact Support
+                        <ArrowRightIcon className="h-3 w-3 inline" />
+                      </a>
+                    </div>
+                    <div className="flex flex-row items-center justify-between mt-8">
+                      <button
+                        onClick={() => {}}
+                        className="items-center rounded-md bg-black dark:bg-white px-2 py-1 text-xs flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      >
+                        <PlusIcon className="h-5 w-5 mr-2" />
+                        Add Customer
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <Card>
                   <Table className="overflow-auto lg:overflow-visible">
@@ -113,7 +151,34 @@ const PortalPage = (props: PortalPageProps) => {
             </div>
           </TabPanel>
           <TabPanel>
-            <div className="mt-8">yessir</div>
+            <div className="flex flex-col w-full h-96 justify-center items-center">
+              <div className="flex flex-col w-2/5">
+                <ChartPieIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                  Analytics coming soon!
+                </p>
+                <p className="text-sm text-gray-500 max-w-sm mt-2">
+                  You will soon be able to get an understanding of how your
+                  customers are using your product and how you can improve their
+                  experience.
+                </p>
+              </div>
+            </div>
+          </TabPanel>
+          <TabPanel>
+            <div className="flex flex-col w-full h-96 justify-center items-center">
+              <div className="flex flex-col w-2/5">
+                <BuildingStorefrontIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                <p className="text-xl text-black dark:text-white font-semibold mt-8">
+                  Branding coming soon!
+                </p>
+                <p className="text-sm text-gray-500 max-w-sm mt-2">
+                  Customize your branding and make your portal your own. Your
+                  customers will be able to see your logo and colors along with
+                  your own domain.
+                </p>
+              </div>
+            </div>
           </TabPanel>
         </TabPanels>
       </TabGroup>

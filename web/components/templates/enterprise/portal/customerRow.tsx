@@ -95,7 +95,9 @@ const CustomerRow = (props: CustomerRowProps) => {
           </div>
         )}
       </TableCell>
-      <TableCell>{org.name}</TableCell>
+      <TableCell className="font-semibold text-black dark:text-white">
+        {org.name}
+      </TableCell>
       <TableCell>
         <Text>{getUSDateFromString(org.created_at || "")}</Text>
       </TableCell>
@@ -126,7 +128,7 @@ const CustomerRow = (props: CustomerRowProps) => {
       </TableCell>
       <TableCell>
         <Menu as="div" className="relative ml-auto">
-          <Menu.Button className="-m-2.5 block p-2.5 text-gray-900 hover:text-gray-700">
+          <Menu.Button className="-m-2.5 block p-2.5 text-gray-900 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-300">
             <span className="sr-only">Open options</span>
             <EllipsisHorizontalIcon className="h-5 w-5" aria-hidden="true" />
           </Menu.Button>
@@ -139,7 +141,7 @@ const CustomerRow = (props: CustomerRowProps) => {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className="absolute z-10 right-0 mt-0.5 w-fit min-w-[8rem] origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
+            <Menu.Items className="absolute z-10 right-0 mt-0.5 w-fit min-w-[8rem] origin-top-right rounded-md bg-white dark:bg-black py-2 shadow-lg border border-gray-300 dark:border-gray-700 focus:outline-none">
               <Menu.Item>
                 {({ active }) => (
                   <button
@@ -150,8 +152,8 @@ const CustomerRow = (props: CustomerRowProps) => {
                       router.push("/dashboard");
                     }}
                     className={clsx(
-                      active ? "bg-gray-50" : "",
-                      "w-full flex px-3 py-1 text-sm leading-6 text-gray-900"
+                      active ? "bg-gray-50 dark:bg-gray-950" : "",
+                      "w-full flex px-3 py-1 text-sm leading-6 text-gray-900 dark:text-gray-100"
                     )}
                   >
                     View
@@ -164,8 +166,8 @@ const CustomerRow = (props: CustomerRowProps) => {
                   <button
                     disabled
                     className={clsx(
-                      active ? "bg-gray-50" : "",
-                      "w-full flex px-3 py-1 text-sm leading-6 text-gray-900"
+                      active ? "bg-gray-50 dark:bg-gray-950" : "",
+                      "w-full flex px-3 py-1 text-sm leading-6 text-gray-900 dark:text-gray-100"
                     )}
                   >
                     Edit (coming soon)
