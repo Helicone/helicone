@@ -15,6 +15,7 @@ import {
   TableHeaderCell,
   TableRow,
   Text,
+  TextInput,
 } from "@tremor/react";
 import { useOrg } from "../../../shared/layout/organizationContext";
 import { useQuery } from "@tanstack/react-query";
@@ -24,40 +25,65 @@ import {
   ChartPieIcon,
   EllipsisHorizontalIcon,
   EnvelopeIcon,
+  MagnifyingGlassIcon,
   PlusIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import CustomerRow from "./customerRow";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
+import { useRouter } from "next/router";
+import { set } from "date-fns";
+import { useDebounce } from "../../../../services/hooks/debounce";
 
-interface PortalPageProps {}
+interface PortalPageProps {
+  searchQuery: string | null;
+}
 
 const PortalPage = (props: PortalPageProps) => {
-  const {} = props;
+  const { searchQuery } = props;
 
   const supabase = useSupabaseClient();
 
   const org = useOrg();
+  const router = useRouter();
+  const [currentSearch, setCurrentSearch] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery<
+  const debouncedSearch = useDebounce(currentSearch, 700);
+
+  const { data, isLoading, refetch } = useQuery<
     Database["public"]["Tables"]["organization"]["Row"][]
-  >(["orgs", org?.currentOrg.id], async (query) => {
+  >(["orgs", org?.currentOrg.id, debouncedSearch], async (query) => {
     const orgId = query.queryKey[1];
-    const { data, error } = await supabase
-      .from("organization")
-      .select("*")
-      .eq("reseller_id", orgId);
+    const newSearch = query.queryKey[2];
+    if (newSearch) {
+      const { data, error } = await supabase
+        .from("organization")
+        .select("*")
+        .eq("reseller_id", orgId)
+        .ilike("name", `%${newSearch}%`);
 
-    if (error) {
-      return [];
+      if (error) {
+        return [];
+      }
+
+      return data as Database["public"]["Tables"]["organization"]["Row"][];
+    } else {
+      const { data, error } = await supabase
+        .from("organization")
+        .select("*")
+        .eq("reseller_id", orgId);
+
+      if (error) {
+        return [];
+      }
+
+      return data as Database["public"]["Tables"]["organization"]["Row"][];
     }
-
-    return data as Database["public"]["Tables"]["organization"]["Row"][];
   });
 
   return (
@@ -82,7 +108,37 @@ const PortalPage = (props: PortalPageProps) => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <div className="flex mt-8">
+            <div className="flex flex-col mt-8">
+              <div className="flex flex-row justify-between items-center mb-4">
+                <TextInput
+                  icon={MagnifyingGlassIcon}
+                  placeholder="Search Customer Name..."
+                  className="max-w-sm"
+                  onChange={(e) => {
+                    // add this into query params as search
+                    const search = e.target.value as string;
+
+                    setCurrentSearch(search);
+
+                    if (search === "") {
+                      // delete the query param from the url
+                      delete router.query.q;
+                      router.push({
+                        pathname: router.pathname,
+                        query: { ...router.query },
+                      });
+                      refetch();
+                      return;
+                    }
+
+                    router.push({
+                      pathname: router.pathname,
+                      query: { ...router.query, q: search },
+                    });
+                    refetch();
+                  }}
+                />
+              </div>
               {isLoading ? (
                 <div>Loading...</div>
               ) : data?.length === 0 ? (
@@ -90,7 +146,7 @@ const PortalPage = (props: PortalPageProps) => {
                   <div className="flex flex-col w-2/5">
                     <UserGroupIcon className="h-12 w-12 text-gray-900 dark:tex-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
                     <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                      You don&apos;t have any customers yet!
+                      No customers exist!
                     </p>
                     <p className="text-sm text-gray-500 max-w-sm mt-2">
                       Create a new customer to get started or reach out to our
@@ -117,36 +173,38 @@ const PortalPage = (props: PortalPageProps) => {
                   </div>
                 </div>
               ) : (
-                <Card>
-                  <Table className="overflow-auto lg:overflow-visible">
-                    <TableHead className="border-b border-gray-300 dark:border-gray-700 ">
-                      <TableRow>
-                        <TableHeaderCell className="w-16"></TableHeaderCell>
-                        <TableHeaderCell className="text-black">
-                          Name
-                        </TableHeaderCell>
-                        <TableHeaderCell className="text-black">
-                          Created At
-                        </TableHeaderCell>
-                        <TableHeaderCell className="text-black">
-                          Status
-                        </TableHeaderCell>
-                        <TableHeaderCell className="text-black">
-                          Members
-                        </TableHeaderCell>
-                        <TableHeaderCell className="text-black">
-                          Requests (30 days)
-                        </TableHeaderCell>
-                        <TableHeaderCell></TableHeaderCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {data?.map((org, index) => (
-                        <CustomerRow org={org} key={index} />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Card>
+                <div className="flex flex-col w-full space-y-4">
+                  <Card>
+                    <Table className="overflow-auto lg:overflow-visible">
+                      <TableHead className="border-b border-gray-300 dark:border-gray-700 ">
+                        <TableRow>
+                          <TableHeaderCell className="w-8"></TableHeaderCell>
+                          <TableHeaderCell className="text-black">
+                            Name
+                          </TableHeaderCell>
+                          <TableHeaderCell className="text-black">
+                            Created At
+                          </TableHeaderCell>
+                          <TableHeaderCell className="text-black">
+                            Status
+                          </TableHeaderCell>
+                          <TableHeaderCell className="text-black">
+                            Members
+                          </TableHeaderCell>
+                          <TableHeaderCell className="text-black">
+                            Requests (30 days)
+                          </TableHeaderCell>
+                          <TableHeaderCell></TableHeaderCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {data?.map((org, index) => (
+                          <CustomerRow org={org} key={index} />
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Card>
+                </div>
               )}
             </div>
           </TabPanel>
