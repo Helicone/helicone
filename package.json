@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@tremor/react": "^3.12.1"
+  }
+}

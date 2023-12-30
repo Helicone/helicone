@@ -1,0 +1,1 @@
+import t,{createContext as r,useContext as c}from"react";let e=r(!1);function l(){return c(e)}function P(o){return t.createElement(e.Provider,{value:o.force},o.children)}export{P as ForcePortalRoot,l as usePortalRoot};

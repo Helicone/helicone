@@ -1,0 +1,84 @@
+{
+  "name": "@floating-ui/react",
+  "version": "0.19.2",
+  "@rollingversions": {
+    "baseVersion": [
+      0,
+      14,
+      0
+    ]
+  },
+  "description": "Floating UI for React",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/floating-ui.react.umd.js",
+  "module": "./dist/floating-ui.react.esm.js",
+  "unpkg": "./dist/floating-ui.react.umd.min.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "module": "./dist/floating-ui.react.esm.js",
+      "import": "./dist/floating-ui.react.mjs",
+      "default": "./dist/floating-ui.react.umd.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/",
+    "index.d.ts",
+    "src/**/*.d.ts"
+  ],
+  "scripts": {
+    "test": "jest test",
+    "build": "NODE_ENV=build rollup -c",
+    "dev": "parcel test/visual/index.html"
+  },
+  "author": "atomiks",
+  "license": "MIT",
+  "bugs": "https://github.com/floating-ui/floating-ui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floating-ui/floating-ui.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://floating-ui.com/docs/react",
+  "keywords": [
+    "tooltip",
+    "popover",
+    "dropdown",
+    "menu",
+    "popup",
+    "positioning",
+    "react",
+    "react-dom"
+  ],
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@floating-ui/react-dom": "^1.3.0",
+    "aria-hidden": "^1.1.3",
+    "tabbable": "^6.0.1"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.16.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.1.1",
+    "@testing-library/react-hooks": "^7.0.2",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/react": "^18.0.1",
+    "framer-motion": "^6.2.8",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-merge-refs": "^1.1.0",
+    "react-responsive": "^9.0.2",
+    "react-router-dom": "^6.3.0",
+    "resize-observer-polyfill": "^1.5.1",
+    "use-isomorphic-layout-effect": "^1.1.1"
+  }
+}

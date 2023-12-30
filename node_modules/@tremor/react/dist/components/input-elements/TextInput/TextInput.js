@@ -1,0 +1,2 @@
+'use client';
+import{__rest as t}from"tslib";import"../../../lib/tremorTwMerge.js";import{makeClassName as e}from"../../../lib/utils.js";import r from"react";import m from"../BaseInput.js";const o=e("TextInput"),p=r.forwardRef(((e,p)=>{const{type:s="text"}=e,a=t(e,["type"]);return r.createElement(m,Object.assign({ref:p,type:s,makeInputClassName:o},a))}));p.displayName="TextInput";export{p as default};

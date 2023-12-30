@@ -1,0 +1,22 @@
+import { Color } from "./inputTypes";
+export declare const DEFAULT_COLOR: Color;
+export declare const WHITE = "white";
+export declare const TRANSPARENT = "transparent";
+export declare const colorPalette: {
+    canvasBackground: number;
+    lightBackground: number;
+    background: number;
+    darkBackground: number;
+    darkestBackground: number;
+    lightBorder: number;
+    border: number;
+    darkBorder: number;
+    lightRing: number;
+    ring: number;
+    lightText: number;
+    text: number;
+    darkText: number;
+    darkestText: number;
+    icon: number;
+};
+export declare const themeColorRange: Color[];

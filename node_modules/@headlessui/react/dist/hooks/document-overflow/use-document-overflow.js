@@ -1,0 +1,1 @@
+import{useIsoMorphicEffect as u}from'../use-iso-morphic-effect.js';import{useStore as s}from'../../hooks/use-store.js';import{overflows as t}from'./overflow-store.js';function p(e,r,n){let f=s(t),o=e?f.get(e):void 0,i=o?o.count>0:!1;return u(()=>{if(!(!e||!r))return t.dispatch("PUSH",e,n),()=>t.dispatch("POP",e,n)},[r,e]),i}export{p as useDocumentOverflowLockedEffect};

@@ -373,15 +373,18 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     "flex flex-grow flex-col"
                   )}
                 >
-                  {/* <div className="flex mx-auto w-full"> */}
                   {org?.currentOrg.organization_type === "reseller" && (
                     <div className="flex w-full">
-                      <button className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md">
+                      <button
+                        onClick={() => {
+                          router.push("/enterprise/portal");
+                        }}
+                        className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
+                      >
                         Customer Portal
                       </button>
                     </div>
                   )}
-                  {/* </div> */}
                   <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
                       {navigation.map((item, idx) => {
