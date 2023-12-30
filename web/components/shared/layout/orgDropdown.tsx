@@ -35,9 +35,11 @@ export default function OrgDropdown(props: OrgDropdownProps) {
 
   const [addOpen, setAddOpen] = useState(false);
 
-  const ownedOrgs = orgContext?.allOrgs.filter((org) => org.owner === user?.id);
+  const ownedOrgs = orgContext?.allOrgs.filter(
+    (org) => org.owner === user?.id && org.organization_type !== "customer"
+  );
   const memberOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner !== user?.id
+    (org) => org.owner !== user?.id && org.organization_type !== "customer"
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
