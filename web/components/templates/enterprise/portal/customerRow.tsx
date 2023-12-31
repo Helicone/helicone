@@ -2,19 +2,11 @@ import {
   EllipsisHorizontalIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Badge,
-  TableCell,
-  TableRow,
-  Text,
-  AreaChart,
-  LineChart,
-} from "@tremor/react";
+import { Badge, TableCell, TableRow, Text, AreaChart } from "@tremor/react";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { clsx } from "../../../shared/clsx";
-import Link from "next/link";
 import { Database } from "../../../../supabase/database.types";
 import { useGetOrgMembersAndOwner } from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
@@ -66,7 +58,6 @@ const CustomerRow = (props: CustomerRowProps) => {
   });
 
   const chartData = data?.data?.map((d: any) => {
-    // if the date is in the future, return null
     if (new Date(d.time) > new Date()) {
       return {
         requests: null,
@@ -102,8 +93,8 @@ const CustomerRow = (props: CustomerRowProps) => {
         <Text>{getUSDateFromString(org.created_at || "")}</Text>
       </TableCell>
       <TableCell>
-        <Badge color="emerald" size="sm">
-          active
+        <Badge color="emerald" size="xs" className="text-xs">
+          <p className="text-xs">active</p>
         </Badge>
       </TableCell>
       <TableCell>
