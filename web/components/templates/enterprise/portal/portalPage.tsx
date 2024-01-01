@@ -26,10 +26,10 @@ import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { useDebounce } from "../../../../services/hooks/debounce";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import AddNewCustomerForm from "./addNewCustomerForm";
 
 import ExportCustomerButton from "./exportCustomerButton";
 import usePortalPage from "../../../../services/hooks/enterprise/portal/usePortalPage";
+import CreateOrgForm from "../../organization/createOrgForm";
 
 interface PortalPageProps {
   searchQuery: string | null;
@@ -209,10 +209,18 @@ const PortalPage = (props: PortalPageProps) => {
         open={addCustomerModalOpen}
         setOpen={setAddCustomerModalOpen}
       >
-        <p className="text-2xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 py-4">
-          Add New Customer
-        </p>
-        <AddNewCustomerForm />
+        <div className="flex flex-col space-y-4">
+          <p className="text-2xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 py-4">
+            Add New Customer
+          </p>
+          <CreateOrgForm
+            variant="reseller"
+            onSuccess={() => {
+              setAddCustomerModalOpen(false);
+              refetch();
+            }}
+          />
+        </div>
       </ThemedDrawer>
     </>
   );
