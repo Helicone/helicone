@@ -35,6 +35,7 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
                 (message: any) =>
                   message.text ||
                   (message.content &&
+                    Array.isArray(message.content) &&
                     message.content.some(
                       (content: any) => content.type === "text"
                     ))
@@ -71,9 +72,12 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               }
               if (message?.tool_calls) {
                 const tools = message.tool_calls;
-                return tools.some(
-                  (tool: { type: string }) => tool.type === "function"
-                );
+
+                return Array.isArray(tools)
+                  ? tools.some(
+                      (tool: { type: string }) => tool.type === "function"
+                    )
+                  : false;
               }
               return false;
             };
