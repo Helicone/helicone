@@ -39,21 +39,40 @@ export class Valhalla {
     path: K,
     data: OnlyPostMethods[K]["post"]["requestBody"]["content"]["application/json"]
   ) {
-    return this.send<T>(path, "POST", JSON.stringify(data));
+    return this.sendWithRetry<T>(path, "POST", JSON.stringify(data));
   }
 
   async patch<T, K extends keyof OnlyPatchMethods>(
     path: K,
     data: OnlyPatchMethods[K]["patch"]["requestBody"]["content"]["application/json"]
   ) {
-    return this.send<T>(path, "PATCH", JSON.stringify(data));
+    return this.sendWithRetry<T>(path, "PATCH", JSON.stringify(data));
   }
 
   async put<T, K extends keyof OnlyPutMethods>(
     path: K,
     data: OnlyPutMethods[K]["put"]["requestBody"]["content"]["application/json"]
   ) {
-    return this.send<T>(path, "PUT", JSON.stringify(data));
+    return this.sendWithRetry<T>(path, "PUT", JSON.stringify(data));
+  }
+
+  // This function will take a maximum of 15 seconds to return
+  // (5 seconds for the request to be sent, 5 second pause, and 5 seconds for the request to be sent again)
+  private async sendWithRetry<T>(
+    path: string,
+    method: string,
+    body: string,
+    timeout = 5000
+  ): Promise<Result<T, string>> {
+    return this.send<T>(path, method, body, timeout).then((result) => {
+      if (result.data) {
+        return result;
+      }
+      // Wait 5 seconds and try again
+      return new Promise((resolve) => setTimeout(resolve, 5000)).then(() =>
+        this.send<T>(path, method, body, timeout)
+      );
+    });
   }
 
   private async send<T>(
