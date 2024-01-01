@@ -30,6 +30,9 @@ import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { useDebounce } from "../../../../services/hooks/debounce";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
+import AddNewCustomerForm from "./addNewCustomerForm";
+import LoadingAnimation from "../../../shared/loadingAnimation";
+import Papa from "papaparse";
 
 interface PortalPageProps {
   searchQuery: string | null;
@@ -126,7 +129,52 @@ const PortalPage = (props: PortalPageProps) => {
                   />
                   <div className="flex flex-row space-x-2 items-center">
                     <button
-                      onClick={() => {}}
+                      onClick={async () => {
+                        let response, error;
+
+                        if (debouncedSearch) {
+                          ({ data: response, error } = await supabase
+                            .from("organization")
+                            .select(
+                              "id, created_at, name, color, icon, tier, organization_type, logo_path"
+                            )
+                            .eq("reseller_id", org?.currentOrg.id)
+                            .ilike("name", `%${debouncedSearch}%`)
+                            .csv());
+                        } else {
+                          ({ data: response, error } = await supabase
+                            .from("organization")
+                            .select(
+                              "id, created_at, name, color, icon, tier, organization_type, logo_path"
+                            )
+                            .eq("reseller_id", org?.currentOrg.id)
+                            .csv());
+                        }
+
+                        if (error || !response) {
+                          console.error(error);
+                          return;
+                        }
+
+                        // Assuming response is a CSV string. If it's not, additional parsing will be needed
+                        const csv =
+                          typeof response === "string"
+                            ? response
+                            : Papa.unparse(response);
+
+                        // Create a Blob from the CSV String
+                        const blob = new Blob([csv], {
+                          type: "text/csv;charset=utf-8;",
+                        });
+
+                        // Create a link element, use it to download the Blob, and remove the link
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.setAttribute("download", "customers.csv");
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
                       className="border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 dark:bg-black dark:hover:bg-sky-900 flex flex-row items-center gap-2"
                     >
                       <ArrowDownTrayIcon
@@ -148,9 +196,7 @@ const PortalPage = (props: PortalPageProps) => {
                     </button>
                   </div>
                 </div>
-                {isLoading ? (
-                  <div>Loading...</div>
-                ) : data?.length === 0 ? (
+                {searchQuery === null && data?.length === 0 ? (
                   <div className="flex flex-col w-full h-96 justify-center items-center">
                     <div className="flex flex-col w-2/5">
                       <UserGroupIcon className="h-12 w-12 text-gray-900 dark:tex-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -257,7 +303,7 @@ const PortalPage = (props: PortalPageProps) => {
         <p className="text-2xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 py-4">
           Add New Customer
         </p>
-        <form></form>
+        <AddNewCustomerForm />
       </ThemedDrawer>
     </>
   );

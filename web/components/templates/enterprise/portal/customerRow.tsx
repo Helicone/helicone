@@ -13,6 +13,10 @@ import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../shared/layout/organizationContext";
 import { useRouter } from "next/router";
+import {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "../../organization/createOrgForm";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -71,10 +75,27 @@ const CustomerRow = (props: CustomerRowProps) => {
     }
   });
 
+  const currentIcon = ORGANIZATION_ICONS.find(
+    (icon) => icon.name === orgContext?.currentOrg.icon
+  );
+
+  const currentColor = ORGANIZATION_COLORS.find(
+    (icon) => icon.name === orgContext?.currentOrg.color
+  );
+
   return (
     <TableRow>
       <TableCell>
-        {org.logo_path ? (
+        <div className="h-8 w-8 flex-none rounded-md bg-gray-100 dark:bg-gray-900 object-cover border border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center">
+          {currentIcon && (
+            <currentIcon.icon
+              className={clsx(`text-${currentColor?.name}-500`, "h-6 w-6")}
+            />
+          )}
+        </div>
+
+        {/* Add this back in once users can upload assets into their logo_path through the UI */}
+        {/* {org.logo_path ? (
           <img
             src={org.logo_path}
             alt={org.name}
@@ -84,7 +105,7 @@ const CustomerRow = (props: CustomerRowProps) => {
           <div className="h-8 w-8 flex-none rounded-md bg-gray-100 dark:bg-gray-900 object-cover border border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center">
             <UserGroupIcon className="h-4 w-4 text-gray-500" />
           </div>
-        )}
+        )} */}
       </TableCell>
       <TableCell className="font-semibold text-black dark:text-white">
         {org.name}
@@ -139,7 +160,6 @@ const CustomerRow = (props: CustomerRowProps) => {
                     onClick={() => {
                       // set the org id and then redirect the user to the dashboard page
                       orgContext?.setCurrentOrg(org.id);
-
                       router.push("/dashboard");
                     }}
                     className={clsx(
@@ -155,13 +175,17 @@ const CustomerRow = (props: CustomerRowProps) => {
               <Menu.Item>
                 {({ active }) => (
                   <button
-                    disabled
+                    onClick={() => {
+                      // set the org id and then redirect the user to the org settings page
+                      orgContext?.setCurrentOrg(org.id);
+                      router.push("/organization/settings");
+                    }}
                     className={clsx(
                       active ? "bg-gray-50 dark:bg-gray-950" : "",
                       "w-full flex px-3 py-1 text-sm leading-6 text-gray-900 dark:text-gray-100"
                     )}
                   >
-                    Edit (coming soon)
+                    Edit
                     <span className="sr-only">, {org.name}</span>
                   </button>
                 )}

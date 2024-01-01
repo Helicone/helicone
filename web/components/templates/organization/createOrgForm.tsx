@@ -209,7 +209,26 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
       <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
         <button
           onClick={() => {
-            onCancelHandler && onCancelHandler(false);
+            if (onCancelHandler) {
+              onCancelHandler(false);
+            } else {
+              // reset to the initial values
+              setOrgName(initialValues?.name || "");
+              setSelectedColor(
+                initialValues?.color
+                  ? ORGANIZATION_COLORS.find(
+                      (c) => c.name === initialValues.color
+                    ) || ORGANIZATION_COLORS[0]
+                  : ORGANIZATION_COLORS[0]
+              );
+              setSelectedIcon(
+                initialValues?.icon
+                  ? ORGANIZATION_ICONS.find(
+                      (i) => i.name === initialValues.icon
+                    ) || ORGANIZATION_ICONS[0]
+                  : ORGANIZATION_ICONS[0]
+              );
+            }
           }}
           className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
         >

@@ -677,7 +677,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
 
           <main className="flex-1">
-            <div className="mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full min-h-screen">
               {/* Replace with your content */}
               {user?.email === DEMO_EMAIL && (
                 <div className="pointer-events-none flex sm:justify-center mt-4">
