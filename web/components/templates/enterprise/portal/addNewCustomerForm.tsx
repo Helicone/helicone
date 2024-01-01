@@ -1,5 +1,3 @@
-import CreateOrgForm from "../../organization/createOrgForm";
-
 interface AddNewCustomerFormProps {}
 
 const AddNewCustomerForm = (props: AddNewCustomerFormProps) => {

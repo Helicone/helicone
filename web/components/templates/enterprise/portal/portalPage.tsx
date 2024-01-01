@@ -1,4 +1,3 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import {
   Card,
   Tab,
@@ -13,26 +12,22 @@ import {
   TableRow,
   TextInput,
 } from "@tremor/react";
-import { useOrg } from "../../../shared/layout/organizationContext";
-import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../../supabase/database.types";
+
 import {
-  ArrowDownTrayIcon,
   BuildingStorefrontIcon,
   ChartPieIcon,
   MagnifyingGlassIcon,
   PlusIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import CustomerRow from "./customerRow";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { useDebounce } from "../../../../services/hooks/debounce";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import AddNewCustomerForm from "./addNewCustomerForm";
-import LoadingAnimation from "../../../shared/loadingAnimation";
-import Papa from "papaparse";
+
 import ExportCustomerButton from "./exportCustomerButton";
 import usePortalPage from "../../../../services/hooks/enterprise/portal/usePortalPage";
 
