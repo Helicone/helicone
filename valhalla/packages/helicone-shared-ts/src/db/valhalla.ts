@@ -63,10 +63,10 @@ class ValhallaDB implements IValhallaDB {
       user: username,
       password: password,
       database: auroraDb,
-      max: 20,
+      max: 3_000,
       idleTimeoutMillis: 1000, // close idle clients after 1 second
       connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
-      maxUses: 1_000,
+      maxUses: 500,
       ssl:
         getEnvironment() === "development"
           ? undefined
