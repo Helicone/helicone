@@ -65,6 +65,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
+  const hasPrivileges =
+    org?.currentOrg.owner === user.id ||
+    org?.currentOrg.organization_type !== "customer";
+
   const navigation = [
     {
       name: "Dashboard",
@@ -85,48 +89,62 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/users"),
     },
     {
-      name: (
-        <div className="flex w-full space-x-2 items-center">
-          <p>Alerts</p>
-          <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
-            new
-          </div>
-        </div>
-      ),
+      name: "Alerts",
       href: "/alerts",
       icon: BellIcon,
       current: pathname.includes("/alerts"),
     },
-    {
-      name: "Properties",
-      href: "/properties",
-      icon: TagIcon,
-      current: pathname.includes("/properties"),
-    },
-    {
-      name: "Cache",
-      href: "/cache",
-      icon: CircleStackIcon,
-      current: pathname.includes("/cache"),
-    },
-    {
-      name: "Jobs",
-      href: "/jobs",
-      icon: BriefcaseIcon,
-      current: pathname.includes("/jobs"),
-    },
-    {
-      name: "Models",
-      href: "/models",
-      icon: CubeTransparentIcon,
-      current: pathname.includes("/models"),
-    },
+    ...(hasPrivileges
+      ? [
+          {
+            name: "Properties",
+            href: "/properties",
+            icon: TagIcon,
+            current: pathname.includes("/properties"),
+          },
+          {
+            name: "Cache",
+            href: "/cache",
+            icon: CircleStackIcon,
+            current: pathname.includes("/cache"),
+          },
+          {
+            name: "Jobs",
+            href: "/jobs",
+            icon: BriefcaseIcon,
+            current: pathname.includes("/jobs"),
+          },
+          {
+            name: "Models",
+            href: "/models",
+            icon: CubeTransparentIcon,
+            current: pathname.includes("/models"),
+          },
+        ]
+      : []),
     {
       name: "Playground",
       href: "/playground",
       icon: BeakerIcon,
       current: pathname.includes("/playground"),
     },
+
+    ...(!hasPrivileges
+      ? [
+          {
+            name: "Members",
+            href: "/organization/members",
+            icon: UserGroupIcon,
+            current: pathname.includes("/members"),
+          },
+          {
+            name: "Keys",
+            href: "/keys",
+            icon: KeyIcon,
+            current: pathname.includes("/keys"),
+          },
+        ]
+      : []),
   ];
 
   const organizationNav = [
@@ -182,10 +200,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/vault"),
     });
   }
-
-  const hasPrivileges =
-    org?.currentOrg.owner === user.id ||
-    org?.currentOrg.organization_type !== "customer";
 
   return (
     <>
