@@ -35,11 +35,9 @@ export default function OrgDropdown(props: OrgDropdownProps) {
 
   const [addOpen, setAddOpen] = useState(false);
 
-  const ownedOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner === user?.id && org.organization_type !== "customer"
-  );
+  const ownedOrgs = orgContext?.allOrgs.filter((org) => org.owner === user?.id);
   const memberOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner !== user?.id && org.organization_type !== "customer"
+    (org) => org.owner !== user?.id
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
@@ -53,6 +51,10 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   const createNewOrgHandler = () => {
     setCreateOpen(true);
   };
+
+  const hasPrivileges =
+    org?.currentOrg.owner === user?.id ||
+    org?.currentOrg.organization_type !== "customer";
 
   return (
     <>
@@ -133,7 +135,9 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                           <button
                             className={`${
                               active
-                                ? "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
+                                ? org.organization_type === "customer"
+                                  ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
+                                  : "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
                                 : "text-gray-700 dark:text-gray-300"
                             } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
                             onClick={() => {
@@ -185,7 +189,9 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                           <button
                             className={`${
                               active
-                                ? "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
+                                ? org.organization_type === "customer"
+                                  ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
+                                  : "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
                                 : "text-gray-700 dark:text-gray-300"
                             } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
                             onClick={() => {
@@ -216,7 +222,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 </div>
               </div>
             )}
-            {org?.currentOrg.organization_type !== "customer" && (
+            {hasPrivileges && (
               <Menu.Item>
                 <div className="p-1">
                   <button

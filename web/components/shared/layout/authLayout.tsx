@@ -183,6 +183,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
     });
   }
 
+  const hasPrivileges =
+    org?.currentOrg.owner === user.id ||
+    org?.currentOrg.organization_type !== "customer";
+
   return (
     <>
       <div>
@@ -413,7 +417,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         );
                       })}
                     </div>
-                    {org?.currentOrg.organization_type !== "customer" && (
+                    {hasPrivileges && (
                       <div>
                         <div className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md px-2 py-1">
                           <p>Developer</p>
@@ -452,7 +456,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       </div>
                     )}
 
-                    {org?.currentOrg.organization_type !== "customer" && (
+                    {hasPrivileges && (
                       <Disclosure
                         defaultOpen={
                           router.pathname.includes("/organization/settings") ||

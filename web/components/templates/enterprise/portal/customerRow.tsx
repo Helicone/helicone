@@ -5,7 +5,10 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { clsx } from "../../../shared/clsx";
 import { Database } from "../../../../supabase/database.types";
-import { useGetOrgMembersAndOwner } from "../../../../services/hooks/organizations";
+import {
+  useGetOrgMembers,
+  useGetOrgMembersAndOwner,
+} from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../shared/layout/organizationContext";
@@ -25,13 +28,9 @@ const CustomerRow = (props: CustomerRowProps) => {
   const orgContext = useOrg();
   const router = useRouter();
 
-  const { data: members, isLoading: isMembersLoading } =
-    useGetOrgMembersAndOwner(org.id);
-
-  const totalMembers = [
-    ...(members?.members?.data ?? []),
-    ...(members?.owner?.data ? [members?.owner.data] : []),
-  ];
+  const { data: members, isLoading: isMembersLoading } = useGetOrgMembers(
+    org.id
+  );
 
   // 30 days ago
   const startOfMonthFormatted = formatISO(
@@ -112,11 +111,11 @@ const CustomerRow = (props: CustomerRowProps) => {
       </TableCell>
       <TableCell>
         <Badge color="emerald" size="xs" className="text-xs">
-          <div className="text-xs">active</div>
+          <span className="text-xs">active</span>
         </Badge>
       </TableCell>
       <TableCell>
-        <Text>{isLoading ? "..." : totalMembers.length}</Text>
+        <Text>{isLoading ? "..." : members?.data?.length}</Text>
       </TableCell>
       <TableCell>
         <div>
