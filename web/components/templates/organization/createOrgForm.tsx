@@ -326,6 +326,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     ...(variant === "reseller" && {
                       reseller_id: orgContext?.currentOrg.id!,
                       size: orgSize,
+                      organization_type: "customer",
                     }),
                   },
                 ])

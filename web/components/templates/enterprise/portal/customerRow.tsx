@@ -112,7 +112,7 @@ const CustomerRow = (props: CustomerRowProps) => {
       </TableCell>
       <TableCell>
         <Badge color="emerald" size="xs" className="text-xs">
-          <p className="text-xs">active</p>
+          <div className="text-xs">active</div>
         </Badge>
       </TableCell>
       <TableCell>
