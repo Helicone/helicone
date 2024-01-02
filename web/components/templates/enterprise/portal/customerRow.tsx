@@ -71,12 +71,10 @@ const CustomerRow = (props: CustomerRowProps) => {
     }
   });
 
-  const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg.icon
-  );
+  const currentIcon = ORGANIZATION_ICONS.find((icon) => icon.name === org.icon);
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg.color
+    (icon) => icon.name === org.color
   );
 
   return (

@@ -35,9 +35,14 @@ export default function OrgDropdown(props: OrgDropdownProps) {
 
   const [addOpen, setAddOpen] = useState(false);
 
-  const ownedOrgs = orgContext?.allOrgs.filter((org) => org.owner === user?.id);
+  const ownedOrgs = orgContext?.allOrgs.filter(
+    (org) => org.owner === user?.id && org.organization_type !== "customer"
+  );
   const memberOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner !== user?.id
+    (org) => org.owner !== user?.id && org.organization_type !== "customer"
+  );
+  const customerOrgs = orgContext?.allOrgs.filter(
+    (org) => org.organization_type === "customer"
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
@@ -135,9 +140,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                           <button
                             className={`${
                               active
-                                ? org.organization_type === "customer"
-                                  ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
-                                  : "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
+                                ? "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
                                 : "text-gray-700 dark:text-gray-300"
                             } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
                             onClick={() => {
@@ -189,9 +192,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                           <button
                             className={`${
                               active
-                                ? org.organization_type === "customer"
-                                  ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
-                                  : "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
+                                ? "bg-sky-100 text-gray-700 dark:bg-sky-900 dark:text-gray-300"
                                 : "text-gray-700 dark:text-gray-300"
                             } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
                             onClick={() => {
@@ -213,6 +214,58 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                             </div>
                             {org.id === orgContext?.currentOrg.id && (
                               <CheckIcon className="h-4 w-4 text-sky-500" />
+                            )}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {customerOrgs && customerOrgs.length > 0 && (
+              <div className="p-1">
+                <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">
+                  Customers{" "}
+                  {customerOrgs.length > 7 && (
+                    <span className="text-xs text-gray-400 dark:text-gray-600 font-normal pl-2">
+                      ({customerOrgs.length})
+                    </span>
+                  )}
+                </p>
+                <div className="h-full max-h-60 overflow-auto">
+                  {customerOrgs.map((org, idx) => {
+                    const icon = ORGANIZATION_ICONS.find(
+                      (icon) => icon.name === org.icon
+                    );
+                    return (
+                      <Menu.Item key={idx}>
+                        {({ active }) => (
+                          <button
+                            className={`${
+                              active
+                                ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
+                                : "text-gray-700 dark:text-gray-300"
+                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
+                            onClick={() => {
+                              orgContext?.setCurrentOrg(org.id);
+                            }}
+                          >
+                            <div className="flex flex-row space-x-2 items-center">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-gray-500" />
+                              )}
+                              <div className="flex flex-row space-x-1">
+                                <p className="w-full max-w-[10rem] text-left truncate">
+                                  {org.name}
+                                </p>
+                                <span className="text-sky-500">
+                                  {org.tier === "pro" && "(Pro)"}
+                                </span>
+                              </div>
+                            </div>
+                            {org.id === orgContext?.currentOrg.id && (
+                              <CheckIcon className="h-4 w-4 text-amber-500" />
                             )}
                           </button>
                         )}
