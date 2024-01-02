@@ -2668,14 +2668,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@helicone/project-rosetta@npm:^1.1.51":
-  version: 1.1.51
-  resolution: "@helicone/project-rosetta@npm:1.1.51"
+"@helicone/project-rosetta@npm:^1.1.55":
+  version: 1.1.55
+  resolution: "@helicone/project-rosetta@npm:1.1.55"
   dependencies:
     "@types/lodash.merge": "npm:^4.6.8"
     lodash: "npm:^4.17.21"
-    openai: "npm:^4.11.1"
-  checksum: 67ddbbc30c5ad4f9fc4cdba5a993de5be171cfb886120a66172adb5ed6e238dbc2fe53d67406b35080e47086499485358218bd324efb0bb62fb294518b717d2d
+    openai: "npm:^4.24.1"
+  checksum: 37ee29104b3b0a71b06904172399f4b2e91a4d17dcecc0cf56343dbff8c5214164f0a03f08d76cc63d3985dad60634c2ef7d2dc6e9b75e59ca1b00bc235cb88c
   languageName: node
   linkType: hard
 
@@ -8171,7 +8171,7 @@ __metadata:
     "@graphql-eslint/eslint-plugin": "npm:^3.17.0"
     "@graphql-tools/schema": "npm:^9.0.17"
     "@headlessui/react": "npm:^1.7.7"
-    "@helicone/project-rosetta": "npm:^1.1.51"
+    "@helicone/project-rosetta": "npm:^1.1.55"
     "@heroicons/react": "npm:^2.0.13"
     "@mui/material": "npm:^5.11.8"
     "@parcel/watcher": "npm:^2.3.0"
@@ -10116,9 +10116,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openai@npm:^4.11.1":
-  version: 4.16.1
-  resolution: "openai@npm:4.16.1"
+"openai@npm:^4.24.1":
+  version: 4.24.1
+  resolution: "openai@npm:4.24.1"
   dependencies:
     "@types/node": "npm:^18.11.18"
     "@types/node-fetch": "npm:^2.6.4"
@@ -10131,7 +10131,7 @@ __metadata:
     web-streams-polyfill: "npm:^3.2.1"
   bin:
     openai: bin/cli
-  checksum: 42d0101d51bb83b2b62215c37069562ceaa02f28648a97c2e628cbf0b9f1ccd57f94257c9a55ff7358d1e099ca1a2f7327053b8512bfb2dd1b4dafd901623434
+  checksum: 3dbcd1cd53aeb7772eed30e3e7814191db79267985b83fafad85038ea7639c6bf3d896331552e131cfbf9ae6b68901c7ab33aad0f025f3b7926535ca1454fce3
   languageName: node
   linkType: hard
 
