@@ -9,6 +9,18 @@ import {
   getTokenCountAnthropic,
   getTokenCountGPT3,
 } from "./tokens/tokenCounter";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+
+// This prevents the application from crashing when an unhandled error occurs
+const errorHandler: ErrorRequestHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error(`Unhandled error: ${err}, stack: ${err.stack}`);
+  res.status(500).send("Something broke!");
+};
 
 const dirname = __dirname;
 
@@ -35,6 +47,8 @@ app.use(
     validateRequests: true,
   })
 );
+
+app.use(errorHandler);
 
 app.post(
   "/v1/request",
