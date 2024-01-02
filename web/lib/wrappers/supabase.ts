@@ -48,7 +48,7 @@ export class SupabaseServerWrapper<T> {
     >
   > {
     const user = await this.client.auth.getUser();
-    if (!user.data || !user.data.user) {
+    if (!user.data?.user?.id) {
       return { error: "Unauthorized User", data: null };
     }
 
@@ -79,19 +79,24 @@ export class SupabaseServerWrapper<T> {
       };
     }
 
-    // If not owner, check if member
-    const orgMember = await this.client
-      .from("organization_member")
-      .select("*")
-      .eq("member", user.data.user.id)
-      .eq("organization", orgAccessCheck.data.id)
-      .single();
+    const checkMembership = async (orgId: string) => {
+      const memberCheck = await this.client
+        .from("organization_member")
+        .select("*")
+        .eq("member", user.data.user?.id)
+        .eq("organization", orgId)
+        .single();
 
-    if (!orgMember.data || orgMember.error !== null) {
-      return {
-        error: "Unauthorized",
-        data: null,
-      };
+      return memberCheck.data ? memberCheck.data.org_role : null;
+    };
+
+    const role =
+      (await checkMembership(orgAccessCheck.data.id)) ||
+      (orgAccessCheck.data.reseller_id &&
+        (await checkMembership(orgAccessCheck.data.reseller_id)));
+
+    if (!role) {
+      return { error: "Unauthorized", data: null };
     }
 
     return {
@@ -100,7 +105,7 @@ export class SupabaseServerWrapper<T> {
         orgId: orgAccessCheck.data.id,
         orgHasOnboarded: orgAccessCheck.data.has_onboarded,
         user: user.data.user,
-        role: orgMember.data.org_role,
+        role: role,
       },
       error: null,
     };
