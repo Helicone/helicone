@@ -120,12 +120,14 @@ app.post("/v1/tokens/anthropic", async (req, res) => {
   const tokens = await getTokenCountAnthropic(content ?? "");
   res.json({ tokens });
 });
+
 app.post("/v1/tokens/gpt3", async (req, res) => {
   const body = req.body;
   const content = body?.content;
   const tokens = await getTokenCountGPT3(content ?? "");
   res.json({ tokens });
 });
+
 app.post(
   "/v1/response",
   withAuth<
@@ -239,7 +241,7 @@ app.get("/healthcheck", (request, res) => {
   });
 });
 
-app.listen(8585, "0.0.0.0", () => {
+app.listen(parseInt(process.env.PORT ?? "8585"), "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:8585`);
 });
 
