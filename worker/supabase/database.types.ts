@@ -921,6 +921,45 @@ export interface Database {
           }
         ]
       }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          referred_user_id: string | null
+          referrer_user_id: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       request: {
         Row: {
           auth_hash: string
@@ -1174,18 +1213,21 @@ export interface Database {
       user_settings: {
         Row: {
           created_at: string | null
+          referral_code: string
           request_limit: number
           tier: string
           user: string
         }
         Insert: {
           created_at?: string | null
+          referral_code?: string
           request_limit?: number
           tier?: string
           user: string
         }
         Update: {
           created_at?: string | null
+          referral_code?: string
           request_limit?: number
           tier?: string
           user?: string
@@ -1504,6 +1546,13 @@ export interface Database {
       ensure_personal: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_all_pending_referrals: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          referrer_user_id: string
+          pending_referrals_count: number
+        }[]
       }
       get_org_id: {
         Args: {

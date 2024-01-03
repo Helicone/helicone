@@ -5,7 +5,7 @@ CREATE TABLE referrals (
     referrer_user_id uuid REFERENCES auth.users (id) MATCH SIMPLE,
     referred_user_id uuid REFERENCES auth.users (id) MATCH SIMPLE,
     created_at timestamp with time zone null default now(),
-    status TEXT
+    status TEXT default 'pending'::text
 );
 -- add rls to referrals
 alter table referrals enable row level security;
