@@ -201,6 +201,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
     });
   }
 
+  const hasPrivileges =
+    org?.currentOrg.owner === user.id ||
+    org?.currentOrg.organization_type !== "customer";
+
   return (
     <>
       <div>

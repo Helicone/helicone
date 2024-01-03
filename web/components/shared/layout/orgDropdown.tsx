@@ -57,6 +57,10 @@ export default function OrgDropdown(props: OrgDropdownProps) {
     setCreateOpen(true);
   };
 
+  const hasPrivileges =
+    org?.currentOrg.owner === user?.id ||
+    org?.currentOrg.organization_type !== "customer";
+
   return (
     <>
       <Menu as="div" className="relative inline-block text-left w-full">
@@ -278,30 +282,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 </div>
               </div>
             )}
-            <Menu.Item>
-              <div className="p-1">
-                <button
-                  onClick={() => setAddOpen(true)}
-                  className={clsx(
-                    "flex items-center space-x-2 text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
-                  )}
-                >
-                  <UserPlusIcon className="h-4 w-4 text-gray-500 mr-2" />
-                  Invite Members
-                </button>
-                <button
-                  onClick={() => {
-                    createNewOrgHandler();
-                  }}
-                  className={clsx(
-                    "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
-                  )}
-                >
-                  <PlusIcon className="h-4 w-4 text-gray-500 mr-2" />
-                  <p>Create New Org</p>
-                </button>
-              </div>
-            </Menu.Item>
+
             <div className="p-1">
               <Menu.Item>
                 {({ active }) => (
