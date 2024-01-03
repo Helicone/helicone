@@ -27,6 +27,7 @@ export type MetricsBackendBody = {
   filter: FilterNode;
   dbIncrement?: TimeIncrement;
   timeZoneDifference: number;
+  organizationId?: string;
 };
 
 export function useBackendMetricCall<T>({

@@ -84,11 +84,12 @@ const RenderOrgPlan = (props: RenderOrgPlanProps) => {
   );
 };
 
-const useRequestsOverTime = (props: {
+export const useRequestsOverTime = (props: {
   timeFilter: {
     start: Date;
     end: Date;
   };
+  organizationId?: string;
 }) => {
   const { timeFilter } = props;
   const timeIncrement = getTimeInterval(timeFilter);
@@ -100,6 +101,7 @@ const useRequestsOverTime = (props: {
     filter: filterListToTree([], "and"),
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
+    organizationId: props.organizationId ?? undefined,
   };
 
   const { data, isLoading, refetch } = useQuery({
