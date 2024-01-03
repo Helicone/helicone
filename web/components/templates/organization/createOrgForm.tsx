@@ -97,9 +97,15 @@ interface CreateOrgFormProps {
     name: string;
     color: string | null;
     icon: string | null;
+    limits?: OrgLimits;
   };
   onSuccess?: () => void;
 }
+
+type OrgLimits = {
+  cost: number;
+  requests: number;
+} | null;
 
 const CreateOrgForm = (props: CreateOrgFormProps) => {
   const {
@@ -115,10 +121,12 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
     requests: number;
   } | null>(
     variant === "reseller"
-      ? {
-          cost: 1_000,
-          requests: 1_000,
-        }
+      ? initialValues?.limits
+        ? initialValues.limits
+        : {
+            cost: 1_000,
+            requests: 1_000,
+          }
       : null
   );
   const [selectedColor, setSelectedColor] = useState(

@@ -53,6 +53,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               name: org.name,
               color: org.color || "",
               icon: org.icon || "",
+              limits: org.limits,
             }}
             variant={variant}
           />
