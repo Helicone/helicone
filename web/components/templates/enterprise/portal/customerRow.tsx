@@ -5,10 +5,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { clsx } from "../../../shared/clsx";
 import { Database } from "../../../../supabase/database.types";
-import {
-  useGetOrgMembers,
-  useGetOrgMembersAndOwner,
-} from "../../../../services/hooks/organizations";
+import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../shared/layout/organizationContext";
