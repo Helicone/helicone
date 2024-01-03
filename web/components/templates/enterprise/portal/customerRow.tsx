@@ -168,8 +168,8 @@ const CustomerRow = (props: CustomerRowProps) => {
                   <button
                     onClick={() => {
                       // set the org id and then redirect the user to the org settings page
-                      orgContext?.setCurrentOrg(org.id);
-                      router.push("/organization/settings");
+                      // orgContext?.setCurrentOrg(org.id);
+                      router.push(`/enterprise/portal/${org.id}`);
                     }}
                     className={clsx(
                       active ? "bg-gray-50 dark:bg-gray-950" : "",

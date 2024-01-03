@@ -61,6 +61,32 @@ const useGetOrgMembersAndOwner = (orgId: string) => {
   };
 };
 
+const useGetOrg = (orgId: string) => {
+  const supabaseClient = useSupabaseClient<Database>();
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["OrganizationsId", orgId],
+    queryFn: async (query) => {
+      if (!orgId) {
+        return null;
+      }
+      const { data, error } = await supabaseClient
+        .from("organization")
+        .select(`*`)
+        .eq("soft_delete", false)
+        .eq("id", orgId)
+        .single();
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    data,
+    isLoading,
+    refetch,
+  };
+};
+
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
@@ -150,5 +176,6 @@ export {
   useGetOrgs,
   useOrgsContextManager,
   setOrgCookie,
+  useGetOrg,
   useGetOrgMembersAndOwner,
 };

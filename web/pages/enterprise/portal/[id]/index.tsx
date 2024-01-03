@@ -1,9 +1,12 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
-import MetaData from "../../components/shared/metaData";
-import AuthLayout from "../../components/shared/layout/authLayout";
-import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
-import PortalPage from "../../components/templates/enterprise/portal/portalPage";
+import MetaData from "../../../../components/shared/metaData";
+import AuthLayout from "../../../../components/shared/layout/authLayout";
+import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
+
+import { useRouter } from "next/router";
+import OrgSettingsPage from "../../../../components/templates/organization/settings/orgSettingsPage";
+import { useGetOrg } from "../../../../services/hooks/organizations";
 
 interface PortalProps {
   user: User;
@@ -12,11 +15,16 @@ interface PortalProps {
 
 const Portal = (props: PortalProps) => {
   const { user, searchQuery } = props;
+  const router = useRouter();
+  const { id: organizationIdToEditId } = router.query;
+  const organizationIdToEdit = useGetOrg(organizationIdToEditId as string);
 
   return (
     <MetaData title="Customer Portal">
       <AuthLayout user={user}>
-        <PortalPage searchQuery={searchQuery} />
+        {organizationIdToEdit.data && (
+          <OrgSettingsPage org={organizationIdToEdit.data} variant="reseller" />
+        )}
       </AuthLayout>
     </MetaData>
   );

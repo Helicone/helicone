@@ -10,10 +10,11 @@ import { useOrg } from "../../../shared/layout/organizationContext";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
+  variant?: "organization" | "reseller";
 }
 
 const OrgSettingsPage = (props: OrgSettingsPageProps) => {
-  const { org } = props;
+  const { org, variant = "organization" } = props;
   const user = useUser();
   const orgContext = useOrg();
   const router = useRouter();
@@ -45,7 +46,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             disabled
           />
         </div>
-        <div className="max-w-[450px] w-full">
+        <div className="max-w-[550px] w-full">
           <CreateOrgForm
             initialValues={{
               id: org.id,
@@ -53,6 +54,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               color: org.color || "",
               icon: org.icon || "",
             }}
+            variant={variant}
           />
         </div>
         {isOwner && !org.is_personal && (

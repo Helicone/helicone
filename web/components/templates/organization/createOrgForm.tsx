@@ -14,6 +14,8 @@ import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { COMPANY_SIZES } from "../welcome/steps/createOrg";
+import VaultPage from "../vault/vaultPage";
+import { useVaultPage } from "../vault/useVaultPage";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -108,6 +110,17 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   } = props;
 
   const [orgName, setOrgName] = useState(initialValues?.name || "");
+  const [limits, setLimits] = useState<{
+    cost: number;
+    requests: number;
+  } | null>(
+    variant === "reseller"
+      ? {
+          cost: 1_000,
+          requests: 1_000,
+        }
+      : null
+  );
   const [selectedColor, setSelectedColor] = useState(
     initialValues?.color
       ? ORGANIZATION_COLORS.find((c) => c.name === initialValues.color) ||
@@ -254,6 +267,68 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           </div>
         </div>
       )}
+      <div>
+        <label
+          htmlFor="org-limits"
+          className="block text-md font-medium leading-6 text-gray-900 dark:text-gray-100"
+        >
+          Limits
+        </label>
+        <div className="flex flex-row mx-auto gap-5">
+          <div className="space-y-1.5 text-sm">
+            <label
+              htmlFor="org-limits"
+              className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+            >
+              Costs (USD)
+            </label>
+            <input
+              type="number"
+              name="org-limits"
+              id="org-name"
+              value={limits?.cost ?? 0}
+              className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+              placeholder={
+                variant === "organization"
+                  ? "Your shiny new org name"
+                  : "Customer name"
+              }
+              onChange={(e) =>
+                setLimits((prev) =>
+                  prev ? { ...prev, cost: +e.target.value } : null
+                )
+              }
+            />
+          </div>
+          <div className="space-y-1.5 text-sm">
+            <label
+              htmlFor="org-limits"
+              className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+            >
+              Requests
+            </label>
+            <input
+              type="number"
+              name="org-limits"
+              id="org-name"
+              value={limits?.requests ?? 0}
+              className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+              placeholder={
+                variant === "organization"
+                  ? "Your shiny new org name"
+                  : "Customer name"
+              }
+              onChange={(e) =>
+                setLimits((prev) =>
+                  prev ? { ...prev, requests: +e.target.value } : null
+                )
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      <VaultPage variant="portal"></VaultPage>
       <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
         <button
           onClick={() => {
@@ -327,6 +402,9 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                       reseller_id: orgContext?.currentOrg.id!,
                       size: orgSize,
                       organization_type: "customer",
+                    }),
+                    ...(limits && {
+                      limits: limits,
                     }),
                   },
                 ])

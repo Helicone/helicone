@@ -37,7 +37,25 @@ async function handler({
     res.status(500).json({ error: "Invalid providerKeyName", data: null });
     return;
   }
-
+  if (providerName === "portal") {
+    const provider = await supabaseServer
+      .from("provider_keys")
+      .select("*")
+      .eq("soft_delete", "false")
+      .eq("provider_name", providerName);
+    if (provider.error) {
+      console.error("Failed to get provider key", provider.error.message);
+      res.status(500).json({ error: provider.error.message, data: null });
+      return;
+    }
+    if (provider.data.length !== 0) {
+      res.status(500).json({
+        error: "Portal provider key already exists",
+        data: null,
+      });
+      return;
+    }
+  }
   const keyId = crypto.randomUUID();
   const { error } = await supabaseServer.from("provider_keys").insert({
     id: keyId,
