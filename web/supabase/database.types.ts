@@ -1547,13 +1547,6 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      get_all_pending_referrals: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          referrer_user_id: string
-          pending_referrals_count: number
-        }[]
-      }
       get_org_id: {
         Args: {
           request_id: string
