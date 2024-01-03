@@ -104,15 +104,16 @@ class ValhallaDB implements IValhallaDB {
     query: string,
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
-    try {
-      const client = await this.pool.connect();
-      const result = await client.query(query, values);
-      client.release();
-      return ok(result);
-    } catch (thrownErr) {
-      console.error("Error in query", query, thrownErr);
-      return err(JSON.stringify(thrownErr));
-    }
+    return err("Not implemented");
+    // try {
+    //   const client = await this.pool.connect();
+    //   const result = await client.query(query, values);
+    //   client.release();
+    //   return ok(result);
+    // } catch (thrownErr) {
+    //   console.error("Error in query", query, thrownErr);
+    //   return err(JSON.stringify(thrownErr));
+    // }
   }
 
   async now() {
