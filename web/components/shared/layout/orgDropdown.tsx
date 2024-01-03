@@ -3,10 +3,8 @@ import { Fragment, useState } from "react";
 import {
   CheckIcon,
   MoonIcon,
-  PlusIcon,
   SunIcon,
   UserCircleIcon,
-  UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import { useOrg } from "./organizationContext";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
