@@ -46,6 +46,7 @@ const CreateOrg = (props: CreateOrgProps) => {
     const orgName = formData.get("org-name") as string;
     const orgSize = formData.get("org-size") as string;
     const orgReferral = formData.get("org-referral") as string;
+    const referralCode = formData.get("referral-code") as string;
 
     if (orgSize === "Select company size") {
       setNotification("Please select a company size.", "info");
@@ -76,6 +77,28 @@ const CreateOrg = (props: CreateOrgProps) => {
       );
       setIsLoading(false);
       return;
+    }
+    if (referralCode && referralCode.trim() !== "") {
+      fetch("/api/referral/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          referralCode: referralCode,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            setNotification(
+              "Referral code not valid. Please try again.",
+              "error"
+            );
+            setIsLoading(false);
+            return;
+          }
+        });
     }
 
     setIsLoading(false);
