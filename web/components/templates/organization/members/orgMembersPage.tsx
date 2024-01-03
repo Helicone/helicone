@@ -46,9 +46,10 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
           // if the org is a customer org, remove all "owner" roles UNLESS the user is the owner
           if (orgContext?.currentOrg.owner === user?.id) {
             return true;
-          }
-          if (orgContext?.currentOrg.organization_type === "customer") {
+          } else if (orgContext?.currentOrg.organization_type === "customer") {
             return d.org_role !== "owner";
+          } else {
+            return true;
           }
         })
         .map((d) => {
