@@ -7,6 +7,14 @@ import {
   ValhallaResponse,
 } from "./valhalla.database.types";
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
+
 export interface IValhallaDB {
   query(query: string, values: any[]): PromiseGenericResult<QueryResult<any>>;
   now(): PromiseGenericResult<QueryResult<any>>;
