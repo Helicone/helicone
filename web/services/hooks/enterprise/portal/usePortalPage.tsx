@@ -17,6 +17,7 @@ const usePortalPage = (searchQuery: string | null) => {
         .from("organization")
         .select("*")
         .eq("reseller_id", orgId)
+        .eq("soft_delete", false)
         .ilike("name", `%${newSearch}%`);
 
       if (error) {
@@ -28,6 +29,7 @@ const usePortalPage = (searchQuery: string | null) => {
       const { data, error } = await supabase
         .from("organization")
         .select("*")
+        .eq("soft_delete", false)
         .eq("reseller_id", orgId);
 
       if (error) {

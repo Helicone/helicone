@@ -127,7 +127,9 @@ const PortalPage = (props: PortalPageProps) => {
                       </div>
                       <div className="flex flex-row items-center justify-between mt-8">
                         <button
-                          onClick={() => {}}
+                          onClick={() => {
+                            setAddCustomerModalOpen(true);
+                          }}
                           className="items-center rounded-md bg-black dark:bg-white px-2 py-1 text-xs flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                         >
                           <PlusIcon className="h-5 w-5 mr-2" />
