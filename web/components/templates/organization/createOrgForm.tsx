@@ -153,7 +153,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           name="org-name"
           id="org-name"
           value={orgName}
-          className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+          className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
           placeholder={
             variant === "organization"
               ? "Your shiny new org name"
@@ -226,7 +226,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="org-size"
-            className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+            className="block text-sm lg:text-md font-medium leading-6 text-gray-900 dark:text-gray-100"
           >
             {
               {
@@ -239,7 +239,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             <select
               id="org-size"
               name="org-size"
-              className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+              className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               required
               onChange={
                 variant === "reseller"
