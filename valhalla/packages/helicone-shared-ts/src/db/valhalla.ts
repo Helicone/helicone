@@ -27,7 +27,6 @@ export interface IValhallaDB {
 
 class ValhallaDB implements IValhallaDB {
   pool: Pool;
-
   constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
     const auroraPort = process.env.AURORA_PORT;
@@ -73,6 +72,19 @@ class ValhallaDB implements IValhallaDB {
           : {
               rejectUnauthorized: true, // This should be set to true for better security
             },
+    });
+    this.pool.on("error", (err, client) => {
+      try {
+        console.error(
+          "Error occurred on client",
+          client,
+          "err",
+          JSON.stringify(err)
+        );
+        client.release();
+      } catch (e) {
+        console.error("Error occurred on client", client, "err", err);
+      }
     });
   }
 
