@@ -1511,19 +1511,6 @@ export interface Database {
         }
         Returns: string
       }
-      insert_feedback_and_update_response: {
-        Args: {
-          response_id: string
-          feedback_metric_id: number
-          boolean_value: boolean
-          numerical_value: number
-          string_value: string
-          categorical_value: string
-          created_by: string
-          name: string
-        }
-        Returns: number
-      }
       verify_helicone_proxy_key: {
         Args: {
           api_key: string
