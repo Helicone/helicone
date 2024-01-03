@@ -182,6 +182,16 @@ export class RequestWrapper {
     }
   }
 
+  async getFormData(): Promise<Result<FormData, string>> {
+    const contentType = this.headers.get("content-type");
+    if (!contentType || !contentType.includes("multipart/form-data")) {
+      return err("Content type must be multipart/form-data");
+    }
+
+    const formData = await this.request.formData();
+    return ok(formData);
+  }
+
   getBody(): ReadableStream<Uint8Array> | null {
     return this.request.body;
   }

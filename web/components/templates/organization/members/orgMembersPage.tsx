@@ -44,24 +44,14 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
     ? data?.data.map((d) => {
         return {
           ...d,
-          isOwner: false,
+          org_role: d.org_role === "owner" ? "admin" : d.org_role,
+          isOwner: d.org_role === "owner",
         };
       })
     : [];
 
-  const orgMembers = [
-    {
-      email: orgOwner?.data?.at(0)?.email,
-      member: "",
-      isOwner: true,
-      org_role: "admin",
-    },
-    ...members,
-  ];
-
   const isUserAdmin =
-    isOwner ||
-    orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
+    isOwner || members.find((m) => m.member === user?.id)?.org_role === "admin";
 
   return (
     <>
@@ -93,7 +83,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
             </ul>
           ) : (
             <ul className="divide-y divide-gray-200 dark:divide-gray-800 border-t border-gray-200 dark:border-gray-800">
-              {orgMembers.map((member, index) => (
+              {members.map((member, index) => (
                 <OrgMemberItem
                   key={index}
                   index={index}
