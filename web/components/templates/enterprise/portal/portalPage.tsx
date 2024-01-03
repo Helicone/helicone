@@ -108,7 +108,7 @@ const PortalPage = (props: PortalPageProps) => {
                 {searchQuery === null && data?.length === 0 ? (
                   <div className="flex flex-col w-full h-96 justify-center items-center">
                     <div className="flex flex-col w-2/5">
-                      <UserGroupIcon className="h-12 w-12 text-gray-900 dark:tex-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
+                      <UserGroupIcon className="h-12 w-12 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
                       <p className="text-xl text-black dark:text-white font-semibold mt-8">
                         No customers exist!
                       </p>
