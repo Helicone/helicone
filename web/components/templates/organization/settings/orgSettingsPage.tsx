@@ -103,8 +103,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                 } else {
                   orgContext?.refetchOrgs();
                   setDeleteOpen(false);
-                  router.push("/organization");
-                  router.push("/organization");
+                  router.push("/requests");
+                  router.push("/requests");
                   setNotification("Delete organization", "success");
                 }
               }}

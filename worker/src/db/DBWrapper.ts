@@ -343,4 +343,71 @@ export class DBWrapper {
 
     return { error: null, data: null };
   }
+
+  async uploadLogo(
+    logoFile: File,
+    logoUrl: string,
+    orgId: string
+  ): Promise<Result<null, string>> {
+    const { data, error } = await this.supabaseClient.storage
+      .from("organization_assets")
+      .upload(logoUrl, logoFile);
+
+    if (error || !data) {
+      return err(error.message);
+    }
+
+    const { error: updateError } = await this.supabaseClient
+      .from("organization")
+      .update({
+        logo_path: data.path,
+      })
+      .eq("id", orgId);
+
+    if (updateError) {
+      return err(updateError.message);
+    }
+
+    return ok(null);
+  }
+
+  async getLogoPath(orgId: string): Promise<Result<string, string>> {
+    const { data: organization, error: organizationErr } =
+      await this.supabaseClient
+        .from("organization")
+        .select("*")
+        .eq("id", orgId)
+        .single();
+
+    console.log(`organization: ${JSON.stringify(organization)}`);
+
+    if (organizationErr || !organization) {
+      return err(organizationErr?.message ?? "Failed to get organization.");
+    }
+
+    // If logo path is already set, return it
+    if (organization.logo_path) {
+      return ok(organization.logo_path);
+    }
+
+    if (!organization.reseller_id) {
+      return err("Reseller id not found on organization.");
+    }
+
+    // Get logo path from reseller id
+    const { data: resellerOrg, error: resellerOrgErr } =
+      await this.supabaseClient
+        .from("organization")
+        .select("*")
+        .eq("organization_id", organization.reseller_id)
+        .single();
+
+    if (resellerOrgErr || !resellerOrg?.logo_path) {
+      return err(
+        resellerOrgErr?.message ?? "Failed to get logo path from reseller id."
+      );
+    }
+
+    return ok(resellerOrg.logo_path);
+  }
 }

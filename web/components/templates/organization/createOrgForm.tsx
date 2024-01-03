@@ -13,6 +13,7 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { DEMO_EMAIL } from "../../../lib/constants";
+import { COMPANY_SIZES } from "../welcome/steps/createOrg";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -87,6 +88,7 @@ export const ORGANIZATION_ICONS: OrgIconType[] = [
 ];
 
 interface CreateOrgFormProps {
+  variant?: "organization" | "reseller";
   onCancelHandler?: (open: boolean) => void;
   initialValues?: {
     id: string;
@@ -94,10 +96,16 @@ interface CreateOrgFormProps {
     color: string | null;
     icon: string | null;
   };
+  onSuccess?: () => void;
 }
 
 const CreateOrgForm = (props: CreateOrgFormProps) => {
-  const { onCancelHandler, initialValues } = props;
+  const {
+    variant = "organization",
+    onCancelHandler,
+    initialValues,
+    onSuccess,
+  } = props;
 
   const [orgName, setOrgName] = useState(initialValues?.name || "");
   const [selectedColor, setSelectedColor] = useState(
@@ -112,6 +120,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           ORGANIZATION_ICONS[0]
       : ORGANIZATION_ICONS[0]
   );
+  const [orgSize, setOrgSize] = useState("");
 
   const user = useUser();
   const orgContext = useOrg();
@@ -119,8 +128,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   const supabaseClient = useSupabaseClient<Database>();
 
   return (
-    <div className="flex flex-col gap-4 w-full space-y-4">
-      {initialValues ? (
+    <div className="flex flex-col gap-4 w-full space-y-8">
+      {initialValues || variant === "reseller" ? (
         <></>
       ) : (
         <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
@@ -132,23 +141,30 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           htmlFor="org-name"
           className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
         >
-          Organization Name
+          {
+            {
+              organization: "Organization Name",
+              reseller: "Customer Name",
+            }[variant]
+          }
         </label>
         <input
           type="text"
           name="org-name"
           id="org-name"
           value={orgName}
-          className={clsx(
-            "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-sm p-2 text-sm"
-          )}
-          placeholder={"Your shiny new org name"}
+          className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+          placeholder={
+            variant === "organization"
+              ? "Your shiny new org name"
+              : "Customer name"
+          }
           onChange={(e) => setOrgName(e.target.value)}
         />
       </div>
       <RadioGroup value={selectedColor} onChange={setSelectedColor}>
         <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-          Choose a label color
+          Choose a color
         </RadioGroup.Label>
         <div className="mt-4 flex items-center justify-between px-8">
           {ORGANIZATION_COLORS.map((color) => (
@@ -206,10 +222,61 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           ))}
         </div>
       </RadioGroup>
-      <div className="border-t border-gray-300 flex justify-end gap-2 pt-4">
+      {variant === "reseller" && (
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="org-size"
+            className="block text-sm lg:text-md font-medium leading-6 text-gray-900"
+          >
+            {
+              {
+                organization: "How large is your company?",
+                reseller: "How large is your customer's company?",
+              }[variant]
+            }
+          </label>
+          <div className="">
+            <select
+              id="org-size"
+              name="org-size"
+              className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+              required
+              onChange={
+                variant === "reseller"
+                  ? (e) => setOrgSize(e.target.value)
+                  : undefined
+              }
+            >
+              {COMPANY_SIZES.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+      <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
         <button
           onClick={() => {
-            onCancelHandler && onCancelHandler(false);
+            if (onCancelHandler) {
+              onCancelHandler(false);
+            } else {
+              // reset to the initial values
+              setOrgName(initialValues?.name || "");
+              setSelectedColor(
+                initialValues?.color
+                  ? ORGANIZATION_COLORS.find(
+                      (c) => c.name === initialValues.color
+                    ) || ORGANIZATION_COLORS[0]
+                  : ORGANIZATION_COLORS[0]
+              );
+              setSelectedIcon(
+                initialValues?.icon
+                  ? ORGANIZATION_ICONS.find(
+                      (i) => i.name === initialValues.icon
+                    ) || ORGANIZATION_ICONS[0]
+                  : ORGANIZATION_ICONS[0]
+              );
+            }
           }}
           className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
         >
@@ -242,6 +309,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 setNotification("Failed to update organization", "error");
               } else {
                 setNotification("Organization updated successfully", "success");
+                onSuccess && onSuccess();
               }
               onCancelHandler && onCancelHandler(false);
               orgContext?.refetchOrgs();
@@ -255,6 +323,11 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     color: selectedColor.name,
                     icon: selectedIcon.name,
                     has_onboarded: true,
+                    ...(variant === "reseller" && {
+                      reseller_id: orgContext?.currentOrg.id!,
+                      size: orgSize,
+                      organization_type: "customer",
+                    }),
                   },
                 ])
                 .select("*");
@@ -262,6 +335,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 setNotification("Failed to create organization", "error");
               } else {
                 setNotification("Organization created successfully", "success");
+                onSuccess && onSuccess();
               }
               onCancelHandler && onCancelHandler(false);
               orgContext?.refetchOrgs();
