@@ -671,8 +671,10 @@ export interface Database {
           icon: string
           id: string
           is_personal: boolean
+          limits: Json | null
           logo_path: string | null
           name: string
+          org_provider_key: string | null
           organization_type: string
           owner: string
           referral: string | null
@@ -691,8 +693,10 @@ export interface Database {
           icon?: string
           id?: string
           is_personal?: boolean
+          limits?: Json | null
           logo_path?: string | null
           name: string
+          org_provider_key?: string | null
           organization_type?: string
           owner: string
           referral?: string | null
@@ -711,8 +715,10 @@ export interface Database {
           icon?: string
           id?: string
           is_personal?: boolean
+          limits?: Json | null
           logo_path?: string | null
           name?: string
+          org_provider_key?: string | null
           organization_type?: string
           owner?: string
           referral?: string | null
@@ -725,6 +731,20 @@ export interface Database {
           tier?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_org_provider_key_fkey"
+            columns: ["org_provider_key"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_org_provider_key_fkey"
+            columns: ["org_provider_key"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_owner_fkey"
             columns: ["owner"]
@@ -1558,7 +1578,6 @@ export interface Database {
           id: string
           name: string
           owner: string | null
-          owner_id: string | null
           public: boolean | null
           updated_at: string | null
         }
@@ -1570,7 +1589,6 @@ export interface Database {
           id: string
           name: string
           owner?: string | null
-          owner_id?: string | null
           public?: boolean | null
           updated_at?: string | null
         }
@@ -1582,11 +1600,18 @@ export interface Database {
           id?: string
           name?: string
           owner?: string | null
-          owner_id?: string | null
           public?: boolean | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "buckets_owner_fkey"
+            columns: ["owner"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       migrations: {
         Row: {
@@ -1618,7 +1643,6 @@ export interface Database {
           metadata: Json | null
           name: string | null
           owner: string | null
-          owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
           version: string | null
@@ -1631,7 +1655,6 @@ export interface Database {
           metadata?: Json | null
           name?: string | null
           owner?: string | null
-          owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
           version?: string | null
@@ -1644,7 +1667,6 @@ export interface Database {
           metadata?: Json | null
           name?: string | null
           owner?: string | null
-          owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
           version?: string | null
