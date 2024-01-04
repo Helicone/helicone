@@ -65,6 +65,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
+  const hasPrivileges =
+    org?.currentOrg.owner === user.id ||
+    org?.currentOrg.organization_type !== "customer";
+
   const navigation = [
     {
       name: "Dashboard",
@@ -85,48 +89,62 @@ const AuthLayout = (props: AuthLayoutProps) => {
       current: pathname.includes("/users"),
     },
     {
-      name: (
-        <div className="flex w-full space-x-2 items-center">
-          <p>Alerts</p>
-          <div className="bg-purple-100 text-purple-700 ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-700 w-max items-center rounded-xl px-2 py-0.5 -my-0.5 text-xs font-medium ring-1 ring-inset">
-            new
-          </div>
-        </div>
-      ),
+      name: "Alerts",
       href: "/alerts",
       icon: BellIcon,
       current: pathname.includes("/alerts"),
     },
-    {
-      name: "Properties",
-      href: "/properties",
-      icon: TagIcon,
-      current: pathname.includes("/properties"),
-    },
-    {
-      name: "Cache",
-      href: "/cache",
-      icon: CircleStackIcon,
-      current: pathname.includes("/cache"),
-    },
-    {
-      name: "Jobs",
-      href: "/jobs",
-      icon: BriefcaseIcon,
-      current: pathname.includes("/jobs"),
-    },
-    {
-      name: "Models",
-      href: "/models",
-      icon: CubeTransparentIcon,
-      current: pathname.includes("/models"),
-    },
+    ...(hasPrivileges
+      ? [
+          {
+            name: "Properties",
+            href: "/properties",
+            icon: TagIcon,
+            current: pathname.includes("/properties"),
+          },
+          {
+            name: "Cache",
+            href: "/cache",
+            icon: CircleStackIcon,
+            current: pathname.includes("/cache"),
+          },
+          {
+            name: "Jobs",
+            href: "/jobs",
+            icon: BriefcaseIcon,
+            current: pathname.includes("/jobs"),
+          },
+          {
+            name: "Models",
+            href: "/models",
+            icon: CubeTransparentIcon,
+            current: pathname.includes("/models"),
+          },
+        ]
+      : []),
     {
       name: "Playground",
       href: "/playground",
       icon: BeakerIcon,
       current: pathname.includes("/playground"),
     },
+
+    ...(!hasPrivileges
+      ? [
+          {
+            name: "Members",
+            href: "/organization/members",
+            icon: UserGroupIcon,
+            current: pathname.includes("/members"),
+          },
+          {
+            name: "Keys",
+            href: "/keys",
+            icon: KeyIcon,
+            current: pathname.includes("/keys"),
+          },
+        ]
+      : []),
   ];
 
   const organizationNav = [
@@ -364,7 +382,27 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <OrgDropdown />
                   </div>
                 </div>
-                <div className="mt-16 flex flex-grow flex-col">
+
+                <div
+                  className={clsx(
+                    org?.currentOrg.organization_type === "reseller"
+                      ? "mt-20"
+                      : "mt-16",
+                    "flex flex-grow flex-col"
+                  )}
+                >
+                  {org?.currentOrg.organization_type === "reseller" && (
+                    <div className="flex w-full">
+                      <button
+                        onClick={() => {
+                          router.push("/enterprise/portal");
+                        }}
+                        className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
+                      >
+                        Customer Portal
+                      </button>
+                    </div>
+                  )}
                   <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
                       {navigation.map((item, idx) => {
@@ -393,110 +431,115 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         );
                       })}
                     </div>
-
-                    <div>
-                      <div className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md px-2 py-1">
-                        <p>Developer</p>
-                      </div>
-                      <div className="flex flex-col space-y-1">
-                        {developerNav.map((item, i) => {
-                          return (
-                            <Link
-                              key={item.name}
-                              href={item.href}
-                              className={clsx(
-                                item.current
-                                  ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
-                              )}
-                            >
-                              <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center">
-                                  <item.icon
-                                    className={clsx(
-                                      item.current
-                                        ? "text-black dark:text-white"
-                                        : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                      "mr-3 flex-shrink-0 h-4 w-4"
-                                    )}
-                                    aria-hidden="true"
-                                  />
-                                  {item.name}
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <Disclosure
-                      defaultOpen={
-                        router.pathname.includes("/organization/settings") ||
-                        router.pathname.includes("/organization/plan") ||
-                        router.pathname.includes("/organization/members")
-                      }
-                    >
-                      {({ open }) => (
-                        <div>
-                          <Disclosure.Button
-                            onClick={() => {
-                              setOpenOrg(openOrg === "true" ? "false" : "true");
-                            }}
-                            className="w-full mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
-                          >
-                            <p>Organization</p>
-                            <ChevronRightIcon
-                              className={clsx(
-                                open ? "transform rotate-90" : "",
-                                "h-3 w-3 inline"
-                              )}
-                            />
-                          </Disclosure.Button>
-                          <Transition
-                            enter="transition duration-100 ease-out"
-                            enterFrom="transform scale-95 opacity-0"
-                            enterTo="transform scale-100 opacity-100"
-                            leave="transition duration-75 ease-out"
-                            leaveFrom="transform scale-100 opacity-100"
-                            leaveTo="transform scale-95 opacity-0"
-                          >
-                            <Disclosure.Panel className="flex flex-col space-y-1">
-                              {organizationNav.map((item, i) => {
-                                return (
-                                  <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={clsx(
-                                      item.current
-                                        ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                      "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
-                                    )}
-                                  >
-                                    <div className="flex items-center justify-between w-full">
-                                      <div className="flex items-center">
-                                        <item.icon
-                                          className={clsx(
-                                            item.current
-                                              ? "text-black dark:text-white"
-                                              : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                            "mr-3 flex-shrink-0 h-4 w-4"
-                                          )}
-                                          aria-hidden="true"
-                                        />
-                                        {item.name}
-                                      </div>
-                                    </div>
-                                  </Link>
-                                );
-                              })}
-                            </Disclosure.Panel>
-                          </Transition>
+                    {hasPrivileges && (
+                      <div>
+                        <div className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md px-2 py-1">
+                          <p>Developer</p>
                         </div>
-                      )}
-                    </Disclosure>
+                        <div className="flex flex-col space-y-1">
+                          {developerNav.map((item, i) => {
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                className={clsx(
+                                  item.current
+                                    ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
+                                  "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
+                                )}
+                              >
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center">
+                                    <item.icon
+                                      className={clsx(
+                                        item.current
+                                          ? "text-black dark:text-white"
+                                          : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
+                                        "mr-3 flex-shrink-0 h-4 w-4"
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    {item.name}
+                                  </div>
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {hasPrivileges && (
+                      <Disclosure
+                        defaultOpen={
+                          router.pathname.includes("/organization/settings") ||
+                          router.pathname.includes("/organization/plan") ||
+                          router.pathname.includes("/organization/members")
+                        }
+                      >
+                        {({ open }) => (
+                          <div>
+                            <Disclosure.Button
+                              onClick={() => {
+                                setOpenOrg(
+                                  openOrg === "true" ? "false" : "true"
+                                );
+                              }}
+                              className="w-full mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
+                            >
+                              <p>Organization</p>
+                              <ChevronRightIcon
+                                className={clsx(
+                                  open ? "transform rotate-90" : "",
+                                  "h-3 w-3 inline"
+                                )}
+                              />
+                            </Disclosure.Button>
+                            <Transition
+                              enter="transition duration-100 ease-out"
+                              enterFrom="transform scale-95 opacity-0"
+                              enterTo="transform scale-100 opacity-100"
+                              leave="transition duration-75 ease-out"
+                              leaveFrom="transform scale-100 opacity-100"
+                              leaveTo="transform scale-95 opacity-0"
+                            >
+                              <Disclosure.Panel className="flex flex-col space-y-1">
+                                {organizationNav.map((item, i) => {
+                                  return (
+                                    <Link
+                                      key={item.name}
+                                      href={item.href}
+                                      className={clsx(
+                                        item.current
+                                          ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
+                                        "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
+                                      )}
+                                    >
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center">
+                                          <item.icon
+                                            className={clsx(
+                                              item.current
+                                                ? "text-black dark:text-white"
+                                                : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
+                                              "mr-3 flex-shrink-0 h-4 w-4"
+                                            )}
+                                            aria-hidden="true"
+                                          />
+                                          {item.name}
+                                        </div>
+                                      </div>
+                                    </Link>
+                                  );
+                                })}
+                              </Disclosure.Panel>
+                            </Transition>
+                          </div>
+                        )}
+                      </Disclosure>
+                    )}
                   </nav>
                 </div>
                 <div>
@@ -519,7 +562,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     <p>Help And Support</p>
                   </Link>
                 </div>
-                {tier === "free" ? (
+                {tier === "free" &&
+                org?.currentOrg.organization_type !== "customer" ? (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
@@ -651,7 +695,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
 
           <main className="flex-1">
-            <div className="mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full">
+            <div className="mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full min-h-screen">
               {/* Replace with your content */}
               {user?.email === DEMO_EMAIL && (
                 <div className="pointer-events-none flex sm:justify-center mt-4">

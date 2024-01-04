@@ -486,6 +486,78 @@ export const getAPIRouter = (router: BaseRouter) => {
     }
   );
 
+  router.post(
+    "/v1/organizations/:id/logo",
+    async (_, requestWrapper: RequestWrapper, env: Env) => {
+      const { error: formDataErr, data: formData } =
+        await requestWrapper.getFormData();
+
+      if (formDataErr || !formData) {
+        return new Response("Expected a POST request with a logo file", {
+          status: 400,
+        });
+      }
+
+      const logoFile = formData.get("logo") as unknown;
+
+      if (!logoFile || !(logoFile instanceof File)) {
+        return new Response("Expected a POST request with a logo file", {
+          status: 400,
+        });
+      }
+
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error: authParamsErr } =
+        await client.db.getAuthParams();
+
+      const orgId = authParams?.organizationId;
+
+      if (authParamsErr || !orgId) {
+        return client.response.unauthorized();
+      }
+
+      const logoId = crypto.randomUUID();
+      const logoUrl = `organization/${orgId}/logo/${logoId}`;
+
+      const { error: uploadErr } = await client.db.uploadLogo(
+        logoFile,
+        logoUrl,
+        orgId
+      );
+
+      if (uploadErr) {
+        return client.response.newError(uploadErr, 500);
+      }
+
+      return client.response.successJSON({ ok: "true" }, true);
+    }
+  );
+
+  router.get(
+    "/v1/organizations/:id/logo",
+    async (_, requestWrapper: RequestWrapper, env: Env) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const { data: authParams, error: authParamsErr } =
+        await client.db.getAuthParams();
+
+      const orgId = authParams?.organizationId;
+
+      if (authParamsErr || !orgId) {
+        return client.response.unauthorized();
+      }
+
+      const { data: logoPath, error: logoPathErr } =
+        await client.db.getLogoPath(orgId);
+
+      if (logoPathErr || !logoPath) {
+        return client.response.newError("Logo not found", 404);
+      }
+
+      const logoUrl = `${env.SUPABASE_URL}/storage/v1/object/public/organization_assets/${logoPath}`;
+      return client.response.successJSON({ logoUrl: logoUrl }, true);
+    }
+  );
+
   router.options(
     "*",
     async (

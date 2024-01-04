@@ -22,13 +22,14 @@ async function handler(
     filter: userFilters,
     dbIncrement,
     timeZoneDifference,
+    organizationId,
   } = options.req.body as MetricsBackendBody;
 
   res.status(200).json(
     await getTotalRequestsOverTime({
       timeFilter,
       userFilter: userFilters,
-      orgId,
+      orgId: organizationId ?? orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     })
