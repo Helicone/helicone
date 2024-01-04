@@ -8,14 +8,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
+import { DEMO_EMAIL } from "../../../lib/constants";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import { DEMO_EMAIL } from "../../../lib/constants";
-import { COMPANY_SIZES } from "../welcome/steps/createOrg";
 import VaultPage from "../vault/vaultPage";
-import { useVaultPage } from "../vault/useVaultPage";
+import { COMPANY_SIZES } from "../welcome/steps/createOrg";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -333,6 +332,23 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 )
               }
             />
+          </div>
+          <div className="space-y-1.5 text-sm">
+            <label
+              htmlFor="org-limits"
+              className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+            >
+              Time Grain
+            </label>
+            <select
+              id="org-size"
+              name="org-size"
+              className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+              required
+              onChange={(e) => setOrgSize(e.target.value)}
+            >
+              <option value="word">monthly</option>
+            </select>
           </div>
         </div>
       </div>

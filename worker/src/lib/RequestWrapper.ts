@@ -6,7 +6,7 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "../db/DBWrapper";
-import { Result, err, ok } from "../results";
+import { Result, err, map, mapPostgrestErr, ok } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
 import { checkLimits } from "./limits/check";
 import { getAndStoreInCache } from "./secureCache";
@@ -25,6 +25,10 @@ export class RequestWrapper {
   headers: Headers;
   heliconeProxyKeyId: string | undefined;
   baseURLOverride: string | null;
+  customerPortalSettings: {
+    request: number;
+    cost: number;
+  } | null = null;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -231,8 +235,16 @@ export class RequestWrapper {
       /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
     const apiKeyPatternV2 =
       /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
+    const apiKeyPatternV3 =
+      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
-    if (!(apiKeyPattern.test(apiKey) || apiKeyPatternV2.test(apiKey))) {
+    if (
+      !(
+        apiKeyPattern.test(apiKey) ||
+        apiKeyPatternV2.test(apiKey) ||
+        apiKeyPatternV3.test(apiKey)
+      )
+    ) {
       return err("API Key is not well formed");
     }
     return ok(null);
@@ -267,7 +279,29 @@ export class RequestWrapper {
       undefined;
 
     // If using proxy key, get the real key from vault
-    if (
+    if (authKey?.startsWith("Bearer sk-helicone-cp")) {
+      const { data, error } = await this.getProviderKeyFromCustomerPortalKey(
+        authKey,
+        env
+      );
+
+      if (error || !data || !data.providerKey) {
+        return err(
+          `Provider key not found using Customer Portal Key. Error: ${error}`
+        );
+      }
+      this.authorization = data.providerKey;
+      const headers = new Headers(this.headers);
+      headers.set("Authorization", `Bearer ${this.authorization}`);
+      this.headers = headers;
+      this.heliconeHeaders.heliconeAuthV2 = {
+        token: authKey,
+        _type: "bearer",
+      };
+      this.heliconeHeaders.heliconeAuth = authKey;
+      this.customerPortalSettings = data.settings;
+      console.log("this.customerPortalSettings", this.customerPortalSettings);
+    } else if (
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
     ) {
@@ -301,6 +335,27 @@ export class RequestWrapper {
     );
     return getProviderKeyFromProxyCache(authKey, env, supabaseClient);
   }
+
+  private async getProviderKeyFromCustomerPortalKey(
+    authKey: string,
+    env: Env
+  ): Promise<Result<CustomerPortalValues, string>> {
+    const supabaseClient: SupabaseClient<Database> = createClient(
+      this.env.SUPABASE_URL,
+      this.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    return await getAndStoreInCache(
+      `getProxy-CP3-${authKey}`,
+      env,
+      async () =>
+        await getProviderKeyFromPortalKey(authKey, env, supabaseClient)
+    );
+  }
+}
+
+export interface CustomerPortalValues {
+  providerKey: string;
+  settings: RequestWrapper["customerPortalSettings"];
 }
 
 export interface ProxyKeyRow {
@@ -309,6 +364,11 @@ export interface ProxyKeyRow {
   organizationId: string;
 }
 
+export interface ProxyKeyRow {
+  providerKey: string;
+  proxyKeyId: string;
+  organizationId: string;
+}
 export async function getProviderKeyFromProxyCache(
   authKey: string,
   env: Env,
@@ -319,6 +379,50 @@ export async function getProviderKeyFromProxyCache(
     env,
     async () => await getProviderKeyFromProxy(authKey, env, supabaseClient)
   );
+}
+
+export interface ProxyKeyRow {
+  providerKey: string;
+  proxyKeyId: string;
+  organizationId: string;
+}
+
+export async function getProviderKeyFromPortalKey(
+  authKey: string,
+  env: Env,
+  supabaseClient: SupabaseClient<Database>
+): Promise<Result<CustomerPortalValues, string>> {
+  const apiKey = await supabaseClient
+    .from("helicone_api_keys")
+    .select("*")
+    .eq("api_key_hash", await hash(authKey))
+    .single();
+  console.log("apiKey", apiKey.error);
+
+  const organization = await supabaseClient
+    .from("organization")
+    .select("*")
+    .eq("id", apiKey.data?.organization_id ?? "")
+    .single();
+
+  const providerKeyId = await supabaseClient
+    .from("provider_keys")
+    .select("*")
+    .eq("id", organization.data?.org_provider_key ?? "")
+    .single();
+
+  const providerKey = await supabaseClient
+    .from("decrypted_provider_keys")
+    .select("decrypted_provider_key")
+    .eq("id", providerKeyId.data?.id ?? "")
+    .eq("soft_delete", "false")
+    .single();
+  console.log("providerKey data", providerKey.data);
+  return map(mapPostgrestErr(providerKey), (x) => ({
+    providerKey: x.decrypted_provider_key ?? "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    settings: organization.data?.limits as any,
+  }));
 }
 
 export async function getProviderKeyFromProxy(

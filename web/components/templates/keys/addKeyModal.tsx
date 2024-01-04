@@ -4,7 +4,10 @@ import ThemedModal from "../../shared/themed/themedModal";
 import generateApiKey from "generate-api-key";
 import { hashAuth } from "../../../lib/hashClient";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { OrgContextValue } from "../../shared/layout/organizationContext";
+import {
+  OrgContextValue,
+  useOrg,
+} from "../../shared/layout/organizationContext";
 import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
@@ -39,7 +42,9 @@ const AddKeyModal = (props: AddKeyModalProps) => {
       return;
     }
 
-    const apiKey = `sk-helicone-${generateApiKey({
+    const apiKey = `sk-helicone${
+      org?.currentOrg.organization_type === "customer" ? "-cp" : ""
+    }-${generateApiKey({
       method: "base32",
       dashes: true,
     }).toString()}`.toLowerCase();
