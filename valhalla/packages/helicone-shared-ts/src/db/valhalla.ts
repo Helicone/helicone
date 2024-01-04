@@ -7,6 +7,14 @@ import {
   ValhallaResponse,
 } from "./valhalla.database.types";
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
+
 export interface IValhallaDB {
   query(query: string, values: any[]): PromiseGenericResult<QueryResult<any>>;
   now(): PromiseGenericResult<QueryResult<any>>;
@@ -27,7 +35,6 @@ export interface IValhallaDB {
 
 class ValhallaDB implements IValhallaDB {
   pool: Pool;
-
   constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
     const auroraPort = process.env.AURORA_PORT;
@@ -63,16 +70,29 @@ class ValhallaDB implements IValhallaDB {
       user: username,
       password: password,
       database: auroraDb,
-      max: 100,
+      max: 3_000,
       idleTimeoutMillis: 1000, // close idle clients after 1 second
       connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
-      maxUses: 7_200,
+      maxUses: 500,
       ssl:
         getEnvironment() === "development"
           ? undefined
           : {
               rejectUnauthorized: true, // This should be set to true for better security
             },
+    });
+    this.pool.on("error", (err, client) => {
+      try {
+        console.error(
+          "Error occurred on client",
+          client,
+          "err",
+          JSON.stringify(err)
+        );
+        client.release();
+      } catch (e) {
+        console.error("Error occurred on client", client, "err", err);
+      }
     });
   }
 
@@ -222,7 +242,7 @@ class ValhallaDB implements IValhallaDB {
 class StaticValhallaPool {
   private static client: ValhallaDB | null = null;
 
-  static async getClient(): Promise<IValhallaDB> {
+  static getClient(): IValhallaDB {
     if (this.client === null) {
       const auroraCreds = process.env.AURORA_CREDS;
       if (!auroraCreds) {
@@ -236,6 +256,6 @@ class StaticValhallaPool {
   }
 }
 
-export async function createValhallaClient(): Promise<IValhallaDB> {
+export function createValhallaClient(): IValhallaDB {
   return StaticValhallaPool.getClient();
 }
