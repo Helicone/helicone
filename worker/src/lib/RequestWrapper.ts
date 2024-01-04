@@ -8,7 +8,7 @@ import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "../db/DBWrapper";
 import { Result, err, map, mapPostgrestErr, ok } from "../results";
 import { HeliconeHeaders } from "./HeliconeHeaders";
-import { checkLimits } from "./limits/check";
+import { checkLimits, checkLimitsSingle } from "./limits/check";
 import { getAndStoreInCache } from "./secureCache";
 
 export type RequestHandlerType =
@@ -25,10 +25,6 @@ export class RequestWrapper {
   headers: Headers;
   heliconeProxyKeyId: string | undefined;
   baseURLOverride: string | null;
-  customerPortalSettings: {
-    request: number;
-    cost: number;
-  } | null = null;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -299,8 +295,6 @@ export class RequestWrapper {
         _type: "bearer",
       };
       this.heliconeHeaders.heliconeAuth = authKey;
-      this.customerPortalSettings = data.settings;
-      console.log("this.customerPortalSettings", this.customerPortalSettings);
     } else if (
       this.env.VAULT_ENABLED &&
       authKey?.startsWith("Bearer sk-helicone-proxy")
@@ -344,8 +338,9 @@ export class RequestWrapper {
       this.env.SUPABASE_URL,
       this.env.SUPABASE_SERVICE_ROLE_KEY
     );
+
     return await getAndStoreInCache(
-      `getProxy-CP3-${authKey}`,
+      `getProxy-CP-${authKey}`,
       env,
       async () =>
         await getProviderKeyFromPortalKey(authKey, env, supabaseClient)
@@ -353,9 +348,8 @@ export class RequestWrapper {
   }
 }
 
-export interface CustomerPortalValues {
+interface CustomerPortalValues {
   providerKey: string;
-  settings: RequestWrapper["customerPortalSettings"];
 }
 
 export interface ProxyKeyRow {
@@ -411,6 +405,22 @@ export async function getProviderKeyFromPortalKey(
     .eq("id", organization.data?.org_provider_key ?? "")
     .single();
 
+  const check = await checkLimitsSingle(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (organization.data?.limits as any)["cost"],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (organization.data?.limits as any)["requests"],
+    "month",
+    apiKey.data?.organization_id ?? "",
+    env
+  );
+
+  if (check.error) {
+    return err(check.error);
+  } else {
+    console.log("check.data", check.data);
+  }
+
   const providerKey = await supabaseClient
     .from("decrypted_provider_keys")
     .select("decrypted_provider_key")
@@ -420,8 +430,6 @@ export async function getProviderKeyFromPortalKey(
   console.log("providerKey data", providerKey.data);
   return map(mapPostgrestErr(providerKey), (x) => ({
     providerKey: x.decrypted_provider_key ?? "",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    settings: organization.data?.limits as any,
   }));
 }
 
