@@ -18,6 +18,9 @@ import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
+import { getTimeInterval } from "../../../lib/timeCalculations/time";
+import { TimeFilter } from "../../../lib/api/handlerWrappers";
+import { useCachePage } from "./useCachePage2";
 
 interface CachePageProps {
   currentPage: number;
@@ -32,10 +35,41 @@ interface CachePageProps {
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort } = props;
 
+  /*
+    const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+
+  const timeIncrement = getTimeInterval(timeFilter);
+    const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
+    timeFilter,
+    uiFilters: debouncedAdvancedFilters,
+    apiKeyFilter: null,
+    timeZoneDifference: new Date().getTimezoneOffset(),
+    dbIncrement: timeIncrement,
+  });
+
+  */
+
   const data = useCachePageMetrics();
   const cacheOverTime = useCacheOvertime();
   const topMetrics = useCachePageTopMetrics();
   const topRequests = useCachePageTopRequests();
+  const timeFilter: TimeFilter = {
+    start: new Date(),
+    end: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 30),
+  };
+  const timeZoneDifference = new Date().getTimezoneOffset();
+  const dbIncrement = getTimeInterval(timeFilter);
+  const {
+    // overTimeData,
+    metrics: metrics2,
+    isAnyLoading,
+  } = useCachePage({
+    timeFilter,
+    timeZoneDifference,
+    dbIncrement,
+    uiFilters: [],
+    apiKeyFilter: null,
+  });
 
   const [selectedRequest, setSelectedRequest] = useState<{
     request_id: string;
@@ -51,12 +85,13 @@ const CachePage = (props: CachePageProps) => {
     ? +data.totalCached.data?.data === 0
     : false;
 
+  console.log(`Total cache hits: ${JSON.stringify(metrics2.totalCacheHits)}`);
   const metrics = [
     {
       id: "caches",
       label: "All Time Caches",
-      value: data.totalCached.data?.data || 0,
-      isLoading: data.totalCached.isLoading,
+      value: metrics2.totalCacheHits.data?.data || 0,
+      isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
@@ -97,8 +132,6 @@ const CachePage = (props: CachePageProps) => {
     })) ?? [];
 
   cacheDist.sort((a, b) => a.name.localeCompare(b.name));
-
-  console.log(chartData);
 
   return (
     <>

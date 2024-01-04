@@ -42,5 +42,8 @@ export async function getTotalRequests(
     count: number;
   }>(query, argsAcc);
 
-  return resultMap(res, (d) => +d[0].count);
+  console.log(res);
+  const temp = resultMap(res, (d) => +d[0].count);
+  console.log(temp);
+  return temp;
 }

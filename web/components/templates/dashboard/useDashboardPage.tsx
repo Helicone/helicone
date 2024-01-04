@@ -187,6 +187,8 @@ export const useDashboardPage = ({
     }),
   };
 
+  console.log("metrics", JSON.stringify(metrics, null, 2));
+
   function isLoading(x: UseQueryResult<any>) {
     return x.isLoading || x.isFetching;
   }

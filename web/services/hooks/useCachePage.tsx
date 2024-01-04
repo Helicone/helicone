@@ -106,6 +106,42 @@ export function useCacheOvertime() {
   };
 }
 
+export function useCacheOvertimeClickhouse() {
+  /*
+  users: useBackendMetricCall<Result<UsersOverTime[], string>>({
+      params,
+      endpoint: "/api/metrics/usersOverTime",
+      key: "usersOverTime",
+      postProcess: (data) => {
+        return resultMap(data, (d) =>
+          d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+        );
+      },
+    }),
+  */
+  // const overTimeData = {
+  //   cacheHits: useBackendMetricCall<Result<CacheHitsOverTime[], string>>({
+  //     params,
+  //     endpoint: "/api/metrics/cacheHitsOverTime",
+  //     key: "cacheHitsOverTime",
+  //     postProcess: (data) => {
+  //       return resultMap(data, (d) =>
+  //         d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+  //       );
+  //     },
+  //   }),
+  // };
+  // const res = await getXOverTimeCacheHits<{
+  //   cost: number;
+  // }>(data, `${CLICKHOUSE_PRICE_CALC("response_copy_v3")} AS cost`);
+  // return resultMap(res, (resData) =>
+  //   resData.map((d) => ({
+  //     time: new Date(new Date(d.created_at_trunc).getTime()),
+  //     cost: Number(d.cost),
+  //   }))
+  // );
+}
+
 export function useCachePageTopRequests() {
   const topRequests = useQuery({
     queryKey: ["topRequests"],

@@ -1,4 +1,4 @@
-import { getCacheCount } from "../../../lib/api/cache/stats";
+import { getCacheCountClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -10,7 +10,9 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  res.status(200).json(await getCacheCount(orgId, "all"));
+  const rezzz = await getCacheCountClickhouse(orgId, "all");
+  console.log(rezzz);
+  res.status(200).json(rezzz);
 }
 
 export default withAuth(handler);

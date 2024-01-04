@@ -1,11 +1,14 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
+import {
+  buildFilterWithAuth,
+  buildFilterWithAuthClickHouseCacheHits,
+} from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import { dbExecute } from "../db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
 
@@ -31,6 +34,26 @@ export async function getCacheCount(
     }>(query, builtFilter.argsAcc),
     (x) => x[0].count
   );
+}
+
+export async function getCacheCountClickhouse(
+  orgId: string,
+  filter: FilterNode
+): Promise<Result<number, string>> {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `select count(*) as count from cache_hits where ${builtFilter.filter}`;
+
+  const res = await dbQueryClickhouse<{
+    count: number;
+  }>(query, builtFilter.argsAcc);
+
+  console.log(res);
+  return resultMap(res, (x) => +x[0].count);
 }
 
 export async function getModelMetrics(org_id: string, filter: FilterNode) {
