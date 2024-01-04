@@ -10,7 +10,7 @@ class SupabaseAuthCache extends InMemoryCache {
   private static instance: SupabaseAuthCache;
   private API_KEY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   constructor() {
-    super(500);
+    super(1_000);
   }
 
   static getInstance(): SupabaseAuthCache {
@@ -30,13 +30,10 @@ export interface AuthParams {
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
 
-export class SupabaseConnector {
-  client: SupabaseClient<Database>;
-  connected: boolean = false;
-  organizationId?: string;
-  authCache: SupabaseAuthCache = SupabaseAuthCache.getInstance();
+let staticClient: SupabaseClient<Database> | null = null;
 
-  constructor() {
+function getSupabaseClient(): SupabaseClient<Database> {
+  if (!staticClient) {
     const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
     const supabaseURL = SUPABASE_CREDS?.url;
     const supabaseServiceRoleKey = SUPABASE_CREDS?.service_role_key;
@@ -47,7 +44,19 @@ export class SupabaseConnector {
     if (!supabaseServiceRoleKey) {
       throw new Error("No Supabase service role key");
     }
-    this.client = createClient(supabaseURL, supabaseServiceRoleKey);
+    return createClient(supabaseURL, supabaseServiceRoleKey);
+  }
+  return staticClient;
+}
+
+export class SupabaseConnector {
+  client: SupabaseClient<Database>;
+  connected: boolean = false;
+  organizationId?: string;
+  authCache: SupabaseAuthCache = SupabaseAuthCache.getInstance();
+
+  constructor() {
+    this.client = getSupabaseClient();
   }
 
   private async authenticateJWT(jwt: string, orgId?: string): AuthResult {
