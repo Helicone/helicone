@@ -30,33 +30,31 @@ export interface AuthParams {
 }
 type AuthResult = PromiseGenericResult<AuthParams>;
 
-let staticClient: SupabaseClient<Database> | null = null;
-
-function getSupabaseClient(): SupabaseClient<Database> {
-  if (!staticClient) {
-    const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
-    const supabaseURL = SUPABASE_CREDS?.url;
-    const supabaseServiceRoleKey = SUPABASE_CREDS?.service_role_key;
-    if (!supabaseURL) {
-      throw new Error("No Supabase URL");
-    }
-
-    if (!supabaseServiceRoleKey) {
-      throw new Error("No Supabase service role key");
-    }
-    return createClient(supabaseURL, supabaseServiceRoleKey);
-  }
-  return staticClient;
+const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
+const supabaseURL = SUPABASE_CREDS?.url;
+const supabaseServiceRoleKey = SUPABASE_CREDS?.service_role_key;
+if (!supabaseURL) {
+  throw new Error("No Supabase URL");
 }
+
+if (!supabaseServiceRoleKey) {
+  throw new Error("No Supabase service role key");
+}
+const staticClient: SupabaseClient<Database> = createClient(
+  supabaseURL,
+  supabaseServiceRoleKey
+);
+const authCache = SupabaseAuthCache.getInstance();
 
 export class SupabaseConnector {
   client: SupabaseClient<Database>;
   connected: boolean = false;
   organizationId?: string;
-  authCache: SupabaseAuthCache = SupabaseAuthCache.getInstance();
+  authCache: SupabaseAuthCache;
 
   constructor() {
-    this.client = getSupabaseClient();
+    this.client = staticClient;
+    this.authCache = authCache;
   }
 
   private async authenticateJWT(jwt: string, orgId?: string): AuthResult {
