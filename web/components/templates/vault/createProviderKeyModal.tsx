@@ -49,8 +49,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
       body: JSON.stringify({
         providerKey: providerKey.value,
         providerName: variant === "portal" ? "portal" : "openai",
-        providerKeyName:
-          variant === "portal" ? "Primary Customer Key" : keyName.value,
+        providerKeyName: keyName.value,
       }),
     })
       .then(
@@ -94,21 +93,20 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
             </option>
           </select>
         </div>
-        {variant === "basic" && (
-          <div className="w-full space-y-1.5 text-sm">
-            <label htmlFor="key-name">Key Name</label>
-            <input
-              type="text"
-              name="key-name"
-              id="key-name"
-              className={clsx(
-                "block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
-              )}
-              required
-              placeholder="Provider Key Name"
-            />
-          </div>
-        )}
+
+        <div className="w-full space-y-1.5 text-sm">
+          <label htmlFor="key-name">Key Name</label>
+          <input
+            type="text"
+            name="key-name"
+            id="key-name"
+            className={clsx(
+              "block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
+            )}
+            required
+            placeholder="Provider Key Name"
+          />
+        </div>
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="provider-key">Provider Key</label>
           <input

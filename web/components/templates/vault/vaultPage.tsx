@@ -15,7 +15,13 @@ import { LimitCell } from "./limitsCell";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useOrg } from "../../shared/layout/organizationContext";
 
-const VaultPage = ({ variant = "basic" }: { variant?: "basic" | "portal" }) => {
+const VaultPage = ({
+  variant = "basic",
+  onRadioSelect,
+}: {
+  variant?: "basic" | "portal";
+  onRadioSelect?: (value: string | null) => void;
+}) => {
   const [deleteProviderOpen, setDeleteProviderOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] =
     useState<DecryptedProviderKey>();
@@ -23,6 +29,9 @@ const VaultPage = ({ variant = "basic" }: { variant?: "basic" | "portal" }) => {
   const [deleteProxyOpen, setDeleteProxyOpen] = useState(false);
   const [selectedProxyKey, setSelectedProxyKey] =
     useState<DecryptedProviderKeyMapping>();
+
+  const [selectedProviderKeyForRadio, setSelectedProviderKeyForRadio] =
+    useState<DecryptedProviderKey["id"]>();
 
   const { setNotification } = useNotification();
 
@@ -112,7 +121,7 @@ const VaultPage = ({ variant = "basic" }: { variant?: "basic" | "portal" }) => {
           </div>
           <p className="text-gray-500">
             {variant === "portal"
-              ? "The key you enter will be added within the `Authorization` header of your API requests."
+              ? "The key you enter will be added within the `Authorization` header of your API requests. Select which key you want to associate with this organization"
               : "These keys will be used to authenticate with your provider."}
           </p>
           {isLoading ? (
@@ -127,6 +136,16 @@ const VaultPage = ({ variant = "basic" }: { variant?: "basic" | "portal" }) => {
           ) : providerKeys.length > 0 ? (
             <ThemedTable
               columns={[
+                ...(onRadioSelect
+                  ? [
+                      {
+                        name: "",
+                        key: "radio_select",
+                        hidden: false,
+                        className: "w-8",
+                      },
+                    ]
+                  : []),
                 { name: "Name", key: "provider_key_name", hidden: false },
                 {
                   name: "Key",
@@ -138,7 +157,22 @@ const VaultPage = ({ variant = "basic" }: { variant?: "basic" | "portal" }) => {
               ]}
               rows={
                 variant === "portal"
-                  ? providerKeys.filter((x) => x.provider_name === "portal")
+                  ? providerKeys
+                      .filter((x) => x.provider_name === "portal")
+                      .map((x) => ({
+                        ...x,
+                        radio_select: (
+                          <input
+                            type="radio"
+                            name="providerKey"
+                            value={+(selectedProviderKeyForRadio === x.id)}
+                            onChange={(e) => {
+                              setSelectedProviderKeyForRadio(x.id);
+                              onRadioSelect && onRadioSelect(x?.id ?? null);
+                            }}
+                          />
+                        ),
+                      }))
                   : providerKeys
               }
               deleteHandler={(row) => {

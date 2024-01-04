@@ -147,6 +147,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   const orgContext = useOrg();
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient<Database>();
+  const [providerKey, setProviderKey] = useState("");
 
   return (
     <div className="flex flex-col gap-4 w-full space-y-8">
@@ -336,7 +337,16 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         </div>
       </div>
 
-      <VaultPage variant="portal"></VaultPage>
+      <VaultPage
+        variant="portal"
+        onRadioSelect={(value) => {
+          if (!value) {
+            setProviderKey("");
+          } else {
+            setProviderKey(value);
+          }
+        }}
+      ></VaultPage>
       <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
         <button
           onClick={() => {
@@ -379,16 +389,24 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
               return;
             }
             if (initialValues) {
+              console.log(
+                "Setting limits" + JSON.stringify(limits),
+                initialValues.id,
+                "success"
+              );
               const { data, error } = await supabaseClient
                 .from("organization")
                 .update({
                   name: orgName,
                   color: selectedColor.name,
                   icon: selectedIcon.name,
+                  limits: limits,
+                  org_provider_key: providerKey,
                 })
                 .eq("id", initialValues.id)
                 .select("*");
-              if (error) {
+
+              if (error || data.length === 0) {
                 setNotification("Failed to update organization", "error");
               } else {
                 setNotification("Organization updated successfully", "success");
@@ -406,13 +424,12 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     color: selectedColor.name,
                     icon: selectedIcon.name,
                     has_onboarded: true,
+                    limits: limits,
+                    org_provider_key: providerKey,
                     ...(variant === "reseller" && {
                       reseller_id: orgContext?.currentOrg.id!,
                       size: orgSize,
                       organization_type: "customer",
-                    }),
-                    ...(limits && {
-                      limits: limits,
                     }),
                   },
                 ])
