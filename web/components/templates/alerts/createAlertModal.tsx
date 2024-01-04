@@ -14,7 +14,6 @@ import {
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import useNotification from "../../shared/notification/useNotification";
-import { useUser } from "@supabase/auth-helpers-react";
 import {
   CodeBracketSquareIcon,
   CurrencyDollarIcon,
@@ -44,7 +43,6 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
   const [selectedTimeWindow, setSelectedTimeWindow] = useState<string>("");
 
   const orgContext = useOrg();
-  const user = useUser();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
     orgContext?.currentOrg.id || ""
@@ -56,11 +54,8 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
 
   const { setNotification } = useNotification();
 
-  const members: {
-    email: string;
-    member: string;
-    org_role: string;
-  }[] = [
+  // Existing code where members are defined
+  const members = [
     {
       email: orgOwner?.data?.at(0)?.email || "",
       member: "",
@@ -68,6 +63,13 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     },
     ...(data?.data || []),
   ];
+
+  // New code to remove duplicates
+  const uniqueMembers = Array.from(
+    new Set(members.map((member) => member.email))
+  ).map((email) => {
+    return members.find((member) => member.email === email);
+  });
 
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -311,14 +313,14 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
               setSelectedEmails(values);
             }}
           >
-            {members.map((member, idx) => {
+            {uniqueMembers.map((member, idx) => {
               return (
                 <MultiSelectItem
-                  value={member.email}
+                  value={member?.email ?? ""}
                   key={idx}
                   className="font-medium text-black"
                 >
-                  {member.email}
+                  {member?.email ?? ""}
                 </MultiSelectItem>
               );
             })}
