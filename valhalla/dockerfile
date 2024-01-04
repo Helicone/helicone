@@ -18,4 +18,5 @@ RUN yarn install
 ENV OPENAPI_SCHEMA_FILE=/usr/src/app/packages/jawn/src/schema/openapi.yml
 
 #yarn workspace jawn serve
+ENV PORT=8585
 CMD [ "yarn", "workspace", "jawn", "serve" ]
