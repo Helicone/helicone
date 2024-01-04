@@ -10,11 +10,14 @@ export function withDB<T>(
   fn: ({ db, request, res }: IRouterWrapperDB<T>) => void
 ) {
   return async (req: ExpressRequest, res: ExpressResponse) => {
-    const valhallaDB = await createValhallaClient();
-    fn({
-      db: valhallaDB,
-      request: new RequestWrapper<T>(req),
-      res,
+    res.json({
+      message: "Response received!  - No implemented:)",
     });
+    // const valhallaDB = await createValhallaClient();
+    // fn({
+    //   db: valhallaDB,
+    //   request: new RequestWrapper<T>(req),
+    //   res,
+    // });
   };
 }
