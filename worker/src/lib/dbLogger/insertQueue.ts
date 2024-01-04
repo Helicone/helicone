@@ -174,13 +174,9 @@ export class InsertQueue {
 
     if (match && match[1]) {
       return match[1];
+    } else {
+      return undefined;
     }
-    // https?://[^/]+(/.*)
-    const justPath = /https?:\/\/[^/]+(\/.*)/.exec(path);
-    if (justPath && justPath[1]) {
-      return justPath[1];
-    }
-    return undefined;
   };
 
   private getModelFromRequest(
