@@ -18,9 +18,8 @@ import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
-import { getTimeInterval } from "../../../lib/timeCalculations/time";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
-import { useCachePage } from "./useCachePage2";
+import { useCachePageClickHouse } from "./useCachePageClickhouse";
 
 interface CachePageProps {
   currentPage: number;
@@ -34,41 +33,24 @@ interface CachePageProps {
 
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort } = props;
-
-  /*
-    const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
-
-  const timeIncrement = getTimeInterval(timeFilter);
-    const { metrics, filterMap, overTimeData, isAnyLoading } = useDashboardPage({
-    timeFilter,
-    uiFilters: debouncedAdvancedFilters,
-    apiKeyFilter: null,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-    dbIncrement: timeIncrement,
-  });
-
-  */
-
   const data = useCachePageMetrics();
   const cacheOverTime = useCacheOvertime();
   const topMetrics = useCachePageTopMetrics();
   const topRequests = useCachePageTopRequests();
-  const timeFilter: TimeFilter = {
-    start: new Date(),
-    end: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 30),
-  };
+  const [timeFilter, _] = useState<TimeFilter>({
+    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
+    end: new Date(),
+  });
   const timeZoneDifference = new Date().getTimezoneOffset();
-  const dbIncrement = getTimeInterval(timeFilter);
+  const dbIncrement = "day";
   const {
-    // overTimeData,
+    overTimeData,
     metrics: metrics2,
     isAnyLoading,
-  } = useCachePage({
+  } = useCachePageClickHouse({
     timeFilter,
     timeZoneDifference,
     dbIncrement,
-    uiFilters: [],
-    apiKeyFilter: null,
   });
 
   const [selectedRequest, setSelectedRequest] = useState<{
@@ -85,7 +67,6 @@ const CachePage = (props: CachePageProps) => {
     ? +data.totalCached.data?.data === 0
     : false;
 
-  console.log(`Total cache hits: ${JSON.stringify(metrics2.totalCacheHits)}`);
   const metrics = [
     {
       id: "caches",
@@ -118,7 +99,7 @@ const CachePage = (props: CachePageProps) => {
     },
   ];
 
-  const cacheData = cacheOverTime.overTime.data?.data ?? [];
+  const cacheData = overTimeData.cacheHits.data?.data ?? [];
 
   const chartData = cacheData.map((d) => ({
     ...d,
@@ -183,7 +164,7 @@ const CachePage = (props: CachePageProps) => {
                     <div className="h-full w-full">
                       <BarChart
                         data={chartData}
-                        categories={["cache"]}
+                        categories={["count"]}
                         index={"date"}
                         className="h-full -ml-4 pt-4"
                         colors={["blue"]}
