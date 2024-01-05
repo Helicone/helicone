@@ -2,9 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
-import { HandlerWrapperOptions } from "../../../../lib/api/handlerWrappers";
-import { Result } from "../../../../lib/result";
-import { supabaseServer } from "../../../../lib/supabaseServer";
 
 export async function getMembers(orgId: String, userId: string) {
   const query = `
@@ -31,14 +28,16 @@ export async function getMembers(orgId: String, userId: string) {
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 export type Members = UnwrapPromise<ReturnType<typeof getMembers>>;
 
-async function handler({
-  res,
-  userData: { orgId, user, userId },
-  supabaseClient: { client },
-  req,
-}: HandlerWrapperOptions<Members>) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Members>
+) {
+  const client = new SupabaseServerWrapper({ req, res }).getClient();
+  const user = await client.auth.getUser();
+  if (!user.data || !user.data.user) {
+    res.status(401).json({ error: "Unauthorized", data: null });
+    return;
+  }
   const { id } = req.query;
-  res.status(200).json(await getMembers(id as string, userId));
+  res.status(200).json(await getMembers(id as string, user.data.user.id));
 }
-
-export default withAuth(handler);
