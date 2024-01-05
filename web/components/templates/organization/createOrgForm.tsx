@@ -2,18 +2,24 @@ import { RadioGroup } from "@headlessui/react";
 import {
   BuildingOfficeIcon,
   CakeIcon,
+  CheckIcon,
   CloudIcon,
   CommandLineIcon,
+  InformationCircleIcon,
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
+import { DEMO_EMAIL } from "../../../lib/constants";
 import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import { DEMO_EMAIL } from "../../../lib/constants";
-import { COMPANY_SIZES } from "../welcome/steps/createOrg";
+import CreateProviderKeyModal from "../vault/createProviderKeyModal";
+import { useVaultPage } from "../vault/useVaultPage";
+import { PlusIcon } from "@heroicons/react/20/solid";
+import { Tooltip } from "@mui/material";
+import { SecretInput } from "../../shared/themed/themedTable";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -95,9 +101,16 @@ interface CreateOrgFormProps {
     name: string;
     color: string | null;
     icon: string | null;
+    providerKey: string | null;
+    limits?: OrgLimits;
   };
   onSuccess?: () => void;
 }
+
+export type OrgLimits = {
+  cost: number;
+  requests: number;
+} | null;
 
 const CreateOrgForm = (props: CreateOrgFormProps) => {
   const {
@@ -108,6 +121,19 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   } = props;
 
   const [orgName, setOrgName] = useState(initialValues?.name || "");
+  const [limits, setLimits] = useState<{
+    cost: number;
+    requests: number;
+  } | null>(
+    variant === "reseller"
+      ? initialValues?.limits
+        ? initialValues.limits
+        : {
+            cost: 1_000,
+            requests: 1_000,
+          }
+      : null
+  );
   const [selectedColor, setSelectedColor] = useState(
     initialValues?.color
       ? ORGANIZATION_COLORS.find((c) => c.name === initialValues.color) ||
@@ -120,233 +146,385 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           ORGANIZATION_ICONS[0]
       : ORGANIZATION_ICONS[0]
   );
-  const [orgSize, setOrgSize] = useState("");
+  // const [orgSize, setOrgSize] = useState("");
 
   const user = useUser();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient<Database>();
+  const [providerKey, setProviderKey] = useState(
+    initialValues?.providerKey || ""
+  );
+
+  const { providerKeys, refetchProviderKeys } = useVaultPage();
+
+  const [isProviderOpen, setIsProviderOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4 w-full space-y-8">
-      {initialValues || variant === "reseller" ? (
-        <></>
-      ) : (
-        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-          Create New Organization
-        </p>
-      )}
-      <div className="space-y-1.5 text-sm">
-        <label
-          htmlFor="org-name"
-          className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-        >
-          {
-            {
-              organization: "Organization Name",
-              reseller: "Customer Name",
-            }[variant]
-          }
-        </label>
-        <input
-          type="text"
-          name="org-name"
-          id="org-name"
-          value={orgName}
-          className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-          placeholder={
-            variant === "organization"
-              ? "Your shiny new org name"
-              : "Customer name"
-          }
-          onChange={(e) => setOrgName(e.target.value)}
-        />
-      </div>
-      <RadioGroup value={selectedColor} onChange={setSelectedColor}>
-        <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-          Choose a color
-        </RadioGroup.Label>
-        <div className="mt-4 flex items-center justify-between px-8">
-          {ORGANIZATION_COLORS.map((color) => (
-            <RadioGroup.Option
-              key={color.name}
-              value={color}
-              className={({ active, checked }) =>
-                clsx(
-                  color.selectedColor,
-                  active && checked ? "ring ring-offset-1" : "",
-                  !active && checked ? "ring-2" : "",
-                  "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none"
-                )
-              }
-            >
-              <RadioGroup.Label as="span" className="sr-only">
-                {color.name}
-              </RadioGroup.Label>
-              <span
-                aria-hidden="true"
-                className={clsx(
-                  color.bgColor,
-                  "h-8 w-8 rounded-full border border-black dark:border-white border-opacity-10"
-                )}
-              />
-            </RadioGroup.Option>
-          ))}
-        </div>
-      </RadioGroup>
-      <RadioGroup value={selectedIcon} onChange={setSelectedIcon}>
-        <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-          Choose an icon
-        </RadioGroup.Label>
-        <div className="mt-4 flex items-center justify-between px-8">
-          {ORGANIZATION_ICONS.map((icon) => (
-            <RadioGroup.Option
-              key={icon.name}
-              value={icon}
-              className={({ active, checked }) =>
-                clsx(
-                  checked
-                    ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
-                    : "ring-1 ring-gray-200 dark:ring-gray-800",
-                  "bg-white dark:bg-black rounded-md p-2"
-                )
-              }
-            >
-              <RadioGroup.Label as="span" className="sr-only">
-                {icon.name}
-              </RadioGroup.Label>
-              {
-                <icon.icon className="h-6 w-6 hover:cursor-pointer text-black dark:text-white" />
-              }
-            </RadioGroup.Option>
-          ))}
-        </div>
-      </RadioGroup>
-      {variant === "reseller" && (
-        <div className="flex flex-col space-y-2">
+    <>
+      <div className="flex flex-col gap-4 w-full space-y-8">
+        {initialValues || variant === "reseller" ? (
+          <></>
+        ) : (
+          <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+            Create New Organization
+          </p>
+        )}
+        <div className="space-y-1.5 text-sm">
           <label
-            htmlFor="org-size"
-            className="block text-sm lg:text-md font-medium leading-6 text-gray-900 dark:text-gray-100"
+            htmlFor="org-name"
+            className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
           >
             {
               {
-                organization: "How large is your company?",
-                reseller: "How large is your customer's company?",
+                organization: "Organization Name",
+                reseller: "Customer Name",
               }[variant]
             }
           </label>
-          <div className="">
-            <select
-              id="org-size"
-              name="org-size"
-              className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
-              required
-              onChange={
-                variant === "reseller"
-                  ? (e) => setOrgSize(e.target.value)
-                  : undefined
-              }
-            >
-              {COMPANY_SIZES.map((o) => (
-                <option key={o}>{o}</option>
-              ))}
-            </select>
-          </div>
+          <input
+            type="text"
+            name="org-name"
+            id="org-name"
+            value={orgName}
+            className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+            placeholder={
+              variant === "organization"
+                ? "Your shiny new org name"
+                : "Customer name"
+            }
+            onChange={(e) => setOrgName(e.target.value)}
+          />
         </div>
-      )}
-      <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
-        <button
-          onClick={() => {
-            if (onCancelHandler) {
-              onCancelHandler(false);
-            } else {
-              // reset to the initial values
-              setOrgName(initialValues?.name || "");
-              setSelectedColor(
-                initialValues?.color
-                  ? ORGANIZATION_COLORS.find(
-                      (c) => c.name === initialValues.color
-                    ) || ORGANIZATION_COLORS[0]
-                  : ORGANIZATION_COLORS[0]
-              );
-              setSelectedIcon(
-                initialValues?.icon
-                  ? ORGANIZATION_ICONS.find(
-                      (i) => i.name === initialValues.icon
-                    ) || ORGANIZATION_ICONS[0]
-                  : ORGANIZATION_ICONS[0]
-              );
-            }
-          }}
-          className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={async () => {
-            if ((user?.email ?? "") === DEMO_EMAIL) {
-              setNotification(
-                "Cannot create organization in demo mode",
-                "error"
-              );
-              return;
-            }
-            if (!orgName || orgName === "") {
-              setNotification("Please provide an organization name", "error");
-              return;
-            }
-            if (initialValues) {
-              const { data, error } = await supabaseClient
-                .from("organization")
-                .update({
-                  name: orgName,
-                  color: selectedColor.name,
-                  icon: selectedIcon.name,
-                })
-                .eq("id", initialValues.id)
-                .select("*");
-              if (error) {
-                setNotification("Failed to update organization", "error");
+        <RadioGroup value={selectedColor} onChange={setSelectedColor}>
+          <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+            Choose a color
+          </RadioGroup.Label>
+          <div className="mt-4 flex items-center justify-between px-8">
+            {ORGANIZATION_COLORS.map((color) => (
+              <RadioGroup.Option
+                key={color.name}
+                value={color}
+                className={({ active, checked }) =>
+                  clsx(
+                    color.selectedColor,
+                    active && checked ? "ring ring-offset-1" : "",
+                    !active && checked ? "ring-2" : "",
+                    "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none"
+                  )
+                }
+              >
+                <RadioGroup.Label as="span" className="sr-only">
+                  {color.name}
+                </RadioGroup.Label>
+                <span
+                  aria-hidden="true"
+                  className={clsx(
+                    color.bgColor,
+                    "h-8 w-8 rounded-full border border-black dark:border-white border-opacity-10"
+                  )}
+                />
+              </RadioGroup.Option>
+            ))}
+          </div>
+        </RadioGroup>
+        <RadioGroup value={selectedIcon} onChange={setSelectedIcon}>
+          <RadioGroup.Label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+            Choose an icon
+          </RadioGroup.Label>
+          <div className="mt-4 flex items-center justify-between px-8">
+            {ORGANIZATION_ICONS.map((icon) => (
+              <RadioGroup.Option
+                key={icon.name}
+                value={icon}
+                className={({ active, checked }) =>
+                  clsx(
+                    checked
+                      ? "ring-2 ring-offset-1 ring-sky-300 dark:ring-sky-700"
+                      : "ring-1 ring-gray-200 dark:ring-gray-800",
+                    "bg-white dark:bg-black rounded-md p-2"
+                  )
+                }
+              >
+                <RadioGroup.Label as="span" className="sr-only">
+                  {icon.name}
+                </RadioGroup.Label>
+                {
+                  <icon.icon className="h-6 w-6 hover:cursor-pointer text-black dark:text-white" />
+                }
+              </RadioGroup.Option>
+            ))}
+          </div>
+        </RadioGroup>
+        {variant === "reseller" && (
+          <>
+            <div>
+              <label
+                htmlFor="org-limits"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+              >
+                Limits
+              </label>
+              <div className="flex flex-row mx-auto gap-4">
+                <div className="space-y-1 text-sm">
+                  <label
+                    htmlFor="org-costs"
+                    className="block text-xs leading-6 text-gray-500"
+                  >
+                    Costs (USD)
+                  </label>
+                  <input
+                    type="number"
+                    name="org-costs"
+                    id="org-costs"
+                    value={limits?.cost ?? 0}
+                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    onChange={(e) =>
+                      setLimits((prev) =>
+                        prev ? { ...prev, cost: +e.target.value } : null
+                      )
+                    }
+                  />
+                </div>
+                <div className="space-y-1 text-xs">
+                  <label
+                    htmlFor="org-requests"
+                    className="block text-xs leading-6 text-gray-500"
+                  >
+                    Requests
+                  </label>
+                  <input
+                    type="number"
+                    name="org-requests"
+                    id="org-requests"
+                    value={limits?.requests ?? 0}
+                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    onChange={(e) =>
+                      setLimits((prev) =>
+                        prev ? { ...prev, requests: +e.target.value } : null
+                      )
+                    }
+                  />
+                </div>
+                <div className="space-y-1 text-xs">
+                  <label
+                    htmlFor="org-time"
+                    className="block text-xs leading-6 text-gray-500"
+                  >
+                    Time Grain
+                  </label>
+                  <select
+                    id="org-size"
+                    name="org-size"
+                    className="bg-gray-50 dark:bg-gray-950 text-black dark:text-white block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
+                    required
+                  >
+                    <option value="word">monthly</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <label
+                htmlFor="org-provider-keys"
+                className="flex items-center text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 gap-1"
+              >
+                Provider Keys
+                <Tooltip title="This key will be used to map to your customer's proxy keys, allowing you to control their spend via configurable rate limits.">
+                  <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
+                </Tooltip>
+              </label>
+              <div className="w-full">
+                <div className="mx-auto w-full">
+                  <RadioGroup
+                    value={providerKey}
+                    onChange={(keyId: string) => {
+                      setProviderKey(keyId);
+                    }}
+                  >
+                    <RadioGroup.Label className="sr-only">
+                      Server size
+                    </RadioGroup.Label>
+                    <div className="space-y-2">
+                      {providerKeys.map((key) => (
+                        <RadioGroup.Option
+                          key={key.id}
+                          value={key.id}
+                          className={({ active, checked }) =>
+                            clsx(
+                              checked
+                                ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
+                                : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
+                              "ring-1 relative flex cursor-pointer rounded-lg p-4 shadow-sm focus:outline-none"
+                            )
+                          }
+                        >
+                          {({ active, checked }) => (
+                            <>
+                              <div className="flex w-full items-center justify-between">
+                                <div className="flex items-center">
+                                  <div className="text-sm flex space-x-2 items-center">
+                                    <RadioGroup.Label
+                                      as="p"
+                                      className={`font-medium text-black dark:text-white`}
+                                    >
+                                      {key.provider_key_name}
+                                    </RadioGroup.Label>
+                                    <RadioGroup.Description
+                                      as="span"
+                                      className={`inline text-gray-500 text-xs pl-2`}
+                                    >
+                                      <SecretInput
+                                        value={key.provider_key || ""}
+                                        variant="secondary"
+                                      />
+                                    </RadioGroup.Description>
+                                  </div>
+                                </div>
+                                {checked && (
+                                  <div className="text-sky-700">
+                                    <CheckIcon className="h-4 w-4" />
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </RadioGroup.Option>
+                      ))}
+                      <button
+                        onClick={() => {
+                          setIsProviderOpen(true);
+                        }}
+                        className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
+                      >
+                        <PlusIcon className="h-3 w-3 mr-1" />
+                        Add Key
+                      </button>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+        <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
+          <button
+            onClick={() => {
+              if (onCancelHandler) {
+                onCancelHandler(false);
               } else {
-                setNotification("Organization updated successfully", "success");
-                onSuccess && onSuccess();
+                // reset to the initial values
+                setOrgName(initialValues?.name || "");
+                setSelectedColor(
+                  initialValues?.color
+                    ? ORGANIZATION_COLORS.find(
+                        (c) => c.name === initialValues.color
+                      ) || ORGANIZATION_COLORS[0]
+                    : ORGANIZATION_COLORS[0]
+                );
+                setSelectedIcon(
+                  initialValues?.icon
+                    ? ORGANIZATION_ICONS.find(
+                        (i) => i.name === initialValues.icon
+                      ) || ORGANIZATION_ICONS[0]
+                    : ORGANIZATION_ICONS[0]
+                );
               }
-              onCancelHandler && onCancelHandler(false);
-              orgContext?.refetchOrgs();
-            } else {
-              const { data, error } = await supabaseClient
-                .from("organization")
-                .insert([
-                  {
+            }}
+            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              if ((user?.email ?? "") === DEMO_EMAIL) {
+                setNotification(
+                  "Cannot create organization in demo mode",
+                  "error"
+                );
+                return;
+              }
+              if (!orgName || orgName === "") {
+                setNotification("Please provide an organization name", "error");
+                return;
+              }
+              if (variant === "reseller" && providerKey === "") {
+                setNotification("Please select a provider key", "error");
+                return;
+              }
+              if (initialValues) {
+                const { data, error } = await supabaseClient
+                  .from("organization")
+                  .update({
                     name: orgName,
-                    owner: user?.id!,
                     color: selectedColor.name,
                     icon: selectedIcon.name,
-                    has_onboarded: true,
                     ...(variant === "reseller" && {
+                      org_provider_key: providerKey,
+                      limits: limits,
                       reseller_id: orgContext?.currentOrg?.id!,
-                      size: orgSize,
                       organization_type: "customer",
                     }),
-                  },
-                ])
-                .select("*");
-              if (error) {
-                setNotification("Failed to create organization", "error");
+                  })
+                  .eq("id", initialValues.id)
+                  .select("*");
+
+                if (error || data.length === 0) {
+                  setNotification("Failed to update organization", "error");
+                } else {
+                  setNotification(
+                    "Organization updated successfully",
+                    "success"
+                  );
+                  onSuccess && onSuccess();
+                }
+                onCancelHandler && onCancelHandler(false);
+                orgContext?.refetchOrgs();
               } else {
-                setNotification("Organization created successfully", "success");
-                onSuccess && onSuccess();
+                const { data, error } = await supabaseClient
+                  .from("organization")
+                  .insert([
+                    {
+                      name: orgName,
+                      owner: user?.id!,
+                      color: selectedColor.name,
+                      icon: selectedIcon.name,
+                      has_onboarded: true,
+                      ...(variant === "reseller" && {
+                        reseller_id: orgContext?.currentOrg?.id!,
+                        organization_type: "customer",
+                        org_provider_key: providerKey,
+                        limits: limits,
+                      }),
+                    },
+                  ])
+                  .select("*");
+                if (error) {
+                  setNotification("Failed to create organization", "error");
+                } else {
+                  setNotification(
+                    "Organization created successfully",
+                    "success"
+                  );
+                  onSuccess && onSuccess();
+                }
+                onCancelHandler && onCancelHandler(false);
+                orgContext?.refetchOrgs();
               }
-              onCancelHandler && onCancelHandler(false);
-              orgContext?.refetchOrgs();
-            }
-          }}
-          className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          {initialValues ? "Update" : "Create"}
-        </button>
+            }}
+            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            {initialValues ? "Update" : "Create"}
+          </button>
+        </div>
       </div>
-    </div>
+      <CreateProviderKeyModal
+        open={isProviderOpen}
+        variant={"portal"}
+        setOpen={setIsProviderOpen}
+        onSuccess={() => refetchProviderKeys()}
+      />
+    </>
   );
 };
 
