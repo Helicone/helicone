@@ -1,4 +1,4 @@
-import { getModelMetrics } from "../../../lib/api/cache/stats";
+import { getModelMetricsClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -14,7 +14,7 @@ async function handler({
   res
     .status(200)
     .json(
-      resultMap(await getModelMetrics(orgId, "all"), (modelMetrics) =>
+      resultMap(await getModelMetricsClickhouse(orgId, "all"), (modelMetrics) =>
         modelMetrics.reduce(
           (acc, modelMetric) => acc + modelCost(modelMetric),
           0

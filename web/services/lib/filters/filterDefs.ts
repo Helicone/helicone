@@ -66,6 +66,17 @@ export type PropertiesTableToOperators = {
   value: SingleKey<TextOperators>;
 };
 
+export type CacheHitsTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  request_id: SingleKey<TextOperators>;
+  latency: SingleKey<NumberOperators>;
+  completion_tokens: SingleKey<NumberOperators>;
+  prompt_tokens: SingleKey<NumberOperators>;
+  created_at: SingleKey<TimestampOperatorsTyped>;
+};
+
+export type FilterLeafCacheHits = SingleKey<CacheHitsTableToOperators>;
+
 export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
 
 type UserApiKeysTableToOperators = {
@@ -200,6 +211,7 @@ export type TablesAndViews = {
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
   job_node: FilterLeafNode;
+  cache_hits: FilterLeafCacheHits;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;
