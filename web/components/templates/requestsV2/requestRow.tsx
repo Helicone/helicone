@@ -112,7 +112,7 @@ const RequestRow = (props: {
     const key = formData.get("key") as string;
     const value = formData.get("value") as string;
 
-    if (!key || !value || org?.currentOrg.id === undefined) {
+    if (!key || !value || org?.currentOrg?.id === undefined) {
       setNotification("Error adding label", "error");
       setIsAdding(false);
       return;
@@ -120,7 +120,7 @@ const RequestRow = (props: {
     try {
       const res = await addRequestLabel(
         request.id,
-        org?.currentOrg.id,
+        org?.currentOrg?.id,
         key,
         value
       );

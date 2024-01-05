@@ -24,7 +24,7 @@ const DeleteAlertModal = (props: DeleteAlertModalProps) => {
   const { setNotification } = useNotification();
 
   const handleDeleteAlert = async (id: string) => {
-    if (orgContext?.currentOrg.id === undefined) {
+    if (orgContext?.currentOrg?.id === undefined) {
       setNotification(
         "The organization you are trying to delete an alert for does not exist.",
         "error"
@@ -49,7 +49,7 @@ const DeleteAlertModal = (props: DeleteAlertModalProps) => {
           headers: {
             "Content-Type": "application/json",
             "helicone-jwt": jwtToken,
-            "helicone-org-id": orgContext?.currentOrg.id,
+            "helicone-org-id": orgContext?.currentOrg?.id,
           },
         }
       );

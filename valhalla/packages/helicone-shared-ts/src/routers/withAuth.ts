@@ -6,12 +6,11 @@ import {
 import { withDB } from "./withDB";
 import { SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
-
+const supabaseClient = new SupabaseConnector();
 export function withAuth<T>(
   fn: ({ db, request, res, supabaseClient }: IRouterWrapperAuth<T>) => void
 ) {
   return withDB<T>(async ({ db, request, res }) => {
-    const supabaseClient = new SupabaseConnector();
     const authorization = request.authHeader();
 
     if (authorization.error) {

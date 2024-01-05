@@ -47,11 +47,11 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
   const user = useUser();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
-    orgContext?.currentOrg.id || ""
+    orgContext?.currentOrg?.id || ""
   );
 
   const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
-    orgContext?.currentOrg.id || ""
+    orgContext?.currentOrg?.id || ""
   );
 
   const { setNotification } = useNotification();
@@ -72,7 +72,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (orgContext?.currentOrg.id === undefined) {
+    if (orgContext?.currentOrg?.id === undefined) {
       return;
     }
 
@@ -125,7 +125,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
       headers: {
         "Content-Type": "application/json",
         "helicone-jwt": jwtToken,
-        "helicone-org-id": orgContext?.currentOrg.id,
+        "helicone-org-id": orgContext?.currentOrg?.id,
       },
       body: JSON.stringify({
         name: alertName,
@@ -133,7 +133,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
         threshold: alertThreshold,
         time_window: selectedTimeWindow,
         emails: selectedEmails,
-        org_id: orgContext?.currentOrg.id,
+        org_id: orgContext?.currentOrg?.id,
         minimum_request_count: isNaN(alertMinRequests)
           ? undefined
           : alertMinRequests,

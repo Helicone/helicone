@@ -78,8 +78,8 @@ const useGetOrgs = () => {
         return [];
       }
       if (!data.find((d) => d.is_personal)) {
-        await supabaseClient.rpc("ensure_personal");
-        console.warn("Created personal org");
+        // await supabaseClient.rpc("ensure_personal");
+        // console.warn("Created personal org");
         // just a shim that will only execute once for the entire life time of a user
         return (await supabaseClient.from("organization").select(`*`)).data!;
       }
@@ -125,22 +125,34 @@ const useOrgsContextManager = () => {
   }, [orgs]);
 
   let orgContextValue: OrgContextValue | null = null;
-  if (org && orgs) {
-    orgContextValue = {
-      allOrgs: orgs,
-      currentOrg: org,
-      setCurrentOrg: (orgId) => {
+
+  orgContextValue = {
+    allOrgs: orgs ?? [],
+    currentOrg: org ?? undefined,
+    refreshCurrentOrg: () => {
+      refetch().then((x) => {
+        if (x.data && x.data.length > 0) {
+          const firstOrg = x.data[0];
+          setOrg(firstOrg);
+          setOrgCookie(firstOrg.id);
+          setRenderKey((key) => key + 1);
+        }
+      });
+    },
+    setCurrentOrg: (orgId) => {
+      refetch().then(() => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
           setOrgCookie(org.id);
           setRenderKey((key) => key + 1);
         }
-      },
-      renderKey,
-      refetchOrgs: refetch,
-    };
-  }
+      });
+    },
+    renderKey,
+    refetchOrgs: refetch,
+  };
+
   return orgContextValue;
 };
 

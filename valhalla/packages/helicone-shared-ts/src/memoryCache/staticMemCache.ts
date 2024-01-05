@@ -4,8 +4,11 @@ export class CacheItem<T> {
 
 export class InMemoryCache {
   private cache: Map<string, CacheItem<any>> = new Map();
+  private checkInterval: number = 60000; // Interval to check for expired items, e.g., every 60 seconds
 
-  constructor(private maxEntries = 100) {}
+  constructor(private maxEntries: number) {
+    this.startCleanupTimer();
+  }
 
   // Sets a value in the cache with a TTL (in milliseconds)
   set<T>(key: string, value: T, ttl: number): void {
@@ -15,7 +18,18 @@ export class InMemoryCache {
     }
     const expiry = Date.now() + ttl;
     this.cache.set(key, new CacheItem(value, expiry));
-    setTimeout(() => this.removeIfExpired(key), ttl);
+  }
+
+  // Starts a timer to periodically clean up expired items
+  private startCleanupTimer(): void {
+    setInterval(() => {
+      const now = Date.now();
+      for (let [key, item] of this.cache.entries()) {
+        if (item.expiry < now) {
+          this.cache.delete(key);
+        }
+      }
+    }, this.checkInterval);
   }
 
   // Retrieves a value from the cache
