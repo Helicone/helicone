@@ -112,9 +112,14 @@ export async function recordCacheHit(
   const promptTokens = response?.prompt_tokens ?? 0;
   const completionTokens = response?.completion_tokens ?? 0;
   const latency = response?.delay_ms ?? 0;
-  const prompt =
-    (request?.body as any)?.prompt ??
-    (request?.body as any)?.messages?.slice(-1)[0]?.content;
+  const prompt = (() => {
+    try {
+      const parsedBody = JSON.parse(request?.body as string);
+      return parsedBody?.prompt ?? parsedBody?.messages?.slice(-1)[0]?.content;
+    } catch {
+      return undefined;
+    }
+  })();
 
   const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
     "cache_hits",
