@@ -13,10 +13,7 @@ import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
-import {
-  useCachePageClickHouse,
-  useCachePageTopRequests,
-} from "./useCachePage";
+import { useCachePageClickHouse } from "./useCachePage";
 
 interface CachePageProps {
   currentPage: number;
@@ -30,7 +27,6 @@ interface CachePageProps {
 
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort } = props;
-  const topRequests = useCachePageTopRequests();
   const [timeFilter, _] = useState<TimeFilter>({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
     end: new Date(),
@@ -175,25 +171,27 @@ const CachePage = (props: CachePageProps) => {
                   Top Requests
                 </h3>
                 <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                  {topRequests.topRequests.data?.data?.map((request, i) => (
-                    <ThemedListItem
-                      key={i}
-                      onClickHandler={() => {
-                        setSelectedRequest(request);
-                        setOpen(true);
-                      }}
-                      title={request.prompt}
-                      subtitle={`Created: ${new Date(
-                        request.first_used
-                      ).toLocaleString()}`}
-                      icon={CircleStackIcon}
-                      value={request.count}
-                      pill={<ModelPill model={request.model} />}
-                      secondarySubtitle={`Recent: ${new Date(
-                        request.last_used
-                      ).toLocaleString()}`}
-                    />
-                  ))}
+                  {chMetrics.topRequests.data?.data?.map(
+                    (request: any, i: any) => (
+                      <ThemedListItem
+                        key={i}
+                        onClickHandler={() => {
+                          setSelectedRequest(request);
+                          setOpen(true);
+                        }}
+                        title={request.prompt}
+                        subtitle={`Created: ${new Date(
+                          request.first_used
+                        ).toLocaleString()}`}
+                        icon={CircleStackIcon}
+                        value={request.count}
+                        pill={<ModelPill model={request.model} />}
+                        secondarySubtitle={`Recent: ${new Date(
+                          request.last_used
+                        ).toLocaleString()}`}
+                      />
+                    )
+                  )}
                 </ul>
               </div>
             </div>

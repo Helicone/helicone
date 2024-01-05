@@ -63,6 +63,11 @@ export const useCachePageClickHouse = ({
       params,
       endpoint: "/api/cache/top_models",
     }),
+    topRequests: useBackendMetricCall<Result<any, string>>({
+      key: "topRequests",
+      params,
+      endpoint: "/api/cache/requests",
+    }),
   };
 
   function isLoading(x: UseQueryResult<any>) {
@@ -79,18 +84,3 @@ export const useCachePageClickHouse = ({
     isAnyLoading,
   };
 };
-
-export function useCachePageTopRequests() {
-  const topRequests = useQuery({
-    queryKey: ["topRequests"],
-    queryFn: async () => {
-      const data = fetch("/api/cache/requests").then(
-        (res) => res.json() as ReturnType<typeof getTopRequests>
-      );
-      return data;
-    },
-  });
-  return {
-    topRequests,
-  };
-}

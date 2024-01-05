@@ -98,10 +98,23 @@ export async function recordCacheHit(
     console.error(responseError);
   }
 
+  const { data: request, error: requestError } = await dbClient
+    .from("request")
+    .select("*")
+    .eq("id", requestId)
+    .single();
+
+  if (requestError) {
+    console.error(requestError);
+  }
+
   const model = (response?.body as { model: string })?.model ?? null;
   const promptTokens = response?.prompt_tokens ?? 0;
   const completionTokens = response?.completion_tokens ?? 0;
   const latency = response?.delay_ms ?? 0;
+  const prompt =
+    (request?.body as any)?.prompt ??
+    (request?.body as any)?.messages?.slice(-1)[0]?.content;
 
   const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
     "cache_hits",
@@ -113,6 +126,7 @@ export async function recordCacheHit(
         completion_tokens: completionTokens,
         model: model ?? "",
         latency: latency,
+        prompt: prompt ?? "",
         created_at: null,
       },
     ]

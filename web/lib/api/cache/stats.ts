@@ -222,6 +222,42 @@ LIMIT 5;
   );
 }
 
+export async function getTopRequestsClickhouse(
+  orgId: string,
+  filter: FilterNode
+) {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+  select 
+    request_id, 
+    count(*) as count, 
+    max(created_at) as last_used, 
+    min(created_at) as first_used,
+    model,
+    prompt
+  from cache_hits
+  where (${builtFilter.filter}) 
+  group by request_id, model, prompt
+  order by count desc
+  limit 10`;
+
+  const res = await dbQueryClickhouse<{
+    request_id: string;
+    count: number;
+    last_used: Date;
+    first_used: Date;
+    prompt: string;
+    model: string;
+  }>(query, builtFilter.argsAcc);
+
+  return res;
+}
+
 export async function getTopRequests(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
