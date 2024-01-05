@@ -4,12 +4,6 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import {
-  useCacheOvertime,
-  useCachePageMetrics,
-  useCachePageTopMetrics,
-  useCachePageTopRequests,
-} from "../../../services/hooks/useCachePage";
 import { MetricsPanel } from "../../shared/metrics/metricsPanel";
 import { BarChart } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -19,7 +13,10 @@ import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeFilter } from "../../../lib/api/handlerWrappers";
-import { useCachePageClickHouse } from "./useCachePageClickhouse";
+import {
+  useCachePageClickHouse,
+  useCachePageTopRequests,
+} from "./useCachePage";
 
 interface CachePageProps {
   currentPage: number;

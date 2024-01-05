@@ -3,10 +3,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getXOverTimeCacheHits } from "../../../lib/api/metrics/getXOverTime";
 import { getSomeDataOverTime } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { resultMap } from "../../../lib/result";
-import { CLICKHOUSE_PRICE_CALC } from "../../../lib/sql/constants";
 
 import { UnPromise } from "../../../lib/tsxHelpers";
 
@@ -43,18 +40,9 @@ async function handler(
     UnPromise<ReturnType<typeof getModelUsageOverTimeBackFill>>
   >
 ) {
-  const res = await getModelUsageOverTimeBackFill(options.userData.orgId);
-  // const res = await getXOverTimeCacheHits<{
-  //   cost: number;
-  // }>(data, `${CLICKHOUSE_PRICE_CALC("response_copy_v3")} AS cost`);
-  // return resultMap(res, (resData) =>
-  //   resData.map((d) => ({
-  //     time: new Date(new Date(d.created_at_trunc).getTime()),
-  //     cost: Number(d.cost),
-  //   }))
-  // );
-
-  options.res.status(200).json(res);
+  options.res
+    .status(200)
+    .json(await getModelUsageOverTimeBackFill(options.userData.orgId));
 }
 
 export default withAuth(handler);

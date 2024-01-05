@@ -154,6 +154,9 @@ const whereKeyMappings: KeyMappings = {
   cache_hits: easyKeyMappings<"cache_hits">({
     organization_id: "cache_hits.organization_id",
     request_id: "cache_hits.request_id",
+    latency: "cache_hits.latency",
+    completion_tokens: "cache_hits.completion_tokens",
+    prompt_tokens: "cache_hits.prompt_tokens",
     created_at: "cache_hits.created_at",
   }),
   response_copy_v1: easyKeyMappings<"response_copy_v1">({

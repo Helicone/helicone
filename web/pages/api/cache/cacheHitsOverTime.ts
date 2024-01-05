@@ -28,7 +28,7 @@ async function handler(
       timeFilter,
       userFilter: userFilters,
       orgId,
-      dbIncrement: dbIncrement ?? "hour",
+      dbIncrement: dbIncrement ?? "day",
       timeZoneDifference,
     })
   );

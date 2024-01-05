@@ -52,7 +52,6 @@ export async function getCacheCountClickhouse(
     count: number;
   }>(query, builtFilter.argsAcc);
 
-  console.log(res);
   return resultMap(res, (x) => +x[0].count);
 }
 
@@ -118,7 +117,6 @@ export async function getTimeSavedClickhouse(
     total_latency_ms: number;
   }>(query, builtFilter.argsAcc);
 
-  console.log(temp);
   const res = resultMap(temp, (x) => +x[0].total_latency_ms / 1000);
   return res;
 }

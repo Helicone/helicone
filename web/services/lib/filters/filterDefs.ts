@@ -69,6 +69,9 @@ export type PropertiesTableToOperators = {
 export type CacheHitsTableToOperators = {
   organization_id: SingleKey<TextOperators>;
   request_id: SingleKey<TextOperators>;
+  latency: SingleKey<NumberOperators>;
+  completion_tokens: SingleKey<NumberOperators>;
+  prompt_tokens: SingleKey<NumberOperators>;
   created_at: SingleKey<TimestampOperatorsTyped>;
 };
 

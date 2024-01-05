@@ -1,4 +1,4 @@
-import { UseQueryResult } from "@tanstack/react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { Result, resultMap } from "../../../lib/result";
 import {
   BackendMetricsCall,
@@ -6,6 +6,7 @@ import {
 } from "../../../services/hooks/useBackendFunction";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { CacheHitsOverTime } from "../../../pages/api/cache/getCacheHitsOverTime";
+import { getTopRequests } from "../../../lib/api/cache/stats";
 
 export interface CachePageData {
   timeFilter: {
@@ -78,3 +79,18 @@ export const useCachePageClickHouse = ({
     isAnyLoading,
   };
 };
+
+export function useCachePageTopRequests() {
+  const topRequests = useQuery({
+    queryKey: ["topRequests"],
+    queryFn: async () => {
+      const data = fetch("/api/cache/requests").then(
+        (res) => res.json() as ReturnType<typeof getTopRequests>
+      );
+      return data;
+    },
+  });
+  return {
+    topRequests,
+  };
+}
