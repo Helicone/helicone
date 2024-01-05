@@ -162,7 +162,9 @@ const CustomerRow = (props: CustomerRowProps) => {
                         router.push("/dashboard");
                       }}
                       className={clsx(
-                        active ? "bg-gray-50 dark:bg-gray-950" : "",
+                        active
+                          ? "bg-gray-50 dark:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
+                          : "",
                         "w-full flex px-3 py-1 text-sm leading-6 text-gray-900 dark:text-gray-100"
                       )}
                     >
@@ -178,7 +180,9 @@ const CustomerRow = (props: CustomerRowProps) => {
                         setOpen(true);
                       }}
                       className={clsx(
-                        active ? "bg-gray-50 dark:bg-gray-950" : "",
+                        active
+                          ? "bg-gray-50 dark:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
+                          : "",
                         "w-full flex px-3 py-1 text-sm leading-6 text-gray-900 dark:text-gray-100"
                       )}
                     >

@@ -357,8 +357,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           className={({ active, checked }) =>
                             clsx(
                               checked
-                                ? "bg-sky-100 ring-sky-300"
-                                : "bg-white ring-gray-300",
+                                ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
+                                : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
                               "ring-1 relative flex cursor-pointer rounded-lg p-4 shadow-sm focus:outline-none"
                             )
                           }
@@ -370,7 +370,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                                   <div className="text-sm flex space-x-2 items-center">
                                     <RadioGroup.Label
                                       as="p"
-                                      className={`font-medium text-black`}
+                                      className={`font-medium text-black dark:text-white`}
                                     >
                                       {key.provider_key_name}
                                     </RadioGroup.Label>
@@ -399,7 +399,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         onClick={() => {
                           setIsProviderOpen(true);
                         }}
-                        className="flex w-full items-center justify-center px-4 py-2 bg-white text-black border border-gray-500 text-xs font-semibold rounded-lg"
+                        className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
                       >
                         <PlusIcon className="h-3 w-3 mr-1" />
                         Add Key
