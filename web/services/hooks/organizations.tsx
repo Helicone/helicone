@@ -78,7 +78,7 @@ const useGetOrgs = () => {
         return [];
       }
       if (!data.find((d) => d.is_personal)) {
-        // await supabaseClient.rpc("ensure_personal");
+        await supabaseClient.rpc("ensure_personal");
         // console.warn("Created personal org");
         // just a shim that will only execute once for the entire life time of a user
         return (await supabaseClient.from("organization").select(`*`)).data!;
