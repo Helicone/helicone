@@ -140,6 +140,7 @@ export function withAuthSSR<T>(
   ): Promise<ReturnType<GetServerSideProps>> => {
     const supabaseClient = new SupabaseServerWrapper(context);
     const { data, error } = await supabaseClient.getUserAndOrg();
+
     if (error !== null || !data.orgId || !data.userId) {
       return {
         redirect: {
