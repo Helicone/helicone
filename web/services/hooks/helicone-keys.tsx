@@ -7,13 +7,13 @@ export const useHeliconeKeys = () => {
   const client = useSupabaseClient<Database>();
   const org = useOrg();
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
-    queryKey: ["helicone-keys", org?.currentOrg.id],
+    queryKey: ["helicone-keys", org?.currentOrg?.id],
     queryFn: async () => {
       return await client
         .from("helicone_api_keys")
         .select("*")
         .eq("soft_delete", false)
-        .eq("organization_id", org?.currentOrg.id);
+        .eq("organization_id", org?.currentOrg?.id);
     },
     refetchOnWindowFocus: false,
   });

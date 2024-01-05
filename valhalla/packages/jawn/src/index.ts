@@ -9,6 +9,18 @@ import {
   getTokenCountAnthropic,
   getTokenCountGPT3,
 } from "./tokens/tokenCounter";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+
+// This prevents the application from crashing when an unhandled error occurs
+const errorHandler: ErrorRequestHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error(`Unhandled error: ${err}, stack: ${err.stack}`);
+  res.status(500).send("Something broke!");
+};
 
 const dirname = __dirname;
 
@@ -35,6 +47,8 @@ app.use(
     validateRequests: true,
   })
 );
+
+app.use(errorHandler);
 
 app.post(
   "/v1/request",
@@ -106,12 +120,14 @@ app.post("/v1/tokens/anthropic", async (req, res) => {
   const tokens = await getTokenCountAnthropic(content ?? "");
   res.json({ tokens });
 });
+
 app.post("/v1/tokens/gpt3", async (req, res) => {
   const body = req.body;
   const content = body?.content;
   const tokens = await getTokenCountGPT3(content ?? "");
   res.json({ tokens });
 });
+
 app.post(
   "/v1/response",
   withAuth<
@@ -225,7 +241,7 @@ app.get("/healthcheck", (request, res) => {
   });
 });
 
-app.listen(8585, "0.0.0.0", () => {
+app.listen(parseInt(process.env.PORT ?? "8585"), "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:8585`);
 });
 

@@ -1,5 +1,6 @@
 import { Env, hash } from "../..";
 import { Database } from "../../../supabase/database.types";
+import { Result, err, ok } from "../../results";
 import { ClickhouseClientWrapper } from "../db/clickhouse";
 
 export const CLICKHOUSE_PRICE_CALC = (table: string) => `
@@ -37,6 +38,54 @@ sum(
   ) / 1000
 `;
 
+// uses Dat trunc
+export async function checkLimitsSingle(
+  costUSD: number,
+  requestCount: number,
+  timeGrain: "minute" | "hour" | "day" | "week" | "month",
+  organizationId: string,
+  env: Env
+): Promise<Result<string, string>> {
+  if (!organizationId) {
+    console.log("No organization ID provided");
+    return err("No organization ID provided");
+  }
+  const client = new ClickhouseClientWrapper(env);
+  const { data, error } = await client.dbQuery<{
+    count: number;
+    cost: number;
+  }>(
+    `
+    SELECT
+      count(*) as count,
+      ${CLICKHOUSE_PRICE_CALC("response_copy_v3")} as cost
+    FROM response_copy_v3
+    WHERE (
+      response_copy_v3.request_created_at >= DATE_TRUNC('${timeGrain}', now())
+    ) AND (
+      response_copy_v3.organization_id = {val_0 : String}
+    )
+  `,
+    [organizationId]
+  );
+  if (error || !data) {
+    console.error("Error checking limits:", error);
+    return err("Error checking limits");
+  }
+  const { cost, count } = data[0];
+  if (cost > costUSD) {
+    console.log("Cost exceeded:", cost, costUSD);
+    return err("Cost exceeded");
+  }
+  if (count > requestCount) {
+    console.log("Count exceeded:", count, requestCount);
+    return err("Count exceeded");
+  }
+
+  return ok(
+    `OK, within limits {cost: ${cost}/${costUSD}, count: ${count}/${requestCount}}}`
+  );
+}
 const generateSubquery = (index: number) => {
   const secondsVal = `val_${index * 2}`;
   const proxyKeyIdVal = `val_${index * 2 + 1}`;

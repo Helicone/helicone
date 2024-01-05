@@ -3,8 +3,9 @@ import { Database } from "../../../supabase/database.types";
 import { useOrgsContextManager } from "../../../services/hooks/organizations";
 
 export interface OrgContextValue {
-  currentOrg: Database["public"]["Tables"]["organization"]["Row"];
+  currentOrg?: Database["public"]["Tables"]["organization"]["Row"];
   allOrgs: Database["public"]["Tables"]["organization"]["Row"][];
+  refreshCurrentOrg: () => void;
   setCurrentOrg: (
     orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]
   ) => void;

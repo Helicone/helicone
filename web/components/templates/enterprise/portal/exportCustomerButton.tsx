@@ -38,7 +38,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
             Export Customers
           </h3>
           <div className="flex flex-col space-y-2">
-            <label className="text-xs">Export Name</label>
+            <label className="text-xs text-gray-500">Export Name</label>
             <TextInput
               placeholder="customers.csv"
               onChange={(e) => {
@@ -63,7 +63,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
                     .select(
                       "id, created_at, name, color, icon, tier, organization_type, logo_path"
                     )
-                    .eq("reseller_id", org?.currentOrg.id)
+                    .eq("reseller_id", org?.currentOrg?.id)
                     .ilike("name", `%${searchQuery}%`)
                     .csv());
                 } else {
@@ -72,7 +72,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
                     .select(
                       "id, created_at, name, color, icon, tier, organization_type, logo_path"
                     )
-                    .eq("reseller_id", org?.currentOrg.id)
+                    .eq("reseller_id", org?.currentOrg?.id)
                     .csv());
                 }
 

@@ -15,7 +15,13 @@ import { LimitCell } from "./limitsCell";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useOrg } from "../../shared/layout/organizationContext";
 
-const VaultPage = () => {
+const VaultPage = ({
+  variant = "basic",
+  onRadioSelect,
+}: {
+  variant?: "basic" | "portal";
+  onRadioSelect?: (value: string | null) => void;
+}) => {
   const [deleteProviderOpen, setDeleteProviderOpen] = useState(false);
   const [selectedProviderKey, setSelectedProviderKey] =
     useState<DecryptedProviderKey>();
@@ -23,6 +29,9 @@ const VaultPage = () => {
   const [deleteProxyOpen, setDeleteProxyOpen] = useState(false);
   const [selectedProxyKey, setSelectedProxyKey] =
     useState<DecryptedProviderKeyMapping>();
+
+  const [selectedProviderKeyForRadio, setSelectedProviderKeyForRadio] =
+    useState<DecryptedProviderKey["id"]>();
 
   const { setNotification } = useNotification();
 
@@ -39,7 +48,7 @@ const VaultPage = () => {
   const org = useOrg();
   const { hasFlag: proxyKeyLimitsFlag } = useFeatureFlags(
     "proxy_key_limits",
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
   const deleteProviderKey = async (id: string) => {
@@ -111,7 +120,9 @@ const VaultPage = () => {
             </button>
           </div>
           <p className="text-gray-500">
-            These keys will be used to authenticate with your provider.
+            {variant === "portal"
+              ? "The key you enter will be added within the `Authorization` header of your API requests. Select which key you want to associate with this organization"
+              : "These keys will be used to authenticate with your provider."}
           </p>
           {isLoading ? (
             <ul className="flex flex-col space-y-6">
@@ -125,6 +136,16 @@ const VaultPage = () => {
           ) : providerKeys.length > 0 ? (
             <ThemedTable
               columns={[
+                ...(onRadioSelect
+                  ? [
+                      {
+                        name: "",
+                        key: "radio_select",
+                        hidden: false,
+                        className: "w-8",
+                      },
+                    ]
+                  : []),
                 { name: "Name", key: "provider_key_name", hidden: false },
                 {
                   name: "Key",
@@ -134,7 +155,26 @@ const VaultPage = () => {
                 },
                 { name: "Provider", key: "provider_name", hidden: true },
               ]}
-              rows={providerKeys}
+              rows={
+                variant === "portal"
+                  ? providerKeys
+                      .filter((x) => x.provider_name === "portal")
+                      .map((x) => ({
+                        ...x,
+                        radio_select: (
+                          <input
+                            type="radio"
+                            name="providerKey"
+                            value={+(selectedProviderKeyForRadio === x.id)}
+                            onChange={(e) => {
+                              setSelectedProviderKeyForRadio(x.id);
+                              onRadioSelect && onRadioSelect(x?.id ?? null);
+                            }}
+                          />
+                        ),
+                      }))
+                  : providerKeys
+              }
               deleteHandler={(row) => {
                 setSelectedProviderKey(row);
                 setDeleteProviderOpen(true);
@@ -155,60 +195,64 @@ const VaultPage = () => {
             </button>
           )}
         </div>
-        <div className="flex flex-col space-y-4 pt-12">
-          <div className="flex flex-row justify-between w-full items-center">
-            <h1 className="font-semibold text-2xl text-gray-900 dark:text-gray-100">
-              Helicone Proxy Keys
-            </h1>
-            <button
-              onClick={() => {
-                setIsProxyOpen(true);
-              }}
-              className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 flex flex-row whitespace-nowrap rounded-md pl-3 pr-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-            >
-              Create Proxy Key
-            </button>
+        {variant === "basic" && (
+          <div className="flex flex-col space-y-4 pt-12">
+            <div className="flex flex-row justify-between w-full items-center">
+              <h1 className="font-semibold text-2xl text-gray-900 dark:text-gray-100">
+                Helicone Proxy Keys
+              </h1>
+              <button
+                onClick={() => {
+                  setIsProxyOpen(true);
+                }}
+                className="bg-gray-900 hover:bg-gray-700 dark:bg-gray-100 dark:hover:bg-gray-300 flex flex-row whitespace-nowrap rounded-md pl-3 pr-4 py-2 text-sm font-semibold text-white dark:text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+              >
+                Create Proxy Key
+              </button>
+            </div>
+            <p className="text-gray-500">
+              These keys will replace your provider keys in your application.
+              This ensures that any usage will be logged in Helicone.
+            </p>
+            {isLoading ? (
+              <ul className="flex flex-col space-y-6">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <li
+                    key={index}
+                    className="h-6 flex flex-row justify-between gap-2 bg-gray-300 dark:bg-gray-700 animate-pulse rounded-md"
+                  ></li>
+                ))}
+              </ul>
+            ) : proxyKeys.length > 0 ? (
+              <ThemedTable
+                columns={proxyKeyColumns}
+                rows={proxyKeys}
+                deleteHandler={(row) => {
+                  setSelectedProxyKey(row);
+                  setDeleteProxyOpen(true);
+                }}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProxyOpen(true);
+                }}
+                className="bg-gray-100 dark:bg-black relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
+                <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  Add a proxy key
+                </span>
+              </button>
+            )}
           </div>
-          <p className="text-gray-500">
-            These keys will replace your provider keys in your application. This
-            ensures that any usage will be logged in Helicone.
-          </p>
-          {isLoading ? (
-            <ul className="flex flex-col space-y-6">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <li
-                  key={index}
-                  className="h-6 flex flex-row justify-between gap-2 bg-gray-300 dark:bg-gray-700 animate-pulse rounded-md"
-                ></li>
-              ))}
-            </ul>
-          ) : proxyKeys.length > 0 ? (
-            <ThemedTable
-              columns={proxyKeyColumns}
-              rows={proxyKeys}
-              deleteHandler={(row) => {
-                setSelectedProxyKey(row);
-                setDeleteProxyOpen(true);
-              }}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setIsProxyOpen(true);
-              }}
-              className="bg-gray-100 dark:bg-black relative flex flex-col justify-center items-center w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
-              <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
-                Add a proxy key
-              </span>
-            </button>
-          )}
-        </div>
+        )}
       </div>
+
       <CreateProviderKeyModal
         open={isProviderOpen}
+        variant={variant}
         setOpen={setIsProviderOpen}
         onSuccess={() => refetchProviderKeys()}
       />
