@@ -1,4 +1,4 @@
-import { useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 
@@ -12,12 +12,40 @@ export const Home = () => {
   const router = useRouter();
 
   const user = useUser();
-
+  const client = useSupabaseClient();
   if (user && user.email !== DEMO_EMAIL) {
     router.push("/dashboard");
     return (
       <div className="h-screen justify-center items-center flex">
-        <LoadingAnimation title="Redirecting you to your dashboard..." />
+        <div className="flex flex-col items-center gap-5">
+          <LoadingAnimation title="Redirecting you to your dashboard..." />
+          <div>Stuck here? Try signing out and back in</div>
+          <button
+            onClick={() => {
+              client.auth.signOut();
+            }}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-32"
+          >
+            Sign out
+          </button>
+
+          <div>
+            Still stuck here?{" "}
+            <a
+              href="https://discord.gg/2jZ6V7Yx"
+              className="text-blue-500 hover:text-blue-700"
+            >
+              Join our Discord
+            </a>{" "}
+            or email us at{" "}
+            <a
+              href="mailto:support@helicone.ai"
+              className="text-blue-500 hover:text-blue-700"
+            >
+              support@helicone.ai
+            </a>
+          </div>
+        </div>
       </div>
     );
   }
