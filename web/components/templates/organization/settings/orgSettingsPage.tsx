@@ -46,7 +46,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             disabled
           />
         </div>
-        <div className="max-w-[550px] w-full">
+        <div className="max-w-[450px] w-full">
           <CreateOrgForm
             initialValues={{
               id: org.id,
@@ -55,7 +55,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               icon: org.icon || "",
               limits: org.limits as any,
             }}
-            variant={variant}
+            variant={"organization"}
           />
         </div>
         {isOwner && !org.is_personal && (
