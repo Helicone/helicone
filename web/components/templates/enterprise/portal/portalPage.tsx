@@ -165,7 +165,11 @@ const PortalPage = (props: PortalPageProps) => {
                         </TableHead>
                         <TableBody>
                           {data?.map((org, index) => (
-                            <CustomerRow org={org} key={index} />
+                            <CustomerRow
+                              org={org}
+                              key={index}
+                              refetchCustomerOrgs={refetch}
+                            />
                           ))}
                         </TableBody>
                       </Table>
