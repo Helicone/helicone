@@ -238,8 +238,7 @@ export async function getTopRequestsClickhouse(
     count(*) as count, 
     max(created_at) as last_used, 
     min(created_at) as first_used,
-    model,
-    prompt
+    model
   from cache_hits
   where (${builtFilter.filter}) 
   group by request_id, model, prompt
@@ -251,11 +250,38 @@ export async function getTopRequestsClickhouse(
     count: number;
     last_used: Date;
     first_used: Date;
-    prompt: string;
     model: string;
   }>(query, builtFilter.argsAcc);
 
-  return res;
+  if (res.error) {
+    return res;
+  }
+
+  const promptQuery = `
+  SELECT 
+    id as request_id, 
+    (coalesce(request.body ->>'prompt', request.body ->'messages'->-1->>'content'))::text as prompt 
+  FROM 
+    request 
+  WHERE 
+    id IN (${res?.data?.map((x) => `'${x.request_id}'`).join(",")})`;
+
+  const prompts = await dbExecute<{
+    request_id: string;
+    prompt: string;
+  }>(promptQuery, []);
+
+  if (prompts.error) {
+    return prompts;
+  }
+
+  const combinedData = res?.data?.map((item) => ({
+    ...item,
+    prompt: prompts?.data?.find((p) => p.request_id === item.request_id)
+      ?.prompt,
+  }));
+
+  return { ...res, data: combinedData };
 }
 
 export async function getTopRequests(org_id: string, filter: FilterNode) {

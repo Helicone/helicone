@@ -200,7 +200,6 @@ export interface CacheHits {
   prompt_tokens: Nullable<number>;
   latency: Nullable<number>;
   model: string;
-  prompt: string;
   created_at: Nullable<string>;
 }
 
