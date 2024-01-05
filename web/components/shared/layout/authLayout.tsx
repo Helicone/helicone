@@ -68,9 +68,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
-  const hasPrivileges =
-    org?.currentOrg?.owner === user.id &&
-    org?.currentOrg.organization_type !== "customer";
+  let hasPrivileges = org?.currentOrg?.organization_type !== "customer";
 
   const navigation = [
     {
@@ -395,26 +393,28 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   )}
                 >
                   {(org?.currentOrg?.organization_type === "reseller" ||
-                    org?.currentOrg?.owner === user.id) && (
-                    <div className="flex w-full">
-                      <button
-                        onClick={() => {
-                          router.push("/enterprise/portal");
-                          if (
-                            org.currentOrg?.organization_type === "customer" &&
-                            org.currentOrg?.reseller_id
-                          ) {
-                            org.setCurrentOrg(org.currentOrg.reseller_id);
-                          }
-                        }}
-                        className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
-                      >
-                        {org.currentOrg.organization_type === "customer"
-                          ? "Edit Customer"
-                          : "Customer Portal"}
-                      </button>
-                    </div>
-                  )}
+                    org?.currentOrg?.organization_type === "customer") &&
+                    org?.currentOrg?.owner === user.id && (
+                      <div className="flex w-full">
+                        <button
+                          onClick={() => {
+                            router.push("/enterprise/portal");
+                            if (
+                              org.currentOrg?.organization_type ===
+                                "customer" &&
+                              org.currentOrg?.reseller_id
+                            ) {
+                              org.setCurrentOrg(org.currentOrg.reseller_id);
+                            }
+                          }}
+                          className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
+                        >
+                          {org.currentOrg?.organization_type === "customer"
+                            ? "Edit Customer"
+                            : "Customer Portal"}
+                        </button>
+                      </div>
+                    )}
                   <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
                     <div className="flex flex-col space-y-1">
                       {navigation.map((item, idx) => {
