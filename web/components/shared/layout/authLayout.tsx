@@ -386,7 +386,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
                 <div
                   className={clsx(
-                    org?.currentOrg?.organization_type === "reseller"
+                    org?.currentOrg?.organization_type === "reseller" ||
+                      org?.isResellerOfCurrentCustomerOrg
                       ? "mt-20"
                       : "mt-16",
                     "flex flex-grow flex-col"
@@ -408,7 +409,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
                       >
                         {org.currentOrg?.organization_type === "customer"
-                          ? "Edit Customer"
+                          ? "Back to Portal"
                           : "Customer Portal"}
                       </button>
                     </div>
