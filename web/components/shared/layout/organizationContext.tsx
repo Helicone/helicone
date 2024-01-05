@@ -12,7 +12,6 @@ export interface OrgContextValue {
   refetchOrgs: () => void;
   // Add to elements you want to re-render when the org changes
   renderKey: number;
-  isResellerOfCurrentCustomerOrg: boolean;
 }
 
 const OrgContext = React.createContext<OrgContextValue | null>(null);
