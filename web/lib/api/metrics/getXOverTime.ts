@@ -3,6 +3,7 @@ import moment from "moment";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseCacheHits,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../result";
@@ -128,6 +129,101 @@ SELECT
   ${dateTrunc} as created_at_trunc,
   ${groupByColumns.concat([countColumn]).join(", ")}
 FROM response_copy_v3
+WHERE (
+  ${builtFilter}
+)
+GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
+ORDER BY ${dateTrunc} ASC ${fill}
+`;
+
+  if (printQuery) {
+    await printRunnableQuery(query, argsAcc);
+  }
+
+  type ResultType = T & {
+    created_at_trunc: Date;
+  };
+  return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
+    d.map((r) => ({
+      ...r,
+      created_at_trunc: new Date(
+        moment
+          .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
+          .toDate()
+          .getTime() +
+          timeZoneDifference * 60 * 1000
+      ),
+    }))
+  );
+}
+
+export async function getXOverTimeCacheHits<T>(
+  { timeFilter, orgId, dbIncrement, timeZoneDifference }: DataOverTimeRequest,
+  countColumn: string,
+  groupByColumns: string[] = [],
+  printQuery = false
+): Promise<
+  Result<
+    (T & {
+      created_at_trunc: Date;
+    })[],
+    string
+  >
+> {
+  const startDate = new Date(timeFilter.start);
+  const endDate = new Date(timeFilter.end);
+  const timeFilterNode: FilterNode = {
+    left: {
+      cache_hits: {
+        created_at: {
+          gte: startDate,
+        },
+      },
+    },
+    right: {
+      cache_hits: {
+        created_at: {
+          lte: endDate,
+        },
+      },
+    },
+    operator: "and",
+  };
+  const filter: FilterNode = timeFilterNode;
+
+  if (!isValidTimeFilter(timeFilter)) {
+    return { data: null, error: "Invalid time filter" };
+  }
+  if (!isValidTimeIncrement(dbIncrement)) {
+    return { data: null, error: "Invalid time increment" };
+  }
+  if (!isValidTimeZoneDifference(timeZoneDifference)) {
+    return { data: null, error: "Invalid time zone difference" };
+  }
+  const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
+    await buildFilterWithAuthClickHouseCacheHits({
+      org_id: orgId,
+      filter,
+      argsAcc: [],
+    });
+  const { fill, argsAcc } = buildFill(
+    startDate,
+    endDate,
+    dbIncrement,
+    timeZoneDifference,
+    builtFilterArgsAcc
+  );
+  const dateTrunc = buildDateTrunc(
+    dbIncrement,
+    timeZoneDifference,
+    "created_at"
+  );
+
+  const query = `
+SELECT
+  ${dateTrunc} as created_at_trunc,
+  ${groupByColumns.concat([countColumn]).join(", ")}
+FROM cache_hits
 WHERE (
   ${builtFilter}
 )
