@@ -159,7 +159,7 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 | [nextjs-chat-app](https://github.com/enricoros/nextjs-chatgpt-app) | [Docs](https://github.com/enricoros/nextjs-chatgpt-app/issues/32)                         |
 | [langchain](https://github.com/hwchase17/langchain)                | [Docs](https://python.langchain.com/en/latest/ecosystem/helicone.html?highlight=helicone) |
 | [langchainjs](https://github.com/hwchase17/langchainjs)            | [Docs](https://js.langchain.com/docs/ecosystem/helicone)                                  |
-| [ModelFusion](https://modelfusion.dev)                             | [Docs](https://modelfusion.dev/integration/observability/helicone#example-helicone-with-custom-call-headers) |
+| [ModelFusion](https://modelfusion.dev)                             | [Docs](https://modelfusion.dev/integration/observability/helicone) |
 
 ## Contributing
 
