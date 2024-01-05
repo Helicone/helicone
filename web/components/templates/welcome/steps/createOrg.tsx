@@ -6,7 +6,6 @@ import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../shared/layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import { PostgrestError } from "@supabase/supabase-js";
-import { randomUUID } from "crypto";
 
 export const COMPANY_SIZES = [
   "Select company size",
@@ -81,7 +80,6 @@ const CreateOrg = (props: CreateOrgProps) => {
         is_personal: true,
         tier: "free",
       });
-      console.log("Created personal org!");
       if (!error) {
         console.log("Created personal org! - refetching", orgContext);
         orgContext?.refreshCurrentOrg();
