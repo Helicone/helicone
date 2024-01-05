@@ -15,14 +15,10 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import VaultPage from "../vault/vaultPage";
-import { COMPANY_SIZES } from "../welcome/steps/createOrg";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
-import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
-import { middleTruncString } from "../../../lib/stringHelpers";
 import { SecretInput } from "../../shared/themed/themedTable";
 
 export const ORGANIZATION_COLORS = [
