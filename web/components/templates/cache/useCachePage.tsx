@@ -1,4 +1,4 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UseQueryResult } from "@tanstack/react-query";
 import { Result, resultMap } from "../../../lib/result";
 import {
   BackendMetricsCall,
@@ -6,7 +6,6 @@ import {
 } from "../../../services/hooks/useBackendFunction";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { CacheHitsOverTime } from "../../../pages/api/cache/getCacheHitsOverTime";
-import { getTopRequests } from "../../../lib/api/cache/stats";
 
 export interface CachePageData {
   timeFilter: {
