@@ -34,7 +34,7 @@ const AlertsPage = (props: AlertsPageProps) => {
   const orgContext = useOrg();
 
   const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
-    orgContext?.currentOrg.id || ""
+    orgContext?.currentOrg?.id || ""
   );
 
   function formatTimeWindow(milliseconds: number): string {

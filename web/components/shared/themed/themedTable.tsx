@@ -40,14 +40,14 @@ const SecretInput = (props: { value: string }) => {
   const org = useOrg();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
   const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
-  const isOwner = org?.currentOrg.owner === user?.id;
+  const isOwner = org?.currentOrg?.owner === user?.id;
 
   const members = data?.data
     ? data?.data.map((d) => {

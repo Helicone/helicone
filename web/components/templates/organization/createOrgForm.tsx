@@ -324,7 +324,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     icon: selectedIcon.name,
                     has_onboarded: true,
                     ...(variant === "reseller" && {
-                      reseller_id: orgContext?.currentOrg.id!,
+                      reseller_id: orgContext?.currentOrg?.id!,
                       size: orgSize,
                       organization_type: "customer",
                     }),

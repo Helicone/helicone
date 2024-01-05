@@ -9,7 +9,7 @@ const usePortalPage = (searchQuery: string | null) => {
 
   const { data, isLoading, refetch } = useQuery<
     Database["public"]["Tables"]["organization"]["Row"][]
-  >(["orgs", org?.currentOrg.id, searchQuery], async (query) => {
+  >(["orgs", org?.currentOrg?.id, searchQuery], async (query) => {
     const orgId = query.queryKey[1];
     const newSearch = query.queryKey[2];
     if (newSearch) {

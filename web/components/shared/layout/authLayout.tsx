@@ -58,16 +58,19 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
 
-  const tier = org?.currentOrg.tier;
+  const tier = org?.currentOrg?.tier;
 
   const [open, setOpen] = useState(false);
-  const { hasFlag } = useFeatureFlags("webhook_beta", org?.currentOrg.id || "");
+  const { hasFlag } = useFeatureFlags(
+    "webhook_beta",
+    org?.currentOrg?.id || ""
+  );
   const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
   const hasPrivileges =
-    org?.currentOrg.owner === user.id ||
-    org?.currentOrg.organization_type !== "customer";
+    org?.currentOrg?.owner === user.id ||
+    org?.currentOrg?.organization_type !== "customer";
 
   const navigation = [
     {
@@ -385,13 +388,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
                 <div
                   className={clsx(
-                    org?.currentOrg.organization_type === "reseller"
+                    org?.currentOrg?.organization_type === "reseller"
                       ? "mt-20"
                       : "mt-16",
                     "flex flex-grow flex-col"
                   )}
                 >
-                  {org?.currentOrg.organization_type === "reseller" && (
+                  {org?.currentOrg?.organization_type === "reseller" && (
                     <div className="flex w-full">
                       <button
                         onClick={() => {
@@ -563,7 +566,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </Link>
                 </div>
                 {tier === "free" &&
-                org?.currentOrg.organization_type !== "customer" ? (
+                org?.currentOrg?.organization_type !== "customer" ? (
                   <div className="p-4 flex w-full justify-center">
                     <button
                       onClick={() => setOpen(true)}
@@ -603,7 +606,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 <div className="flex md:hidden">
                   {org && (
                     <ThemedDropdown
-                      selectedValue={org.currentOrg.id}
+                      selectedValue={org.currentOrg?.id}
                       options={org.allOrgs.map((org) => {
                         if (org.owner === user?.id) {
                           return {
