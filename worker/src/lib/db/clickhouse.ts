@@ -196,6 +196,10 @@ export interface PropertyWithResponseV1 {
 export interface CacheHits {
   request_id: string;
   organization_id: string;
+  completion_tokens: Nullable<number>;
+  prompt_tokens: Nullable<number>;
+  latency: Nullable<number>;
+  model: string;
   created_at: Nullable<string>;
 }
 
