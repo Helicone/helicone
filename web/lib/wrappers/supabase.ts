@@ -55,10 +55,8 @@ export class SupabaseServerWrapper<T> {
     const orgAccessCheck = await this.client
       .from("organization")
       .select("*")
-      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY])
-      .single();
-    if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
-      console.log("No org access check", orgAccessCheck.error);
+      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY]);
+    if (orgAccessCheck.data?.length === 0) {
       return ok({
         userId: user.data.user.id,
         orgId: "na",
@@ -73,14 +71,15 @@ export class SupabaseServerWrapper<T> {
         data: null,
       };
     }
+    const org = orgAccessCheck.data[0];
 
     // If owner, return role as owner
-    if (orgAccessCheck.data.owner === user.data.user.id) {
+    if (org.owner === user.data.user.id) {
       return {
         data: {
           userId: user.data.user.id,
-          orgId: orgAccessCheck.data.id,
-          orgHasOnboarded: orgAccessCheck.data.has_onboarded,
+          orgId: org.id,
+          orgHasOnboarded: org.has_onboarded,
           user: user.data.user,
           role: "owner",
         },
@@ -100,9 +99,8 @@ export class SupabaseServerWrapper<T> {
     };
 
     const role =
-      (await checkMembership(orgAccessCheck.data.id)) ||
-      (orgAccessCheck.data.reseller_id &&
-        (await checkMembership(orgAccessCheck.data.reseller_id)));
+      (await checkMembership(org.id)) ||
+      (org.reseller_id && (await checkMembership(org.reseller_id)));
 
     if (!role) {
       return { error: "Unauthorized", data: null };
@@ -111,8 +109,8 @@ export class SupabaseServerWrapper<T> {
     return {
       data: {
         userId: user.data.user.id,
-        orgId: orgAccessCheck.data.id,
-        orgHasOnboarded: orgAccessCheck.data.has_onboarded,
+        orgId: org.id,
+        orgHasOnboarded: org.has_onboarded,
         user: user.data.user,
         role: role,
       },
