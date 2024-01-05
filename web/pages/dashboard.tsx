@@ -47,14 +47,14 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user, orgHasOnboarded },
   } = options;
 
-  if (!orgHasOnboarded) {
-    return {
-      redirect: {
-        destination: "/welcome",
-        permanent: false,
-      },
-    };
-  }
+  // if (!orgHasOnboarded) {
+  //   return {
+  //     redirect: {
+  //       destination: "/welcome",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
 
   return {
     props: {
