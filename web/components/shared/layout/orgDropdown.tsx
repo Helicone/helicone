@@ -44,11 +44,11 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg.icon
+    (icon) => icon.name === orgContext?.currentOrg?.icon
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg.color
+    (icon) => icon.name === orgContext?.currentOrg?.color
   );
 
   const createNewOrgHandler = () => {
@@ -56,8 +56,8 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   };
 
   const hasPrivileges =
-    org?.currentOrg.owner === user?.id ||
-    org?.currentOrg.organization_type !== "customer";
+    org?.currentOrg?.owner === user?.id ||
+    org?.currentOrg?.organization_type !== "customer";
 
   return (
     <>
@@ -79,7 +79,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
               />
             )}
             <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[8rem] text-left">
-              {orgContext?.currentOrg.name}
+              {orgContext?.currentOrg?.name}
             </p>
           </div>
           <div className="px-[7px] py-0.5 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
@@ -158,7 +158,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 </span>
                               </div>
                             </div>
-                            {org.id === orgContext?.currentOrg.id && (
+                            {org.id === orgContext?.currentOrg?.id && (
                               <CheckIcon className="h-4 w-4 text-sky-500" />
                             )}
                           </button>
@@ -217,7 +217,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 </span>
                               </div>
                             </div>
-                            {org.id === orgContext?.currentOrg.id && (
+                            {org.id === orgContext?.currentOrg?.id && (
                               <CheckIcon className="h-4 w-4 text-sky-500" />
                             )}
                           </button>
@@ -269,7 +269,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 </span>
                               </div>
                             </div>
-                            {org.id === orgContext?.currentOrg.id && (
+                            {org.id === orgContext?.currentOrg?.id && (
                               <CheckIcon className="h-4 w-4 text-amber-500" />
                             )}
                           </button>
@@ -308,8 +308,8 @@ export default function OrgDropdown(props: OrgDropdownProps) {
         </div>
       </ThemedModal>
       <AddMemberModal
-        orgId={org?.currentOrg.id || ""}
-        orgOwnerId={org?.currentOrg.owner || ""}
+        orgId={org?.currentOrg?.id || ""}
+        orgOwnerId={org?.currentOrg?.owner || ""}
         open={addOpen}
         setOpen={setAddOpen}
       />
