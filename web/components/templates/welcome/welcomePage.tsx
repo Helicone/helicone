@@ -11,6 +11,7 @@ import { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface WelcomePageProps {}
 
@@ -34,6 +35,7 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const [step, setStep] = useLocalStorage<number>("welcome-step", 0);
   const [apiKey, setApiKey] = useState<string>("");
+  const orgs = useOrg();
 
   const nextStep = () => {
     setStep(step + 1);
@@ -93,6 +95,12 @@ const WelcomePage = (props: WelcomePageProps) => {
           <div className="flex flex-col gap-1 text-start p-8">
             <p className="text-xs text-gray-500">Logged in as:</p>
             <p className="text-sm text-gray-900">{user?.email}</p>
+            {orgs?.currentOrg?.id && (
+              <>
+                <p className="text-xs text-gray-500">Organization Id: </p>
+                <p className="text-sm text-gray-900">{orgs?.currentOrg?.id}</p>
+              </>
+            )}
           </div>
         )}
       </div>

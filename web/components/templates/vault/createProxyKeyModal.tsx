@@ -157,7 +157,7 @@ const LimitsInput = (props: {
   const org = useOrg();
   const { hasFlag } = useFeatureFlags(
     "proxy_key_limits",
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
   const [limits, setLimits] = useState<LimitRow[]>([]);
