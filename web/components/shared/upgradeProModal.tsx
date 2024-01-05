@@ -34,15 +34,15 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   const { count, isLoading: isCountLoading } = useGetRequestCountClickhouse(
     startOfMonthFormatted,
     endOfMonthFormatted,
-    orgContext?.currentOrg.id
+    orgContext?.currentOrg?.id
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg.icon
+    (icon) => icon.name === orgContext?.currentOrg?.icon
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg.color
+    (icon) => icon.name === orgContext?.currentOrg?.color
   );
 
   const getProgress = (count: number) => {
@@ -65,7 +65,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        orgId: orgContext?.currentOrg.id,
+        orgId: orgContext?.currentOrg?.id,
         userEmail: user?.email,
       }),
     });
@@ -90,7 +90,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               />
             )}
             <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              {orgContext?.currentOrg.name}
+              {orgContext?.currentOrg?.name}
             </h1>
           </div>
           <div className="border-2 p-4 text-sm rounded-lg flex flex-col text-gray-600 border-gray-300 dark:text-gray-200 dark:border-gray-700 w-full gap-4">

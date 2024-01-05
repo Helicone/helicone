@@ -48,7 +48,7 @@ const VaultPage = ({
   const org = useOrg();
   const { hasFlag: proxyKeyLimitsFlag } = useFeatureFlags(
     "proxy_key_limits",
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
   const deleteProviderKey = async (id: string) => {

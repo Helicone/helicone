@@ -466,6 +466,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                     ...(variant === "reseller" && {
                       org_provider_key: providerKey,
                       limits: limits,
+                      reseller_id: orgContext?.currentOrg?.id!,
+                      organization_type: "customer",
                     }),
                   })
                   .eq("id", initialValues.id)
@@ -493,7 +495,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                       icon: selectedIcon.name,
                       has_onboarded: true,
                       ...(variant === "reseller" && {
-                        reseller_id: orgContext?.currentOrg.id!,
+                        reseller_id: orgContext?.currentOrg?.id!,
                         organization_type: "customer",
                         org_provider_key: providerKey,
                         limits: limits,

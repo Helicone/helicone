@@ -63,7 +63,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
                     .select(
                       "id, created_at, name, color, icon, tier, organization_type, logo_path"
                     )
-                    .eq("reseller_id", org?.currentOrg.id)
+                    .eq("reseller_id", org?.currentOrg?.id)
                     .ilike("name", `%${searchQuery}%`)
                     .csv());
                 } else {
@@ -72,7 +72,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
                     .select(
                       "id, created_at, name, color, icon, tier, organization_type, logo_path"
                     )
-                    .eq("reseller_id", org?.currentOrg.id)
+                    .eq("reseller_id", org?.currentOrg?.id)
                     .csv());
                 }
 

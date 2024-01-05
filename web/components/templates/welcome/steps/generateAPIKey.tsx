@@ -47,7 +47,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
   ): Promise<string> {
     const apiKey = await generateAPIKey();
 
-    if (!user || org?.currentOrg.id === undefined) {
+    if (!user || org?.currentOrg?.id === undefined) {
       setNotification("Invalid user", "error");
       console.error("Invalid user");
       return apiKey;
@@ -57,7 +57,7 @@ const GenerateAPIKey = (props: GenerateAPIKeyProps) => {
       api_key_hash: await hashAuth(apiKey),
       user_id: user.id,
       api_key_name: keyName,
-      organization_id: org.currentOrg.id,
+      organization_id: org.currentOrg?.id,
     });
 
     if (res.error) {
