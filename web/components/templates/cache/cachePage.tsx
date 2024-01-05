@@ -33,9 +33,6 @@ interface CachePageProps {
 
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort } = props;
-  const data = useCachePageMetrics();
-  const cacheOverTime = useCacheOvertime();
-  const topMetrics = useCachePageTopMetrics();
   const topRequests = useCachePageTopRequests();
   const [timeFilter, _] = useState<TimeFilter>({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
@@ -45,7 +42,7 @@ const CachePage = (props: CachePageProps) => {
   const dbIncrement = "day";
   const {
     overTimeData,
-    metrics: metrics2,
+    metrics: chMetrics,
     isAnyLoading,
   } = useCachePageClickHouse({
     timeFilter,
@@ -63,38 +60,38 @@ const CachePage = (props: CachePageProps) => {
   }>();
   const [open, setOpen] = useState<boolean>(false);
 
-  const hasCache = data.totalCached.data?.data
-    ? +data.totalCached.data?.data === 0
+  const hasCache = chMetrics.totalCacheHits.data?.data
+    ? +chMetrics.totalCacheHits.data?.data === 0
     : false;
 
   const metrics = [
     {
       id: "caches",
       label: "All Time Caches",
-      value: metrics2.totalCacheHits.data?.data || 0,
+      value: chMetrics.totalCacheHits.data?.data || 0,
       isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
       id: "savings",
       label: "All Time Savings",
-      value: data.totalSavings.data?.data
+      value: chMetrics.totalSavings.data?.data
         ? `$${
-            data.totalSavings.data?.data < 1
-              ? data.totalSavings.data?.data.toFixed(5)
-              : data.totalSavings.data?.data.toFixed(2)
+            chMetrics.totalSavings.data?.data < 1
+              ? chMetrics.totalSavings.data?.data.toFixed(5)
+              : chMetrics.totalSavings.data?.data.toFixed(2)
           }`
         : "$0.00",
-      isLoading: data.totalSavings.isLoading,
+      isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
     {
       id: "time-saved",
       label: "Total Time Saved",
-      value: data.totalTimeSaved.data?.data
-        ? `${data.totalTimeSaved.data?.data}s`
+      value: chMetrics.timeSaved.data?.data
+        ? `${chMetrics.timeSaved.data?.data}s`
         : "0s",
-      isLoading: data.totalTimeSaved.isLoading,
+      isLoading: isAnyLoading,
       icon: ClockIcon,
     },
   ];
@@ -107,12 +104,12 @@ const CachePage = (props: CachePageProps) => {
   }));
 
   const cacheDist =
-    topMetrics.topModels.data?.data?.map((x) => ({
+    chMetrics.topModels?.data?.data?.map((x: any) => ({
       name: x.model,
       value: +x.count,
     })) ?? [];
 
-  cacheDist.sort((a, b) => a.name.localeCompare(b.name));
+  cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
   return (
     <>
@@ -156,7 +153,7 @@ const CachePage = (props: CachePageProps) => {
                   Caches last 30 days
                 </h3>
                 <div className="h-72 px-4">
-                  {cacheOverTime.overTime.isLoading ? (
+                  {isAnyLoading ? (
                     <div className="h-full w-full flex-col flex p-8">
                       <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
                     </div>

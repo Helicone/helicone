@@ -56,6 +56,29 @@ export async function getCacheCountClickhouse(
   return resultMap(res, (x) => +x[0].count);
 }
 
+export async function getModelMetricsClickhouse(
+  orgId: string,
+  filter: FilterNode
+): Promise<Result<ModelMetrics[], string>> {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `
+  select model, 
+    sum(completion_tokens) as sum_completion_tokens, 
+    sum(prompt_tokens) as sum_prompt_tokens, 
+    sum(completion_tokens + prompt_tokens) as sum_tokens 
+  from cache_hits 
+  where (${builtFilter.filter})
+  group by model`;
+
+  const res = await dbQueryClickhouse<ModelMetrics>(query, builtFilter.argsAcc);
+
+  return res;
+}
+
 export async function getModelMetrics(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -76,6 +99,28 @@ WHERE (
 GROUP BY response.body ->> 'model'::text;
     `;
   return dbExecute<ModelMetrics>(query, builtFilter.argsAcc);
+}
+
+export async function getTimeSavedClickhouse(
+  orgId: string,
+  filter: FilterNode
+) {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `SELECT sum(latency) AS total_latency_ms
+  FROM cache_hits
+  WHERE (${builtFilter.filter});`;
+
+  const temp = await dbQueryClickhouse<{
+    total_latency_ms: number;
+  }>(query, builtFilter.argsAcc);
+
+  console.log(temp);
+  const res = resultMap(temp, (x) => +x[0].total_latency_ms / 1000);
+  return res;
 }
 
 export async function getTimeSaved(org_id: string, filter: FilterNode) {
@@ -99,6 +144,25 @@ WHERE (
     }>(query, builtFilter.argsAcc),
     (x) => +x[0].total_latency_ms / 1000
   );
+  return res;
+}
+
+export async function getTopModelUsageClickhouse(
+  orgId: string,
+  filter: FilterNode
+) {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `select model, count(*) as count from cache_hits where (${builtFilter.filter}) group by model order by count desc limit 10`;
+
+  const res = await dbQueryClickhouse<{
+    model: string;
+    count: number;
+  }>(query, builtFilter.argsAcc);
+
   return res;
 }
 

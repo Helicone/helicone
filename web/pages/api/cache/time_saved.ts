@@ -1,4 +1,4 @@
-import { getTimeSaved } from "../../../lib/api/cache/stats";
+import { getTimeSavedClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -10,7 +10,7 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  res.status(200).json(await getTimeSaved(orgId, "all"));
+  res.status(200).json(await getTimeSavedClickhouse(orgId, "all"));
 }
 
 export default withAuth(handler);

@@ -47,6 +47,21 @@ export const useCachePageClickHouse = ({
       params,
       endpoint: "/api/cache/total",
     }),
+    totalSavings: useBackendMetricCall<Result<number, string>>({
+      key: "totalSavings",
+      params,
+      endpoint: "/api/cache/total_savings",
+    }),
+    timeSaved: useBackendMetricCall<Result<number, string>>({
+      key: "timeSaved",
+      params,
+      endpoint: "/api/cache/time_saved",
+    }),
+    topModels: useBackendMetricCall<Result<any, string>>({
+      key: "topModels",
+      params,
+      endpoint: "/api/cache/top_models",
+    }),
   };
 
   function isLoading(x: UseQueryResult<any>) {
