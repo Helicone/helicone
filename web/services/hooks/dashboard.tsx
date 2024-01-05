@@ -101,7 +101,7 @@ const useGetAuthorized = (userId: string) => {
 
   return {
     authorized:
-      org?.currentOrg.tier === "free" && Number(count?.data || 0) > 100_000,
+      org?.currentOrg?.tier === "free" && Number(count?.data || 0) > 100_000,
     isLoading: isCountLoading,
   };
 };

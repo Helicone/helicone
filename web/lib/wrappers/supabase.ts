@@ -11,7 +11,7 @@ import {
 } from "next";
 import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
-import { Result } from "../result";
+import { Result, ok } from "../result";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }
@@ -57,7 +57,16 @@ export class SupabaseServerWrapper<T> {
       .select("*")
       .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY])
       .single();
-
+    if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
+      console.log("No org access check", orgAccessCheck.error);
+      return ok({
+        userId: user.data.user.id,
+        orgId: "na",
+        orgHasOnboarded: false,
+        user: user.data.user,
+        role: "owner",
+      });
+    }
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
       return {
         error: `Unauthorized orgChecking ${this.ctx.req.cookies[ORG_ID_COOKIE_KEY]}`,
