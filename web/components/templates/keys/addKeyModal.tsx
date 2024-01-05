@@ -40,7 +40,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
     }
 
     const apiKey = `sk-helicone${
-      org?.currentOrg.organization_type === "customer" ? "-cp" : ""
+      org?.currentOrg?.organization_type === "customer" ? "-cp" : ""
     }-${generateApiKey({
       method: "base32",
       dashes: true,

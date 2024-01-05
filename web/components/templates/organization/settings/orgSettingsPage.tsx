@@ -54,6 +54,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               color: org.color || "",
               icon: org.icon || "",
               limits: org.limits as any,
+              providerKey: "",
             }}
             variant={"organization"}
           />

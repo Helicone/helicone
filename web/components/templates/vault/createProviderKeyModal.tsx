@@ -89,7 +89,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
             className="block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
           >
             <option value="openai">
-              {variant === "portal" ? org?.currentOrg.name : "OpenAI"}
+              {variant === "portal" ? org?.currentOrg?.name : "OpenAI"}
             </option>
           </select>
         </div>
