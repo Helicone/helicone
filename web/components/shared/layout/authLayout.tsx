@@ -66,7 +66,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
   const hasPrivileges =
-    org?.currentOrg.owner === user.id ||
+    org?.currentOrg.owner === user.id &&
     org?.currentOrg.organization_type !== "customer";
 
   const navigation = [
@@ -391,15 +391,24 @@ const AuthLayout = (props: AuthLayoutProps) => {
                     "flex flex-grow flex-col"
                   )}
                 >
-                  {org?.currentOrg.organization_type === "reseller" && (
+                  {(org?.currentOrg.organization_type === "reseller" ||
+                    org?.currentOrg.owner === user.id) && (
                     <div className="flex w-full">
                       <button
                         onClick={() => {
                           router.push("/enterprise/portal");
+                          if (
+                            org.currentOrg.organization_type === "customer" &&
+                            org.currentOrg.reseller_id
+                          ) {
+                            org.setCurrentOrg(org.currentOrg.reseller_id);
+                          }
                         }}
                         className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
                       >
-                        Customer Portal
+                        {org.currentOrg.organization_type === "customer"
+                          ? "Edit Customer"
+                          : "Customer Portal"}
                       </button>
                     </div>
                   )}
