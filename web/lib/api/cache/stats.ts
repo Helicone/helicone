@@ -241,7 +241,7 @@ export async function getTopRequestsClickhouse(
     model
   from cache_hits
   where (${builtFilter.filter}) 
-  group by request_id, model, prompt
+  group by request_id, model
   order by count desc
   limit 10`;
 
