@@ -303,7 +303,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                   <PlusIcon className="h-4 w-4 text-gray-500 mr-2" />
                   <p>Create New Org</p>
                 </button>
-                <button
+                {/* <button
                   onClick={() => {
                     setReferOpen(true);
                   }}
@@ -313,7 +313,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 >
                   <UserGroupIcon className="h-4 w-4 text-gray-500 mr-2" />
                   <p>Refer a friend</p>
-                </button>
+                </button> */}
               </div>
             </Menu.Item>
             <div className="p-1">
