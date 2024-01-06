@@ -172,12 +172,13 @@ const useOrgsContextManager = () => {
   }, [orgs]);
 
   useEffect(() => {
-    if (org?.organization_type === "customer") {
-      if (org.reseller_id) {
-        const isPartOfResellerOrg = orgs?.find((x) => x.id === org.reseller_id);
-        setIsResellerOfCurrentOrg(!!isPartOfResellerOrg);
-      }
-    }
+    setIsResellerOfCurrentOrg(
+      !!(
+        org?.organization_type === "customer" &&
+        org.reseller_id &&
+        orgs?.find((x) => x.id === org.reseller_id)
+      )
+    );
   }, [org?.organization_type, org?.reseller_id, orgs]);
 
   let orgContextValue: OrgContextValue | null = null;
