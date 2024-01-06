@@ -72,14 +72,20 @@ const CreateOrg = (props: CreateOrgProps) => {
     }
 
     if (!orgContext?.currentOrg?.id) {
-      const { data, error } = await supabaseClient.from("organization").insert({
-        name: orgName,
-        size: orgSize,
-        referral: orgReferral,
-        owner: user.id,
-        is_personal: true,
-        tier: "free",
-      });
+      const { data, error } = await fetch("/api/organization/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: orgName,
+          size: orgSize,
+          referral: orgReferral,
+          owner: user.id,
+          is_personal: true,
+          tier: "free",
+        }),
+      }).then((res) => res.json());
       if (!error) {
         console.log("Created personal org! - refetching", orgContext);
         orgContext?.refreshCurrentOrg();
