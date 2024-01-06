@@ -16,6 +16,7 @@ import CreateOrgForm, {
   OrgLimits,
 } from "../../organization/createOrgForm";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
+import { DeleteOrgModal } from "../../organization/deleteOrgModal";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -24,7 +25,7 @@ interface CustomerRowProps {
 
 const CustomerRow = (props: CustomerRowProps) => {
   const { org, refetchCustomerOrgs } = props;
-
+  const [deleteHeliconeOpen, setDeleteHeliconeOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
   const orgContext = useOrg();
@@ -191,6 +192,24 @@ const CustomerRow = (props: CustomerRowProps) => {
                     </button>
                   )}
                 </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => {
+                        setDeleteHeliconeOpen(true);
+                      }}
+                      className={clsx(
+                        active
+                          ? "bg-gray-50 dark:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
+                          : "",
+                        "w-full flex px-3 py-1 text-sm leading-6 text-red-500 dark:text-red-500"
+                      )}
+                    >
+                      Delete
+                      <span className="sr-only">, {org.name}</span>
+                    </button>
+                  )}
+                </Menu.Item>
               </Menu.Items>
             </Transition>
           </Menu>
@@ -213,10 +232,17 @@ const CustomerRow = (props: CustomerRowProps) => {
                 id: org.id,
                 limits: limits,
                 providerKey: org.org_provider_key,
+                isOwner: true,
               }}
             />
           </div>
         </ThemedDrawer>
+        <DeleteOrgModal
+          open={deleteHeliconeOpen}
+          setOpen={setDeleteHeliconeOpen}
+          orgId={org.id}
+          orgName={org.name}
+        />
       </TableRow>
     </>
   );

@@ -20,6 +20,7 @@ import { useVaultPage } from "../vault/useVaultPage";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import { SecretInput } from "../../shared/themed/themedTable";
+import { DeleteOrgModal } from "./deleteOrgModal";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -102,6 +103,7 @@ interface CreateOrgFormProps {
     color: string | null;
     icon: string | null;
     providerKey: string | null;
+    isOwner: boolean;
     limits?: OrgLimits;
   };
   onSuccess?: () => void;
@@ -157,7 +159,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   );
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
-
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [isProviderOpen, setIsProviderOpen] = useState(false);
 
   return (
@@ -517,7 +519,28 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             {initialValues ? "Update" : "Create"}
           </button>
         </div>
+        {initialValues?.isOwner && (
+          <div className="py-36 flex flex-col">
+            <div className="flex flex-row">
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete Organization
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+      {initialValues && (
+        <DeleteOrgModal
+          open={deleteOpen}
+          setOpen={setDeleteOpen}
+          orgId={initialValues.id}
+          orgName={initialValues.name}
+        />
+      )}
       <CreateProviderKeyModal
         open={isProviderOpen}
         variant={"portal"}
