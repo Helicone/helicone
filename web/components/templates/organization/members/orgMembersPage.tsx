@@ -77,8 +77,6 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
   let maxSeats = 0;
   let tierColor = "";
 
-  org.tier = "free";
-
   if (org.tier === "enterprise") {
     tierBadgeText = "Enterprise";
     tierColor = "purple";
