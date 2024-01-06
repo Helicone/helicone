@@ -8,7 +8,12 @@ import { SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 const supabaseClient = new SupabaseConnector();
 export function withAuth<T>(
-  fn: ({ db, request, res, supabaseClient }: IRouterWrapperAuth<T>) => void
+  fn: ({
+    db,
+    request,
+    res,
+    supabaseClient,
+  }: IRouterWrapperAuth<T>) => Promise<void>
 ) {
   return withDB<T>(async ({ db, request, res }) => {
     const authorization = request.authHeader();
@@ -41,7 +46,7 @@ export function withAuth<T>(
       return;
     }
 
-    fn({
+    return await fn({
       db,
       request,
       res,
