@@ -1,4 +1,3 @@
-import { Tooltip } from "@mui/material";
 import ThemedModal from "../shared/themed/themedModal";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
