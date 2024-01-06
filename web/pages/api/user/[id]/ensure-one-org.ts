@@ -15,7 +15,7 @@ export default async function handler(
     .eq("soft_delete", false)
     .eq("owner", userId);
 
-  if (!orgs.data || orgs.data.length > 0) {
+  if (!orgs.data || orgs.data.length === 0) {
     const result = await supabaseServer.from("organization").insert([
       {
         name: "My Organization",
