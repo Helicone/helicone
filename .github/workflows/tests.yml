@@ -25,6 +25,7 @@ jobs:
         run: |
           supabase gen types typescript --local > web/supabase/database.types.ts
           if ! git diff --ignore-space-at-eol web/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
+              git diff --ignore-space-at-eol web/supabase/database.types.ts
               echo "Detected uncommitted changes after build in web/supabase/database.types.ts. See status below:"
               git diff
               exit 1
