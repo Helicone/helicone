@@ -3,8 +3,10 @@ import { Fragment, useState } from "react";
 import {
   CheckIcon,
   MoonIcon,
+  PlusIcon,
   SunIcon,
   UserCircleIcon,
+  UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import { useOrg } from "./organizationContext";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
@@ -18,6 +20,7 @@ import ThemedModal from "../themed/themedModal";
 import AddMemberModal from "../../templates/organization/addMemberModal";
 import { ThemedSwitch } from "../themed/themedSwitch";
 import { useTheme } from "../theme/themeContext";
+import ReferralModal from "../../common/referralModal";
 
 interface OrgDropdownProps {}
 
@@ -27,6 +30,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
+  const [referOpen, setReferOpen] = useState(false);
 
   const org = useOrg();
   const themeContext = useTheme();
@@ -54,10 +58,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   const createNewOrgHandler = () => {
     setCreateOpen(true);
   };
-
-  const hasPrivileges =
-    org?.currentOrg?.owner === user?.id ||
-    org?.currentOrg?.organization_type !== "customer";
 
   return (
     <>
@@ -280,7 +280,41 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 </div>
               </div>
             )}
-
+            <Menu.Item>
+              <div className="p-1">
+                <button
+                  onClick={() => setAddOpen(true)}
+                  className={clsx(
+                    "flex items-center space-x-2 text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
+                  )}
+                >
+                  <UserPlusIcon className="h-4 w-4 text-gray-500 mr-2" />
+                  Invite Members
+                </button>
+                <button
+                  onClick={() => {
+                    createNewOrgHandler();
+                  }}
+                  className={clsx(
+                    "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
+                  )}
+                >
+                  <PlusIcon className="h-4 w-4 text-gray-500 mr-2" />
+                  <p>Create New Org</p>
+                </button>
+                {/* <button
+                  onClick={() => {
+                    setReferOpen(true);
+                  }}
+                  className={clsx(
+                    "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
+                  )}
+                >
+                  <UserGroupIcon className="h-4 w-4 text-gray-500 mr-2" />
+                  <p>Refer a friend</p>
+                </button> */}
+              </div>
+            </Menu.Item>
             <div className="p-1">
               <Menu.Item>
                 {({ active }) => (
@@ -307,6 +341,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           <CreateOrgForm onCancelHandler={setCreateOpen} />
         </div>
       </ThemedModal>
+      <ReferralModal open={referOpen} setOpen={setReferOpen} />
       <AddMemberModal
         orgId={org?.currentOrg?.id || ""}
         orgOwnerId={org?.currentOrg?.owner || ""}
