@@ -3,7 +3,7 @@ import { supabaseServer } from "../../../../lib/supabaseServer";
 
 export type Tier = "free" | "pro" | "enterprise";
 
-export async function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<string>
 ) {
