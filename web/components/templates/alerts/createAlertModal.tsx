@@ -60,14 +60,7 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
     email: string;
     member: string;
     org_role: string;
-  }[] = [
-    {
-      email: orgOwner?.data?.at(0)?.email || "",
-      member: "",
-      org_role: "admin",
-    },
-    ...(data?.data || []),
-  ];
+  }[] = [...(data?.data || [])];
 
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
