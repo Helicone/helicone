@@ -9,6 +9,7 @@ import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
+import { Database } from "../../supabase/database.types";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -34,6 +35,11 @@ export class RequestBodyParser {
       this.body = {};
     }
   }
+
+  get<T>(): T {
+    return this.body;
+  }
+
   getFilter(): Result<FilterNode, string> {
     if (this.body.filter) {
       return ok(this.body.filter);
@@ -66,6 +72,7 @@ export interface HandlerWrapperOptions<RetVal>
     userId: string;
     orgHasOnboarded: boolean;
     orgId: string;
+    org?: Database["public"]["Tables"]["organization"]["Row"];
     user: User;
     role: string;
   };

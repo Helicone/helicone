@@ -481,26 +481,34 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 onCancelHandler && onCancelHandler(false);
                 orgContext?.refetchOrgs();
               } else {
-                const { data, error } = await supabaseClient
-                  .from("organization")
-                  .insert([
-                    {
+                const { data, error } = await fetch(
+                  "/api/organization/create",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
                       name: orgName,
                       owner: user?.id!,
                       color: selectedColor.name,
                       icon: selectedIcon.name,
                       has_onboarded: true,
+                      tier: "free",
                       ...(variant === "reseller" && {
                         reseller_id: orgContext?.currentOrg?.id!,
                         organization_type: "customer",
                         org_provider_key: providerKey,
                         limits: limits,
                       }),
-                    },
-                  ])
-                  .select("*");
+                    }),
+                  }
+                ).then((res) => res.json());
                 if (error) {
-                  setNotification("Failed to create organization", "error");
+                  setNotification(
+                    "Failed to create organization" + error,
+                    "error"
+                  );
                 } else {
                   setNotification(
                     "Organization created successfully",
