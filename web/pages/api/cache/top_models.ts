@@ -1,4 +1,4 @@
-import { getTopModelUsage } from "../../../lib/api/cache/stats";
+import { getTopModelUsageClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -9,8 +9,10 @@ async function handler({
   req,
   res,
   userData: { orgId },
-}: HandlerWrapperOptions<UnPromise<ReturnType<typeof getTopModelUsage>>>) {
-  res.status(200).json(await getTopModelUsage(orgId, "all"));
+}: HandlerWrapperOptions<
+  UnPromise<ReturnType<typeof getTopModelUsageClickhouse>>
+>) {
+  res.status(200).json(await getTopModelUsageClickhouse(orgId, "all"));
 }
 
 export default withAuth(handler);

@@ -151,6 +151,14 @@ const whereKeyMappings: KeyMappings = {
     created_at: "feedback.created_at",
     response_id: "feedback.response_id",
   }),
+  cache_hits: easyKeyMappings<"cache_hits">({
+    organization_id: "cache_hits.organization_id",
+    request_id: "cache_hits.request_id",
+    latency: "cache_hits.latency",
+    completion_tokens: "cache_hits.completion_tokens",
+    prompt_tokens: "cache_hits.prompt_tokens",
+    created_at: "cache_hits.created_at",
+  }),
   response_copy_v1: easyKeyMappings<"response_copy_v1">({
     auth_hash: "response_copy_v1.auth_hash",
     model: "response_copy_v1.model",
@@ -285,6 +293,7 @@ const havingKeyMappings: KeyMappings = {
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
+  cache_hits: NOT_IMPLEMENTED,
 };
 
 export function buildFilterLeaf(
@@ -508,6 +517,18 @@ export async function buildFilterWithAuthClickHouseProperties(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     properties_copy_v2: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseCacheHits(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    cache_hits: {
       organization_id: {
         equals: orgId,
       },

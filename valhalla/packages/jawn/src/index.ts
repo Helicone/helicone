@@ -204,7 +204,7 @@ app.patch(
 );
 
 app.get(
-  "/healthcheck-db",
+  "/healthcheck",
   withDB(async ({ db, request, res }) => {
     const now = await db.now();
     if (now.error) {
@@ -234,12 +234,6 @@ app.get(
     });
   })
 );
-
-app.get("/healthcheck", (request, res) => {
-  res.json({
-    status: "healthy :)",
-  });
-});
 
 app.listen(parseInt(process.env.PORT ?? "8585"), "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:8585`);

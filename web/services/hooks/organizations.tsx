@@ -61,6 +61,32 @@ const useGetOrgMembersAndOwner = (orgId: string) => {
   };
 };
 
+const useGetOrg = (orgId: string) => {
+  const supabaseClient = useSupabaseClient<Database>();
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["OrganizationsId", orgId],
+    queryFn: async (query) => {
+      if (!orgId) {
+        return null;
+      }
+      const { data, error } = await supabaseClient
+        .from("organization")
+        .select(`*`)
+        .eq("soft_delete", false)
+        .eq("id", orgId)
+        .single();
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    data,
+    isLoading,
+    refetch,
+  };
+};
+
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
@@ -78,7 +104,7 @@ const useGetOrgs = () => {
         return [];
       }
       if (!data.find((d) => d.is_personal)) {
-        // await supabaseClient.rpc("ensure_personal");
+        await supabaseClient.rpc("ensure_personal");
         // console.warn("Created personal org");
         // just a shim that will only execute once for the entire life time of a user
         return (await supabaseClient.from("organization").select(`*`)).data!;
@@ -112,6 +138,8 @@ const useOrgsContextManager = () => {
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
+  const [isResellerOfCurrentCustomerOrg, setIsResellerOfCurrentOrg] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (orgs && orgs.length > 0) {
@@ -124,11 +152,20 @@ const useOrgsContextManager = () => {
     }
   }, [orgs]);
 
-  let orgContextValue: OrgContextValue | null = null;
+  useEffect(() => {
+    if (org?.organization_type === "customer") {
+      if (org.reseller_id) {
+        const isPartOfResellerOrg = orgs?.find((x) => x.id === org.reseller_id);
+        setIsResellerOfCurrentOrg(!!isPartOfResellerOrg);
+      }
+    }
+  }, [org?.organization_type, org?.reseller_id, orgs]);
 
+  let orgContextValue: OrgContextValue | null = null;
   orgContextValue = {
     allOrgs: orgs ?? [],
     currentOrg: org ?? undefined,
+    isResellerOfCurrentCustomerOrg,
     refreshCurrentOrg: () => {
       refetch().then((x) => {
         if (x.data && x.data.length > 0) {
@@ -162,5 +199,6 @@ export {
   useGetOrgs,
   useOrgsContextManager,
   setOrgCookie,
+  useGetOrg,
   useGetOrgMembersAndOwner,
 };

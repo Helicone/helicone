@@ -40,9 +40,9 @@ async function handler(
     UnPromise<ReturnType<typeof getModelUsageOverTimeBackFill>>
   >
 ) {
-  const res = await getModelUsageOverTimeBackFill(options.userData.orgId);
-
-  options.res.status(200).json(res);
+  options.res
+    .status(200)
+    .json(await getModelUsageOverTimeBackFill(options.userData.orgId));
 }
 
 export default withAuth(handler);

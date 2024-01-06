@@ -38,9 +38,10 @@ export async function getTotalRequests(
   FROM total_count
 `;
 
-  const res = await dbQueryClickhouse<{
-    count: number;
-  }>(query, argsAcc);
-
-  return resultMap(res, (d) => +d[0].count);
+  return resultMap(
+    await dbQueryClickhouse<{
+      count: number;
+    }>(query, argsAcc),
+    (d) => +d[0].count
+  );
 }

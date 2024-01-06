@@ -38,7 +38,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
             Export Customers
           </h3>
           <div className="flex flex-col space-y-2">
-            <label className="text-xs">Export Name</label>
+            <label className="text-xs text-gray-500">Export Name</label>
             <TextInput
               placeholder="customers.csv"
               onChange={(e) => {
