@@ -40,6 +40,7 @@ export class SupabaseServerWrapper<T> {
       {
         userId: string;
         orgId: string;
+        org?: Database["public"]["Tables"]["organization"]["Row"];
         orgHasOnboarded: boolean;
         user: User;
         role: string;
@@ -79,6 +80,7 @@ export class SupabaseServerWrapper<T> {
         data: {
           userId: user.data.user.id,
           orgId: org.id,
+          org: org,
           orgHasOnboarded: org.has_onboarded,
           user: user.data.user,
           role: "owner",
