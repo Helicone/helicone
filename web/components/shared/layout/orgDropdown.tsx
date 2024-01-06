@@ -6,7 +6,6 @@ import {
   PlusIcon,
   SunIcon,
   UserCircleIcon,
-  UserGroupIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import { useOrg } from "./organizationContext";
