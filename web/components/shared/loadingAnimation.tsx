@@ -52,11 +52,7 @@ const LoadingAnimation = (props: LoadingAnimationProps) => {
   useEffect(() => {
     if (animation !== undefined) return;
 
-    // Regular
-    // const animationItems = [chicky, hamster, plane, boxbee];
-
-    // Xmas
-    const animationItems = [Tree, Santa, Ornaments];
+    const animationItems = [chicky, hamster, plane, boxbee];
 
     const randomIndex = randomIntFromInterval(0, animationItems.length - 1);
     setAnimation(animationItems[randomIndex]);
