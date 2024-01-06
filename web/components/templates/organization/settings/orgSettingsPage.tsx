@@ -2,12 +2,10 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
 import CreateOrgForm from "../createOrgForm";
-import ThemedModal from "../../../shared/themed/themedModal";
 import { useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import { useOrg } from "../../../shared/layout/organizationContext";
-import { DeleteOrgModal } from "./deleteOrgModal";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
