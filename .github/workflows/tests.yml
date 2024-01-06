@@ -21,21 +21,13 @@ jobs:
       - run: supabase db start
       - run: supabase db lint
 
-      - name: Verify generated types match Postgres schema for web (ignores date_count ordering)
+      - name: Generate types and check for changes
         run: |
-          supabase gen types typescript --local > web/supabase/database.types.ts
-          if ! git diff --ignore-space-at-eol web/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
+          bash genSupabaseTypes.sh
+
+          if git status | grep "database.types.ts"; then
               git diff --ignore-space-at-eol web/supabase/database.types.ts
               echo "Detected uncommitted changes after build in web/supabase/database.types.ts. See status below:"
-              git diff
-              exit 1
-          fi
-
-      - name: Verify generated types match Postgres schema for worker (ignores date_count ordering)
-        run: |
-          supabase gen types typescript --local > worker/supabase/database.types.ts
-          if ! git diff --ignore-space-at-eol worker/supabase/database.types.ts | grep -v "date_count" | grep -q "."; then
-              echo "Detected uncommitted changes after build in worker/supabase/database.types.ts. See status below:"
               git diff
               exit 1
           fi
