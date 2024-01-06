@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Members } from "../../pages/api/organization/[id]/members";
 import { Owner } from "../../pages/api/organization/[id]/owner";
 import { Database } from "../../supabase/database.types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/shared/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
@@ -103,12 +103,7 @@ const useGetOrgs = () => {
       if (error) {
         return [];
       }
-      if (data.length === 0) {
-        const res = await fetch(`/api/user/${user.id}/ensure-one-org`);
-        if (res.status !== 200) {
-          console.error("Failed to create org", res.json());
-        }
-      }
+
       return data;
     },
     refetchOnWindowFocus: false,
@@ -134,12 +129,36 @@ const setOrgCookie = (orgId: string) => {
 };
 
 const useOrgsContextManager = () => {
+  const user = useUser();
   const { data: orgs, refetch } = useGetOrgs();
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
   const [isResellerOfCurrentCustomerOrg, setIsResellerOfCurrentOrg] =
     useState<boolean>(false);
+
+  const refreshCurrentOrg = useCallback(() => {
+    refetch().then((x) => {
+      if (x.data && x.data.length > 0) {
+        const firstOrg = x.data[0];
+        setOrg(firstOrg);
+        setOrgCookie(firstOrg.id);
+        setRenderKey((key) => key + 1);
+      }
+    });
+  }, [refetch]);
+
+  useEffect(() => {
+    if ((!orgs || orgs.length === 0) && user?.id) {
+      fetch(`/api/user/${user.id}/ensure-one-org`).then((res) => {
+        if (res.status !== 200) {
+          console.error("Failed to create org", res.json());
+        } else {
+          refreshCurrentOrg();
+        }
+      });
+    }
+  }, [orgs, user?.id, refreshCurrentOrg]);
 
   useEffect(() => {
     if (orgs && orgs.length > 0) {
@@ -166,16 +185,7 @@ const useOrgsContextManager = () => {
     allOrgs: orgs ?? [],
     currentOrg: org ?? undefined,
     isResellerOfCurrentCustomerOrg,
-    refreshCurrentOrg: () => {
-      refetch().then((x) => {
-        if (x.data && x.data.length > 0) {
-          const firstOrg = x.data[0];
-          setOrg(firstOrg);
-          setOrgCookie(firstOrg.id);
-          setRenderKey((key) => key + 1);
-        }
-      });
-    },
+    refreshCurrentOrg,
     setCurrentOrg: (orgId) => {
       refetch().then(() => {
         const org = orgs?.find((org) => org.id === orgId);
