@@ -21,6 +21,7 @@ export async function handler(
         name: "My Organization",
         owner: userId,
         tier: "free",
+        is_personal: true,
       },
     ]);
     if (result.error) {
