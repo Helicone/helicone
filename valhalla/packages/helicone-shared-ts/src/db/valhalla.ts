@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from "pg";
+import { Pool, QueryResult, PoolClient } from "pg";
 import { getEnvironment } from "../environment/get";
 import { PromiseGenericResult, err, ok } from "../modules/result";
 import {
@@ -70,7 +70,7 @@ class ValhallaDB implements IValhallaDB {
       user: username,
       password: password,
       database: auroraDb,
-      max: 10_000,
+      max: 500,
       idleTimeoutMillis: 1000, // close idle clients after 1 second
       connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
       maxUses: 500,
@@ -81,6 +81,7 @@ class ValhallaDB implements IValhallaDB {
               rejectUnauthorized: true, // This should be set to true for better security
             },
     });
+
     this.pool.on("error", (err, client) => {
       try {
         console.error(
@@ -104,13 +105,21 @@ class ValhallaDB implements IValhallaDB {
     query: string,
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
+    let client: PoolClient | null = null;
     try {
-      const client = await this.pool.connect();
+      client = await this.pool.connect();
+    } catch (thrownErr) {
+      console.error("Error in query", query, thrownErr);
+      return err(JSON.stringify(thrownErr));
+    }
+
+    try {
       const result = await client.query(query, values);
       client.release();
       return ok(result);
     } catch (thrownErr) {
       console.error("Error in query", query, thrownErr);
+      client.release();
       return err(JSON.stringify(thrownErr));
     }
   }

@@ -1,4 +1,7 @@
-// src/index.ts
+require("dotenv").config({
+  path: "./.env",
+});
+
 import express from "express";
 import * as OpenApiValidator from "express-openapi-validator";
 import { withAuth, withDB } from "helicone-shared-ts";
@@ -23,10 +26,6 @@ const errorHandler: ErrorRequestHandler = (
 };
 
 const dirname = __dirname;
-
-require("dotenv").config({
-  path: "./.env",
-});
 
 const app = express();
 
@@ -235,8 +234,15 @@ app.get(
   })
 );
 
-app.listen(parseInt(process.env.PORT ?? "8585"), "0.0.0.0", () => {
-  console.log(`Server is running on http://localhost:8585`);
-});
+const server = app.listen(
+  parseInt(process.env.PORT ?? "8585"),
+  "0.0.0.0",
+  () => {
+    console.log(`Server is running on http://localhost:8585`);
+  }
+);
 
-console.log("Hello, world!");
+server.on("error", console.error);
+
+// This
+server.setTimeout(1000 * 60 * 10); // 10 minutes
