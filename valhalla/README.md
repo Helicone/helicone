@@ -20,3 +20,12 @@ psql -h localhost -p 54328 -U root -d helicone
 export FLYWAY_PASSWORD='<Password>' #important use single quotes to handle special characters
 flyway -url="jdbc:postgresql://localhost:54328/helicone" -user="root" -locations=filesystem:./migrations  migrate
 ```
+
+## Memory Leak measuring
+
+```
+export NODE_OPTIONS='--inspect-brk'
+yarn dev:jawn
+```
+
+Go to chrome://inspect and then click the process that is running to inspect the memory.
