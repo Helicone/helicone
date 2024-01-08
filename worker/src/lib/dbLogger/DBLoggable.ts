@@ -115,6 +115,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
     providerResponseHeaders,
     provider,
   } = props;
+
   return new DBLoggable({
     request: {
       requestId: providerRequestHeaders.requestId ?? crypto.randomUUID(),
@@ -131,6 +132,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
       omitLog: false,
       provider,
       nodeId: requestWrapper.getNodeId(),
+      modelOverride: requestWrapper.heliconeHeaders.modelOverride ?? undefined,
     },
     response: {
       responseId: crypto.randomUUID(),
@@ -279,7 +281,10 @@ export class DBLoggable {
             parse_response_error: parsedResponse.error,
             body: this.tryJsonParse(responseBody),
           },
-          model: (parsedResponse.data as any)?.model ?? undefined,
+          model:
+            (parsedResponse.data as any)?.model ??
+            (parsedResponse.data as any)?.body?.model ?? // anthropic
+            undefined,
           status: await this.response.status(),
         };
   }

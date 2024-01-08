@@ -22,7 +22,9 @@ export interface HeliconeRequest {
   response_created_at: string;
   response_body?: any;
   response_status: number;
+  response_model: string | null;
   request_id: string;
+  request_model: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
@@ -86,6 +88,8 @@ export async function getRequests(
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
     request.provider as provider,
+    request.model as request_model,
+    response.model as response_model,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
@@ -159,6 +163,8 @@ export async function getRequestsCached(
     request.formatted_prompt_id as request_formatted_prompt_id,
     request.prompt_values as request_prompt_values,
     request.provider as provider,
+    request.model as request_model,
+    response.model as response_model,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,

@@ -96,6 +96,17 @@ export async function logRequest(
       return { data: null, error: `No task found for id ${request.nodeId}` };
     }
 
+    function getModelFromPath(path: string) {
+      let regex = /\/engines\/([^\/]+)/;
+      let match = path.match(regex);
+
+      if (match && match[1]) {
+        return match[1];
+      } else {
+        return undefined;
+      }
+    }
+
     const getModelFromRequest = () => {
       if (request.modelOverride) {
         return request.modelOverride;
@@ -103,6 +114,12 @@ export async function logRequest(
       if ((requestBody as any).model) {
         return (requestBody as any).model;
       }
+
+      const modelFromPath = getModelFromPath(request.path);
+      if (modelFromPath) {
+        return modelFromPath;
+      }
+
       return null;
     };
 
