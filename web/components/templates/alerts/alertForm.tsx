@@ -1,13 +1,8 @@
 import { FormEvent, useState } from "react";
 import { useOrg } from "../../shared/layout/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
-import {
-  useGetOrgMembers,
-  useGetOrgOwner,
-} from "../../../services/hooks/organizations";
+import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import useNotification from "../../shared/notification/useNotification";
-import Cookies from "js-cookie";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import {
   MultiSelect,
   MultiSelectItem,
