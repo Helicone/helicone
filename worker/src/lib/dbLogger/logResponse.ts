@@ -96,6 +96,16 @@ export async function logRequest(
       return { data: null, error: `No task found for id ${request.nodeId}` };
     }
 
+    const getModelFromRequest = () => {
+      if (request.modelOverride) {
+        return request.modelOverride;
+      }
+      if ((requestBody as any).model) {
+        return (requestBody as any).model;
+      }
+      return null;
+    };
+
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
@@ -119,6 +129,7 @@ export async function logRequest(
       helicone_org_id: authParams.organizationId,
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
+      model: getModelFromRequest(),
       created_at: createdAt.toISOString(),
     };
 

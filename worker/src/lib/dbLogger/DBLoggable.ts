@@ -42,6 +42,7 @@ export interface DBLoggableProps {
     omitLog: boolean;
     provider: Provider;
     nodeId: string | null;
+    modelOverride?: string;
   };
   timing: {
     startTime: Date;
@@ -72,6 +73,8 @@ export function dbLoggableRequestFromProxyRequest(
     omitLog: proxyRequest.omitOptions.omitRequest,
     provider: proxyRequest.provider,
     nodeId: proxyRequest.nodeId,
+    modelOverride:
+      proxyRequest.requestWrapper.heliconeHeaders.modelOverride ?? undefined,
   };
 }
 
@@ -264,6 +267,7 @@ export class DBLoggable {
           status: await this.response.status(),
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+          model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
         }
       : {
@@ -275,6 +279,7 @@ export class DBLoggable {
             parse_response_error: parsedResponse.error,
             body: this.tryJsonParse(responseBody),
           },
+          model: (parsedResponse.data as any)?.model ?? undefined,
           status: await this.response.status(),
         };
   }
