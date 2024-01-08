@@ -305,7 +305,9 @@ const UserModal = (props: UserModalProps) => {
                 Average Tokens per Request
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {formatNumber(user.average_tokens_per_request)}
+                {user.average_tokens_per_request
+                  ? formatNumber(user.average_tokens_per_request)
+                  : "N/A"}
               </p>
             </li>
           </ul>
