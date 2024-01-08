@@ -124,7 +124,7 @@ const AlertForm = (props: AlertFormProps) => {
       className="grid grid-cols-4 gap-8 w-full sm:w-[450px] max-w-[450px] h-full"
     >
       <h1 className="col-span-4 font-semibold text-xl text-gray-900 dark:text-gray-100">
-        Create Alert
+        {initialValues ? "Edit Alert" : "Create Alert"}
       </h1>
       <div className="col-span-4 w-full space-y-1.5 text-sm">
         <label htmlFor="alert-name" className="text-gray-500">
@@ -306,7 +306,7 @@ const AlertForm = (props: AlertFormProps) => {
           type="submit"
           className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          {initialValues ? "Edit Alert" : "Create Alert"}
+          {initialValues ? "Save" : "Create Alert"}
         </button>
       </div>
     </form>
