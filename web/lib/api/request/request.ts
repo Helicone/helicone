@@ -25,6 +25,7 @@ export interface HeliconeRequest {
   response_model: string | null;
   request_id: string;
   request_model: string | null;
+  model_override: string | null;
   request_created_at: string;
   request_body: any;
   request_path: string;
@@ -89,6 +90,7 @@ export async function getRequests(
     request.prompt_values as request_prompt_values,
     request.provider as provider,
     request.model as request_model,
+    request.model_override as model_override,
     response.model as response_model,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
@@ -164,6 +166,7 @@ export async function getRequestsCached(
     request.prompt_values as request_prompt_values,
     request.provider as provider,
     request.model as request_model,
+    request.model_override as model_override,
     response.model as response_model,
     response.feedback as request_feedback,
     request.helicone_user as helicone_user,
@@ -216,8 +219,9 @@ async function mapLLMCalls(
     heliconeRequests?.map(async (heliconeRequest) => {
       // Extract the model from various possible locations.
       const model =
-        heliconeRequest.request_model ||
+        heliconeRequest.model_override ||
         heliconeRequest.response_model ||
+        heliconeRequest.request_model ||
         heliconeRequest.response_body?.model ||
         heliconeRequest.request_body?.model ||
         heliconeRequest.response_body?.body?.model || // anthropic

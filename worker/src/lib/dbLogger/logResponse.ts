@@ -108,9 +108,6 @@ export async function logRequest(
     }
 
     const getModelFromRequest = () => {
-      if (request.modelOverride) {
-        return request.modelOverride;
-      }
       if ((requestBody as any).model) {
         return (requestBody as any).model;
       }
@@ -147,6 +144,7 @@ export async function logRequest(
       provider: request.provider,
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       model: getModelFromRequest(),
+      model_override: request.modelOverride ?? null,
       created_at: createdAt.toISOString(),
     };
 
