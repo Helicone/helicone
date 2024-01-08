@@ -96,17 +96,6 @@ export async function logRequest(
       return { data: null, error: `No task found for id ${request.nodeId}` };
     }
 
-    function getModelFromPath(path: string) {
-      let regex = /\/engines\/([^\/]+)/;
-      let match = path.match(regex);
-
-      if (match && match[1]) {
-        return match[1];
-      } else {
-        return undefined;
-      }
-    }
-
     const getModelFromRequest = () => {
       if ((requestBody as any).model) {
         return (requestBody as any).model;
@@ -195,5 +184,16 @@ export async function logRequest(
     };
   } catch (e) {
     return { data: null, error: JSON.stringify(e) };
+  }
+
+  function getModelFromPath(path: string) {
+    const regex = /\/engines\/([^/]+)/;
+    const match = path.match(regex);
+
+    if (match && match[1]) {
+      return match[1];
+    } else {
+      return undefined;
+    }
   }
 }
