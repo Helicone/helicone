@@ -269,6 +269,7 @@ export class DBLoggable {
           status: await this.response.status(),
           completion_tokens: parsedResponse.data.usage?.completion_tokens,
           prompt_tokens: parsedResponse.data.usage?.prompt_tokens,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           model: (parsedResponse.data as any)?.model ?? undefined,
           delay_ms,
         }
@@ -282,7 +283,9 @@ export class DBLoggable {
             body: this.tryJsonParse(responseBody),
           },
           model:
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (parsedResponse.data as any)?.model ??
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (parsedResponse.data as any)?.body?.model ?? // anthropic
             undefined,
           status: await this.response.status(),
