@@ -216,6 +216,8 @@ async function mapLLMCalls(
     heliconeRequests?.map(async (heliconeRequest) => {
       // Extract the model from various possible locations.
       const model =
+        heliconeRequest.request_model ||
+        heliconeRequest.response_model ||
         heliconeRequest.response_body?.model ||
         heliconeRequest.request_body?.model ||
         heliconeRequest.response_body?.body?.model || // anthropic
