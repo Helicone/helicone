@@ -26,8 +26,10 @@ export default async function handler(
     ]);
     if (result.error) {
       res.status(500).json(result.error.message);
-      return;
+    } else {
+      res.status(200).json("Added successfully");
     }
+  } else {
+    res.status(201).json("Already exists");
   }
-  res.status(200).json("Added successfully");
 }
