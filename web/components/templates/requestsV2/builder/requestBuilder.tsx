@@ -12,6 +12,7 @@ import UnknownBuilder from "./unknownBuilder";
 import CompletionBuilder from "./completionBuilder";
 import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
+import { DalleBuilder } from "./dalleBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -22,6 +23,7 @@ export type BuilderType =
   | "EmbeddingBuilder"
   | "ClaudeBuilder"
   | "CustomBuilder"
+  | "DalleBuilder"
   | "UnknownBuilder";
 
 export const getBuilderType = (
@@ -43,6 +45,10 @@ export const getBuilderType = (
 
   if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
     return "ChatGPTBuilder";
+  }
+
+  if (model === "dall-e-3" || model === "dall-e-2") {
+    return "DalleBuilder";
   }
 
   // mistralai/Mistral-7B-Instruct-v[number].[number]
@@ -98,6 +104,7 @@ const builders: {
   EmbeddingBuilder: EmbeddingBuilder,
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
+  DalleBuilder: DalleBuilder,
   UnknownBuilder: UnknownBuilder,
 };
 
