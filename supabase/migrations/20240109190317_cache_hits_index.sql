@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS cache_hits_request_id_idx ON public.cache_hits USING btree (request_id);
