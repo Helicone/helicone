@@ -97,7 +97,7 @@ export async function logRequest(
     }
 
     const getModelFromRequest = () => {
-      if ((requestBody as any).model) {
+      if (requestBody && (requestBody as any).model) {
         return (requestBody as any).model;
       }
 
