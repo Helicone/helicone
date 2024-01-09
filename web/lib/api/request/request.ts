@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
+  buildFilterWithAuthCacheHits,
   buildFilterWithAuthClickHouse,
 } from "../../../services/lib/filters/filters";
 import {
@@ -136,7 +137,7 @@ export async function getRequestsCached(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuth({
+  const builtFilter = await buildFilterWithAuthCacheHits({
     org_id: orgId,
     filter,
     argsAcc: [],
