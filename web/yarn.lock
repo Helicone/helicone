@@ -933,6 +933,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@clickhouse/client-common@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@clickhouse/client-common@npm:0.2.7"
+  checksum: e4e19d988ef0e4a3dc8e0a4dc87e7fed7fbb2fa884b0108e7a1b2f5f00f446837580c9a0409b9275a55484b6fd11b700410ef8aadcc8d2780a691c17f1ff437f
+  languageName: node
+  linkType: hard
+
 "@clickhouse/client@npm:^0.0.14":
   version: 0.0.14
   resolution: "@clickhouse/client@npm:0.0.14"
@@ -940,6 +947,15 @@ __metadata:
     node-abort-controller: "npm:^3.0.1"
     uuid: "npm:^9.0.0"
   checksum: 0e318a630fad9a60e8f8b2b6262ec265858a6523b7de098189a9aac93e4146759830ef10ec6ffb9629329edece9cc28e17a9ef0bdec4d93d4fa965b2b8908dce
+  languageName: node
+  linkType: hard
+
+"@clickhouse/client@npm:^0.2.7":
+  version: 0.2.7
+  resolution: "@clickhouse/client@npm:0.2.7"
+  dependencies:
+    "@clickhouse/client-common": "npm:0.2.7"
+  checksum: 44080717ea85ba6383c932178b2f024872ba99a8b28601c717ef85974f029181a4c83f910951a5f6094ab6dcb77efdd3d1f7f1b6dae612c999d0f24202e096c4
   languageName: node
   linkType: hard
 
@@ -7659,6 +7675,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "helicone-shared-ts@portal:../valhalla/packages/helicone-shared-ts::locator=helicone%40workspace%3A."
   dependencies:
+    "@clickhouse/client": "npm:^0.2.7"
     "@supabase/supabase-js": "npm:^2.38.4"
   languageName: node
   linkType: soft
