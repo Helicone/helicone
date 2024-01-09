@@ -183,6 +183,8 @@ export async function getRequestsCached(
   OFFSET ${offset}
 `;
 
+  console.log(query);
+
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
 
   if (!supabaseServer) {
