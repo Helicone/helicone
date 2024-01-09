@@ -8153,6 +8153,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"helicone-shared-ts@portal:../helicone-shared-ts::locator=helicone%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "helicone-shared-ts@portal:../helicone-shared-ts::locator=helicone%40workspace%3A."
+  languageName: node
+  linkType: soft
+
 "helicone@workspace:.":
   version: 0.0.0-use.local
   resolution: "helicone@workspace:."
@@ -8215,6 +8221,7 @@ __metadata:
     graphql: "npm:^16.6.0"
     graphql-tag: "npm:^2.12.6"
     graphql-type-json: "npm:^0.3.2"
+    helicone-shared-ts: "portal:../helicone-shared-ts"
     js-cookie: "npm:^3.0.5"
     micro: "npm:^10.0.1"
     moment: "npm:^2.29.4"
