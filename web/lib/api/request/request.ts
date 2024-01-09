@@ -168,8 +168,8 @@ export async function getRequestsCached(
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM cache_hits
-    left join request on cache_hits.request_id = request.id
-    left join response on request.id = response.request
+    inner join request on cache_hits.request_id = request.id
+    inner join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})
