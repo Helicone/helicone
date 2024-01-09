@@ -5,6 +5,29 @@
 
 
 export interface paths {
+  "/v1/test": {
+    /**
+     * Test the API
+     * @description Tests the API.
+     */
+    get: {
+      responses: {
+        /** @description API is up and running. */
+        200: {
+          content: {
+            "application/json": {
+              /** @example API is up and running. */
+              message?: string;
+            };
+          };
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/tokens/anthropic": {
     /**
      * Get a token for the Anthropic API
@@ -117,6 +140,48 @@ export interface paths {
     };
   };
   "/v1/request": {
+    /**
+     * Insert a new request and its response
+     * @description Adds a new entry to the 'request' and 'response' tables.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["RequestInsert"];
+        };
+      };
+      responses: {
+        /** @description Successfully inserted the new request and response. */
+        201: {
+          content: {
+            "application/json": {
+              /**
+               * Format: uuid
+               * @description The unique ID of the newly inserted request.
+               */
+              requestId?: string;
+              /**
+               * Format: uuid
+               * @description The unique ID of the associated response.
+               */
+              responseId?: string;
+              /** @example Request and Response successfully inserted. */
+              message?: string;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
+  "/v1/request/query": {
     /**
      * Insert a new request and its response
      * @description Adds a new entry to the 'request' and 'response' tables.
@@ -315,6 +380,15 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    AnyType: unknown;
+    FilterLeaf: components["schemas"]["AnyType"];
+    FilterBranch: {
+      left: components["schemas"]["FilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      right: components["schemas"]["FilterNode"];
+    };
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | "all";
     FeedbackInsert: {
       /** @description The rating of the response. */
       rating: boolean;

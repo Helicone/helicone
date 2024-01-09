@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vercel env pull .env && next dev -p 3000",
-    "dev:preview": "vercel env pull .env --environment preview && next dev -p 3001",
-    "build": "next build",
+    "dev": "yarn build-dependencies && vercel env pull .env && next dev -p 3000",
+    "dev:preview": "yarn build-dependencies && vercel env pull .env --environment preview && next dev -p 3001",
+    "build-dependencies": "yarn --cwd ../valhalla/packages/helicone-shared-ts build",
+    "build": "yarn build-dependencies && next build",
     "start": "next start",
-    "build-and-start": "next build && next start",
+    "build-and-start": "yarn build && yarn start",
     "lint": "next lint",
     "codegen": "graphql-codegen --config codegen.ts"
   },
@@ -50,6 +51,7 @@
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "graphql-type-json": "^0.3.2",
+    "helicone-shared-ts": "portal:../valhalla/packages/helicone-shared-ts",
     "js-cookie": "^3.0.5",
     "micro": "^10.0.1",
     "moment": "^2.29.4",
@@ -104,5 +106,8 @@
     "prettier": "^2.8.0",
     "tailwindcss": "^3.3.5"
   },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.0.2",
+  "resolutions": {
+    "helicone-shared-ts": "portal:../valhalla/packages/helicone-shared-ts"
+  }
 }

@@ -13,6 +13,9 @@ import {
   getTokenCountGPT3,
 } from "./tokens/tokenCounter";
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+import { FilterNode } from "./filters/filterDefs";
+import fs from "fs";
+import path from "path";
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -49,43 +52,33 @@ app.use(
 
 app.use(errorHandler);
 
-app.post(
-  "/v1/request",
-  withAuth<
-    paths["/v1/request"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db }) => {
-    // Handle your logic here
-    const heliconeRequest = await request.getBody();
-    const heliconeRequestID = heliconeRequest.request_id;
-    const insertRequestResult = await db.insertRequest({
-      body: heliconeRequest.body,
-      createdAt: new Date(),
-      requestReceivedAt: new Date(heliconeRequest.requestReceivedAt),
-      heliconeApiKeyID: null,
-      heliconeOrgID: supabaseClient.organizationId ?? null,
-      heliconeProxyKeyID: null,
-      id: heliconeRequestID,
-      properties: heliconeRequest.properties,
-      provider: heliconeRequest.provider,
-      urlHref: heliconeRequest.url_href,
-      userId: heliconeRequest.user_id ?? null,
-      model: heliconeRequest.model ?? null,
-    });
-    if (insertRequestResult.error) {
-      res.status(500).json({
-        error: insertRequestResult.error,
-        trace: "insertRequestResult.error",
-      });
-      return;
-    }
+const routesPath = path.join(__dirname, "routes");
 
-    res.json({
-      message: "Request received! :)",
-      orgId: supabaseClient.organizationId,
-      requestId: heliconeRequestID,
-    });
-  })
-);
+function walkDownDir(directory: string, fn: (path: string) => void) {
+  fs.readdirSync(directory).forEach(async (file) => {
+    if (fs.statSync(`${directory}/${file}`).isDirectory()) {
+      walkDownDir(`${directory}/${file}`, fn);
+    } else {
+      fn(`${directory}/${file}`);
+    }
+  });
+}
+
+walkDownDir(routesPath, (file) => {
+  if (file.endsWith(".ts")) {
+    const route = file.substring(0, file.length - 3);
+    const { default: router } = require(route);
+    let routeName = route.replace(routesPath, "");
+    if (routeName.endsWith("index")) {
+      routeName = routeName.substring(0, routeName.length - 5);
+    }
+    console.log(`Adding route: ${routeName}`);
+    if (router) {
+      app.use(routeName, router);
+    }
+  }
+});
+
 app.put(
   "/v1/feedback",
   withAuth<

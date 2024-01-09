@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/tokenizer": "^0.0.4",
+    "@helicone/project-rosetta": "^1.1.55",
     "@types/express": "^4.17.20",
     "@types/morgan": "^1.9.7",
     "dotenv": "^16.3.1",

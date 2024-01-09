@@ -9,10 +9,13 @@
   "author": "Justin Torre (Helicone.ai)",
   "license": "MIT",
   "devDependencies": {
+    "@types/dateformat": "^5.0.2",
     "@types/node": "^20.8.10",
+    "@types/ws": "^8.5.10",
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@clickhouse/client": "^0.2.7",
     "@supabase/supabase-js": "^2.38.4"
   }
 }

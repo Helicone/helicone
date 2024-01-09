@@ -16,6 +16,25 @@ servers:
     description: Production server
 
 paths:
+  /v1/test:
+    get:
+      tags:
+        - test
+      summary: Test the API
+      description: Tests the API.
+      responses:
+        "200":
+          description: API is up and running.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API is up and running.
+        "500":
+          description: Internal server error.
   /v1/tokens/anthropic:
     post:
       tags:
@@ -119,6 +138,45 @@ paths:
         - authorization: []
         - helicone-authorization: []
   /v1/request:
+    post:
+      tags:
+        - request
+      summary: Insert a new request and its response
+      description: Adds a new entry to the 'request' and 'response' tables.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestInsert"
+      responses:
+        "201":
+          description: Successfully inserted the new request and response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted request.
+                  responseId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the associated response.
+                  message:
+                    type: string
+                    example: Request and Response successfully inserted.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
+
+  /v1/request/query:
     post:
       tags:
         - request
@@ -293,6 +351,31 @@ paths:
 
 components:
   schemas:
+    AnyType: {}
+    FilterLeaf:
+      type: object
+      $ref: "#/components/schemas/AnyType"
+    FilterBranch:
+      type: object
+      properties:
+        left:
+          $ref: "#/components/schemas/FilterNode"
+        operator:
+          type: string
+          enum: [or, and]
+        right:
+          $ref: "#/components/schemas/FilterNode"
+      required:
+        - left
+        - operator
+        - right
+    FilterNode:
+      oneOf:
+        - $ref: "#/components/schemas/FilterLeaf"
+        - $ref: "#/components/schemas/FilterBranch"
+        - type: string
+          enum: [all]
+
     FeedbackInsert:
       type: object
       nullable: false
