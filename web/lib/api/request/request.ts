@@ -113,6 +113,8 @@ export async function getRequests(
   OFFSET ${offset}
 `;
 
+  console.log(query);
+
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
   if (!supabaseServer) {
     return resultMap(requests, (data) => {
@@ -176,7 +178,6 @@ export async function getRequestsCached(
     left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})
-    AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
