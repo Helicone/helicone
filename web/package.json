@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vercel env pull .env && next dev -p 3000",
-    "dev:preview": "vercel env pull .env --environment preview && next dev -p 3001",
-    "build": "next build",
+    "build-dependencies": "cd ../valhalla/packages/helicone-shared-ts && yarn && yarn build && cd ../../../web",
+    "dev": "yarn build-dependencies && vercel env pull .env && next dev -p 3000",
+    "dev:preview": "yarn build-dependencies && vercel env pull .env --environment preview && next dev -p 3001",
+    "build": "yarn build-dependencies && next build",
     "start": "next start",
     "build-and-start": "next build && next start",
     "lint": "next lint",
