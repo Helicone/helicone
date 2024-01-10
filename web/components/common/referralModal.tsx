@@ -1,5 +1,10 @@
+import { Tooltip } from "@mui/material";
 import ThemedModal from "../shared/themed/themedModal";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { clsx } from "../shared/clsx";
+import useNotification from "../shared/notification/useNotification";
+import { useQuery } from "@tanstack/react-query";
+import { ClipboardIcon } from "@heroicons/react/24/outline";
 
 interface ReferralModalProps {
   open: boolean;
@@ -10,8 +15,21 @@ const ReferralModal = (props: ReferralModalProps) => {
   const { open, setOpen } = props;
 
   const supabaseClient = useSupabaseClient();
+  const user = useUser();
+  const { setNotification } = useNotification();
 
-  const {} = supabaseClient.from("user_settings").select("referral_code");
+  const { data, isLoading } = useQuery({
+    queryKey: ["referralCode", user?.id],
+    queryFn: async (query) => {
+      const userId = query.queryKey[1];
+      return supabaseClient
+        .from("user_settings")
+        .select("referral_code")
+        .eq("user", userId)
+        .single();
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
@@ -19,28 +37,34 @@ const ReferralModal = (props: ReferralModalProps) => {
         <h3 className="font-semibold text-black dark:text-white text-xl">
           Refer a friend - Get Helicone Pro for free!
         </h3>
-        <p className="text-gray-500 text-md">
-          If you refer a friend, you will receive 6 months of Helicone Pro for
-          free! Give the following code to a friend and have them enter it when
+        <p className="text-gray-500 text-sm">
+          If you refer a friend, you will receive{" "}
+          <span className="font-semibold text-black dark:text-white">
+            6 months of Helicone Pro for free!
+          </span>{" "}
+          Give the following code to a friend and have them enter it when
           onboarding!
         </p>
-        {/* <Tooltip title="Click to Copy" placement="top" arrow>
-          <button
-            id="secret-key"
-            onClick={(e) => {
-              navigator.clipboard.writeText(value);
-              setNotification("Copied to clipboard", "success");
-            }}
-            className={clsx(
-              variant === "primary"
-                ? "bg-gray-200 dark:bg-gray-800 text-xs hover:cursor-pointer"
-                : "hover:cursor-pointer text-xs bg-inherit",
-              "flex w-[200px] rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 text-left p-2 truncate"
-            )}
-          >
-            {value}
-          </button>
-        </Tooltip> */}
+        <div className="pb-4">
+          <Tooltip title="Click to Copy" placement="top" arrow>
+            <button
+              id="secret-key"
+              onClick={(e) => {
+                navigator.clipboard.writeText(
+                  data?.data?.referral_code as string
+                );
+                setNotification("Copied to clipboard", "success");
+              }}
+              className={clsx(
+                "mt-4 bg-gray-100 dark:bg-gray-900 text-md hover:cursor-pointer",
+                "border border-gray-300 dark:border-gray-700 mx-auto flex items-center w-max rounded-md h-full text-gray-900 dark:text-gray-100 text-left px-4 py-2 truncate"
+              )}
+            >
+              {data?.data?.referral_code}
+              <ClipboardIcon className="h-4 w-4 ml-2 text-gray-500" />
+            </button>
+          </Tooltip>
+        </div>
       </div>
     </ThemedModal>
   );
