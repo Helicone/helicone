@@ -2,7 +2,6 @@ import { RadioGroup } from "@headlessui/react";
 import {
   CheckIcon,
   InformationCircleIcon,
-  PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { SecretInput } from "../../../../shared/themed/themedTable";
@@ -73,7 +72,9 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
         <div className="mx-auto w-full space-y-4 mt-8">
           <div className="flex flex-row justify-between items-center">
             <div className="flex items-center space-x-2 py-2">
-              <h3 className="text-lg font-semibold">Provider Keys</h3>
+              <h3 className="text-lg font-semibold text-black dark:text-white">
+                Provider Keys
+              </h3>
               <Tooltip title="This key will be used to map to your customer's proxy keys, allowing you to control their spend via configurable rate limits.">
                 <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
               </Tooltip>

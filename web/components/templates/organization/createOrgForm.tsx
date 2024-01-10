@@ -2,10 +2,8 @@ import { RadioGroup } from "@headlessui/react";
 import {
   BuildingOfficeIcon,
   CakeIcon,
-  CheckIcon,
   CloudIcon,
   CommandLineIcon,
-  InformationCircleIcon,
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
@@ -17,9 +15,6 @@ import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
-import { PlusIcon } from "@heroicons/react/20/solid";
-import { Tooltip } from "@mui/material";
-import { SecretInput } from "../../shared/themed/themedTable";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 
 export const ORGANIZATION_COLORS = [

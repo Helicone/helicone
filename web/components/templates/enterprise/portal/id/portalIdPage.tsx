@@ -1,13 +1,6 @@
 import {
-  CheckIcon,
-  ChevronLeftIcon,
-  InformationCircleIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
-import {
   useGetOrg,
   useGetOrgMembers,
-  useGetOrgOwner,
 } from "../../../../../services/hooks/organizations";
 import Link from "next/link";
 import CreateOrgForm, {
@@ -15,14 +8,10 @@ import CreateOrgForm, {
   ORGANIZATION_ICONS,
   OrgLimits,
 } from "../../../organization/createOrgForm";
-import { getUSDate, getUSDateFromString } from "../../../../shared/utils/utils";
+import { getUSDateFromString } from "../../../../shared/utils/utils";
 import { clsx } from "../../../../shared/clsx";
 import OrgMembersPage from "../../../organization/members/orgMembersPage";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
-import { Tooltip } from "@mui/material";
-import { RadioGroup } from "@headlessui/react";
-import { SecretInput } from "../../../../shared/themed/themedTable";
-import { useVaultPage } from "../../../vault/useVaultPage";
 import { useState } from "react";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ProviderKeyList from "./providerKeyList";
@@ -84,7 +73,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                     />
                   )}
                 </div>
-                <h1 className="text-2xl font-semibold text-black">
+                <h1 className="text-2xl font-semibold text-black dark:text-white">
                   {org?.name}
                 </h1>
               </div>
@@ -110,7 +99,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   Edit
                 </button>
               </div>
-              <div className="flex flex-col space-y-4 divide-y divide-gray-200 w-full pt-4">
+              <div className="flex flex-col space-y-4 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-4 text-black dark:text-white">
                 <p className="font-semibold text-md">Limits</p>
                 <div className="flex flex-row items-center w-full justify-between space-x-2 pt-4 pr-4">
                   <div className="flex flex-col items-start space-y-1">
@@ -129,7 +118,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col space-y-4 divide-y divide-gray-200 w-full pt-8">
+              <div className="flex flex-col space-y-4 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-8 text-black dark:text-white">
                 <p className="font-semibold text-md">Details</p>
                 <div className="flex flex-col pt-4 pr-4 space-y-4">
                   <div className="flex flex-col items-start space-y-1">

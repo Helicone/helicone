@@ -1,7 +1,5 @@
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Badge, TableCell, TableRow, Text, AreaChart } from "@tremor/react";
 import { getUSDateFromString } from "../../../shared/utils/utils";
-import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import { Database } from "../../../../supabase/database.types";
@@ -10,12 +8,10 @@ import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../shared/layout/organizationContext";
 import { useRouter } from "next/router";
-import CreateOrgForm, {
+import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
-  OrgLimits,
 } from "../../organization/createOrgForm";
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -79,15 +75,13 @@ const CustomerRow = (props: CustomerRowProps) => {
     (icon) => icon.name === org.color
   );
 
-  const limits = org.limits as OrgLimits;
-
   return (
     <>
       <TableRow
         onClick={() => {
           router.push(`/enterprise/portal/${org.id}`);
         }}
-        className="hover:bg-gray-100 hover:cursor-pointer"
+        className="hover:bg-gray-100 dark:bg-gray-900 hover:cursor-pointer"
       >
         <TableCell>
           <div className="h-8 w-8 flex-none rounded-md bg-gray-100 dark:bg-gray-900 object-cover border border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center">
