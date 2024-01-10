@@ -4,9 +4,15 @@ import {
   Response as ExpressResponse,
 } from "express";
 import { withDB } from "./withDB";
-import { SupabaseConnector } from "../db/supabase";
+import { SupabaseConnector, supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 const supabaseClient = new SupabaseConnector();
+
+class AuthError extends Error {
+  constructor(message: string, trace: string) {
+    super(`message, trace: ${trace}`);
+  }
+}
 
 export function withAuth<T>(
   fn: ({

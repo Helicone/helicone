@@ -4,7 +4,7 @@ require("dotenv").config({
 
 import express from "express";
 import * as OpenApiValidator from "express-openapi-validator";
-import { withAuth, withDB } from "helicone-shared-ts";
+import { getRequests, withAuth, withDB } from "helicone-shared-ts";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
@@ -48,6 +48,27 @@ app.use(
 );
 
 app.use(errorHandler);
+
+app.post(
+  "/v1/request/query",
+  withAuth<
+    paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db, authParams }) => {
+    const body = await request.getRawBody<any>();
+    console.log("body", body);
+    const { filter, offset, limit, sort, isCached } = body;
+
+    const metrics = await getRequests(
+      authParams.organizationId,
+      filter,
+      offset,
+      limit,
+      sort,
+      supabaseClient.client
+    );
+    res.status(metrics.error === null ? 200 : 500).json(metrics);
+  })
+);
 
 app.post(
   "/v1/request",
