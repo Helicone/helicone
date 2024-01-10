@@ -14,7 +14,6 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import useNotification from "../../../../shared/notification/useNotification";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useOrg } from "../../../../shared/layout/organizationContext";
 
 interface ProviderKeyListProps {
   setProviderKeyCallback?: (key: string) => void;
