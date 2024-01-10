@@ -1,7 +1,0 @@
-{
-  "watch": ["packages/slay/src/**/*", "packages/shared-ts/src/**/*"],
-  "ext": "ts,tsx,js,json",
-  "exec": "yarn workspace helicone-shared-ts build && ts-node packages/slay/src/index.ts",
-  "ignore": ["node_modules/*", "packages/*/node_modules/*"],
-  "delay": "1000"
-}
