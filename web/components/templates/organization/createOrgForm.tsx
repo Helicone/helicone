@@ -142,7 +142,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           ORGANIZATION_ICONS[0]
       : ORGANIZATION_ICONS[0]
   );
-  // const [orgSize, setOrgSize] = useState("");
 
   const user = useUser();
   const orgContext = useOrg();
@@ -322,6 +321,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             </div>
             <ProviderKeyList
               orgProviderKey={initialValues?.providerKey || undefined}
+              setProviderKeyCallback={setProviderKey}
             />
           </>
         )}

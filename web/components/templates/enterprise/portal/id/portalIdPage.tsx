@@ -159,6 +159,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   <TabPanel>
                     <ProviderKeyList
                       orgProviderKey={org?.org_provider_key || ""}
+                      orgId={org?.id}
                     />
                   </TabPanel>
                 </TabPanels>

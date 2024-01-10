@@ -17,16 +17,17 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../../../shared/layout/organizationContext";
 
 interface ProviderKeyListProps {
+  setProviderKeyCallback?: (key: string) => void;
+  orgId?: string; // the id of the org that we want to change provider keys for
   orgProviderKey?: string;
 }
 
 const ProviderKeyList = (props: ProviderKeyListProps) => {
-  const { orgProviderKey } = props;
+  const { setProviderKeyCallback, orgId, orgProviderKey } = props;
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
   const { setNotification } = useNotification();
   const supabaseClient = useSupabaseClient();
-  const orgContext = useOrg();
 
   const [providerKey, setProviderKey] = useState(orgProviderKey);
 
@@ -38,17 +39,24 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
     useState<DecryptedProviderKey>();
 
   const changeProviderKeyHandler = async (newProviderKey: string) => {
-    // update the current orgs provider key
-    const { error } = await supabaseClient
-      .from("organization")
-      .update({ org_provider_key: newProviderKey })
-      .eq("id", orgContext?.currentOrg?.id);
+    if (setProviderKeyCallback) {
+      setProviderKeyCallback(newProviderKey);
+      return;
+    }
 
-    if (error) {
-      setNotification("Error Updating Provider Key", "error");
-    } else {
-      setNotification("Provider Key Updated", "success");
-      setProviderKey(newProviderKey);
+    if (orgId) {
+      // update the current orgs provider key if the orgId is set
+      const { error } = await supabaseClient
+        .from("organization")
+        .update({ org_provider_key: newProviderKey })
+        .eq("id", orgId);
+
+      if (error) {
+        setNotification("Error Updating Provider Key", "error");
+      } else {
+        setNotification("Provider Key Updated", "success");
+        setProviderKey(newProviderKey);
+      }
     }
   };
 
