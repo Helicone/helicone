@@ -8153,9 +8153,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"helicone-shared-ts@portal:../helicone-shared-ts::locator=helicone%40workspace%3A.":
+"helicone-shared-ts@portal:../valhalla/packages/helicone-shared-ts::locator=helicone%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "helicone-shared-ts@portal:../helicone-shared-ts::locator=helicone%40workspace%3A."
+  resolution: "helicone-shared-ts@portal:../valhalla/packages/helicone-shared-ts::locator=helicone%40workspace%3A."
   dependencies:
     "@clickhouse/client": "npm:^0.0.14"
     "@supabase/supabase-js": "npm:^2.1.1"
@@ -8226,7 +8226,7 @@ __metadata:
     graphql: "npm:^16.6.0"
     graphql-tag: "npm:^2.12.6"
     graphql-type-json: "npm:^0.3.2"
-    helicone-shared-ts: "portal:../helicone-shared-ts"
+    helicone-shared-ts: "portal:../valhalla/packages/helicone-shared-ts"
     js-cookie: "npm:^3.0.5"
     micro: "npm:^10.0.1"
     moment: "npm:^2.29.4"

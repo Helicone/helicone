@@ -50,7 +50,7 @@
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "graphql-type-json": "^0.3.2",
-    "helicone-shared-ts": "portal:../helicone-shared-ts",
+    "helicone-shared-ts": "portal:../valhalla/packages/helicone-shared-ts",
     "js-cookie": "^3.0.5",
     "micro": "^10.0.1",
     "moment": "^2.29.4",
@@ -107,6 +107,6 @@
   },
   "packageManager": "yarn@4.0.2",
   "resolutions": {
-    "helicone-shared-ts": "portal:../helicone-shared-ts"
+    "helicone-shared-ts": "portal:../valhalla/packages/helicone-shared-ts"
   }
 }

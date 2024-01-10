@@ -1,6 +1,11 @@
 import { Pool, QueryResult, PoolClient } from "pg";
 import { getEnvironment } from "../environment/get";
-import { PromiseGenericResult, err, ok } from "../modules/result";
+import {
+  GenericResult,
+  PromiseGenericResult,
+  err,
+  ok,
+} from "../modules/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
@@ -104,7 +109,7 @@ class ValhallaDB implements IValhallaDB {
   async query(
     query: string,
     values: any[] = []
-  ): PromiseGenericResult<QueryResult<any>> {
+  ): Promise<GenericResult<QueryResult<any>>> {
     let client: PoolClient | null = null;
     try {
       client = await this.pool.connect();
@@ -130,7 +135,7 @@ class ValhallaDB implements IValhallaDB {
 
   async upsertFeedback(
     feedback: ValhallaFeedback
-  ): PromiseGenericResult<QueryResult<any>> {
+  ): Promise<GenericResult<QueryResult<any>>> {
     const query = `
       INSERT INTO feedback (
         response_id,
@@ -153,7 +158,7 @@ class ValhallaDB implements IValhallaDB {
 
   async updateResponse(
     response: ValhallaResponse
-  ): PromiseGenericResult<QueryResult<any>> {
+  ): Promise<GenericResult<QueryResult<any>>> {
     const query = `
       UPDATE response
       SET
@@ -180,7 +185,7 @@ class ValhallaDB implements IValhallaDB {
 
   async insertRequest(
     request: ValhallaRequest
-  ): PromiseGenericResult<QueryResult<any>> {
+  ): Promise<GenericResult<QueryResult<any>>> {
     const query = `
       INSERT INTO request (
         id,

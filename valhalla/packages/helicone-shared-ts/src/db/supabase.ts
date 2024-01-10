@@ -1,4 +1,8 @@
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import {
+  PostgrestSingleResponse,
+  SupabaseClient,
+  createClient,
+} from "@supabase/supabase-js";
 import { InMemoryCache } from "../memoryCache/staticMemCache";
 import { PromiseGenericResult, err, ok } from "../modules/result";
 import { Database } from "./database.types";
