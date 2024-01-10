@@ -1,18 +1,13 @@
 import { Env } from ".";
 import { Database } from "../supabase/database.types";
 import { Result, err, ok } from "./results";
-import { AlertStore } from "./db/AlertStore";
+import { AlertState, AlertStore } from "./db/AlertStore";
 
 type AlertStateUpdate = {
   alert: Database["public"]["Tables"]["alert"]["Row"];
   status: "triggered" | "resolved" | "unchanged";
   timestamp: number;
   triggeredThreshold?: number;
-};
-
-type AlertState = {
-  totalCount: number;
-  errorCount: number;
 };
 
 export class AlertManager {
@@ -41,10 +36,7 @@ export class AlertManager {
     const timestamp = Date.now();
     const alertStatePromises = allAlerts.map(async (alert) => {
       const { data: alertState, error: alertStateErr } =
-        await this.alertStore.checkAlertClickhouse(
-          alert.org_id,
-          alert.time_window
-        );
+        await this.getAlertState(alert);
 
       if (alertStateErr || !alertState) {
         console.error(
@@ -203,24 +195,54 @@ export class AlertManager {
     return ok(null);
   }
 
+  async getAlertState(
+    alert: Database["public"]["Tables"]["alert"]["Row"]
+  ): Promise<Result<AlertState, string>> {
+    if (alert.metric === "response.status") {
+      return await this.alertStore.getErrorRate(
+        alert.org_id,
+        alert.time_window
+      );
+    } else if (alert.metric === "cost") {
+      return await this.alertStore.getCost(alert.org_id, alert.time_window);
+    }
+
+    return err(`Unsupported metric: ${alert.metric}`);
+  }
+
   async getAlertStateUpdate(
     alert: Database["public"]["Tables"]["alert"]["Row"],
     alertState: AlertState,
     timestamp: number
   ): Promise<AlertStateUpdate> {
-    const rate =
-      alertState.totalCount > 0
-        ? (alertState.errorCount / alertState.totalCount) * 100
-        : 0;
-    const isRateBelowThreshold = rate < alert.threshold;
+    let isRateBelowThreshold = false;
+    let triggerThreshold = 0;
+    if (alert.metric === "response.status") {
+      triggerThreshold =
+        alertState.totalCount > 0 && alertState.errorCount
+          ? (alertState.errorCount / alertState.totalCount) * 100
+          : 0;
+
+      isRateBelowThreshold = triggerThreshold < alert.threshold;
+    } else if (alert.metric === "cost") {
+      triggerThreshold = alertState.totalCount;
+      isRateBelowThreshold = alertState.totalCount < alert.threshold;
+    } else {
+      throw new Error(`Unsupported metric: ${alert.metric}`);
+    }
 
     // Handle scenarios where rate is below threshold
     if (isRateBelowThreshold) {
-      return this.handleRateBelowThreshold(alert, timestamp);
+      return await this.handleRateBelowThreshold(alert, timestamp);
     }
 
     // Handle scenarios where rate is above or equal to threshold
-    return this.handleRateAboveThreshold(alert, rate, timestamp);
+    return await this.handleRateAboveThreshold(
+      alert,
+      triggerThreshold,
+      alertState.requestCount,
+      timestamp
+    );
   }
 
   async handleRateBelowThreshold(
@@ -247,15 +269,19 @@ export class AlertManager {
 
   async handleRateAboveThreshold(
     alert: Database["public"]["Tables"]["alert"]["Row"],
-    rate: number,
+    triggerThreshold: number,
+    requestCount: number,
     timestamp: number
   ): Promise<AlertStateUpdate> {
-    if (alert.status === "resolved") {
+    if (
+      alert.status === "resolved" &&
+      requestCount >= (alert.minimum_request_count ?? 0)
+    ) {
       await this.deleteCooldown(alert.id);
       return {
         status: "triggered",
         timestamp,
-        triggeredThreshold: rate,
+        triggeredThreshold: triggerThreshold,
         alert,
       };
     }
@@ -447,8 +473,10 @@ export class AlertManager {
                                         : "alertTime not found"
                                     }</li>
                                     <li><strong>Threshold:</strong> ${
-                                      alert.threshold
-                                    }%</li>
+                                      alert.metric === "cost"
+                                        ? `$${alert.threshold}`
+                                        : `${alert.threshold}%`
+                                    }</li>
                                     <li><strong>Metric:</strong> ${
                                       alert.metric
                                     }</li>
@@ -468,7 +496,7 @@ export class AlertManager {
                             <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
                               <tr style="vertical-align:middle;" valign="middle">
                                 <td align="left" style="padding:0 0 0 30px;" class="content">
-                                  <a href="https://helicone.ai/organization/alerts" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
+                                  <a href="https://helicone.ai/alerts" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
                                     <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%;mso-text-raise:30pt" hidden>&nbsp;</i>
                                     <![endif]--><span style="mso-text-raise:15pt;">View alert here</span>
                                     <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%" hidden>&nbsp;</i>
@@ -494,7 +522,7 @@ export class AlertManager {
                       <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;">
                         <tr style="vertical-align:middle;" valign="middle">
                           <td align="center" style="padding:30px 0;">
-                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai/organization/alerts" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
+                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai/alerts" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
                             </td>
                         </tr>
                       </table>
@@ -512,10 +540,3 @@ export class AlertManager {
     return { subject, text, html };
   }
 }
-
-/*
-1. Get triggered & resolved alerts from DB
-2. Check if triggered alerts are resolved (below threshold and past cooldown)
-3. Check if resolved alerts are triggered (above threshold)
-4. 
-*/

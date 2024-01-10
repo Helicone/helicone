@@ -5,9 +5,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getLatencyOverTime } from "../../../lib/api/metrics/getLatencyOverTime";
-import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
-import { Result } from "../../../lib/shared/result";
-import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
+import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 export interface LatencyOverTime {

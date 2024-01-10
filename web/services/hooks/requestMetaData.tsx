@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { RequestMetaData } from "../../lib/shared/request/metadata";
-import { Result } from "../../lib/shared/result";
+import { RequestMetaData } from "../../lib/api/request/metadata";
+import { Result } from "../../lib/result";
 
 const useGetRequestMetaData = (requestId: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({

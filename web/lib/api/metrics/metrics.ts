@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { FilterNode } from "../../shared/filters/filterDefs";
-import { Result, unwrapAsync } from "../../shared/result";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { Result, unwrapAsync } from "../../result";
 import { modelCost } from "./costCalc";
 
 import { getRequestCount } from "./getRequestCount";

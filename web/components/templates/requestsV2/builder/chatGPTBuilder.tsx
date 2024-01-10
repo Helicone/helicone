@@ -1,7 +1,5 @@
-import { modelCost } from "../../../../lib/api/metrics/costCalc";
 import { Chat } from "../../requests/chat";
 import AbstractRequestBuilder, {
-  NormalizedRequest,
   SpecificFields,
 } from "./abstractRequestBuilder";
 
@@ -24,12 +22,26 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
           const content = messages.at(-1).content;
 
           if (Array.isArray(content)) {
+            // if the first element inside of content is a string, return the string
+            if (typeof content[0] === "string") {
+              return content[0];
+            }
             // image handling
-            const textMessage = content.find(
-              (message) => message.type === "text"
-            );
+            // find the last message that has the key text OR type:text is inside of `content`
+            const textMessage = messages
+              .slice()
+              .reverse()
+              .find(
+                (message: any) =>
+                  message.text ||
+                  (message.content &&
+                    Array.isArray(message.content) &&
+                    message.content.some(
+                      (content: any) => content.type === "text"
+                    ))
+              );
 
-            return textMessage?.text ?? content ?? "";
+            return textMessage?.text || textMessage?.content[0].text || "";
           } else {
             return content;
           }
@@ -60,9 +72,12 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
               }
               if (message?.tool_calls) {
                 const tools = message.tool_calls;
-                return tools.some(
-                  (tool: { type: string }) => tool.type === "function"
-                );
+
+                return Array.isArray(tools)
+                  ? tools.some(
+                      (tool: { type: string }) => tool.type === "function"
+                    )
+                  : false;
               }
               return false;
             };

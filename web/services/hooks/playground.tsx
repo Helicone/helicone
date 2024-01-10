@@ -1,8 +1,3 @@
-import { getUSDateFromString } from "../../components/shared/utils/utils";
-import useRequestsPage, {
-  PromptResponsePair,
-} from "../../components/templates/requests/useRequestsPage";
-import { Json } from "../../supabase/database.types";
 import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
 
 export const usePlaygroundPage = (requestId: string) => {
@@ -41,10 +36,16 @@ export const usePlaygroundPage = (requestId: string) => {
       return [];
     }
 
-    const sourcePrompt = [
-      ...sourceChat.messages,
-      sourceResponse.choices[0].message,
-    ];
+    const sourcePrompt = [...sourceChat.messages];
+
+    if (
+      sourceResponse &&
+      sourceResponse.choices &&
+      sourceResponse.choices[0].message &&
+      sourceResponse.choices[0].message !== ""
+    ) {
+      sourcePrompt.push(sourceResponse.choices[0].message);
+    }
 
     // give all the messages in sourcePrompt an id
     sourcePrompt.forEach((message: any, index: number) => {

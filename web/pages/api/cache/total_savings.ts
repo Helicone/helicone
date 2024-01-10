@@ -1,10 +1,10 @@
-import { getCacheCount, getModelMetrics } from "../../../lib/api/cache/stats";
+import { getModelMetricsClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
-import { Result, resultMap } from "../../../lib/shared/result";
+import { Result, resultMap } from "../../../lib/result";
 
 async function handler({
   req,
@@ -14,7 +14,7 @@ async function handler({
   res
     .status(200)
     .json(
-      resultMap(await getModelMetrics(orgId, "all"), (modelMetrics) =>
+      resultMap(await getModelMetricsClickhouse(orgId, "all"), (modelMetrics) =>
         modelMetrics.reduce(
           (acc, modelMetric) => acc + modelCost(modelMetric),
           0

@@ -1,10 +1,3 @@
-import {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-  PreviewData,
-} from "next";
-import { ParsedUrlQuery } from "querystring";
 import { DEMO_EMAIL } from "./constants";
 import { SSRContext, SupabaseServerWrapper } from "./wrappers/supabase";
 

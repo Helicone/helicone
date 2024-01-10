@@ -3,7 +3,6 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { BsGoogle } from "react-icons/bs";
-import Stripe from "stripe";
 
 interface LoginProps {
   formState: "login" | "reset" | "signup";

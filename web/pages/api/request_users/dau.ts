@@ -6,7 +6,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getDailyActiveUsers } from "../../../lib/api/users/dau";
 import { UnPromise } from "../../../lib/tsxHelpers";
-import { FilterNode } from "../../../lib/shared/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export type DailyActiveUsers = UnPromise<
   ReturnType<typeof getDailyActiveUsers>

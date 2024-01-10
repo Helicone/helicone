@@ -1,8 +1,5 @@
 import { ReactNode } from "react";
-import {
-  HeliconeRequest,
-  Provider,
-} from "../../../../lib/shared/request/request";
+import { HeliconeRequest, Provider } from "../../../../lib/api/request/request";
 import { Json } from "../../../../supabase/database.types";
 import { modelCost } from "../../../../lib/api/metrics/costCalc";
 

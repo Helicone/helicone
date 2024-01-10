@@ -89,8 +89,13 @@ export async function handleProxyRequest(
         request: dbLoggableRequestFromProxyRequest(proxyRequest),
         response: {
           responseId: crypto.randomUUID(),
-          getResponseBody: async () =>
-            (await interceptor?.waitForChunk())?.body ?? "",
+          getResponseBody: async () => ({
+            body: (await interceptor?.waitForChunk())?.body ?? "",
+            endTime: new Date(
+              (await interceptor?.waitForChunk())?.endTimeUnix ??
+                new Date().getTime()
+            ),
+          }),
           responseHeaders: new Headers(response.headers),
           status: async () => {
             return getStatus(

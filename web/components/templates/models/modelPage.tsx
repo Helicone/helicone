@@ -1,12 +1,7 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { ModelMetric } from "../../../lib/api/models/models";
-import { Result } from "../../../lib/shared/result";
-import { Database } from "../../../supabase/database.types";
+import { Result } from "../../../lib/result";
 import AuthHeader from "../../shared/authHeader";
-import LoadingAnimation from "../../shared/loadingAnimation";
-import ThemedTable from "../../shared/themed/themedTable";
-import ThemedTableHeader from "../../shared/themed/themedTableHeader";
 import {
   TimeInterval,
   getTimeIntervalAgo,
@@ -14,13 +9,7 @@ import {
 import { useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { INITIAL_COLUMNS } from "./initialColumns";
-import ThemedModal from "../../shared/themed/themedModal";
-import {
-  ClipboardDocumentIcon,
-  CubeTransparentIcon,
-} from "@heroicons/react/24/outline";
-import { Dialog } from "@headlessui/react";
-import useNotification from "../../shared/notification/useNotification";
+
 import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface ModelPageProps {}

@@ -16,6 +16,74 @@ servers:
     description: Production server
 
 paths:
+  /v1/tokens/anthropic:
+    post:
+      tags:
+        - tokens
+      summary: Get a token for the Anthropic API
+      description: Counts the number of tokens used for the given request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        "200":
+          description: The number of tokens used for the given request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    type: integer
+                    format: int64
+                    description: The number of tokens used for the given request.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
+  /v1/tokens/gpt3:
+    post:
+      tags:
+        - tokens
+      summary: Get a token for the GPT-3 API
+      description: Counts the number of tokens used for the given request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        "200":
+          description: The number of tokens used for the given request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    type: integer
+                    format: int64
+                    description: The number of tokens used for the given request.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
   /v1/feedback:
     put:
       tags:

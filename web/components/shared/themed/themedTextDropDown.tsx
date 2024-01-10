@@ -1,13 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/20/solid";
-import { Combobox, Dialog, Transition } from "@headlessui/react";
-import { clsx } from "../clsx";
-import { Result } from "../../../lib/shared/result";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Combobox, Transition } from "@headlessui/react";
+import { Result } from "../../../lib/result";
 
 interface ThemedTextDropDownProps {
   options: string[];

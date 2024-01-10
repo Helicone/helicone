@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { Result } from "../../lib/shared/result";
+import { dbExecute, dbQueryClickhouse } from "../../lib/api/db/dbExecute";
+import { Result } from "../../lib/result";
 
 type CountOverTime = {
   count_step: number;

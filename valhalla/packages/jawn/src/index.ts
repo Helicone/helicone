@@ -1,5 +1,3 @@
-// src/index.ts
-
 require("dotenv").config({
   path: "./.env",
 });
@@ -10,7 +8,22 @@ import { withAuth, withDB } from "helicone-shared-ts";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
-import { getRequests } from "helicone-shared-ts";
+import {
+  getTokenCountAnthropic,
+  getTokenCountGPT3,
+} from "./tokens/tokenCounter";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+
+// This prevents the application from crashing when an unhandled error occurs
+const errorHandler: ErrorRequestHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error(`Unhandled error: ${err}, stack: ${err.stack}`);
+  res.status(500).send("Something broke!");
+};
 
 const dirname = __dirname;
 
@@ -19,6 +32,9 @@ const app = express();
 export const helloWorld = () => {
   return "Hello, world!";
 };
+
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb" }));
 
 // for logs
 app.use(morgan("combined"));
@@ -30,6 +46,8 @@ app.use(
     validateRequests: true,
   })
 );
+
+app.use(errorHandler);
 
 app.post(
   "/v1/request",
@@ -68,27 +86,6 @@ app.post(
     });
   })
 );
-
-app.post(
-  "/v1/request/query",
-  withAuth<
-    paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
-  >(async ({ request, res, supabaseClient, db, authParams }) => {
-    const body = await request.getRawBody<any>();
-    console.log("body", body);
-    const { filter, offset, limit, sort, isCached } = body;
-
-    const metrics = await getRequests(
-      authParams.organizationId,
-      filter,
-      offset,
-      limit,
-      sort,
-      supabaseClient.client
-    );
-  })
-);
-
 app.put(
   "/v1/feedback",
   withAuth<
@@ -115,6 +112,21 @@ app.put(
     });
   })
 );
+
+app.post("/v1/tokens/anthropic", async (req, res) => {
+  const body = req.body;
+  const content = body?.content;
+  const tokens = await getTokenCountAnthropic(content ?? "");
+  res.json({ tokens });
+});
+
+app.post("/v1/tokens/gpt3", async (req, res) => {
+  const body = req.body;
+  const content = body?.content;
+  const tokens = await getTokenCountGPT3(content ?? "");
+  res.json({ tokens });
+});
+
 app.post(
   "/v1/response",
   withAuth<
@@ -178,7 +190,7 @@ app.patch(
     if (insertResponseResult.error) {
       res.status(500).json({
         error: insertResponseResult.error,
-        trace: "insertResponseResult.error",
+        trace: "patch.insertResponseResult.error",
       });
       return;
     }
@@ -191,14 +203,18 @@ app.patch(
 );
 
 app.get(
-  "/healthcheck-db",
+  "/healthcheck",
   withDB(async ({ db, request, res }) => {
     const now = await db.now();
     if (now.error) {
       res.json({ status: "unhealthy :(", error: now.error });
       return;
     }
-    res.json({ status: "healthy :)", dataBase: now.data?.rows });
+    res.json({
+      status: "healthy :)",
+      dataBase: now.data?.rows,
+      version: "jawn prod - pools",
+    });
   })
 );
 
@@ -218,14 +234,15 @@ app.get(
   })
 );
 
-app.get("/healthcheck", (request, res) => {
-  res.json({
-    status: "healthy :)",
-  });
-});
+const server = app.listen(
+  parseInt(process.env.PORT ?? "8585"),
+  "0.0.0.0",
+  () => {
+    console.log(`Server is running on http://localhost:8585`);
+  }
+);
 
-app.listen(8585, "0.0.0.0", () => {
-  console.log(`Server is running on http://localhost:8585`);
-});
+server.on("error", console.error);
 
-console.log("Hello, world!");
+// This
+server.setTimeout(1000 * 60 * 10); // 10 minutes

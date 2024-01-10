@@ -2,14 +2,14 @@
 import {
   getRequestCount,
   getRequestCountCached,
-} from "../../../lib/shared/request/request";
+} from "../../../lib/api/request/request";
 
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/shared/result";
-import { FilterNode } from "../../../lib/shared/filters/filterDefs";
+import { Result } from "../../../lib/result";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 async function handler({
   req,
   res,

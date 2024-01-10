@@ -5,6 +5,80 @@
 
 
 export interface paths {
+  "/v1/tokens/anthropic": {
+    /**
+     * Get a token for the Anthropic API
+     * @description Counts the number of tokens used for the given request.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            content?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description The number of tokens used for the given request. */
+        200: {
+          content: {
+            "application/json": {
+              /**
+               * Format: int64
+               * @description The number of tokens used for the given request.
+               */
+              tokens?: number;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
+  "/v1/tokens/gpt3": {
+    /**
+     * Get a token for the GPT-3 API
+     * @description Counts the number of tokens used for the given request.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            content?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description The number of tokens used for the given request. */
+        200: {
+          content: {
+            "application/json": {
+              /**
+               * Format: int64
+               * @description The number of tokens used for the given request.
+               */
+              tokens?: number;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/feedback": {
     /**
      * Insert a new feedback

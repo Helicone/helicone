@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
-import { resultsAll } from "../../../lib/shared/result";
+import { resultsAll } from "../../../lib/result";
 import { UnPromise } from "../../../lib/tsxHelpers";
 
 async function handler(

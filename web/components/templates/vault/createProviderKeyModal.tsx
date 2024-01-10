@@ -1,22 +1,25 @@
 import { FormEvent, useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { clsx } from "../../shared/clsx";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface CreateProviderKeyModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   onSuccess: () => void;
+  variant?: "basic" | "portal";
 }
 
 const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
-  const { open, setOpen, onSuccess } = props;
+  const { open, setOpen, onSuccess, variant = "basic" } = props;
 
   const { setNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
+  const org = useOrg();
 
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,7 +32,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
       "provider-key"
     ) as HTMLInputElement;
 
-    if (!keyName || keyName.value === "") {
+    if ((!keyName || keyName.value === "") && variant !== "portal") {
       setNotification("Please enter in a key name", "error");
       return;
     }
@@ -45,7 +48,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
       },
       body: JSON.stringify({
         providerKey: providerKey.value,
-        providerName: "openai",
+        providerName: variant === "portal" ? "portal" : "openai",
         providerKeyName: keyName.value,
       }),
     })
@@ -57,6 +60,11 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
           setNotification("Successfully created provider key", "success");
           setOpen(false);
           onSuccess();
+        } else {
+          setNotification(
+            "Failed to create provider key, you are only allowed 1 provider key",
+            "error"
+          );
         }
       })
       .catch(console.error)
@@ -80,9 +88,12 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
             disabled
             className="block w-full rounded-md border border-gray-500 bg-gray-100 dark:bg-gray-900 shadow-sm p-2 text-sm"
           >
-            <option value="openai">OpenAI</option>
+            <option value="openai">
+              {variant === "portal" ? org?.currentOrg?.name : "OpenAI"}
+            </option>
           </select>
         </div>
+
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="key-name">Key Name</label>
           <input

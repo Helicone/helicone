@@ -1,10 +1,10 @@
 import {
   FilterNode,
   timeFilterToFilterNode,
-} from "../../shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../shared/filters/filters";
-import { Result, resultMap } from "../../shared/result";
-import { dbQueryClickhouse } from "../../shared/db/dbExecute";
+} from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
+import { Result, resultMap } from "../../result";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getActiveUsers(
   filter: FilterNode,

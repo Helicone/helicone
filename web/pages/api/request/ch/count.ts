@@ -1,15 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import {
-  getRequestCount,
-  getRequestCountClickhouse,
-} from "../../../../lib/shared/request/request";
+import { getRequestCountClickhouse } from "../../../../lib/api/request/request";
 
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
-import { Result } from "../../../../lib/shared/result";
-import { FilterNode } from "../../../../lib/shared/filters/filterDefs";
+import { Result } from "../../../../lib/result";
+import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 
 async function handler({
   req,

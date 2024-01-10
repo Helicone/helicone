@@ -5,6 +5,80 @@
 
 
 export interface paths {
+  "/v1/tokens/anthropic": {
+    /**
+     * Get a token for the Anthropic API
+     * @description Counts the number of tokens used for the given request.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            content?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description The number of tokens used for the given request. */
+        200: {
+          content: {
+            "application/json": {
+              /**
+               * Format: int64
+               * @description The number of tokens used for the given request.
+               */
+              tokens?: number;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
+  "/v1/tokens/gpt3": {
+    /**
+     * Get a token for the GPT-3 API
+     * @description Counts the number of tokens used for the given request.
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            content?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description The number of tokens used for the given request. */
+        200: {
+          content: {
+            "application/json": {
+              /**
+               * Format: int64
+               * @description The number of tokens used for the given request.
+               */
+              tokens?: number;
+            };
+          };
+        };
+        /** @description Invalid input. */
+        400: {
+          content: never;
+        };
+        /** @description Internal server error. */
+        500: {
+          content: never;
+        };
+      };
+    };
+  };
   "/v1/feedback": {
     /**
      * Insert a new feedback
@@ -27,48 +101,6 @@ export interface paths {
                */
               feedbackId?: string;
               /** @example Feedback successfully inserted. */
-              message?: string;
-            };
-          };
-        };
-        /** @description Invalid input. */
-        400: {
-          content: never;
-        };
-        /** @description Internal server error. */
-        500: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/v1/request/query": {
-    /**
-     * Insert a new request and its response
-     * @description Adds a new entry to the 'request' and 'response' tables.
-     */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": Record<string, never>;
-        };
-      };
-      responses: {
-        /** @description Successfully inserted the new request and response. */
-        201: {
-          content: {
-            "application/json": {
-              /**
-               * Format: uuid
-               * @description The unique ID of the newly inserted request.
-               */
-              requestId?: string;
-              /**
-               * Format: uuid
-               * @description The unique ID of the associated response.
-               */
-              responseId?: string;
-              /** @example Request and Response successfully inserted. */
               message?: string;
             };
           };
@@ -314,7 +346,7 @@ export interface components {
       /** @description The user ID associated with the request. */
       user_id?: string | null;
       /** @description JSON object containing additional properties. */
-      properties?: unknown;
+      properties?: Record<string, unknown> | null;
       /**
        * Format: int64
        * @description The API key ID for Helicone.
@@ -356,7 +388,7 @@ export interface components {
       /** @description Number of tokens used in the prompt. */
       prompt_tokens?: number | null;
       /** @description JSON object containing the response body. */
-      body: unknown;
+      body: Record<string, unknown> | null;
       /**
        * Format: uuid
        * @description JSON object containing the response body.

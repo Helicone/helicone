@@ -17,12 +17,12 @@ export HELICONE_API_KEY=sk-<your-api-key>
 ```
 
 ```typescript
-import { HeliconeAsyncConfiguration } from "../core/HeliconeAsyncConfiguration";
 import {
+  HeliconeAsyncConfiguration,
   HeliconeLogBuilder,
   HeliconeLogger,
   ResponseBody,
-} from "../async_logger/HeliconeLogger";
+} from "@helicone/helicone";
 
 const heliconeApiKey = process.env.HELICONE_API_KEY;
 
@@ -84,7 +84,7 @@ POST https://api.hconeai.com/custom/v1/log
 
 | Name          | Value            |
 | ------------- | ---------------- |
-| Authorization | Bearer {API_KEY} |
+| Authorization | Bearer `{API_KEY}` |
 
 Replace `{API_KEY}` with your actual API Key.
 

@@ -51,12 +51,5 @@ export function buildUserSort(
       orderByString: `{val_${argsAcc.length - 1}: Identifier} ${sortDirection}`,
       argsAcc,
     };
-
-    // const sortKey = sortKeys[0];
-    // const sortDirection = sort[sortKey as keyof UserMetric];
-    // assertValidSortDirection(sortDirection!);
-    // const sortColumn = sortMappings[sortKey as keyof UserMetric];
-    // const sortSQL = `${sortColumn} ${sortDirection}`;
-    // return { orderByString: sortSQL, argsAcc };
   }
 }

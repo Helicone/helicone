@@ -1,6 +1,6 @@
-import { buildFilterWithAuthClickHouseProperties } from "../../shared/filters/filters";
-import { Result } from "../../shared/result";
-import { dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/filters/filters";
+import { Result } from "../../result";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface Property {
   property: string;

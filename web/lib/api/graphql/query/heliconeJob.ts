@@ -4,7 +4,7 @@ import {
   FilterLeaf,
   filterListToTree,
   FilterNode,
-} from "../../../shared/filters/filterDefs";
+} from "../../../../services/lib/filters/filterDefs";
 import { getJobs } from "../../jobs/jobs";
 import {
   HeliconeJob,
@@ -98,10 +98,10 @@ function convertFilterInputToFilterLeaf(filter: HeliconeJobFilter): FilterNode {
 }
 
 export async function heliconeJob(
-  root: any,
+  _root: any,
   args: QueryHeliconeJobArgs,
   context: Context,
-  info: any
+  _info: any
 ): Promise<HeliconeJob[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {

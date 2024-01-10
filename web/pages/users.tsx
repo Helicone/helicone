@@ -4,7 +4,7 @@ import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import UsersPageV2 from "../components/templates/users/usersPageV2";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { SortDirection } from "../lib/shared/sorts/users/sorts";
+import { SortDirection } from "../services/lib/sorts/users/sorts";
 
 interface UsersProps {
   user: User;

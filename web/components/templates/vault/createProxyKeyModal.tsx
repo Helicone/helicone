@@ -5,7 +5,7 @@ import {
   DecryptedProviderKeyMapping,
 } from "../../../services/lib/keys";
 import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { clsx } from "../../shared/clsx";
 import {
   ArrowPathIcon,
@@ -157,7 +157,7 @@ const LimitsInput = (props: {
   const org = useOrg();
   const { hasFlag } = useFeatureFlags(
     "proxy_key_limits",
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
   const [limits, setLimits] = useState<LimitRow[]>([]);

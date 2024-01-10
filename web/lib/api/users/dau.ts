@@ -1,7 +1,7 @@
-import { FilterNode } from "../../shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../shared/filters/filters";
-import { resultMap } from "../../shared/result";
-import { dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
+import { resultMap } from "../../result";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getDailyActiveUsers(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuthClickHouse({

@@ -2,7 +2,7 @@ import { Tooltip } from "@mui/material";
 import { UserMetric } from "../../../lib/api/users/users";
 import { clsx } from "../../shared/clsx";
 import ThemedModal from "../../shared/themed/themedModal";
-import { getUSDate, getUSDateFromString } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import { formatNumber } from "./initialColumns";
 import {
   ClipboardDocumentIcon,
@@ -15,20 +15,17 @@ import useNotification from "../../shared/notification/useNotification";
 import StyledAreaChart from "../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
 import { useEffect, useState } from "react";
-import { useUserRequests } from "./useUserRequests";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
-  REQUEST_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../lib/shared/filters/frontendFilterDefs";
+} from "../../../services/lib/filters/frontendFilterDefs";
 import {
   filterListToTree,
   filterUIToFilterLeafs,
-} from "../../../lib/shared/filters/filterDefs";
+} from "../../../services/lib/filters/filterDefs";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useRouter } from "next/router";
 import { encodeFilter } from "../requestsV2/requestsPageV2";
-import useSearchParams from "../../shared/utils/useSearchParams";
 import ThemedTabs from "../../../components/shared/themed/themedTabs";
 interface UserModalProps {
   open: boolean;
@@ -47,7 +44,6 @@ const UserModal = (props: UserModalProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const valueFormatter = function (number: number) {
     return "$" + number;
@@ -309,7 +305,9 @@ const UserModal = (props: UserModalProps) => {
                 Average Tokens per Request
               </p>
               <p className="text-gray-700 dark:text-gray-300 truncate">
-                {formatNumber(user.average_tokens_per_request)}
+                {user.average_tokens_per_request
+                  ? formatNumber(user.average_tokens_per_request)
+                  : "N/A"}
               </p>
             </li>
           </ul>

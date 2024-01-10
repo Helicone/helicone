@@ -37,12 +37,13 @@ module "aurora" {
   master_username = "root"
   storage_type    = "aurora-iopt1"
   storage_encrypted   = true
-  instance_class  = "db.r5.large" 
+  instance_class  = "db.r6g.2xlarge" 
+  monitoring_interval = 60
   backup_retention_period = 7
   preferred_backup_window = "03:00-06:00"
   preferred_maintenance_window = "Sat:06:00-Sat:09:00"
   instances = {
-    one = { }
+    one = {}
     two = {
       identifier     = "static-member-1"
       instance_class = "db.r6g.2xlarge"
@@ -340,49 +341,225 @@ resource "aws_security_group_rule" "allow_postgres_outbound" {
   description       = "Allow Postgres traffic from VPC"
 }
 
-resource "aws_iam_role" "apprunner_service_role" {
-  name = "${local.name}-apprunner-service-role"
+module "ecs" {
+  source  = "terraform-aws-modules/ecs/aws"
+  version = "5.7.4"
+
+  cluster_name = "valhalla_cluster"
+
+  cluster_configuration = {
+    execute_command_configuration = {
+      logging = "OVERRIDE"
+      log_configuration = {
+        cloud_watch_log_group_name = "/aws/ecs/aws-ec2"
+      }
+    }
+  }
+
+  fargate_capacity_providers = {
+    FARGATE = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+    FARGATE_SPOT = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_execution_role" {
+  name = "ecs_execution_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Action = "sts:AssumeRole",
         Effect = "Allow",
         Principal = {
-          Service = "build.apprunner.amazonaws.com"
-        }
+          Service = "ecs-tasks.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
       }
     ]
   })
 }
 
-
-resource "aws_iam_role_policy_attachment" "apprunner_managed_policy_attachment" {
-  role       = aws_iam_role.apprunner_service_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_iam_role" "apprunner_instance_role" {
-  name = "${local.name}-apprunner-instance-role"
+resource "aws_cloudwatch_log_group" "ecs_logs" {
+  name = "/ecs/valhalla_jawn"  # Update with the name you're using in your task definition
+}
 
-  assume_role_policy = jsonencode({
+resource "aws_cloudwatch_log_group" "ecs_logs_staging" {
+  name = "/ecs/valhalla_jawn_staging_v2"  # Update with the name you're using in your task definition
+}
+resource "aws_iam_policy" "ecs_logging" {
+  name        = "ecs_logging"
+  description = "Allow ECS tasks to log to CloudWatch"
+
+  policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "tasks.apprunner.amazonaws.com"
-        }
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect   = "Allow",
+        Resource = aws_cloudwatch_log_group.ecs_logs.arn
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "apprunner_instance_secrets_access" {
-  name        = "${local.name}-apprunner-instance-secrets-access"
-  description = "Allow AppRunner to access RDS secrets and SSM parameters"
+resource "aws_iam_role_policy_attachment" "ecs_logging_attachment" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = aws_iam_policy.ecs_logging.arn
+}
+
+
+# https://repost.aws/knowledge-center/ecs-fargate-service-auto-scaling
+resource "aws_ecs_task_definition" "valhalla_jawn_production" {
+  family                   = "valhalla_jawn_production"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "4096" # Adjust as needed
+  memory                   = "8192" # Adjust as needed
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "valhalla_jawn_staging"
+      image = "${var.image_url}:latest"
+      portMappings = [
+        {
+          containerPort = 8585
+          hostPort      = 8585
+        }
+      ]
+      secrets = [
+        {
+          name      = "AURORA_CREDS",
+          valueFrom = module.aurora.cluster_master_user_secret[0].secret_arn
+        },
+        {
+          name      = "SUPABASE_CREDS",
+          valueFrom = var.supabase_creds_secret_arn
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_logs.name
+          awslogs-region        = "us-west-2"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      environment = [
+        {
+          name  = "ENV"
+          value = "production"
+        },
+        {
+          name  = "AURORA_HOST"
+          value = aws_db_proxy.aurora_writer_proxy.endpoint
+        },
+        {
+          name  = "AURORA_PORT"
+          value = "5432"
+        },
+        {
+          name  = "AURORA_DATABASE"
+          value = local.database_name
+        }
+      ]
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:8585/healthcheck || exit 1"]
+        interval    = 30
+        timeout     = 5
+        startPeriod = 60
+        retries     = 3
+      }
+    }
+  ])
+}
+
+
+# https://repost.aws/knowledge-center/ecs-fargate-service-auto-scaling
+resource "aws_ecs_task_definition" "valhalla_jawn_staging" {
+  family                   = "valhalla_jawn_staging"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "512" # Adjust as needed
+  memory                   = "1024" # Adjust as needed
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "valhalla_jawn_staging"
+      image = "${var.image_url}-staging:latest"
+      portMappings = [
+        {
+          containerPort = 8585
+          hostPort      = 8585
+        }
+      ]
+      secrets = [
+        {
+          name      = "AURORA_CREDS",
+          valueFrom = module.aurora.cluster_master_user_secret[0].secret_arn
+        },
+        {
+          name      = "SUPABASE_CREDS",
+          valueFrom = var.supabase_creds_secret_arn
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_logs_staging.name
+          awslogs-region        = "us-west-2"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      environment = [
+        {
+          name  = "ENV"
+          value = "production"
+        },
+        {
+          name  = "AURORA_HOST"
+          value = aws_db_proxy.aurora_writer_proxy.endpoint
+        },
+        {
+          name  = "AURORA_PORT"
+          value = "5432"
+        },
+        {
+          name  = "AURORA_DATABASE"
+          value = local.database_name
+        }
+      ]
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:8585/healthcheck || exit 1"]
+        interval    = 30
+        timeout     = 5
+        startPeriod = 60
+        retries     = 3
+      }
+    }
+  ])
+}
+
+resource "aws_iam_policy" "ecs_secrets_access" {
+  name        = "ecs_secrets_access"
+  description = "Allow ECS tasks to retrieve secrets from Secrets Manager"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -401,63 +578,35 @@ resource "aws_iam_policy" "apprunner_instance_secrets_access" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "apprunner_instance_secrets_access_attachment" {
-  role       = aws_iam_role.apprunner_instance_role.name
-  policy_arn = aws_iam_policy.apprunner_instance_secrets_access.arn
+resource "aws_iam_role_policy_attachment" "ecs_secrets_access_attachment" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = aws_iam_policy.ecs_secrets_access.arn
 }
 
-resource "aws_apprunner_vpc_connector" "connector" {
-  vpc_connector_name = "connector-${local.name}"
-  subnets            = [module.vpc.private_subnets[1]]
-  security_groups    = [aws_security_group.bastion_sg.id]
-}
 
-resource "aws_apprunner_service" "app_service" {
-  service_name = "${local.name}-apprunner-service"
-  source_configuration {
-    auto_deployments_enabled = true
-    authentication_configuration {
-      access_role_arn = aws_iam_role.apprunner_service_role.arn
-    }
-    image_repository {
-      image_identifier      = "${var.image_url}:latest"
-      image_repository_type = "ECR"
-      image_configuration {
-        port                = "8585"
-        runtime_environment_secrets = {
-          AURORA_CREDS = module.aurora.cluster_master_user_secret[0].secret_arn
-          SUPABASE_CREDS = var.supabase_creds_secret_arn
-        }
-        runtime_environment_variables = {
-          # proxy endpoint
-          AURORA_HOST     = aws_db_proxy.aurora_reader_proxy.endpoint
-          AURORA_PORT     = "5432"
-          AURORA_DATABASE = local.database_name
-          ENV             = "production"
-        }  
-      }
-    }
-  }
-  network_configuration{
-     egress_configuration {
-      egress_type       = "VPC"
-      vpc_connector_arn = aws_apprunner_vpc_connector.connector.arn
-    }
-  }
-  
-  health_check_configuration {
-    protocol = "HTTP"
-    path     = "/healthcheck"
-    interval = 10
-    timeout  = 5
+resource "aws_security_group" "alb_sg" {
+  name        = "${local.name}-alb-sg"
+  description = "Security group for the ALB"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 80  # Add port 80 for HTTP traffic
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Restrict this to known IP ranges for better security
   }
 
-
-  instance_configuration {
-    cpu    = "2 vCPU"
-    memory = "4 GB"
-    instance_role_arn = aws_iam_role.apprunner_instance_role.arn 
+  ingress {
+    from_port   = 443  # Adjust if your ALB listens on a different port
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Restrict this to known IP ranges for better security
   }
 
-  # More configurations like auto scaling, tags, etc. can be added if needed.
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }

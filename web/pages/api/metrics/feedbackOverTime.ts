@@ -6,7 +6,7 @@ import {
   FeedbackOverTime,
   getFeedbackOverTime,
 } from "../../../lib/api/metrics/getFeedbackOverTime";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(

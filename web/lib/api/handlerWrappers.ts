@@ -1,21 +1,24 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
 import {
   GetServerSideProps,
   GetServerSidePropsContext,
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { Result, err, ok } from "../shared/result";
+import { Result, err, ok } from "../result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
-import { FilterNode } from "../shared/filters/filterDefs";
+import { FilterNode } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
-import { TimeFilter } from "../shared/filters/timeFilter";
+import { Database } from "../../supabase/database.types";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
   res: NextApiResponse<RetVal>;
+}
+
+export interface TimeFilter {
+  start: Date;
+  end: Date;
 }
 
 export class RequestBodyParser {
@@ -32,6 +35,11 @@ export class RequestBodyParser {
       this.body = {};
     }
   }
+
+  get<T>(): T {
+    return this.body;
+  }
+
   getFilter(): Result<FilterNode, string> {
     if (this.body.filter) {
       return ok(this.body.filter);
@@ -64,6 +72,7 @@ export interface HandlerWrapperOptions<RetVal>
     userId: string;
     orgHasOnboarded: boolean;
     orgId: string;
+    org?: Database["public"]["Tables"]["organization"]["Row"];
     user: User;
     role: string;
   };
@@ -83,11 +92,6 @@ export function withAuth<T>(
     req: NextApiRequest,
     res: NextApiResponse<T | { error: string }>
   ) => {
-    console.log("withAuth", req.url);
-    console.error("withAuth", req.cookies);
-    req.cookies["supabase-auth-token"] =
-      '["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzA0ODU0MzQ2LCJpYXQiOjE3MDQ4NTA3NDYsImlzcyI6Imh0dHA6Ly8xMjcuMC4wLjE6NTQzMjEvYXV0aC92MSIsInN1YiI6ImY3NjYyOWM1LWEwNzAtNGJiYy05OTE4LTY0YmVhZWE0ODg0OCIsImVtYWlsIjoidGVzdEBoZWxpY29uZS5haSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnt9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzA0ODUwNzQ2fV0sInNlc3Npb25faWQiOiJmYzM1ZTBmYy05ZGZmLTQ4Y2YtYjIyMy02NGM2YTEzY2U4Y2MifQ.VK29cFTs0iVUiW13XgMuMP3SXFRKKHhzdGGwkN1jpZA","eebQMzHwQCgmlG6hn_idgQ",null,null]';
-
     const supabaseClient = new SupabaseServerWrapper({
       req,
       res,
@@ -143,6 +147,7 @@ export function withAuthSSR<T>(
   ): Promise<ReturnType<GetServerSideProps>> => {
     const supabaseClient = new SupabaseServerWrapper(context);
     const { data, error } = await supabaseClient.getUserAndOrg();
+
     if (error !== null || !data.orgId || !data.userId) {
       return {
         redirect: {

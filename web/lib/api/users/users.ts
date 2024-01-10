@@ -1,11 +1,14 @@
-import { dbQueryClickhouse } from "../../shared/db/dbExecute";
-import { Result } from "../../shared/result";
+import { dbQueryClickhouse } from "../db/dbExecute";
+import { Result } from "../../result";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
-} from "../../shared/filters/filters";
-import { FilterNode } from "../../shared/filters/filterDefs";
-import { buildUserSort, SortLeafUsers } from "../../shared/sorts/users/sorts";
+} from "../../../services/lib/filters/filters";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import {
+  buildUserSort,
+  SortLeafUsers,
+} from "../../../services/lib/sorts/users/sorts";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 
 export interface UserMetric {

@@ -1,14 +1,13 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 
 import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { Database } from "../../../supabase/database.types";
 // import { Tier } from "../../../components/templates/usage/usagePage";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
-import { stripeServer } from "../../../utlis/stripeServer";
 // import { REQUEST_LIMITS } from "../../../lib/constants";
 type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"];
 

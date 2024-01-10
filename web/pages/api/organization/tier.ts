@@ -4,7 +4,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 
 export type Tier = "free" | "pro" | "enterprise";

@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getUsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 export interface UsersOverTime {

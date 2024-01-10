@@ -4,15 +4,7 @@ import {
   FilterLeaf,
   filterListToTree,
   FilterNode,
-} from "../../../shared/filters/filterDefs";
-import { resultMap } from "../../../shared/result";
-import { getCacheCount, getModelMetrics } from "../../cache/stats";
-import { modelCost } from "../../metrics/costCalc";
-import { getTotalCostProperties } from "../../property/totalCosts";
-import {
-  getRequestCount,
-  getRequestsDateRange,
-} from "../../../shared/request/request";
+} from "../../../../services/lib/filters/filterDefs";
 import {
   QueryHeliconeNodeArgs,
   HeliconeNode,
@@ -107,10 +99,10 @@ function convertFilterInputToFilterLeaf(
 }
 
 export async function heliconeNode(
-  root: any,
+  _root: any,
   args: QueryHeliconeNodeArgs,
   context: Context,
-  info: any
+  _info: any
 ): Promise<HeliconeNode[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters, jobId } = {

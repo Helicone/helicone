@@ -3,26 +3,17 @@ import {
   CircleStackIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
-import { request } from "https";
 import { useState } from "react";
-import { truncString } from "../../../lib/stringHelpers";
-import {
-  useCacheOvertime,
-  useCachePageMetrics,
-  useCachePageTopMetrics,
-  useCachePageTopRequests,
-} from "../../../services/hooks/useCachePage";
-import { clsx } from "../../shared/clsx";
 import { MetricsPanel } from "../../shared/metrics/metricsPanel";
-import { RenderPieChart } from "../../shared/metrics/pieChart";
-import { StackedBarChart } from "../../shared/metrics/stackedBarChart";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
+import { BarChart } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
-import ThemedModal from "../../shared/themed/themedModal";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
-import { SortDirection } from "../../../lib/shared/sorts/requests/sorts";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
+import { getTimeMap } from "../../../lib/timeCalculations/constants";
+import { TimeFilter } from "../../../lib/api/handlerWrappers";
+import { useCachePageClickHouse } from "./useCachePage";
 
 interface CachePageProps {
   currentPage: number;
@@ -36,11 +27,21 @@ interface CachePageProps {
 
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort } = props;
-
-  const data = useCachePageMetrics();
-  const cacheOverTime = useCacheOvertime();
-  const topMetrics = useCachePageTopMetrics();
-  const topRequests = useCachePageTopRequests();
+  const [timeFilter, _] = useState<TimeFilter>({
+    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
+    end: new Date(),
+  });
+  const timeZoneDifference = new Date().getTimezoneOffset();
+  const dbIncrement = "day";
+  const {
+    overTimeData,
+    metrics: chMetrics,
+    isAnyLoading,
+  } = useCachePageClickHouse({
+    timeFilter,
+    timeZoneDifference,
+    dbIncrement,
+  });
 
   const [selectedRequest, setSelectedRequest] = useState<{
     request_id: string;
@@ -52,74 +53,56 @@ const CachePage = (props: CachePageProps) => {
   }>();
   const [open, setOpen] = useState<boolean>(false);
 
-  const hasCache = data.totalCached.data?.data
-    ? +data.totalCached.data?.data === 0
+  const hasCache = chMetrics.totalCacheHits.data?.data
+    ? +chMetrics.totalCacheHits.data?.data === 0
     : false;
 
   const metrics = [
     {
       id: "caches",
       label: "All Time Caches",
-      value: data.totalCached.data?.data || 0,
-      isLoading: data.totalCached.isLoading,
+      value: chMetrics.totalCacheHits.data?.data || 0,
+      isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
       id: "savings",
       label: "All Time Savings",
-      value: data.totalSavings.data?.data
+      value: chMetrics.totalSavings.data?.data
         ? `$${
-            data.totalSavings.data?.data < 1
-              ? data.totalSavings.data?.data.toFixed(5)
-              : data.totalSavings.data?.data.toFixed(2)
+            chMetrics.totalSavings.data?.data < 1
+              ? chMetrics.totalSavings.data?.data.toFixed(5)
+              : chMetrics.totalSavings.data?.data.toFixed(2)
           }`
         : "$0.00",
-      isLoading: data.totalSavings.isLoading,
+      isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
     {
       id: "time-saved",
       label: "Total Time Saved",
-      value: data.totalTimeSaved.data?.data
-        ? `${data.totalTimeSaved.data?.data}s`
+      value: chMetrics.timeSaved.data?.data
+        ? `${chMetrics.timeSaved.data?.data}s`
         : "0s",
-      isLoading: data.totalTimeSaved.isLoading,
+      isLoading: isAnyLoading,
       icon: ClockIcon,
     },
   ];
 
-  const cacheData = cacheOverTime.overTime.data?.data ?? [];
-
-  const timeMap = (x: Date) => new Date(x).toDateString();
+  const cacheData = overTimeData.cacheHits.data?.data ?? [];
 
   const chartData = cacheData.map((d) => ({
     ...d,
-    time: timeMap(d.time),
+    date: getTimeMap("day")(new Date(d.time)),
   }));
 
-  const getCacheModels = () => {
-    const cacheModels = new Set<string>();
-    chartData.forEach((d) => {
-      Object.keys(d).forEach((key) => {
-        if (key !== "time") {
-          cacheModels.add(key);
-        }
-      });
-    });
-    const cacheModelsArray = Array.from(cacheModels);
-    cacheModelsArray.sort();
-    return cacheModelsArray;
-  };
-
-  const cacheModels = getCacheModels();
-
   const cacheDist =
-    topMetrics.topModels.data?.data?.map((x) => ({
+    chMetrics.topModels?.data?.data?.map((x: any) => ({
       name: x.model,
       value: +x.count,
     })) ?? [];
 
-  cacheDist.sort((a, b) => a.name.localeCompare(b.name));
+  cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
   return (
     <>
@@ -163,12 +146,21 @@ const CachePage = (props: CachePageProps) => {
                   Caches last 30 days
                 </h3>
                 <div className="h-72 px-4">
-                  {cacheOverTime.overTime.isLoading ? (
+                  {isAnyLoading ? (
                     <div className="h-full w-full flex-col flex p-8">
                       <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
                     </div>
                   ) : (
-                    <StackedBarChart data={chartData} keys={cacheModels} />
+                    <div className="h-full w-full">
+                      <BarChart
+                        data={chartData}
+                        categories={["count"]}
+                        index={"date"}
+                        className="h-full -ml-4 pt-4"
+                        colors={["blue"]}
+                        showLegend={false}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -179,25 +171,27 @@ const CachePage = (props: CachePageProps) => {
                   Top Requests
                 </h3>
                 <ul className="h-72 px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                  {topRequests.topRequests.data?.data?.map((request, i) => (
-                    <ThemedListItem
-                      key={i}
-                      onClickHandler={() => {
-                        setSelectedRequest(request);
-                        setOpen(true);
-                      }}
-                      title={request.prompt}
-                      subtitle={`Created: ${new Date(
-                        request.first_used
-                      ).toLocaleString()}`}
-                      icon={CircleStackIcon}
-                      value={request.count}
-                      pill={<ModelPill model={request.model} />}
-                      secondarySubtitle={`Recent: ${new Date(
-                        request.last_used
-                      ).toLocaleString()}`}
-                    />
-                  ))}
+                  {chMetrics.topRequests.data?.data?.map(
+                    (request: any, i: any) => (
+                      <ThemedListItem
+                        key={i}
+                        onClickHandler={() => {
+                          setSelectedRequest(request);
+                          setOpen(true);
+                        }}
+                        title={request.prompt}
+                        subtitle={`Created: ${new Date(
+                          request.first_used
+                        ).toLocaleString()}`}
+                        icon={CircleStackIcon}
+                        value={request.count}
+                        pill={<ModelPill model={request.model} />}
+                        secondarySubtitle={`Recent: ${new Date(
+                          request.last_used
+                        ).toLocaleString()}`}
+                      />
+                    )
+                  )}
                 </ul>
               </div>
             </div>

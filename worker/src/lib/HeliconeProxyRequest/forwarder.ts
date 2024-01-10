@@ -75,14 +75,30 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-    const cachedResponse = await getCachedResponse(
-      proxyRequest,
-      cacheSettings.bucketSettings,
-      env.CACHE_KV
-    );
-    if (cachedResponse) {
-      ctx.waitUntil(recordCacheHit(cachedResponse.headers, env));
-      return cachedResponse;
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
+        console.error("Error getting org", orgError);
+      } else {
+        const cachedResponse = await getCachedResponse(
+          proxyRequest,
+          cacheSettings.bucketSettings,
+          env.CACHE_KV
+        );
+        if (cachedResponse) {
+          ctx.waitUntil(
+            recordCacheHit(
+              cachedResponse.headers,
+              env,
+              new ClickhouseClientWrapper(env),
+              orgData.organizationId
+            )
+          );
+          return cachedResponse;
+        }
+      }
     }
   }
 
@@ -96,20 +112,29 @@ export async function proxyForwarder(
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache && response.status === 200) {
-    ctx.waitUntil(
-      loggable
-        .waitForResponse()
-        .then((responseBody) =>
-          saveToCache(
-            proxyRequest,
-            response,
-            responseBody,
-            cacheSettings.cacheControl,
-            cacheSettings.bucketSettings,
-            env.CACHE_KV
-          )
-        )
-    );
+    const { data: auth, error: authError } = await request.auth();
+    if (authError == null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError !== null || !orgData?.organizationId) {
+        console.error("Error getting org", orgError);
+      } else {
+        ctx.waitUntil(
+          loggable
+            .waitForResponse()
+            .then((responseBody) =>
+              saveToCache(
+                proxyRequest,
+                response,
+                responseBody.body,
+                cacheSettings.cacheControl,
+                cacheSettings.bucketSettings,
+                env.CACHE_KV
+              )
+            )
+        );
+      }
+    }
   }
 
   response.headers.forEach((value, key) => {

@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-
+import { TimeFilter } from "../../lib/api/handlerWrappers";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 import {
   FilterLeaf,
   FilterNode,
   filterListToTree,
-} from "../../lib/shared/filters/filterDefs";
-import { TimeFilter } from "../../lib/shared/filters/timeFilter";
+} from "../lib/filters/filterDefs";
 
 export interface BackendMetricsCall<T> {
   params: {
@@ -28,6 +27,7 @@ export type MetricsBackendBody = {
   filter: FilterNode;
   dbIncrement?: TimeIncrement;
   timeZoneDifference: number;
+  organizationId?: string;
 };
 
 export function useBackendMetricCall<T>({

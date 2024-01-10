@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { Result } from "../lib/shared/result";
+import { Result } from "../lib/result";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { stripeServer } from "./stripeServer";
 

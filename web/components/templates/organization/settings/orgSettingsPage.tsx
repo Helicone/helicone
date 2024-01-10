@@ -10,10 +10,11 @@ import { useOrg } from "../../../shared/layout/organizationContext";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
+  variant?: "organization" | "reseller";
 }
 
 const OrgSettingsPage = (props: OrgSettingsPageProps) => {
-  const { org } = props;
+  const { org, variant = "organization" } = props;
   const user = useUser();
   const orgContext = useOrg();
   const router = useRouter();
@@ -52,7 +53,10 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               name: org.name,
               color: org.color || "",
               icon: org.icon || "",
+              limits: org.limits as any,
+              providerKey: "",
             }}
+            variant={"organization"}
           />
         </div>
         {isOwner && !org.is_personal && (
@@ -103,8 +107,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                 } else {
                   orgContext?.refetchOrgs();
                   setDeleteOpen(false);
-                  router.push("/organization");
-                  router.push("/organization");
+                  router.push("/requests");
+                  router.push("/requests");
                   setNotification("Delete organization", "success");
                 }
               }}

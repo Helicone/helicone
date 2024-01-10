@@ -1,9 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useState } from "react";
 import {
-  BuildingOffice2Icon,
   CheckIcon,
-  ChevronDownIcon,
   MoonIcon,
   PlusIcon,
   SunIcon,
@@ -18,13 +16,11 @@ import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../../templates/organization/createOrgForm";
-import Link from "next/link";
 import ThemedModal from "../themed/themedModal";
-import useNotification from "../notification/useNotification";
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
 import AddMemberModal from "../../templates/organization/addMemberModal";
 import { ThemedSwitch } from "../themed/themedSwitch";
 import { useTheme } from "../theme/themeContext";
+import ReferralModal from "../../common/referralModal";
 
 interface OrgDropdownProps {}
 
@@ -34,23 +30,29 @@ export default function OrgDropdown(props: OrgDropdownProps) {
   const supabaseClient = useSupabaseClient();
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
+  const [referOpen, setReferOpen] = useState(false);
 
   const org = useOrg();
   const themeContext = useTheme();
 
   const [addOpen, setAddOpen] = useState(false);
 
-  const ownedOrgs = orgContext?.allOrgs.filter((org) => org.owner === user?.id);
+  const ownedOrgs = orgContext?.allOrgs.filter(
+    (org) => org.owner === user?.id && org.organization_type !== "customer"
+  );
   const memberOrgs = orgContext?.allOrgs.filter(
-    (org) => org.owner !== user?.id
+    (org) => org.owner !== user?.id && org.organization_type !== "customer"
+  );
+  const customerOrgs = orgContext?.allOrgs.filter(
+    (org) => org.organization_type === "customer"
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg.icon
+    (icon) => icon.name === orgContext?.currentOrg?.icon
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg.color
+    (icon) => icon.name === orgContext?.currentOrg?.color
   );
 
   const createNewOrgHandler = () => {
@@ -77,7 +79,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
               />
             )}
             <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[8rem] text-left">
-              {orgContext?.currentOrg.name}
+              {orgContext?.currentOrg?.name}
             </p>
           </div>
           <div className="px-[7px] py-0.5 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
@@ -156,7 +158,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 </span>
                               </div>
                             </div>
-                            {org.id === orgContext?.currentOrg.id && (
+                            {org.id === orgContext?.currentOrg?.id && (
                               <CheckIcon className="h-4 w-4 text-sky-500" />
                             )}
                           </button>
@@ -177,7 +179,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                     </span>
                   )}
                 </p>
-                <div className="h-full max-h-60 overflow-auto">
+                <div className="h-full max-h-60 w-full overflow-x-auto">
                   {memberOrgs.map((org, idx) => {
                     const icon = ORGANIZATION_ICONS.find(
                       (icon) => icon.name === org.icon
@@ -199,6 +201,65 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                               {icon && (
                                 <icon.icon className="h-4 w-4 text-gray-500" />
                               )}
+                              <div className="flex flex-row space-x-1 w-full">
+                                <p
+                                  className={clsx(
+                                    org.tier === "pro"
+                                      ? "max-w-[7.5rem]"
+                                      : "max-w-[10rem]",
+                                    "w-full text-left truncate"
+                                  )}
+                                >
+                                  {org.name}
+                                </p>
+                                <span className="text-sky-500">
+                                  {org.tier === "pro" && "(Pro)"}
+                                </span>
+                              </div>
+                            </div>
+                            {org.id === orgContext?.currentOrg?.id && (
+                              <CheckIcon className="h-4 w-4 text-sky-500" />
+                            )}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {customerOrgs && customerOrgs.length > 0 && (
+              <div className="p-1">
+                <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">
+                  Customers{" "}
+                  {customerOrgs.length > 7 && (
+                    <span className="text-xs text-gray-400 dark:text-gray-600 font-normal pl-2">
+                      ({customerOrgs.length})
+                    </span>
+                  )}
+                </p>
+                <div className="h-full max-h-60 overflow-auto">
+                  {customerOrgs.map((org, idx) => {
+                    const icon = ORGANIZATION_ICONS.find(
+                      (icon) => icon.name === org.icon
+                    );
+                    return (
+                      <Menu.Item key={idx}>
+                        {({ active }) => (
+                          <button
+                            className={`${
+                              active
+                                ? "bg-amber-100 text-gray-700 dark:bg-amber-900 dark:text-gray-300"
+                                : "text-gray-700 dark:text-gray-300"
+                            } group flex w-full justify-between items-center rounded-md pl-4 pr-2 py-2 text-sm`}
+                            onClick={() => {
+                              orgContext?.setCurrentOrg(org.id);
+                            }}
+                          >
+                            <div className="flex flex-row space-x-2 items-center">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-gray-500" />
+                              )}
                               <div className="flex flex-row space-x-1">
                                 <p className="w-full max-w-[10rem] text-left truncate">
                                   {org.name}
@@ -208,8 +269,8 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                                 </span>
                               </div>
                             </div>
-                            {org.id === orgContext?.currentOrg.id && (
-                              <CheckIcon className="h-4 w-4 text-sky-500" />
+                            {org.id === orgContext?.currentOrg?.id && (
+                              <CheckIcon className="h-4 w-4 text-amber-500" />
                             )}
                           </button>
                         )}
@@ -241,9 +302,19 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                   <PlusIcon className="h-4 w-4 text-gray-500 mr-2" />
                   <p>Create New Org</p>
                 </button>
+                {/* <button
+                  onClick={() => {
+                    setReferOpen(true);
+                  }}
+                  className={clsx(
+                    "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
+                  )}
+                >
+                  <UserGroupIcon className="h-4 w-4 text-gray-500 mr-2" />
+                  <p>Refer a friend</p>
+                </button> */}
               </div>
             </Menu.Item>
-
             <div className="p-1">
               <Menu.Item>
                 {({ active }) => (
@@ -270,9 +341,10 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           <CreateOrgForm onCancelHandler={setCreateOpen} />
         </div>
       </ThemedModal>
+      <ReferralModal open={referOpen} setOpen={setReferOpen} />
       <AddMemberModal
-        orgId={org?.currentOrg.id || ""}
-        orgOwnerId={org?.currentOrg.owner || ""}
+        orgId={org?.currentOrg?.id || ""}
+        orgOwnerId={org?.currentOrg?.owner || ""}
         open={addOpen}
         setOpen={setAddOpen}
       />

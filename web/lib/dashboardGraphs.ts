@@ -6,15 +6,14 @@ import {
   FilterLeaf,
   FilterNode,
   filterListToTree,
-} from "./shared/filters/filterDefs";
+} from "../services/lib/filters/filterDefs";
 import { Metrics } from "./api/metrics/metrics";
 import { OverTimeRequestQueryParams } from "./api/metrics/timeDataHandlerWrapper";
-import { Result } from "./shared/result";
+import { Result } from "./result";
 import {
   RequestsOverTime,
   TimeIncrement,
 } from "./timeCalculations/fetchTimeData";
-
 import { getTimeInterval } from "./timeCalculations/time";
 
 export const initialGraphDataState: GraphDataState = {
@@ -26,6 +25,7 @@ export interface GraphDataState {
   requestsOverTime: Loading<Result<RequestsOverTime[], string>>;
   costOverTime: Loading<Result<CostOverTime[], string>>;
 }
+
 async function fetchDataOverTime<T>(
   timeFilter: {
     start: Date;

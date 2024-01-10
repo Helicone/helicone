@@ -1,10 +1,9 @@
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Dispatch, SetStateAction } from "react";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import {
   ColumnType,
   SingleFilterDef,
-} from "../../../lib/shared/filters/frontendFilterDefs";
+} from "../../../services/lib/filters/frontendFilterDefs";
 import ThemedDropdown from "./themedDropdown";
 import { ThemedTextDropDown } from "./themedTextDropDown";
 

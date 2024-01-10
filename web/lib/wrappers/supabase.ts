@@ -11,7 +11,7 @@ import {
 } from "next";
 import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
-import { Result } from "../shared/result";
+import { Result, ok } from "../result";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }
@@ -40,6 +40,7 @@ export class SupabaseServerWrapper<T> {
       {
         userId: string;
         orgId: string;
+        org?: Database["public"]["Tables"]["organization"]["Row"];
         orgHasOnboarded: boolean;
         user: User;
         role: string;
@@ -55,23 +56,32 @@ export class SupabaseServerWrapper<T> {
     const orgAccessCheck = await this.client
       .from("organization")
       .select("*")
-      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY])
-      .single();
-
+      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY]);
+    if (orgAccessCheck.data?.length === 0) {
+      return ok({
+        userId: user.data.user.id,
+        orgId: "na",
+        orgHasOnboarded: false,
+        user: user.data.user,
+        role: "owner",
+      });
+    }
     if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
       return {
         error: `Unauthorized orgChecking ${this.ctx.req.cookies[ORG_ID_COOKIE_KEY]}`,
         data: null,
       };
     }
+    const org = orgAccessCheck.data[0];
 
     // If owner, return role as owner
-    if (orgAccessCheck.data.owner === user.data.user.id) {
+    if (org.owner === user.data.user.id) {
       return {
         data: {
           userId: user.data.user.id,
-          orgId: orgAccessCheck.data.id,
-          orgHasOnboarded: orgAccessCheck.data.has_onboarded,
+          orgId: org.id,
+          org: org,
+          orgHasOnboarded: org.has_onboarded,
           user: user.data.user,
           role: "owner",
         },
@@ -79,28 +89,32 @@ export class SupabaseServerWrapper<T> {
       };
     }
 
-    // If not owner, check if member
-    const orgMember = await this.client
-      .from("organization_member")
-      .select("*")
-      .eq("member", user.data.user.id)
-      .eq("organization", orgAccessCheck.data.id)
-      .single();
+    const checkMembership = async (orgId: string) => {
+      const memberCheck = await this.client
+        .from("organization_member")
+        .select("*")
+        .eq("member", user.data.user?.id)
+        .eq("organization", orgId)
+        .single();
 
-    if (!orgMember.data || orgMember.error !== null) {
-      return {
-        error: "Unauthorized",
-        data: null,
-      };
+      return memberCheck.data ? memberCheck.data.org_role : null;
+    };
+
+    const role =
+      (await checkMembership(org.id)) ||
+      (org.reseller_id && (await checkMembership(org.reseller_id)));
+
+    if (!role) {
+      return { error: "Unauthorized", data: null };
     }
 
     return {
       data: {
         userId: user.data.user.id,
-        orgId: orgAccessCheck.data.id,
-        orgHasOnboarded: orgAccessCheck.data.has_onboarded,
+        orgId: org.id,
+        orgHasOnboarded: org.has_onboarded,
         user: user.data.user,
-        role: orgMember.data.org_role,
+        role: role,
       },
       error: null,
     };

@@ -3,8 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
   RequestMetaData,
   getRequestMetaData,
-} from "../../../../lib/shared/request/metadata";
-import { Result } from "../../../../lib/shared/result";
+} from "../../../../lib/api/request/metadata";
+import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export default async function handler(

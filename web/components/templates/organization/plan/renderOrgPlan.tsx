@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, formatISO } from "date-fns";
 import { useEffect } from "react";
-import MainGraph from "../../dashboard/graphs/mainGraph";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import { getTimeInterval } from "../../../../lib/timeCalculations/time";
-import { filterListToTree } from "../../../../lib/shared/filters/filterDefs";
+import { filterListToTree } from "../../../../services/lib/filters/filterDefs";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
 
@@ -86,11 +84,12 @@ const RenderOrgPlan = (props: RenderOrgPlanProps) => {
   );
 };
 
-const useRequestsOverTime = (props: {
+export const useRequestsOverTime = (props: {
   timeFilter: {
     start: Date;
     end: Date;
   };
+  organizationId?: string;
 }) => {
   const { timeFilter } = props;
   const timeIncrement = getTimeInterval(timeFilter);
@@ -102,6 +101,7 @@ const useRequestsOverTime = (props: {
     filter: filterListToTree([], "and"),
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),
+    organizationId: props.organizationId ?? undefined,
   };
 
   const { data, isLoading, refetch } = useQuery({

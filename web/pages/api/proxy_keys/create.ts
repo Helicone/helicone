@@ -1,10 +1,10 @@
 import generateApiKey from "generate-api-key";
-import { dbExecute } from "../../../lib/shared/db/dbExecute";
+import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import crypto from "crypto";

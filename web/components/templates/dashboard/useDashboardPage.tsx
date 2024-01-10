@@ -1,6 +1,6 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, resultMap } from "../../../lib/shared/result";
+import { Result, resultMap } from "../../../lib/result";
 import {
   RequestsOverTime,
   TimeIncrement,
@@ -17,15 +17,14 @@ import {
 import {
   FilterLeaf,
   filterUIToFilterLeafs,
-} from "../../../lib/shared/filters/filterDefs";
+} from "../../../services/lib/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../lib/shared/filters/frontendFilterDefs";
+} from "../../../services/lib/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
-import { FeedbackOverTime } from "../../../lib/api/metrics/getFeedbackOverTime";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {

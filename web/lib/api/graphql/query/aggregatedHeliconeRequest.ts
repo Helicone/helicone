@@ -3,23 +3,21 @@ import { Context } from "../../../../pages/api/graphql";
 import {
   filterListToTree,
   FilterNode,
-} from "../../../shared/filters/filterDefs";
-import { resultMap } from "../../../shared/result";
+} from "../../../../services/lib/filters/filterDefs";
+import { resultMap } from "../../../result";
 import { getCacheCount, getModelMetrics } from "../../cache/stats";
 import { modelCost } from "../../metrics/costCalc";
 import { getTotalCostProperties } from "../../property/totalCosts";
-import {
-  getRequestCount,
-  getRequestsDateRange,
-} from "../../../shared/request/request";
+import { getRequestCount, getRequestsDateRange } from "../../request/request";
 import {
   AggregatedHeliconeRequest,
   QueryAggregatedHeliconeRequestArgs,
 } from "../schema/types/graphql";
 import { convertTextOperators } from "./helper";
+import { getTotalCost } from "../../metrics/totalCosts";
 
 export async function aggregatedHeliconeRequest(
-  root: any,
+  _root: any,
   args: QueryAggregatedHeliconeRequestArgs,
   context: Context,
   info: any
@@ -35,10 +33,17 @@ export async function aggregatedHeliconeRequest(
     },
   }));
 
-  const { data: cost, error: costError } = await getTotalCostProperties(
-    properties,
-    orgId
-  );
+  const { data: cost, error: costError } =
+    postgrestPropertyFilter.length === 0
+      ? await getTotalCost(
+          "all",
+          {
+            start: new Date(0),
+            end: new Date(),
+          },
+          orgId
+        )
+      : await getTotalCostProperties(properties, orgId);
 
   const { data: dateRange, error: dateError } = await getRequestsDateRange(
     orgId,
@@ -97,8 +102,9 @@ export async function aggregatedHeliconeRequest(
 
   return {
     id: "1",
-    cost: cost,
-    costUSD: cost,
+    cost: cost.cost,
+    costUSD: cost.cost,
+    count: cost.count ?? -1,
     firstRequest: dateRange.min.toISOString(),
     lastRequest: dateRange.max.toISOString(),
     cache: requestedFields.includes("cache") ? await getCacheData() : undefined,

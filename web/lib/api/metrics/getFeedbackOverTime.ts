@@ -1,4 +1,4 @@
-import { Result, resultMap } from "../../shared/result";
+import { Result, resultMap } from "../../result";
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 

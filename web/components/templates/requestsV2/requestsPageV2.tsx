@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import AuthHeader from "../../shared/authHeader";
 import useRequestsPageV2 from "./useRequestsPageV2";
@@ -8,8 +8,8 @@ import TableFooter from "./tableFooter";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../lib/shared/sorts/requests/sorts";
-import { FilterNode } from "../../../lib/shared/filters/filterDefs";
+} from "../../../services/lib/sorts/requests/sorts";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -20,9 +20,8 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
-import { HeliconeRequest } from "../../../lib/shared/request/request";
-import getRequestBuilder from "./builder/requestBuilder";
-import { Result } from "../../../lib/shared/result";
+import { HeliconeRequest } from "../../../lib/api/request/request";
+import { Result } from "../../../lib/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";

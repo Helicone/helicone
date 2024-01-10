@@ -1,14 +1,15 @@
 import {
   FilterNode,
   timeFilterToFilterNode,
-} from "../../shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../shared/filters/filters";
-import { Result, resultMap } from "../../shared/result";
+} from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
+import { Result, resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface TotalCost {
   cost: number;
+  count: number;
 }
 
 export async function getTotalCost(
@@ -18,7 +19,15 @@ export async function getTotalCost(
     end: Date;
   },
   org_id: string
-): Promise<Result<number, string>> {
+): Promise<
+  Result<
+    {
+      cost: number;
+      count: number;
+    },
+    string
+  >
+> {
   const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
     {
       org_id,
@@ -39,11 +48,18 @@ export async function getTotalCost(
       (${filterString})
     )
   )
-  SELECT coalesce(sum(cost), 0) as cost
+  SELECT coalesce(sum(cost), 0) as cost,
+  (
+    SELECT count(*) as count
+    FROM response_copy_v3
+    WHERE (
+      (${filterString})
+    )
+  ) as count
   FROM total_cost
 `;
 
   const res = await dbQueryClickhouse<TotalCost>(query, argsAcc);
 
-  return resultMap(res, (d) => d[0].cost);
+  return resultMap(res, (d) => ({ cost: d[0].cost, count: d[0].count }));
 }

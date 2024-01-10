@@ -5,7 +5,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
@@ -22,13 +22,14 @@ async function handler(
     filter: userFilters,
     dbIncrement,
     timeZoneDifference,
+    organizationId,
   } = options.req.body as MetricsBackendBody;
 
   res.status(200).json(
     await getTotalRequestsOverTime({
       timeFilter,
       userFilter: userFilters,
-      orgId,
+      orgId: organizationId ?? orgId,
       dbIncrement: dbIncrement ?? "hour",
       timeZoneDifference,
     })

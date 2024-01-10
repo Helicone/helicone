@@ -1,16 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { DashboardPageData } from "../dashboard/useDashboardPage";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../lib/shared/filters/frontendFilterDefs";
-import {
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../../../lib/shared/filters/filterDefs";
+} from "../../../services/lib/filters/frontendFilterDefs";
+import { filterUIToFilterLeafs } from "../../../services/lib/filters/filterDefs";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
-import { Result, resultMap } from "../../../lib/shared/result";
-import { getTimeMap } from "../../../lib/timeCalculations/constants";
+import { Result, resultMap } from "../../../lib/result";
 import {
   BackendMetricsCall,
   useBackendMetricCall,

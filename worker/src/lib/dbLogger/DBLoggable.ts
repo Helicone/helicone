@@ -21,7 +21,10 @@ import { getTokenCount } from "./tokenCounter";
 export interface DBLoggableProps {
   response: {
     responseId: string;
-    getResponseBody: () => Promise<string>;
+    getResponseBody: () => Promise<{
+      body: string;
+      endTime: Date;
+    }>;
     status: () => Promise<number>;
     responseHeaders: Headers;
     omitLog: boolean;
@@ -81,13 +84,19 @@ interface DBLoggableRequestFromAsyncLogModelProps {
   provider: Provider;
 }
 
-function getResponseBody(json: Record<string, Json>): string {
+function getResponseBody(json: Record<string, Json>): {
+  body: string;
+  endTime: Date;
+} {
   // This will mock the response as if it came from OpenAI
   if (json.streamed_data) {
     const streamedData = json.streamed_data as Json[];
-    return streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n");
+    return {
+      body: streamedData.map((d) => "data: " + JSON.stringify(d)).join("\n"),
+      endTime: new Date(),
+    };
   }
-  return JSON.stringify(json);
+  return { body: JSON.stringify(json), endTime: new Date() };
 }
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -138,7 +147,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
           asyncLogModel.timing.endTime.milliseconds
       ),
     },
-    tokenCalcUrl: env.TOKEN_COUNT_URL,
+    tokenCalcUrl: env.VALHALLA_URL,
   });
 }
 
@@ -158,7 +167,10 @@ export class DBLoggable {
     this.tokenCalcUrl = props.tokenCalcUrl;
   }
 
-  async waitForResponse(): Promise<string> {
+  async waitForResponse(): Promise<{
+    body: string;
+    endTime: Date;
+  }> {
     return await this.response.getResponseBody();
   }
 
@@ -231,9 +243,9 @@ export class DBLoggable {
   }
 
   async getResponse() {
-    const responseBody = await this.response.getResponseBody();
-
-    const endTime = this.timing.endTime ?? new Date();
+    const { body: responseBody, endTime: responseEndTime } =
+      await this.response.getResponseBody();
+    const endTime = this.timing.endTime ?? responseEndTime;
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const status = await this.response.status();
     const parsedResponse = await this.parseResponse(responseBody, status);
@@ -246,6 +258,7 @@ export class DBLoggable {
           body: this.response.omitLog
             ? {
                 usage: parsedResponse.data?.usage,
+                model: parsedResponse.data?.model,
               }
             : parsedResponse.data,
           status: await this.response.status(),
@@ -279,7 +292,8 @@ export class DBLoggable {
         response
       );
       if (error !== null) {
-        return err(error);
+        console.error("Error updating response", error);
+        // return err(error);
       }
       return ok(response);
     } catch (e) {
@@ -290,8 +304,9 @@ export class DBLoggable {
           status: -1,
           body: {
             helicone_error: "error getting response, " + e,
-            helicone_repsonse_body_as_string:
-              await this.response.getResponseBody(),
+            helicone_repsonse_body_as_string: (
+              await this.response.getResponseBody()
+            ).body,
           },
         }
       );

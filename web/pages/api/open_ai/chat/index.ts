@@ -6,9 +6,8 @@ import {
   OpenAIApi,
 } from "openai";
 import { DEMO_EMAIL } from "../../../../lib/constants";
-import { Result } from "../../../../lib/shared/result";
+import { Result } from "../../../../lib/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
-import { Readable } from "stream";
 
 export default async function handler(
   req: NextApiRequest,

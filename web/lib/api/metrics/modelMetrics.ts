@@ -1,7 +1,7 @@
-import { FilterNode } from "../../shared/filters/filterDefs";
-import { buildFilterWithAuth } from "../../shared/filters/filters";
-import { dbExecute } from "../../shared/db/dbExecute";
-import { resultMap } from "../../shared/result";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
+import { dbExecute } from "../db/dbExecute";
+import { resultMap } from "../../result";
 
 export interface ModelMetrics {
   model: string;
@@ -62,6 +62,7 @@ export interface ModelMetricsUsers {
   sum_completion_tokens: number;
   user_id: string;
 }
+
 export async function getModelMetricsForUsers(
   filter: FilterNode,
   org_id: string,

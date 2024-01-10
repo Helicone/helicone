@@ -4,20 +4,12 @@ import {
   FilterLeaf,
   filterListToTree,
   FilterNode,
-  SingleKey,
-  TablesAndViews,
-  TextOperators,
-  TimestampOperators,
-} from "../../../shared/filters/filterDefs";
-import { getRequests } from "../../../shared/request/request";
-import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
+} from "../../../../services/lib/filters/filterDefs";
+import { getRequests } from "../../request/request";
 import {
   HeliconeRequest,
   QueryHeliconeRequestArgs,
   HeliconeRequestFilter,
-  TextOperators as GQLTextOperators,
-  PropertyFilter,
-  DateOperators,
 } from "../schema/types/graphql";
 import { modelCost } from "../../metrics/costCalc";
 import { convertTextOperators, convertTimeOperators } from "./helper";
@@ -122,10 +114,10 @@ function convertFilterInputToFilterLeaf(
 }
 
 export async function heliconeRequest(
-  root: any,
+  _root: any,
   args: QueryHeliconeRequestArgs,
   context: Context,
-  info: any
+  _info: any
 ): Promise<HeliconeRequest[]> {
   const orgId = await context.getOrgIdOrThrow();
   const { limit, offset, filters } = {

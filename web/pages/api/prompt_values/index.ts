@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Value, getPromptValues } from "../../../lib/api/prompts/prompts";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 
 export default async function handler(

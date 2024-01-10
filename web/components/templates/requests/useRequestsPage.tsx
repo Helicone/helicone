@@ -1,4 +1,4 @@
-import { HeliconeRequest } from "../../../lib/shared/request/request";
+import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useGetProperties } from "../../../services/hooks/properties";
 import { useGetFeedback } from "../../../services/hooks/feedback";
 import { useGetRequests } from "../../../services/hooks/requests";
@@ -6,12 +6,12 @@ import {
   filterListToTree,
   FilterNode,
   filterUIToFilterLeafs,
-} from "../../../lib/shared/filters/filterDefs";
+} from "../../../services/lib/filters/filterDefs";
 import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../lib/shared/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../lib/shared/sorts/requests/sorts";
+} from "../../../services/lib/filters/frontendFilterDefs";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { Json } from "../../../supabase/database.types";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { Message } from "./chat";

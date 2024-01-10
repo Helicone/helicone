@@ -1,35 +1,58 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 import { useOrg } from "../../shared/layout/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import CreateAlertModal from "./createAlertModal";
-import {
-  BellIcon,
-  ChevronDownIcon,
-  NewspaperIcon,
-} from "@heroicons/react/24/outline";
+import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { Menu, Transition } from "@headlessui/react";
 import { Tooltip } from "@mui/material";
+import EditAlertModal from "./editAlertModal";
 
 interface AlertsPageProps {
   user: User;
 }
 
+export const alertTimeWindows: { [key: string]: number } = {
+  "5 minutes": 5 * 60 * 1000,
+  "10 minutes": 10 * 60 * 1000,
+  "15 minutes": 15 * 60 * 1000,
+  "30 minutes": 30 * 60 * 1000,
+  "1 hour": 60 * 60 * 1000,
+  "1 day": 24 * 60 * 60 * 1000,
+  "1 week": 7 * 24 * 60 * 60 * 1000,
+  "1 month": 30 * 24 * 60 * 60 * 1000,
+};
+
 const AlertsPage = (props: AlertsPageProps) => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [editAlertOpen, setEditAlertOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] =
     useState<Database["public"]["Tables"]["alert"]["Row"]>();
   const orgContext = useOrg();
 
   const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
-    orgContext?.currentOrg.id || ""
+    orgContext?.currentOrg?.id || ""
   );
+
+  function formatTimeWindow(milliseconds: number): string {
+    // Define the time windows with an index signature
+
+    let closest = Object.keys(alertTimeWindows).reduce((a, b) => {
+      return Math.abs(alertTimeWindows[a] - milliseconds) <
+        Math.abs(alertTimeWindows[b] - milliseconds)
+        ? a
+        : b;
+    });
+
+    return closest;
+  }
+
+  console.log("alerts", alerts);
 
   return (
     <div className="flex flex-col space-y-16">
@@ -74,6 +97,11 @@ const AlertsPage = (props: AlertsPageProps) => {
                 { name: "Threshold", key: "threshold", hidden: false },
                 { name: "Metric", key: "metric", hidden: false },
                 { name: "Time Window", key: "time_window", hidden: false },
+                {
+                  name: "Min Requests",
+                  key: "minimum_request_count",
+                  hidden: false,
+                },
                 { name: "Emails", key: "emails", hidden: false },
               ]}
               rows={alerts?.map((key) => {
@@ -87,7 +115,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                   status: (
                     <div>
                       {key.status === "resolved" ? (
-                        <Tooltip title={"Resolved"}>
+                        <Tooltip title={"Healthy"}>
                           <span className="relative flex h-2.5 w-2.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
@@ -110,27 +138,43 @@ const AlertsPage = (props: AlertsPageProps) => {
                   ),
                   threshold: (
                     <p className="text-gray-900 dark:text-gray-100">
-                      {`${key.threshold}%`}
+                      {key.metric === "response.status" && (
+                        <span>{`${key.threshold}%`}</span>
+                      )}
+                      {key.metric === "cost" && (
+                        <span>{`$${key.threshold.toFixed(2)}`}</span>
+                      )}
                     </p>
                   ),
                   metric: (
                     <p className="text-xs text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-2 py-1 w-fit">
-                      {key.metric}
+                      {key.metric === "response.status" ? "status" : key.metric}
                     </p>
                   ),
                   time_window: (
                     <p className="text-gray-900 dark:text-gray-100">
-                      {/* convert to minutes */}
-                      {`${key.time_window / 60000} minutes`}
+                      {formatTimeWindow(key.time_window)}
+                    </p>
+                  ),
+                  minimum_request_count: (
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {key.minimum_request_count}
                     </p>
                   ),
                   emails: (
-                    <div className="text-gray-900 dark:text-gray-100 overflow-auto">
+                    <div className="text-gray-900 dark:text-gray-100 flex">
                       {key.emails.join(", ")}
                     </div>
                   ),
                 };
               })}
+              editHandler={(row) => {
+                setEditAlertOpen(true);
+
+                // get the alert from the alerts array by id
+                const alertToEdit = alerts.find((alert) => alert.id === row.id);
+                setSelectedAlert(alertToEdit);
+              }}
               deleteHandler={(row) => {
                 setDeleteAlertOpen(true);
                 setSelectedAlert(row);
@@ -152,7 +196,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           </div>
         </div>
         {alertHistory.length === 0 ? (
-          <div className="relative block w-full rounded-lg border-2 border-dashed hover:cursor-pointer border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          <div className="relative block w-full rounded-lg border-2 border-dashed border-gray-500 p-12 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
             <div className="w-full justify-center align-middle items-center">
               <NewspaperIcon className="h-10 w-10 mx-auto text-gray-900 dark:text-gray-100" />
             </div>
@@ -204,7 +248,16 @@ const AlertsPage = (props: AlertsPageProps) => {
                 ),
                 triggered_value: (
                   <p className="text-gray-900 dark:text-gray-100">
-                    {`${key.triggered_value}%`}
+                    {key.alert_metric === "response.status" && (
+                      <span>{`${key.triggered_value}%`}</span>
+                    )}
+                    {key.alert_metric === "cost" && (
+                      <span>{`$${key.triggered_value}`}</span>
+                    )}
+                    {key.alert_metric !== "response.status" &&
+                      key.alert_metric !== "cost" && (
+                        <span>{key.triggered_value}</span>
+                      )}
                   </p>
                 ),
                 status: <p className="text-gray-500">{key.status}</p>,
@@ -219,6 +272,14 @@ const AlertsPage = (props: AlertsPageProps) => {
         onSuccess={() => {
           refetch();
         }}
+      />
+      <EditAlertModal
+        open={editAlertOpen}
+        setOpen={setEditAlertOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        currentAlert={selectedAlert}
       />
       <DeleteAlertModal
         open={deleteAlertOpen}

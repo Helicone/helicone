@@ -7,7 +7,7 @@ import {
   PropertyParam,
   getPropertyParams,
 } from "../../../../lib/api/properties/propertyParams";
-import { Result } from "../../../../lib/shared/result";
+import { Result } from "../../../../lib/result";
 
 async function handler(
   options: HandlerWrapperOptions<Result<PropertyParam[], string>>

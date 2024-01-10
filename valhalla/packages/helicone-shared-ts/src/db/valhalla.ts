@@ -1,16 +1,19 @@
-import { Client, QueryResult } from "pg";
+import { Pool, QueryResult, PoolClient } from "pg";
 import { getEnvironment } from "../environment/get";
-import {
-  GenericResult,
-  PromiseGenericResult,
-  err,
-  ok,
-} from "../modules/result";
+import { PromiseGenericResult, err, ok } from "../modules/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
   ValhallaResponse,
 } from "./valhalla.database.types";
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
 
 export interface IValhallaDB {
   query(query: string, values: any[]): PromiseGenericResult<QueryResult<any>>;
@@ -31,9 +34,7 @@ export interface IValhallaDB {
 }
 
 class ValhallaDB implements IValhallaDB {
-  client: Client;
-  connected: boolean = false;
-
+  pool: Pool;
   constructor(auroraCreds: string) {
     const auroraHost = process.env.AURORA_HOST;
     const auroraPort = process.env.AURORA_PORT;
@@ -63,12 +64,16 @@ class ValhallaDB implements IValhallaDB {
       password: string;
     } = JSON.parse(auroraCreds);
 
-    this.client = new Client({
+    this.pool = new Pool({
       host: auroraHost,
       port: parseInt(auroraPort),
       user: username,
       password: password,
       database: auroraDb,
+      max: 2_000,
+      idleTimeoutMillis: 1000, // close idle clients after 1 second
+      connectionTimeoutMillis: 1000, // return an error after 1 second if connection could not be established
+      maxUses: 500,
       ssl:
         getEnvironment() === "development"
           ? undefined
@@ -76,28 +81,45 @@ class ValhallaDB implements IValhallaDB {
               rejectUnauthorized: true, // This should be set to true for better security
             },
     });
-  }
 
-  private async connect() {
-    if (!this.connected) {
-      await this.client.connect();
-      this.connected = true;
-    }
+    this.pool.on("error", (err, client) => {
+      try {
+        console.error(
+          "Error occurred on client",
+          client,
+          "err",
+          JSON.stringify(err)
+        );
+        client.release();
+      } catch (e) {
+        console.error("Error occurred on client", client, "err", err);
+      }
+    });
   }
 
   async close() {
-    await this.client.end();
+    await this.pool.end();
   }
 
   async query(
     query: string,
     values: any[] = []
   ): PromiseGenericResult<QueryResult<any>> {
+    let client: PoolClient | null = null;
     try {
-      this.connect();
-      return ok(await this.client.query(query, values));
+      client = await this.pool.connect();
     } catch (thrownErr) {
       console.error("Error in query", query, thrownErr);
+      return err(JSON.stringify(thrownErr));
+    }
+
+    try {
+      const result = await client.query(query, values);
+      client.release();
+      return ok(result);
+    } catch (thrownErr) {
+      console.error("Error in query", query, thrownErr);
+      client.release();
       return err(JSON.stringify(thrownErr));
     }
   }
@@ -209,7 +231,6 @@ class ValhallaDB implements IValhallaDB {
       helicone_org_id
     )
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    RETURNING *
   `;
     return this.query(query, [
       response.id,

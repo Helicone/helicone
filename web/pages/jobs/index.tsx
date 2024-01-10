@@ -4,7 +4,7 @@ import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
 import JobsPage from "../../components/templates/jobs/jobsPage";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
-import { SortDirection } from "../../lib/shared/sorts/requests/sorts";
+import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 
 interface RequestsV2Props {
   user: User;

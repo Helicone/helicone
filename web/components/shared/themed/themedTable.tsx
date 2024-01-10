@@ -30,8 +30,11 @@ export interface ThemedTableProps {
   deleteHandler?: (row: any) => void;
 }
 
-const SecretInput = (props: { value: string }) => {
-  const { value } = props;
+export const SecretInput = (props: {
+  value: string;
+  variant?: "primary" | "secondary";
+}) => {
+  const { value, variant = "primary" } = props;
   const [show, setShow] = useState(false);
   const { setNotification } = useNotification();
 
@@ -40,14 +43,14 @@ const SecretInput = (props: { value: string }) => {
   const org = useOrg();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
   const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
-    org?.currentOrg.id || ""
+    org?.currentOrg?.id || ""
   );
 
-  const isOwner = org?.currentOrg.owner === user?.id;
+  const isOwner = org?.currentOrg?.owner === user?.id;
 
   const members = data?.data
     ? data?.data.map((d) => {
@@ -73,30 +76,36 @@ const SecretInput = (props: { value: string }) => {
     orgMembers.find((m) => m.member === user?.id)?.org_role === "admin";
 
   return (
-    <div className="flex flex-row items-center">
+    <div className="flex flex-row items-center w-full">
       {isUserAdmin ? (
-        <div className="flex flex-row space-x-1">
+        <div className="flex flex-row w-full">
           <button
-            className="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1"
-            onClick={() => setShow(!show)}
+            className="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-0.5"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShow(!show);
+            }}
           >
             {show ? (
-              <EyeSlashIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+              <EyeSlashIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
             ) : (
-              <EyeIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+              <EyeIcon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
             )}
           </button>
-          <div className="flex w-full min-w-[10rem]">
+          <div className="flex w-full min-w-[15rem]">
             {show ? (
               <Tooltip title="Click to Copy" placement="top" arrow>
                 <button
                   id="secret-key"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     navigator.clipboard.writeText(value);
                     setNotification("Copied to clipboard", "success");
                   }}
                   className={clsx(
-                    "bg-gray-200 dark:bg-gray-800 text-xs hover:cursor-pointer",
+                    variant === "primary"
+                      ? "bg-gray-200 dark:bg-gray-800 text-xs hover:cursor-pointer"
+                      : "hover:cursor-pointer text-xs bg-inherit",
                     "flex w-[200px] rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 text-left p-2 truncate"
                   )}
                 >
@@ -113,7 +122,10 @@ const SecretInput = (props: { value: string }) => {
                 disabled
                 className={clsx(
                   "text-md",
-                  "block w-fit rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
+                  variant === "primary"
+                    ? "bg-gray-100 dark:bg-gray-900"
+                    : "bg-inherit",
+                  "block w-[10rem] rounded-md border-0 h-8 text-gray-900 dark:text-gray-100"
                 )}
               />
             )}
@@ -129,7 +141,10 @@ const SecretInput = (props: { value: string }) => {
           disabled
           className={clsx(
             "text-md",
-            "block w-fit rounded-md border-0 h-8 text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900"
+            variant === "primary"
+              ? "bg-gray-100 dark:bg-gray-900"
+              : "bg-inherit",
+            "block w-fit rounded-md border-0 h-8 text-gray-900 dark:text-gray-100"
           )}
         />
       )}

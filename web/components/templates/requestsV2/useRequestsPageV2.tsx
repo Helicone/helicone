@@ -5,12 +5,12 @@ import {
   filterListToTree,
   FilterNode,
   filterUIToFilterLeafs,
-} from "../../../lib/shared/filters/filterDefs";
+} from "../../../services/lib/filters/filterDefs";
 import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../lib/shared/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../lib/shared/sorts/requests/sorts";
+} from "../../../services/lib/filters/frontendFilterDefs";
+import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import getNormalizedRequest from "./builder/requestBuilder";
 

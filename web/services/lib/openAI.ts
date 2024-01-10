@@ -1,9 +1,8 @@
-import axios from "axios";
 import {
   ChatCompletionRequestMessage,
   CreateChatCompletionResponse,
 } from "openai";
-import { Result } from "../../lib/shared/result";
+import { Result } from "../../lib/result";
 
 export const fetchOpenAI = async (
   messages: ChatCompletionRequestMessage[],

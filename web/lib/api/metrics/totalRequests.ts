@@ -1,11 +1,10 @@
 import {
   FilterNode,
   timeFilterToFilterNode,
-} from "../../shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../shared/filters/filters";
-import { Result, resultMap } from "../../shared/result";
-import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+} from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
+import { Result, resultMap } from "../../result";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getTotalRequests(
   filter: FilterNode,
@@ -39,9 +38,10 @@ export async function getTotalRequests(
   FROM total_count
 `;
 
-  const res = await dbQueryClickhouse<{
-    count: number;
-  }>(query, argsAcc);
-
-  return resultMap(res, (d) => +d[0].count);
+  return resultMap(
+    await dbQueryClickhouse<{
+      count: number;
+    }>(query, argsAcc),
+    (d) => +d[0].count
+  );
 }

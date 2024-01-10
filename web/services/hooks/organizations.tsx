@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Members } from "../../pages/api/organization/[id]/members";
 import { Owner } from "../../pages/api/organization/[id]/owner";
 import { Database } from "../../supabase/database.types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "../../components/shared/layout/organizationContext";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
@@ -61,6 +61,32 @@ const useGetOrgMembersAndOwner = (orgId: string) => {
   };
 };
 
+const useGetOrg = (orgId: string) => {
+  const supabaseClient = useSupabaseClient<Database>();
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["OrganizationsId", orgId],
+    queryFn: async (query) => {
+      if (!orgId) {
+        return null;
+      }
+      const { data, error } = await supabaseClient
+        .from("organization")
+        .select(`*`)
+        .eq("soft_delete", false)
+        .eq("id", orgId)
+        .single();
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    data,
+    isLoading,
+    refetch,
+  };
+};
+
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
@@ -77,12 +103,7 @@ const useGetOrgs = () => {
       if (error) {
         return [];
       }
-      if (!data.find((d) => d.is_personal)) {
-        await supabaseClient.rpc("ensure_personal");
-        console.warn("Created personal org");
-        // just a shim that will only execute once for the entire life time of a user
-        return (await supabaseClient.from("organization").select(`*`)).data!;
-      }
+
       return data;
     },
     refetchOnWindowFocus: false,
@@ -108,10 +129,39 @@ const setOrgCookie = (orgId: string) => {
 };
 
 const useOrgsContextManager = () => {
+  const user = useUser();
   const { data: orgs, refetch } = useGetOrgs();
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
+  const [isResellerOfCurrentCustomerOrg, setIsResellerOfCurrentOrg] =
+    useState<boolean>(false);
+
+  const refreshCurrentOrg = useCallback(() => {
+    refetch().then((x) => {
+      if (x.data && x.data.length > 0) {
+        const firstOrg = x.data[0];
+        setOrg(firstOrg);
+        setOrgCookie(firstOrg.id);
+        setRenderKey((key) => key + 1);
+      }
+    });
+  }, [refetch]);
+
+  useEffect(() => {
+    if ((!orgs || orgs.length === 0) && user?.id) {
+      fetch(`/api/user/${user.id}/ensure-one-org`).then((res) => {
+        if (res.status === 201) {
+          console.log("found orgs");
+        } else if (res.status !== 200) {
+          console.error("Failed to create org", res.json());
+        } else {
+          console.log(res.json());
+          refreshCurrentOrg();
+        }
+      });
+    }
+  }, [orgs, user?.id, refreshCurrentOrg]);
 
   useEffect(() => {
     if (orgs && orgs.length > 0) {
@@ -124,23 +174,36 @@ const useOrgsContextManager = () => {
     }
   }, [orgs]);
 
+  useEffect(() => {
+    setIsResellerOfCurrentOrg(
+      !!(
+        org?.organization_type === "customer" &&
+        org.reseller_id &&
+        orgs?.find((x) => x.id === org.reseller_id)
+      )
+    );
+  }, [org?.organization_type, org?.reseller_id, orgs]);
+
   let orgContextValue: OrgContextValue | null = null;
-  if (org && orgs) {
-    orgContextValue = {
-      allOrgs: orgs,
-      currentOrg: org,
-      setCurrentOrg: (orgId) => {
+  orgContextValue = {
+    allOrgs: orgs ?? [],
+    currentOrg: org ?? undefined,
+    isResellerOfCurrentCustomerOrg,
+    refreshCurrentOrg,
+    setCurrentOrg: (orgId) => {
+      refetch().then(() => {
         const org = orgs?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
           setOrgCookie(org.id);
           setRenderKey((key) => key + 1);
         }
-      },
-      renderKey,
-      refetchOrgs: refetch,
-    };
-  }
+      });
+    },
+    renderKey,
+    refetchOrgs: refetch,
+  };
+
   return orgContextValue;
 };
 
@@ -150,5 +213,6 @@ export {
   useGetOrgs,
   useOrgsContextManager,
   setOrgCookie,
+  useGetOrg,
   useGetOrgMembersAndOwner,
 };

@@ -6,7 +6,7 @@
   ],
 
   "ext": "ts,tsx,js,json",
-  "exec": "openapi-typescript packages/jawn/src/schema/openapi.yml --output ../worker/src/lib/db/valhalla.types.ts && openapi-typescript packages/jawn/src/schema/openapi.yml --output packages/jawn/src/schema/types.d.ts && yarn workspace helicone-shared-ts build && ts-node --esm packages/jawn/src/index.ts ",
+  "exec": "openapi-typescript packages/jawn/src/schema/openapi.yml --output ../worker/src/lib/db/valhalla.types.ts && openapi-typescript packages/jawn/src/schema/openapi.yml --output packages/jawn/src/schema/types.d.ts && yarn workspace helicone-shared-ts build && ts-node packages/jawn/src/index.ts ",
   "ignore": [
     "node_modules/*",
     "packages/*/node_modules/*",

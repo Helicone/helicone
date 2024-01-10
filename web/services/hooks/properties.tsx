@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Property } from "../../lib/api/properties/properties";
-import { ok, Result } from "../../lib/shared/result";
+import { ok, Result } from "../../lib/result";
 import {
   getPropertyFilters,
   SingleFilterDef,
-} from "../../lib/shared/filters/frontendFilterDefs";
+} from "../lib/filters/frontendFilterDefs";
 import { getProperties } from "../lib/properties";
 import { getPropertyParams } from "../lib/propertyParams";
 import { useDebounce } from "./debounce";

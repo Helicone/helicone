@@ -5,9 +5,9 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { UserMetric, userMetrics } from "../../../lib/api/users/users";
-import { Result } from "../../../lib/shared/result";
-import { FilterNode } from "../../../lib/shared/filters/filterDefs";
-import { SortLeafUsers } from "../../../lib/shared/sorts/users/sorts";
+import { Result } from "../../../lib/result";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
 
 async function handler({
   req,

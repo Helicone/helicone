@@ -108,7 +108,10 @@ export async function storeInCache(
 ): Promise<void> {
   const encrypted = await encrypt(value, env);
   const hashedKey = await hash(key);
-  await env.SECURE_CACHE.put(hashedKey, JSON.stringify(encrypted), {});
+  await env.SECURE_CACHE.put(hashedKey, JSON.stringify(encrypted), {
+    // 10 minutes
+    expirationTtl: 600,
+  });
   InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
 }
 

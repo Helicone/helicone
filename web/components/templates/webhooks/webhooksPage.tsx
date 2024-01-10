@@ -5,11 +5,7 @@ import useNotification from "../../shared/notification/useNotification";
 import { useOrg } from "../../shared/layout/organizationContext";
 import ThemedTable from "../../shared/themed/themedTable";
 import { useState } from "react";
-import { Result } from "../../../lib/shared/result";
-import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { getUSDateFromString } from "../../shared/utils/utils";
-import ModelPill from "../requestsV2/modelPill";
-import AuthHeader from "../../shared/authHeader";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import ThemedModal from "../../shared/themed/themedModal";
 import AddWebhookForm from "./addWebhookForm";
@@ -39,7 +35,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
       return client
         .from("webhooks")
         .select("*")
-        .eq("org_id", org?.currentOrg.id);
+        .eq("org_id", org?.currentOrg?.id);
     },
     refetchOnWindowFocus: false,
   });

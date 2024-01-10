@@ -2,16 +2,9 @@ import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
-import { NormalizedRequest } from "../components/templates/requestsV2/builder/abstractRequestBuilder";
 import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
-import { getRequests, HeliconeRequest } from "../lib/shared/request/request";
-import { Result } from "../lib/shared/result";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { FilterNode } from "../lib/shared/filters/filterDefs";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../lib/shared/sorts/requests/sorts";
+import { SortDirection } from "../services/lib/sorts/requests/sorts";
 
 interface RequestsV2Props {
   user: User;

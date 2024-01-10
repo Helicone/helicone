@@ -5,19 +5,18 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { clsx } from "./shared/clsx";
 import { useRouter } from "next/router";
-import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
 import {
   SortDirection,
   SortLeafRequest,
-} from "../lib/shared/sorts/requests/sorts";
-import { ColumnType } from "../lib/shared/filters/frontendFilterDefs";
+} from "../services/lib/sorts/requests/sorts";
+import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
 import { RequestWrapper } from "./templates/requests/useRequestsPage";
-import { SortLeafUsers } from "../lib/shared/sorts/users/sorts";
+import { SortLeafUsers } from "../services/lib/sorts/users/sorts";
 import { UserMetric } from "../lib/api/users/users";
 
 export interface Column {

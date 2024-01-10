@@ -1,14 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import { getRequests } from "../../../lib/shared/request/request";
-import { Result } from "../../../lib/shared/result";
+import { Result } from "../../../lib/result";
 
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { supabaseServer } from "../../../lib/supabaseServer";
-import { Database } from "../../../supabase/database.types";
 
 const characters =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

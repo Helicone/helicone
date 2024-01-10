@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../..";
 import { HeliconeProxyRequest } from "../HeliconeProxyRequest/mapper";
+import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
+import { Database } from "../../../supabase/database.types";
 
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
@@ -62,22 +64,62 @@ export async function saveToCache(
 
 export async function recordCacheHit(
   headers: Headers,
-  env: Env
+  env: Env,
+  clickhouseDb: ClickhouseClientWrapper,
+  organizationId: string
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {
     console.error("No request id found in cache hit");
     return;
   }
-  const dbClient = createClient(
+  // Dual writing for now
+  const dbClient = createClient<Database>(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
+
+  // TODO: Remove this ->
   const { error } = await dbClient
     .from("cache_hits")
     .insert({ request_id: requestId });
+
   if (error) {
     console.error(error);
+  }
+
+  const { data: response, error: responseError } = await dbClient
+    .from("response")
+    .select("*")
+    .eq("request", requestId)
+    .single();
+
+  if (responseError) {
+    console.error(responseError);
+  }
+
+  const model = (response?.body as { model: string })?.model ?? null;
+  const promptTokens = response?.prompt_tokens ?? 0;
+  const completionTokens = response?.completion_tokens ?? 0;
+  const latency = response?.delay_ms ?? 0;
+
+  const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
+    "cache_hits",
+    [
+      {
+        request_id: requestId,
+        organization_id: organizationId,
+        prompt_tokens: promptTokens,
+        completion_tokens: completionTokens,
+        model: model ?? "",
+        latency: latency,
+        created_at: null,
+      },
+    ]
+  );
+
+  if (clickhouseError) {
+    console.error(clickhouseError);
   }
 }
 export async function getCachedResponse(

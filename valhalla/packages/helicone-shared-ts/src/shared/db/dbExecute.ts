@@ -23,7 +23,6 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
     }, {});
 }
 
-//Only for debugging purposes
 export function printRunnableQuery(
   query: string,
   parameters: (number | string | boolean | Date)[]
@@ -35,6 +34,7 @@ export function printRunnableQuery(
 
   console.log(`\n\n${setParams}\n\n${query}\n\n`);
 }
+
 export async function dbQueryClickhouse<T>(
   query: string,
   parameters: (number | string | boolean | Date)[]
@@ -71,6 +71,12 @@ export async function dbQueryClickhouse<T>(
   }
 }
 
+/**
+ * Executes a database query with the given parameters.
+ * @param query - The SQL query to execute.
+ * @param parameters - The parameters to be used in the query.
+ * @returns A promise that resolves to a Result object containing the query result or an error message.
+ */
 export async function dbExecute<T>(
   query: string,
   parameters: any[]

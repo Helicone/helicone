@@ -1,21 +1,21 @@
-import { ArrowLeftIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import Image from "next/image";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ChevronLeftIcon,
+} from "@heroicons/react/20/solid";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { getOrCreateUserSettings } from "../../../pages/api/user_settings";
 import { clsx } from "../../shared/clsx";
 import CodeIntegration from "./steps/codeIntegration";
 import EventListen from "./steps/eventListen";
-import Features from "./steps/features";
 import GenerateAPIKey from "./steps/generateAPIKey";
 import GetStarted from "./steps/getStarted";
-import MethodFork, { IntegrationMethods, Providers } from "./steps/methodFork";
+import { IntegrationMethods, Providers } from "./steps/methodFork";
 import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
-import { useOrg } from "../../shared/layout/organizationContext";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface WelcomePageProps {}
 
@@ -39,6 +39,7 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const [step, setStep] = useLocalStorage<number>("welcome-step", 0);
   const [apiKey, setApiKey] = useState<string>("");
+  const orgs = useOrg();
 
   const nextStep = () => {
     setStep(step + 1);
@@ -94,12 +95,22 @@ const WelcomePage = (props: WelcomePageProps) => {
           <ArrowLeftIcon className="h-3 w-3 inline" />
           Sign Out
         </button>
-        {user?.email && (
-          <div className="flex flex-col gap-1 text-start p-8">
-            <p className="text-xs text-gray-500">Logged in as:</p>
-            <p className="text-sm text-gray-900">{user?.email}</p>
-          </div>
-        )}
+        <button
+          onClick={async () => {
+            await supabaseClient
+              .from("organization")
+              .update({
+                has_onboarded: true,
+              })
+              .eq("id", orgs?.currentOrg?.id);
+
+            router.push("/dashboard");
+          }}
+          className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
+        >
+          Skip Onboarding
+          <ArrowRightIcon className="h-3 w-3 inline" />
+        </button>
       </div>
       <svg
         className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"

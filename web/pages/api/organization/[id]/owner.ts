@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { dbExecute } from "../../../../lib/shared/db/dbExecute";
+import { dbExecute } from "../../../../lib/api/db/dbExecute";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export async function getOwner(orgId: String, userId: string) {

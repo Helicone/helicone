@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { dbExecute } from "../../../../lib/shared/db/dbExecute";
-import { Result } from "../../../../lib/shared/result";
+import { dbExecute } from "../../../../lib/api/db/dbExecute";
+import { Result } from "../../../../lib/result";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 

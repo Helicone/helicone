@@ -1,14 +1,11 @@
 import {
   FilterNode,
   timeFilterToFilterNode,
-} from "../../shared/filters/filterDefs";
-import { buildFilterWithAuthClickHousePropResponse } from "../../shared/filters/filters";
-import { resultMap } from "../../shared/result";
+} from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuthClickHousePropResponse } from "../../../services/lib/filters/filters";
+import { resultMap } from "../../result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import {
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../shared/db/dbExecute";
+import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getAggregatedKeyMetrics(
   filter: FilterNode,

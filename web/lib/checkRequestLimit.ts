@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
-import { getRequestCountClickhouse } from "./shared/request/request";
+import { getRequestCountClickhouse } from "./api/request/request";
 
 export async function requestOverLimit(
   client: SupabaseClient<Database>,

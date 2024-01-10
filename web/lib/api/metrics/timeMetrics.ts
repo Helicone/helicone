@@ -1,12 +1,13 @@
-import { FilterNode } from "../../shared/filters/filterDefs";
-import { buildFilterWithAuth } from "../../shared/filters/filters";
-import { Result } from "../../shared/result";
-import { dbExecute } from "../../shared/db/dbExecute";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
+import { Result } from "../../result";
+import { dbExecute } from "../db/dbExecute";
 
 export interface AverageResponseTime {
   average_response_time: number;
   average_tokens_per_response: number;
 }
+
 export async function getAggregatedAvgMetrics(
   filter: FilterNode,
   org_id: string

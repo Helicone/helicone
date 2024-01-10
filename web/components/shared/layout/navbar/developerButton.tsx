@@ -11,11 +11,7 @@ import {
   UserGroupIcon,
   UserIcon,
 } from "@heroicons/react/20/solid";
-import {
-  BuildingOfficeIcon,
-  ChartPieIcon,
-  CircleStackIcon,
-} from "@heroicons/react/20/solid";
+import { ChartPieIcon, CircleStackIcon } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
 import { clsx } from "../../clsx";
 import Link from "next/link";

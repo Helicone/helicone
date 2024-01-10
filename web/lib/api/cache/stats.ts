@@ -1,23 +1,14 @@
-import { FilterNode } from "../../shared/filters/filterDefs";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
-} from "../../shared/filters/filters";
-import {
-  SortLeafRequest,
-  buildRequestSort,
-} from "../../shared/sorts/requests/sorts";
-import { Json } from "../../../supabase/database.types";
-import { Result, resultMap } from "../../shared/result";
+  buildFilterWithAuthClickHouseCacheHits,
+} from "../../../services/lib/filters/filters";
+import { Result, resultMap } from "../../result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../shared/db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
 
@@ -45,6 +36,48 @@ export async function getCacheCount(
   );
 }
 
+export async function getCacheCountClickhouse(
+  orgId: string,
+  filter: FilterNode
+): Promise<Result<number, string>> {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `select count(*) as count from cache_hits where ${builtFilter.filter}`;
+
+  const res = await dbQueryClickhouse<{
+    count: number;
+  }>(query, builtFilter.argsAcc);
+
+  return resultMap(res, (x) => +x[0].count);
+}
+
+export async function getModelMetricsClickhouse(
+  orgId: string,
+  filter: FilterNode
+): Promise<Result<ModelMetrics[], string>> {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `
+  select model, 
+    sum(completion_tokens) as sum_completion_tokens, 
+    sum(prompt_tokens) as sum_prompt_tokens, 
+    sum(completion_tokens + prompt_tokens) as sum_tokens 
+  from cache_hits 
+  where (${builtFilter.filter})
+  group by model`;
+
+  const res = await dbQueryClickhouse<ModelMetrics>(query, builtFilter.argsAcc);
+
+  return res;
+}
+
 export async function getModelMetrics(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -65,6 +98,27 @@ WHERE (
 GROUP BY response.body ->> 'model'::text;
     `;
   return dbExecute<ModelMetrics>(query, builtFilter.argsAcc);
+}
+
+export async function getTimeSavedClickhouse(
+  orgId: string,
+  filter: FilterNode
+) {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `SELECT sum(latency) AS total_latency_ms
+  FROM cache_hits
+  WHERE (${builtFilter.filter});`;
+
+  const temp = await dbQueryClickhouse<{
+    total_latency_ms: number;
+  }>(query, builtFilter.argsAcc);
+
+  const res = resultMap(temp, (x) => +x[0].total_latency_ms / 1000);
+  return res;
 }
 
 export async function getTimeSaved(org_id: string, filter: FilterNode) {
@@ -88,6 +142,25 @@ WHERE (
     }>(query, builtFilter.argsAcc),
     (x) => +x[0].total_latency_ms / 1000
   );
+  return res;
+}
+
+export async function getTopModelUsageClickhouse(
+  orgId: string,
+  filter: FilterNode
+) {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+  const query = `select model, count(*) as count from cache_hits where (${builtFilter.filter}) group by model order by count desc limit 10`;
+
+  const res = await dbQueryClickhouse<{
+    model: string;
+    count: number;
+  }>(query, builtFilter.argsAcc);
+
   return res;
 }
 
@@ -149,6 +222,68 @@ LIMIT 5;
   );
 }
 
+export async function getTopRequestsClickhouse(
+  orgId: string,
+  filter: FilterNode
+) {
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+  select 
+    request_id, 
+    count(*) as count, 
+    max(created_at) as last_used, 
+    min(created_at) as first_used,
+    model
+  from cache_hits
+  where (${builtFilter.filter}) 
+  group by request_id, model
+  order by count desc
+  limit 10`;
+
+  const res = await dbQueryClickhouse<{
+    request_id: string;
+    count: number;
+    last_used: Date;
+    first_used: Date;
+    model: string;
+  }>(query, builtFilter.argsAcc);
+
+  if (res.error) {
+    return res;
+  }
+
+  const promptQuery = `
+  SELECT 
+    id as request_id, 
+    (coalesce(request.body ->>'prompt', request.body ->'messages'->-1->>'content'))::text as prompt 
+  FROM 
+    request 
+  WHERE 
+    id IN (${res?.data?.map((x) => `'${x.request_id}'`).join(",")})`;
+
+  const prompts = await dbExecute<{
+    request_id: string;
+    prompt: string;
+  }>(promptQuery, []);
+
+  if (prompts.error) {
+    return prompts;
+  }
+
+  const combinedData = res?.data?.map((item) => ({
+    ...item,
+    prompt: prompts?.data?.find((p) => p.request_id === item.request_id)
+      ?.prompt,
+  }));
+
+  return { ...res, data: combinedData };
+}
+
 export async function getTopRequests(org_id: string, filter: FilterNode) {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -189,7 +324,6 @@ LIMIT 10;
 }
 
 export async function getModelUsageOverTime({
-  timeFilter,
   userFilter,
   orgId,
   dbIncrement,

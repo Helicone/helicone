@@ -1,7 +1,5 @@
 import {
   ArrowPathIcon,
-  CodeBracketIcon,
-  EyeIcon,
   HandThumbDownIcon,
   HandThumbUpIcon,
   InformationCircleIcon,
@@ -11,9 +9,6 @@ import {
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ThemedTabs from "../../shared/themed/themedTabs";
-import { getUSDateFromString } from "../../shared/utils/utils";
-import { Completion } from "../requests/completion";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
@@ -22,8 +17,6 @@ import {
   HandThumbUpIcon as HTUp,
   HandThumbDownIcon as HTDown,
 } from "@heroicons/react/24/solid";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import Cookies from "js-cookie";
 import {
   addRequestLabel,
   updateRequestFeedback,
@@ -92,7 +85,7 @@ const RequestRow = (props: {
     });
 
     setCurrentProperties(currentProperties);
-  }, [properties]);
+  }, [properties, request.customProperties]);
 
   const updateFeedbackHandler = async (requestId: string, rating: boolean) => {
     updateRequestFeedback(requestId, rating)
@@ -119,7 +112,7 @@ const RequestRow = (props: {
     const key = formData.get("key") as string;
     const value = formData.get("value") as string;
 
-    if (!key || !value || org?.currentOrg.id === undefined) {
+    if (!key || !value || org?.currentOrg?.id === undefined) {
       setNotification("Error adding label", "error");
       setIsAdding(false);
       return;
@@ -127,7 +120,7 @@ const RequestRow = (props: {
     try {
       const res = await addRequestLabel(
         request.id,
-        org?.currentOrg.id,
+        org?.currentOrg?.id,
         key,
         value
       );

@@ -1,15 +1,7 @@
 import { clsx } from "../../shared/clsx";
-import Image from "next/image";
-import {
-  CheckIcon,
-  PencilIcon,
-  TrashIcon,
-  UserCircleIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState } from "react";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 import ResizeTextArea from "./resizeTextArea";
-import { ChatCompletionRequestMessage } from "openai";
 import { Message } from "../requests/chat";
 
 interface ChatRowProps {
@@ -48,14 +40,13 @@ const ChatRow = (props: ChatRowProps) => {
               item.type === "image_url" ? (
                 <div key={index}>
                   {item.image_url.url ? (
-                    <Image
+                    <img
                       src={item.image_url.url}
                       alt={""}
                       width={200}
                       height={200}
                     />
                   ) : (
-                    // </button>
                     <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
                       Unsupported Image Type
                     </div>

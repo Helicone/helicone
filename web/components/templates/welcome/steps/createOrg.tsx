@@ -5,6 +5,7 @@ import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
 import { useOrg } from "../../../shared/layout/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
+import { PostgrestError } from "@supabase/supabase-js";
 
 export const COMPANY_SIZES = [
   "Select company size",
@@ -59,23 +60,48 @@ const CreateOrg = (props: CreateOrgProps) => {
       return;
     }
 
-    // update the current org
-    const { error } = await supabaseClient
-      .from("organization")
-      .update({
-        name: orgName,
-        size: orgSize,
-        referral: orgReferral,
-      })
-      .eq("id", orgContext?.currentOrg.id ?? "");
+    function checkError(error: PostgrestError | null) {
+      if (error) {
+        setNotification(
+          "Failed to update organization. Please try again.",
+          "error"
+        );
+        setIsLoading(false);
+        return;
+      }
+    }
 
-    if (error) {
-      setNotification(
-        "Failed to update organization. Please try again.",
-        "error"
-      );
-      setIsLoading(false);
-      return;
+    if (!orgContext?.currentOrg?.id) {
+      const { data, error } = await fetch("/api/organization/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: orgName,
+          size: orgSize,
+          referral: orgReferral,
+          owner: user.id,
+          is_personal: true,
+          tier: "free",
+        }),
+      }).then((res) => res.json());
+      if (!error) {
+        console.log("Created personal org! - refetching", orgContext);
+        orgContext?.refreshCurrentOrg();
+      }
+      checkError(error);
+    } else {
+      // update the current org
+      const { error } = await supabaseClient
+        .from("organization")
+        .update({
+          name: orgName,
+          size: orgSize,
+          referral: orgReferral,
+        })
+        .eq("id", orgContext?.currentOrg?.id ?? "");
+      checkError(error);
     }
 
     setIsLoading(false);
@@ -191,9 +217,7 @@ const CreateOrg = (props: CreateOrgProps) => {
           {isLoading && (
             <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />
           )}
-          {orgContext?.currentOrg.name === "Personal"
-            ? "Create Organization"
-            : "Next"}
+          {orgContext?.currentOrg ? "Create Organization" : "Next"}
         </button>
       </form>
     </div>
