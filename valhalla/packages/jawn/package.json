@@ -25,6 +25,7 @@
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
+    "@types/node": "^20.8.10",
     "@types/pg": "^8.10.7",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
