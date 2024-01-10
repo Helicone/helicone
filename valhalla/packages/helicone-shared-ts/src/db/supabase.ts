@@ -72,8 +72,8 @@ export class SupabaseConnector {
     const member = await this.client
       .from("organization_member")
       .select("*")
-      .eq("user_id", data.user.id)
-      .eq("organization_id", orgId);
+      .eq("member", data.user.id)
+      .eq("organization", orgId);
 
     const owner = await this.client
       .from("organization")

@@ -86,6 +86,7 @@ export async function dbExecute<T>(
           ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
         }
       : undefined;
+
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl,

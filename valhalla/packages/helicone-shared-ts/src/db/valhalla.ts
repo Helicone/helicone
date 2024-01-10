@@ -251,7 +251,7 @@ class ValhallaDB implements IValhallaDB {
 class StaticValhallaPool {
   private static client: ValhallaDB | null = null;
 
-  static async getClient(): Promise<IValhallaDB> {
+  static getClient(): IValhallaDB {
     if (this.client === null) {
       const auroraCreds = process.env.AURORA_CREDS;
       if (!auroraCreds) {
@@ -265,6 +265,6 @@ class StaticValhallaPool {
   }
 }
 
-export async function createValhallaClient(): Promise<IValhallaDB> {
+export function createValhallaClient(): IValhallaDB {
   return StaticValhallaPool.getClient();
 }

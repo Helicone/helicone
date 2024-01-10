@@ -88,10 +88,17 @@ export async function dbExecute<T>(
           ca: process.env.SUPABASE_SSL_CERT_CONTENTS!.split("\\n").join("\n"),
         }
       : undefined;
+
+  if (!process.env.SUPABASE_DATABASE_URL) {
+    console.error("SUPABASE_DATABASE_URL not set");
+    return { data: null, error: "DATABASE_URL not set" };
+  }
+
   const client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.SUPABASE_DATABASE_URL,
     ssl,
   });
+
   try {
     // Let's print out the time it takes to execute the query
     await client.connect();

@@ -112,6 +112,7 @@ export async function getRequests(
 `;
 
   const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
+
   if (!supabaseServer) {
     return resultMap(requests, (data) => {
       return truncLargeData(data, MAX_TOTAL_BODY_SIZE);
