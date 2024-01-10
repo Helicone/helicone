@@ -69,7 +69,7 @@ app.post(
   })
 );
 
-app.get(
+app.post(
   "/v1/request/query",
   withAuth<
     paths["/v1/request/query"]["post"]["requestBody"]["content"]["application/json"]
