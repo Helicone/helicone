@@ -6,10 +6,10 @@ import {
   FilterLeaf,
   FilterNode,
   filterListToTree,
-} from "../services/lib/filters/filterDefs";
+} from "./shared/filters/filterDefs";
 import { Metrics } from "./api/metrics/metrics";
 import { OverTimeRequestQueryParams } from "./api/metrics/timeDataHandlerWrapper";
-import { Result } from "./result";
+import { Result } from "./shared/result";
 import {
   RequestsOverTime,
   TimeIncrement,

@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { Permission } from "../../../../services/lib/user";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../lib/shared/result";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 
 async function handler({

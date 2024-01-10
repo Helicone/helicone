@@ -1,4 +1,4 @@
-import { Result, resultMap } from "../../result";
+import { Result, resultMap } from "../../shared/result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import { getXOverTime } from "./getXOverTime";
 

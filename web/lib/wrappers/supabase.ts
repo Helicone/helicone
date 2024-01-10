@@ -11,7 +11,7 @@ import {
 } from "next";
 import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
-import { Result } from "../result";
+import { Result } from "../shared/result";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }

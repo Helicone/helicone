@@ -1,11 +1,11 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
-import { Result } from "../../result";
+} from "../../shared/filters/filters";
+import { Result } from "../../shared/result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
-import { dbQueryClickhouse } from "../db/dbExecute";
+import { dbQueryClickhouse } from "../../shared/db/dbExecute";
 
 export interface ModelMetric {
   model: string;

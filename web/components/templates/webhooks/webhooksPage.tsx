@@ -5,7 +5,7 @@ import useNotification from "../../shared/notification/useNotification";
 import { useOrg } from "../../shared/layout/organizationContext";
 import ThemedTable from "../../shared/themed/themedTable";
 import { useState } from "react";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";
 import { getUSDateFromString } from "../../shared/utils/utils";
 import ModelPill from "../requestsV2/modelPill";

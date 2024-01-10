@@ -8,8 +8,8 @@ import TableFooter from "./tableFooter";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+} from "../../../lib/shared/sorts/requests/sorts";
+import { FilterNode } from "../../../lib/shared/filters/filterDefs";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -20,9 +20,9 @@ import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
-import { HeliconeRequest } from "../../../lib/api/request/request";
+import { HeliconeRequest } from "../../../lib/shared/request/request";
 import getRequestBuilder from "./builder/requestBuilder";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 import { ThemedSwitch } from "../../shared/themed/themedSwitch";

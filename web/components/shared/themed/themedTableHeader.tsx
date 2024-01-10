@@ -29,8 +29,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
-import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
-import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
+import { FilterLeaf } from "../../../lib/shared/filters/filterDefs";
+import { SingleFilterDef } from "../../../lib/shared/filters/frontendFilterDefs";
 import { clsx } from "../clsx";
 import ThemedTimeFilter from "./themedTimeFilter";
 
@@ -42,7 +42,7 @@ import ThemedModal from "./themedModal";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../notification/useNotification";
 import Link from "next/link";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { ThemedPill } from "./themedPill";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import { Toggle } from "./themedToggle";

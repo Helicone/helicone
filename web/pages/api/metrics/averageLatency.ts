@@ -5,7 +5,7 @@ import {
 import { getAverageLatency } from "../../../lib/api/metrics/averageLatency";
 import { getTotalCost } from "../../../lib/api/metrics/totalCosts";
 import { getTotalRequests } from "../../../lib/api/metrics/totalRequests";
-import { Result, resultsAll } from "../../../lib/result";
+import { Result, resultsAll } from "../../../lib/shared/result";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   const { req, res, userData } = options;

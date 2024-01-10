@@ -5,7 +5,7 @@ import {
   getValueParams,
   ValueParam,
 } from "../../../lib/api/values/valueParams";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 
 export default async function handler(

@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import BasePageV2 from "../components/shared/layout/basePageV2";
 import MetaData from "../components/shared/metaData";
 import { RenderBarChart } from "../components/shared/metrics/barChart";
-import { Result } from "../lib/result";
+import { Result } from "../lib/shared/result";
 import { HeliconeStats } from "./api/stats";
 
 interface HomeProps {}

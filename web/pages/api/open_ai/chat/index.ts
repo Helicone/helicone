@@ -6,7 +6,7 @@ import {
   OpenAIApi,
 } from "openai";
 import { DEMO_EMAIL } from "../../../../lib/constants";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../lib/shared/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 import { Readable } from "stream";
 

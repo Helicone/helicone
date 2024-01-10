@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Papa from "papaparse";
-import { getRequests } from "../../../../lib/api/request/request";
-import { FilterNode } from "../../../../services/lib/filters/filterDefs";
-import { SortLeafRequest } from "../../../../services/lib/sorts/requests/sorts";
+import { getRequests } from "../../../../lib/shared/request/request";
+import { FilterNode } from "../../../../lib/shared/filters/filterDefs";
+import { SortLeafRequest } from "../../../../lib/shared/sorts/requests/sorts";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 interface FlatObject {

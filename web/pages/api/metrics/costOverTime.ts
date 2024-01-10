@@ -4,7 +4,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getCostOverTime } from "../../../lib/api/metrics/getCostOverTime";
 
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 export interface CostOverTime {

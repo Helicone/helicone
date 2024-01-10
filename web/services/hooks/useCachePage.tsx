@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Result, resultMap } from "../../lib/result";
+import { Result, resultMap } from "../../lib/shared/result";
 import {
   getModelUsageOverTime,
   getTopModelUsage,

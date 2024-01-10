@@ -3,7 +3,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 
 async function handler({
   req,

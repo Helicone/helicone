@@ -1,4 +1,4 @@
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { supabaseServer } from "../../supabaseServer";
 import {
   AllOperators,
   AnyOperator,

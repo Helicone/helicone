@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { UserMetric } from "../../lib/api/users/users";
-import { Result } from "../../lib/result";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafUsers } from "../lib/sorts/users/sorts";
+import { Result } from "../../lib/shared/result";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { SortLeafUsers } from "../../lib/shared/sorts/users/sorts";
 import { Tier } from "../../pages/api/organization/tier";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 

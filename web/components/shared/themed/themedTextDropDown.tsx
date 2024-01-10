@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { Combobox, Dialog, Transition } from "@headlessui/react";
 import { clsx } from "../clsx";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 
 interface ThemedTextDropDownProps {
   options: string[];

@@ -2,7 +2,7 @@
 import { useQuery } from "@apollo/client";
 import { gql } from "../../lib/api/graphql/client";
 import { HeliconeJobFilter } from "../../lib/api/graphql/schema/types/graphql";
-import { SortLeafJob } from "../lib/sorts/requests/sorts";
+import { SortLeafJob } from "../../lib/shared/sorts/requests/sorts";
 
 export const GET_JOBS = gql(/* GraphQL */ `
   query FetchRuns($limit: Int, $offset: Int, $filters: [HeliconeJobFilter!]) {

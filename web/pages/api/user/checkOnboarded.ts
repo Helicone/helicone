@@ -1,11 +1,11 @@
-import { getRequestCountClickhouse } from "../../../lib/api/request/request";
+import { getRequestCountClickhouse } from "../../../lib/shared/request/request";
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { Database } from "../../../supabase/database.types";
 
 async function checkAndUpdateOrgs(

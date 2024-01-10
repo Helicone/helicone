@@ -4,7 +4,7 @@ import {
   FilterLeaf,
   filterListToTree,
   FilterNode,
-} from "../../../../services/lib/filters/filterDefs";
+} from "../../../shared/filters/filterDefs";
 import { getJobs } from "../../jobs/jobs";
 import {
   HeliconeJob,

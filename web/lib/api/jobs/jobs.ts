@@ -1,12 +1,9 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthJobsTable } from "../../../services/lib/filters/filters";
-import {
-  SortLeafJob,
-  buildJobSort,
-} from "../../../services/lib/sorts/requests/sorts";
-import { Result } from "../../result";
+import { FilterNode } from "../../shared/filters/filterDefs";
+import { buildFilterWithAuthJobsTable } from "../../shared/filters/filters";
+import { SortLeafJob, buildJobSort } from "../../shared/sorts/requests/sorts";
+import { Result } from "../../shared/result";
 import { JobStatus } from "../../sql/jobs";
-import { dbExecute } from "../db/dbExecute";
+import { dbExecute } from "../../shared/db/dbExecute";
 
 export interface HeliconeJob {
   id: string;

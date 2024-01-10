@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../lib/shared/result";
 import {
   RequestsOverTime,
   TimeIncrement,
@@ -17,11 +17,11 @@ import {
 import {
   FilterLeaf,
   filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
+} from "../../../lib/shared/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../services/lib/filters/frontendFilterDefs";
+} from "../../../lib/shared/filters/frontendFilterDefs";
 import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
 import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";

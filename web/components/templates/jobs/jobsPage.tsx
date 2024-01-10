@@ -2,14 +2,14 @@ import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { HeliconeJob } from "../../../lib/api/graphql/client/graphql";
-import { HeliconeRequest } from "../../../lib/api/request/request";
-import { Result } from "../../../lib/result";
+import { HeliconeRequest } from "../../../lib/shared/request/request";
+import { Result } from "../../../lib/shared/result";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../lib/shared/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
+} from "../../../lib/shared/sorts/requests/sorts";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";

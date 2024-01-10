@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { TimeFilter } from "../../lib/api/handlerWrappers";
+
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 import {
   FilterLeaf,
   FilterNode,
   filterListToTree,
-} from "../lib/filters/filterDefs";
+} from "../../lib/shared/filters/filterDefs";
+import { TimeFilter } from "../../lib/shared/filters/timeFilter";
 
 export interface BackendMetricsCall<T> {
   params: {

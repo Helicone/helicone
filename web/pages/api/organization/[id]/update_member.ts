@@ -1,6 +1,6 @@
 import { supabaseServer } from "./../../../../lib/supabaseServer";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../lib/shared/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export default async function handler(

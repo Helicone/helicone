@@ -5,8 +5,8 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { ModelMetric, modelMetrics } from "../../../lib/api/models/models";
-import { Result } from "../../../lib/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { Result } from "../../../lib/shared/result";
+import { FilterNode } from "../../../lib/shared/filters/filterDefs";
 
 async function handler(
   options: HandlerWrapperOptions<Result<ModelMetric[], string>>

@@ -2,15 +2,15 @@ import {
   HeliconeRequest,
   getRequests,
   getRequestsCached,
-} from "../../../lib/api/request/request";
+} from "../../../lib/shared/request/request";
 
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { Result } from "../../../lib/shared/result";
+import { FilterNode } from "../../../lib/shared/filters/filterDefs";
+import { SortLeafRequest } from "../../../lib/shared/sorts/requests/sorts";
 import { supabaseServer } from "../../../lib/supabaseServer";
 
 async function handler({

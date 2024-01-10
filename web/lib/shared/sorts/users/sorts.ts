@@ -1,4 +1,4 @@
-import { UserMetric } from "../../../../lib/api/users/users";
+import { UserMetric } from "../../../api/users/users";
 
 export type SortDirection = "asc" | "desc";
 

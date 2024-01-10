@@ -1,5 +1,5 @@
 import { dbExecute } from "../db/dbExecute";
-import { Result } from "../../result";
+import { Result } from "../result";
 
 export interface RequestMetaData {
   request_id: string;

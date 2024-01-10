@@ -1,10 +1,13 @@
 import { ApolloError } from "apollo-server-core";
-import { buildFilterWithAuthClickHouse } from "../../../../services/lib/filters/filters";
-import { dbQueryClickhouse, printRunnableQuery } from "../../db/dbExecute";
+import { buildFilterWithAuthClickHouse } from "../../../shared/filters/filters";
+import {
+  dbQueryClickhouse,
+  printRunnableQuery,
+} from "../../../shared/db/dbExecute";
 import { getUserOrThrow } from "../helpers/auth";
 import { QueryUserArgs, User } from "../schema/types/graphql";
-import { FilterNode } from "../../../../services/lib/filters/filterDefs";
-import { resultMap } from "../../../result";
+import { FilterNode } from "../../../shared/filters/filterDefs";
+import { resultMap } from "../../../shared/result";
 
 export async function getUsers(
   orgId: string,

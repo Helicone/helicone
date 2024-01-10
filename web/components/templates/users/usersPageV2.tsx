@@ -10,13 +10,13 @@ import { useUsers } from "../../../services/hooks/users";
 import {
   filterListToTree,
   filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
-import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+} from "../../../lib/shared/filters/filterDefs";
+import { userTableFilters } from "../../../lib/shared/filters/frontendFilterDefs";
+import { SortLeafRequest } from "../../../lib/shared/sorts/requests/sorts";
 import {
   SortDirection,
   SortLeafUsers,
-} from "../../../services/lib/sorts/users/sorts";
+} from "../../../lib/shared/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedTableV5 from "../../shared/themed/table/themedTableV5";

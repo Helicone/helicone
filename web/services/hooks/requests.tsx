@@ -1,9 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { HeliconeRequest } from "../../lib/api/request/request";
-import { Result } from "../../lib/result";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { HeliconeRequest } from "../../lib/shared/request/request";
+import { Result } from "../../lib/shared/result";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { updateRequestFeedback } from "../lib/requests";
 
 const useGetRequest = (requestId: string) => {

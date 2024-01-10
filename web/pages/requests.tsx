@@ -4,14 +4,14 @@ import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import { NormalizedRequest } from "../components/templates/requestsV2/builder/abstractRequestBuilder";
 import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
-import { getRequests, HeliconeRequest } from "../lib/api/request/request";
-import { Result } from "../lib/result";
+import { getRequests, HeliconeRequest } from "../lib/shared/request/request";
+import { Result } from "../lib/shared/result";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import { FilterNode } from "../services/lib/filters/filterDefs";
+import { FilterNode } from "../lib/shared/filters/filterDefs";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../services/lib/sorts/requests/sorts";
+} from "../lib/shared/sorts/requests/sorts";
 
 interface RequestsV2Props {
   user: User;

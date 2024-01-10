@@ -8,7 +8,9 @@
     "declarationMap": true,
     "sourceMap": true,
     "composite": true,
-    "rootDir": "src"
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]

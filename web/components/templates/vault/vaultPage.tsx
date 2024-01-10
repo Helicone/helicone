@@ -1,6 +1,6 @@
 // pages/Vault.tsx
 import { useEffect, useState } from "react";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import generateApiKey from "generate-api-key";
 import {
   DecryptedProviderKey,

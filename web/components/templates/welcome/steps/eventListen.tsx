@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import Lottie from "react-lottie";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../lib/shared/result";
 import { clsx } from "../../../shared/clsx";
 import * as Listening from "../../../../public/lottie/Listening.json";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";

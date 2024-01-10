@@ -2,7 +2,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";

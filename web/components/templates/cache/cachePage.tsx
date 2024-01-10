@@ -21,7 +21,7 @@ import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import ThemedModal from "../../shared/themed/themedModal";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
-import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import { SortDirection } from "../../../lib/shared/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
 
 interface CachePageProps {

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import {
   DecryptedProviderKey,
   DecryptedProviderKeyMapping,

@@ -1,18 +1,21 @@
 import moment from "moment";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   clickhouseParam,
-} from "../../../services/lib/filters/filters";
+} from "../../shared/filters/filters";
 
-import { Result, resultMap } from "../../result";
+import { Result, resultMap } from "../../shared/result";
 import {
   isValidTimeFilter,
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
-import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
+import {
+  dbQueryClickhouse,
+  printRunnableQuery,
+} from "../../shared/db/dbExecute";
 
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 

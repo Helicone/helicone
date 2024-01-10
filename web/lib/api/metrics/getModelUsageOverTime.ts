@@ -1,15 +1,15 @@
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../shared/filters/filterDefs";
 
-import { Result } from "../../result";
+import { Result } from "../../shared/result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
-import { dbExecute } from "../db/dbExecute";
+import { dbExecute } from "../../shared/db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
+import { buildFilterWithAuth } from "../../shared/filters/filters";
 
 export interface AuthClient {
   client: SupabaseClient;

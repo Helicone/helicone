@@ -1,6 +1,6 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { RequestMetaData } from "../../../lib/api/request/metadata";
+import { RequestMetaData } from "../../../lib/shared/request/metadata";
 
 interface CacheHitsProps {
   metadata: RequestMetaData[];

@@ -1,6 +1,11 @@
-import { UIFilterRow } from "../../../components/shared/themed/themedAdvancedFilters";
-import { TimeFilter } from "../../../lib/api/handlerWrappers";
+export type UIFilterRow = {
+  filterMapIdx: number;
+  operatorIdx: number;
+  value: string;
+};
+
 import { SingleFilterDef } from "./frontendFilterDefs";
+import { TimeFilter } from "./timeFilter";
 export type AllOperators =
   | "equals"
   | "like"

@@ -4,7 +4,7 @@ import Stripe from "stripe";
 // import { Tier } from "../components/templates/usage/usagePage";
 import getStripe from "../utlis/getStripe";
 import { DEMO_EMAIL } from "./constants";
-import { Result } from "./result";
+import { Result } from "./shared/result";
 export async function fetchPostJSON(url: string, data?: {}) {
   try {
     // Default options are marked with *

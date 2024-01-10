@@ -26,7 +26,7 @@ import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatNumber } from "../users/initialColumns";
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { ModelMetric } from "../../../lib/api/models/models";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 

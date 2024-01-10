@@ -10,7 +10,7 @@ import { useOrg } from "../components/shared/layout/organizationContext";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Result } from "../lib/result";
+import { Result } from "../lib/shared/result";
 import { useGetAuthorized } from "../services/hooks/dashboard";
 import UpgradeProModal from "../components/shared/upgradeProModal";
 import { useTheme } from "../components/shared/theme/themeContext";

@@ -6,7 +6,7 @@ import { getAverageLatency } from "../../../lib/api/metrics/averageLatency";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
 import { getTotalCost } from "../../../lib/api/metrics/totalCosts";
 import { getTotalRequests } from "../../../lib/api/metrics/totalRequests";
-import { Result, resultsAll } from "../../../lib/result";
+import { Result, resultsAll } from "../../../lib/shared/result";
 import { UnPromise } from "../../../lib/tsxHelpers";
 
 async function handler(

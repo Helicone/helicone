@@ -190,3 +190,5 @@ export class SupabaseConnector {
     });
   }
 }
+
+export const supabaseServer = new SupabaseConnector();

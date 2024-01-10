@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../../../lib/shared/filters/filterDefs";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 
 export function Filters({

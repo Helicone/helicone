@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import { getRequests } from "../../../lib/api/request/request";
-import { Result } from "../../../lib/result";
+import { getRequests } from "../../../lib/shared/request/request";
+import { Result } from "../../../lib/shared/result";
 
 import {
   HandlerWrapperOptions,

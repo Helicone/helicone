@@ -1,13 +1,10 @@
-import {
-  FilterLeaf,
-  FilterNode,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterLeaf, FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseProperties,
-} from "../../../services/lib/filters/filters";
-import { Result } from "../../result";
-import { dbQueryClickhouse } from "../db/dbExecute";
+} from "../../shared/filters/filters";
+import { Result } from "../../shared/result";
+import { dbQueryClickhouse } from "../../shared/db/dbExecute";
 
 export interface PropertyParam {
   property_param: string;

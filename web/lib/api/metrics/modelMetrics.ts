@@ -1,7 +1,7 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
-import { dbExecute } from "../db/dbExecute";
-import { resultMap } from "../../result";
+import { FilterNode } from "../../shared/filters/filterDefs";
+import { buildFilterWithAuth } from "../../shared/filters/filters";
+import { dbExecute } from "../../shared/db/dbExecute";
+import { resultMap } from "../../shared/result";
 
 export interface ModelMetrics {
   model: string;

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";

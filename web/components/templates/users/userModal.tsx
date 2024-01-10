@@ -20,11 +20,11 @@ import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../services/lib/filters/frontendFilterDefs";
+} from "../../../lib/shared/filters/frontendFilterDefs";
 import {
   filterListToTree,
   filterUIToFilterLeafs,
-} from "../../../services/lib/filters/filterDefs";
+} from "../../../lib/shared/filters/filterDefs";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useRouter } from "next/router";
 import { encodeFilter } from "../requestsV2/requestsPageV2";

@@ -2,8 +2,8 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Database } from "../../supabase/database.types";
-import { getRequests } from "../../lib/api/request/request";
-import { Result } from "../../lib/result";
+import { getRequests } from "../../lib/shared/request/request";
+import { Result } from "../../lib/shared/result";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { HandlerWrapperOptions, withAuth } from "../../lib/api/handlerWrappers";
 

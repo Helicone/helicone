@@ -1,4 +1,7 @@
-import { HeliconeRequest, Provider } from "../../../../lib/api/request/request";
+import {
+  HeliconeRequest,
+  Provider,
+} from "../../../../lib/shared/request/request";
 import ClaudeBuilder from "./claudeBuilder";
 import EmbeddingBuilder from "./embeddingBuilder";
 import ChatGPTBuilder from "./chatGPTBuilder";

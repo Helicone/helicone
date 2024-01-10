@@ -4,7 +4,7 @@ import {
   Response as ExpressResponse,
 } from "express";
 import { withDB } from "./withDB";
-import { SupabaseConnector } from "../db/supabase";
+import { SupabaseConnector, supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
 
 class AuthError extends Error {
@@ -18,7 +18,6 @@ export function withAuth<T>(
   throwOnAuthError = false
 ) {
   return withDB<T>(async ({ db, request, res }) => {
-    const supabaseClient = new SupabaseConnector();
     const authorization = request.authHeader();
 
     if (authorization.error) {
@@ -36,7 +35,7 @@ export function withAuth<T>(
       return;
     }
 
-    const authParams = await supabaseClient.authenticate(authorization.data!);
+    const authParams = await supabaseServer.authenticate(authorization.data!);
 
     if (authParams.error) {
       console.error("authParams.error", authParams.error);
@@ -65,7 +64,7 @@ export function withAuth<T>(
       request,
       res,
       authParams: authParams.data!,
-      supabaseClient: supabaseClient,
+      supabaseClient: supabaseServer,
     });
   });
 }

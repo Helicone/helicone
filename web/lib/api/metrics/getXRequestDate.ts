@@ -1,7 +1,7 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
-import { Result } from "../../result";
-import { dbExecute } from "../db/dbExecute";
+import { FilterNode } from "../../shared/filters/filterDefs";
+import { buildFilterWithAuth } from "../../shared/filters/filters";
+import { Result } from "../../shared/result";
+import { dbExecute } from "../../shared/db/dbExecute";
 
 export interface CreatedAt {
   created_at: number;

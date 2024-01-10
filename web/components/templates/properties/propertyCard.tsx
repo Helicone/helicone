@@ -18,7 +18,7 @@ import { useGetProperties } from "../../../services/hooks/properties";
 import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
-} from "../../../services/lib/filters/frontendFilterDefs";
+} from "../../../lib/shared/filters/frontendFilterDefs";
 import { encodeFilter } from "../requestsV2/requestsPageV2";
 
 interface PropertyCardPageProps {

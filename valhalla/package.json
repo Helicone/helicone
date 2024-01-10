@@ -13,7 +13,9 @@
     "packages/*"
   ],
   "private": "true",
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
   "devDependencies": {
     "lerna": "^7.4.2"
   }

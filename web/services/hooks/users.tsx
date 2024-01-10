@@ -2,9 +2,9 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { UserMetric } from "../../lib/api/users/users";
-import { Result } from "../../lib/result";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafUsers } from "../lib/sorts/users/sorts";
+import { Result } from "../../lib/shared/result";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { SortLeafUsers } from "../../lib/shared/sorts/users/sorts";
 import { DailyActiveUsers } from "../../pages/api/request_users/dau";
 
 const useUsers = (

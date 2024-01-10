@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { HeliconeRequest } from "../../lib/api/request/request";
-import { Result } from "../../lib/result";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { HeliconeRequest } from "../../lib/shared/request/request";
+import { Result } from "../../lib/shared/result";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Database } from "../../supabase/database.types";

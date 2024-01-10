@@ -1,18 +1,15 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "../filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
-import {
-  SortLeafRequest,
-  buildRequestSort,
-} from "../../../services/lib/sorts/requests/sorts";
+} from "../filters/filters";
+import { SortLeafRequest, buildRequestSort } from "../sorts/requests/sorts";
 import { Database, Json } from "../../../supabase/database.types";
-import { Result, resultMap, ok } from "../../result";
-import { RosettaWrapper } from "../../wrappers/rosetta/rosettaWrapper";
+import { Result, resultMap, ok } from "../result";
+import { RosettaWrapper } from "../rosetta/rosettaWrapper";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-import { LlmSchema } from "../models/requestResponseModel";
+import { LlmSchema } from "../requestResponseModel";
 
 export type Provider = "OPENAI" | "ANTHROPIC" | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3900000 / 10;

@@ -14,10 +14,10 @@ import { ArrowsUpDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import {
   SortDirection,
   SortLeafRequest,
-} from "../services/lib/sorts/requests/sorts";
-import { ColumnType } from "../services/lib/filters/frontendFilterDefs";
+} from "../lib/shared/sorts/requests/sorts";
+import { ColumnType } from "../lib/shared/filters/frontendFilterDefs";
 import { RequestWrapper } from "./templates/requests/useRequestsPage";
-import { SortLeafUsers } from "../services/lib/sorts/users/sorts";
+import { SortLeafUsers } from "../lib/shared/sorts/users/sorts";
 import { UserMetric } from "../lib/api/users/users";
 
 export interface Column {

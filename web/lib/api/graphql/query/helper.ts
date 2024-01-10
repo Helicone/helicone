@@ -8,8 +8,8 @@ import {
   TablesAndViews,
   TextOperators,
   TimestampOperators,
-} from "../../../../services/lib/filters/filterDefs";
-import { getRequests } from "../../request/request";
+} from "../../../shared/filters/filterDefs";
+import { getRequests } from "../../../shared/request/request";
 import { getOrgIdOrThrow, getUserOrThrow } from "../helpers/auth";
 import {
   HeliconeRequest,

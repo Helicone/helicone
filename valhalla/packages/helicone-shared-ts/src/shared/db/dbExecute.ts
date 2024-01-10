@@ -1,14 +1,16 @@
 import { Client } from "pg";
-import { Result } from "../../result";
+import { Result } from "../result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
-import dateFormat from "dateformat";
+// import dateFormat from "dateformat";
+// const dateFormat = require("dateformat");
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
     .map((p) => {
       if (p instanceof Date) {
         //ex: 2023-05-27T08:21:26
-        return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
+        // return dateFormat(p, "yyyy-mm-dd HH:MM:ss", true);
+        return p.toISOString().replace("T", " ").replace("Z", "");
       } else {
         return p;
       }

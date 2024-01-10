@@ -1,7 +1,7 @@
-import { dbExecute } from "../../lib/api/db/dbExecute";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { HandlerWrapperOptions, withAuth } from "../../lib/api/handlerWrappers";
-import { getRequests } from "../../lib/api/request/request";
-import { Result, resultMap } from "../../lib/result";
+import { getRequests } from "../../lib/shared/request/request";
+import { Result, resultMap } from "../../lib/shared/result";
 
 async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
   const {

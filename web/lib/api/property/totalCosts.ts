@@ -2,18 +2,18 @@ import {
   FilterNode,
   filterListToTree,
   timeFilterToFilterNode,
-} from "../../../services/lib/filters/filterDefs";
+} from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHousePropResponse,
-} from "../../../services/lib/filters/filters";
-import { Result, resultMap } from "../../result";
+} from "../../shared/filters/filters";
+import { Result, resultMap } from "../../shared/result";
 import { CLICKHOUSE_PRICE_CALC } from "../../sql/constants";
 import {
   dbExecute,
   dbQueryClickhouse,
   printRunnableQuery,
-} from "../db/dbExecute";
+} from "../../shared/db/dbExecute";
 import { convertTextOperators } from "../graphql/query/helper";
 import { PropertyFilter } from "../graphql/schema/types/graphql";
 

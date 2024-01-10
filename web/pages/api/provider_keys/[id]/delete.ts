@@ -1,4 +1,4 @@
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../lib/shared/result";
 import {
   HandlerWrapperOptions,
   withAuth,

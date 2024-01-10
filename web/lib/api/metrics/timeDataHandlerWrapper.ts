@@ -1,9 +1,6 @@
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
-import {
-  FilterLeaf,
-  FilterNode,
-} from "../../../services/lib/filters/filterDefs";
-import { Result } from "../../result";
+import { FilterLeaf, FilterNode } from "../../shared/filters/filterDefs";
+import { Result } from "../../shared/result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { timeBackfill } from "../../timeCalculations/time";
 import { HandlerWrapperOptions } from "../handlerWrappers";

@@ -1,9 +1,9 @@
-import { dbExecute } from "../../../lib/api/db/dbExecute";
+import { dbExecute } from "../../../lib/shared/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 
 interface FeedbackMetric {
   name: string;

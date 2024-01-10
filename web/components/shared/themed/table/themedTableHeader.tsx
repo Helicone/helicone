@@ -1,9 +1,9 @@
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../lib/shared/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
-import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { SingleFilterDef } from "../../../../lib/shared/filters/frontendFilterDefs";
 import { clsx } from "../../clsx";
 import { AdvancedFilters, UIFilterRow } from "../themedAdvancedFilters";
 import { ThemedPill } from "../themedPill";

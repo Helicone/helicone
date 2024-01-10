@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../lib/shared/result";
 
 import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { supabaseServer } from "../../../lib/supabaseServer";

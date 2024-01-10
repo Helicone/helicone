@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
 import { PropertyParam } from "../../lib/api/properties/propertyParams";
-import { Result } from "../../lib/result";
+import { Result } from "../../lib/shared/result";
 
 const getPropertyParams = async (property: string, search: string) => {
   const resp = await axios.get(
