@@ -25,6 +25,7 @@ const CreateOrg = (props: CreateOrgProps) => {
 
   const user = useUser();
   const [loaded, setLoaded] = useState(false);
+  const [referralType, setReferralType] = useState<string>("");
   const supabaseClient = useSupabaseClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useNotification();
@@ -98,6 +99,7 @@ const CreateOrg = (props: CreateOrgProps) => {
         .eq("id", orgContext?.currentOrg?.id ?? "");
       checkError(error);
     }
+
     if (referralCode && referralCode.trim() !== "") {
       fetch("/api/referral/create", {
         method: "POST",
@@ -117,13 +119,17 @@ const CreateOrg = (props: CreateOrgProps) => {
             );
             setIsLoading(false);
             return;
+          } else {
+            setIsLoading(false);
+            orgContext?.refetchOrgs();
+            nextStep();
           }
         });
+    } else {
+      setIsLoading(false);
+      orgContext?.refetchOrgs();
+      nextStep();
     }
-
-    setIsLoading(false);
-    orgContext?.refetchOrgs();
-    nextStep();
   };
 
   return (
@@ -179,7 +185,6 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              // value={orgContext?.currentOrg?.size || ""}
               placeholder={
                 orgContext?.currentOrg?.size || "Select company size"
               }
@@ -194,7 +199,7 @@ const CreateOrg = (props: CreateOrgProps) => {
             </select>
           </div>
         </div>
-        <div className="flex flex-col space-y-2 pb-8">
+        <div className="flex flex-col space-y-2">
           <label
             htmlFor="org-referral"
             className="block text-md font-semibold leading-6 text-gray-900"
@@ -212,10 +217,11 @@ const CreateOrg = (props: CreateOrgProps) => {
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
               required
+              onChange={(e) => setReferralType(e.target.value)}
             >
               {[
                 "Select referral source",
-                "Friend",
+                "Friend (referral)",
                 "Google",
                 "Twitter",
                 "LinkedIn",
@@ -227,9 +233,30 @@ const CreateOrg = (props: CreateOrgProps) => {
             </select>
           </div>
         </div>
+        {referralType === "Friend (referral)" && (
+          <div className="flex flex-col space-y-2">
+            <label
+              htmlFor="referral-code"
+              className="block text-md font-semibold leading-6 text-gray-900"
+            >
+              Referral Code (optional)
+            </label>
+            <div className="">
+              <input
+                id="referral-code"
+                name="referral-code"
+                placeholder={"Referral code"}
+                className={clsx(
+                  "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                )}
+              />
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
-          className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl"
+          className="px-28 py-3 mt-11 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl"
         >
           {isLoading && (
             <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />

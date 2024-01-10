@@ -50,7 +50,9 @@ const ReferralModal = (props: ReferralModalProps) => {
             <button
               id="secret-key"
               onClick={(e) => {
-                navigator.clipboard.writeText("123");
+                navigator.clipboard.writeText(
+                  data?.data?.referral_code as string
+                );
                 setNotification("Copied to clipboard", "success");
               }}
               className={clsx(
