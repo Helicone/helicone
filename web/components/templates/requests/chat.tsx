@@ -469,7 +469,8 @@ export const Chat = (props: ChatProps) => {
             </button>
             {!(
               model === "gpt-4-vision-preview" ||
-              model === "gpt-4-1106-vision-preview"
+              model === "gpt-4-1106-vision-preview" ||
+              /^claude/.test(model)
             ) && (
               <button
                 onClick={() => {
