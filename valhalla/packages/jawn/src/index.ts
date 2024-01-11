@@ -63,7 +63,6 @@ const corsForHelicone = (req: Request, res: Response, next: () => void) => {
     next();
     return;
   }
-  console.log("origin", origin);
 
   const allowedOrigins =
     ENVIRONMENT === "development"
