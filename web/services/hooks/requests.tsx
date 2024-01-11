@@ -56,6 +56,7 @@ const useGetRequests = (
         advancedFilter,
         sortLeaf,
         isCached,
+        org?.currentOrg?.id,
       ],
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
@@ -63,6 +64,13 @@ const useGetRequests = (
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
         const isCached = query.queryKey[5];
+        const orgId = query.queryKey[6];
+        if (!orgId) {
+          return {
+            data: [],
+            error: "No org provided",
+          };
+        }
         const authFromCookie = getHeliconeCookie();
         return await fetch(
           `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
@@ -73,7 +81,7 @@ const useGetRequests = (
               "helicone-authorization": JSON.stringify({
                 _type: "jwt",
                 token: authFromCookie.data?.jwtToken,
-                orgId: org?.currentOrg?.id,
+                orgId: orgId,
               }),
             },
             body: JSON.stringify({

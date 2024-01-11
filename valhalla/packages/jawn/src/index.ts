@@ -40,13 +40,6 @@ app.use(express.urlencoded({ limit: "50mb" }));
 app.use(morgan("combined"));
 app.use(express.json()); // for parsing application/json
 
-// app.use(
-//   OpenApiValidator.middleware({
-//     apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
-//     validateRequests: true,
-//   })
-// );
-
 app.use(errorHandler);
 
 const corsForHelicone = (req: Request, res: Response, next: () => void) => {
@@ -70,6 +63,13 @@ app.use(corsForHelicone);
 app.options("*", (req, res) => {
   res.sendStatus(200);
 });
+
+app.use(
+  OpenApiValidator.middleware({
+    apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
+    validateRequests: true,
+  })
+);
 // Use the CORS middleware in your application
 
 app.post(

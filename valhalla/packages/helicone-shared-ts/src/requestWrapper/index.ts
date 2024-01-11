@@ -33,6 +33,7 @@ function isValidHeliconeAuth(auth: HeliconeAuth): boolean {
     return typeof auth.token === "string";
   }
   if (auth._type === "jwt") {
+    console.error;
     return typeof auth.token === "string" && typeof auth.orgId === "string";
   }
   return false;
@@ -64,7 +65,7 @@ export class RequestWrapper<T> {
     try {
       const parsedAuthHeader = JSON.parse(authHeader) as HeliconeAuth;
       if (!isValidHeliconeAuth(parsedAuthHeader)) {
-        return err("Invalid auth header format" + JSON.stringify(authHeader));
+        return err("Invalid auth header format" + authHeader);
       }
       return ok(parsedAuthHeader);
     } catch (e) {
