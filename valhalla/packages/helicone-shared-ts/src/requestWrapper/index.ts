@@ -40,6 +40,9 @@ function isValidHeliconeAuth(auth: HeliconeAuth): boolean {
 
 export class RequestWrapper<T> {
   constructor(private request: ExpressRequest) {}
+  public async getRawBody<T>(): Promise<T> {
+    return await this.request.body;
+  }
 
   public async getBody(): Promise<T> {
     return await this.request.body;
