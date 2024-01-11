@@ -49,8 +49,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const { setNotification } = useNotification();
 
-  console.log("single Req", singleRequest);
-
   return (
     <>
       <AuthHeader
