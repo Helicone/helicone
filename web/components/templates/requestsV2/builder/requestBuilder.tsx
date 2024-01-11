@@ -29,6 +29,7 @@ export type BuilderType =
 export const getBuilderType = (
   model: string,
   provider: Provider,
+  path?: string | null,
   llmType?: LlmType | null
 ): BuilderType => {
   if (llmType === "chat") {
@@ -84,7 +85,11 @@ export const getBuilderType = (
   }
 
   if (/^claude/.test(model)) {
-    return "ClaudeBuilder";
+    if (path?.includes("messages")) {
+      return "ChatGPTBuilder";
+    } else {
+      return "ClaudeBuilder";
+    }
   }
 
   return "UnknownBuilder";
@@ -129,6 +134,7 @@ const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
   const builderType = getBuilderType(
     model,
     request.provider,
+    request.request_path,
     useRosetta ? request.llmSchema?.request?.llm_type ?? null : null
   );
   let builder = builders[builderType];

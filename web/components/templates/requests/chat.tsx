@@ -2,12 +2,9 @@ import {
   BeakerIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
-  CodeBracketIcon,
   EyeIcon,
   EyeSlashIcon,
-  UserIcon,
 } from "@heroicons/react/24/outline";
-import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import React, { useEffect, useRef, useState } from "react";
@@ -227,28 +224,23 @@ export const SingleChat = (props: {
       <div
         className={clsx(
           getBgColor(),
-          "items-start p-4 text-left grid grid-cols-12 space-x-2 text-black dark:text-white",
+          "items-start p-4 text-left grid grid-cols-12 space-x-4 text-black dark:text-white",
           isSystem && "font-semibold",
           isLast && "rounded-b-md"
         )}
         key={index}
       >
-        <div className="col-span-1 flex items-center justify-center">
-          {isAssistant || isSystem ? (
-            <Image
-              src={"/assets/chatGPT.png"}
-              className="h-6 w-6 rounded-md"
-              height={30}
-              width={30}
-              alt="ChatGPT Logo"
-            />
-          ) : isFunction ? (
-            <CodeBracketIcon className="h-6 w-6 rounded-md border bg-white dark:bg-black dark:text-white text-black border-black dark:border-white p-1" />
-          ) : (
-            <UserIcon className="h-6 w-6 bg-white dark:bg-black rounded-md p-1 border border-black text-black dark:border-white dark:text-white" />
-          )}
+        <div className="col-span-2 flex items-center justify-center">
+          <div
+            className={clsx(
+              "bg-white dark:bg-black border border-gray-300 dark:border-gray-700",
+              "flex text-gray-900 dark:text-gray-100 w-20 h-6 px-1 text-xs rounded-lg font-semibold text-center justify-center items-center"
+            )}
+          >
+            <p>{message.role}</p>
+          </div>
         </div>
-        <div className="relative whitespace-pre-wrap col-span-11 leading-6 items-center h-full">
+        <div className="relative whitespace-pre-wrap col-span-10 leading-6 items-center h-full">
           {isFunction ? (
             <div className="flex flex-col space-y-2">
               <code className="text-xs whitespace-pre-wrap font-semibold">
@@ -280,7 +272,7 @@ export const SingleChat = (props: {
                   : formattedMessageContent}
               </div>
               {showButton && (
-                <div className="w-full flex justify-center items-center pt-2">
+                <div className="w-full flex justify-center items-center pt-2 pr-24">
                   <button onClick={handleToggle}>
                     {expanded ? (
                       <ChevronDownIcon className="rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5 rotate-180" />
@@ -312,8 +304,21 @@ export const Chat = (props: ChatProps) => {
 
   const requestMessages =
     llmSchema?.request.messages ?? requestBody?.messages ?? [];
-  const responseMessage =
-    llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? "";
+
+  const getResponseMessage = () => {
+    if (/^claude/.test(model)) {
+      const claudeResponse: Message = {
+        content: responseBody?.content?.[0]?.text ?? "",
+        id: "123",
+        role: "assistant",
+      };
+      return claudeResponse;
+    }
+    return (
+      llmSchema?.response?.message ?? responseBody?.choices?.[0]?.message ?? ""
+    );
+  };
+  const responseMessage = getResponseMessage();
 
   const [expandedChildren, setExpandedChildren] = React.useState<{
     [key: string]: boolean;
@@ -464,7 +469,8 @@ export const Chat = (props: ChatProps) => {
             </button>
             {!(
               model === "gpt-4-vision-preview" ||
-              model === "gpt-4-1106-vision-preview"
+              model === "gpt-4-1106-vision-preview" ||
+              /^claude/.test(model)
             ) && (
               <button
                 onClick={() => {
