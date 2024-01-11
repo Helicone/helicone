@@ -1,9 +1,8 @@
-import Cookies from "js-cookie";
+import { getHeliconeCookie } from "../../../lib/cookies";
+import { useOrg } from "../../shared/layout/organizationContext";
+import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import AlertForm, { AlertRequest } from "./alertForm";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import useNotification from "../../shared/notification/useNotification";
-import { useOrg } from "../../shared/layout/organizationContext";
 
 interface CreateAlertModalProps {
   open: boolean;
@@ -24,20 +23,17 @@ const CreateAlertModal = (props: CreateAlertModalProps) => {
   const orgContext = useOrg();
 
   const handleCreateAlert = async (req: AlertRequest) => {
-    const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-    if (!authFromCookie) {
+    const authFromCookie = getHeliconeCookie();
+    if (authFromCookie.error || !authFromCookie.data) {
       setNotification("Please login to create an alert", "error");
       return;
     }
-    const decodedCookie = decodeURIComponent(authFromCookie);
-    const parsedCookie = JSON.parse(decodedCookie);
-    const jwtToken = parsedCookie[0];
 
     fetch(`${API_BASE_PATH_WITHOUT_VERSION}/alerts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "helicone-jwt": jwtToken,
+        "helicone-jwt": authFromCookie.data.jwtToken,
         "helicone-org-id": orgContext?.currentOrg?.id || "",
       },
       body: JSON.stringify({
