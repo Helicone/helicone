@@ -47,8 +47,8 @@ app.use(errorHandler);
 const allowedOriginsEnv = {
   production: [
     /^https?:\/\/(www\.)?helicone\.ai$/,
-    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app\/$/,
-    /^https?:\/\/(www\.)?helicone\.vercel\.app\/$/,
+    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
     /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
@@ -78,7 +78,10 @@ const corsForHelicone = (req: Request, res: Response, next: () => void) => {
       "Content-Type, helicone-authorization"
     );
   } else {
-    res.header("info", `not allowed origin for ${ENVIRONMENT} environment :(`);
+    res.header(
+      "info",
+      `not allowed origin (${origin}) for ${ENVIRONMENT} environment :(`
+    );
   }
   next();
 };
