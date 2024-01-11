@@ -4,4 +4,4 @@ supabase gen types typescript --local > valhalla/jawn/src/lib/db/database.types.
 
 git add web/supabase/database.types.ts
 git add worker/supabase/database.types.ts
-git add valhalla/packages/helicone-shared-ts/src/db/database.types.ts
+git add valhalla/jawn/src/db/database.types.ts
