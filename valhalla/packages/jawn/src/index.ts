@@ -30,6 +30,7 @@ const errorHandler: ErrorRequestHandler = (
   res.status(500).send("Something broke!");
 };
 
+export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
 const dirname = __dirname;
 
 const app = express();
@@ -46,12 +47,33 @@ app.use(morgan("combined"));
 app.use(express.json()); // for parsing application/json
 
 app.use(errorHandler);
+const allowedOriginsEnv = {
+  production: [
+    /^https:\/\/helicone\.ai$/,
+    /^https:\/\/.*-helicone\.vercel\.app\/$/,
+    /^https:\/\/helicone\.vercel\.app\/$/,
+    /^https:\/\/helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
+  ],
+  development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+};
 
 const corsForHelicone = (req: Request, res: Response, next: () => void) => {
   const origin = req.get("Origin");
+  if (!origin) {
+    next();
+    return;
+  }
   console.log("origin", origin);
-  // Check if the origin is helicone.ai
-  if (origin === "https://helicone.ai" || origin === "http://localhost:3000") {
+
+  const allowedOrigins =
+    ENVIRONMENT === "development"
+      ? allowedOriginsEnv["development"]
+      : allowedOriginsEnv["production"];
+  const isAllowedOrigin = allowedOrigins.some((pattern) =>
+    pattern.test(origin)
+  );
+
+  if (isAllowedOrigin) {
     // Set CORS headers
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
@@ -59,8 +81,9 @@ const corsForHelicone = (req: Request, res: Response, next: () => void) => {
       "Access-Control-Allow-Headers",
       "Content-Type, helicone-authorization"
     );
+  } else {
+    res.header("info", `not allowed origin for ${ENVIRONMENT} environment :(`);
   }
-
   next();
 };
 
