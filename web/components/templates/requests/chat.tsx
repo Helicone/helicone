@@ -2,12 +2,9 @@ import {
   BeakerIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
-  CodeBracketIcon,
   EyeIcon,
   EyeSlashIcon,
-  UserIcon,
 } from "@heroicons/react/24/outline";
-import Image from "next/image";
 import { clsx } from "../../shared/clsx";
 import { removeLeadingWhitespace } from "../../shared/utils/utils";
 import React, { useEffect, useRef, useState } from "react";
