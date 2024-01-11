@@ -4,7 +4,6 @@ require("dotenv").config({
 
 import express from "express";
 import * as OpenApiValidator from "express-openapi-validator";
-import { getRequests, withAuth, withDB } from "helicone-shared-ts";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
@@ -13,6 +12,9 @@ import {
   getTokenCountGPT3,
 } from "./tokens/tokenCounter";
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+import { withAuth } from "./lib/routers/withAuth";
+import { getRequests, getRequestsCached } from "./lib/shared/request/request";
+import { withDB } from "./lib/routers/withDB";
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -25,6 +27,7 @@ const errorHandler: ErrorRequestHandler = (
   res.status(500).send("Something broke!");
 };
 
+export const ENVIRONMENT = process.env.VERCEL_ENV ?? "development";
 const dirname = __dirname;
 
 const app = express();
@@ -40,14 +43,60 @@ app.use(express.urlencoded({ limit: "50mb" }));
 app.use(morgan("combined"));
 app.use(express.json()); // for parsing application/json
 
+app.use(errorHandler);
+const allowedOriginsEnv = {
+  production: [
+    /^https?:\/\/(www\.)?helicone\.ai$/,
+    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
+  ],
+  development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
+};
+
+const corsForHelicone = (req: Request, res: Response, next: () => void) => {
+  const origin = req.get("Origin");
+  if (!origin) {
+    next();
+    return;
+  }
+
+  const allowedOrigins =
+    ENVIRONMENT === "development"
+      ? allowedOriginsEnv["development"]
+      : allowedOriginsEnv["production"];
+  const isAllowedOrigin = allowedOrigins.some((pattern) =>
+    pattern.test(origin)
+  );
+
+  if (isAllowedOrigin) {
+    // Set CORS headers
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, helicone-authorization"
+    );
+  } else {
+    res.header(
+      "info",
+      `not allowed origin (${origin}) for ${ENVIRONMENT} environment :(`
+    );
+  }
+  next();
+};
+
+app.use(corsForHelicone);
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
+
 app.use(
   OpenApiValidator.middleware({
     apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
     validateRequests: true,
   })
 );
-
-app.use(errorHandler);
 
 app.post(
   "/v1/request/query",
@@ -58,15 +107,32 @@ app.post(
     console.log("body", body);
     const { filter, offset, limit, sort, isCached } = body;
 
-    const metrics = await getRequests(
-      authParams.organizationId,
-      filter,
-      offset,
-      limit,
-      sort,
-      supabaseClient.client
-    );
-    res.status(metrics.error === null ? 200 : 500).json(metrics);
+    const metrics = isCached
+      ? await getRequestsCached(
+          authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          supabaseClient.client
+        )
+      : await getRequests(
+          authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          supabaseClient.client
+        );
+    res
+      .header("Access-Control-Allow-Origin", "*")
+      .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+      .header(
+        "Access-Control-Allow-Headers",
+        "Content-Type, helicone-authorization"
+      )
+      .status(metrics.error === null ? 200 : 500)
+      .json(metrics);
   })
 );
 
