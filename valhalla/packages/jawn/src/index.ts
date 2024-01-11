@@ -49,10 +49,10 @@ app.use(express.json()); // for parsing application/json
 app.use(errorHandler);
 const allowedOriginsEnv = {
   production: [
-    /^https:\/\/helicone\.ai$/,
-    /^https:\/\/.*-helicone\.vercel\.app\/$/,
-    /^https:\/\/helicone\.vercel\.app\/$/,
-    /^https:\/\/helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.ai$/,
+    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app\/$/,
+    /^https?:\/\/(www\.)?helicone\.vercel\.app\/$/,
+    /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
 };
