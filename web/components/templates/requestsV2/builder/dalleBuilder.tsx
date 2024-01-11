@@ -49,7 +49,9 @@ export class DalleBuilder extends AbstractRequestBuilder {
           response={{
             title: "Response",
             text: responseTextComputed,
-            image_url: this.response.response_body?.data[0]?.url,
+            image_url: this.response.response_body?.data
+              ? this.response.response_body?.data[0]?.url
+              : "",
           }}
           rawRequest={this.response.request_body}
           rawResponse={this.response.response_body}
