@@ -65,7 +65,7 @@ export class RequestWrapper<T> {
     try {
       const parsedAuthHeader = JSON.parse(authHeader) as HeliconeAuth;
       if (!isValidHeliconeAuth(parsedAuthHeader)) {
-        return err("Invalid auth header format" + authHeader);
+        return err("Invalid auth header format");
       }
       return ok(parsedAuthHeader);
     } catch (e) {

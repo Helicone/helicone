@@ -26,7 +26,6 @@ export function withAuth<T>(
     const authorization = request.authHeader();
 
     if (authorization.error) {
-      console.error("authorization.error", authorization.error);
       res.status(401).json({
         error: authorization.error,
       });

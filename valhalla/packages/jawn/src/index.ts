@@ -70,7 +70,6 @@ app.use(
     validateRequests: true,
   })
 );
-// Use the CORS middleware in your application
 
 app.post(
   "/v1/request/query",
