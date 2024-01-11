@@ -589,3 +589,31 @@ export async function buildFilterWithAuth(
     filter: filterNode,
   });
 }
+
+export async function buildFilterWithAuthCacheHits(
+  args: ExternalBuildFilterArgs & {
+    org_id: string;
+  },
+  getOrgIdFilter: (orgId: string) => FilterLeaf = (orgId) => ({
+    cache_hits: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  })
+): Promise<{ filter: string; argsAcc: any[] }> {
+  const { org_id, filter } = args;
+
+  const filterNode: FilterNode = {
+    left: getOrgIdFilter(org_id),
+    operator: "and",
+    right: filter,
+  };
+
+  const filterBuilder = buildFilterPostgres;
+
+  return filterBuilder({
+    ...args,
+    filter: filterNode,
+  });
+}
