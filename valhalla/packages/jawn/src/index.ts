@@ -4,7 +4,12 @@ require("dotenv").config({
 
 import express from "express";
 import * as OpenApiValidator from "express-openapi-validator";
-import { getRequests, withAuth, withDB } from "helicone-shared-ts";
+import {
+  getRequests,
+  getRequestsCached,
+  withAuth,
+  withDB,
+} from "helicone-shared-ts";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
@@ -80,14 +85,23 @@ app.post(
     console.log("body", body);
     const { filter, offset, limit, sort, isCached } = body;
 
-    const metrics = await getRequests(
-      authParams.organizationId,
-      filter,
-      offset,
-      limit,
-      sort,
-      supabaseClient.client
-    );
+    const metrics = isCached
+      ? await getRequestsCached(
+          authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          supabaseClient.client
+        )
+      : await getRequests(
+          authParams.organizationId,
+          filter,
+          offset,
+          limit,
+          sort,
+          supabaseClient.client
+        );
     res
       .header("Access-Control-Allow-Origin", "*")
       .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
