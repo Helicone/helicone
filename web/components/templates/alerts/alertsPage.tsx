@@ -52,8 +52,6 @@ const AlertsPage = (props: AlertsPageProps) => {
     return closest;
   }
 
-  console.log("alerts", alerts);
-
   return (
     <div className="flex flex-col space-y-16">
       <div className="flex flex-col space-y-8">
