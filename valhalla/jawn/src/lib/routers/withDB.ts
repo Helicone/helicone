@@ -1,4 +1,4 @@
-import { createValhallaClient } from "..";
+import { createValhallaClient } from "../db/valhalla";
 import { RequestWrapper } from "../requestWrapper";
 import { IRouterWrapperDB } from "./iRouterWrapper";
 import {

@@ -31,23 +31,23 @@ def build():
 
 
 def start(mode):
-    runCommand(Command.DOCKER_COMPOSE_CLICKHOUSE)
     if mode == "db-only":
+        runCommand(Command.DOCKER_COMPOSE_CLICKHOUSE)
         runCommand(Command.SUPABASE_START)
-        runCommand(Command.DOCKER_COMPOSE_VALHALLA_DB)
+
         runCommand(Command.DOCKER_COMPOSE_CLICKHOUSE)
     elif mode == "front-end-dev":
+        runCommand(Command.DOCKER_COMPOSE_CLICKHOUSE)
         runCommand(Command.SUPABASE_START)
         runCommand(Command.DOCKER_COMPOSE_VALHALLA)
         runCommand(Command.DOCKER_COMPOSE_WORKER)
     elif mode == "worker-dev":
+        runCommand(Command.DOCKER_COMPOSE_CLICKHOUSE)
         runCommand(Command.SUPABASE_START)
         runCommand(Command.DOCKER_COMPOSE_VALHALLA)
         runCommand(Command.DOCKER_COMPOSE_FRONTEND)
     elif mode == "valhalla-dev":
-        runCommand(Command.SUPABASE_START)
-        runCommand(Command.DOCKER_COMPOSE_FRONTEND)
-        runCommand(Command.DOCKER_COMPOSE_WORKER)
+        runCommand(Command.DOCKER_COMPOSE_VALHALLA_DB)
     elif mode == "all":
         runCommand(Command.SUPABASE_START)
         runCommand(Command.DOCKER_COMPOSE_UP)
