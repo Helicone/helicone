@@ -5,3 +5,7 @@ ALTER TABLE IF EXISTS public.cache_hits
 ADD COLUMN IF NOT EXISTS organization_id uuid;
 -- Create an index on organization_id and created_at desc if it doesn't exist
 CREATE INDEX IF NOT EXISTS idx_cache_hits_org_id_created_at_desc ON public.cache_hits (organization_id, created_at DESC);
+UPDATE public.cache_hits
+SET organization_id = r.helicone_org_id
+FROM public.request r
+WHERE cache_hits.request_id = r.id;
