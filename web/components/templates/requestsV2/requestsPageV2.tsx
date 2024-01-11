@@ -160,7 +160,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   >(undefined);
   const searchParams = useSearchParams();
 
-  function getTimeFilter() {
+  const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
 
@@ -196,7 +196,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         },
       };
     }
-  }
+  };
 
   const getAdvancedFilters = (): UIFilterRow[] => {
     try {
