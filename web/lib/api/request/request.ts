@@ -137,7 +137,7 @@ export async function getRequestsCached(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuth({
+  const builtFilter = await buildFilterWithAuthCacheHits({
     org_id: orgId,
     filter,
     argsAcc: [],
@@ -168,8 +168,8 @@ export async function getRequestsCached(
     feedback.rating AS feedback_rating,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
-  FROM request
-    inner join cache_hits on cache_hits.request_id = request.id
+  FROM cache_hits
+    inner join request on cache_hits.request_id = request.id
     inner join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
   WHERE (
