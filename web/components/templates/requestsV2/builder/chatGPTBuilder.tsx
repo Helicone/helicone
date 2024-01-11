@@ -61,6 +61,10 @@ class ChatGPTBuilder extends AbstractRequestBuilder {
         if (this.response.response_body?.error) {
           return this.response.response_body?.error?.message || "";
         }
+        //
+        if (/^claude/.test(this.model)) {
+          return this.response.response_body?.content[0].text || "";
+        }
         // successful response, check for choices
         if (this.response.response_body?.choices) {
           if (hasNoContent) {
