@@ -21,9 +21,7 @@ interface PlaygroundPageProps {
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
   const [requestId, setRequestId] = useState<string | undefined>(request);
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
-  const [temperature, setTemperature] = useState<number>(1);
-  const [maxTokens, setMaxTokens] = useState<number>(256);
+
   const [open, setOpen] = useState<boolean>(false);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
@@ -32,9 +30,26 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { data, isLoading, chat, hasData, isChat } = usePlaygroundPage(
     debouncedRequestId || ""
   );
-  const { setNotification } = useNotification();
 
   const singleRequest = data.length > 0 ? data[0] : null;
+
+  // cast requestBody to an object that contains { max_tokens: number}
+  const reqBody =
+    singleRequest !== null ? (singleRequest.requestBody as any) : null;
+
+  const [selectedModels, setSelectedModels] = useState<string[]>(
+    singleRequest !== null ? [singleRequest.model] : []
+  );
+  const [temperature, setTemperature] = useState<number>(
+    reqBody !== null ? reqBody.temperature : 0.7
+  );
+  const [maxTokens, setMaxTokens] = useState<number>(
+    reqBody !== null ? reqBody.max_tokens : 256
+  );
+
+  const { setNotification } = useNotification();
+
+  console.log("single Req", singleRequest);
 
   return (
     <>
