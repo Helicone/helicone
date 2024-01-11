@@ -33,7 +33,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const singleRequest = data.length > 0 ? data[0] : null;
 
-  // cast requestBody to an object that contains { max_tokens: number}
   const reqBody =
     singleRequest !== null ? (singleRequest.requestBody as any) : null;
 
