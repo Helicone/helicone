@@ -40,14 +40,37 @@ app.use(express.urlencoded({ limit: "50mb" }));
 app.use(morgan("combined"));
 app.use(express.json()); // for parsing application/json
 
-app.use(
-  OpenApiValidator.middleware({
-    apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
-    validateRequests: true,
-  })
-);
+// app.use(
+//   OpenApiValidator.middleware({
+//     apiSpec: process.env.OPENAPI_SCHEMA_FILE ?? `${dirname}/schema/openapi.yml`,
+//     validateRequests: true,
+//   })
+// );
 
 app.use(errorHandler);
+
+const corsForHelicone = (req: Request, res: Response, next: () => void) => {
+  const origin = req.get("Origin");
+  console.log("origin", origin);
+  // Check if the origin is helicone.ai
+  if (origin === "https://helicone.ai" || origin === "http://localhost:3000") {
+    // Set CORS headers
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, helicone-authorization"
+    );
+  }
+
+  next();
+};
+
+app.use(corsForHelicone);
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
+// Use the CORS middleware in your application
 
 app.post(
   "/v1/request/query",
@@ -66,7 +89,15 @@ app.post(
       sort,
       supabaseClient.client
     );
-    res.status(metrics.error === null ? 200 : 500).json(metrics);
+    res
+      .header("Access-Control-Allow-Origin", "*")
+      .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+      .header(
+        "Access-Control-Allow-Headers",
+        "Content-Type, helicone-authorization"
+      )
+      .status(metrics.error === null ? 200 : 500)
+      .json(metrics);
   })
 );
 
