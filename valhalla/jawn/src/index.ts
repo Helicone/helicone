@@ -4,12 +4,6 @@ require("dotenv").config({
 
 import express from "express";
 import * as OpenApiValidator from "express-openapi-validator";
-import {
-  getRequests,
-  getRequestsCached,
-  withAuth,
-  withDB,
-} from "helicone-shared-ts";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
 import { paths } from "./schema/types";
@@ -18,6 +12,9 @@ import {
   getTokenCountGPT3,
 } from "./tokens/tokenCounter";
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+import { withAuth } from "./lib/routers/withAuth";
+import { getRequests, getRequestsCached } from "./lib/shared/request/request";
+import { withDB } from "./lib/routers/withDB";
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -49,10 +46,10 @@ app.use(express.json()); // for parsing application/json
 app.use(errorHandler);
 const allowedOriginsEnv = {
   production: [
-    /^https:\/\/helicone\.ai$/,
-    /^https:\/\/.*-helicone\.vercel\.app\/$/,
-    /^https:\/\/helicone\.vercel\.app\/$/,
-    /^https:\/\/helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.ai$/,
+    /^https?:\/\/(www\.)?.*-helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone\.vercel\.app$/,
+    /^https?:\/\/(www\.)?helicone-git-valhalla-use-jawn-to-read-helicone\.vercel\.app$/,
   ],
   development: [/^http:\/\/localhost:3000$/, /^http:\/\/localhost:3001$/],
 };
@@ -81,7 +78,10 @@ const corsForHelicone = (req: Request, res: Response, next: () => void) => {
       "Content-Type, helicone-authorization"
     );
   } else {
-    res.header("info", `not allowed origin for ${ENVIRONMENT} environment :(`);
+    res.header(
+      "info",
+      `not allowed origin (${origin}) for ${ENVIRONMENT} environment :(`
+    );
   }
   next();
 };

@@ -31,6 +31,7 @@ const useGetRequest = (requestId: string) => {
         }),
       }).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
     },
+    refetchOnWindowFocus: false,
   });
   return {
     request: data?.data,
