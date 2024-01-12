@@ -128,14 +128,17 @@ export interface Database {
       cache_hits: {
         Row: {
           created_at: string
+          organization_id: string | null
           request_id: string
         }
         Insert: {
           created_at?: string
+          organization_id?: string | null
           request_id: string
         }
         Update: {
           created_at?: string
+          organization_id?: string | null
           request_id?: string
         }
         Relationships: [
