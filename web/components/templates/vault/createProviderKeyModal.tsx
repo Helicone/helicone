@@ -97,7 +97,6 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="key-name">Key Name</label>
           <input
-            type="text"
             name="key-name"
             id="key-name"
             className={clsx(
@@ -110,7 +109,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
         <div className="w-full space-y-1.5 text-sm">
           <label htmlFor="provider-key">Provider Key</label>
           <input
-            type="text"
+            type="password"
             name="provider-key"
             id="provider-key"
             className={clsx(

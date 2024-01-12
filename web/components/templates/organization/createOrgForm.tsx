@@ -13,9 +13,9 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
+import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
-import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 
 export const ORGANIZATION_COLORS = [
   {
@@ -152,7 +152,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
   );
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
-
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [isProviderOpen, setIsProviderOpen] = useState(false);
 
   return (
@@ -444,6 +444,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           </button>
         </div>
       </div>
+
       <CreateProviderKeyModal
         open={isProviderOpen}
         variant={"portal"}
