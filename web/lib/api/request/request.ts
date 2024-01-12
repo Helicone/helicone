@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
+  buildFilterWithAuthCacheHits,
   buildFilterWithAuthClickHouse,
 } from "../../../services/lib/filters/filters";
 import {
@@ -92,8 +93,6 @@ export async function getRequests(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
-    prompt.name AS prompt_name,
-    prompt.prompt AS prompt_regex,
     job_node_request.node_id as node_id,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
@@ -102,7 +101,6 @@ export async function getRequests(
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM request
     left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
     left join feedback on response.id = feedback.response_id
     left join job_node_request on request.id = job_node_request.request_id
   WHERE (
@@ -139,7 +137,7 @@ export async function getRequestsCached(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuth({
+  const builtFilter = await buildFilterWithAuthCacheHits({
     org_id: orgId,
     filter,
     argsAcc: [],
@@ -165,17 +163,14 @@ export async function getRequestsCached(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
-    prompt.name AS prompt_name,
-    prompt.prompt AS prompt_regex,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM cache_hits
-    left join request on cache_hits.request_id = request.id
-    left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
+    inner join request on cache_hits.request_id = request.id
+    inner join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})

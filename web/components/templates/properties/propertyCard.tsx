@@ -50,8 +50,6 @@ const PropertyCard = (props: PropertyCardPageProps) => {
     propertyFilters
   );
 
-  console.log(filterMap);
-
   const metricsData: MetricsPanelProps["metric"][] = [
     {
       id: "totalCost",
