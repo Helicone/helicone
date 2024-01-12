@@ -10,6 +10,7 @@ interface CompletionProps {
   response: {
     title: string;
     text: string;
+    image_url?: string;
   };
 
   rawRequest: any;
@@ -28,6 +29,26 @@ export const Completion = (props: CompletionProps) => {
   } = props;
 
   const [mode, setMode] = useState<"pretty" | "json">(defaultMode);
+
+  const renderImageRow = () => {
+    const image_url = response?.image_url;
+    if (image_url) {
+      return (
+        <div className="flex flex-col space-y-4 divide-y divide-gray-100 dark:divide-gray-900">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {image_url ? (
+            <img src={image_url} alt={""} width={200} height={200} />
+          ) : (
+            <div className="h-[150px] w-[200px] bg-white dark:bg-black border border-gray-300 dark:border-gray-700 text-center items-center flex justify-center text-xs italic text-gray-500">
+              Unsupported Image Type
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
 
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
@@ -92,6 +113,7 @@ export const Completion = (props: CompletionProps) => {
               </p>
               <p className="text-gray-900 dark:text-gray-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#17191d]">
                 {response && removeLeadingWhitespace(response.text)}
+                {renderImageRow()}
               </p>
             </div>
           </div>

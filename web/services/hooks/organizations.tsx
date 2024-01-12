@@ -75,7 +75,7 @@ const useGetOrg = (orgId: string) => {
         .eq("soft_delete", false)
         .eq("id", orgId)
         .single();
-      return data;
+      return data as Database["public"]["Tables"]["organization"]["Row"];
     },
     refetchOnWindowFocus: false,
   });

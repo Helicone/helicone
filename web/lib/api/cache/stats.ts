@@ -260,7 +260,8 @@ export async function getTopRequestsClickhouse(
   const promptQuery = `
   SELECT 
     id as request_id, 
-    (coalesce(request.body ->>'prompt', request.body ->'messages'->-1->>'content'))::text as prompt 
+    (coalesce(request.body ->>'prompt', request.body ->'messages'->-1->>'content'))::text as prompt,
+    (coalesce(request.body ->>'model'))::text as model
   FROM 
     request 
   WHERE 
@@ -269,17 +270,28 @@ export async function getTopRequestsClickhouse(
   const prompts = await dbExecute<{
     request_id: string;
     prompt: string;
+    model: string;
   }>(promptQuery, []);
 
   if (prompts.error) {
     return prompts;
   }
 
-  const combinedData = res?.data?.map((item) => ({
-    ...item,
-    prompt: prompts?.data?.find((p) => p.request_id === item.request_id)
-      ?.prompt,
-  }));
+  const promptsMap = new Map(prompts?.data?.map((p) => [p.request_id, p]));
+
+  const combinedData = res?.data?.map((item) => {
+    const promptEntry = promptsMap.get(item.request_id);
+    let model: string | undefined = item.model;
+    if (!model || model === "") {
+      model = promptEntry?.model;
+    }
+
+    return {
+      ...item,
+      prompt: promptEntry?.prompt,
+      model: model,
+    };
+  });
 
   return { ...res, data: combinedData };
 }

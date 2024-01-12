@@ -3,6 +3,8 @@ import { HeliconeRequest } from "../../lib/api/request/request";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { getHeliconeCookie } from "../../lib/cookies";
+import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetRequest = (requestId: string) => {
   const { data, isLoading } = useQuery({
@@ -29,6 +31,7 @@ const useGetRequest = (requestId: string) => {
         }),
       }).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
     },
+    refetchOnWindowFocus: false,
   });
   return {
     request: data?.data,
@@ -44,6 +47,7 @@ const useGetRequests = (
   isCached: boolean = false,
   isLive: boolean = false
 ) => {
+  const org = useOrg();
   return {
     requests: useQuery({
       queryKey: [
@@ -53,6 +57,7 @@ const useGetRequests = (
         advancedFilter,
         sortLeaf,
         isCached,
+        org?.currentOrg?.id,
       ],
       queryFn: async (query) => {
         const currentPage = query.queryKey[1] as number;
@@ -60,19 +65,35 @@ const useGetRequests = (
         const advancedFilter = query.queryKey[3];
         const sortLeaf = query.queryKey[4];
         const isCached = query.queryKey[5];
-        return await fetch("/api/request", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: advancedFilter,
-            offset: (currentPage - 1) * currentPageSize,
-            limit: currentPageSize,
-            sort: sortLeaf,
-            isCached,
-          }),
-        }).then(
+        const orgId = query.queryKey[6];
+        if (!orgId) {
+          return {
+            data: [],
+            error: "No org provided",
+          };
+        }
+        const authFromCookie = getHeliconeCookie();
+        return await fetch(
+          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "helicone-authorization": JSON.stringify({
+                _type: "jwt",
+                token: authFromCookie.data?.jwtToken,
+                orgId: orgId,
+              }),
+            },
+            body: JSON.stringify({
+              filter: advancedFilter,
+              offset: (currentPage - 1) * currentPageSize,
+              limit: currentPageSize,
+              sort: sortLeaf,
+              isCached,
+            }),
+          }
+        ).then(
           (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
         );
       },

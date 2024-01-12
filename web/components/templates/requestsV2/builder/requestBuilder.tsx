@@ -12,6 +12,7 @@ import UnknownBuilder from "./unknownBuilder";
 import CompletionBuilder from "./completionBuilder";
 import { LlmType } from "../../../../lib/api/models/requestResponseModel";
 import ChatBuilder from "./chatBuilder";
+import { DalleBuilder } from "./dalleBuilder";
 
 export type BuilderType =
   | "ChatBuilder"
@@ -22,11 +23,13 @@ export type BuilderType =
   | "EmbeddingBuilder"
   | "ClaudeBuilder"
   | "CustomBuilder"
+  | "DalleBuilder"
   | "UnknownBuilder";
 
 export const getBuilderType = (
   model: string,
   provider: Provider,
+  path?: string | null,
   llmType?: LlmType | null
 ): BuilderType => {
   if (llmType === "chat") {
@@ -43,6 +46,10 @@ export const getBuilderType = (
 
   if (model == "gpt-4-vision-preview" || model == "gpt-4-1106-vision-preview") {
     return "ChatGPTBuilder";
+  }
+
+  if (model === "dall-e-3" || model === "dall-e-2") {
+    return "DalleBuilder";
   }
 
   // mistralai/Mistral-7B-Instruct-v[number].[number]
@@ -78,7 +85,11 @@ export const getBuilderType = (
   }
 
   if (/^claude/.test(model)) {
-    return "ClaudeBuilder";
+    if (path?.includes("messages")) {
+      return "ChatGPTBuilder";
+    } else {
+      return "ClaudeBuilder";
+    }
   }
 
   return "UnknownBuilder";
@@ -98,6 +109,7 @@ const builders: {
   EmbeddingBuilder: EmbeddingBuilder,
   ClaudeBuilder: ClaudeBuilder,
   CustomBuilder: CustomBuilder,
+  DalleBuilder: DalleBuilder,
   UnknownBuilder: UnknownBuilder,
 };
 
@@ -125,6 +137,7 @@ const getRequestBuilder = (request: HeliconeRequest, useRosetta: boolean) => {
   const builderType = getBuilderType(
     model,
     request.provider,
+    request.request_path,
     useRosetta ? request.llmSchema?.request?.llm_type ?? null : null
   );
   let builder = builders[builderType];
