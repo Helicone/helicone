@@ -12,15 +12,17 @@ interface DeleteOrgModalProps {
   setOpen: (open: boolean) => void;
   orgId: string;
   orgName: string;
+  onDeleteRoute: string | null;
 }
 export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
-  const { open: isOpen, orgId, orgName, setOpen } = props;
+  const { open: isOpen, orgId, orgName, setOpen, onDeleteRoute } = props;
 
   const { setNotification } = useNotification();
   const orgContext = useOrg();
   const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
   const [confirmOrgName, setConfirmOrgName] = useState("");
+
   return (
     <ThemedModal open={isOpen} setOpen={setOpen}>
       <div className="flex flex-col gap-4 w-full">
@@ -32,8 +34,8 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
           This is an irreversible action and cannot be undone, please confirm
           you want to delete this organization.
         </p>
-        <div className="flex flex-col gap-1">
-          <i className="text-gray-700  whitespace-pre-wrap text-xs">
+        <div className="flex flex-col gap-1 py-4">
+          <i className="text-gray-700 whitespace-pre-wrap text-xs">
             Confirm the name of the organization you want to delete
           </i>
           <input
@@ -72,14 +74,15 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
 
               if (error) {
                 setNotification("Error deleting organization", "error");
-                setOpen(false);
               } else {
                 orgContext?.refetchOrgs();
-                setOpen(false);
-                router.push("/requests");
-                router.push("/requests");
+                if (onDeleteRoute) {
+                  router.push(onDeleteRoute || "/request");
+                }
                 setNotification("Delete organization", "success");
               }
+
+              setOpen(false);
             }}
             className={clsx(
               "relative inline-flex items-center rounded-md hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"

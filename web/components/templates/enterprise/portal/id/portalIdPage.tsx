@@ -18,6 +18,8 @@ import ProviderKeyList from "./providerKeyList";
 import ThemedDrawer from "../../../../shared/themed/themedDrawer";
 import { useOrg } from "../../../../shared/layout/organizationContext";
 import { useRouter } from "next/router";
+import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
+import EditCustomerOrgModal from "../editCustomerOrgModal";
 
 interface PortalIdPageProps {
   orgId: string | null;
@@ -36,6 +38,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   const router = useRouter();
 
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const currentIcon = ORGANIZATION_ICONS.find(
     (icon) => icon.name === org?.icon
@@ -77,7 +80,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   {org?.name}
                 </h1>
               </div>
-              <div className="flex flex-row w-full items-center space-x-4 pt-4">
+              <div className="flex flex-row w-full items-center space-x-2 pt-4">
                 <button
                   onClick={() => {
                     // set the org id and then redirect the user to the dashboard page
@@ -97,6 +100,14 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                   className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
                 >
                   Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteOpen(true);
+                  }}
+                  className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
+                >
+                  Delete
                 </button>
               </div>
               <div className="flex flex-col space-y-4 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-4 text-black dark:text-white">
@@ -168,33 +179,28 @@ const PortalIdPage = (props: PortalIdPageProps) => {
           </>
         )}
       </div>
-      <ThemedDrawer open={editOpen} setOpen={setEditOpen}>
-        <div className="flex flex-col space-y-4">
-          <p className="text-2xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 py-4">
-            Edit Customer
-          </p>
-          <CreateOrgForm
-            variant="reseller"
-            onSuccess={() => {
-              setEditOpen(false);
-              refetch();
-            }}
-            initialValues={
-              org
-                ? {
-                    color: org.color,
-                    icon: org.icon,
-                    name: org.name,
-                    id: org.id,
-                    limits: org.limits as OrgLimits,
-                    providerKey: org.org_provider_key,
-                    isOwner: true,
-                  }
-                : undefined
-            }
-          />
-        </div>
-      </ThemedDrawer>
+      <EditCustomerOrgModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        initialValues={{
+          color: org?.color || "",
+          icon: org?.icon || "",
+          name: org?.name || "",
+          id: org?.id || "",
+          limits: org?.limits as OrgLimits,
+          providerKey: org?.org_provider_key || "",
+        }}
+      />
+      <DeleteOrgModal
+        open={deleteOpen}
+        setOpen={setDeleteOpen}
+        orgId={org?.id || ""}
+        orgName={org?.name || ""}
+        onDeleteRoute={"/enterprise/portal"}
+      />
     </>
   );
 };

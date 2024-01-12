@@ -160,6 +160,7 @@ const PortalPage = (props: PortalPageProps) => {
                             <TableHeaderCell className="text-black">
                               Requests (30 days)
                             </TableHeaderCell>
+                            <TableHeaderCell />
                           </TableRow>
                         </TableHead>
                         <TableBody>

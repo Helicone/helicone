@@ -99,7 +99,6 @@ interface CreateOrgFormProps {
     color: string | null;
     icon: string | null;
     providerKey: string | null;
-    isOwner: boolean;
     limits?: OrgLimits;
   };
   onSuccess?: () => void;
@@ -445,28 +444,8 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
             {initialValues ? "Update" : "Create"}
           </button>
         </div>
-        {initialValues?.isOwner && (
-          <div className="py-10 flex flex-col">
-            <div className="flex flex-row">
-              <button
-                type="button"
-                className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                onClick={() => setDeleteOpen(true)}
-              >
-                Delete Organization
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-      {initialValues && (
-        <DeleteOrgModal
-          open={deleteOpen}
-          setOpen={setDeleteOpen}
-          orgId={initialValues.id}
-          orgName={initialValues.name}
-        />
-      )}
+
       <CreateProviderKeyModal
         open={isProviderOpen}
         variant={"portal"}
