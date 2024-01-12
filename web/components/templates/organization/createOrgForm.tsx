@@ -16,7 +16,6 @@ import useNotification from "../../shared/notification/useNotification";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
-import { DeleteOrgModal } from "./deleteOrgModal";
 
 export const ORGANIZATION_COLORS = [
   {

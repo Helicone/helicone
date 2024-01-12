@@ -1,4 +1,3 @@
-import { Database } from "../../../../supabase/database.types";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import CreateOrgForm, { OrgLimits } from "../../organization/createOrgForm";
 
