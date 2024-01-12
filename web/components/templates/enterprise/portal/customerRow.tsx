@@ -12,8 +12,6 @@ import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../../organization/createOrgForm";
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import { DeleteOrgModal } from "../../organization/deleteOrgModal";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
