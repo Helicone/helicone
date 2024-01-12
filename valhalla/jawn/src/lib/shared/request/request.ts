@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../filters/filterDefs";
 import {
   buildFilterWithAuth,
+  buildFilterWithAuthCacheHits,
   buildFilterWithAuthClickHouse,
 } from "../filters/filters";
 import { SortLeafRequest, buildRequestSort } from "../sorts/requests/sorts";
@@ -138,7 +139,7 @@ export async function getRequestsCached(
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
-  const builtFilter = await buildFilterWithAuth({
+  const builtFilter = await buildFilterWithAuthCacheHits({
     org_id: orgId,
     filter,
     argsAcc: [],
@@ -164,21 +165,17 @@ export async function getRequestsCached(
     (response.prompt_tokens + response.completion_tokens) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
-    prompt.name AS prompt_name,
-    prompt.prompt AS prompt_regex,
     feedback.created_at AS feedback_created_at,
     feedback.id AS feedback_id,
     feedback.rating AS feedback_rating,
     (coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content'))::text as request_prompt,
     (coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text as response_prompt
   FROM cache_hits
-    left join request on cache_hits.request_id = request.id
-    left join response on request.id = response.request
-    left join prompt on request.formatted_prompt_id = prompt.id
+    inner join request on cache_hits.request_id = request.id
+    inner join response on request.id = response.request
     left join feedback on response.id = feedback.response_id
   WHERE (
     (${builtFilter.filter})
-    AND (LENGTH(response.body::text) + LENGTH(request.body::text)) <= ${MAX_TOTAL_BODY_SIZE}
   )
   ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
   LIMIT ${limit}
