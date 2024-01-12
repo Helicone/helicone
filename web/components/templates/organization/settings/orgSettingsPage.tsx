@@ -6,6 +6,7 @@ import { useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import { useRouter } from "next/router";
 import { useOrg } from "../../../shared/layout/organizationContext";
+import { DeleteOrgModal } from "../deleteOrgModal";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -54,12 +55,31 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               icon: org.icon || "",
               limits: org.limits as any,
               providerKey: "",
-              isOwner,
             }}
             variant={"organization"}
           />
         </div>
+        {isOwner && (
+          <div className="py-36 flex flex-col">
+            <div className="flex flex-row">
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete Organization
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+      <DeleteOrgModal
+        open={deleteOpen}
+        setOpen={setDeleteOpen}
+        orgId={org.id}
+        onDeleteRoute={"/dashboard"}
+        orgName={org.name}
+      />
     </>
   );
 };
