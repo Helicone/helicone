@@ -61,8 +61,8 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                 <Dialog.Panel
                   className={clsx(
                     expanded
-                      ? "min-w-[60rem] w-full md:w-[33vw]"
-                      : "min-w-[35rem] w-full md:w-[33vw]",
+                      ? "min-w-[60rem] w-full md:w-[36vw]"
+                      : "min-w-[35rem] w-full md:w-[36vw]",
                     "pointer-events-auto ease-in-out duration-300"
                   )}
                 >

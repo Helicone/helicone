@@ -2,10 +2,8 @@ import { RadioGroup } from "@headlessui/react";
 import {
   BuildingOfficeIcon,
   CakeIcon,
-  CheckIcon,
   CloudIcon,
   CommandLineIcon,
-  InformationCircleIcon,
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
@@ -15,11 +13,9 @@ import { Database } from "../../../supabase/database.types";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
+import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
 import CreateProviderKeyModal from "../vault/createProviderKeyModal";
 import { useVaultPage } from "../vault/useVaultPage";
-import { PlusIcon } from "@heroicons/react/20/solid";
-import { Tooltip } from "@mui/material";
-import { SecretInput } from "../../shared/themed/themedTable";
 import { DeleteOrgModal } from "./deleteOrgModal";
 
 export const ORGANIZATION_COLORS = [
@@ -148,7 +144,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           ORGANIZATION_ICONS[0]
       : ORGANIZATION_ICONS[0]
   );
-  // const [orgSize, setOrgSize] = useState("");
 
   const user = useUser();
   const orgContext = useOrg();
@@ -326,87 +321,10 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col space-y-2">
-              <label
-                htmlFor="org-provider-keys"
-                className="flex items-center text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 gap-1"
-              >
-                Provider Keys
-                <Tooltip title="This key will be used to map to your customer's proxy keys, allowing you to control their spend via configurable rate limits.">
-                  <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
-                </Tooltip>
-              </label>
-              <div className="w-full">
-                <div className="mx-auto w-full">
-                  <RadioGroup
-                    value={providerKey}
-                    onChange={(keyId: string) => {
-                      setProviderKey(keyId);
-                    }}
-                  >
-                    <RadioGroup.Label className="sr-only">
-                      Server size
-                    </RadioGroup.Label>
-                    <div className="space-y-2">
-                      {providerKeys.map((key) => (
-                        <RadioGroup.Option
-                          key={key.id}
-                          value={key.id}
-                          className={({ active, checked }) =>
-                            clsx(
-                              checked
-                                ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
-                                : "bg-white ring-gray-300 dark:bg-black dark:ring-gray-700",
-                              "ring-1 relative flex cursor-pointer rounded-lg p-4 shadow-sm focus:outline-none"
-                            )
-                          }
-                        >
-                          {({ active, checked }) => (
-                            <>
-                              <div className="flex w-full items-center justify-between">
-                                <div className="flex items-center">
-                                  <div className="text-sm flex space-x-2 items-center">
-                                    <RadioGroup.Label
-                                      as="p"
-                                      className={`font-medium text-black dark:text-white`}
-                                    >
-                                      {key.provider_key_name}
-                                    </RadioGroup.Label>
-                                    <RadioGroup.Description
-                                      as="span"
-                                      className={`inline text-gray-500 text-xs pl-2`}
-                                    >
-                                      <SecretInput
-                                        value={key.provider_key || ""}
-                                        variant="secondary"
-                                      />
-                                    </RadioGroup.Description>
-                                  </div>
-                                </div>
-                                {checked && (
-                                  <div className="text-sky-700">
-                                    <CheckIcon className="h-4 w-4" />
-                                  </div>
-                                )}
-                              </div>
-                            </>
-                          )}
-                        </RadioGroup.Option>
-                      ))}
-                      <button
-                        onClick={() => {
-                          setIsProviderOpen(true);
-                        }}
-                        className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"
-                      >
-                        <PlusIcon className="h-3 w-3 mr-1" />
-                        Add Key
-                      </button>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </div>
-            </div>
+            <ProviderKeyList
+              orgProviderKey={initialValues?.providerKey || undefined}
+              setProviderKeyCallback={setProviderKey}
+            />
           </>
         )}
         <div className="border-t border-gray-300 flex justify-end gap-2 pt-8">
@@ -483,26 +401,34 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                 onCancelHandler && onCancelHandler(false);
                 orgContext?.refetchOrgs();
               } else {
-                const { data, error } = await supabaseClient
-                  .from("organization")
-                  .insert([
-                    {
+                const { data, error } = await fetch(
+                  "/api/organization/create",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
                       name: orgName,
                       owner: user?.id!,
                       color: selectedColor.name,
                       icon: selectedIcon.name,
                       has_onboarded: true,
+                      tier: "free",
                       ...(variant === "reseller" && {
                         reseller_id: orgContext?.currentOrg?.id!,
                         organization_type: "customer",
                         org_provider_key: providerKey,
                         limits: limits,
                       }),
-                    },
-                  ])
-                  .select("*");
+                    }),
+                  }
+                ).then((res) => res.json());
                 if (error) {
-                  setNotification("Failed to create organization", "error");
+                  setNotification(
+                    "Failed to create organization" + error,
+                    "error"
+                  );
                 } else {
                   setNotification(
                     "Organization created successfully",
@@ -520,7 +446,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           </button>
         </div>
         {initialValues?.isOwner && (
-          <div className="py-36 flex flex-col">
+          <div className="py-10 flex flex-col">
             <div className="flex flex-row">
               <button
                 type="button"

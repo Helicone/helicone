@@ -5,26 +5,29 @@ import AuthLayout from "../../../../components/shared/layout/authLayout";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 import { useRouter } from "next/router";
-import OrgSettingsPage from "../../../../components/templates/organization/settings/orgSettingsPage";
-import { useGetOrg } from "../../../../services/hooks/organizations";
+import PortalIdPage from "../../../../components/templates/enterprise/portal/id/portalIdPage";
 
 interface PortalProps {
   user: User;
-  searchQuery: string | null;
+
+  orgId: string | null;
 }
 
 const Portal = (props: PortalProps) => {
-  const { user, searchQuery } = props;
+  const { user, orgId } = props;
   const router = useRouter();
-  const { id: organizationIdToEditId } = router.query;
-  const organizationIdToEdit = useGetOrg(organizationIdToEditId as string);
+
+  // const { data, isLoading, refetch } = useGetOrg(
+  //   organizationIdToEditId as string
+  // );
 
   return (
     <MetaData title="Customer Portal">
       <AuthLayout user={user}>
-        {organizationIdToEdit.data && (
+        <PortalIdPage orgId={orgId} />
+        {/* {organizationIdToEdit.data && (
           <OrgSettingsPage org={organizationIdToEdit.data} variant="reseller" />
-        )}
+        )} */}
       </AuthLayout>
     </MetaData>
   );
@@ -49,13 +52,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
 
   // get the query param q from the url
-  const { q } = ctx.query;
+  const { id } = ctx.query;
 
   return {
     props: {
       initialSession: session,
       user: session.user,
-      searchQuery: q || null,
+      orgId: id || null,
     },
   };
 };

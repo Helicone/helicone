@@ -8,15 +8,14 @@ FROM --platform=linux/amd64 node:20
 WORKDIR /usr/src/app
 
 COPY . .
-RUN yarn install
 
-# Build the TypeScript code
-RUN npx lerna run build
-
-RUN yarn install
-
-ENV OPENAPI_SCHEMA_FILE=/usr/src/app/packages/jawn/src/schema/openapi.yml
+ENV OPENAPI_SCHEMA_FILE=/usr/src/app/jawn/src/schema/openapi.yml
 
 #yarn workspace jawn serve
 ENV PORT=8585
-CMD [ "yarn", "workspace", "jawn", "serve" ]
+
+WORKDIR /usr/src/app/jawn
+
+RUN yarn install
+RUN yarn build
+CMD [ "yarn", "serve" ]

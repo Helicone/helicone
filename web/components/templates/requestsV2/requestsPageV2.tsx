@@ -78,6 +78,10 @@ export function encodeFilter(filter: UIFilterRow): string {
   )}`;
 }
 
+function getTableName(isCached: boolean): string {
+  return isCached ? "cache_hits" : "request";
+}
+
 export function decodeFilter(encoded: string): UIFilterRow | null {
   try {
     const parts = encoded.split(":");
@@ -158,13 +162,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
+    const tableName = getTableName(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
 
       const filter: FilterNode = {
         left: {
-          request: {
+          [tableName]: {
             created_at: {
               gte: new Date(start).toISOString(),
             },
@@ -172,7 +177,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         },
         operator: "and",
         right: {
-          request: {
+          [tableName]: {
             created_at: {
               lte: new Date(end).toISOString(),
             },
@@ -182,7 +187,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return filter;
     } else {
       return {
-        request: {
+        [tableName]: {
           created_at: {
             gte: getTimeIntervalAgo(
               (searchParams.get("t") as TimeInterval) || "24h"
@@ -297,11 +302,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const onTimeSelectHandler = (key: TimeInterval, value: string) => {
+    const tableName = getTableName(isCached);
     if (key === "custom") {
       const [start, end] = value.split("_");
       const filter: FilterNode = {
         left: {
-          request: {
+          [tableName]: {
             created_at: {
               gte: new Date(start).toISOString(),
             },
@@ -309,7 +315,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         },
         operator: "and",
         right: {
-          request: {
+          [tableName]: {
             created_at: {
               lte: new Date(end).toISOString(),
             },
@@ -320,7 +326,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       return;
     }
     setTimeFilter({
-      request: {
+      [tableName]: {
         created_at: {
           gte: getTimeIntervalAgo(key).toISOString(),
         },

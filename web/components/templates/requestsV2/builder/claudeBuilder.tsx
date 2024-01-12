@@ -28,7 +28,9 @@ class ClaudeBuilder extends AbstractRequestBuilder {
     return {
       requestText: this.response.request_body.tooLarge
         ? "Helicone Message: Input too large"
-        : this.response.request_body.prompt || "Invalid Prompt",
+        : this.response.request_body.prompt ||
+          this.response.request_body.messages.slice(-1)[0].content ||
+          "",
       responseText: getResponseText(),
       render:
         this.response.response_status === 0 ||
@@ -36,17 +38,22 @@ class ClaudeBuilder extends AbstractRequestBuilder {
           <p>Pending...</p>
         ) : this.response.response_status === 200 ? (
           <Completion
-            request={this.response.request_body.prompt}
+            request={
+              this.response.request_body.prompt ||
+              this.response.request_body.messages.slice(-1)[0].content ||
+              ""
+            }
             response={{
               title: "Response",
               text:
-                this.response.response_body?.body ??
                 this.response.response_body?.body?.completion ??
                 this.response.response_body?.completion ??
                 "",
             }}
             rawRequest={this.response.request_body}
-            rawResponse={this.response.response_body}
+            rawResponse={
+              this.response.response_body?.body || this.response.response_body
+            }
           />
         ) : (
           <Completion

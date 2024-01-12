@@ -25,6 +25,7 @@ const CreateOrg = (props: CreateOrgProps) => {
 
   const user = useUser();
   const [loaded, setLoaded] = useState(false);
+  const [referralType, setReferralType] = useState<string>("");
   const supabaseClient = useSupabaseClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useNotification();
@@ -47,6 +48,7 @@ const CreateOrg = (props: CreateOrgProps) => {
     const orgName = formData.get("org-name") as string;
     const orgSize = formData.get("org-size") as string;
     const orgReferral = formData.get("org-referral") as string;
+    const referralCode = formData.get("referral-code") as string;
 
     if (orgSize === "Select company size") {
       setNotification("Please select a company size.", "info");
@@ -72,14 +74,20 @@ const CreateOrg = (props: CreateOrgProps) => {
     }
 
     if (!orgContext?.currentOrg?.id) {
-      const { data, error } = await supabaseClient.from("organization").insert({
-        name: orgName,
-        size: orgSize,
-        referral: orgReferral,
-        owner: user.id,
-        is_personal: true,
-        tier: "free",
-      });
+      const { data, error } = await fetch("/api/organization/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: orgName,
+          size: orgSize,
+          referral: orgReferral,
+          owner: user.id,
+          is_personal: true,
+          tier: "free",
+        }),
+      }).then((res) => res.json());
       if (!error) {
         console.log("Created personal org! - refetching", orgContext);
         orgContext?.refreshCurrentOrg();
@@ -98,9 +106,36 @@ const CreateOrg = (props: CreateOrgProps) => {
       checkError(error);
     }
 
-    setIsLoading(false);
-    orgContext?.refetchOrgs();
-    nextStep();
+    if (referralCode && referralCode.trim() !== "") {
+      fetch("/api/referral/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          referralCode: referralCode,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            setNotification(
+              "Referral code not valid. Please try again.",
+              "error"
+            );
+            setIsLoading(false);
+            return;
+          } else {
+            setIsLoading(false);
+            orgContext?.refetchOrgs();
+            nextStep();
+          }
+        });
+    } else {
+      setIsLoading(false);
+      orgContext?.refetchOrgs();
+      nextStep();
+    }
   };
 
   return (
@@ -156,7 +191,6 @@ const CreateOrg = (props: CreateOrgProps) => {
             <select
               id="org-size"
               name="org-size"
-              // value={orgContext?.currentOrg?.size || ""}
               placeholder={
                 orgContext?.currentOrg?.size || "Select company size"
               }
@@ -171,7 +205,7 @@ const CreateOrg = (props: CreateOrgProps) => {
             </select>
           </div>
         </div>
-        <div className="flex flex-col space-y-2 pb-8">
+        <div className="flex flex-col space-y-2">
           <label
             htmlFor="org-referral"
             className="block text-md font-semibold leading-6 text-gray-900"
@@ -189,10 +223,11 @@ const CreateOrg = (props: CreateOrgProps) => {
                 "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
               )}
               required
+              onChange={(e) => setReferralType(e.target.value)}
             >
               {[
                 "Select referral source",
-                "Friend",
+                "Friend (referral)",
                 "Google",
                 "Twitter",
                 "LinkedIn",
@@ -204,9 +239,30 @@ const CreateOrg = (props: CreateOrgProps) => {
             </select>
           </div>
         </div>
+        {referralType === "Friend (referral)" && (
+          <div className="flex flex-col space-y-2">
+            <label
+              htmlFor="referral-code"
+              className="block text-md font-semibold leading-6 text-gray-900"
+            >
+              Referral Code (optional)
+            </label>
+            <div className="">
+              <input
+                id="referral-code"
+                name="referral-code"
+                placeholder={"Referral code"}
+                className={clsx(
+                  "block w-full rounded-md border-0 px-4 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:leading-6"
+                )}
+              />
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
-          className="px-28 py-3 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl"
+          className="px-28 py-3 mt-11 bg-gray-900 hover:bg-gray-700 font-medium text-white rounded-xl"
         >
           {isLoading && (
             <ArrowPathIcon className="animate-spin h-5 w-5 mr-2 inline" />

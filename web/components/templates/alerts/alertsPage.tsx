@@ -10,6 +10,7 @@ import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { Tooltip } from "@mui/material";
+import EditAlertModal from "./editAlertModal";
 
 interface AlertsPageProps {
   user: User;
@@ -29,6 +30,7 @@ export const alertTimeWindows: { [key: string]: number } = {
 const AlertsPage = (props: AlertsPageProps) => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [editAlertOpen, setEditAlertOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] =
     useState<Database["public"]["Tables"]["alert"]["Row"]>();
   const orgContext = useOrg();
@@ -164,6 +166,13 @@ const AlertsPage = (props: AlertsPageProps) => {
                   ),
                 };
               })}
+              editHandler={(row) => {
+                setEditAlertOpen(true);
+
+                // get the alert from the alerts array by id
+                const alertToEdit = alerts.find((alert) => alert.id === row.id);
+                setSelectedAlert(alertToEdit);
+              }}
               deleteHandler={(row) => {
                 setDeleteAlertOpen(true);
                 setSelectedAlert(row);
@@ -261,6 +270,14 @@ const AlertsPage = (props: AlertsPageProps) => {
         onSuccess={() => {
           refetch();
         }}
+      />
+      <EditAlertModal
+        open={editAlertOpen}
+        setOpen={setEditAlertOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        currentAlert={selectedAlert}
       />
       <DeleteAlertModal
         open={deleteAlertOpen}
