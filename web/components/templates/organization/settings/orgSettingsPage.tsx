@@ -54,7 +54,6 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               icon: org.icon || "",
               limits: org.limits as any,
               providerKey: "",
-              isOwner,
             }}
             variant={"organization"}
           />
