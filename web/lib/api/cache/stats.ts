@@ -281,11 +281,15 @@ export async function getTopRequestsClickhouse(
 
   const combinedData = res?.data?.map((item) => {
     const promptEntry = promptsMap.get(item.request_id);
+    let model: string | undefined = item.model;
+    if (!model || model === "") {
+      model = promptEntry?.model;
+    }
 
     return {
       ...item,
       prompt: promptEntry?.prompt,
-      model: item.model ?? promptEntry,
+      model: model,
     };
   });
 
