@@ -5,12 +5,23 @@ import {
   CodeBracketSquareIcon,
   DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
-import { ChartPieIcon, CircleStackIcon } from "@heroicons/react/20/solid";
+import {
+  ChartPieIcon,
+  CircleStackIcon,
+  UserGroupIcon,
+} from "@heroicons/react/20/solid";
 import { Fragment } from "react";
 import { clsx } from "../../clsx";
 import Link from "next/link";
 
 const solutions = [
+  {
+    name: "Customer Portal",
+    description: "Share Helicone usage with customers",
+    href: "/use-cases/customer-portal",
+    icon: UserGroupIcon,
+    color: "text-violet-500",
+  },
   {
     name: "Data Segmentation",
     description: "Get insights into costs & behaviors.",
@@ -30,7 +41,7 @@ const solutions = [
     description: "Turn Helicone into a data warehouse.",
     href: "https://docs.helicone.ai/use-cases/etl",
     icon: CircleStackIcon,
-    color: "text-violet-500",
+    color: "text-zinc-500",
   },
   {
     name: "Internal Auditing",
@@ -62,7 +73,7 @@ export default function SolutionsButton() {
               <span>Solutions</span>
               <ChevronDownIcon
                 className={`${open ? "" : "text-opacity-70"}
-                  ml-1 h-5 w-5 transition duration-150 ease-in-out group-hover:text-opacity-80`}
+                  ml-1 h-5 w-5 transition duration-150  ease-in-out group-hover:text-opacity-80`}
                 aria-hidden="true"
               />
             </Popover.Button>
