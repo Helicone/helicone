@@ -11,6 +11,7 @@ import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../feedback";
 import { getGatewayAPIRouter } from "./gatewayRouter";
+import { handleLoggingEndpoint } from "../properties";
 
 export type BaseRouter = RouterType<
   Route,
@@ -86,6 +87,17 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
           "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
         },
       });
+    }
+  );
+  router.post(
+    "/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return await handleLoggingEndpoint(requestWrapper, env);
     }
   );
 }
