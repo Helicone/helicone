@@ -1,18 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
-import { Env, Provider } from "..";
-import { Database, Json } from "../../supabase/database.types";
-import { DBWrapper, HeliconeAuth } from "../db/DBWrapper";
-import { HeliconeHeaders } from "../lib/HeliconeHeaders";
-import { RequestWrapper } from "../lib/RequestWrapper";
-import { ClickhouseClientWrapper } from "../lib/db/clickhouse";
-import { Valhalla } from "../lib/db/valhalla";
-import { dbLoggableRequestFromAsyncLogModel } from "../lib/dbLogger/DBLoggable";
-import { InsertQueue } from "../lib/dbLogger/insertQueue";
-import { AsyncLogModel, validateAsyncLogModel } from "../lib/models/AsyncLog";
-import { Job, isValidStatus, validateRun } from "../lib/models/Runs";
-import { HeliconeNode, validateHeliconeNode } from "../lib/models/Tasks";
-import { validateAlertCreate } from "../lib/validators/alertValidators";
-import { BaseRouter } from "./routerFactory";
+import { Env, Provider } from "../..";
+import { Database, Json } from "../../../supabase/database.types";
+import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
+import { HeliconeHeaders } from "../../lib/HeliconeHeaders";
+import { RequestWrapper } from "../../lib/RequestWrapper";
+import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
+import { Valhalla } from "../../lib/db/valhalla";
+import { dbLoggableRequestFromAsyncLogModel } from "../../lib/dbLogger/DBLoggable";
+import { InsertQueue } from "../../lib/dbLogger/insertQueue";
+import {
+  AsyncLogModel,
+  validateAsyncLogModel,
+} from "../../lib/models/AsyncLog";
+import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
+import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
+import { validateAlertCreate } from "../../lib/validators/alertValidators";
+import { BaseOpenAPIRouter } from "../routerFactory";
 
 class InternalResponse {
   constructor(private client: APIClient) {}
@@ -146,7 +149,7 @@ async function logAsync(
   });
 }
 
-export const getAPIRouter = (router: BaseRouter) => {
+export const getAPIRouter = (router: BaseOpenAPIRouter) => {
   router.post(
     "/job",
     async (
