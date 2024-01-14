@@ -9,17 +9,39 @@ import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../api/helpers/logAsync";
 import { createAPIClient } from "../../api/lib/apiClient";
-import { CustomersGet } from "../../api/routes/customer-portal/customers/get";
+import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
 
-export const getAPIRouter = (
+function getOPENAPIRouter(
   router: OpenAPIRouterType<
     Route,
     [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
   >
-) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  router.post("/api/tasks/:taskSlug/", CustomersGet as any);
+) {
+  router.all(
+    "*",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const client = await createAPIClient(env, requestWrapper);
+      const authParams = await client.db.getAuthParams();
+      if (authParams.error !== null) {
+        return client.response.unauthorized();
+      }
+    }
+  );
 
+  router.get("/v1/customers", CustomerGet as any);
+}
+
+function getAPIRouterV1(
+  router: OpenAPIRouterType<
+    Route,
+    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+  >
+) {
   router.post(
     "/job",
     async (
@@ -449,7 +471,16 @@ export const getAPIRouter = (
       });
     }
   );
+}
 
+export const getAPIRouter = (
+  router: OpenAPIRouterType<
+    Route,
+    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+  >
+) => {
+  getAPIRouterV1(router);
+  getOPENAPIRouter(router);
   // Proxy only + proxy forwarder
   router.all(
     "*",

@@ -13,12 +13,12 @@ const BodyOpenAPI = z.object({
 
 type BodyType = z.infer<typeof BodyOpenAPI>;
 
-export class CustomersGet extends OpenAPIRoute<
+export class CustomerGet extends OpenAPIRoute<
   IRequest,
   [RequestWrapper, Env, ExecutionContext, Provider]
 > {
   static schema = {
-    tags: ["Tasks"],
+    tags: ["Customer Portal"],
     summary: "Get a single Task by slug",
     requestBody: BodyOpenAPI,
     parameters: {
@@ -46,7 +46,7 @@ export class CustomersGet extends OpenAPIRoute<
     type User = z.infer<typeof BodyOpenAPI>;
 
     // Retrieve the validated slug
-    // const { taskSlug } = requestWrapper.getJson<BodyType>();
+    const body = await requestWrapper.getJson<BodyType>();
 
     // Actually fetch a task using the taskSlug
 
