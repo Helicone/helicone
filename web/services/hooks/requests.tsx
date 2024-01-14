@@ -7,16 +7,30 @@ import { getHeliconeCookie } from "../../lib/cookies";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetRequest = (requestId: string) => {
+  const org = useOrg();
   const { data, isLoading } = useQuery({
-    queryKey: ["requestData", requestId],
+    queryKey: ["requestData", requestId, org?.currentOrg?.id],
     queryFn: async (query) => {
       const requestId = query.queryKey[1] as string;
+      const orgId = query.queryKey[2];
+      if (!orgId) {
+        return {
+          data: [],
+          error: "No org provided",
+        };
+      }
+      const authFromCookie = getHeliconeCookie();
       return await fetch(
         `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "helicone-authorization": JSON.stringify({
+              _type: "jwt",
+              token: authFromCookie.data?.jwtToken,
+              orgId: orgId,
+            }),
           },
           body: JSON.stringify({
             filter: {
