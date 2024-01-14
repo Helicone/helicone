@@ -29,6 +29,8 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import { TimeFilter } from "../dashboard/dashboardPage";
 import RequestCard from "./requestCard";
 import getNormalizedRequest from "./builder/requestBuilder";
+import { getHeliconeCookie } from "../../../lib/cookies";
+import { useOrg } from "../../shared/layout/organizationContext";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -108,33 +110,46 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     initialRequestId,
   } = props;
   const [isLive, setIsLive] = useLocalStorage("isLive", false);
+  const org = useOrg();
 
   // set the initial selected data on component load
   useEffect(() => {
     if (initialRequestId) {
       const fetchRequest = async () => {
-        const resp = await fetch(`/api/request/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: {
-              left: {
-                request: {
-                  id: {
-                    equals: initialRequestId,
+        if (!org?.currentOrg?.id) {
+          return;
+        }
+        const authFromCookie = getHeliconeCookie();
+        const resp = await fetch(
+          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "helicone-authorization": JSON.stringify({
+                _type: "jwt",
+                token: authFromCookie.data?.jwtToken,
+                orgId: org?.currentOrg?.id,
+              }),
+            },
+            body: JSON.stringify({
+              filter: {
+                left: {
+                  request: {
+                    id: {
+                      equals: initialRequestId,
+                    },
                   },
                 },
-              },
-              operator: "and",
-              right: "all",
-            } as FilterNode,
-            offset: 0,
-            limit: 1,
-            sort: {},
-          }),
-        })
+                operator: "and",
+                right: "all",
+              } as FilterNode,
+              offset: 0,
+              limit: 1,
+              sort: {},
+            }),
+          }
+        )
           .then(
             (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
           )
@@ -149,7 +164,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       };
       fetchRequest();
     }
-  }, [initialRequestId]);
+  }, [initialRequestId, org?.currentOrg?.id]);
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);

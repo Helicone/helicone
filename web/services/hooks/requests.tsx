@@ -7,29 +7,46 @@ import { getHeliconeCookie } from "../../lib/cookies";
 import { useOrg } from "../../components/shared/layout/organizationContext";
 
 const useGetRequest = (requestId: string) => {
+  const org = useOrg();
   const { data, isLoading } = useQuery({
-    queryKey: ["requestData", requestId],
+    queryKey: ["requestData", requestId, org?.currentOrg?.id],
     queryFn: async (query) => {
       const requestId = query.queryKey[1] as string;
-      return await fetch(`/api/request/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request: {
-                id: {
-                  equals: requestId,
+      const orgId = query.queryKey[2];
+      if (!orgId) {
+        return {
+          data: [],
+          error: "No org provided",
+        };
+      }
+      const authFromCookie = getHeliconeCookie();
+      return await fetch(
+        `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "helicone-authorization": JSON.stringify({
+              _type: "jwt",
+              token: authFromCookie.data?.jwtToken,
+              orgId: orgId,
+            }),
+          },
+          body: JSON.stringify({
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: requestId,
+                  },
                 },
               },
-            },
-            operator: "and",
-            right: "all",
-          } as FilterNode,
-        }),
-      }).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
+              operator: "and",
+              right: "all",
+            } as FilterNode,
+          }),
+        }
+      ).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
     },
     refetchOnWindowFocus: false,
   });
