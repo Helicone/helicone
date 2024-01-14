@@ -1,19 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
-import { Database, Json } from "../../../supabase/database.types";
+import { Database } from "../../../supabase/database.types";
 import { DBWrapper, HeliconeAuth } from "../../db/DBWrapper";
 import { RequestWrapper } from "../../lib/RequestWrapper";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
 import { Valhalla } from "../../lib/db/valhalla";
 import { InsertQueue } from "../../lib/dbLogger/insertQueue";
-import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
-import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
-import { validateAlertCreate } from "../../lib/validators/alertValidators";
-
-import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
-import { Route } from "itty-router";
-import { CustomersGet } from "../../api/routes/customer-portal/customers/get";
-import { logAsync } from "../../api/helpers/logAsync";
 
 class InternalResponse {
   constructor(private client: APIClient) {}

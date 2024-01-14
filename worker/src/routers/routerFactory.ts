@@ -6,7 +6,6 @@ import {
 
 import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { handleLoggingEndpoint } from "../properties";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
