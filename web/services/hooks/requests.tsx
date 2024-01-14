@@ -11,25 +11,28 @@ const useGetRequest = (requestId: string) => {
     queryKey: ["requestData", requestId],
     queryFn: async (query) => {
       const requestId = query.queryKey[1] as string;
-      return await fetch(`/api/request/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request: {
-                id: {
-                  equals: requestId,
+      return await fetch(
+        `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filter: {
+              left: {
+                request: {
+                  id: {
+                    equals: requestId,
+                  },
                 },
               },
-            },
-            operator: "and",
-            right: "all",
-          } as FilterNode,
-        }),
-      }).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
+              operator: "and",
+              right: "all",
+            } as FilterNode,
+          }),
+        }
+      ).then((res) => res.json() as Promise<Result<HeliconeRequest, string>>);
     },
     refetchOnWindowFocus: false,
   });
