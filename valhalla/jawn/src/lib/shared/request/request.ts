@@ -290,50 +290,11 @@ function truncLargeData(
   const trunced = data.map((d) => {
     return {
       ...d,
-      response_prompt:
-        JSON.stringify(d.response_prompt).length > maxBodySize / 2
-          ? "Response prompt too large"
-          : d.response_prompt,
-      request_prompt:
-        JSON.stringify(d.request_prompt).length > maxBodySize / 2
-          ? "Request prompt too large"
-          : d.request_prompt,
-      request_body:
-        JSON.stringify(d.request_body).length > maxBodySize / 2
-          ? {
-              model: d.request_body.model,
-              heliconeMessage: "Request body too large",
-              tooLarge: true,
-            }
-          : d.request_body,
-      response_body:
-        JSON.stringify(d.response_body).length > maxBodySize / 2
-          ? {
-              heliconeMessage: "Response body too large",
-              model: d.response_body.model,
-              tooLarge: true,
-            }
-          : {
-              ...d.response_body,
-            },
-      llmSchema: {
-        request:
-          JSON.stringify(d.llmSchema?.request ?? {}).length > maxBodySize / 2
-            ? {
-                model: d.llmSchema?.request.model,
-                heliconeMessage: "Request schema too large",
-                tooLarge: true,
-              }
-            : d.llmSchema?.request ?? {},
-        response:
-          JSON.stringify(d.llmSchema?.response ?? {}).length > maxBodySize / 2
-            ? {
-                model: d.llmSchema?.request?.model,
-                heliconeMessage: "Response body too large",
-                tooLarge: true,
-              }
-            : d.llmSchema?.response,
-      },
+      response_prompt: d.response_prompt,
+      request_prompt: d.request_prompt,
+      request_body: d.request_body,
+      response_body: d.response_body,
+      llmSchema: d.llmSchema,
     };
   });
 
