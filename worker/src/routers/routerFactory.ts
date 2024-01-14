@@ -1,20 +1,35 @@
 import { IRequest, Route, Router, RouterType, error } from "itty-router";
+import {
+  OpenAPIRouter,
+  OpenAPIRouterType,
+} from "@cloudflare/itty-router-openapi";
+
 import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { handleLoggingEndpoint } from "../properties";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
-import { getAPIRouter } from "./apiRouter";
+import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../feedback";
 import { getGatewayAPIRouter } from "./gatewayRouter";
+import { handleLoggingEndpoint } from "../properties";
 
 export type BaseRouter = RouterType<
   Route,
   [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
 >;
 
-const WORKER_MAP: {
-  [key in Env["WORKER_TYPE"]]: (router: BaseRouter) => BaseRouter;
+export type BaseOpenAPIRouter = OpenAPIRouterType<
+  Route,
+  [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+>;
+
+const WORKER_MAP: Omit<
+  {
+    [key in Env["WORKER_TYPE"]]: (router: BaseRouter) => BaseRouter;
+  },
+  "HELICONE_API"
+> & {
+  HELICONE_API: (router: OpenAPIRouterType) => OpenAPIRouterType;
 } = {
   ANTHROPIC_PROXY: getAnthropicProxyRouter,
   OPENAI_PROXY: getOpenAIProxyRouter,
@@ -44,16 +59,11 @@ const WORKER_MAP: {
   },
 };
 
-export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
-  const router = Router<
-    IRequest,
-    [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
-  >();
-
+function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
   router.post(
     "/v1/feedback",
     async (
-      _,
+      _: unknown,
       requestWrapper: RequestWrapper,
       env: Env,
       _ctx: ExecutionContext
@@ -65,7 +75,7 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
   router.options(
     "/v1/feedback",
     async (
-      _,
+      _: unknown,
       _requestWrapper: RequestWrapper,
       _env: Env,
       _ctx: ExecutionContext
@@ -79,11 +89,6 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
       });
     }
   );
-
-  // Call worker specific router AFTER the generic router
-  WORKER_MAP[provider](router);
-
-  //TODO remove this
   router.post(
     "/v1/log",
     async (
@@ -95,6 +100,24 @@ export function buildRouter(provider: Env["WORKER_TYPE"]): BaseRouter {
       return await handleLoggingEndpoint(requestWrapper, env);
     }
   );
+}
 
-  return router;
+export function buildRouter(
+  provider: Env["WORKER_TYPE"]
+): BaseRouter | BaseOpenAPIRouter {
+  if (provider === "HELICONE_API") {
+    const router = OpenAPIRouter<
+      IRequest,
+      [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+    >();
+    addBaseRoutes(router);
+    return WORKER_MAP[provider](router);
+  } else {
+    const router = Router<
+      IRequest,
+      [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
+    >();
+    addBaseRoutes(router);
+    return WORKER_MAP[provider](router);
+  }
 }
