@@ -113,28 +113,31 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   useEffect(() => {
     if (initialRequestId) {
       const fetchRequest = async () => {
-        const resp = await fetch(`/api/request/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: {
-              left: {
-                request: {
-                  id: {
-                    equals: initialRequestId,
+        const resp = await fetch(
+          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/request/query`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              filter: {
+                left: {
+                  request: {
+                    id: {
+                      equals: initialRequestId,
+                    },
                   },
                 },
-              },
-              operator: "and",
-              right: "all",
-            } as FilterNode,
-            offset: 0,
-            limit: 1,
-            sort: {},
-          }),
-        })
+                operator: "and",
+                right: "all",
+              } as FilterNode,
+              offset: 0,
+              limit: 1,
+              sort: {},
+            }),
+          }
+        )
           .then(
             (res) => res.json() as Promise<Result<HeliconeRequest[], string>>
           )
