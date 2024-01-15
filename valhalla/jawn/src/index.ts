@@ -246,6 +246,8 @@ app.post(
       .eq("org_id", authParams.organizationId)
       .single();
 
+    console.log("key", key);
+
     if (keyError || !key) {
       res
         .header("Access-Control-Allow-Origin", "*")

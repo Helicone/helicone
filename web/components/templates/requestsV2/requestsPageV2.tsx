@@ -283,6 +283,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     refetch,
     filterMap,
     searchPropertyFilters,
+    filter: builtFilter,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -501,7 +502,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }
         }}
       />
-      <FineTuneModal setOpen={setFineTuneModalOpen} open={fineTuneModalOpen} />
+      <FineTuneModal
+        filter={builtFilter}
+        setOpen={setFineTuneModalOpen}
+        open={fineTuneModalOpen}
+      />
     </div>
   );
 };

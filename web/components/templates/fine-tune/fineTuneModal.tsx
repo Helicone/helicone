@@ -6,13 +6,16 @@ import { useOrg } from "../../shared/layout/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ProviderKeyList from "../enterprise/portal/id/providerKeyList";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { getHeliconeCookie } from "../../../lib/cookies";
 
 interface FineTuneModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  filter: FilterNode;
 }
 export const FineTuneModal = (props: FineTuneModalProps) => {
-  const { open: isOpen, setOpen, onDeleteRoute } = props;
+  const { open: isOpen, setOpen, filter } = props;
 
   const { setNotification } = useNotification();
   const orgContext = useOrg();
@@ -20,6 +23,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
   const supabaseClient = useSupabaseClient<Database>();
   const [confirmOrgName, setConfirmOrgName] = useState("");
   const org = useOrg();
+  const [providerKeyId, setProviderKeyId] = useState("");
 
   return (
     <ThemedDrawer open={isOpen} setOpen={setOpen}>
@@ -29,7 +33,9 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
         openAPI key.
         <ProviderKeyList
           orgId={org?.currentOrg?.id}
-          setProviderKeyCallback={() => {}}
+          setProviderKeyCallback={(x) => {
+            setProviderKeyId(x);
+          }}
           variant="basic"
         />
         <p className="text-gray-700 w-[400px] whitespace-pre-wrap text-sm">
@@ -40,7 +46,38 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
           charged. Are you sure you want to continue?
         </p>
         <button
-          onClick={() => {}}
+          onClick={() => {
+            if (!providerKeyId) {
+              setNotification("must include a providerKey", "error");
+            } else {
+              const authFromCookie = getHeliconeCookie();
+              fetch(
+                `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/fine-tune`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "helicone-authorization": JSON.stringify({
+                      _type: "jwt",
+                      token: authFromCookie.data?.jwtToken,
+                      orgId: org?.currentOrg?.id,
+                    }),
+                  },
+                  body: JSON.stringify({
+                    filter: filter,
+                    providerKeyId,
+                  }),
+                }
+              ).then((res) => {
+                console.log(res.json());
+                if (res.ok) {
+                  setNotification("fine tune job started!", "success");
+                } else {
+                  setNotification("error see console", "error");
+                }
+              });
+            }
+          }}
           className=" text-center items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Run Fine tune
