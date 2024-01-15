@@ -49,6 +49,7 @@ interface ThemedTableHeaderProps<T> {
     currentView: RequestViews;
     onViewChange: (value: RequestViews) => void;
   };
+  onFineTune?: () => void;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -105,9 +106,13 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           <div />
         )}
         <div className="flex flex-row gap-2">
-          {advancedFilters && (
+          {advancedFilters && props.onFineTune && (
             <button
-              onClick={() => {}}
+              onClick={() => {
+                if (props.onFineTune) {
+                  props.onFineTune();
+                }
+              }}
               className={clsx(
                 "bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-2.5 py-1.5 hover:bg-sky-50 dark:hover:bg-sky-900 flex flex-row items-center gap-2"
               )}

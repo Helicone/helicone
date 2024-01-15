@@ -228,14 +228,14 @@ app.post(
   >(async ({ request, res, supabaseClient, db, authParams }) => {
     const body = await request.getRawBody<any>();
     console.log("body", body);
-    const { filter, offset, limit, sort, providerKeyId } = body;
+    const { filter, providerKeyId } = body;
 
     const metrics = await getRequests(
       authParams.organizationId,
       filter,
-      offset,
-      limit,
-      sort,
+      0,
+      10_000,
+      {},
       supabaseClient.client
     );
 

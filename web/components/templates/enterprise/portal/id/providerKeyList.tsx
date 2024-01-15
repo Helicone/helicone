@@ -16,13 +16,19 @@ import useNotification from "../../../../shared/notification/useNotification";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 interface ProviderKeyListProps {
+  variant?: "portal" | "basic";
   setProviderKeyCallback?: (key: string) => void;
   orgId?: string; // the id of the org that we want to change provider keys for
   orgProviderKey?: string;
 }
 
 const ProviderKeyList = (props: ProviderKeyListProps) => {
-  const { setProviderKeyCallback, orgId, orgProviderKey } = props;
+  const {
+    setProviderKeyCallback,
+    orgId,
+    orgProviderKey,
+    variant = "protal",
+  } = props;
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
   const { setNotification } = useNotification();
@@ -82,7 +88,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
               <h3 className="text-lg font-semibold text-black dark:text-white">
                 Provider Keys
               </h3>
-              <Tooltip title="This key will be used to map to your customer's proxy keys, allowing you to control their spend via configurable rate limits.">
+              <Tooltip title="This key is securely stored using our vault technologies, with the state of the art encryption.">
                 <InformationCircleIcon className="h-4 w-4 inline text-gray-500" />
               </Tooltip>
             </div>
@@ -168,7 +174,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
       </div>
       <CreateProviderKeyModal
         open={isProviderOpen}
-        variant={"portal"}
+        variant={variant}
         setOpen={setIsProviderOpen}
         onSuccess={() => refetchProviderKeys()}
       />
