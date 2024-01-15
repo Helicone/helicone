@@ -48,9 +48,8 @@ const WORKER_MAP: Omit<
         if (!env.CUSTOMER_GATEWAY_URL) {
           return error(500, "CUSTOMER_GATEWAY_URL not set.");
         }
-
-        if (!requestWrapper?.heliconeProxyKeyId) {
-          return error(401, "Invalid user.");
+        if (!requestWrapper?.heliconeHeaders?.heliconeAuthV2?.token) {
+          return error(500, "Invalid User");
         }
         requestWrapper.setBaseURLOverride(env.CUSTOMER_GATEWAY_URL);
       }
