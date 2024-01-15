@@ -221,6 +221,57 @@ app.put(
   })
 );
 
+app.post(
+  "/v1/fine-tune",
+  withAuth<
+    paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db, authParams }) => {
+    const body = await request.getRawBody<any>();
+    console.log("body", body);
+    const { filter, offset, limit, sort, providerKeyId } = body;
+
+    const metrics = await getRequests(
+      authParams.organizationId,
+      filter,
+      offset,
+      limit,
+      sort,
+      supabaseClient.client
+    );
+
+    const { data: key, error: keyError } = await supabaseClient.client
+      .from("decrypted_provider_keys")
+      .select("decrypted_provider_key")
+      .eq("id", providerKeyId)
+      .eq("org_id", authParams.organizationId)
+      .single();
+
+    if (keyError || !key) {
+      res
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+        .header(
+          "Access-Control-Allow-Headers",
+          "Content-Type, helicone-authorization"
+        )
+        .status(metrics.error === null ? 200 : 500)
+        .json({
+          error: "No Provider Key found",
+        });
+    } else {
+      res
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
+        .header(
+          "Access-Control-Allow-Headers",
+          "Content-Type, helicone-authorization"
+        )
+        .status(metrics.error === null ? 200 : 500)
+        .json(metrics);
+    }
+  })
+);
+
 app.post("/v1/tokens/anthropic", async (req, res) => {
   const body = req.body;
   const content = body?.content;

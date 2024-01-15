@@ -16,6 +16,46 @@ servers:
     description: Production server
 
 paths:
+  /v1/fine-tune:
+    post:
+      tags:
+        - request
+      summary: Insert a new request and its response
+      description: Adds a new entry to the 'request' and 'response' tables.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        "201":
+          description: Successfully inserted the new request and response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the newly inserted request.
+                  responseId:
+                    type: string
+                    format: uuid
+                    description: The unique ID of the associated response.
+                  message:
+                    type: string
+                    example: Request and Response successfully inserted.
+        "400":
+          description: Invalid input.
+        "500":
+          description: Internal server error.
+      security:
+        - authorization: []
+        - helicone-authorization: []
+
   /v1/tokens/anthropic:
     post:
       tags:
