@@ -10,29 +10,15 @@ import { Route } from "itty-router";
 import { logAsync } from "../../api/helpers/logAsync";
 import { createAPIClient } from "../../api/lib/apiClient";
 import { CustomerGet } from "../../api/routes/customer-portal/customer/get";
+import { CustomerUsageGet } from "../../api/routes/customer-portal/customer/usage/get";
 
-function getOPENAPIRouter(
+function getOpenAPIRouter(
   router: OpenAPIRouterType<
     Route,
     [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
   >
 ) {
-  router.all(
-    "*",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      const client = await createAPIClient(env, requestWrapper);
-      const authParams = await client.db.getAuthParams();
-      if (authParams.error !== null) {
-        return client.response.unauthorized();
-      }
-    }
-  );
-
+  router.get("/v1/customer/:customerId/usage", CustomerUsageGet as any);
   router.get("/v1/customers", CustomerGet as any);
 }
 
@@ -480,7 +466,7 @@ export const getAPIRouter = (
   >
 ) => {
   getAPIRouterV1(router);
-  getOPENAPIRouter(router);
+  getOpenAPIRouter(router);
   // Proxy only + proxy forwarder
   router.all(
     "*",

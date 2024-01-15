@@ -41,7 +41,7 @@ class InternalResponse {
   }
 }
 
-class APIClient {
+export class APIClient {
   public queue: InsertQueue;
   public response: InternalResponse;
   db: DBWrapper;
