@@ -1,12 +1,10 @@
-import { z } from "zod";
-
-import { OpenAPIRoute, Path, Str } from "@cloudflare/itty-router-openapi";
+import { OpenAPIRoute } from "@cloudflare/itty-router-openapi";
 import { IRequest } from "itty-router";
 import { Env, Provider } from "../../.";
 import { RequestWrapper } from "../../lib/RequestWrapper";
-import { createAPIClient, APIClient } from "../lib/apiClient";
-import { AuthParams } from "../../lib/dbLogger/DBLoggable";
 import { ClickhouseClientWrapper } from "../../lib/db/clickhouse";
+import { AuthParams } from "../../lib/dbLogger/DBLoggable";
+import { APIClient, createAPIClient } from "../lib/apiClient";
 
 export abstract class BaseAPIRoute extends OpenAPIRoute<
   IRequest,
@@ -20,7 +18,7 @@ export abstract class BaseAPIRoute extends OpenAPIRoute<
     client: APIClient;
     authParams: AuthParams;
     clickhouse: ClickhouseClientWrapper;
-  }): Promise<any>;
+  }): Promise<unknown>;
 
   async handle(
     request: IRequest,

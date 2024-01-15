@@ -1,12 +1,10 @@
 import { z } from "zod";
 
-import { OpenAPIRoute, Path, Str } from "@cloudflare/itty-router-openapi";
-import { IRequest } from "itty-router";
-import { Env, Provider } from "../../../..";
+import { Env } from "../../../..";
 import { RequestWrapper } from "../../../../lib/RequestWrapper";
-import { BaseAPIRoute } from "../../baseAPIRoute";
-import { APIClient } from "../../../lib/apiClient";
 import { AuthParams } from "../../../../lib/dbLogger/DBLoggable";
+import { APIClient } from "../../../lib/apiClient";
+import { BaseAPIRoute } from "../../baseAPIRoute";
 
 const ReturnBody = z
   .object({
@@ -34,10 +32,6 @@ export class CustomerGet extends BaseAPIRoute {
   };
 
   async heliconeHandle({
-    request,
-    requestWrapper,
-    env,
-    ctx,
     client,
     authParams,
   }: {

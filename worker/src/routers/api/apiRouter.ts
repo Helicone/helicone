@@ -18,7 +18,9 @@ function getOpenAPIRouter(
     [requestWrapper: RequestWrapper, env: Env, ctx: ExecutionContext]
   >
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   router.get("/v1/customer/:customerId/usage", CustomerUsageGet as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   router.get("/v1/customers", CustomerGet as any);
 }
 
