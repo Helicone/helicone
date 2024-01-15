@@ -89,6 +89,7 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
       });
     }
   );
+
   router.post(
     "/v1/log",
     async (
