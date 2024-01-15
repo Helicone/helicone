@@ -17,6 +17,7 @@ import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { withDB } from "./lib/routers/withDB";
+import { FineTuningManager } from "./lib/managers/FineTuningManager";
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -239,6 +240,13 @@ app.post(
       supabaseClient.client
     );
 
+    if (metrics.error || !metrics.data || metrics.data.length === 0) {
+      res.status(500).json({
+        error: "No requests found",
+      });
+      return;
+    }
+
     const { data: key, error: keyError } = await supabaseClient.client
       .from("decrypted_provider_keys")
       .select("decrypted_provider_key")
@@ -246,31 +254,35 @@ app.post(
       .eq("org_id", authParams.organizationId)
       .single();
 
-    console.log("key", key);
-
-    if (keyError || !key) {
-      res
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
-        .header(
-          "Access-Control-Allow-Headers",
-          "Content-Type, helicone-authorization"
-        )
-        .status(metrics.error === null ? 200 : 500)
-        .json({
-          error: "No Provider Key found",
-        });
-    } else {
-      res
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE")
-        .header(
-          "Access-Control-Allow-Headers",
-          "Content-Type, helicone-authorization"
-        )
-        .status(metrics.error === null ? 200 : 500)
-        .json(metrics);
+    if (keyError || !key || !key.decrypted_provider_key) {
+      res.status(500).json({
+        error: "No Provider Key found",
+      });
+      return;
     }
+
+    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+
+    const fineTuneJob = await fineTuningManager.createFineTuneJob(
+      metrics.data,
+      "model",
+      "suffix"
+    );
+
+    if (fineTuneJob.error || !fineTuneJob.data) {
+      res.status(500).json({
+        error: "Failed to create fine tune job",
+      });
+      return;
+    }
+
+    const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
+    res.json({
+      success: true,
+      data: {
+        url: url,
+      },
+    });
   })
 );
 
