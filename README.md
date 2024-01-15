@@ -152,6 +152,9 @@ SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 # Community 🌍
 
+## Learn this repo with Onboard AI
+[learnthisrepo.com/helicone](learnthisrepo.com/helicone)
+
 ## Supported Projects
 
 | Name                                                               | Docs                                                                                      |
