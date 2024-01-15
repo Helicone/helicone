@@ -8,14 +8,6 @@ import { chatCompletionMessage } from "./types";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions";
 
-const VALID_MODELS = [
-  "gpt-3.5-turbo-1106",
-  "gpt-3.5-turbo-0613",
-  "babbage-002",
-  "davinci-002",
-  "gpt-4-0613",
-];
-
 export class FineTuningManager {
   private openAIClient: OpenAIClient;
 

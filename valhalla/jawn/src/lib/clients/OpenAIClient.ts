@@ -10,7 +10,6 @@ export class OpenAIClient {
   constructor(apiKey: string) {
     this.openai = new OpenAI({
       apiKey: apiKey,
-      organization: "org-GNGkfLr8bEzt1R1MLfWdhBSb",
     });
   }
 
