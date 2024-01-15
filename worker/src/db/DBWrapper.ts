@@ -150,6 +150,9 @@ export class DBWrapper {
     this.atomicRateLimiter = env.RATE_LIMITER;
   }
 
+  getClient(): SupabaseClient<Database> {
+    return this.supabaseClient;
+  }
   async getRateLimiter(): Promise<Result<RateLimiter, string>> {
     if (this.rateLimiter !== undefined) {
       return ok(this.rateLimiter);
