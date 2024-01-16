@@ -263,16 +263,20 @@ Here is an example cURL command:
     openai.api_base = "https://oai.hconeai.com/v1"
     llm = ChatOpenAI(
         openai_api_key='<>',
-        headers={
-            "Helicone-Auth": f"Bearer {env.HELICONE_API_KEY}"
-        },
+        model_kwargs={
+          "extra_headers":{
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+          }
+        }
     )
     
     # Option 2
     llm = ChatOpenAI(
         openai_api_key='<>',
-        headers={
-            "Helicone-Auth": f"Bearer {env.HELICONE_API_KEY}"
+        model_kwargs={
+          "extra_headers":{
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+          }
         },
         openai_api_base="https://oai.hconeai.com/v1",
     )
