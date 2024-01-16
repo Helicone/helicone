@@ -15,10 +15,10 @@ const Vault = (props: VaultProps) => {
 
   return (
     <MetaData title="Vault">
-      <AuthLayout user={user}>
-        <AuthHeader title={"Vault"} />
-        <VaultPage />
-      </AuthLayout>
+      {/* <AuthLayout user={user}> */}
+      <AuthHeader title={"Vault"} />
+      <VaultPage />
+      {/* </AuthLayout> */}
     </MetaData>
   );
 };

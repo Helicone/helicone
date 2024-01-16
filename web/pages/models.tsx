@@ -15,9 +15,9 @@ const Dashboard = (props: ModelProps) => {
 
   return (
     <MetaData title="Models">
-      <AuthLayout user={user}>
-        <ModelPage />
-      </AuthLayout>
+      {/* <AuthLayout user={user}> */}
+      <ModelPage />
+      {/* </AuthLayout> */}
     </MetaData>
   );
 };

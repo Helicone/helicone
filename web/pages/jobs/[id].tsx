@@ -4,6 +4,7 @@ import AuthLayout from "../../components/shared/layout/authLayout";
 import MetaData from "../../components/shared/metaData";
 import SingleJobPage from "../../components/templates/jobs/single/singleJobPage";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
+import { ReactElement } from "react";
 
 interface SingleJobPageProps {
   user: User;
@@ -13,13 +14,11 @@ interface SingleJobPageProps {
 const SingleJob = (props: SingleJobPageProps) => {
   const { user, jobId } = props;
 
-  return (
-    <MetaData title={"Requests"}>
-      <AuthLayout user={user}>
-        <SingleJobPage jobId={jobId} />
-      </AuthLayout>
-    </MetaData>
-  );
+  return <SingleJobPage jobId={jobId} />;
+};
+
+SingleJob.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default SingleJob;

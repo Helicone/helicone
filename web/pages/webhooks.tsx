@@ -16,10 +16,10 @@ const Webhooks = (props: WebhooksProps) => {
 
   return (
     <MetaData title="Webhook">
-      <AuthLayout user={user}>
-        <AuthHeader title={"Webhooks"} />
-        <WebhooksPage user={user} />
-      </AuthLayout>
+      {/* <AuthLayout user={user}> */}
+      <AuthHeader title={"Webhooks"} />
+      <WebhooksPage user={user} />
+      {/* </AuthLayout> */}
     </MetaData>
   );
 };

@@ -5,6 +5,7 @@ import MetaData from "../../components/shared/metaData";
 import JobsPage from "../../components/templates/jobs/jobsPage";
 import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
+import { ReactElement } from "react";
 
 interface RequestsV2Props {
   user: User;
@@ -21,20 +22,11 @@ interface RequestsV2Props {
 const RequestsV2 = (props: RequestsV2Props) => {
   const { user, currentPage, pageSize, sort, initialRequestId } = props;
 
-  return (
-    <MetaData title={"Requests"}>
-      <AuthLayout user={user}>
-        <JobsPage
-          currentPage={currentPage}
-          pageSize={pageSize}
-          sort={sort}
-          // initialRequestId={
-          //   initialRequestId === null ? undefined : initialRequestId
-          // }
-        />
-      </AuthLayout>
-    </MetaData>
-  );
+  return <JobsPage currentPage={currentPage} pageSize={pageSize} sort={sort} />;
+};
+
+RequestsV2.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default RequestsV2;

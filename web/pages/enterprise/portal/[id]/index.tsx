@@ -6,31 +6,25 @@ import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 import { useRouter } from "next/router";
 import PortalIdPage from "../../../../components/templates/enterprise/portal/id/portalIdPage";
+import { ReactElement } from "react";
 
 interface PortalProps {
   user: User;
-
   orgId: string | null;
 }
 
 const Portal = (props: PortalProps) => {
   const { user, orgId } = props;
-  const router = useRouter();
-
-  // const { data, isLoading, refetch } = useGetOrg(
-  //   organizationIdToEditId as string
-  // );
 
   return (
     <MetaData title="Customer Portal">
-      <AuthLayout user={user}>
-        <PortalIdPage orgId={orgId} />
-        {/* {organizationIdToEdit.data && (
-          <OrgSettingsPage org={organizationIdToEdit.data} variant="reseller" />
-        )} */}
-      </AuthLayout>
+      <PortalIdPage orgId={orgId} />
     </MetaData>
   );
+};
+
+Portal.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Portal;
