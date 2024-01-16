@@ -279,27 +279,35 @@ app.post(
     }
 
     const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+    try {
+      const fineTuneJob = await fineTuningManager.createFineTuneJob(
+        metrics.data,
+        "model",
+        "suffix"
+      );
 
-    const fineTuneJob = await fineTuningManager.createFineTuneJob(
-      metrics.data,
-      "model",
-      "suffix"
-    );
+      if (fineTuneJob.error || !fineTuneJob.data) {
+        res.status(500).json({
+          error: fineTuneJob.error,
+        });
+        return;
+      }
 
-    if (fineTuneJob.error || !fineTuneJob.data) {
+      const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
+      res.json({
+        success: true,
+        data: {
+          url: url,
+        },
+      });
+    } catch (e) {
       res.status(500).json({
-        error: fineTuneJob.error,
+        error:
+          "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 requests",
+        message: e,
       });
       return;
     }
-
-    const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
-    res.json({
-      success: true,
-      data: {
-        url: url,
-      },
-    });
   })
 );
 
