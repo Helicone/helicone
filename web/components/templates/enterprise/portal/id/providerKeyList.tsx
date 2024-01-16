@@ -27,7 +27,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
     setProviderKeyCallback,
     orgId,
     orgProviderKey,
-    variant = "protal",
+    variant = "portal",
   } = props;
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
