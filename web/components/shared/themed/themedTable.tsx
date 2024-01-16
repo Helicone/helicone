@@ -206,7 +206,7 @@ const ThemedTable = (props: ThemedTableProps) => {
                         className={clsx(
                           rowIdx === 0 ? "" : "border-t border-transparent",
                           viewHandler ? "cursor-pointer underline" : "",
-                          "py-2.5 pl-4 sm:pl-6 pr-3 text-sm"
+                          "relative py-2.5 pl-4 sm:pl-6 pr-3 text-sm"
                         )}
                         onClick={() => viewHandler && viewHandler(row)}
                       >
