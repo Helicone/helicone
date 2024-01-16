@@ -252,7 +252,7 @@ app.post(
       authParams.organizationId,
       filter,
       0,
-      10_000,
+      1000,
       {},
       supabaseClient.client
     );
