@@ -6,6 +6,7 @@ import {
 } from "express";
 import { AuthParams, SupabaseConnector } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper";
+import { Database } from "../db/database.types";
 
 export interface IRouterWrapper<T> {
   request: RequestWrapper<T>;
@@ -19,4 +20,5 @@ export interface IRouterWrapperDB<T> extends IRouterWrapper<T> {
 export interface IRouterWrapperAuth<T> extends IRouterWrapperDB<T> {
   supabaseClient: SupabaseConnector;
   authParams: AuthParams;
+  org?: Database["public"]["Tables"]["organization"]["Row"];
 }

@@ -227,6 +227,23 @@ app.post(
   withAuth<
     paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
   >(async ({ request, res, supabaseClient, db, authParams }) => {
+    const { data: org, error: orgError } = await supabaseClient.client
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.organizationId ?? "")
+      .single();
+    if (orgError) {
+      res.status(500).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+    if (!org.tier || org.tier === "free") {
+      res.status(405).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
     const body = await request.getRawBody<any>();
     console.log("body", body);
     const { filter, providerKeyId } = body;
@@ -235,7 +252,7 @@ app.post(
       authParams.organizationId,
       filter,
       0,
-      10_000,
+      1000,
       {},
       supabaseClient.client
     );
