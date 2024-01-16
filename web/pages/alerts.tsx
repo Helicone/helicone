@@ -1,7 +1,6 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import AuthLayout from "../components/shared/layout/authLayout";
 import AuthHeader from "../components/shared/authHeader";
-import MetaData from "../components/shared/metaData";
 import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { ReactElement } from "react";

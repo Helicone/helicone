@@ -1,27 +1,15 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import {
-  CheckIcon,
-  MoonIcon,
-  PlusIcon,
-  SunIcon,
-  UserCircleIcon,
-  UserGroupIcon,
-  UserPlusIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { useOrg } from "./organizationContext";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 import { clsx } from "../clsx";
-import { useRouter } from "next/router";
 import CreateOrgForm, {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../../templates/organization/createOrgForm";
 import ThemedModal from "../themed/themedModal";
 import AddMemberModal from "../../templates/organization/addMemberModal";
-import { ThemedSwitch } from "../themed/themedSwitch";
-import { useTheme } from "../theme/themeContext";
-import ReferralModal from "../../common/referralModal";
 
 interface OrgDropdownProps {}
 

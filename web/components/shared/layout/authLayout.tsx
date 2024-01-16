@@ -1,36 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BellIcon,
   BeakerIcon,
   BookOpenIcon,
-  BriefcaseIcon,
-  ChartBarIcon,
-  ChevronRightIcon,
-  CircleStackIcon,
   CloudArrowUpIcon,
   Cog6ToothIcon,
-  CubeTransparentIcon,
-  GlobeAltIcon,
   HomeIcon,
-  KeyIcon,
-  LockClosedIcon,
   QuestionMarkCircleIcon,
   TableCellsIcon,
   TagIcon,
   UserCircleIcon,
-  UserGroupIcon,
   UsersIcon,
   XMarkIcon,
   CodeBracketIcon,
   SunIcon,
   MoonIcon,
 } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
@@ -40,12 +31,9 @@ import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
-import { GrGraphQl } from "react-icons/gr";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { ThemedSwitch } from "../themed/themedSwitch";
 import { useTheme } from "../theme/themeContext";
 import ReferralModal from "../../common/referralModal";
@@ -198,8 +186,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   </div>
                   <div className="mt-5 h-0 flex-1 overflow-y-auto">
                     <nav className="p-2 flex flex-col text-sm space-y-1">
-                      {NAVIGATION.map((nav) => (
+                      {NAVIGATION.map((nav, idx) => (
                         <Link
+                          key={idx}
                           href={nav.href}
                           className={clsx(
                             nav.current ? "bg-gray-200 dark:bg-gray-800" : "",
@@ -392,8 +381,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 </div>
               )}
               <nav className="p-2 flex flex-col text-sm space-y-1">
-                {NAVIGATION.map((nav) => (
+                {NAVIGATION.map((nav, idx) => (
                   <Link
+                    key={idx}
                     href={nav.href}
                     className={clsx(
                       nav.current ? "bg-gray-200 dark:bg-gray-800" : "",

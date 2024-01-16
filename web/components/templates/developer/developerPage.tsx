@@ -1,31 +1,10 @@
 import {
-  MagnifyingGlassIcon,
-  PlusIcon,
-  UserGroupIcon,
-  ArrowRightIcon,
-  ChartPieIcon,
-  BuildingStorefrontIcon,
-  BuildingOfficeIcon,
-  CreditCardIcon,
   LockClosedIcon,
   GlobeAltIcon,
   CodeBracketSquareIcon,
   KeyIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Card,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Table,
-  TableBody,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-  TextInput,
-} from "@tremor/react";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@tremor/react";
 import { useOrg } from "../../shared/layout/organizationContext";
 import KeyPage from "../keys/keyPage";
 import GraphQLPage from "../graphql/graphqlPage";

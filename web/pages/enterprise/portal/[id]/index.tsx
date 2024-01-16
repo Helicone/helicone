@@ -4,7 +4,6 @@ import MetaData from "../../../../components/shared/metaData";
 import AuthLayout from "../../../../components/shared/layout/authLayout";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
-import { useRouter } from "next/router";
 import PortalIdPage from "../../../../components/templates/enterprise/portal/id/portalIdPage";
 import { ReactElement } from "react";
 
