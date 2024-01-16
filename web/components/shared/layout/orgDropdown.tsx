@@ -63,7 +63,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                 aria-hidden="true"
               />
             )}
-            <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[8rem] text-left">
+            <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[7.25rem] text-left">
               {orgContext?.currentOrg?.name}
             </p>
           </div>
