@@ -71,6 +71,10 @@
       ]
     },
     {
+      "group": "Community",
+      "pages": ["community/openpipe", "community/promptarmor"]
+    },
+    {
       "group": "Integrations",
       "pages": [
         "getting-started/integration-method/gateway",

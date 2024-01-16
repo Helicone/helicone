@@ -3,6 +3,8 @@ require("dotenv").config({
 });
 
 import express from "express";
+import * as Sentry from "@sentry/node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 import * as OpenApiValidator from "express-openapi-validator";
 import morgan from "morgan";
 import { v4 as uuid } from "uuid";
@@ -15,6 +17,7 @@ import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { withAuth } from "./lib/routers/withAuth";
 import { getRequests, getRequestsCached } from "./lib/shared/request/request";
 import { withDB } from "./lib/routers/withDB";
+import { FineTuningManager } from "./lib/managers/FineTuningManager";
 
 // This prevents the application from crashing when an unhandled error occurs
 const errorHandler: ErrorRequestHandler = (
@@ -32,9 +35,28 @@ const dirname = __dirname;
 
 const app = express();
 
-export const helloWorld = () => {
-  return "Hello, world!";
-};
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Sentry.Integrations.Express({ app }),
+    new ProfilingIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  // Set sampling rate for profiling - this is relative to tracesSampleRate
+  profilesSampleRate: 1.0,
+});
+
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
+app.use(Sentry.Handlers.errorHandler());
+
+app.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("My first Sentry error!");
+});
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
@@ -196,6 +218,87 @@ app.put(
     }
     res.json({
       message: "Feedback received! :)",
+    });
+  })
+);
+
+app.post(
+  "/v1/fine-tune",
+  withAuth<
+    paths["/v1/fine-tune"]["post"]["requestBody"]["content"]["application/json"]
+  >(async ({ request, res, supabaseClient, db, authParams }) => {
+    const { data: org, error: orgError } = await supabaseClient.client
+      .from("organization")
+      .select("*")
+      .eq("id", authParams.organizationId ?? "")
+      .single();
+    if (orgError) {
+      res.status(500).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+    if (!org.tier || org.tier === "free") {
+      res.status(405).json({
+        error: "Must be on pro or higher plan to use fine-tuning",
+      });
+      return;
+    }
+    const body = await request.getRawBody<any>();
+    console.log("body", body);
+    const { filter, providerKeyId } = body;
+
+    const metrics = await getRequests(
+      authParams.organizationId,
+      filter,
+      0,
+      1000,
+      {},
+      supabaseClient.client
+    );
+
+    if (metrics.error || !metrics.data || metrics.data.length === 0) {
+      res.status(500).json({
+        error: "No requests found",
+      });
+      return;
+    }
+
+    const { data: key, error: keyError } = await supabaseClient.client
+      .from("decrypted_provider_keys")
+      .select("decrypted_provider_key")
+      .eq("id", providerKeyId)
+      .eq("org_id", authParams.organizationId)
+      .single();
+
+    if (keyError || !key || !key.decrypted_provider_key) {
+      res.status(500).json({
+        error: "No Provider Key found",
+      });
+      return;
+    }
+
+    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+
+    const fineTuneJob = await fineTuningManager.createFineTuneJob(
+      metrics.data,
+      "model",
+      "suffix"
+    );
+
+    if (fineTuneJob.error || !fineTuneJob.data) {
+      res.status(500).json({
+        error: fineTuneJob.error,
+      });
+      return;
+    }
+
+    const url = `https://platform.openai.com/finetune/${fineTuneJob.data.id}?filter=all`;
+    res.json({
+      success: true,
+      data: {
+        url: url,
+      },
     });
   })
 );

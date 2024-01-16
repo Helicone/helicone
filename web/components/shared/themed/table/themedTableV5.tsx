@@ -58,6 +58,7 @@ interface ThemedTableV5Props<T> {
   };
   hideView?: boolean;
   noDataCTA?: React.ReactNode;
+  onFineTune?: () => void;
 }
 
 export type RequestViews = "table" | "card" | "row";
@@ -77,6 +78,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
     makeRow,
     hideView, // hides the view columns button
     noDataCTA,
+    onFineTune,
   } = props;
 
   const [visibleColumns, setVisibleColumns] = useState<VisibilityState>({});
@@ -120,6 +122,7 @@ export default function ThemedTableV5<T>(props: ThemedTableV5Props<T>) {
   return (
     <div className="flex flex-col space-y-4">
       <ThemedTableHeader
+        onFineTune={onFineTune}
         advancedFilters={
           advancedFilters
             ? {

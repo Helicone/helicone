@@ -57,6 +57,7 @@ const OPENAI_FINETUNE_COSTS_PROMPT = {
   babbage: 0.0024,
   curie: 0.012,
   davinci: 0.12,
+  "gpt-3.5-turbo-1106": 0.003,
 };
 
 const OPENAI_FINETUNE_COSTS_COMPLETIONS = {
@@ -64,6 +65,7 @@ const OPENAI_FINETUNE_COSTS_COMPLETIONS = {
   babbage: 0.0024,
   curie: 0.012,
   davinci: 0.12,
+  "gpt-3.5-turbo-1106": 0.006,
 };
 
 export function modelCost(modelRow: ModelMetrics): number {
@@ -81,7 +83,7 @@ export function modelCost(modelRow: ModelMetrics): number {
   }
   const is_finetuned_model = model.includes(":");
 
-  const model_prefix = is_finetuned_model ? model.split(":")[0] : model;
+  const model_prefix = is_finetuned_model ? model.split(":")[1] : model;
 
   const promptCosts = is_finetuned_model
     ? OPENAI_FINETUNE_COSTS_PROMPT

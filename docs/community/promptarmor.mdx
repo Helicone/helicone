@@ -1,0 +1,24 @@
+---
+title: "Promptarmor"
+description: "Lock down and protect your prompt using prompt armor"
+---
+
+# Getting access
+
+If you want access to Promptarmor you will need to join our beta program. You can do this by emailing us at [engineering@helicone.ai](engineering@helicone.ai).
+
+# Integration is super easy
+
+Simply add a [Helicone Header](/helicone-headers) to your request and you will be able to use Promptarmor.
+
+The following headers are required:
+
+Simply add the following header for which services you want to have your requests get rejected on:
+
+```
+Helicone-Reject-On-Promptarmor: "PII, Injection, etc..."
+```
+
+That is it!!
+
+Congrats, you're now protected by Promptarmor.

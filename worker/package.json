@@ -29,6 +29,7 @@
   "dependencies": {
     "@clickhouse/client-common": "^0.2.1",
     "@clickhouse/client-web": "^0.2.2",
+    "@cloudflare/itty-router-openapi": "^1.0.7",
     "@helicone/project-rosetta": "1.1.51",
     "@supabase/supabase-js": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
