@@ -1,33 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   ArrowTopRightOnSquareIcon,
   Bars3BottomLeftIcon,
   BellIcon,
   BeakerIcon,
   BookOpenIcon,
-  BriefcaseIcon,
-  ChartBarIcon,
-  ChevronRightIcon,
-  CircleStackIcon,
   CloudArrowUpIcon,
   Cog6ToothIcon,
-  CubeTransparentIcon,
-  GlobeAltIcon,
   HomeIcon,
-  KeyIcon,
-  LockClosedIcon,
   QuestionMarkCircleIcon,
   TableCellsIcon,
   TagIcon,
   UserCircleIcon,
-  UserGroupIcon,
   UsersIcon,
   XMarkIcon,
+  CodeBracketIcon,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
@@ -37,40 +31,35 @@ import { clsx } from "../clsx";
 import ThemedDropdown from "../themed/themedDropdown";
 import OrgContext, { useOrg } from "./organizationContext";
 
-import { GrGraphQl } from "react-icons/gr";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import UpgradeProModal from "../upgradeProModal";
 import OrgDropdown from "./orgDropdown";
 
-import { useLocalStorage } from "../../../services/hooks/localStorage";
+import { ThemedSwitch } from "../themed/themedSwitch";
+import { useTheme } from "../theme/themeContext";
+import ReferralModal from "../../common/referralModal";
+import MetaData from "../metaData";
 interface AuthLayoutProps {
   children: React.ReactNode;
-  user: User;
-  hideSidebar?: boolean;
 }
 
 const AuthLayout = (props: AuthLayoutProps) => {
-  const { children, user, hideSidebar } = props;
+  const { children } = props;
   const router = useRouter();
   const supabaseClient = useSupabaseClient<Database>();
   const { pathname } = router;
+  const user = useUser();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const org = useOrg();
 
   const tier = org?.currentOrg?.tier;
 
+  const themeContext = useTheme();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [referOpen, setReferOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const { hasFlag } = useFeatureFlags(
-    "webhook_beta",
-    org?.currentOrg?.id || ""
-  );
-  const [openDev, setOpenDev] = useLocalStorage("openDev", "true");
-  const [openOrg, setOpenOrg] = useLocalStorage("openOrg", "false");
 
-  let hasPrivileges = org?.currentOrg?.organization_type !== "customer";
-
-  const navigation = [
+  const NAVIGATION = [
     {
       name: "Dashboard",
       href: "/dashboard",
@@ -95,511 +84,360 @@ const AuthLayout = (props: AuthLayoutProps) => {
       icon: BellIcon,
       current: pathname.includes("/alerts"),
     },
-    ...(hasPrivileges
-      ? [
-          {
-            name: "Properties",
-            href: "/properties",
-            icon: TagIcon,
-            current: pathname.includes("/properties"),
-          },
-          {
-            name: "Cache",
-            href: "/cache",
-            icon: CircleStackIcon,
-            current: pathname.includes("/cache"),
-          },
-          {
-            name: "Jobs",
-            href: "/jobs",
-            icon: BriefcaseIcon,
-            current: pathname.includes("/jobs"),
-          },
-          {
-            name: "Models",
-            href: "/models",
-            icon: CubeTransparentIcon,
-            current: pathname.includes("/models"),
-          },
-        ]
-      : []),
+    {
+      name: "Properties",
+      href: "/properties",
+      icon: TagIcon,
+      current: pathname.includes("/properties"),
+    },
+    {
+      name: "Cache",
+      href: "/cache",
+      icon: BellIcon,
+      current: pathname.includes("/cache"),
+    },
     {
       name: "Playground",
       href: "/playground",
       icon: BeakerIcon,
       current: pathname.includes("/playground"),
     },
-
-    ...(!hasPrivileges
-      ? [
-          {
-            name: "Members",
-            href: "/organization/members",
-            icon: UserGroupIcon,
-            current: pathname.includes("/members"),
-          },
-          {
-            name: "Keys",
-            href: "/keys",
-            icon: KeyIcon,
-            current: pathname.includes("/keys"),
-          },
-        ]
-      : []),
-  ];
-
-  const organizationNav = [
+    {
+      name: "Developer",
+      href: "/developer",
+      icon: CodeBracketIcon,
+      current: pathname.includes("/developer"),
+    },
     {
       name: "Settings",
-      href: "/organization/settings",
+      href: "/settings",
       icon: Cog6ToothIcon,
       current: pathname.includes("/settings"),
     },
-    {
-      name: "Plan",
-      href: "/organization/plan",
-      icon: ChartBarIcon,
-      current: pathname.includes("/plan"),
-    },
-    {
-      name: "Members",
-      href: "/organization/members",
-      icon: UserGroupIcon,
-      current: pathname.includes("/members"),
-    },
   ];
 
-  const developerNav = [
-    {
-      name: "Keys",
-      href: "/keys",
-      icon: KeyIcon,
-      current: pathname.includes("/keys"),
-    },
-    {
-      name: "GraphQL",
-      href: "/graphql",
-      icon: GrGraphQl,
-      current: pathname.includes("/graphql"),
-    },
-  ];
-
-  if (hasFlag) {
-    developerNav.push({
-      name: "Webhooks",
-      href: "/webhooks",
-      icon: GlobeAltIcon,
-      current: pathname.includes("/webhooks"),
-    });
-  }
-
-  if (tier === "pro" || tier === "enterprise") {
-    developerNav.push({
-      name: "Vault",
-      href: "/vault",
-      icon: LockClosedIcon,
-      current: pathname.includes("/vault"),
-    });
-  }
+  const currentPage =
+    pathname.split("/")[1].charAt(0).toUpperCase() +
+    pathname.split("/")[1].substring(1);
 
   return (
-    <>
+    <MetaData title={`${currentPage} ${"| " + (org?.currentOrg?.name || "")}`}>
       <div>
-        {!hideSidebar && (
-          <>
-            <Transition.Root show={sidebarOpen} as={Fragment}>
-              <Dialog
-                as="div"
-                className="relative z-40 md:hidden"
-                onClose={setSidebarOpen}
-              >
-                <Transition.Child
-                  as={Fragment}
-                  enter="transition-opacity ease-linear duration-300"
-                  enterFrom="opacity-0"
-                  enterTo="opacity-100"
-                  leave="transition-opacity ease-linear duration-300"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
-                </Transition.Child>
+        <Transition.Root show={sidebarOpen} as={Fragment}>
+          <Dialog
+            as="div"
+            className="relative z-40 md:hidden"
+            onClose={setSidebarOpen}
+          >
+            <Transition.Child
+              as={Fragment}
+              enter="transition-opacity ease-linear duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition-opacity ease-linear duration-300"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
+            </Transition.Child>
 
-                <div className="fixed inset-0 z-40 flex">
+            <div className="fixed inset-0 z-40 flex">
+              <Transition.Child
+                as={Fragment}
+                enter="transition ease-in-out duration-300 transform"
+                enterFrom="-translate-x-full"
+                enterTo="translate-x-0"
+                leave="transition ease-in-out duration-300 transform"
+                leaveFrom="translate-x-0"
+                leaveTo="-translate-x-full"
+              >
+                <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white pt-5 pb-4">
                   <Transition.Child
                     as={Fragment}
-                    enter="transition ease-in-out duration-300 transform"
-                    enterFrom="-translate-x-full"
-                    enterTo="translate-x-0"
-                    leave="transition ease-in-out duration-300 transform"
-                    leaveFrom="translate-x-0"
-                    leaveTo="-translate-x-full"
+                    enter="ease-in-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in-out duration-300"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
                   >
-                    <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white pt-5 pb-4">
-                      <Transition.Child
-                        as={Fragment}
-                        enter="ease-in-out duration-300"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="ease-in-out duration-300"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
+                    <div className="absolute top-0 right-0 -mr-12 pt-2">
+                      <button
+                        type="button"
+                        className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                        onClick={() => setSidebarOpen(false)}
                       >
-                        <div className="absolute top-0 right-0 -mr-12 pt-2">
-                          <button
-                            type="button"
-                            className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                            onClick={() => setSidebarOpen(false)}
-                          >
-                            <span className="sr-only">Close sidebar</span>
-                            <XMarkIcon
-                              className="h-6 w-6 text-white"
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </div>
-                      </Transition.Child>
-                      <div className="flex flex-shrink-0 items-center px-4">
-                        <Image
-                          className="block rounded-md"
-                          src="/assets/landing/helicone.webp"
-                          width={150}
-                          height={150 / (1876 / 528)}
-                          alt="Helicone-full-logo"
+                        <span className="sr-only">Close sidebar</span>
+                        <XMarkIcon
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
                         />
-                      </div>
-                      <div className="mt-5 h-0 flex-1 overflow-y-auto">
-                        <nav className="space-y-1 px-2">
-                          {navigation.map((item, idx) => {
-                            return (
-                              <Link
-                                key={idx}
-                                href={item.href}
-                                className={clsx(
-                                  item.current
-                                    ? "bg-gray-200 text-black"
-                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md"
-                                )}
-                              >
-                                <item.icon
-                                  className={clsx(
-                                    item.current
-                                      ? "text-black"
-                                      : "text-gray-600 group-hover:text-gray-900",
-                                    "mr-3 flex-shrink-0 h-5 w-5"
-                                  )}
-                                />
-                                {item.name}
-                              </Link>
-                            );
-                          })}
-                          <p className="ml-1 mb-1 text-xs font-sans font-medium tracking-wider pt-8 text-gray-700">
-                            Account
-                          </p>
-                          {organizationNav.map((item, i) => {
-                            return (
-                              <Link
-                                key={item.name}
-                                href={item.href}
-                                className={clsx(
-                                  "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                                  "group flex items-center px-2 py-2 text-md font-medium rounded-md w-full"
-                                )}
-                              >
-                                <div className="flex items-center justify-between w-full">
-                                  <div className="flex items-center">
-                                    <item.icon
-                                      className={clsx(
-                                        item.current
-                                          ? "text-black"
-                                          : "text-gray-600 group-hover:text-gray-900",
-                                        "mr-3 flex-shrink-0 h-5 w-5"
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                    {item.name}
-                                  </div>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </nav>
-                      </div>
-                      <div>
+                      </button>
+                    </div>
+                  </Transition.Child>
+                  <div className="flex flex-shrink-0 items-center px-4">
+                    <Image
+                      className="block rounded-md"
+                      src="/assets/landing/helicone.webp"
+                      width={150}
+                      height={150 / (1876 / 528)}
+                      alt="Helicone-full-logo"
+                    />
+                  </div>
+                  <div className="mt-5 h-0 flex-1 overflow-y-auto">
+                    <nav className="p-2 flex flex-col text-sm space-y-1">
+                      {NAVIGATION.map((nav, idx) => (
                         <Link
-                          className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                          key={idx}
+                          href={nav.href}
+                          className={clsx(
+                            nav.current ? "bg-gray-200 dark:bg-gray-800" : "",
+                            "flex items-center text-black dark:text-white px-2 py-1.5 gap-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md font-medium"
+                          )}
+                        >
+                          <nav.icon className="h-4 w-4" />
+                          {nav.name}
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                  <div>
+                    <Link
+                      className="px-4 py-2 text-xs text-gray-500 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                      href={"https://docs.helicone.ai/introduction"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <BookOpenIcon className="h-4 w-4" />
+                      <p>View Documentation</p>
+                    </Link>
+                    <Link
+                      className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                      href={"https://discord.gg/zsSTcH2qhG"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <QuestionMarkCircleIcon className="h-4 w-4" />
+                      <p>Help And Support</p>
+                    </Link>
+                  </div>
+                  {tier === "free" ? (
+                    <div className="p-4 flex w-full justify-center">
+                      <button
+                        onClick={() => setOpen(true)}
+                        className="bg-gray-100 border border-gray-300 text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
+                      >
+                        <div className="flex flex-row items-center">
+                          <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                          <p>Free Plan</p>
+                        </div>
+
+                        <p className="text-xs font-normal text-sky-600">
+                          Learn More
+                        </p>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-4" />
+                  )}
+                </Dialog.Panel>
+              </Transition.Child>
+              <div className="w-14 flex-shrink-0" aria-hidden="true">
+                {/* Dummy element to force sidebar to shrink to fit close icon */}
+              </div>
+            </div>
+          </Dialog>
+        </Transition.Root>
+
+        {/* Static sidebar for desktop */}
+        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-50">
+          {/* Sidebar component, swap this element with another sidebar if you like */}
+          <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+            <div className="p-2 flex items-center gap-4 h-14 border-b border-gray-300 dark:border-gray-700 absolute w-full">
+              <OrgDropdown />
+              <Menu as="div" className="relative">
+                <Menu.Button className="px-[7px] py-0.5 mr-2 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                  <span className="sr-only">Open user menu</span>
+                  {user?.email?.charAt(0).toUpperCase() || (
+                    <UserCircleIcon className="h-8 w-8 text-black dark:text-white" />
+                  )}
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="absolute -left-2 mt-2 w-[12.5rem] z-20 origin-top-left divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
+                    <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
+                      <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
+                        {user?.email}
+                      </p>
+                    </div>
+                    <div className="flex items-center w-full justify-between px-2">
+                      <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate p-2">
+                        Theme
+                      </p>
+                      <ThemedSwitch
+                        checked={themeContext?.theme === "dark" ? true : false}
+                        onChange={() => {
+                          themeContext?.theme === "dark"
+                            ? themeContext?.setTheme("light")
+                            : themeContext?.setTheme("dark");
+                        }}
+                        OnIcon={SunIcon}
+                        OffIcon={MoonIcon}
+                      />
+                    </div>
+
+                    <Menu.Item>
+                      <div className="p-1">
+                        <Link
                           href={"https://docs.helicone.ai/introduction"}
                           target="_blank"
                           rel="noopener noreferrer"
+                          className={clsx(
+                            "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                          )}
                         >
-                          <BookOpenIcon className="h-4 w-4" />
-                          <p>View Documentation</p>
+                          <p>Documentation</p>
                         </Link>
                         <Link
-                          className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
                           href={"https://discord.gg/zsSTcH2qhG"}
                           target="_blank"
                           rel="noopener noreferrer"
+                          className={clsx(
+                            "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                          )}
                         >
-                          <QuestionMarkCircleIcon className="h-4 w-4" />
-                          <p>Help And Support</p>
+                          <p>Join Discord</p>
                         </Link>
+                        <button
+                          onClick={() => {
+                            // setReferOpen(true);
+                          }}
+                          className={clsx(
+                            "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
+                          )}
+                        >
+                          <p>Refer a friend</p>
+                        </button>
                       </div>
-                      {tier === "free" ? (
-                        <div className="p-4 flex w-full justify-center">
+                    </Menu.Item>
+                    <div className="p-1">
+                      <Menu.Item>
+                        {({ active }) => (
                           <button
-                            onClick={() => setOpen(true)}
-                            className="bg-gray-100 border border-gray-300 text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
-                          >
-                            <div className="flex flex-row items-center">
-                              <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
-                              <p>Free Plan</p>
-                            </div>
-
-                            <p className="text-xs font-normal text-sky-600">
-                              Learn More
-                            </p>
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="h-4" />
-                      )}
-                    </Dialog.Panel>
-                  </Transition.Child>
-                  <div className="w-14 flex-shrink-0" aria-hidden="true">
-                    {/* Dummy element to force sidebar to shrink to fit close icon */}
-                  </div>
-                </div>
-              </Dialog>
-            </Transition.Root>
-
-            {/* Static sidebar for desktop */}
-            <div className="hidden md:fixed md:inset-y-0 md:flex md:w-56 md:flex-col z-10">
-              {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="w-full flex flex-grow flex-col overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-                <div className="w-full bg-white dark:bg-black absolute flex flex-row justify-between items-center px-2 border-b border-r border-gray-200 dark:border-gray-800 h-16 min-h-[4rem]">
-                  <div className="flex flex-col w-full">
-                    <OrgDropdown />
-                  </div>
-                </div>
-
-                <div
-                  className={clsx(
-                    org?.currentOrg?.organization_type === "reseller" ||
-                      org?.isResellerOfCurrentCustomerOrg
-                      ? "mt-20"
-                      : "mt-16",
-                    "flex flex-grow flex-col"
-                  )}
-                >
-                  {(org?.currentOrg?.organization_type === "reseller" ||
-                    org?.isResellerOfCurrentCustomerOrg) && (
-                    <div className="flex w-full">
-                      <button
-                        onClick={() => {
-                          router.push("/enterprise/portal");
-                          if (
-                            org.currentOrg?.organization_type === "customer" &&
-                            org.currentOrg?.reseller_id
-                          ) {
-                            org.setCurrentOrg(org.currentOrg.reseller_id);
-                          }
-                        }}
-                        className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
-                      >
-                        {org.currentOrg?.organization_type === "customer"
-                          ? "Back to Portal"
-                          : "Customer Portal"}
-                      </button>
-                    </div>
-                  )}
-                  <nav className="flex-1 space-y-6 px-2 pb-4 pt-2">
-                    <div className="flex flex-col space-y-1">
-                      {navigation.map((item, idx) => {
-                        return (
-                          <Link
-                            key={idx}
-                            href={item.href}
                             className={clsx(
-                              item.current
-                                ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                              "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
+                              "text-left block text-gray-700 hover:bg-red-100 dark:text-gray-300 dark:hover:bg-red-900 rounded-md text-sm pl-3 py-2 w-full truncate"
                             )}
+                            onClick={async () => {
+                              supabaseClient.auth.signOut().then(() => {
+                                router.push("/");
+                              });
+                            }}
                           >
-                            <item.icon
-                              className={clsx(
-                                item.current
-                                  ? "text-black dark:text-white"
-                                  : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                "mr-3 flex-shrink-0 h-4 w-4"
-                              )}
-                              aria-hidden="true"
-                            />
-                            {item.name}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                    {hasPrivileges && (
-                      <div>
-                        <div className="mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-2 rounded-md px-2 py-1">
-                          <p>Developer</p>
-                        </div>
-                        <div className="flex flex-col space-y-1">
-                          {developerNav.map((item, i) => {
-                            return (
-                              <Link
-                                key={item.name}
-                                href={item.href}
-                                className={clsx(
-                                  item.current
-                                    ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                  "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
-                                )}
-                              >
-                                <div className="flex items-center justify-between w-full">
-                                  <div className="flex items-center">
-                                    <item.icon
-                                      className={clsx(
-                                        item.current
-                                          ? "text-black dark:text-white"
-                                          : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                        "mr-3 flex-shrink-0 h-4 w-4"
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                    {item.name}
-                                  </div>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {hasPrivileges && (
-                      <Disclosure
-                        defaultOpen={
-                          router.pathname.includes("/organization/settings") ||
-                          router.pathname.includes("/organization/plan") ||
-                          router.pathname.includes("/organization/members")
-                        }
-                      >
-                        {({ open }) => (
-                          <div>
-                            <Disclosure.Button
-                              onClick={() => {
-                                setOpenOrg(
-                                  openOrg === "true" ? "false" : "true"
-                                );
-                              }}
-                              className="w-full mb-1 text-xs font-sans font-medium tracking-wider text-gray-500 flex items-center space-x-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 px-2 py-1"
-                            >
-                              <p>Organization</p>
-                              <ChevronRightIcon
-                                className={clsx(
-                                  open ? "transform rotate-90" : "",
-                                  "h-3 w-3 inline"
-                                )}
-                              />
-                            </Disclosure.Button>
-                            <Transition
-                              enter="transition duration-100 ease-out"
-                              enterFrom="transform scale-95 opacity-0"
-                              enterTo="transform scale-100 opacity-100"
-                              leave="transition duration-75 ease-out"
-                              leaveFrom="transform scale-100 opacity-100"
-                              leaveTo="transform scale-95 opacity-0"
-                            >
-                              <Disclosure.Panel className="flex flex-col space-y-1">
-                                {organizationNav.map((item, i) => {
-                                  return (
-                                    <Link
-                                      key={item.name}
-                                      href={item.href}
-                                      className={clsx(
-                                        item.current
-                                          ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
-                                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-100",
-                                        "group flex items-center px-2 py-1.5 text-sm font-medium rounded-md"
-                                      )}
-                                    >
-                                      <div className="flex items-center justify-between w-full">
-                                        <div className="flex items-center">
-                                          <item.icon
-                                            className={clsx(
-                                              item.current
-                                                ? "text-black dark:text-white"
-                                                : "text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100",
-                                              "mr-3 flex-shrink-0 h-4 w-4"
-                                            )}
-                                            aria-hidden="true"
-                                          />
-                                          {item.name}
-                                        </div>
-                                      </div>
-                                    </Link>
-                                  );
-                                })}
-                              </Disclosure.Panel>
-                            </Transition>
-                          </div>
+                            Sign out
+                          </button>
                         )}
-                      </Disclosure>
-                    )}
-                  </nav>
-                </div>
-                <div>
-                  <Link
-                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
-                    href={"https://docs.helicone.ai/introduction"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <BookOpenIcon className="h-4 w-4" />
-                    <p>View Documentation</p>
-                  </Link>
-                  <Link
-                    className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
-                    href={"https://discord.gg/zsSTcH2qhG"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <QuestionMarkCircleIcon className="h-4 w-4" />
-                    <p>Help And Support</p>
-                  </Link>
-                </div>
-                {tier === "free" &&
-                org?.currentOrg?.organization_type !== "customer" ? (
-                  <div className="p-4 flex w-full justify-center">
-                    <button
-                      onClick={() => setOpen(true)}
-                      className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 dark:text-white text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
-                    >
-                      <div className="flex flex-row items-center">
-                        <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
-                        <p>Free Plan</p>
-                      </div>
-
-                      <p className="text-xs font-normal text-sky-600">
-                        Learn More
-                      </p>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="h-4" />
-                )}
-              </div>
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
             </div>
-          </>
-        )}
-        <div
-          className={clsx("flex flex-1 flex-col", !hideSidebar && "md:pl-56")}
-        >
+
+            <div
+              className={clsx(
+                org?.currentOrg?.organization_type === "reseller" ||
+                  org?.isResellerOfCurrentCustomerOrg
+                  ? "mt-16"
+                  : "mt-14",
+                "flex flex-grow flex-col"
+              )}
+            >
+              {(org?.currentOrg?.organization_type === "reseller" ||
+                org?.isResellerOfCurrentCustomerOrg) && (
+                <div className="flex w-full">
+                  <button
+                    onClick={() => {
+                      router.push("/enterprise/portal");
+                      if (
+                        org.currentOrg?.organization_type === "customer" &&
+                        org.currentOrg?.reseller_id
+                      ) {
+                        org.setCurrentOrg(org.currentOrg.reseller_id);
+                      }
+                    }}
+                    className="border border-gray-300 dark:border-gray-700 dark:text-white w-full flex text-black px-4 py-1 text-sm font-medium items-center text-center justify-center mx-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-md"
+                  >
+                    {org.currentOrg?.organization_type === "customer"
+                      ? "Back to Portal"
+                      : "Customer Portal"}
+                  </button>
+                </div>
+              )}
+              <nav className="p-2 flex flex-col text-sm space-y-1">
+                {NAVIGATION.map((nav, idx) => (
+                  <Link
+                    key={idx}
+                    href={nav.href}
+                    className={clsx(
+                      nav.current ? "bg-gray-200 dark:bg-gray-800" : "",
+                      "flex items-center text-black dark:text-white px-2 py-1.5 gap-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md font-medium"
+                    )}
+                  >
+                    <nav.icon className="h-4 w-4" />
+                    {nav.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+            <div>
+              <Link
+                className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                href={"https://docs.helicone.ai/introduction"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <BookOpenIcon className="h-4 w-4" />
+                <p>View Documentation</p>
+              </Link>
+              <Link
+                className="px-4 py-2 text-xs text-gray-500 dark:hover:text-gray-100 flex flex-row space-x-2 hover:text-gray-900 hover:underline hover:cursor-pointer"
+                href={"https://discord.gg/zsSTcH2qhG"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <QuestionMarkCircleIcon className="h-4 w-4" />
+                <p>Help And Support</p>
+              </Link>
+            </div>
+            {tier === "free" &&
+            org?.currentOrg?.organization_type !== "customer" ? (
+              <div className="p-4 flex w-full justify-center">
+                <button
+                  onClick={() => setOpen(true)}
+                  className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 dark:text-white text-black text-sm font-medium w-full rounded-md py-2 px-2.5 flex flex-row justify-between items-center"
+                >
+                  <div className="flex flex-row items-center">
+                    <CloudArrowUpIcon className="h-5 w-5 mr-1.5" />
+                    <p>Free Plan</p>
+                  </div>
+
+                  <p className="text-xs font-normal text-sky-600">Learn More</p>
+                </button>
+              </div>
+            ) : (
+              <div className="h-4" />
+            )}
+          </div>
+        </div>
+
+        <div className={clsx("flex flex-1 flex-col md:ml-56")}>
           <div className="sticky top-0 z-20 h-16 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-700">
             <button
               type="button"
@@ -665,22 +503,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                           </p>
                         )}
                       </Menu.Item>
-                      {organizationNav.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <a
-                              href={item.href}
-                              className={clsx(
-                                active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm text-gray-600"
-                              )}
-                            >
-                              {item.name}
-                            </a>
-                          )}
-                        </Menu.Item>
-                      ))}
-
                       <Menu.Item>
                         {({ active }) => (
                           <button
@@ -704,14 +526,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
               </div>
             </div>
           </div>
-
           <main className="flex-1">
             <div
               className={clsx(
-                router.pathname.includes("enterprise")
-                  ? "bg-gray-100" // change this to white after layout change
-                  : "bg-gray-100",
-                "mx-auto px-4 sm:px-8 dark:bg-[#17191d] h-full min-h-screen"
+                "mx-auto px-4 sm:px-8 bg-gray-100 dark:bg-[#17191d] h-full min-h-screen"
               )}
             >
               {/* Replace with your content */}
@@ -767,8 +585,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </main>
         </div>
       </div>
+      <ReferralModal open={referOpen} setOpen={setReferOpen} />
       <UpgradeProModal open={open} setOpen={setOpen} />
-    </>
+    </MetaData>
   );
 };
 

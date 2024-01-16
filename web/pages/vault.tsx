@@ -1,7 +1,6 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { GetServerSidePropsContext } from "next";
 import AuthHeader from "../components/shared/authHeader";
-import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import VaultPage from "../components/templates/vault/vaultPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
@@ -15,10 +14,10 @@ const Vault = (props: VaultProps) => {
 
   return (
     <MetaData title="Vault">
-      <AuthLayout user={user}>
-        <AuthHeader title={"Vault"} />
-        <VaultPage />
-      </AuthLayout>
+      {/* <AuthLayout user={user}> */}
+      <AuthHeader title={"Vault"} />
+      <VaultPage />
+      {/* </AuthLayout> */}
     </MetaData>
   );
 };
