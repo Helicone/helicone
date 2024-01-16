@@ -16,8 +16,11 @@ import MfsCoupon from "./steps/mfsCoupon";
 import CreateOrg from "./steps/createOrg";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrg } from "../../shared/layout/organizationContext";
+import UserSettings from "./steps/userSettings";
 
-interface WelcomePageProps {}
+interface WelcomePageProps {
+  currentStep: number;
+}
 
 export type HeliconeMethod = "proxy" | "async";
 
@@ -32,17 +35,22 @@ export type OrgProps = {
 };
 
 const WelcomePage = (props: WelcomePageProps) => {
-  const user = useUser();
-
+  const { currentStep } = props;
   const router = useRouter();
   const supabaseClient = useSupabaseClient();
 
-  const [step, setStep] = useLocalStorage<number>("welcome-step", 0);
+  const [step, setStep] = useState<number>(currentStep || 0);
+
+  const stepHandler = (step: number) => {
+    setStep(step);
+    router.push(`/welcome?step=${step}`, undefined, { shallow: true });
+  };
+
   const [apiKey, setApiKey] = useState<string>("");
   const orgs = useOrg();
 
   const nextStep = () => {
-    setStep(step + 1);
+    stepHandler(step + 1);
   };
 
   // check for the localStorage mfs item
@@ -55,9 +63,10 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   const stepArray = [
     <GetStarted key={0} nextStep={nextStep} />,
-    <CreateOrg key={1} nextStep={nextStep} />,
+    <UserSettings key={1} nextStep={nextStep} />,
+    <CreateOrg key={2} nextStep={nextStep} />,
     <GenerateAPIKey
-      key={2}
+      key={3}
       nextStep={nextStep}
       apiKey={apiKey}
       setApiKey={setApiKey}
@@ -154,14 +163,14 @@ const WelcomePage = (props: WelcomePageProps) => {
               )}
               onClick={() => {
                 if (step === 0) return;
-                setStep(step - 1);
+                stepHandler(step - 1);
               }}
             />
           </button>
           {Array.from({ length: stepArray.length }).map((_, i) => (
             <li
               key={i}
-              onClick={() => setStep(i)}
+              onClick={() => stepHandler(i)}
               className={clsx(
                 step >= i ? "bg-gray-700" : "bg-gray-300",
                 "h-2.5 w-2.5 rounded-full hover:cursor-pointer"
@@ -178,7 +187,7 @@ const WelcomePage = (props: WelcomePageProps) => {
               )}
               onClick={() => {
                 if (step === stepArray.length - 1) return;
-                setStep(step + 1);
+                stepHandler(step + 1);
               }}
             />
           </button>
