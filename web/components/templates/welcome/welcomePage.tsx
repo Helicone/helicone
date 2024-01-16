@@ -83,35 +83,6 @@ const WelcomePage = (props: WelcomePageProps) => {
 
   return (
     <div className="bg-white h-screen w-screen overflow-hidden items-center justify-center align-middle flex flex-col text-gray-900 relative isolate">
-      <div className="flex flex-row justify-between items-center w-full top-0 absolute">
-        <button
-          onClick={() => {
-            supabaseClient.auth.signOut().then(() => {
-              router.push("/");
-            });
-          }}
-          className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
-        >
-          <ArrowLeftIcon className="h-3 w-3 inline" />
-          Sign Out
-        </button>
-        <button
-          onClick={async () => {
-            await supabaseClient
-              .from("organization")
-              .update({
-                has_onboarded: true,
-              })
-              .eq("id", orgs?.currentOrg?.id);
-
-            router.push("/dashboard");
-          }}
-          className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
-        >
-          Skip Onboarding
-          <ArrowRightIcon className="h-3 w-3 inline" />
-        </button>
-      </div>
       <svg
         className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_60%_at_top_center,white,transparent)]"
         aria-hidden="true"
@@ -140,49 +111,79 @@ const WelcomePage = (props: WelcomePageProps) => {
         </defs>
         <rect width="100%" height="100%" strokeWidth={0} fill="url(#abc)" />
       </svg>
+      <div className="flex flex-col h-full w-full relative items-center justify-center">
+        <div className="flex flex-row justify-between items-center w-full top-0 absolute">
+          <button
+            onClick={() => {
+              supabaseClient.auth.signOut().then(() => {
+                router.push("/");
+              });
+            }}
+            className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
+          >
+            <ArrowLeftIcon className="h-3 w-3 inline" />
+            Sign Out
+          </button>
+          <button
+            onClick={async () => {
+              await supabaseClient
+                .from("organization")
+                .update({
+                  has_onboarded: true,
+                })
+                .eq("id", orgs?.currentOrg?.id);
 
-      {stepArray[step]}
-      <div className="h-4 w-full mx-auto bottom-0 mb-8 absolute flex">
-        <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
-          <button className="mr-6">
-            <ChevronLeftIcon
-              className={clsx(
-                step === 0
-                  ? "text-gray-300"
-                  : "text-gray-900 hover:cursor-pointer",
-                "h-6 w-6"
-              )}
-              onClick={() => {
-                if (step === 0) return;
-                setStep(step - 1);
-              }}
-            />
+              router.push("/dashboard");
+            }}
+            className="p-8 flex flex-row gap-1 text-xs items-center underline underline-offset-2 font-semibold text-gray-900"
+          >
+            Skip Onboarding
+            <ArrowRightIcon className="h-3 w-3 inline" />
           </button>
-          {Array.from({ length: stepArray.length }).map((_, i) => (
-            <li
-              key={i}
-              onClick={() => setStep(i)}
-              className={clsx(
-                step >= i ? "bg-gray-700" : "bg-gray-300",
-                "h-2.5 w-2.5 rounded-full hover:cursor-pointer"
-              )}
-            />
-          ))}
-          <button className="ml-6">
-            <ChevronLeftIcon
-              className={clsx(
-                step === stepArray.length - 1
-                  ? "text-gray-300"
-                  : "text-gray-900 hover:cursor-pointer",
-                "h-6 w-6 rotate-180"
-              )}
-              onClick={() => {
-                if (step === stepArray.length - 1) return;
-                setStep(step + 1);
-              }}
-            />
-          </button>
-        </ul>
+        </div>
+        {stepArray[step]}
+        <div className="w-full mx-auto bottom-8 absolute flex bg-white">
+          <ul className="flex flex-row gap-6 items-center w-full mx-auto justify-center">
+            <button className="mr-6">
+              <ChevronLeftIcon
+                className={clsx(
+                  step === 0
+                    ? "text-gray-300"
+                    : "text-gray-900 hover:cursor-pointer",
+                  "h-6 w-6"
+                )}
+                onClick={() => {
+                  if (step === 0) return;
+                  setStep(step - 1);
+                }}
+              />
+            </button>
+            {Array.from({ length: stepArray.length }).map((_, i) => (
+              <li
+                key={i}
+                onClick={() => setStep(i)}
+                className={clsx(
+                  step >= i ? "bg-gray-700" : "bg-gray-300",
+                  "h-2.5 w-2.5 rounded-full hover:cursor-pointer"
+                )}
+              />
+            ))}
+            <button className="ml-6">
+              <ChevronLeftIcon
+                className={clsx(
+                  step === stepArray.length - 1
+                    ? "text-gray-300"
+                    : "text-gray-900 hover:cursor-pointer",
+                  "h-6 w-6 rotate-180"
+                )}
+                onClick={() => {
+                  if (step === stepArray.length - 1) return;
+                  setStep(step + 1);
+                }}
+              />
+            </button>
+          </ul>
+        </div>
       </div>
     </div>
   );
