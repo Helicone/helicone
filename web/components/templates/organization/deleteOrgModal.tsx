@@ -67,12 +67,12 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
                 setNotification("Organization name does not match", "error");
                 return;
               }
-              const { data, error } = await supabaseClient
-                .from("organization")
-                .update({ soft_delete: true })
-                .eq("id", orgId);
+              const res = await (
+                await fetch(`/api/organization/${orgId}/delete`)
+              ).json();
 
-              if (error) {
+              if (res.error) {
+                console.error(res);
                 setNotification("Error deleting organization", "error");
               } else {
                 orgContext?.refetchOrgs();
