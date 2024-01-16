@@ -182,6 +182,7 @@ export class SupabaseConnector {
       return err(result.error);
     }
     const { organizationId: orgId } = result.data!;
+
     if (!orgId) {
       return err("No organization ID");
     }
