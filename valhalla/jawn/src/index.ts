@@ -303,7 +303,7 @@ app.post(
     } catch (e) {
       res.status(500).json({
         error:
-          "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 requests",
+          "Sorry the fine tuning job you requested failed. Right now it is in beta and only support gpt3.5 and gpt4 requests",
         message: e,
       });
       return;
