@@ -355,7 +355,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 org?.currentOrg?.organization_type === "reseller" ||
                   org?.isResellerOfCurrentCustomerOrg
                   ? "mt-16"
-                  : "mt-12",
+                  : "mt-14",
                 "flex flex-grow flex-col"
               )}
             >
