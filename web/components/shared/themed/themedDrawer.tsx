@@ -31,7 +31,7 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(themeContext?.theme ?? "light", "relative z-20")}
+        className={clsx(themeContext?.theme ?? "light", "relative z-50")}
         onClose={setOpen}
       >
         <Transition.Child
@@ -61,8 +61,8 @@ const ThemedDrawer = (props: ThemedDrawerProps) => {
                 <Dialog.Panel
                   className={clsx(
                     expanded
-                      ? "min-w-[60rem] w-full md:w-[36vw]"
-                      : "min-w-[35rem] w-full md:w-[36vw]",
+                      ? "md:min-w-[60rem] w-full md:w-[60vw]"
+                      : "md:min-w-[35rem] w-full md:w-[36vw]",
                     "pointer-events-auto ease-in-out duration-300"
                   )}
                 >
