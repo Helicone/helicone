@@ -317,7 +317,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                         </Link>
                         <button
                           onClick={() => {
-                            // setReferOpen(true);
+                            setReferOpen(true);
                           }}
                           className={clsx(
                             "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-3 py-2 w-full truncate"
