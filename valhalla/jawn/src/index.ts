@@ -271,7 +271,7 @@ app.post(
 
     if (fineTuneJob.error || !fineTuneJob.data) {
       res.status(500).json({
-        error: "Failed to create fine tune job",
+        error: fineTuneJob.error,
       });
       return;
     }

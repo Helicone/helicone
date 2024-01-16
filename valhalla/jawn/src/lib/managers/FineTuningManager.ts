@@ -75,6 +75,7 @@ export class FineTuningManager {
       return ok(fineTuneJob.data);
     } catch (e) {
       console.error("Failed to start openai training", e);
+      return err("Failed to start openai training" + e);
     } finally {
       fs.unlinkSync(trainingFilePath);
     }
