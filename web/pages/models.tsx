@@ -1,7 +1,6 @@
 import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 
-import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import ModelPage from "../components/templates/models/modelPage";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
@@ -15,9 +14,9 @@ const Dashboard = (props: ModelProps) => {
 
   return (
     <MetaData title="Models">
-      <AuthLayout user={user}>
-        <ModelPage />
-      </AuthLayout>
+      {/* <AuthLayout user={user}> */}
+      <ModelPage />
+      {/* </AuthLayout> */}
     </MetaData>
   );
 };

@@ -1,9 +1,9 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { AppProps } from "next/app";
-import { useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "../styles/globals.css";
@@ -17,6 +17,7 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ThemeContextProvider } from "../components/shared/theme/themeContext";
+import { NextPage } from "next";
 
 if (
   typeof window !== "undefined" &&
@@ -29,12 +30,15 @@ if (
   });
 }
 
-export default function MyApp({
-  Component,
-  pageProps,
-}: AppProps<{
-  initialSession: Session;
-}>) {
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
   const apolloClient = new ApolloClient({
     uri: `/api/graphql`,
@@ -48,6 +52,8 @@ export default function MyApp({
   // Create a new supabase browser client on every first render.
   const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
+  const getLayout = Component.getLayout ?? ((page) => page);
+
   return (
     <>
       <SessionContextProvider
@@ -60,7 +66,7 @@ export default function MyApp({
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
                   <ThemeContextProvider>
-                    <Component {...pageProps} />
+                    {getLayout(<Component {...pageProps} />)}
                   </ThemeContextProvider>
                   <Notification />
                 </OrgContextProvider>
