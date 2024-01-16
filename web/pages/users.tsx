@@ -5,6 +5,7 @@ import MetaData from "../components/shared/metaData";
 import UsersPageV2 from "../components/templates/users/usersPageV2";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { SortDirection } from "../services/lib/sorts/users/sorts";
+import { ReactElement } from "react";
 
 interface UsersProps {
   user: User;
@@ -20,15 +21,11 @@ interface UsersProps {
 const Users = (props: UsersProps) => {
   const { user, page, pageSize, sort } = props;
 
-  console.log("Users props", page);
+  return <UsersPageV2 currentPage={page} pageSize={pageSize} sort={sort} />;
+};
 
-  return (
-    <MetaData title="Users">
-      <AuthLayout user={user}>
-        <UsersPageV2 currentPage={page} pageSize={pageSize} sort={sort} />
-      </AuthLayout>
-    </MetaData>
-  );
+Users.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Users;

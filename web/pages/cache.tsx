@@ -6,6 +6,7 @@ import { User } from "@supabase/auth-helpers-react";
 import AuthHeader from "../components/shared/authHeader";
 import CachePage from "../components/templates/cache/cachePage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
+import { ReactElement } from "react";
 
 interface CacheProps {
   user: User;
@@ -20,13 +21,15 @@ interface CacheProps {
 const Cache = (props: CacheProps) => {
   const { currentPage, pageSize, sort } = props;
   return (
-    <MetaData title="Cache">
-      <AuthLayout user={props.user}>
-        <AuthHeader title={"Cache"} />
-        <CachePage currentPage={currentPage} pageSize={pageSize} sort={sort} />
-      </AuthLayout>
-    </MetaData>
+    <>
+      <AuthHeader title={"Cache"} />
+      <CachePage currentPage={currentPage} pageSize={pageSize} sort={sort} />
+    </>
   );
+};
+
+Cache.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Cache;

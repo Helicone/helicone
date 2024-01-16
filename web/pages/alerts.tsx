@@ -4,6 +4,7 @@ import AuthHeader from "../components/shared/authHeader";
 import MetaData from "../components/shared/metaData";
 import AlertsPage from "../components/templates/alerts/alertsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { ReactElement } from "react";
 
 interface AlertProps {
   user: User;
@@ -13,13 +14,15 @@ const Alert = (props: AlertProps) => {
   const { user } = props;
 
   return (
-    <MetaData title="Alerts">
-      <AuthLayout user={user}>
-        <AuthHeader title={"Alerts"} />
-        <AlertsPage user={user} />
-      </AuthLayout>
-    </MetaData>
+    <>
+      <AuthHeader title={"Alerts"} />
+      <AlertsPage user={user} />
+    </>
   );
+};
+
+Alert.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
 export default Alert;

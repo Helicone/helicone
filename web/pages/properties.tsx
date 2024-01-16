@@ -3,24 +3,23 @@ import AuthLayout from "../components/shared/layout/authLayout";
 import MetaData from "../components/shared/metaData";
 import PropertiesPage from "../components/templates/properties/propertiesPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { ReactElement } from "react";
 
-interface DashboardProps {
+interface PropertiesProps {
   user: User;
 }
 
-const Dashboard = (props: DashboardProps) => {
+const Properties = (props: PropertiesProps) => {
   const { user } = props;
 
-  return (
-    <MetaData title="Properties">
-      <AuthLayout user={user}>
-        <PropertiesPage />
-      </AuthLayout>
-    </MetaData>
-  );
+  return <PropertiesPage />;
 };
 
-export default Dashboard;
+Properties.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
+};
+
+export default Properties;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const {

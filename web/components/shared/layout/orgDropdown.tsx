@@ -28,13 +28,9 @@ interface OrgDropdownProps {}
 export default function OrgDropdown(props: OrgDropdownProps) {
   const orgContext = useOrg();
   const user = useUser();
-  const supabaseClient = useSupabaseClient();
-  const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
-  const [referOpen, setReferOpen] = useState(false);
 
   const org = useOrg();
-  const themeContext = useTheme();
 
   const [addOpen, setAddOpen] = useState(false);
 
@@ -69,12 +65,12 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             "group flex justify-between w-full items-center p-2 text-sm font-medium rounded-md"
           )}
         >
-          <div className="flex space-x-1">
+          <div className="flex items-center">
             {currentIcon && (
               <currentIcon.icon
                 className={clsx(
                   `text-${currentColor?.name}-500`,
-                  "mr-3 flex-shrink-0 h-5 w-5"
+                  "mr-3 flex-shrink-0 h-4 w-4"
                 )}
                 aria-hidden="true"
               />
@@ -82,12 +78,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             <p className="text-md font-semibold text-gray-900 dark:text-gray-100 truncate w-fit max-w-[8rem] text-left">
               {orgContext?.currentOrg?.name}
             </p>
-          </div>
-          <div className="px-[7px] py-0.5 text-sm bg-gray-900 dark:bg-gray-500 dark:text-gray-900 text-gray-50 rounded-full flex items-center justify-center focus:ring-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
-            <span className="sr-only">Open user menu</span>
-            {user?.email?.charAt(0).toUpperCase() || (
-              <UserCircleIcon className="h-8 w-8 text-black dark:text-white" />
-            )}
           </div>
         </Menu.Button>
         <Transition
@@ -99,25 +89,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute left-0 mt-2 w-[14.5rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
-            <div className="flex flex-row justify-between items-center divide-x divide-gray-300 dark:divide-gray-700">
-              <p className="text-gray-900 dark:text-gray-100 text-sm w-full truncate pl-4 p-2">
-                {user?.email}
-              </p>
-              <div className="p-2">
-                <ThemedSwitch
-                  checked={themeContext?.theme === "dark" ? true : false}
-                  onChange={() => {
-                    themeContext?.theme === "dark"
-                      ? themeContext?.setTheme("light")
-                      : themeContext?.setTheme("dark");
-                  }}
-                  OnIcon={SunIcon}
-                  OffIcon={MoonIcon}
-                />
-              </div>
-            </div>
-
+          <Menu.Items className="absolute left-0 mt-1 w-[15rem] z-50 origin-top-right divide-y divide-gray-200 dark:divide-gray-800 rounded-md bg-white dark:bg-black border border-gray-300 dark:border-gray-700 shadow-2xl">
             {ownedOrgs && ownedOrgs.length > 0 && (
               <div className="p-1">
                 <p className="text-gray-900 dark:text-gray-100 font-semibold text-xs px-2 py-2 w-full">
@@ -284,15 +256,6 @@ export default function OrgDropdown(props: OrgDropdownProps) {
             <Menu.Item>
               <div className="p-1">
                 <button
-                  onClick={() => setAddOpen(true)}
-                  className={clsx(
-                    "flex items-center space-x-2 text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
-                  )}
-                >
-                  <UserPlusIcon className="h-4 w-4 text-gray-500 mr-2" />
-                  Invite Members
-                </button>
-                <button
                   onClick={() => {
                     createNewOrgHandler();
                   }}
@@ -300,40 +263,18 @@ export default function OrgDropdown(props: OrgDropdownProps) {
                     "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
                   )}
                 >
-                  <PlusIcon className="h-4 w-4 text-gray-500 mr-2" />
                   <p>Create New Org</p>
                 </button>
                 <button
-                  onClick={() => {
-                    setReferOpen(true);
-                  }}
+                  onClick={() => setAddOpen(true)}
                   className={clsx(
-                    "flex items-center text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
+                    "flex items-center space-x-2 text-gray-700 hover:bg-sky-100 dark:text-gray-300 dark:hover:bg-sky-900 rounded-md text-sm pl-4 py-2 w-full truncate"
                   )}
                 >
-                  <UserGroupIcon className="h-4 w-4 text-gray-500 mr-2" />
-                  <p>Refer a friend</p>
+                  Invite Members
                 </button>
               </div>
             </Menu.Item>
-            <div className="p-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    className={clsx(
-                      "text-left block text-gray-700 hover:bg-red-100 dark:text-gray-300 dark:hover:bg-red-900 rounded-md text-sm pl-3 py-2 w-full truncate"
-                    )}
-                    onClick={async () => {
-                      supabaseClient.auth.signOut().then(() => {
-                        router.push("/");
-                      });
-                    }}
-                  >
-                    Sign out
-                  </button>
-                )}
-              </Menu.Item>
-            </div>
           </Menu.Items>
         </Transition>
       </Menu>
@@ -342,7 +283,7 @@ export default function OrgDropdown(props: OrgDropdownProps) {
           <CreateOrgForm onCancelHandler={setCreateOpen} />
         </div>
       </ThemedModal>
-      <ReferralModal open={referOpen} setOpen={setReferOpen} />
+
       <AddMemberModal
         orgId={org?.currentOrg?.id || ""}
         orgOwnerId={org?.currentOrg?.owner || ""}

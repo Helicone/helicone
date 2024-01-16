@@ -1,25 +1,19 @@
 import type { ReactElement } from "react";
-import type { NextPageWithLayout } from "./_app";
+import { NextPageWithLayout } from "./_app";
 import { GetServerSidePropsContext } from "next";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
-import AuthLayoutV2 from "../components/shared/layout/authLayoutV2";
-import AuthHeader from "../components/shared/authHeader";
-import KeyPage from "../components/templates/keys/keyPage";
+import DeveloperPage from "../components/templates/developer/developerPage";
+import AuthLayout from "../components/shared/layout/authLayout";
 
-const Keys: NextPageWithLayout = () => {
-  return (
-    <>
-      <AuthHeader title="API Keys" />
-      <KeyPage />
-    </>
-  );
+const Developer: NextPageWithLayout = () => {
+  return <DeveloperPage />;
 };
 
-Keys.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayoutV2>{page}</AuthLayoutV2>;
+Developer.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
 };
 
-export default Keys;
+export default Developer;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // Create authenticated Supabase Client
