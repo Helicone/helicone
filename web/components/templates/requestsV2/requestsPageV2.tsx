@@ -31,6 +31,7 @@ import RequestCard from "./requestCard";
 import getNormalizedRequest from "./builder/requestBuilder";
 import { getHeliconeCookie } from "../../../lib/cookies";
 import { useOrg } from "../../shared/layout/organizationContext";
+import { FineTuneModal } from "../fine-tune/fineTuneModal";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -254,6 +255,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return range;
   };
 
+  const [fineTuneModalOpen, setFineTuneModalOpen] = useState<boolean>(false);
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
   const [timeRange, setTimeRange] = useState<TimeFilter>(getTimeRange());
 
@@ -281,6 +283,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     refetch,
     filterMap,
     searchPropertyFilters,
+    filter: builtFilter,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -423,6 +426,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             setAdvancedFilters: onSetAdvancedFilters,
             searchPropertyFilters: searchPropertyFilters,
           }}
+          onFineTune={() => {
+            setFineTuneModalOpen(true);
+          }}
           exportData={requests.map((request) => {
             const flattenedRequest: any = {};
             Object.entries(request).forEach(([key, value]) => {
@@ -495,6 +501,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             searchParams.set("requestId", requests[selectedDataIndex + 1].id);
           }
         }}
+      />
+      <FineTuneModal
+        filter={builtFilter}
+        setOpen={setFineTuneModalOpen}
+        open={fineTuneModalOpen}
       />
     </div>
   );
