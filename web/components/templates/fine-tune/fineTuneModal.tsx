@@ -30,6 +30,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
   const [error, setError] = useState("");
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [resultLink, setResultLink] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [accepted, setAccepted] = useState(false);
 
@@ -37,7 +38,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
     <ThemedDrawer open={isOpen} setOpen={setOpen}>
       <div className="flex flex-col gap-4 w-full">
         <p className="font-semibold text-lg">Fine tune you request</p>
-        This will fine tune your request with a limit of 10,000 rows using your
+        This will fine tune your request with a limit of 1,000 rows using your
         openAPI key.
         <ProviderKeyList
           orgId={org?.currentOrg?.id}
@@ -67,6 +68,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
           Run Fine tune
         </button>
         {error && <div className="text-red-500">{error}</div>}
+        {loading && <div className="animate-pulse">...loading</div>}
         {resultLink && (
           <div className="text-green-500">
             Job is completed! You can view your new model here: {resultLink}
@@ -109,7 +111,12 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                 if (!providerKeyId) {
                   setNotification("must include a providerKey", "error");
                 } else {
+                  setConfirmModalOpen(false);
+                  setError("");
+                  setLoading(true);
+                  setResultLink("");
                   const authFromCookie = getHeliconeCookie();
+
                   fetch(
                     `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/fine-tune`,
                     {
@@ -129,6 +136,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                     }
                   )
                     .then((res) => {
+                      setLoading(false);
                       res.json().then((x) => {
                         if (res.ok) {
                           setResultLink(x?.data?.url);
@@ -136,7 +144,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                           setError(x.error);
                         }
                       });
-                      setConfirmModalOpen(false);
+
                       if (res.ok) {
                         setNotification("fine tune job started!", "success");
                       } else {
@@ -144,6 +152,7 @@ export const FineTuneModal = (props: FineTuneModalProps) => {
                       }
                     })
                     .catch((res: any) => {
+                      setLoading(false);
                       setError(JSON.stringify(res));
                       setNotification("error see console", "error");
                     });
