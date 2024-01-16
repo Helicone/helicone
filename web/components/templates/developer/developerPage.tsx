@@ -31,6 +31,43 @@ const DeveloperPage = (props: DeveloperPageProps) => {
 
   const isPaidPlan = tier === "pro" || tier === "enterprise";
 
+  const renderConditionalTabs = () => {
+    if (hasFlag && isPaidPlan) {
+      return (
+        <>
+          <TabPanel>
+            <div className="p-4">
+              <WebhooksPage user={user!} />
+            </div>
+          </TabPanel>{" "}
+          <TabPanel>
+            <VaultPage />
+          </TabPanel>
+        </>
+      );
+    }
+    if (hasFlag) {
+      return (
+        <>
+          <TabPanel>
+            <div className="p-4">
+              <WebhooksPage user={user!} />
+            </div>
+          </TabPanel>
+        </>
+      );
+    }
+    if (isPaidPlan) {
+      return (
+        <>
+          <TabPanel>
+            <VaultPage />
+          </TabPanel>
+        </>
+      );
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex flex-row items-center justify-between">
@@ -54,22 +91,7 @@ const DeveloperPage = (props: DeveloperPageProps) => {
               <GraphQLPage />
             </div>
           </TabPanel>
-          {hasFlag ? (
-            <TabPanel>
-              <div className="p-4">
-                <WebhooksPage user={user!} />
-              </div>
-            </TabPanel>
-          ) : (
-            <></>
-          )}
-          {isPaidPlan ? (
-            <TabPanel>
-              <VaultPage />
-            </TabPanel>
-          ) : (
-            <></>
-          )}
+          {renderConditionalTabs()}
         </TabPanels>
       </TabGroup>
     </div>
